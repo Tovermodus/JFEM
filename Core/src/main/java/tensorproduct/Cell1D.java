@@ -1,19 +1,22 @@
 package tensorproduct;
 
+import org.jetbrains.annotations.NotNull;
+
 import java.util.ArrayList;
 
-public class Cell1D
+public class Cell1D implements Comparable<Cell1D>
 {
         private final double start;
         private final double end;
         double[] points;
         double[] weights;
         public ArrayList<LagrangeBasisFunction1D> shapefunctions;
-        
-        public Cell1D(double start, double end, QuadratureRule1D quadratureRule)
+        private int indexInDimension;
+        public Cell1D(double start, double end, QuadratureRule1D quadratureRule, int indexInDimension)
         {
                 this.start = start;
                 this.end = end;
+                this.indexInDimension = indexInDimension;
                 points = new double[quadratureRule.length()];
                 weights = new double[quadratureRule.length()];
                 for(int i = 0; i < points.length; i++)
@@ -24,9 +27,12 @@ public class Cell1D
         }
         public Cell1D(double start, double end)
         {
-                this(start,end, QuadratureRule1D.Gauss5);
+                this(start,end, QuadratureRule1D.Gauss5, -1);
         }
-        
+        int getIndexInDimension()
+        {
+                return indexInDimension;
+        }
         public double getStart()
         {
                 return start;
@@ -77,5 +83,15 @@ public class Cell1D
         public void print()
         {
                 System.out.println("Cell: start" + start + ", end: "+ end);
+        }
+        
+        @Override
+        public int compareTo(@NotNull Cell1D o)
+        {
+                if(getStart() < o.getStart())
+                        return -1;
+                if(getStart() > o.getStart())
+                        return 1;
+                return 0;
         }
 }

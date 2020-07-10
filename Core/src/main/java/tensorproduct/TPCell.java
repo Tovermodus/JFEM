@@ -1,120 +1,168 @@
 package tensorproduct;
 
 import basic.Cell;
-import basic.Face;
-import basic.ScalarShapeFunction;
-import linalg.DoubleTensor;
+import basic.ShapeFunction;
+import linalg.CoordinateComparator;
+import linalg.CoordinateVector;
+import org.jetbrains.annotations.NotNull;
 
-import java.util.ArrayList;
+import java.util.List;
+import java.util.Set;
+import java.util.TreeSet;
 
-public class TPCell extends Cell
+public class TPCell<ST extends ShapeFunction<TPCell<ST>,TPFace<ST>,ST,?,?,?>> implements Cell<TPCell<ST>, TPFace<ST>,
+	ST>
 {
-	Cell1D cellx;
-	Cell1D celly;
-	private int polynomialDegree;
-	public TPCell(double xStart, double yStart, double xEnd, double yEnd, int polynomialDegree)
+	List<Cell1D> cell1Ds;
+	Set<ST> shapeFunctions;
+	Set<TPFace<ST>> faces;
+	boolean refined;
+	
+	public TPCell(List<Cell1D> cell1Ds)
 	{
-		super();
-		cellx = new Cell1D(xStart, xEnd);
-		celly = new Cell1D(yStart, yEnd);
-		this.polynomialDegree = polynomialDegree;
+		this.cell1Ds = cell1Ds;
+		this.shapeFunctions = new TreeSet<>();
+		this.faces = new TreeSet<>();
+		this.refined = false;
 	}
-	public TPCell(Cell1D cellx,Cell1D celly, int polynomialDegree)
-	{
-		this.cellx = cellx;
-		this.celly = celly;
-		this.polynomialDegree = polynomialDegree;
-	}
-
 	@Override
-	public void addFace(Face face)
+	public int getDimension()
 	{
-		this.faces.add(face);
-		face.getCells().add(this);
+		return cell1Ds.size();
 	}
-
 	@Override
-	public void distributeFunctions(ArrayList<ScalarShapeFunction> globalshapeFunctions)
+	public Set<ST> getShapeFunctions()
 	{
-		for(int i = 0; i <= polynomialDegree; i++)
+		return shapeFunctions;
+	}
+	
+	@Override
+	public Set<TPFace<ST>> getFaces()
+	{
+		return faces;
+	}
+	
+	@Override
+	public boolean isRefined()
+	{
+		return refined;
+	}
+	
+	@Override
+	public void setRefined(boolean refined)
+	{
+		refined = refined;
+	}
+	@Override
+	public void addFace(TPFace<ST> face)
+	{
+		if(faces.add(face))
+			face.addCell(this);
+	}
+	@Override
+	public void addShapeFunction(ST shapeFunction)
+	{
+		if(shapeFunctions.add(shapeFunction))
+			shapeFunction.addCell(this);
+	}
+	
+	@Override
+	public boolean isInCell(CoordinateVector pos)
+	{
+		for(int d = 0; d < cell1Ds.size(); d++)
 		{
-			for(int j = 0; j <= polynomialDegree; j++)
-				shapeFunctions.add(new TPShapeFunction(new LagrangeBasisFunction1D(polynomialDegree,
-					i, cellx), new LagrangeBasisFunction1D(polynomialDegree,j,celly),this));
+			if (!cell1Ds.get(d).isInCell(pos.at(d)))
+				return false;
 		}
-		for(ScalarShapeFunction shapeFunction:shapeFunctions)
+		return true;
+	}
+	
+	@Override
+	public CoordinateVector center()
+	{
+		CoordinateVector ret = new CoordinateVector(getDimension());
+		for(int i = 0; i < ret.getLength(); i++)
+			ret.set(cell1Ds.get(i).center(),i);
+		return ret;
+	}
+	
+	@Override
+	public List<TPCell<ST>> refine(List<TPFace<ST>> refinedFaces)
+	{
+		throw new UnsupportedOperationException();
+	}
+	public String toString()
+	{
+		String ret = "";
+		int subd = 0;
+		for(int d = 0; d < getDimension(); d++)
 		{
-			for(Face face:faces)
-			{
-				face.getShapeFunctions().add(shapeFunction);
-			}
-			globalshapeFunctions.add(shapeFunction);
-			shapeFunction.setGlobalIndex(globalshapeFunctions.size()-1);
-
+			ret = ret.concat("["+cell1Ds.get(subd).getStart()+", "+cell1Ds.get(subd++).getEnd()+ "]");
+			if(d<getDimension()-1)
+				ret = ret.concat("x");
 		}
+		return ret;
 	}
-
-
+	
 	@Override
-	public boolean isInCell(DoubleTensor pos)
+	public int compareTo(@NotNull TPCell<ST> o)
 	{
-		return pos.x()>=cellx.getStart() && pos.x()<= cellx.getEnd() && pos.y()>=celly.getStart() && pos.y()<=celly.getEnd();
+		if(o.getDimension() < getDimension())
+			return -1;
+		if(o.getDimension() > getDimension())
+			return 1;
+		return CoordinateComparator.comp(center().getEntries(), o.center().getEntries());
 	}
-
-	@Override
-	public DoubleTensor center()
-	{
-		return DoubleTensor.vectorFromValues(0.5*(cellx.getStart() +cellx.getEnd()),0.5*(celly.getStart() +celly.getEnd()));
-	}
-
-	@Override
-	public ArrayList<Cell> refine(ArrayList<Face> refinedFaces)
-	{
-		ArrayList<Cell> refinedCells = new ArrayList<>();
-		TPCell cell1 = new TPCell(cellx.getStart(),celly.getStart(),cellx.center(),celly.center(),polynomialDegree);
-		TPFace face1 = new TPFace(new Cell1D(cellx.getStart(),cellx.center()),celly.center(),1);
-		TPFace face2 = new TPFace(new Cell1D(celly.getStart(),celly.center()),cellx.center(),0);
-		TPCell cell2 = new TPCell(cellx.center(),celly.getStart(),cellx.getEnd(),celly.center(),polynomialDegree);
-		TPCell cell3 = new TPCell(cellx.getStart(),celly.center(),cellx.center(),celly.getEnd(),polynomialDegree);
-		TPCell cell4 = new TPCell(cellx.center(),celly.center(),cellx.getEnd(),celly.getEnd(),polynomialDegree);
-		TPFace face3 = new TPFace(new Cell1D(cellx.center(),cellx.getEnd()),celly.center(),1);
-		TPFace face4 = new TPFace(new Cell1D(celly.center(),celly.getEnd()),cellx.center(),0);
-		cell1.faces.add(face1);
-		cell1.faces.add(face2);
-		cell2.faces.add(face2);
-		cell2.faces.add(face3);
-		cell3.faces.add(face1);
-		cell3.faces.add(face4);
-		cell4.faces.add(face3);
-		cell4.faces.add(face4);
-		System.out.println("MAKE NICER TPCELL");
-		face1.getCells().add(cell1);
-		face1.getCells().add(cell3);
-		face2.getCells().add(cell1);
-		face2.getCells().add(cell2);
-		face3.getCells().add(cell2);
-		face3.getCells().add(cell4);
-		face4.getCells().add(cell3);
-		face4.getCells().add(cell4);
-		face1.setBoundaryFace(false);
-		face2.setBoundaryFace(false);
-		face3.setBoundaryFace(false);
-		face4.setBoundaryFace(false);
-		refinedCells.add(cell1);
-		refinedCells.add(cell2);
-		refinedCells.add(cell3);
-		refinedCells.add(cell4);
-		refinedFaces.add(face1);
-		refinedFaces.add(face2);
-		refinedFaces.add(face3);
-		refinedFaces.add(face4);
-		setRefined(true);
-		return refinedCells;
-	}
-	public void print()
-	{
-		System.out.println("["+cellx.getStart()+","+cellx.getEnd()+"]×["+celly.getStart()+","+celly.getEnd()+"]");
-	}
+	
+	//	@Override
+//	public  List<TPCell> refine(List<TPFace> refinedFaces)
+//	{
+//		List<Cell<TPFace,TPShapeFunction>> refinedCells = new ArrayList<>();
+//		TPCell cell1 = new TPCell(cellx.getStart(),celly.getStart(),cellx.center(),celly.center(),
+//			polynomialDegree);
+//		TPFace face1 = new TPFace(new Cell1D(cellx.getStart(),cellx.center()),celly.center(),1);
+//		TPFace face2 = new TPFace(new Cell1D(celly.getStart(),celly.center()),cellx.center(),0);
+//		TPCell cell2 = new TPCell(cellx.center(),celly.getStart(),cellx.getEnd(),celly.center(),
+//			polynomialDegree);
+//		TPCell cell3 = new TPCell(cellx.getStart(),celly.center(),cellx.center(),celly.getEnd(),
+//			polynomialDegree);
+//		TPCell cell4 = new TPCell(cellx.center(),celly.center(),cellx.getEnd(),celly.getEnd(),
+//			polynomialDegree);
+//		TPFace face3 = new TPFace(new Cell1D(cellx.center(),cellx.getEnd()),celly.center(),1);
+//		TPFace face4 = new TPFace(new Cell1D(celly.center(),celly.getEnd()),cellx.center(),0);
+//		cell1.faces.add(face1);
+//		cell1.faces.add(face2);
+//		cell2.faces.add(face2);
+//		cell2.faces.add(face3);
+//		cell3.faces.add(face1);
+//		cell3.faces.add(face4);
+//		cell4.faces.add(face3);
+//		cell4.faces.add(face4);
+//		System.out.println("MAKE NICER TPCELL");
+//		face1.getCells().add(cell1);
+//		face1.getCells().add(cell3);
+//		face2.getCells().add(cell1);
+//		face2.getCells().add(cell2);
+//		face3.getCells().add(cell2);
+//		face3.getCells().add(cell4);
+//		face4.getCells().add(cell3);
+//		face4.getCells().add(cell4);
+//		face1.setBoundaryFace(false);
+//		face2.setBoundaryFace(false);
+//		face3.setBoundaryFace(false);
+//		face4.setBoundaryFace(false);
+//		refinedCells.add(cell1);
+//		refinedCells.add(cell2);
+//		refinedCells.add(cell3);
+//		refinedCells.add(cell4);
+//		refinedFaces.add(face1);
+//		refinedFaces.add(face2);
+//		refinedFaces.add(face3);
+//		refinedFaces.add(face4);
+//		setRefined(true);
+//		return refinedCells;
+//	}
+//
 
 
 }

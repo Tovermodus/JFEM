@@ -1,18 +1,19 @@
 package tensorproduct;
 
+import org.jetbrains.annotations.NotNull;
+
 public class LagrangeBasisFunction1D extends Function1D
 {
-	public Cell1D cell;
-	public int polynomialDegree;
-	public int localFunctionNumber;
-	public double degreeOfFreedom;
+	private Cell1D cell;
+	private int polynomialDegree;
+	private int localFunctionNumber;
+	private double degreeOfFreedom;
 	public LagrangeBasisFunction1D(int polynomialDegree, int localFunctionNumber, Cell1D cell)
 	{
 		this.cell = cell;
 		this.localFunctionNumber = localFunctionNumber;
 		this.polynomialDegree = polynomialDegree;
 		this.degreeOfFreedom = cell.positionOnGrid(1.0/polynomialDegree*localFunctionNumber); //equidistant
-		// Lagrange dofs
 	}
 	public double valueOnReferenceCell(double pos)
 	{
@@ -50,14 +51,6 @@ public class LagrangeBasisFunction1D extends Function1D
 				return ret;
 		}
 		return 0;
-	}
-	public QuadratureRule1D getDefaultQuadratureRule()
-	{
-		if(polynomialDegree > 3 && polynomialDegree <=5)
-			return QuadratureRule1D.Gauss5;
-		if(polynomialDegree <= 3)
-			return QuadratureRule1D.Gauss3;
-		throw new UnsupportedOperationException();
 	}
 	public double derivativeOnReferenceCell(double pos)
 	{
@@ -128,5 +121,15 @@ public class LagrangeBasisFunction1D extends Function1D
 		System.out.println("Shapefunction: Degree " +polynomialDegree+", Local Number "+localFunctionNumber+
 			", on Cell:\n\t\t");
 		cell.print();
+	}
+	
+	public double getDegreeOfFreedom()
+	{
+		return degreeOfFreedom;
+	}
+	
+	int getCellIndexInDimension()
+	{
+		return cell.getIndexInDimension();
 	}
 }

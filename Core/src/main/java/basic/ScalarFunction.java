@@ -1,69 +1,108 @@
 package basic;
 
-import linalg.DoubleTensor;
+import linalg.*;
 
 import java.io.BufferedWriter;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.stream.DoubleStream;
 
-public abstract class ScalarFunction
+public abstract class ScalarFunction implements Function<Double, Vector, Matrix>
 {
-	public abstract double value(DoubleTensor pos);
-
-	public abstract DoubleTensor derivative(DoubleTensor pos);
-	public static ScalarFunction oneFunction()
-	{
-		return constantFunction(1);
-	}
 	public static ScalarFunction constantFunction(double constant)
 	{
-		ScalarFunction oneF = new ScalarFunction()
+		return new ScalarFunction()
 		{
 			@Override
-			public double value(DoubleTensor pos)
+			public int getDomainDimension()
+			{
+				return -1;
+			}
+			
+			@Override
+			public Double value(CoordinateVector pos)
 			{
 				return constant;
 			}
-
+			
 			@Override
-			public DoubleTensor derivative(DoubleTensor pos)
+			public CoordinateVector gradient(CoordinateVector pos)
 			{
-				return new DoubleTensor((int)pos.size());
+				return new CoordinateVector((int) pos.size());
+			}
+			
+			@Override
+			public CoordinateMatrix hessian(CoordinateVector pos)
+			{
+				return new CoordinateMatrix((int)pos.size(), (int)pos.size());
 			}
 		};
-		return oneF;
 	}
-	public void plot(int pointres, String filename)
+	public Map<CoordinateVector, Double> valuesInPoints(List<CoordinateVector> points)
 	{
-		double[][] values = new double[pointres][pointres];
-		for (int k = 0; k < pointres; k++)
-		{
-			for (int j = 0; j < pointres; j++)
-			{
-				DoubleTensor pos = DoubleTensor.vectorFromValues(1.0 / (pointres - 1) * k,
-					1.0 / (pointres - 1) * j);
-
-				values[k][j] = value(pos);
-			}
-		}
-		try
-		{
-			BufferedWriter plotWriter = new BufferedWriter(new FileWriter(filename));
-			for (int i = 0; i < pointres; i++)
-			{
-				for (int j = 0; j < pointres; j++)
-				{
-					plotWriter.write(Double.toString(values[i][j]) + " ");
-				}
-				plotWriter.newLine();
-			}
-			plotWriter.flush();
-			plotWriter.close();
-		} catch (
-			IOException e)
-		{
-			e.printStackTrace();
-		}
+		ConcurrentHashMap<CoordinateVector, Double> ret = new ConcurrentHashMap<>();
+		points.stream().parallel().forEach(point->ret.put(point, value(point)));
+		return ret;
 	}
+	public Double directionalDerivative(CoordinateVector pos, CoordinateVector direction)
+	{
+		return direction.inner(gradient(pos));
+	}
+	public Double delI(CoordinateVector pos, int i)
+	{
+		return gradient(pos).at(i);
+	}
+	public boolean hasFastEvaluation()
+	{
+		return false;
+	}
+	public double fastValue(CoordinateVector pos)
+	{
+		throw new UnsupportedOperationException();
+	}
+	public double[] fastGradient(CoordinateVector pos)
+	{
+		throw new UnsupportedOperationException();
+	}
+	public double[][] fastHessian(CoordinateVector pos)
+	{
+		throw new UnsupportedOperationException();
+	}
+//	default void plot(int pointres, String filename)
+//	{
+//		double[][] values = new double[pointres][pointres];
+//		for (int k = 0; k < pointres; k++)
+//		{
+//			for (int j = 0; j < pointres; j++)
+//			{
+//				DoubleTensor pos = DoubleTensor.vectorFromValues(1.0 / (pointres - 1) * k,
+//					1.0 / (pointres - 1) * j);
+//
+//				values[k][j] = value(pos);
+//			}
+//		}
+//		try
+//		{
+//			BufferedWriter plotWriter = new BufferedWriter(new FileWriter(filename));
+//			for (int i = 0; i < pointres; i++)
+//			{
+//				for (int j = 0; j < pointres; j++)
+//				{
+//					plotWriter.write(values[i][j] + " ");
+//				}
+//				plotWriter.newLine();
+//			}
+//			plotWriter.flush();
+//			plotWriter.close();
+//		} catch (
+//			IOException e)
+//		{
+//			e.printStackTrace();
+//		}
+//	}
 
 }

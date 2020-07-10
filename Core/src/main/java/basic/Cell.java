@@ -1,43 +1,31 @@
 package basic;
 
-import linalg.DoubleTensor;
+import linalg.CoordinateVector;
 
-import java.util.ArrayList;
+import java.util.List;
+import java.util.Set;
 
-public abstract class Cell
+public interface Cell<CT extends Cell<CT,FT,ST>, FT extends Face<CT,FT,ST>, ST extends ShapeFunction<CT,FT,ST,?,?,?>> extends Comparable<CT>
 {
-	protected ArrayList<ScalarShapeFunction> shapeFunctions;
-	protected ArrayList<Face> faces;
-	private boolean refined;
-	public Cell()
-	{
-		faces = new ArrayList<>();
-		shapeFunctions = new ArrayList<>();
-	}
-	public ArrayList<ScalarShapeFunction> getShapeFunctions()
-	{
-		return shapeFunctions;
-	}
+	int  getDimension();
 	
-	public ArrayList<Face> getFaces()
-	{
-		return faces;
-	}
+	Set<ST> getShapeFunctions();
 	
-	public boolean isRefined()
-	{
-		return refined;
-	}
+	Set<FT> getFaces();
 	
-	public void setRefined(boolean refined)
-	{
-		this.refined = refined;
-	}
+	boolean isRefined();
 	
-	public abstract void addFace(Face face);
-	public abstract void distributeFunctions(ArrayList<ScalarShapeFunction> shapeFunctions);
-	public abstract boolean isInCell(DoubleTensor pos);
-	public abstract DoubleTensor center();
-	public abstract ArrayList<Cell> refine(ArrayList<Face> refinedFaces);
+	void setRefined(boolean refined);
+	
+	void addFace(FT face);
+	void addShapeFunction(ST shapeFunction);
+	
+	boolean isInCell(CoordinateVector pos);
+	CoordinateVector center();
+	
+	default List<CT> refine(List<FT> refinedFaces)
+	{
+		throw new UnsupportedOperationException();
+	}
 
 }

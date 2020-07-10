@@ -1,175 +1,126 @@
 package tensorproduct;
 
 import basic.CellIntegral;
-import basic.ScalarFunction;
-import basic.ScalarShapeFunction;
-import basic.TensorFunction;
-import basic.Cell;
-import linalg.DoubleTensor;
-import tensorproduct.TPFunction;
+import basic.Function;
+import linalg.CoordinateVector;
+import linalg.Vector;
 
-public class TPCellIntegral extends CellIntegral
+import java.util.List;
+import java.util.function.ToDoubleFunction;
+
+public class TPCellIntegral extends CellIntegral<TPCell<TPShapeFunction>,TPFace<TPShapeFunction>,TPShapeFunction>
 {
-	TPFunction tpWeight;
-	TPVectorFunction tpVectorWeight;
-	public static String GRAD_GRAD = "GradGrad";
-	public static String VALUE_VALUE = "ValueValue";
-	public static String GRAD_VALUE = "GradValue";
-	public static String VALUE_GRAD = "ValueGrad";
-
-	public TPCellIntegral(ScalarFunction vectorWeight, String name)
+	public static final String GRAD_GRAD = "GradGrad";
+	public static final String VALUE_VALUE = "ValueValue";
+	public static final String GRAD_VALUE = "GradValue";
+	public static final String VALUE_GRAD = "ValueGrad";
+	private final boolean weightIsTensorProduct;
+	public TPCellIntegral(Function<?,?,?> weight, String name, boolean weightIsTensorProduct)
 	{
-		super(vectorWeight, name);
+		super(weight,name);
+		this.weightIsTensorProduct = weightIsTensorProduct;
+		if(name.equals(GRAD_GRAD) && !(weight.value(new CoordinateVector(weight.getDomainDimension())) instanceof Double))
+			throw new IllegalArgumentException();
+		if(name.equals(VALUE_VALUE) && !(weight.value(new CoordinateVector(weight.getDomainDimension())) instanceof Double))
+			throw new IllegalArgumentException();
+		if(name.equals(GRAD_VALUE) && !(weight.value(new CoordinateVector(weight.getDomainDimension())) instanceof Vector))
+			throw new IllegalArgumentException();
+		if(name.equals(VALUE_GRAD) && !(weight.value(new CoordinateVector(weight.getDomainDimension())) instanceof Vector))
+			throw new IllegalArgumentException();
+			
 	}
-	public TPCellIntegral(TensorFunction weight, String name)
-	{
-		super(weight, name);
-	}
-
-	public TPCellIntegral(TPFunction weight, String name)
-	{
-		super(weight, name);
-		this.tpWeight = weight;
-	}
-
-
-	public TPCellIntegral(TPVectorFunction vectorWeight, String name)
-	{
-		super(vectorWeight, name);
-		this.tpVectorWeight = vectorWeight;
-	}
-
 	public TPCellIntegral(String name)
 	{
-		this(new TPFunction(Function1D.oneFunction(),Function1D.oneFunction()),name);
+		super(name);
+		this.weightIsTensorProduct = true;
+		if(name.equals(GRAD_GRAD) && !(weight.value(new CoordinateVector(weight.getDomainDimension())) instanceof Double))
+			throw new IllegalArgumentException();
+		if(name.equals(VALUE_VALUE) && !(weight.value(new CoordinateVector(weight.getDomainDimension())) instanceof Double))
+			throw new IllegalArgumentException();
+		if(name.equals(GRAD_VALUE) && !(weight.value(new CoordinateVector(weight.getDomainDimension())) instanceof Vector))
+			throw new IllegalArgumentException();
+		if(name.equals(VALUE_GRAD) && !(weight.value(new CoordinateVector(weight.getDomainDimension())) instanceof Vector))
+			throw new IllegalArgumentException();
 	}
-
-	@Override
-	public double evaluateCellIntegral(Cell cell, ScalarShapeFunction shapeFunction1, ScalarShapeFunction shapeFunction2)
+	static double integrateTensorProduct(ToDoubleFunction<CoordinateVector> eval, List<Cell1D> cells)
 	{
-		if(cell instanceof TPCell)
+		double ret = 1;
+		for(int j = 0; j < cells.size(); j++)
 		{
-			if(shapeFunction1 instanceof TPShapeFunction && shapeFunction2 instanceof TPShapeFunction && (tpWeight != null || tpVectorWeight != null))
-				return this.evaluateCellIntegral((TPCell) cell,(TPShapeFunction)shapeFunction1,
-					(TPShapeFunction)shapeFunction2);
-			else
-				return this.evaluateCellIntegral((TPCell) cell,shapeFunction1,
-					shapeFunction2);
-
-		}
-		throw new UnsupportedOperationException();
-	}
-
-	public double evaluateCellIntegral(TPCell cell, ScalarShapeFunction function1,
-	                                   ScalarShapeFunction function2)
-	{
-		double ret = 0;
-		for(int i = 0; i < cell.cellx.weights.length; i++)
-			for(int j = 0; j < cell.celly.weights.length; j++)
+			double val = 0;
+			Cell1D cell = cells.get(j);
+			CoordinateVector quadPoint =
+				CoordinateVector.fromValues(cells.stream().mapToDouble(Cell1D::center).toArray());
+			for(int i = 0; i < cell.points.length; i++)
 			{
-				DoubleTensor point = DoubleTensor.vectorFromValues(cell.cellx.points[i],
-					cell.celly.points[j]);
-				double integralWeight = cell.cellx.weights[i]*cell.celly.weights[j];
-				if(name.equals(GRAD_GRAD))
-					ret += function1.derivative(point).inner(function2.derivative(point))*weight.value(point)*integralWeight;
-				if(name.equals(VALUE_VALUE))
-					ret += function1.value(point)*function2.value(point)*weight.value(point)*integralWeight;
-				if(name.equals(GRAD_VALUE))
-					ret += function1.derivative(point).inner(vectorWeight.value(point))*function2.value(point)*integralWeight;
-				if(name.equals(VALUE_GRAD))
-					ret += function1.value(point)*function2.derivative(point).inner(vectorWeight.value(point))*integralWeight;
+				quadPoint.set(cell.points[i],j);
+				val+= eval.applyAsDouble(quadPoint)*cell.weights[i];
 			}
+			ret *= val;
+		}
 		return ret;
 	}
-	double evaluateCellIntegral(TPCell cell, TPShapeFunction function1,
-	                             TPShapeFunction function2)
+	static double integrateNonTensorProduct(ToDoubleFunction<CoordinateVector> eval, List<Cell1D> cells)
 	{
-		Cell1D cellx = cell.cellx;
-		Cell1D celly = cell.celly;
+		if(cells.size() == 1)
+		{
+			double ret = 0;
+			Cell1D cell = cells.get(0);
+			for(int i = 0; i < cell.points.length; i++)
+			{
+				ret += eval.applyAsDouble(CoordinateVector.fromValues(cell.points[i]))*cell.weights[i];
+			}
+			return ret;
+		}
+		
+		double ret = 0;
+		Cell1D cell = cells.get(0);
+		for(int i = 0; i < cell.points.length; i++)
+		{
+			int finalI = i;
+			ret += integrateNonTensorProduct(x->{
+				double [] point = new double [cells.size()];
+				point[0] = cell.points[finalI];
+				for (int j = 1; j < cells.size(); j++)
+				{
+					point[j] = x.at(j-1);
+				}
+				return eval.applyAsDouble(CoordinateVector.fromValues(point));
+			},cells.subList(1,cells.size()-1))*cell.weights[i];
+		}
+		return ret;
+	}
+	@Override
+	public double evaluateCellIntegral(TPCell<TPShapeFunction> cell, TPShapeFunction shapeFunction1, TPShapeFunction shapeFunction2)
+	{
 		if(name.equals(GRAD_GRAD))
 		{
-			double derX = 0;
-			double derY = 0;
-			double valX = 0;
-			double valY = 0;
-			for(int i = 0; i < cellx.weights.length; i++)
-			{
-				double αi = cellx.weights[i];
-				double xi = cellx.points[i];
-				derX += function1.xFunction.derivative(xi)*function2.xFunction.derivative(xi)*this.tpWeight.xFunction.value(xi)*αi;
-				valX += function1.xFunction.value(xi)*function2.xFunction.value(xi)*this.tpWeight.xFunction.value(xi)*αi;
-			}
-			for(int i = 0; i < celly.weights.length; i++)
-			{
-				double αi = celly.weights[i];
-				double yi = celly.points[i];
-				derY += function1.yFunction.derivative(yi)*function2.yFunction.derivative(yi)*this.tpWeight.yFunction.value(yi)*αi;
-				valY += function1.yFunction.value(yi)*function2.yFunction.value(yi)*this.tpWeight.yFunction.value(yi)*αi;
-			}
-			return derX*valY+valX*derY;
+			if(weightIsTensorProduct)
+				return integrateTensorProduct(x->shapeFunction1.gradient(x).inner(shapeFunction2.gradient(x))*(Double)weight.value(x),cell.cell1Ds);
+			else
+				return integrateNonTensorProduct(x->shapeFunction1.gradient(x).inner(shapeFunction2.gradient(x))*(Double)weight.value(x),cell.cell1Ds);
 		}
 		if(name.equals(VALUE_VALUE))
 		{
-			double valX = 0;
-			double valY = 0;
-			for(int i = 0; i < cellx.weights.length; i++)
-			{
-				double αi = cellx.weights[i];
-				double xi = cellx.points[i];
-				valX += function1.xFunction.value(xi)*function2.xFunction.value(xi)*this.tpWeight.xFunction.value(xi)*αi;
-			}
-			for(int i = 0; i < celly.weights.length; i++)
-			{
-				double αi = celly.weights[i];
-				double yi = celly.points[i];
-				valY += function1.yFunction.value(yi)*function2.yFunction.value(yi)*this.tpWeight.yFunction.value(yi)*αi;
-			}
-			return valX*valY;
+			if(weightIsTensorProduct)
+				return integrateTensorProduct(x->shapeFunction1.value(x)*shapeFunction2.value(x)*(Double)weight.value(x),cell.cell1Ds);
+			else
+				return integrateNonTensorProduct(x->shapeFunction1.value(x)*shapeFunction2.value(x)*(Double)weight.value(x),cell.cell1Ds);
 		}
 		if(name.equals(GRAD_VALUE))
 		{
-			double derX = 0;
-			double derY = 0;
-			double valX = 0;
-			double valY = 0;
-			for(int i = 0; i < cellx.weights.length; i++)
-			{
-				double αi = cellx.weights[i];
-				double xi = cellx.points[i];
-				derX += function1.xFunction.derivative(xi)*function2.xFunction.value(xi)*this.tpVectorWeight.xFunctionx.value(xi)*αi;
-				valX += function1.xFunction.value(xi)*function2.xFunction.value(xi)*this.tpVectorWeight.yFunctionx.value(xi)*αi;
-			}
-			for(int i = 0; i < celly.weights.length; i++)
-			{
-				double αi = celly.weights[i];
-				double yi = celly.points[i];
-				derY += function1.yFunction.derivative(yi)*function2.yFunction.value(yi)*this.tpVectorWeight.yFunctiony.value(yi)*αi;
-				valY += function1.yFunction.value(yi)*function2.yFunction.value(yi)*this.tpVectorWeight.xFunctiony.value(yi)*αi;
-			}
-			return derX*valY+valX*valY;
+			if(weightIsTensorProduct)
+				return integrateTensorProduct(x->shapeFunction1.gradient(x).inner((Vector)weight.value(x))*shapeFunction2.value(x),cell.cell1Ds);
+			else
+				return integrateNonTensorProduct(x->shapeFunction1.gradient(x).inner((Vector)weight.value(x))*shapeFunction2.value(x),cell.cell1Ds);
 		}
 		if(name.equals(VALUE_GRAD))
 		{
-			double derX = 0;
-			double derY = 0;
-			double valX = 0;
-			double valY = 0;
-			for(int i = 0; i < cellx.weights.length; i++)
-			{
-				double αi = cellx.weights[i];
-				double xi = cellx.points[i];
-				derX += function1.xFunction.value(xi)*function2.xFunction.derivative(xi)*this.tpVectorWeight.xFunctionx.value(xi)*αi;
-				valX += function1.xFunction.value(xi)*function2.xFunction.value(xi)*this.tpVectorWeight.yFunctionx.value(xi)*αi;
-			}
-			for(int i = 0; i < celly.weights.length; i++)
-			{
-				double αi = celly.weights[i];
-				double yi = celly.points[i];
-				derY += function1.yFunction.value(yi)*function2.yFunction.derivative(yi)*this.tpVectorWeight.yFunctiony.value(yi)*αi;
-				valY += function1.yFunction.value(yi)*function2.yFunction.value(yi)*this.tpVectorWeight.xFunctiony.value(yi)*αi;
-			}
-			return derX*valY+valX*valY;
+			if(weightIsTensorProduct)
+				return integrateTensorProduct(x->shapeFunction2.gradient(x).inner((Vector)weight.value(x))*shapeFunction1.value(x),cell.cell1Ds);
+			else
+				return integrateNonTensorProduct(x->shapeFunction2.gradient(x).inner((Vector)weight.value(x))*shapeFunction1.value(x),cell.cell1Ds);
 		}
-		return 0;
+		throw new UnsupportedOperationException("unknown integral name");
 	}
 }

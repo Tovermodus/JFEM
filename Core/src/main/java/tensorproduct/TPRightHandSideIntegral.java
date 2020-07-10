@@ -1,43 +1,30 @@
 package tensorproduct;
 
-import basic.RightHandSideIntegral;
-import basic.ScalarFunction;
-import basic.ScalarShapeFunction;
-import basic.Cell;
-import com.google.common.collect.Table;
-import linalg.DoubleTensor;
+import basic.*;
+import linalg.CoordinateVector;
 
-public class TPRightHandSideIntegral extends RightHandSideIntegral
+public class TPRightHandSideIntegral extends RightHandSideIntegral<TPCell<TPShapeFunction>,TPFace<TPShapeFunction>,TPShapeFunction>
 {
-	public TPRightHandSideIntegral(ScalarFunction rightHandSide, ScalarFunction weight)
+	public static final String VALUE="Value";
+	private final boolean weightIsTensorProduct;
+	public TPRightHandSideIntegral(Function<?,?,?> rightHandSide, String name, boolean weightIsTensorProduct)
 	{
-		super(rightHandSide, weight);
+		super(rightHandSide, name);
+		if(name.equals(VALUE) && !(rightHandSide.value(new CoordinateVector(rightHandSide.getDomainDimension())) instanceof Double))
+			throw new IllegalArgumentException();
+		this.weightIsTensorProduct = weightIsTensorProduct;
 	}
-
-	public TPRightHandSideIntegral(ScalarFunction rightHandSide)
-	{
-		super(rightHandSide);
-	}
-
+	
 	@Override
-	public double evaluateRightHandSideIntegral(Cell k, ScalarShapeFunction v)
+	public double evaluateRightHandSideIntegral(TPCell<TPShapeFunction> cell, TPShapeFunction shapeFunction1)
 	{
-		if(k instanceof  TPCell)
-			return this.evaluateRightHandSideIntegral((TPCell) k, v);
-		throw new UnsupportedOperationException();
-	}
-
-	public double evaluateRightHandSideIntegral(TPCell k, ScalarShapeFunction v)
-	{
-
-		double ret = 0;
-		DoubleTensor point;
-		for(int i = 0; i < k.cellx.weights.length; i++)
-			for(int j = 0; j < k.celly.weights.length; j++)
-			{
-				point = DoubleTensor.vectorFromValues(k.cellx.points[i],k.celly.points[j]);
-				ret += v.value(point)*rightHandSide.value(point)*weight.value(point)*k.cellx.weights[i]*k.celly.weights[j];
-			}
-		return ret;
+		if(name.equals(VALUE))
+		{
+			if(weightIsTensorProduct)
+				return TPCellIntegral.integrateTensorProduct(x->shapeFunction1.value(x)*(Double)(rightHandSide.value(x)),cell.cell1Ds);
+			else
+				return TPCellIntegral.integrateNonTensorProduct(x->shapeFunction1.value(x)*(Double)(rightHandSide.value(x)),cell.cell1Ds);
+		}
+		throw new UnsupportedOperationException("unknown rhs integral");
 	}
 }

@@ -1,16 +1,16 @@
 package basic;
 
-import linalg.DoubleTensor;
+import linalg.CoordinateVector;
 
-public class LagrangeNodeFunctional extends ScalarNodeFunctional
+public class LagrangeNodeFunctional implements NodeFunctional
 {
-	private DoubleTensor point;
-	public LagrangeNodeFunctional(DoubleTensor point)
+	private CoordinateVector point;
+	public LagrangeNodeFunctional(CoordinateVector point)
 	{
 		this.point = point;
 	}
 	
-	public DoubleTensor getPoint()
+	public CoordinateVector getPoint()
 	{
 		return point;
 	}
@@ -18,6 +18,6 @@ public class LagrangeNodeFunctional extends ScalarNodeFunctional
 	@Override
 	public double evaluate(ScalarFunction func)
 	{
-		return func.value(point);
+		 return func.value(point);
 	}
 }

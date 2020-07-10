@@ -125,16 +125,16 @@ class GMRES extends AbstractIterativeSolver
 			v[i] = r.copy().zero();
 	}
 
-	public<T extends VectorMultiplication> DoubleTensor solve(T preconditioner, DoubleTensor A,
-	                                                          DoubleTensor b,
-	                                                          double tol)
+	public<T extends VectorMultiplyable> linalg.Vector solve(T preconditioner, VectorMultiplyable A,
+	                                                         linalg.Vector b,
+	                                                         double tol)
 		throws IterativeSolverNotConvergedException
 	{
-		DoubleTensor x = new DoubleTensor(A.getM());
-		DoubleTensor r_ = preconditioner.mvmul(b.sub(A.mvmul(x)));
-		DoubleTensor w;
-		double normr = r_.vectorNorm();
-		DoubleTensor v_[] = new DoubleTensor[v.length];
+		linalg.Vector x = new linalg.DenseVector(b.getShape().get(0));
+		linalg.Vector r_ = preconditioner.mvMul(b.sub(A.mvMul(x)));
+		linalg.Vector w;
+		double normr = r_.euclidianNorm();
+		linalg.Vector v_[] = new linalg.DenseVector[v.length];
 		// Outer iteration
 		for (iter.setFirst(); normr > tol; iter.next()) {
 
@@ -144,12 +144,12 @@ class GMRES extends AbstractIterativeSolver
 			// Inner iteration
 			for (; i < restart && normr>tol; i++, iter
 				.next()) {
-				w = preconditioner.mvmul(A.mvmul(v_[i]));
+				w = preconditioner.mvMul(A.mvMul(v_[i]));
 				for (int k = 0; k <= i; k++) {
 					H.set(k, i, w.inner(v_[k]));
 					w = v_[k].mul(-H.get(k, i)).add(w);
 				}
-				H.set(i + 1, i, w.vectorNorm());
+				H.set(i + 1, i, w.euclidianNorm());
 				v_[i+1] = w.mul(1. / H.get(i + 1, i));
 				// QR factorization of H using Givens rotations
 				for (int k = 0; k < i; ++k)
@@ -165,24 +165,23 @@ class GMRES extends AbstractIterativeSolver
 			for (int j = 0; j < i; j++)
 				x = x.add(v_[j].mul(s.get(j)));
 
-			r_ = b.sub(A.mvmul(x));
-			normr = r_.vectorNorm();
-			System.out.println(normr);
+			r_ = b.sub(A.mvMul(x));
+			normr = r_.euclidianNorm();
 		}
 
 		return x;
 	}
 
-	public DoubleTensor solve(DoubleTensor A,
-	                                                          DoubleTensor b,
+	public linalg.Vector solve(VectorMultiplyable A,
+	                                                          linalg.Vector b,
 	                                                          double tol)
 		throws IterativeSolverNotConvergedException
 	{
-		DoubleTensor x = new DoubleTensor(A.getM());
-		DoubleTensor r_ = b.sub(A.mvmul(x));
-		DoubleTensor w;
-		double normr = r_.vectorNorm();
-		DoubleTensor v_[] = new DoubleTensor[v.length];
+		linalg.Vector x = new linalg.DenseVector(b.getShape().get(0));
+		linalg.Vector r_ = b.sub(A.mvMul(x));
+		linalg.Vector w;
+		double normr = r_.euclidianNorm();
+		linalg.Vector v_[] = new linalg.Vector[v.length];
 		// Outer iteration
 		for (iter.setFirst(); normr > tol; iter.next()) {
 
@@ -192,12 +191,12 @@ class GMRES extends AbstractIterativeSolver
 			// Inner iteration
 			for (; i < restart && normr>tol; i++, iter
 				.next()) {
-				w = A.mvmul(v_[i]);
+				w = A.mvMul(v_[i]);
 				for (int k = 0; k <= i; k++) {
 					H.set(k, i, w.inner(v_[k]));
 					w = v_[k].mul(-H.get(k, i)).add(w);
 				}
-				H.set(i + 1, i, w.vectorNorm());
+				H.set(i + 1, i, w.euclidianNorm());
 				v_[i+1] = w.mul(1. / H.get(i + 1, i));
 				// QR factorization of H using Givens rotations
 				for (int k = 0; k < i; ++k)
@@ -213,9 +212,8 @@ class GMRES extends AbstractIterativeSolver
 			for (int j = 0; j < i; j++)
 				x = x.add(v_[j].mul(s.get(j)));
 
-			r_ = b.sub(A.mvmul(x));
-			normr = r_.vectorNorm();
-			System.out.println(normr);
+			r_ = b.sub(A.mvMul(x));
+			normr = r_.euclidianNorm();
 		}
 
 		return x;

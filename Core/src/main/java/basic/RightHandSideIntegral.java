@@ -1,20 +1,15 @@
 package basic;
 
-public abstract class RightHandSideIntegral
+public abstract class RightHandSideIntegral<CT extends Cell<CT,FT,ST>, FT extends Face<CT,FT,ST>, ST extends ShapeFunction<CT,
+	FT,ST,?,?,?>>
 {
-	protected ScalarFunction rightHandSide;
-	protected ScalarFunction weight;
-	public RightHandSideIntegral(ScalarFunction rightHandSide, ScalarFunction weight)
+	protected Function<?, ?, ?> rightHandSide;
+	protected String name;
+	public RightHandSideIntegral(Function<?, ?, ?> rightHandSide, String name)
 	{
 		this.rightHandSide = rightHandSide;
-		this.weight = weight;
+		this.name = name;
 	}
-
-	public RightHandSideIntegral(ScalarFunction rightHandSide)
-	{
-		this(rightHandSide, ScalarFunction.oneFunction());
-	}
-
-	public abstract double evaluateRightHandSideIntegral(Cell k, ScalarShapeFunction v);
+	public abstract double evaluateRightHandSideIntegral(CT cell, ST shapeFunction1);
 	
 }

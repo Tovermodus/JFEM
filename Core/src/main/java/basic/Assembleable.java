@@ -2,7 +2,7 @@ package basic;
 
 public interface Assembleable
 {
-	void assembleFunctions();
+	void assembleFunctions(int polynomialDegree);
 	
-	void assembleCells(int polynomialDegree);
+	void assembleCells();
 }

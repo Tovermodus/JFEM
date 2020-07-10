@@ -1,42 +1,32 @@
 package tensorproduct;
-import basic.BoundaryFaceIntegral;
-import basic.Face;
-import basic.ScalarFunction;
-import basic.ScalarShapeFunction;
-import linalg.DoubleTensor;
-import tensorproduct.TPFace;
+import basic.*;
+import linalg.CoordinateVector;
 
-public class TPBoundaryFaceIntegral extends BoundaryFaceIntegral
+public class TPBoundaryFaceIntegral extends BoundaryRightHandSideIntegral<TPCell<TPShapeFunction>,TPFace<TPShapeFunction>,
+	TPShapeFunction>
 {
-	public TPBoundaryFaceIntegral(ScalarFunction rightHandSide, ScalarFunction weight)
+	static final String VALUE="Value";
+	private final boolean weightIsTensorProduct;
+	public TPBoundaryFaceIntegral(Function<?,?,?> rightHandSide, String name, boolean weightIsTensorProduct)
 	{
-		super(rightHandSide, weight);
+		super(rightHandSide, name);
+		if(name.equals(VALUE) && !(rightHandSide.value(new CoordinateVector(rightHandSide.getDomainDimension())) instanceof Double))
+			throw new IllegalArgumentException();
+		this.weightIsTensorProduct = weightIsTensorProduct;
 	}
-
+	
 	@Override
-	public double evaluateBoundaryFaceIntegral(Face f, ScalarShapeFunction v)
+	public double evaluateBoundaryRightHandSideIntegral(TPFace<TPShapeFunction> face,
+	                                                    TPShapeFunction shapeFunction1)
 	{
-		if(f instanceof TPFace)
+		if(name.equals(VALUE))
 		{
-			System.out.println("make nice TBOUNFARYFACE");
-			return this.evaluateBoundaryFaceIntegral((TPFace) f, v);
+			if(weightIsTensorProduct)
+				return TPFaceIntegral.integrateTensorProduct(x->shapeFunction1.value(x)*(Double)(rightHandSide.value(x)),face.cell1Ds, face.flatDimension, face.otherCoordinate);
+			else
+				return TPFaceIntegral.integrateNonTensorProduct(x->shapeFunction1.value(x)*(Double)(rightHandSide.value(x)),face.cell1Ds, face.flatDimension, face.otherCoordinate);
 		}
-		throw new UnsupportedOperationException();
+		throw new UnsupportedOperationException("unknown rhs integral");
 	}
-
-	public double evaluateBoundaryFaceIntegral(TPFace f, ScalarShapeFunction v)
-	{
-		if(!f.isBoundaryFace())
-			return 0;
-		double ret = 0;
-		for(int i = 0; i < f.getCell1d().weights.length; i++)
-		{
-			double weight = f.getCell1d().weights[i];
-			DoubleTensor point = new DoubleTensor(2);
-			point.set(f.getNormaldirection(), f.getCell1d().points[i]);
-			point.set(1-f.getNormaldirection(),f.getOtherCoordinate());
-			ret += v.value(point)*rightHandSide.value(point)*this.weight.value(point)*weight;
-		}
-		return ret;
-	}
+	
 }
