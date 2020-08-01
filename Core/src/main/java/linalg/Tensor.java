@@ -3,10 +3,7 @@ package linalg;
 import com.google.common.primitives.Ints;
 
 import java.util.*;
-import java.util.function.DoubleUnaryOperator;
-import java.util.stream.DoubleStream;
 import java.util.stream.IntStream;
-import java.util.stream.Stream;
 
 public interface Tensor
 {
@@ -15,6 +12,8 @@ public interface Tensor
 	void add(double value, int...coordinates);
 	
 	Tensor add(Tensor other);
+	void addInPlace(Tensor other);
+	void subInPlace(Tensor other);
 	default Tensor sub(Tensor other)
 	{
 		if(Ints.toArray(getShape()) != Ints.toArray(other.getShape()))

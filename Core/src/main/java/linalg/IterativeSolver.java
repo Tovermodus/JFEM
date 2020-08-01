@@ -1,5 +1,6 @@
 package linalg;
 
+import com.google.common.base.Stopwatch;
 import no.uib.cipr.matrix.sparse.IterativeSolverNotConvergedException;
 
 public class IterativeSolver<Op extends VectorMultiplyable>
@@ -7,12 +8,13 @@ public class IterativeSolver<Op extends VectorMultiplyable>
 
 	public Vector solveCG(Op operator, Vector rhs, double tol)
 	{
-		
+		Stopwatch s = Stopwatch.createStarted();
 		int n = rhs.getLength();
 		Vector z;
 		Vector newResiduum;
 		Vector iterate = new DenseVector(n);
-		Vector residuum = rhs.sub(operator.mvMul(iterate));
+		Vector m = operator.mvMul(iterate);
+		Vector residuum = rhs.sub(m);
 		Vector defect = new DenseVector(residuum);
 		double alpha;
 		double beta;
@@ -20,11 +22,12 @@ public class IterativeSolver<Op extends VectorMultiplyable>
 		{
 			z = operator.mvMul(defect);
 			alpha = residuum.inner(residuum)/defect.inner(z);
-			iterate = iterate.add(defect.mul(alpha));
+			iterate.addInPlace(defect.mul(alpha));
 			newResiduum = residuum.sub(z.mul(alpha));
 			beta = newResiduum.inner(newResiduum)/residuum.inner(residuum);
 			defect = newResiduum.add(defect.mul(beta));
 			residuum = newResiduum;
+			System.out.println(residuum.euclidianNorm());
 		}
 		return iterate;
 	}
@@ -87,6 +90,7 @@ public class IterativeSolver<Op extends VectorMultiplyable>
 			rho = residuum.inner(startResiduum);
 			beta = alpha/omega*rho/rhoLast;
 			p = residuum.add(p.mul(beta)).sub(v.mul(omega*beta));
+			System.out.println(residuum.euclidianNorm());
 		}
 		return iterate;
 

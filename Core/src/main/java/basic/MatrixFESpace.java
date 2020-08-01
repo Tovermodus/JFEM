@@ -4,6 +4,7 @@ import com.google.common.collect.Lists;
 import linalg.Matrix;
 import linalg.Vector;
 
+import java.util.Arrays;
 import java.util.List;
 
 public interface MatrixFESpace<CT extends Cell<CT,FT,ST>, FT extends  Face<CT,FT,ST>,
@@ -59,17 +60,34 @@ public interface MatrixFESpace<CT extends Cell<CT,FT,ST>, FT extends  Face<CT,FT
 	{
 		
 		List<List<FT>> smallerList = Lists.partition(getFaces(),12);
+//		for (ST s: getShapeFunctions())
+//		{
+//			if(s.getGlobalIndex() == 2)
+//				s.setGlobalIndex(4);
+//			else if(s.getGlobalIndex() == 3)
+//				s.setGlobalIndex(5);
+//			else if(s.getGlobalIndex() == 4)
+//				s.setGlobalIndex(2);
+//			else if(s.getGlobalIndex() == 5)
+//				s.setGlobalIndex(3);
+//			else if(s.getGlobalIndex() == 10)
+//				s.setGlobalIndex(12);
+//			else if(s.getGlobalIndex() == 11)
+//				s.setGlobalIndex(13);
+//			else if(s.getGlobalIndex() == 12)
+//				s.setGlobalIndex(10);
+//			else if(s.getGlobalIndex() == 13)
+//				s.setGlobalIndex(11);
+//		}
 		smallerList.stream().parallel().forEach(smallList->
 		{
 			for (FT F : smallList)
 			{
-				//System.out.println("evaluate face integrals: " + (int) ((1.0 * i++) / (faces.size()
-				// ) * 100) + "%");
 				for (ST u : F.getShapeFunctions())
 				{
+					
 					for (ST v : F.getShapeFunctions())
 					{
-						
 						double integral = 0;
 						for (FaceIntegral<CT,FT,ST> faceIntegral :
 							faceIntegrals)

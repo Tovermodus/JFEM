@@ -40,6 +40,29 @@ public interface Vector extends Tensor
 			throw new IllegalArgumentException("Vectors are of different size");
 		return add(other.mul(-1.));
 	}
+	
+	@Override
+	default void addInPlace(Tensor other)
+	{
+		if(!getShape().equals(other.getShape()))
+			throw new IllegalArgumentException("Vectors are of different size");
+		for (int i = 0; i < getLength(); i++)
+		{
+			set(at(i)+other.at(i),i);
+		}
+	}
+	
+	@Override
+	default void subInPlace(Tensor other)
+	{
+		if(!getShape().equals(other.getShape()))
+			throw new IllegalArgumentException("Vectors are of different size");
+		for (int i = 0; i < getLength(); i++)
+		{
+			set(at(i)-other.at(i),i);
+		}
+	}
+	
 	@Override
 	Vector mul(double scalar);
 	
@@ -47,7 +70,7 @@ public interface Vector extends Tensor
 	{
 		if(getLength() != other.getLength())
 			throw new IllegalArgumentException("Vectors are of different size");
-		return IntStream.range(0,getLength()).parallel().mapToDouble(i->at(i)*other.at(i)).sum();
+		return IntStream.range(0,getLength()).mapToDouble(i->at(i)*other.at(i)).sum();
 	}
 	default double euclidianNorm()
 	{

@@ -20,9 +20,6 @@ public class TPRightHandSideIntegral extends RightHandSideIntegral<TPCell<TPShap
 	{
 		if(name.equals(VALUE))
 		{
-			if(weightIsTensorProduct)
-				return TPCellIntegral.integrateTensorProduct(x->shapeFunction1.value(x)*(Double)(rightHandSide.value(x)),cell.cell1Ds);
-			else
 				return TPCellIntegral.integrateNonTensorProduct(x->shapeFunction1.value(x)*(Double)(rightHandSide.value(x)),cell.cell1Ds);
 		}
 		throw new UnsupportedOperationException("unknown rhs integral");

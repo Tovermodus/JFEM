@@ -2,8 +2,11 @@ package tensorproduct;
 
 import basic.CellIntegral;
 import basic.Function;
+import com.google.common.primitives.Doubles;
 import linalg.CoordinateVector;
 import linalg.Vector;
+
+import java.util.ArrayList;
 
 import java.util.List;
 import java.util.function.ToDoubleFunction;
@@ -42,51 +45,28 @@ public class TPCellIntegral extends CellIntegral<TPCell<TPShapeFunction>,TPFace<
 		if(name.equals(VALUE_GRAD) && !(weight.value(new CoordinateVector(weight.getDomainDimension())) instanceof Vector))
 			throw new IllegalArgumentException();
 	}
-	static double integrateTensorProduct(ToDoubleFunction<CoordinateVector> eval, List<Cell1D> cells)
-	{
-		double ret = 1;
-		for(int j = 0; j < cells.size(); j++)
-		{
-			double val = 0;
-			Cell1D cell = cells.get(j);
-			CoordinateVector quadPoint =
-				CoordinateVector.fromValues(cells.stream().mapToDouble(Cell1D::center).toArray());
-			for(int i = 0; i < cell.points.length; i++)
-			{
-				quadPoint.set(cell.points[i],j);
-				val+= eval.applyAsDouble(quadPoint)*cell.weights[i];
-			}
-			ret *= val;
-		}
-		return ret;
-	}
 	static double integrateNonTensorProduct(ToDoubleFunction<CoordinateVector> eval, List<Cell1D> cells)
 	{
-		if(cells.size() == 1)
-		{
-			double ret = 0;
-			Cell1D cell = cells.get(0);
-			for(int i = 0; i < cell.points.length; i++)
-			{
-				ret += eval.applyAsDouble(CoordinateVector.fromValues(cell.points[i]))*cell.weights[i];
-			}
-			return ret;
-		}
-		
+		int qsize = cells.get(0).points.length;
 		double ret = 0;
-		Cell1D cell = cells.get(0);
-		for(int i = 0; i < cell.points.length; i++)
+		double val = 0;
+		CoordinateVector quadraturePoint = new CoordinateVector(cells.size());
+		int [] decomposedPointIndex = new int[cells.size()];
+		for (int i = 0; i < Math.pow(qsize,cells.size()); i++)
 		{
-			int finalI = i;
-			ret += integrateNonTensorProduct(x->{
-				double [] point = new double [cells.size()];
-				point[0] = cell.points[finalI];
-				for (int j = 1; j < cells.size(); j++)
-				{
-					point[j] = x.at(j-1);
-				}
-				return eval.applyAsDouble(CoordinateVector.fromValues(point));
-			},cells.subList(1,cells.size()-1))*cell.weights[i];
+			int icopy = i;
+			for (int j = 0; j < cells.size(); j++)
+			{
+				decomposedPointIndex[j] = icopy % qsize;
+				icopy = icopy/qsize;
+				quadraturePoint.set(cells.get(j).points[decomposedPointIndex[j]],j);
+			}
+			//System.out.println(quadraturePoint);
+			val = eval.applyAsDouble(quadraturePoint);
+			//System.out.println(ret + " ret" + val+ " "+ quadraturePoint);
+			for(int j = 0; j < cells.size(); j++)
+				val *= cells.get(j).weights[decomposedPointIndex[j]];
+			ret += val;
 		}
 		return ret;
 	}
@@ -95,30 +75,18 @@ public class TPCellIntegral extends CellIntegral<TPCell<TPShapeFunction>,TPFace<
 	{
 		if(name.equals(GRAD_GRAD))
 		{
-			if(weightIsTensorProduct)
-				return integrateTensorProduct(x->shapeFunction1.gradient(x).inner(shapeFunction2.gradient(x))*(Double)weight.value(x),cell.cell1Ds);
-			else
 				return integrateNonTensorProduct(x->shapeFunction1.gradient(x).inner(shapeFunction2.gradient(x))*(Double)weight.value(x),cell.cell1Ds);
 		}
 		if(name.equals(VALUE_VALUE))
 		{
-			if(weightIsTensorProduct)
-				return integrateTensorProduct(x->shapeFunction1.value(x)*shapeFunction2.value(x)*(Double)weight.value(x),cell.cell1Ds);
-			else
 				return integrateNonTensorProduct(x->shapeFunction1.value(x)*shapeFunction2.value(x)*(Double)weight.value(x),cell.cell1Ds);
 		}
 		if(name.equals(GRAD_VALUE))
 		{
-			if(weightIsTensorProduct)
-				return integrateTensorProduct(x->shapeFunction1.gradient(x).inner((Vector)weight.value(x))*shapeFunction2.value(x),cell.cell1Ds);
-			else
 				return integrateNonTensorProduct(x->shapeFunction1.gradient(x).inner((Vector)weight.value(x))*shapeFunction2.value(x),cell.cell1Ds);
 		}
 		if(name.equals(VALUE_GRAD))
 		{
-			if(weightIsTensorProduct)
-				return integrateTensorProduct(x->shapeFunction2.gradient(x).inner((Vector)weight.value(x))*shapeFunction1.value(x),cell.cell1Ds);
-			else
 				return integrateNonTensorProduct(x->shapeFunction2.gradient(x).inner((Vector)weight.value(x))*shapeFunction1.value(x),cell.cell1Ds);
 		}
 		throw new UnsupportedOperationException("unknown integral name");

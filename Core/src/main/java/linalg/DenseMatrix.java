@@ -4,6 +4,7 @@ import com.google.common.primitives.Ints;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 public class DenseMatrix implements Matrix, Decomposable, DirectlySolvable
 {
@@ -16,9 +17,17 @@ public class DenseMatrix implements Matrix, Decomposable, DirectlySolvable
 	public DenseMatrix(Matrix matrix)
 	{
 		entries = new double[matrix.getRows()][matrix.getCols()];
-		for(int i = 0; i < getRows(); i++)
-			for(int j = 0; j < getCols(); j++)
-				entries[i][j] = matrix.at(i,j);
+		if(matrix.isSparse())
+		{
+			for(Map.Entry<List<Integer>,Double> entry:matrix.getCoordinateEntryList().entrySet())
+				entries[entry.getKey().get(0)][entry.getKey().get(1)] += entry.getValue();
+		}
+		else
+		{
+			for (int i = 0; i < getRows(); i++)
+				for (int j = 0; j < getCols(); j++)
+					entries[i][j] = matrix.at(i, j);
+		}
 	}
 	public static DenseMatrix squareMatrixFromValues(double... values)
 	{

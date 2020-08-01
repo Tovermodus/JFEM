@@ -28,7 +28,7 @@ public class TPFESpace implements MatrixFESpace<TPCell<TPShapeFunction>,
 	List<TPFace<TPShapeFunction>> faces;
 	Map<List<Integer>, TPCell<TPShapeFunction>> lexicographicCellNumbers;
 	List<TPShapeFunction> shapeFunctions;
-	DenseMatrix systemMatrix;
+	SparseMatrix systemMatrix;
 	DenseVector rhs;
 	public TPFESpace(CoordinateVector startCoordinates, CoordinateVector endCoordinates,
 	                 List<Integer> cellsPerDimension, int polynomialDegree)
@@ -39,7 +39,7 @@ public class TPFESpace implements MatrixFESpace<TPCell<TPShapeFunction>,
 		coordinates1D = new ArrayList<>();
 		QuadratureRule1D quad;
 		if(polynomialDegree < 3)
-			quad = QuadratureRule1D.Gauss3;
+			quad = QuadratureRule1D.Gauss5;
 		else
 			quad = QuadratureRule1D.Gauss5;
 		for (int i = 0; i < startCoordinates.getLength(); i++)
@@ -81,11 +81,9 @@ public class TPFESpace implements MatrixFESpace<TPCell<TPShapeFunction>,
 		{
 			int [] lexicographicCellIndex =
 				functionCombination.stream().mapToInt(LagrangeBasisFunction1D::getCellIndexInDimension).toArray();
-			System.out.println(Arrays.deepToString(Ints.asList(lexicographicCellIndex).toArray()));
 			shapeFunctions.add(new TPShapeFunction(lexicographicCellNumbers.get(Ints.asList(lexicographicCellIndex)),
 				functionCombination));
 			Iterables.getLast(shapeFunctions).setGlobalIndex(shapeFunctions.size()-1);
-			System.out.println(Arrays.deepToString(shapeFunctions.toArray()));
 		}
 	}
 	@Override
@@ -134,14 +132,12 @@ public class TPFESpace implements MatrixFESpace<TPCell<TPShapeFunction>,
 				}
 			}
 		}
-		for(TPCell<TPShapeFunction> cell: cells)
-			System.out.println(Arrays.deepToString(cell.getFaces().toArray()));
 	}
 	
 	@Override
 	public void initializeSystemMatrix()
 	{
-		systemMatrix = new DenseMatrix(shapeFunctions.size(),shapeFunctions.size());
+		systemMatrix = new SparseMatrix(shapeFunctions.size(),shapeFunctions.size());
 	}
 	
 	@Override
@@ -151,13 +147,13 @@ public class TPFESpace implements MatrixFESpace<TPCell<TPShapeFunction>,
 	}
 	
 	@Override
-	public Vector getRhs()
+	public DenseVector getRhs()
 	{
 		return rhs;
 	}
 	
 	@Override
-	public Matrix getSystemMatrix()
+	public SparseMatrix getSystemMatrix()
 	{
 		return systemMatrix;
 	}
@@ -181,20 +177,20 @@ public class TPFESpace implements MatrixFESpace<TPCell<TPShapeFunction>,
 	}
 	
 	@Override
-	public List<CoordinateVector> generatePlotPoints(double resolution)
+	public List<CoordinateVector> generatePlotPoints(int resolution)
 	{
-		int n = (int)(1./(1.-resolution));
+		int n = resolution;
 		List<List<Double>> plotCoordinates1D = new ArrayList<>();
-		for (int i = 0; i < coordinates1D.size(); i++)
+		for (List<Double> doubles : coordinates1D)
 		{
 			List<Double> coordinatesForDirection = new ArrayList<>();
 			double le =
-				(Iterables.getLast(coordinates1D.get(i)) -coordinates1D.get(i).get(0))/n;
+				(Iterables.getLast(doubles) - doubles.get(0)) / n;
 			for (int j = 0; j < n; j++)
 			{
-				coordinatesForDirection.add(coordinates1D.get(i).get(0) + le*j);
+				coordinatesForDirection.add(doubles.get(0) + le * j+Math.random()*1e-5);
 			}
-			coordinatesForDirection.add(Iterables.getLast(coordinates1D.get(i)));
+			coordinatesForDirection.add(Iterables.getLast(doubles));
 			plotCoordinates1D.add(coordinatesForDirection);
 		}
 		return Lists.cartesianProduct(plotCoordinates1D).stream().map(Doubles::toArray).map(CoordinateVector::fromValues).collect(Collectors.toList());

@@ -1,10 +1,8 @@
 package linalg;
 
 import com.google.common.primitives.Ints;
-import org.jetbrains.annotations.NotNull;
 
 import java.util.*;
-import java.util.stream.IntStream;
 
 public class SparseVector implements Vector
 {

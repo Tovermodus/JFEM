@@ -22,6 +22,31 @@ public interface Matrix extends Tensor, VectorMultiplyable
 			throw new IllegalArgumentException("Matrices are of different size");
 		return add(other.mul(-1.));
 	}
+	
+	@Override
+	default void addInPlace(Tensor other)
+	{
+		if(!getShape().equals(other.getShape()))
+			throw new IllegalArgumentException("Matrices are of different size");
+		for(int i = 0; i < getRows(); i++)
+			for (int j = 0; j < getCols(); j++)
+			{
+				set(at(i,j)+other.at(i,j),i,j);
+			}
+	}
+	
+	@Override
+	default void subInPlace(Tensor other)
+	{
+		if(!getShape().equals(other.getShape()))
+			throw new IllegalArgumentException("Matrices are of different size");
+		for(int i = 0; i < getRows(); i++)
+			for (int j = 0; j < getCols(); j++)
+			{
+				set(at(i,j)-other.at(i,j),i,j);
+			}
+	}
+	
 	@Override
 	default Map<List<Integer>,Double> getCoordinateEntryList()
 	{

@@ -21,9 +21,6 @@ public class TPBoundaryFaceIntegral extends BoundaryRightHandSideIntegral<TPCell
 	{
 		if(name.equals(VALUE))
 		{
-			if(weightIsTensorProduct)
-				return TPFaceIntegral.integrateTensorProduct(x->shapeFunction1.value(x)*(Double)(rightHandSide.value(x)),face.cell1Ds, face.flatDimension, face.otherCoordinate);
-			else
 				return TPFaceIntegral.integrateNonTensorProduct(x->shapeFunction1.value(x)*(Double)(rightHandSide.value(x)),face.cell1Ds, face.flatDimension, face.otherCoordinate);
 		}
 		throw new UnsupportedOperationException("unknown rhs integral");

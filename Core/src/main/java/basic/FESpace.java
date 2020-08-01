@@ -15,7 +15,7 @@ public interface FESpace<CT extends Cell<CT,FT,ST>, FT extends  Face<CT,FT,ST>, 
 	
 	List<FT> getFaces();
 	
-	List<CoordinateVector> generatePlotPoints(double resolution);
+	List<CoordinateVector> generatePlotPoints(int resolution);
 	default FST refine(Multimap<CT, CT> cellRefinedCellMapping,
 	           Multimap<FT, FT> faceRefinedFaceMapping)
 	{

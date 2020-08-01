@@ -17,8 +17,10 @@ public class DenseVector implements Vector
 	public DenseVector(Vector vect)
 	{
 		entries = new double[vect.getLength()];
-		for(List<Integer> key: vect.getCoordinateEntryList().keySet())
-			add(vect.getCoordinateEntryList().get(key), Ints.toArray(key));
+		for (int i = 0; i < vect.getLength(); i++)
+		{
+			entries[i] = vect.at(i);
+		}
 	}
 	
 	public static DenseVector vectorFromValues(double... values)
@@ -28,6 +30,30 @@ public class DenseVector implements Vector
 			ret.set(values[i],i);
 		return ret;
 	}
+	
+	@Override
+	public double inner(Vector other)
+	{
+		if(getLength() != other.getLength())
+			throw new IllegalArgumentException("Vectors have different size");
+		if(other instanceof DenseVector)
+		{
+			double ret = 0;
+			for (int i = 0; i < getLength(); i++)
+				ret += this.entries[i] * ((DenseVector) other).entries[i];
+			return ret;
+		}
+		else
+		{
+			double ret = 0;
+			for (int i = 0; i < getLength(); i++)
+				ret += this.entries[i] * other.at(i);
+			return ret;
+		}
+		
+		
+	}
+	
 	@Override
 	public int getSparseEntryCount()
 	{
@@ -77,10 +103,18 @@ public class DenseVector implements Vector
 			throw new IllegalArgumentException("Vectors are of different size");
 		DenseVector ret = new DenseVector(this);
 		if(!other.isSparse())
-			for (int i = 0; i < getLength(); i++)
+		{
+			if(other instanceof DenseVector)
 			{
-				ret.add(other.at(i),i);
+				for (int i = 0; i < getLength(); i++)
+					ret.entries[i] = entries[i]+((DenseVector) other).entries[i];
 			}
+			else
+				for (int i = 0; i < getLength(); i++)
+				{
+					ret.add(other.at(i), i);
+				}
+		}
 		else
 			for(List<Integer> key: other.getCoordinateEntryList().keySet())
 				ret.add(other.getCoordinateEntryList().get(key), Ints.toArray(key));
@@ -91,15 +125,18 @@ public class DenseVector implements Vector
 	{
 		if(!getShape().equals(other.getShape()))
 			throw new IllegalArgumentException("Vectors are of different size");
-		DenseVector ret = new DenseVector(this);
-		if(!other.isSparse())
+		DenseVector ret = new DenseVector(getLength());
+		if (other instanceof DenseVector)
+		{
+			for (int i = 0; i < getLength(); i++)
+				ret.entries[i] = entries[i] - ((DenseVector) other).entries[i];
+		} else
+		{
 			for (int i = 0; i < getLength(); i++)
 			{
-				ret.add(-other.at(i),i);
+				ret.add(-other.at(i), i);
 			}
-		else
-			for(List<Integer> key: other.getCoordinateEntryList().keySet())
-				ret.add(-other.getCoordinateEntryList().get(key), Ints.toArray(key));
+		}
 		return ret;
 	}
 	@Override

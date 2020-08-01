@@ -214,6 +214,7 @@ class GMRES extends AbstractIterativeSolver
 
 			r_ = b.sub(A.mvMul(x));
 			normr = r_.euclidianNorm();
+			System.out.println(normr);
 		}
 
 		return x;

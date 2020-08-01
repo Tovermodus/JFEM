@@ -4,6 +4,8 @@ import basic.LagrangeNodeFunctional;
 import basic.NodeFunctional;
 import basic.ScalarShapeFunction;
 import basic.ShapeFunction;
+import com.google.common.primitives.Doubles;
+import com.google.common.primitives.Ints;
 import linalg.CoordinateComparator;
 import linalg.CoordinateVector;
 import linalg.Matrix;
@@ -165,9 +167,9 @@ public class TPShapeFunction extends ScalarShapeFunction<TPCell<TPShapeFunction>
 			for(int j = 0; j < pos.getLength(); j++)
 			{
 				if(i == j)
-					comp *= function1Ds.get(i).derivative(pos.at(i));
+					comp *= function1Ds.get(j).derivative(pos.at(j));
 				else
-					comp *= function1Ds.get(i).value(pos.at(i));
+					comp *= function1Ds.get(j).value(pos.at(j));
 			}
 			ret.set(comp,i);
 		}
@@ -204,6 +206,7 @@ public class TPShapeFunction extends ScalarShapeFunction<TPCell<TPShapeFunction>
 					comp *= function1Ds.get(i).derivative(pos.at(i));
 				else
 					comp *= function1Ds.get(i).value(pos.at(i));
+				System.out.println("comp"+comp+" i "+i);
 			}
 			ret[i] = comp;
 		}
@@ -213,7 +216,12 @@ public class TPShapeFunction extends ScalarShapeFunction<TPCell<TPShapeFunction>
 	@Override
 	public int compareTo(@NotNull TPShapeFunction o)
 	{
-		return CoordinateComparator.comp(nodeFunctional.getPoint().getEntries(), o.nodeFunctional.getPoint().getEntries());
+		if(CoordinateComparator.comp(nodeFunctional.getPoint().getEntries(),
+			o.nodeFunctional.getPoint().getEntries())==0)
+			return CoordinateComparator.comp(supportCell.center().getEntries(),
+				o.supportCell.center().getEntries());
+		return CoordinateComparator.comp(nodeFunctional.getPoint().getEntries(),
+			o.nodeFunctional.getPoint().getEntries());
 	}
 	
 	@Override

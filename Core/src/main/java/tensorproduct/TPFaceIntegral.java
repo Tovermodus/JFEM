@@ -39,120 +39,71 @@ public class TPFaceIntegral extends FaceIntegral<TPCell<TPShapeFunction>,TPFace<
 		if(name.equals(VALUE_VALUE) && !(weight.value(new CoordinateVector(weight.getDomainDimension())) instanceof Double))
 			throw new IllegalArgumentException();
 	}
-	static double integrateTensorProduct(ToDoubleFunction<CoordinateVector> eval, List<Cell1D> cells,
-	                                     int flatDimension, double otherCoordinate)
-	{
-		return TPCellIntegral.integrateTensorProduct(x->{
-			double [] point = new double [cells.size()+1];
-			int subd = 0;
-			for (int j = 0; j < cells.size()+1; j++)
-			{
-				if(j == flatDimension)
-					point[j] = otherCoordinate;
-				else
-					point[j] = x.at(subd++);
-			}
-			return eval.applyAsDouble(CoordinateVector.fromValues(point));
-		},cells);
-	}
 	static double integrateNonTensorProduct(ToDoubleFunction<CoordinateVector> eval, List<Cell1D> cells,
 	                                        int flatDimension, double otherCoordinate)
 	{
-		return TPCellIntegral.integrateNonTensorProduct(x->{
-			double [] point = new double [cells.size()+1];
+		double v = TPCellIntegral.integrateNonTensorProduct(x ->
+		{
+			double[] point = new double[cells.size() + 1];
 			int subd = 0;
-			for (int j = 0; j < cells.size()+1; j++)
+			for (int j = 0; j < cells.size() + 1; j++)
 			{
-				if(j == flatDimension)
+				if (j == flatDimension)
 					point[j] = otherCoordinate;
 				else
 					point[j] = x.at(subd++);
 			}
 			return eval.applyAsDouble(CoordinateVector.fromValues(point));
-		},cells);
+		}, cells);
+//		System.out.println(v);
+		return v;
 	}
 	
 	@Override
 	public double evaluateFaceIntegral(TPFace<TPShapeFunction> face, TPShapeFunction shapeFunction1, TPShapeFunction shapeFunction2)
 	{
-		if(name.equals(VALUE_JUMP_VALUE_JUMP))
+		if (name.equals(VALUE_JUMP_VALUE_JUMP))
 		{
-			if(weightIsTensorProduct)
-				return integrateTensorProduct(x->shapeFunction1.jumpInValue(face,x)*shapeFunction2.jumpInValue(face,x)*(Double) weight.value(x),
-					face.cell1Ds,
-					face.flatDimension,
-					face.otherCoordinate);
-			else
-				return integrateNonTensorProduct(x->shapeFunction1.jumpInValue(face,x)*shapeFunction2.jumpInValue(face,x)*(Double) weight.value(x),
-					face.cell1Ds,
-					face.flatDimension,
-					face.otherCoordinate);
+			return integrateNonTensorProduct(x -> shapeFunction1.jumpInValue(face, x) * shapeFunction2.jumpInValue(face, x) * (Double) weight.value(x),
+				face.cell1Ds,
+				face.flatDimension,
+				face.otherCoordinate);
 		}
-		if(name.equals(GRAD_NORMALAVERAGE_VALUE_JUMP))
+		if (name.equals(GRAD_NORMALAVERAGE_VALUE_JUMP))
 		{
-			if(weightIsTensorProduct)
-				return integrateTensorProduct(x->shapeFunction1.normalAverageInDerivative(face,x)*shapeFunction2.jumpInValue(face,x)*(Double) weight.value(x),
-					face.cell1Ds,
-					face.flatDimension,
-					face.otherCoordinate);
-			else
-				return integrateNonTensorProduct(x->shapeFunction1.normalAverageInDerivative(face,x)*shapeFunction2.jumpInValue(face,x)*(Double) weight.value(x),
-					face.cell1Ds,
-					face.flatDimension,
-					face.otherCoordinate);
+			return integrateNonTensorProduct(x -> shapeFunction1.normalAverageInDerivative(face, x) * shapeFunction2.jumpInValue(face, x) * (Double) weight.value(x),
+				face.cell1Ds,
+				face.flatDimension,
+				face.otherCoordinate);
 		}
-		if(name.equals(VALUE_JUMP_GRAD_NORMALAVERAGE))
+		if (name.equals(VALUE_JUMP_GRAD_NORMALAVERAGE))
 		{
-			if(weightIsTensorProduct)
-				return integrateTensorProduct(x->shapeFunction1.jumpInValue(face,x)*shapeFunction2.normalAverageInDerivative(face,x)*(Double) weight.value(x),
-					face.cell1Ds,
-					face.flatDimension,
-					face.otherCoordinate);
-			else
-				return integrateNonTensorProduct(x->shapeFunction1.jumpInValue(face,x)*shapeFunction2.normalAverageInDerivative(face,x)*(Double) weight.value(x),
-					face.cell1Ds,
-					face.flatDimension,
-					face.otherCoordinate);
+			return integrateNonTensorProduct(x -> shapeFunction1.jumpInValue(face, x) * shapeFunction2.normalAverageInDerivative(face, x) * (Double) weight.value(x),
+				face.cell1Ds,
+				face.flatDimension,
+				face.otherCoordinate);
 		}
-		if(name.equals(GRAD_VALUE_NORMAL))
+		if (name.equals(GRAD_VALUE_NORMAL))
 		{
-			if(weightIsTensorProduct)
-				return integrateTensorProduct(x->shapeFunction1.gradient(x).inner(face.getNormal().value(x))*shapeFunction2.value(x)*(Double) weight.value(x),
-					face.cell1Ds,
-					face.flatDimension,
-					face.otherCoordinate);
-			else
-				return integrateNonTensorProduct(x->shapeFunction1.gradient(x).inner(face.getNormal().value(x))*shapeFunction2.value(x)*(Double) weight.value(x),
-					face.cell1Ds,
-					face.flatDimension,
-					face.otherCoordinate);
+			return integrateNonTensorProduct(x -> shapeFunction1.gradient(x).inner(face.getNormal().value(x)) * shapeFunction2.value(x) * (Double) weight.value(x),
+				face.cell1Ds,
+				face.flatDimension,
+				face.otherCoordinate);
 		}
-		if(name.equals(VALUE_GRAD_NORMAL))
+		if (name.equals(VALUE_GRAD_NORMAL))
 		{
-			if (weightIsTensorProduct)
-				return integrateTensorProduct(x -> shapeFunction2.gradient(x).inner(face.getNormal().value(x)) * shapeFunction1.value(x) * (Double) weight.value(x),
-					face.cell1Ds,
-					face.flatDimension,
-					face.otherCoordinate);
-			else
-				return integrateNonTensorProduct(x -> shapeFunction2.gradient(x).inner(face.getNormal().value(x)) * shapeFunction1.value(x) * (Double) weight.value(x),
-					face.cell1Ds,
-					face.flatDimension,
-					face.otherCoordinate);
+			return integrateNonTensorProduct(x -> shapeFunction2.gradient(x).inner(face.getNormal().value(x)) * shapeFunction1.value(x) * (Double) weight.value(x),
+				face.cell1Ds,
+				face.flatDimension,
+				face.otherCoordinate);
 		}
-		if(name.equals(VALUE_VALUE))
+		if (name.equals(VALUE_VALUE))
 		{
-			if (weightIsTensorProduct)
-				return integrateTensorProduct(x -> shapeFunction1.value(x) * shapeFunction1.value(x) * (Double) weight.value(x),
-					face.cell1Ds,
-					face.flatDimension,
-					face.otherCoordinate);
-			else
-				return integrateNonTensorProduct(x ->
-						shapeFunction1.value(x)* shapeFunction1.value(x) * (Double) weight.value(x),
-					face.cell1Ds,
-					face.flatDimension,
-					face.otherCoordinate);
+			return integrateNonTensorProduct(x ->
+					shapeFunction1.value(x) * shapeFunction1.value(x) * (Double) weight.value(x),
+				face.cell1Ds,
+				face.flatDimension,
+				face.otherCoordinate);
 		}
 		throw new UnsupportedOperationException("unkown face integral name");
 	}
