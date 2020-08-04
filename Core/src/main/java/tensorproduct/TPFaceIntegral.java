@@ -6,7 +6,8 @@ import linalg.CoordinateVector;
 import java.util.List;
 import java.util.function.ToDoubleFunction;
 
-public class TPFaceIntegral extends FaceIntegral<TPCell<TPShapeFunction>,TPFace<TPShapeFunction>,TPShapeFunction>
+public class TPFaceIntegral<ST extends ScalarShapeFunction<TPCell<ST>,TPFace<ST>,ST>> extends FaceIntegral<TPCell<ST>,
+	TPFace<ST>,ST>
 {
 	public static String VALUE_JUMP_VALUE_JUMP = "ValueJumpValueJump";
 	public static String GRAD_NORMALAVERAGE_VALUE_JUMP = "GradNormalaverageValueJump";
@@ -14,12 +15,15 @@ public class TPFaceIntegral extends FaceIntegral<TPCell<TPShapeFunction>,TPFace<
 	public static String GRAD_VALUE_NORMAL = "GradValueNormal";
 	public static String VALUE_GRAD_NORMAL = "ValueGradNormal";
 	public static String VALUE_VALUE = "ValueValue";
+	public static String BOUNDARY_VALUE = "BoundaryValue";
 	private final boolean weightIsTensorProduct;
 	public TPFaceIntegral(Function<?,?,?> weight, String name, boolean weightIsTensorProduct)
 	{
 		super(weight,name);
 		this.weightIsTensorProduct = weightIsTensorProduct;
 		if(name.equals(VALUE_VALUE) && !(weight.value(new CoordinateVector(weight.getDomainDimension())) instanceof Double))
+			throw new IllegalArgumentException();
+		if(name.equals(BOUNDARY_VALUE) && !(weight.value(new CoordinateVector(weight.getDomainDimension())) instanceof Double))
 			throw new IllegalArgumentException();
 		if(name.equals(VALUE_JUMP_GRAD_NORMALAVERAGE) && !(weight.value(new CoordinateVector(weight.getDomainDimension())) instanceof Double))
 			throw new IllegalArgumentException();
@@ -37,6 +41,8 @@ public class TPFaceIntegral extends FaceIntegral<TPCell<TPShapeFunction>,TPFace<
 		super(name);
 		this.weightIsTensorProduct = true;
 		if(name.equals(VALUE_VALUE) && !(weight.value(new CoordinateVector(weight.getDomainDimension())) instanceof Double))
+			throw new IllegalArgumentException();
+		if(name.equals(BOUNDARY_VALUE) && !(weight.value(new CoordinateVector(weight.getDomainDimension())) instanceof Double))
 			throw new IllegalArgumentException();
 	}
 	static double integrateNonTensorProduct(ToDoubleFunction<CoordinateVector> eval, List<Cell1D> cells,
@@ -60,7 +66,8 @@ public class TPFaceIntegral extends FaceIntegral<TPCell<TPShapeFunction>,TPFace<
 	}
 	
 	@Override
-	public double evaluateFaceIntegral(TPFace<TPShapeFunction> face, TPShapeFunction shapeFunction1, TPShapeFunction shapeFunction2)
+	public double evaluateFaceIntegral(TPFace<ST> face, ST shapeFunction1,
+	                                   ST shapeFunction2)
 	{
 		if (name.equals(VALUE_JUMP_VALUE_JUMP))
 		{
@@ -100,10 +107,21 @@ public class TPFaceIntegral extends FaceIntegral<TPCell<TPShapeFunction>,TPFace<
 		if (name.equals(VALUE_VALUE))
 		{
 			return integrateNonTensorProduct(x ->
-					shapeFunction1.value(x) * shapeFunction1.value(x) * (Double) weight.value(x),
+					shapeFunction1.value(x) * shapeFunction2.value(x) * (Double) weight.value(x),
 				face.cell1Ds,
 				face.flatDimension,
 				face.otherCoordinate);
+		}
+		if (name.equals(BOUNDARY_VALUE))
+		{
+			if(face.isBoundaryFace())
+				return integrateNonTensorProduct(x ->
+						shapeFunction1.jumpInValue(face, x)* shapeFunction2.jumpInValue(face,
+							x)* (Double) weight.value(x),
+					face.cell1Ds,
+					face.flatDimension,
+					face.otherCoordinate);
+			return 0;
 		}
 		throw new UnsupportedOperationException("unkown face integral name");
 	}

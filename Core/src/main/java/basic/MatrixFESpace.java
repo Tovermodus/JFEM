@@ -22,7 +22,7 @@ public interface MatrixFESpace<CT extends Cell<CT,FT,ST>, FT extends  Face<CT,FT
 	default void evaluateCellIntegrals(List<CellIntegral<CT,FT,ST>> cellIntegrals,
 	                           List<RightHandSideIntegral<CT,FT,ST>> rightHandSideIntegrals)
 		{
-		List<List<CT>> smallerList = Lists.partition(getCells(),12);
+		List<List<CT>> smallerList = Lists.partition(getCells(),getCells().size()/12+1);
 		smallerList.stream().parallel().forEach(smallList->
 		{
 			for (CT K : smallList)
@@ -59,7 +59,7 @@ public interface MatrixFESpace<CT extends Cell<CT,FT,ST>, FT extends  Face<CT,FT
 	                                   List<BoundaryRightHandSideIntegral<CT,FT,ST>> boundaryRightHandSideIntegrals)
 	{
 		
-		List<List<FT>> smallerList = Lists.partition(getFaces(),12);
+		List<List<FT>> smallerList = Lists.partition(getFaces(),getFaces().size()/12+1);
 //		for (ST s: getShapeFunctions())
 //		{
 //			if(s.getGlobalIndex() == 2)

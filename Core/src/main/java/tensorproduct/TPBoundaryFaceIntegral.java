@@ -2,8 +2,8 @@ package tensorproduct;
 import basic.*;
 import linalg.CoordinateVector;
 
-public class TPBoundaryFaceIntegral extends BoundaryRightHandSideIntegral<TPCell<TPShapeFunction>,TPFace<TPShapeFunction>,
-	TPShapeFunction>
+public class TPBoundaryFaceIntegral<ST extends ScalarShapeFunction<TPCell<ST>,TPFace<ST>,ST>> extends BoundaryRightHandSideIntegral<TPCell<ST>,TPFace<ST>,
+	ST>
 {
 	static final String VALUE="Value";
 	private final boolean weightIsTensorProduct;
@@ -16,8 +16,8 @@ public class TPBoundaryFaceIntegral extends BoundaryRightHandSideIntegral<TPCell
 	}
 	
 	@Override
-	public double evaluateBoundaryRightHandSideIntegral(TPFace<TPShapeFunction> face,
-	                                                    TPShapeFunction shapeFunction1)
+	public double evaluateBoundaryRightHandSideIntegral(TPFace<ST> face,
+	                                                    ST shapeFunction1)
 	{
 		if(name.equals(VALUE))
 		{

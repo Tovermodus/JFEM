@@ -3,10 +3,7 @@ package basic;
 import linalg.CoordinateVector;
 import linalg.Vector;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 public class ScalarFESpaceFunction<ST extends ScalarShapeFunction<?,?,ST>> extends ScalarFunction
 {
@@ -20,13 +17,13 @@ public class ScalarFESpaceFunction<ST extends ScalarShapeFunction<?,?,ST>> exten
 			this.coefficients.put(functions[i], coefficients[i]);
 		}
 	}
-	public ScalarFESpaceFunction(List<ST> functions, Vector coefficients)
+	public ScalarFESpaceFunction(Map<Integer, ST> functions, Vector coefficients)
 	{
 		assert(functions.size() == coefficients.size());
 		this.coefficients = new HashMap<>();
-		for(int i = 0; i < functions.size(); i++)
+		for(Map.Entry<Integer,ST> function:functions.entrySet())
 		{
-			this.coefficients.put(functions.get(i), coefficients.at(i));
+			this.coefficients.put(function.getValue(), coefficients.at(function.getKey()));
 		}
 	}
 	

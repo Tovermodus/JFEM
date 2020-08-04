@@ -9,7 +9,7 @@ import java.util.List;
 public enum QuadratureRule1D
 {
 	Gauss3(new double[]{5./9,8./9,5./9}, //on [-1,1]
-		new double[]{-Math.sqrt(3./5),0,-Math.sqrt(3./5)}),
+		new double[]{-Math.sqrt(3./5),0,Math.sqrt(3./5)}),
 	Gauss5(new double[]{
 		(322.0 - 13 * Math.sqrt(70)) / 900,
 		(322.0 + 13 * Math.sqrt(70)) / 900,

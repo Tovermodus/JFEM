@@ -15,6 +15,17 @@ public class LagrangeBasisFunction1D extends Function1D
 		this.polynomialDegree = polynomialDegree;
 		this.degreeOfFreedom = cell.positionOnGrid(1.0/polynomialDegree*localFunctionNumber); //equidistant
 	}
+	public LagrangeBasisFunction1D(int polynomialDegree, double degreeOfFreedom, Cell1D cell)
+	{
+		this.cell = cell;
+		if(Math.abs(cell.positionOnReferenceCell(degreeOfFreedom)*polynomialDegree - (int)(cell.positionOnReferenceCell(degreeOfFreedom)*polynomialDegree+1e-12))>1e-14)
+			throw new IllegalArgumentException("Identification not possible" + Math.abs(cell.positionOnReferenceCell(degreeOfFreedom)*polynomialDegree - (int)(cell.positionOnReferenceCell(degreeOfFreedom)*polynomialDegree)));
+		this.localFunctionNumber =
+			(int)(cell.positionOnReferenceCell(degreeOfFreedom)*polynomialDegree+1e-12);
+		this.polynomialDegree = polynomialDegree;
+		this.degreeOfFreedom = degreeOfFreedom; //equidistant
+	}
+	
 	public double valueOnReferenceCell(double pos)
 	{
 		switch (this.polynomialDegree)

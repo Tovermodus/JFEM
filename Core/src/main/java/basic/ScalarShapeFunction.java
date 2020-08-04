@@ -16,6 +16,18 @@ public abstract class ScalarShapeFunction<CT extends Cell<CT,FT,ST>, FT extends 
 {
 	protected int globalIndex;
 	
+	public double fastValueInCell(CoordinateVector pos, CT cell)
+	{
+		throw new UnsupportedOperationException();
+	}
+	public double[] fastGradientInCell(CoordinateVector pos, CT cell)
+	{
+		throw new UnsupportedOperationException();
+	}
+	public double[][] fastHessianInCell(CoordinateVector pos, CT cell)
+	{
+		throw new UnsupportedOperationException();
+	}
 	@Override
 	public void setGlobalIndex(int index)
 	{

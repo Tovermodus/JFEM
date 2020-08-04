@@ -5,14 +5,14 @@ public abstract class Function1D
 	public abstract double value(double pos);
 
 	public abstract double derivative(double pos);
-	public static Function1D oneFunction()
+	public static Function1D constFunction(double con)
 	{
-		Function1D oneF = new Function1D()
+		Function1D constF = new Function1D()
 		{
 			@Override
 			public double value(double pos)
 			{
-				return 1;
+				return con;
 			}
 
 			@Override
@@ -21,6 +21,6 @@ public abstract class Function1D
 				return 0;
 			}
 		};
-		return oneF;
+		return constF;
 	}
 }

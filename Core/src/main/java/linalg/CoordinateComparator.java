@@ -37,6 +37,19 @@ public class CoordinateComparator implements Comparator<List<Integer>>
 		}
 		return 0;
 	}
+	public static int comp(CoordinateVector o1, CoordinateVector o2)
+	{
+		if(o1.getLength() != o2.getLength())
+			throw new IllegalArgumentException("coordinates have different length");
+		for(int i = 0; i < o1.getLength(); i++)
+		{
+			if(o1.at(i) > o2.at(i)+1e-15)
+				return 1;
+			if(o1.at(i) < o2.at(i)-1e-15)
+				return -1;
+		}
+		return 0;
+	}
 	@Override
 	public int compare(List<Integer> o1, List<Integer> o2)
 	{

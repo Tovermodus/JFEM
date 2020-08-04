@@ -58,8 +58,8 @@ public class TPShapeFunction extends ScalarShapeFunction<TPCell<TPShapeFunction>
 		int[] ret = new int[dimension];
 		for (int i = 0; i < dimension; i++)
 		{
-			ret[i] = localIndex % polynomialDegree;
-			localIndex = localIndex/polynomialDegree;
+			ret[i] = localIndex % (polynomialDegree+1);
+			localIndex = localIndex/(polynomialDegree+1);
 		}
 		return ret;
 	}
@@ -134,6 +134,38 @@ public class TPShapeFunction extends ScalarShapeFunction<TPCell<TPShapeFunction>
 		else
 			return hessian(pos).mul(0);
 	}
+	@Override
+	public double fastValueInCell(CoordinateVector pos, TPCell<TPShapeFunction> cell)
+	{
+		if(cell == null)
+			return 0.;
+		if(cell.equals(supportCell))
+			return fastValue(pos);
+		else
+			return 0.;
+	}
+	
+	@Override
+	public double[] fastGradientInCell(CoordinateVector pos, TPCell<TPShapeFunction> cell)
+	{
+		if(cell == null)
+			return new double[pos.getLength()];
+		if(cell.equals(supportCell))
+			return fastGradient(pos);
+		else
+			return new double[pos.getLength()];
+	}
+	
+	@Override
+	public double[][] fastHessianInCell(CoordinateVector pos, TPCell<TPShapeFunction> cell)
+	{
+		if(cell == null)
+			return new double[pos.getLength()][pos.getLength()];
+		if(cell.equals(supportCell))
+			return fastHessian(pos);
+		else
+			return new double[pos.getLength()][pos.getLength()];
+	}
 	
 	@Override
 	public Map<Integer, Double> prolongate(Set<TPShapeFunction> refinedFunctions)
@@ -149,31 +181,14 @@ public class TPShapeFunction extends ScalarShapeFunction<TPCell<TPShapeFunction>
 	@Override
 	public Double value(CoordinateVector pos)
 	{
-		double ret = 1;
-		for(int i = 0; i < pos.getLength(); i++)
-		{
-			ret *= function1Ds.get(i).value(pos.at(i));
-		}
-		return ret;
+		return fastValue(pos);
 	}
 	
 	@Override
 	public Vector gradient(CoordinateVector pos)
 	{
 		CoordinateVector ret = new CoordinateVector(pos.getLength());
-		for (int i = 0; i < pos.getLength(); i++)
-		{
-			double comp = 1;
-			for(int j = 0; j < pos.getLength(); j++)
-			{
-				if(i == j)
-					comp *= function1Ds.get(j).derivative(pos.at(j));
-				else
-					comp *= function1Ds.get(j).value(pos.at(j));
-			}
-			ret.set(comp,i);
-		}
-		return ret;
+		return CoordinateVector.fromValues(fastGradient(pos));
 	}
 	
 	@Override
@@ -199,16 +214,15 @@ public class TPShapeFunction extends ScalarShapeFunction<TPCell<TPShapeFunction>
 		double[] ret = new double[pos.getLength()];
 		for (int i = 0; i < pos.getLength(); i++)
 		{
-			double comp = 1;
+			double component = 1;
 			for(int j = 0; j < pos.getLength(); j++)
 			{
 				if(i == j)
-					comp *= function1Ds.get(i).derivative(pos.at(i));
+					component *= function1Ds.get(j).derivative(pos.at(j));
 				else
-					comp *= function1Ds.get(i).value(pos.at(i));
-				System.out.println("comp"+comp+" i "+i);
+					component *= function1Ds.get(j).value(pos.at(j));
 			}
-			ret[i] = comp;
+			ret[i] = component;
 		}
 		return ret;
 	}
@@ -229,89 +243,4 @@ public class TPShapeFunction extends ScalarShapeFunction<TPCell<TPShapeFunction>
 	{
 		return "Cell: ".concat(supportCell.toString()).concat(", Node point: ").concat(nodeFunctional.getPoint().toString()).concat(", global Index: ").concat(getGlobalIndex()+"");
 	}
-	//	LagrangeBasisFunction1D xFunction;
-//	LagrangeBasisFunction1D yFunction;
-//	private CoordinateVector functional_point;
-//	TPCell supportCell;
-//	Set<TPFace> faces;
-//	LagrangeNodeFunctional nodeFunctional;
-//	int globalIndex;
-//	public TPShapeFunction(LagrangeBasisFunction1D xFunction, LagrangeBasisFunction1D yFunction,TPCell cell)
-//	{
-//		this.xFunction = xFunction;
-//		this.yFunction = yFunction;
-//		functional_point = CoordinateVector.vectorFromValues(xFunction.degreeOfFreedom, yFunction.degreeOfFreedom);
-//		cell.getShapeFunctions().add(this);
-//		for(TPFace f: cell.getFaces())
-//			f.getShapeFunctions().add(this);
-//		nodeFunctional = new LagrangeNodeFunctional(functional_point);
-//	}
-//
-//	@Override
-//	public Double value(CoordinateVector pos)
-//	{
-//		return xFunction.value(pos.x())*yFunction.value(pos.y());
-//	}
-//
-//	@Override
-//	public Vector derivative(CoordinateVector pos)
-//	{
-//		return .vectorFromValues(xFunction.derivative(pos.x())*yFunction.value(pos.y()),
-//			xFunction.value(pos.x())*yFunction.derivative(pos.y()));
-//	}
-//
-//	@Override
-//	public void setGlobalIndex(int index)
-//	{
-//		globalIndex = index;
-//	}
-//
-//	@Override
-//	public List<TPCell> getCells()
-//	{
-//		Set<TPCell> ret = new HashSet<>();
-//		ret.add(supportCell);
-//		return ret;
-//	}
-//
-//	@Override
-//	public int getGlobalIndex()
-//	{
-//		return globalIndex;
-//	}
-//
-//	@Override
-//	public ScalarNodeFunctional getNodeFunctional()
-//	{
-//		return nodeFunctional;
-//	}
-//
-//	@Override
-//	public double valueInCell(DoubleTensor pos, TPCell cell)
-//	{
-//		if(supportCell == cell)
-//			return value(pos);
-//		else
-//			return 0;
-//	}
-//	@Override
-//	public DoubleTensor derivativeInCell(DoubleTensor pos, TPCell cell)
-//	{
-//		if(supportCell == cell)
-//			return derivative(pos);
-//		else
-//			return new DoubleTensor(pos.size());
-//	}
-//
-//	@Override
-//	public Map<Integer, Double> prolongate(List<ScalarShapeFunction<TPCell, TPFace>> refinedFunctions)
-//	{
-//	}
-//
-//
-//	@Override
-//	public int compareTo(@NotNull TPShapeFunction o)
-//	{
-//
-//	}
 }

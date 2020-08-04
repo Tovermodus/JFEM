@@ -165,9 +165,13 @@ public class TPFESpace implements MatrixFESpace<TPCell<TPShapeFunction>,
 	}
 	
 	@Override
-	public List<TPShapeFunction> getShapeFunctions()
+	public Map<Integer, TPShapeFunction> getShapeFunctions()
 	{
-		return shapeFunctions;
+		
+		Map<Integer, TPShapeFunction> functionNumbers = new TreeMap<>();
+		for(TPShapeFunction shapeFunction:shapeFunctions)
+			functionNumbers.put(shapeFunction.getGlobalIndex(), shapeFunction);
+		return functionNumbers;
 	}
 	
 	@Override

@@ -3,15 +3,17 @@ package basic;
 import com.google.common.collect.Multimap;
 import linalg.CoordinateVector;
 
+import java.util.Collection;
 import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
 public interface FESpace<CT extends Cell<CT,FT,ST>, FT extends  Face<CT,FT,ST>, ST extends ShapeFunction<CT,FT,
 	ST,valueT,gradientT,hessianT>,valueT,gradientT,hessianT, FST extends FESpace<CT,FT,ST,valueT,gradientT,
 	hessianT,FST>>
 {
 	List<CT> getCells();
-	
-	List<ST> getShapeFunctions();
+	Map<Integer, ST> getShapeFunctions();
 	
 	List<FT> getFaces();
 	
