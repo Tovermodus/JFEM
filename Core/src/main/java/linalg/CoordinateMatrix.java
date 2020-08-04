@@ -17,4 +17,38 @@ public class CoordinateMatrix extends DenseMatrix
 			throw new IllegalArgumentException("only 1D, 2D and 3D supported");
 	}
 	
+	@Override
+	public CoordinateMatrix add(Tensor other)
+	{
+		if(!getShape().equals(other.getShape()))
+			throw new IllegalArgumentException("Incompatible sizes");
+		CoordinateMatrix ret = new CoordinateMatrix(this);
+		for(int i = 0; i < ret.getRows(); i++)
+			for(int j = 0; j < ret.getCols(); j++)
+				ret.add(other.at(i,j),i,j);
+		return ret;
+	}
+	
+	@Override
+	public CoordinateMatrix sub(Tensor other){
+		
+		if(!getShape().equals(other.getShape()))
+			throw new IllegalArgumentException("Incompatible sizes");
+		CoordinateMatrix ret = new CoordinateMatrix(this);
+		for(int i = 0; i < ret.getRows(); i++)
+			for(int j = 0; j < ret.getCols(); j++)
+				ret.add(-other.at(i,j),i,j);
+		return ret;
+	}
+	
+	@Override
+	public CoordinateMatrix mul(double scalar)
+	{
+		
+		CoordinateMatrix ret = new CoordinateMatrix(entries.length, entries[0].length);
+		for(int i = 0; i < ret.getRows(); i++)
+			for(int j = 0; j < ret.getCols(); j++)
+				ret.set(scalar*at(i,j),i,j);
+		return ret;
+	}
 }
