@@ -10,18 +10,15 @@ import java.util.List;
 import java.util.Set;
 import java.util.TreeSet;
 
-public class TPCell<ST extends ShapeFunction<TPCell<ST>,TPFace<ST>,ST,?,?,?>> implements Cell<TPCell<ST>, TPFace<ST>,
-	ST>
+public class TPCell implements Cell<TPCell, TPFace>
 {
 	List<Cell1D> cell1Ds;
-	Set<ST> shapeFunctions;
-	Set<TPFace<ST>> faces;
+	Set<TPFace> faces;
 	boolean refined;
 	
 	public TPCell(List<Cell1D> cell1Ds)
 	{
 		this.cell1Ds = cell1Ds;
-		this.shapeFunctions = new TreeSet<>();
 		this.faces = new TreeSet<>();
 		this.refined = false;
 	}
@@ -30,14 +27,9 @@ public class TPCell<ST extends ShapeFunction<TPCell<ST>,TPFace<ST>,ST,?,?,?>> im
 	{
 		return cell1Ds.size();
 	}
-	@Override
-	public Set<ST> getShapeFunctions()
-	{
-		return shapeFunctions;
-	}
 	
 	@Override
-	public Set<TPFace<ST>> getFaces()
+	public Set<TPFace> getFaces()
 	{
 		return faces;
 	}
@@ -54,16 +46,10 @@ public class TPCell<ST extends ShapeFunction<TPCell<ST>,TPFace<ST>,ST,?,?,?>> im
 		refined = refined;
 	}
 	@Override
-	public void addFace(TPFace<ST> face)
+	public void addFace(TPFace face)
 	{
 		if(faces.add(face))
 			face.addCell(this);
-	}
-	@Override
-	public void addShapeFunction(ST shapeFunction)
-	{
-		if(shapeFunctions.add(shapeFunction))
-			shapeFunction.addCell(this);
 	}
 	
 	@Override
@@ -87,7 +73,7 @@ public class TPCell<ST extends ShapeFunction<TPCell<ST>,TPFace<ST>,ST,?,?,?>> im
 	}
 	
 	@Override
-	public List<TPCell<ST>> refine(List<TPFace<ST>> refinedFaces)
+	public List<TPCell> refine(List<TPFace> refinedFaces)
 	{
 		throw new UnsupportedOperationException();
 	}
@@ -105,7 +91,7 @@ public class TPCell<ST extends ShapeFunction<TPCell<ST>,TPFace<ST>,ST,?,?,?>> im
 	}
 	
 	@Override
-	public int compareTo(@NotNull TPCell<ST> o)
+	public int compareTo(@NotNull TPCell o)
 	{
 		if(o.getDimension() < getDimension())
 			return -1;

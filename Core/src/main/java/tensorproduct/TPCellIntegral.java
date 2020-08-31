@@ -12,8 +12,8 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.function.ToDoubleFunction;
 
-public class TPCellIntegral<ST extends ScalarShapeFunction<TPCell<ST>,TPFace<ST>,ST>> extends CellIntegral<TPCell<ST>,
-	TPFace<ST>
+public class TPCellIntegral<ST extends ScalarShapeFunction<TPCell,TPFace,ST>> extends CellIntegral<TPCell,
+	TPFace
 	,ST>
 {
 	public static final String GRAD_GRAD = "GradGrad";
@@ -74,7 +74,7 @@ public class TPCellIntegral<ST extends ScalarShapeFunction<TPCell<ST>,TPFace<ST>
 		return ret;
 	}
 	@Override
-	public double evaluateCellIntegral(TPCell<ST> cell, ST shapeFunction1,
+	public double evaluateCellIntegral(TPCell cell, ST shapeFunction1,
 	                                   ST shapeFunction2)
 	{
 		if(name.equals(GRAD_GRAD))

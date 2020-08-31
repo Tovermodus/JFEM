@@ -26,7 +26,7 @@ public class ContinuousIntegralTest
 		
 		Cell1D c2 = new Cell1D(0,1,QuadratureRule1D.Gauss3,0);
 		Cell1D c1 = new Cell1D(2.3,3.1,QuadratureRule1D.Gauss3,0);
-		TPCell<ContinuousTPShapeFunction> cell = new TPCell<ContinuousTPShapeFunction>(List.of(c1,c2));
+		TPCell cell = new TPCell(List.of(c1,c2));
 		List<ContinuousTPShapeFunction> shapeFunctions = new ArrayList<>();
 		for (int i = 0; i < Math.pow(polynomialDegree+1,2); i++)
 		{
@@ -59,7 +59,7 @@ public class ContinuousIntegralTest
 			}
 			
 			@Override
-			public Vector value(CoordinateVector pos)
+			public CoordinateVector value(CoordinateVector pos)
 			{
 				return CoordinateVector.fromValues(2-pos.x()+pos.y()*0.1,pos.x()*pos.y());
 			}
@@ -104,7 +104,7 @@ public class ContinuousIntegralTest
 		
 		Cell1D c2 = new Cell1D(0,1,QuadratureRule1D.Gauss5,0);
 		Cell1D c1 = new Cell1D(2.3,3.1,QuadratureRule1D.Gauss5,0);
-		TPCell<ContinuousTPShapeFunction> cell = new TPCell<ContinuousTPShapeFunction>(List.of(c1,c2));
+		TPCell cell = new TPCell(List.of(c1,c2));
 		List<ContinuousTPShapeFunction> shapeFunctions = new ArrayList<>();
 		for (int i = 0; i < Math.pow(polynomialDegree+1,2); i++)
 		{
@@ -137,7 +137,7 @@ public class ContinuousIntegralTest
 			}
 			
 			@Override
-			public Vector value(CoordinateVector pos)
+			public CoordinateVector value(CoordinateVector pos)
 			{
 				return CoordinateVector.fromValues(2-pos.x()+pos.y()*0.1,pos.x()*pos.y());
 			}
@@ -182,7 +182,7 @@ public class ContinuousIntegralTest
 		
 		Cell1D c2 = new Cell1D(0,1,QuadratureRule1D.Gauss5,0);
 		Cell1D c1 = new Cell1D(2.3,3.1,QuadratureRule1D.Gauss5,0);
-		TPCell<ContinuousTPShapeFunction> cell = new TPCell<ContinuousTPShapeFunction>(List.of(c1,c2));
+		TPCell cell = new TPCell(List.of(c1,c2));
 		List<ContinuousTPShapeFunction> shapeFunctions = new ArrayList<>();
 		for (int i = 0; i < Math.pow(polynomialDegree+1,2); i++)
 		{
@@ -215,7 +215,7 @@ public class ContinuousIntegralTest
 			}
 			
 			@Override
-			public Vector value(CoordinateVector pos)
+			public CoordinateVector value(CoordinateVector pos)
 			{
 				return CoordinateVector.fromValues(2-pos.x()+pos.y()*0.1,pos.x()*pos.y());
 			}

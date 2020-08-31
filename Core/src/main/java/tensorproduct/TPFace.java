@@ -15,14 +15,12 @@ import java.util.List;
 import java.util.Set;
 import java.util.TreeSet;
 
-public class TPFace<ST extends ShapeFunction<TPCell<ST>,TPFace<ST>,ST,?,?,?>> implements Face<TPCell<ST>, TPFace<ST>,
-	ST>,Comparable<TPFace<ST>>
+public class TPFace implements Face<TPCell, TPFace>,Comparable<TPFace>
 {
 	double otherCoordinate;
 	List<Cell1D> cell1Ds;
 	int flatDimension;
-	private Set<TPCell<ST>> cells;
-	private Set<ST> shapeFunctions;
+	private Set<TPCell> cells;
 	private boolean isBoundaryFace;
 	private VectorFunction normal;
 	
@@ -33,7 +31,6 @@ public class TPFace<ST extends ShapeFunction<TPCell<ST>,TPFace<ST>,ST,?,?,?>> im
 		this.isBoundaryFace = isBoundaryFace;
 		this.cell1Ds = cell1Ds;
 		this.cells = new TreeSet<>();
-		this.shapeFunctions = new TreeSet<>();
 		this.normal = new VectorFunction()
 		{
 			@Override
@@ -59,15 +56,9 @@ public class TPFace<ST extends ShapeFunction<TPCell<ST>,TPFace<ST>,ST,?,?,?>> im
 	}
 	
 	@Override
-	public Set<TPCell<ST>> getCells()
+	public Set<TPCell> getCells()
 	{
 		return cells;
-	}
-	
-	@Override
-	public Set<ST> getShapeFunctions()
-	{
-		return shapeFunctions;
 	}
 	
 	@Override
@@ -83,32 +74,26 @@ public class TPFace<ST extends ShapeFunction<TPCell<ST>,TPFace<ST>,ST,?,?,?>> im
 	}
 	
 	@Override
-	public void addCell(TPCell<ST> cell)
+	public void addCell(TPCell cell)
 	{
 		if(cells.add(cell))
 			cell.addFace(this);
 	}
 	
-	@Override
-	public void addShapeFunction(ST shapeFunction)
-	{
-		if(shapeFunctions.add(shapeFunction))
-			shapeFunction.addFace(this);
-	}
 	
 	@Override
 	public VectorFunction getNormal()
 	{
 		return normal;
 	}
-	public TPCell<ST> getUpStreamCell(CoordinateVector pos, CoordinateVector direction)
+	public TPCell getUpStreamCell(CoordinateVector pos, CoordinateVector direction)
 	{
 		if(normal.value(pos).inner(direction)>0)
 			return getNormalUpstreamCell(pos);
 		else
 			return getNormalDownstreamCell(pos);
 	}
-	public TPCell<ST> getDownStreamCell(CoordinateVector pos, CoordinateVector direction)
+	public TPCell getDownStreamCell(CoordinateVector pos, CoordinateVector direction)
 	{
 		if(normal.value(pos).inner(direction)<0)
 			return getNormalUpstreamCell(pos);
@@ -117,9 +102,9 @@ public class TPFace<ST extends ShapeFunction<TPCell<ST>,TPFace<ST>,ST,?,?,?>> im
 	}
 	
 	@Override
-	public TPCell<ST> getNormalDownstreamCell(CoordinateVector pos)
+	public TPCell getNormalDownstreamCell(CoordinateVector pos)
 	{
-		for(TPCell<ST> cell:cells)
+		for(TPCell cell:cells)
 		{
 			if(cell.isInCell(pos))
 			{
@@ -132,9 +117,9 @@ public class TPFace<ST extends ShapeFunction<TPCell<ST>,TPFace<ST>,ST,?,?,?>> im
 		return null;
 	}
 	@Override
-	public TPCell<ST> getNormalUpstreamCell(CoordinateVector pos)
+	public TPCell getNormalUpstreamCell(CoordinateVector pos)
 	{
-		for(TPCell<ST> cell:cells)
+		for(TPCell cell:cells)
 		{
 			if(cell.isInCell(pos))
 			{
@@ -184,7 +169,7 @@ public class TPFace<ST extends ShapeFunction<TPCell<ST>,TPFace<ST>,ST,?,?,?>> im
 	}
 	
 	@Override
-	public List<TPFace<ST>> refine(Multimap<TPCell<ST>, TPCell<ST>> cellMap)
+	public List<TPFace> refine(Multimap<TPCell, TPCell> cellMap)
 	{
 		throw new UnsupportedOperationException();
 	}
@@ -217,7 +202,7 @@ public class TPFace<ST extends ShapeFunction<TPCell<ST>,TPFace<ST>,ST,?,?,?>> im
 		return ret;
 	}
 	@Override
-	public int compareTo(@NotNull TPFace<ST> o)
+	public int compareTo(@NotNull TPFace o)
 	{
 		if(o.getDimension() < getDimension())
 			return -1;

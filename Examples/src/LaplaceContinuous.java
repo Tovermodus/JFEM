@@ -40,17 +40,17 @@ public class LaplaceContinuous
 			false);
 		TPFaceIntegral<ContinuousTPShapeFunction> jj = new TPFaceIntegral<>(ScalarFunction.constantFunction(1000),
 			TPFaceIntegral.BOUNDARY_VALUE, false);
-		ArrayList<CellIntegral<TPCell<ContinuousTPShapeFunction>,TPFace<ContinuousTPShapeFunction>,ContinuousTPShapeFunction>> cellIntegrals =
+		ArrayList<CellIntegral<TPCell,TPFace,ContinuousTPShapeFunction>> cellIntegrals =
 			new ArrayList<>();
 		cellIntegrals.add(gg);
-		ArrayList<FaceIntegral<TPCell<ContinuousTPShapeFunction>,TPFace<ContinuousTPShapeFunction>,ContinuousTPShapeFunction>> faceIntegrals = new ArrayList<>();
+		ArrayList<FaceIntegral<TPCell,TPFace,ContinuousTPShapeFunction>> faceIntegrals = new ArrayList<>();
 		faceIntegrals.add(jj);
 		TPRightHandSideIntegral<ContinuousTPShapeFunction> rightHandSideIntegral =
 			new TPRightHandSideIntegral<>(ScalarFunction.constantFunction(1),TPRightHandSideIntegral.VALUE,
 				true);
-		ArrayList<RightHandSideIntegral<TPCell<ContinuousTPShapeFunction>,TPFace<ContinuousTPShapeFunction>,ContinuousTPShapeFunction>> rightHandSideIntegrals = new ArrayList<>();
+		ArrayList<RightHandSideIntegral<TPCell,TPFace,ContinuousTPShapeFunction>> rightHandSideIntegrals = new ArrayList<>();
 		rightHandSideIntegrals.add(rightHandSideIntegral);
-		ArrayList<BoundaryRightHandSideIntegral<TPCell<ContinuousTPShapeFunction>,TPFace<ContinuousTPShapeFunction>,ContinuousTPShapeFunction>> boundaryFaceIntegrals = new ArrayList<>();
+		ArrayList<BoundaryRightHandSideIntegral<TPCell,TPFace,ContinuousTPShapeFunction>> boundaryFaceIntegrals = new ArrayList<>();
 		grid.assembleCells();
 		grid.assembleFunctions(polynomialDegree);
 		grid.initializeSystemMatrix();

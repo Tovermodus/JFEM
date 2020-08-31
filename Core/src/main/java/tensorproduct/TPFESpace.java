@@ -1,13 +1,12 @@
 package tensorproduct;
 
 import basic.*;
-import com.google.common.collect.Iterables;
-import com.google.common.collect.Lists;
-import com.google.common.collect.Multimap;
+import com.google.common.collect.*;
 import com.google.common.primitives.Doubles;
 import com.google.common.primitives.Ints;
 import linalg.*;
 import linalg.Vector;
+import org.checkerframework.checker.nullness.qual.Nullable;
 
 import java.awt.image.AreaAveragingScaleFilter;
 import java.util.*;
@@ -16,17 +15,19 @@ import java.util.stream.Collectors;
 /*
 Workflow of this finite element is: first generate 1D cells, then
  */
-public class TPFESpace implements MatrixFESpace<TPCell<TPShapeFunction>,
-	TPFace<TPShapeFunction>,
-	TPShapeFunction,Double, Vector,Matrix,TPFESpace>,
+public class TPFESpace implements MatrixFESpace<TPCell,
+	TPFace,
+	TPShapeFunction,Double, CoordinateVector,Matrix,TPFESpace>,
 	Assembleable
 {
 	List<List<Double>> coordinates1D;
 	List<List<LagrangeBasisFunction1D>> basisFunctions;
 	List<List<Cell1D>> cells1D;
-	List<TPCell<TPShapeFunction>> cells;
-	List<TPFace<TPShapeFunction>> faces;
-	Map<List<Integer>, TPCell<TPShapeFunction>> lexicographicCellNumbers;
+	List<TPCell> cells;
+	List<TPFace> faces;
+	Map<List<Integer>, TPCell> lexicographicCellNumbers;
+	TreeMultimap<TPCell,TPShapeFunction> supportOnCell;
+	TreeMultimap<TPFace,TPShapeFunction> supportOnFace;
 	List<TPShapeFunction> shapeFunctions;
 	SparseMatrix systemMatrix;
 	DenseVector rhs;
@@ -37,6 +38,8 @@ public class TPFESpace implements MatrixFESpace<TPCell<TPShapeFunction>,
 			throw new IllegalArgumentException();
 		cells1D = new ArrayList<>();
 		coordinates1D = new ArrayList<>();
+		supportOnCell = TreeMultimap.create();
+		supportOnFace = TreeMultimap.create();
 		QuadratureRule1D quad;
 		if(polynomialDegree < 3)
 			quad = QuadratureRule1D.Gauss5;
@@ -64,27 +67,51 @@ public class TPFESpace implements MatrixFESpace<TPCell<TPShapeFunction>,
 	{
 		shapeFunctions = new ArrayList<>();
 		basisFunctions = new ArrayList<>();
-		for (int i = 0; i < coordinates1D.size(); i++)
+		for (int d = 0; d < getDimension(); d++)
 		{
 			List<LagrangeBasisFunction1D> functionsForDirection = new ArrayList<>();
-			for (int j = 0; j < cells1D.get(i).size(); j++)
+			for (Cell1D oneDimensionalCell : cells1D.get(d))
 			{
-				for (int k = 0; k < polynomialDegree + 1; k++)
+				for (int deg = 0; deg < polynomialDegree + 1; deg++)
 				{
-					functionsForDirection.add(new LagrangeBasisFunction1D(polynomialDegree, k,
-						cells1D.get(i).get(j)));
+					functionsForDirection.add(new LagrangeBasisFunction1D(polynomialDegree, deg,
+						oneDimensionalCell));
 				}
 			}
 			basisFunctions.add(functionsForDirection);
 		}
-		for(List<LagrangeBasisFunction1D> functionCombination: Lists.cartesianProduct(basisFunctions))
+		List<List<LagrangeBasisFunction1D>> oneDimensionalFunctionCombinations =
+			Lists.cartesianProduct(basisFunctions);
+		for (int i = 0; i < oneDimensionalFunctionCombinations.size(); i++)
 		{
-			int [] lexicographicCellIndex =
-				functionCombination.stream().mapToInt(LagrangeBasisFunction1D::getCellIndexInDimension).toArray();
-			shapeFunctions.add(new TPShapeFunction(lexicographicCellNumbers.get(Ints.asList(lexicographicCellIndex)),
-				functionCombination));
-			Iterables.getLast(shapeFunctions).setGlobalIndex(shapeFunctions.size()-1);
+			int[] lexicographicFunctionIndex = decomposeLexicographic(i, basisFunctions);
+			int[] lexicographicCellIndex = new int[getDimension()];
+			for(int j = 0; j < getDimension(); j++)
+				lexicographicCellIndex[j] = lexicographicFunctionIndex[j]/(polynomialDegree+1);
+			System.out.println(Ints.asList(lexicographicCellIndex));
+			TPCell supportCell = lexicographicCellNumbers.get(Ints.asList(lexicographicCellIndex));
+			TPShapeFunction function = new TPShapeFunction(supportCell,
+				oneDimensionalFunctionCombinations.get(i));
+			shapeFunctions.add(function);
+			supportOnCell.put(supportCell, function);
+			for (TPFace supportFace : function.getFaces())
+				supportOnFace.put(supportFace, function);
+			Iterables.getLast(shapeFunctions).setGlobalIndex(shapeFunctions.size() - 1);
+			System.out.println(supportCell);
+			System.out.println(function);
 		}
+	}
+	private<T> int[] decomposeLexicographic(int index, List<List<T>> list)
+	{
+		int[] ret = new int[list.size()];
+		for (int i = list.size()-1; i >= 0; i--)
+		{
+			ret[i] = index % list.get(i).size();
+			index = index/list.get(i).size();
+		}
+		if(index != 0)
+			throw new IllegalStateException("index too high");
+		return ret;
 	}
 	@Override
 	public void assembleCells()
@@ -92,40 +119,43 @@ public class TPFESpace implements MatrixFESpace<TPCell<TPShapeFunction>,
 		cells = new ArrayList<>();
 		faces = new ArrayList<>();
 		lexicographicCellNumbers = new HashMap<>();
-		for(List<Cell1D> cellCombination: Lists.cartesianProduct(cells1D))
+		List<List<Cell1D>> cellCombinations = Lists.cartesianProduct(cells1D);
+		for (int combinationIndex = 0; combinationIndex < cellCombinations.size(); combinationIndex++)
 		{
-			cells.add(new TPCell<>(cellCombination));
-			lexicographicCellNumbers.put(cellCombination.stream().map(Cell1D::getIndexInDimension).collect(Collectors.toList()),
+			cells.add(new TPCell(cellCombinations.get(combinationIndex)));
+			lexicographicCellNumbers.put(Ints.asList(decomposeLexicographic(combinationIndex, cells1D)),
 				Iterables.getLast(cells));
 		}
-		for(int i = 0; i < cells1D.size(); i++)
+		for (int d = 0; d < getDimension(); d++)
 		{
 			List<List<Cell1D>> cells1Dcopy = new ArrayList<>(cells1D);
-			cells1Dcopy.remove(i);
-			for(int j = 0; j < coordinates1D.get(i).size(); j++)
+			//noinspection SuspiciousListRemoveInLoop
+			cells1Dcopy.remove(d);
+			for (int coordinateIndex = 0; coordinateIndex < coordinates1D.get(d).size(); coordinateIndex++)
 			{
-				for(List<Cell1D> cellCombination: Lists.cartesianProduct(cells1Dcopy))
+				List<List<Cell1D>> cellSubCombinations = Lists.cartesianProduct(cells1Dcopy);
+				for (int combinationIndex = 0; combinationIndex < cellSubCombinations.size(); combinationIndex++)
 				{
-					faces.add(new TPFace<>(cellCombination,i,coordinates1D.get(i).get(j),
-						(j == 0 || j == coordinates1D.get(i).size()-1)));
-					int [] lexicographicIndex = new int[coordinates1D.size()];
-					int[] subLexIndex =
-						cellCombination.stream().mapToInt(Cell1D::getIndexInDimension).toArray();
+					faces.add(new TPFace(cellSubCombinations.get(combinationIndex), d,
+						coordinates1D.get(d).get(coordinateIndex),
+						(coordinateIndex == 0 || coordinateIndex == coordinates1D.get(d).size() - 1)));
+					int[] lexicographicIndex = new int[coordinates1D.size()];
+					int[] subLexIndex = decomposeLexicographic(combinationIndex, cells1Dcopy);
 					int subd = 0;
-					for(int k = 0; k < coordinates1D.size(); k++)
+					for (int k = 0; k < getDimension(); k++)
 					{
-						if(k == i)
-							lexicographicIndex[k] = j-1;
+						if (k == d)
+							lexicographicIndex[k] = coordinateIndex - 1;
 						else
 							lexicographicIndex[k] = subLexIndex[subd++];
 					}
-					if(j!=0)
+					if (coordinateIndex != 0)
 					{
 						lexicographicCellNumbers.get(Ints.asList(lexicographicIndex)).addFace(Iterables.getLast(faces));
 					}
-					if(j != cells1D.get(i).size())
+					if (coordinateIndex != cells1D.get(d).size())
 					{
-						lexicographicIndex[i] = j;
+						lexicographicIndex[d] = coordinateIndex;
 						lexicographicCellNumbers.get(Ints.asList(lexicographicIndex)).addFace(Iterables.getLast(faces));
 					}
 					
@@ -159,7 +189,13 @@ public class TPFESpace implements MatrixFESpace<TPCell<TPShapeFunction>,
 	}
 	
 	@Override
-	public List<TPCell<TPShapeFunction>> getCells()
+	public int getDimension()
+	{
+		return cells1D.size();
+	}
+	
+	@Override
+	public List<TPCell> getCells()
 	{
 		return cells;
 	}
@@ -175,9 +211,21 @@ public class TPFESpace implements MatrixFESpace<TPCell<TPShapeFunction>,
 	}
 	
 	@Override
-	public List<TPFace<TPShapeFunction>> getFaces()
+	public List<TPFace> getFaces()
 	{
 		return faces;
+	}
+	
+	@Override
+	public Set<TPShapeFunction> getShapeFunctionsWithSupportOnCell(TPCell cell)
+	{
+		return supportOnCell.get(cell);
+	}
+	
+	@Override
+	public Set<TPShapeFunction> getShapeFunctionsWithSupportOnFace(TPFace face)
+	{
+		return supportOnFace.get(face);
 	}
 	
 	@Override
@@ -201,8 +249,8 @@ public class TPFESpace implements MatrixFESpace<TPCell<TPShapeFunction>,
 	}
 	
 	@Override
-	public TPFESpace refine(Multimap<TPCell<TPShapeFunction>,TPCell<TPShapeFunction>> cellRefinedCellMapping,
-	                        Multimap<TPFace<TPShapeFunction>,TPFace<TPShapeFunction>> faceRefinedFaceMapping)
+	public TPFESpace refine(Multimap<TPCell,TPCell> cellRefinedCellMapping,
+	                        Multimap<TPFace,TPFace> faceRefinedFaceMapping)
 	{
 		return null;
 	}

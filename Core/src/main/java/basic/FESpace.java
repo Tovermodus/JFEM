@@ -12,11 +12,12 @@ public interface FESpace<CT extends Cell<CT,FT>, FT extends  Face<CT,FT>, ST ext
 	ST,valueT,gradientT,hessianT>,valueT,gradientT,hessianT, FST extends FESpace<CT,FT,ST,valueT,gradientT,
 	hessianT,FST>>
 {
+	int getDimension();
 	List<CT> getCells();
 	Map<Integer, ST> getShapeFunctions();
 	List<FT> getFaces();
-	Set<ST> getShapeFunctionsWithSupportOnCell(CT cell);
-	Set<ST> getShapeFunctionsWithSupportOnFace(FT face);
+	Collection<ST> getShapeFunctionsWithSupportOnCell(CT cell);
+	Collection<ST> getShapeFunctionsWithSupportOnFace(FT face);
 	
 	List<CoordinateVector> generatePlotPoints(int resolution);
 	default FST refine(Multimap<CT, CT> cellRefinedCellMapping,

@@ -10,14 +10,14 @@ import linalg.Vector;
 
 import java.util.*;
 
-public class ContinuousTPShapeFunction extends ScalarShapeFunction<TPCell<ContinuousTPShapeFunction>, TPFace<ContinuousTPShapeFunction>,ContinuousTPShapeFunction> implements Comparable<ContinuousTPShapeFunction> {
+public class ContinuousTPShapeFunction extends ScalarShapeFunction<TPCell, TPFace,ContinuousTPShapeFunction> implements Comparable<ContinuousTPShapeFunction> {
     
-    private Map<TPCell<ContinuousTPShapeFunction>, List<LagrangeBasisFunction1D>> cells;
-    private Set<TPFace<ContinuousTPShapeFunction>> faces;
+    private Map<TPCell, List<LagrangeBasisFunction1D>> cells;
+    private Set<TPFace> faces;
     private final LagrangeNodeFunctional nodeFunctional;
     private final int polynomialDegree;
     private int localIndex;
-    public ContinuousTPShapeFunction(TPCell<ContinuousTPShapeFunction> supportCell, int localIndex, int polynomialDegree)
+    public ContinuousTPShapeFunction(TPCell supportCell, int localIndex, int polynomialDegree)
     {
         cells = new TreeMap<>();
         faces = new TreeSet<>();
@@ -29,43 +29,29 @@ public class ContinuousTPShapeFunction extends ScalarShapeFunction<TPCell<Contin
                 CoordinateVector.fromValues(supportCellFunctions.stream().mapToDouble(LagrangeBasisFunction1D::getDegreeOfFreedom).toArray());
         nodeFunctional = new LagrangeNodeFunctional(functionalPoint);
         cells.put(supportCell, supportCellFunctions);
-        supportCell.addShapeFunction(this);
         checkIfPointOnFace(functionalPoint,supportCell);
-//        for(TPFace<ContinuousTPShapeFunction> face: supportCell.faces)
-//        {
-//            faces.add(face);
-//            if (face.isOnFace(functionalPoint))
-//            {
-//                for (TPCell<ContinuousTPShapeFunction> cellOfFace : face.getCells())
-//                {
-//                    cells.put(cellOfFace, generateBasisFunctionOnCell(cellOfFace,  functionalPoint));
-//                    cellOfFace.addShapeFunction(this);
-//                }
-//                face.addShapeFunction(this);
-//            }
-//        }
     }
-    private void checkIfPointOnFace(CoordinateVector functionalPoint, TPCell<ContinuousTPShapeFunction> cell)
+    private void checkIfPointOnFace(CoordinateVector functionalPoint, TPCell cell)
     {
     
-        for(TPFace<ContinuousTPShapeFunction> face: cell.faces)
+        for(TPFace face: cell.faces)
         {
             if(faces.add(face))
             {
                 if (face.isOnFace(functionalPoint))
                 {
-                    for (TPCell<ContinuousTPShapeFunction> cellOfFace : face.getCells())
+                    for (TPCell cellOfFace : face.getCells())
                     {
+                        System.out.println(face);
+                        System.out.println(cellOfFace);
                         cells.put(cellOfFace, generateBasisFunctionOnCell(cellOfFace, functionalPoint));
-                        cellOfFace.addShapeFunction(this);
                         checkIfPointOnFace(functionalPoint,cellOfFace);
                     }
-                    face.addShapeFunction(this);
                 }
             }
         }
     }
-    private List<LagrangeBasisFunction1D> generateBasisFunctionOnCell(TPCell<ContinuousTPShapeFunction> cell,
+    private List<LagrangeBasisFunction1D> generateBasisFunctionOnCell(TPCell cell,
                                                                        int localIndex)
     {
         int[] decomposedLocalIndex = decomposeIndex(cell.getDimension(), polynomialDegree, localIndex);
@@ -77,9 +63,11 @@ public class ContinuousTPShapeFunction extends ScalarShapeFunction<TPCell<Contin
         }
         return function1Ds;
     }
-    private List<LagrangeBasisFunction1D> generateBasisFunctionOnCell(TPCell<ContinuousTPShapeFunction> cell,
+    private List<LagrangeBasisFunction1D> generateBasisFunctionOnCell(TPCell cell,
                                              CoordinateVector functionalPoint)
     {
+        if(!cell.isInCell(functionalPoint))
+            throw new IllegalArgumentException("functional point is not in cell");
         List<LagrangeBasisFunction1D> function1Ds = new ArrayList<>();
         for (int i = 0; i < functionalPoint.getLength(); i++)
         {
@@ -99,12 +87,12 @@ public class ContinuousTPShapeFunction extends ScalarShapeFunction<TPCell<Contin
         return ret;
     }
     @Override
-    public Set<TPCell<ContinuousTPShapeFunction>> getCells() {
+    public Set<TPCell> getCells() {
         return cells.keySet();
     }
 
     @Override
-    public Set<TPFace<ContinuousTPShapeFunction>> getFaces() {
+    public Set<TPFace> getFaces() {
         return faces;
     }
 
@@ -114,18 +102,15 @@ public class ContinuousTPShapeFunction extends ScalarShapeFunction<TPCell<Contin
     }
 
     @Override
-    public void addFace(TPFace<ContinuousTPShapeFunction> face) {
-    
-        if(faces.add(face))
-            face.addShapeFunction(this);
+    public void addFace(TPFace face) {
+        faces.add(face);
     }
 
     @Override
-    public void addCell(TPCell<ContinuousTPShapeFunction> cell) {
+    public void addCell(TPCell cell) {
         if(!cells.containsKey(cell))
         {
             cells.put(cell, generateBasisFunctionOnCell(cell, nodeFunctional.getPoint()));
-            cell.addShapeFunction(this);
         }
     }
 
@@ -138,7 +123,7 @@ public class ContinuousTPShapeFunction extends ScalarShapeFunction<TPCell<Contin
     @Override
     public Double value(CoordinateVector pos)
     {
-        for(TPCell<ContinuousTPShapeFunction>  c:cells.keySet())
+        for(TPCell  c:cells.keySet())
         {
             if(c.isInCell(pos))
                 return valueInCell(pos,c);
@@ -147,9 +132,9 @@ public class ContinuousTPShapeFunction extends ScalarShapeFunction<TPCell<Contin
     }
     
     @Override
-    public Vector gradient(CoordinateVector pos)
+    public CoordinateVector gradient(CoordinateVector pos)
     {
-        for(TPCell<ContinuousTPShapeFunction>  c:cells.keySet())
+        for(TPCell  c:cells.keySet())
         {
             if(c.isInCell(pos))
                 return gradientInCell(pos,c);
@@ -158,7 +143,7 @@ public class ContinuousTPShapeFunction extends ScalarShapeFunction<TPCell<Contin
     }
     @Override
     public double fastValue(CoordinateVector pos) {
-        for(TPCell<ContinuousTPShapeFunction>  c:cells.keySet())
+        for(TPCell  c:cells.keySet())
         {
             if(c.isInCell(pos))
                 return fastValueInCell(pos,c);
@@ -168,7 +153,7 @@ public class ContinuousTPShapeFunction extends ScalarShapeFunction<TPCell<Contin
 
     @Override
     public double[] fastGradient(CoordinateVector pos) {
-        for(TPCell<ContinuousTPShapeFunction>  c:cells.keySet())
+        for(TPCell  c:cells.keySet())
         {
             if(c.isInCell(pos))
                 return fastGradientInCell(pos,c);
@@ -177,17 +162,17 @@ public class ContinuousTPShapeFunction extends ScalarShapeFunction<TPCell<Contin
     }
 
     @Override
-    public Double valueInCell(CoordinateVector pos, TPCell<ContinuousTPShapeFunction> cell) {
+    public Double valueInCell(CoordinateVector pos, TPCell cell) {
         return fastValueInCell(pos,cell);
     }
     
     @Override
-    public Vector gradientInCell(CoordinateVector pos, TPCell<ContinuousTPShapeFunction> cell) {
+    public CoordinateVector gradientInCell(CoordinateVector pos, TPCell cell) {
         return CoordinateVector.fromValues(fastGradientInCell(pos,cell));
     }
     
     @Override
-    public double fastValueInCell(CoordinateVector pos, TPCell<ContinuousTPShapeFunction> cell)
+    public double fastValueInCell(CoordinateVector pos, TPCell cell)
     {
         double ret = 1;
         if(cell == null)
@@ -206,7 +191,7 @@ public class ContinuousTPShapeFunction extends ScalarShapeFunction<TPCell<Contin
     }
     
     @Override
-    public double[] fastGradientInCell(CoordinateVector pos, TPCell<ContinuousTPShapeFunction> cell)
+    public double[] fastGradientInCell(CoordinateVector pos, TPCell cell)
     {
         double[] ret = new double[pos.getLength()];
         if(cell == null)

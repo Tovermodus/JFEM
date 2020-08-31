@@ -11,12 +11,10 @@ public class Cell1D implements Comparable<Cell1D>
         double[] points;
         double[] weights;
         public ArrayList<LagrangeBasisFunction1D> shapefunctions;
-        private int indexInDimension;
         public Cell1D(double start, double end, QuadratureRule1D quadratureRule, int indexInDimension)
         {
                 this.start = start;
                 this.end = end;
-                this.indexInDimension = indexInDimension;
                 points = new double[quadratureRule.length()];
                 weights = new double[quadratureRule.length()];
                 for(int i = 0; i < points.length; i++)
@@ -28,10 +26,6 @@ public class Cell1D implements Comparable<Cell1D>
         public Cell1D(double start, double end)
         {
                 this(start,end, QuadratureRule1D.Gauss5, -1);
-        }
-        int getIndexInDimension()
-        {
-                return indexInDimension;
         }
         public double getStart()
         {
@@ -80,9 +74,16 @@ public class Cell1D implements Comparable<Cell1D>
                         shapefunctions.add(new LagrangeBasisFunction1D(polynomialDegree, i, this));
                 }
         }
+        
+        @Override
+        public String toString()
+        {
+                return "Cell: start" + start + ", end: "+ end;
+        }
+        
         public void print()
         {
-                System.out.println("Cell: start" + start + ", end: "+ end);
+                System.out.println(this);
         }
         
         @Override

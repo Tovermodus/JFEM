@@ -4,8 +4,6 @@ import basic.LagrangeNodeFunctional;
 import basic.NodeFunctional;
 import basic.ScalarShapeFunction;
 import basic.ShapeFunction;
-import com.google.common.primitives.Doubles;
-import com.google.common.primitives.Ints;
 import linalg.CoordinateComparator;
 import linalg.CoordinateVector;
 import linalg.Matrix;
@@ -14,19 +12,19 @@ import org.jetbrains.annotations.NotNull;
 
 import java.util.*;
 
-public class TPShapeFunction extends ScalarShapeFunction<TPCell<TPShapeFunction>,TPFace<TPShapeFunction>,
+public class TPShapeFunction extends ScalarShapeFunction<TPCell,TPFace,
 	TPShapeFunction> implements Comparable<TPShapeFunction>
 {
 	List<LagrangeBasisFunction1D> function1Ds;
-	TPCell<TPShapeFunction> supportCell;
+	TPCell supportCell;
 	LagrangeNodeFunctional nodeFunctional;
 	
-	public TPShapeFunction(TPCell<TPShapeFunction> supportCell, int polynomialDegree, int localIndex)
+	public TPShapeFunction(TPCell supportCell, int polynomialDegree, int localIndex)
 	{
 		this(supportCell, polynomialDegree, decomposeIndex(supportCell.getDimension(),polynomialDegree,
 			localIndex));
 	}
-	public TPShapeFunction(TPCell<TPShapeFunction> supportCell, int polynomialDegree, int[] localIndices)
+	public TPShapeFunction(TPCell supportCell, int polynomialDegree, int[] localIndices)
 	{
 		function1Ds = new ArrayList<>();
 		this.supportCell = supportCell;
@@ -38,20 +36,14 @@ public class TPShapeFunction extends ScalarShapeFunction<TPCell<TPShapeFunction>
 		CoordinateVector functional_point =
 			CoordinateVector.fromValues(function1Ds.stream().mapToDouble(LagrangeBasisFunction1D::getDegreeOfFreedom).toArray());
 		nodeFunctional = new LagrangeNodeFunctional(functional_point);
-		this.supportCell.addShapeFunction(this);
-		for(TPFace<TPShapeFunction> f: getFaces())
-			f.addShapeFunction(this);
 	}
-	public TPShapeFunction(TPCell<TPShapeFunction> supportCell, List<LagrangeBasisFunction1D> function1Ds)
+	public TPShapeFunction(TPCell supportCell, List<LagrangeBasisFunction1D> function1Ds)
 	{
 		this.function1Ds = function1Ds;
 		this.supportCell = supportCell;
 		CoordinateVector functional_point =
 			CoordinateVector.fromValues(function1Ds.stream().mapToDouble(LagrangeBasisFunction1D::getDegreeOfFreedom).toArray());
 		nodeFunctional = new LagrangeNodeFunctional(functional_point);
-		this.supportCell.addShapeFunction(this);
-		for(TPFace<TPShapeFunction> f: getFaces())
-			f.addShapeFunction(this);
 	}
 	private static int[] decomposeIndex(int dimension, int polynomialDegree, int localIndex)
 	{
@@ -64,15 +56,15 @@ public class TPShapeFunction extends ScalarShapeFunction<TPCell<TPShapeFunction>
 		return ret;
 	}
 	@Override
-	public Set<TPCell<TPShapeFunction>> getCells()
+	public Set<TPCell> getCells()
 	{
-		Set<TPCell<TPShapeFunction>> ret = new HashSet<TPCell<TPShapeFunction>>();
+		Set<TPCell> ret = new HashSet<>();
 		ret.add(supportCell);
 		return ret;
 	}
 	
 	@Override
-	public Set<TPFace<TPShapeFunction>> getFaces()
+	public Set<TPFace> getFaces()
 	{
 		return supportCell.getFaces();
 	}
@@ -84,26 +76,24 @@ public class TPShapeFunction extends ScalarShapeFunction<TPCell<TPShapeFunction>
 	}
 	
 	@Override
-	public void addFace(TPFace<TPShapeFunction> face)
+	public void addFace(TPFace face)
 	{
-		supportCell.addFace(face);
-		face.addShapeFunction(this);
+		throw new UnsupportedOperationException("TPShapefunctions do not live on faces");
 	}
 	
 	@Override
-	public void addCell(TPCell<TPShapeFunction> cell)
+	public void addCell(TPCell cell)
 	{
 		if(supportCell != cell)
 		{
 			if(supportCell != null)
 				throw new UnsupportedOperationException();
 			supportCell = cell;
-			cell.addShapeFunction(this);
 		}
 	}
 	
 	@Override
-	public Double valueInCell(CoordinateVector pos, TPCell<TPShapeFunction> cell)
+	public Double valueInCell(CoordinateVector pos, TPCell cell)
 	{
 		if(cell == null)
 			return 0.;
@@ -114,7 +104,7 @@ public class TPShapeFunction extends ScalarShapeFunction<TPCell<TPShapeFunction>
 	}
 	
 	@Override
-	public Vector gradientInCell(CoordinateVector pos, TPCell<TPShapeFunction> cell)
+	public CoordinateVector gradientInCell(CoordinateVector pos, TPCell cell)
 	{
 		if(cell == null)
 			return gradient(pos).mul(0);
@@ -125,7 +115,7 @@ public class TPShapeFunction extends ScalarShapeFunction<TPCell<TPShapeFunction>
 	}
 	
 	@Override
-	public Matrix hessianInCell(CoordinateVector pos, TPCell<TPShapeFunction> cell)
+	public Matrix hessianInCell(CoordinateVector pos, TPCell cell)
 	{
 		if(cell == null)
 			return hessian(pos).mul(0);
@@ -135,7 +125,7 @@ public class TPShapeFunction extends ScalarShapeFunction<TPCell<TPShapeFunction>
 			return hessian(pos).mul(0);
 	}
 	@Override
-	public double fastValueInCell(CoordinateVector pos, TPCell<TPShapeFunction> cell)
+	public double fastValueInCell(CoordinateVector pos, TPCell cell)
 	{
 		if(cell == null)
 			return 0.;
@@ -146,7 +136,7 @@ public class TPShapeFunction extends ScalarShapeFunction<TPCell<TPShapeFunction>
 	}
 	
 	@Override
-	public double[] fastGradientInCell(CoordinateVector pos, TPCell<TPShapeFunction> cell)
+	public double[] fastGradientInCell(CoordinateVector pos, TPCell cell)
 	{
 		if(cell == null)
 			return new double[pos.getLength()];
@@ -157,7 +147,7 @@ public class TPShapeFunction extends ScalarShapeFunction<TPCell<TPShapeFunction>
 	}
 	
 	@Override
-	public double[][] fastHessianInCell(CoordinateVector pos, TPCell<TPShapeFunction> cell)
+	public double[][] fastHessianInCell(CoordinateVector pos, TPCell cell)
 	{
 		if(cell == null)
 			return new double[pos.getLength()][pos.getLength()];
@@ -185,7 +175,7 @@ public class TPShapeFunction extends ScalarShapeFunction<TPCell<TPShapeFunction>
 	}
 	
 	@Override
-	public Vector gradient(CoordinateVector pos)
+	public CoordinateVector gradient(CoordinateVector pos)
 	{
 		CoordinateVector ret = new CoordinateVector(pos.getLength());
 		return CoordinateVector.fromValues(fastGradient(pos));

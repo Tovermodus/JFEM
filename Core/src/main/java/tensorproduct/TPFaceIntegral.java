@@ -6,8 +6,8 @@ import linalg.CoordinateVector;
 import java.util.List;
 import java.util.function.ToDoubleFunction;
 
-public class TPFaceIntegral<ST extends ScalarShapeFunction<TPCell<ST>,TPFace<ST>,ST>> extends FaceIntegral<TPCell<ST>,
-	TPFace<ST>,ST>
+public class TPFaceIntegral<ST extends ScalarShapeFunction<TPCell,TPFace,ST>> extends FaceIntegral<TPCell,
+	TPFace,ST>
 {
 	public static String VALUE_JUMP_VALUE_JUMP = "ValueJumpValueJump";
 	public static String GRAD_NORMALAVERAGE_VALUE_JUMP = "GradNormalaverageValueJump";
@@ -66,7 +66,7 @@ public class TPFaceIntegral<ST extends ScalarShapeFunction<TPCell<ST>,TPFace<ST>
 	}
 	
 	@Override
-	public double evaluateFaceIntegral(TPFace<ST> face, ST shapeFunction1,
+	public double evaluateFaceIntegral(TPFace face, ST shapeFunction1,
 	                                   ST shapeFunction2)
 	{
 		if (name.equals(VALUE_JUMP_VALUE_JUMP))

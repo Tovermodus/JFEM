@@ -18,8 +18,10 @@ public class LagrangeBasisFunction1D extends Function1D
 	public LagrangeBasisFunction1D(int polynomialDegree, double degreeOfFreedom, Cell1D cell)
 	{
 		this.cell = cell;
-		if(Math.abs(cell.positionOnReferenceCell(degreeOfFreedom)*polynomialDegree - (int)(cell.positionOnReferenceCell(degreeOfFreedom)*polynomialDegree+1e-12))>1e-14)
-			throw new IllegalArgumentException("Identification not possible" + Math.abs(cell.positionOnReferenceCell(degreeOfFreedom)*polynomialDegree - (int)(cell.positionOnReferenceCell(degreeOfFreedom)*polynomialDegree)));
+		if(!cell.isInCell(degreeOfFreedom))
+			throw new IllegalArgumentException("degree of freedom is not in given cell");
+		if(Math.abs(cell.positionOnReferenceCell(degreeOfFreedom)*polynomialDegree - (int)(cell.positionOnReferenceCell(degreeOfFreedom)*polynomialDegree+1e-10))>1e-13)
+			throw new IllegalArgumentException("Identification not possible " + cell.positionOnReferenceCell(degreeOfFreedom)*polynomialDegree +" "+(int)(cell.positionOnReferenceCell(degreeOfFreedom)*polynomialDegree+1e-10));
 		this.localFunctionNumber =
 			(int)(cell.positionOnReferenceCell(degreeOfFreedom)*polynomialDegree+1e-12);
 		this.polynomialDegree = polynomialDegree;
@@ -139,8 +141,4 @@ public class LagrangeBasisFunction1D extends Function1D
 		return degreeOfFreedom;
 	}
 	
-	int getCellIndexInDimension()
-	{
-		return cell.getIndexInDimension();
-	}
 }
