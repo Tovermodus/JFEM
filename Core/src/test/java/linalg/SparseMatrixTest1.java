@@ -62,17 +62,17 @@ public class SparseMatrixTest1
 			}
 		}
 		DenseVector largeVector = new DenseVector(100);
-		SparseVector sparseVector = new SparseVector(100);
+		DenseVector DenseVector = new DenseVector(100);
 		for(int i = 0; i < 100; i++)
 		{
 			double x = Math.random();
 			largeVector.set(x,i);
-			sparseVector.set(x,i);
+			DenseVector.set(x,i);
 		}
 		Vector mul1 = largeDense.mvMul(largeVector);
 		Vector mul2 = largeDense3.mvMul(largeVector);
-		Vector smul1 = largeDense.mvMul(sparseVector);
-		Vector smul2 = largeDense3.mvMul(sparseVector);
+		Vector smul1 = largeDense.mvMul(DenseVector);
+		Vector smul2 = largeDense3.mvMul(DenseVector);
 		assertEquals(largeDense, largeDense3.mul(0.5));
 		assertEquals(mul1.mul(2),mul2);
 		assertTrue(mul1.almostEqual(mul2.mul(0.5),1e-14));
@@ -130,12 +130,12 @@ public class SparseMatrixTest1
 	@Test
 	public void testSpvecSolve()
 	{
-		SparseVector small = new SparseVector(40);
+		DenseVector small = new DenseVector(40);
 		small.add(4.3,4);
 		small.add(7.8,45);
 		assertEquals(small.euclidianNorm(), Math.sqrt(4.3*4.3+7.8*7.8));
 		SparseMatrix largeDense = new SparseMatrix(500,500);
-		SparseVector largeVector = new SparseVector(500);
+		DenseVector largeVector = new DenseVector(500);
 		DenseVector largeVector2 = new DenseVector(500);
 		for(int i = 0; i < 4000; i++)
 		{

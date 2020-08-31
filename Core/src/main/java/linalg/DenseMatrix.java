@@ -8,7 +8,7 @@ import java.util.Map;
 
 public class DenseMatrix implements Matrix, Decomposable, DirectlySolvable
 {
-	double[][] entries;
+	volatile double[][] entries;
 	private org.ujmp.core.Matrix ujmpmat = null;
 	public DenseMatrix(int i, int j)
 	{
@@ -55,7 +55,7 @@ public class DenseMatrix implements Matrix, Decomposable, DirectlySolvable
 	}
 	
 	@Override
-	public synchronized void set(double value, int... coordinates)
+	public void set(double value, int... coordinates)
 	{
 		if(coordinates.length != 2)
 			throw new IllegalArgumentException("Wrong number of coordinates");
@@ -63,7 +63,7 @@ public class DenseMatrix implements Matrix, Decomposable, DirectlySolvable
 	}
 	
 	@Override
-	public synchronized void add(double value, int... coordinates)
+	public void add(double value, int... coordinates)
 	{
 		if(coordinates.length != 2)
 			throw new IllegalArgumentException("Wrong number of coordinates");

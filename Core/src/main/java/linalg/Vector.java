@@ -65,7 +65,7 @@ public interface Vector extends Tensor
 	
 	@Override
 	Vector mul(double scalar);
-	
+	Matrix outer(Vector other);
 	default double inner(Vector other)
 	{
 		if(getLength() != other.getLength())

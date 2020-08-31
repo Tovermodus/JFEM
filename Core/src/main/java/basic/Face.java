@@ -9,10 +9,6 @@ import java.util.Set;
 
 public interface Face<CT extends Cell<CT,FT,ST>,FT extends Face<CT,FT,ST>, ST extends ShapeFunction<CT,FT,ST,?,?,?>> extends Comparable<FT>
 {
-//	protected ArrayList<Cell> cells;
-//	protected ArrayList<ScalarShapeFunction> shapeFunctions;
-//	protected TensorFunction normal;
-//	private boolean isBoundaryFace;
 	
 	int  getDimension();
 	

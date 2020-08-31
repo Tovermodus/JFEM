@@ -150,4 +150,10 @@ public class BlockVector implements Vector
 		return ret;
 	}
 	
+	@Override
+	public Matrix outer(Vector other)
+	{
+		throw new UnsupportedOperationException("outer not yet implemented");
+	}
+	
 }

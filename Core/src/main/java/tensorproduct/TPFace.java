@@ -43,7 +43,7 @@ public class TPFace<ST extends ShapeFunction<TPCell<ST>,TPFace<ST>,ST,?,?,?>> im
 			}
 			
 			@Override
-			public Vector value(CoordinateVector pos)
+			public CoordinateVector value(CoordinateVector pos)
 			{
 				CoordinateVector ret = new CoordinateVector(pos.getLength());
 				ret.set(1,flatDimension);

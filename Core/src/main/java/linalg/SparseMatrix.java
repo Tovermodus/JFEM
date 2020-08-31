@@ -8,10 +8,10 @@ public class SparseMatrix implements Matrix, DirectlySolvable, Decomposable
 {
 	private final int rows;
 	private final int cols;
-	double [] sparseValues;
-	int [] sparseXs;
-	int [] sparseYs;
-	int sparseEntries;
+	volatile double [] sparseValues;
+	volatile int [] sparseXs;
+	volatile int [] sparseYs;
+	volatile int sparseEntries;
 	public SparseMatrix(int rows, int cols)
 	{
 		this.rows = rows;
@@ -80,7 +80,7 @@ public class SparseMatrix implements Matrix, DirectlySolvable, Decomposable
 		return ret;
 	}
 	
-	private void resizeSparse()
+	private synchronized void resizeSparse()
 	{
 		double [] sparseVals = new double[sparseValues.length*2];
 		int [] sparseX  = new int[sparseValues.length*2];
@@ -167,7 +167,7 @@ public class SparseMatrix implements Matrix, DirectlySolvable, Decomposable
 			throw new IllegalArgumentException("Matrix is two dimensional");
 		List<Vector> ret = new ArrayList<>(getShape().get(dimension));
 		for(int i = 0; i < getShape().get(dimension); i++)
-			ret.add(new SparseVector(getShape().get(1-dimension)));
+			ret.add(new DenseVector(getShape().get(1-dimension)));
 		if(dimension == 0)
 			for (int i = 0; i < sparseEntries; i++)
 				ret.get(sparseYs[i]).add(sparseValues[i],sparseXs[i]);

@@ -1,120 +1,101 @@
 package mixed;
 
-import linalg.CoordinateVector;
-import linalg.Tensor;
-import linalg.Vector;
+import linalg.*;
 
 import java.util.List;
 
 public class MixedValue implements Vector
 {
-	private boolean isVelocity;
-	private boolean isPure;
-	private double pressure;
+	private volatile double pressure;
 	private CoordinateVector velocity;
-	private MixedValue()
+	public MixedValue(MixedValue mv)
 	{
-		isVelocity = false;
-		isPure = false;
+		pressure = mv.getPressure();
+		velocity = new CoordinateVector(mv.getVelocity());
+	}
+	protected MixedValue(int d)
+	{
 		pressure = 0;
-		velocity = new CoordinateVector(3);
+		velocity = new CoordinateVector(d);
 	}
-	public static MixedValue pressureValue(double p)
-	{
-		MixedValue vec = new MixedValue();
-		vec.isVelocity = false;
-		vec.isPure = true;
-		vec.setPressure(p);
-		return vec;
-	}
-	public static MixedValue velocityValue(CoordinateVector c)
-	{
-		MixedValue vec = new MixedValue();
-		vec.isVelocity = true;
-		vec.isPure = true;
-		vec.setVelocity(new CoordinateVector(c));
-		return vec;
-	}
-	public static MixedValue velocityValue(double ... values)
-	{
-		MixedValue vec = new MixedValue();
-		vec.isVelocity = true;
-		vec.isPure = true;
-		vec.setVelocity(CoordinateVector.fromValues(values));
-		return vec;
-	}
+	
 	@Override
 	public double at(int... coordinates)
 	{
 		
-		if(coordinates.length != 1)
+		if (coordinates.length != 1)
 			throw new IllegalArgumentException("Wrong number of coordinates");
-		if(coordinates[0] == 0)
+		if (coordinates[0] == 0)
 			return getPressure();
 		else
-			return getVelocity().at(coordinates[0]-1);
+			return getVelocity().at(coordinates[0] - 1);
 	}
 	
 	@Override
 	public void set(double value, int... coordinates)
 	{
-		if(coordinates.length != 1)
+		if (coordinates.length != 1)
 			throw new IllegalArgumentException("Wrong number of coordinates");
-		if(coordinates[0] == 0)
-			setPressure(pressure);
-		else
-			getVelocity().set(value,coordinates[0]-1);
+		if (coordinates[0] == 0)
+		{
+			setPressure(value);
+		} else
+		{
+			getVelocity().set(value, coordinates[0] - 1);
+		}
 	}
 	
 	@Override
 	public void add(double value, int... coordinates)
 	{
-		if(coordinates.length != 1)
+		if (coordinates.length != 1)
 			throw new IllegalArgumentException("Wrong number of coordinates");
-		if(coordinates[0] == 0)
-			setPressure(getPressure()+value);
-		else
-			getVelocity().add(value,coordinates[0]-1);
+		if (coordinates[0] == 0)
+		{
+			setPressure(getPressure() + value);
+			
+		} else
+		{
+			getVelocity().add(value, coordinates[0] - 1);
+		}
 	}
 	
 	@Override
 	public MixedValue add(Tensor other)
 	{
-		if(!getShape().equals(other.getShape()))
-			throw new IllegalArgumentException("Vectors are of different size");
-		if(!(other instanceof MixedValue))
+		if (!(other instanceof MixedValue))
 			throw new IllegalArgumentException("Cant add MixedValueVector to different Vector");
-		MixedValue ret = new MixedValue();
-		ret.setPressure(getPressure()+((MixedValue) other).getPressure());
-		ret.setVelocity(getVelocity().add(((MixedValue) other).getVelocity()));
-		if(isPure() && ((MixedValue) other).isPure())
-		{
-			ret.isPure = true;
-			if(isVelocity() && ((MixedValue) other).isVelocity())
-				ret.isVelocity = true;
-			if(isPressure() && ((MixedValue) other).isPressure())
-				ret.isVelocity = false;
-		}
+		if (!getShape().equals(other.getShape()))
+			throw new IllegalArgumentException("Vectors are of different size");
+		MixedValue ret = new MixedValue(this);
+		if(!(other instanceof PressureValue))
+			ret.addVelocity(((MixedValue) other).getVelocity());
+		if(!(other instanceof VelocityValue))
+			ret.addPressure(((MixedValue) other).getPressure());
 		return ret;
 	}
 	
 	@Override
 	public MixedValue mul(double scalar)
 	{
-		MixedValue ret = new MixedValue();
-		ret.isPure = isPure();
-		ret.isVelocity = isVelocity();
+		MixedValue ret = new MixedValue(getDomainDimension());
 		ret.setPressure(getPressure() * scalar);
 		ret.setVelocity(getVelocity().mul(scalar));
 		return ret;
 	}
 	
-	private CoordinateVector getVelocity()
+	@Override
+	public Matrix outer(Vector other)
+	{
+		throw new UnsupportedOperationException("outer makes no sense");
+	}
+	
+	public CoordinateVector getVelocity()
 	{
 		return velocity;
 	}
 	
-	private double getPressure()
+	public double getPressure()
 	{
 		return pressure;
 	}
@@ -135,24 +116,17 @@ public class MixedValue implements Vector
 	@Override
 	public List<Integer> getShape()
 	{
-		return List.of(1+velocity.getLength());
+		return List.of(1 + velocity.getLength());
 	}
+	
 	public List<Integer> getVelocityShape()
 	{
 		return getVelocity().getShape();
 	}
-	public int getVelocityLength()
+	
+	public int getDomainDimension()
 	{
 		return getVelocity().getLength();
-	}
-	
-	public boolean isVelocity()
-	{
-		return isVelocity;
-	}
-	public boolean isPressure()
-	{
-		return !isVelocity&&isPure;
 	}
 	
 	public void setPressure(double pressure)
@@ -162,11 +136,22 @@ public class MixedValue implements Vector
 	
 	public void setVelocity(CoordinateVector velocity)
 	{
-		this.velocity = velocity;
+		this.velocity = new CoordinateVector(velocity);
 	}
 	
-	public boolean isPure()
+	public void addPressure(double pressure)
 	{
-		return isPure;
+		this.pressure += pressure;
+	}
+	
+	public void addVelocity(CoordinateVector velocity)
+	{
+		setVelocity(getVelocity().add(velocity));
+	}
+	
+	@Override
+	public String toString()
+	{
+		return "Mixed, P: " + getPressure() + ", V: " + getVelocity().toString();
 	}
 }

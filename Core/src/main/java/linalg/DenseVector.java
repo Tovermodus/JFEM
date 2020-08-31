@@ -7,7 +7,7 @@ import java.util.List;
 
 public class DenseVector implements Vector
 {
-	protected double [] entries;
+	protected volatile double [] entries;
 	public DenseVector(int size)
 	{
 		if(size <= 0)
@@ -81,7 +81,7 @@ public class DenseVector implements Vector
 	}
 	
 	@Override
-	public synchronized void set(double value, int... coordinates)
+	public void set(double value, int... coordinates)
 	{
 		if(coordinates.length != 1)
 			throw new IllegalArgumentException("Wrong number of coordinates");
@@ -89,7 +89,7 @@ public class DenseVector implements Vector
 	}
 	
 	@Override
-	public synchronized void add(double value, int... coordinates)
+	public void add(double value, int... coordinates)
 	{
 		if(coordinates.length != 1)
 			throw new IllegalArgumentException("Wrong number of coordinates");
@@ -149,6 +149,21 @@ public class DenseVector implements Vector
 		}
 		return ret;
 	}
+	
+	@Override
+	public DenseMatrix outer(Vector other)
+	{
+		DenseMatrix ret = new DenseMatrix(getLength(), other.getLength());
+		for(int i = 0; i < getLength(); i++)
+		{
+			for(int j = 0; j < other.getLength(); j++)
+			{
+				ret.set(at(i)*other.at(j),i,j);
+			}
+		}
+		return ret;
+	}
+	
 	no.uib.cipr.matrix.DenseVector toMTJvector()
 	{
 		no.uib.cipr.matrix.DenseVector m = new no.uib.cipr.matrix.DenseVector(getShape().get(0));

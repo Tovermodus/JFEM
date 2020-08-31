@@ -11,7 +11,7 @@ import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.DoubleStream;
 
-public abstract class ScalarFunction implements Function<Double, Vector, Matrix>
+public abstract class ScalarFunction implements Function<Double, CoordinateVector, Matrix>
 {
 	public static ScalarFunction constantFunction(double constant)
 	{

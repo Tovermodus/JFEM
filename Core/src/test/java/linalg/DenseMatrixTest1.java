@@ -80,7 +80,7 @@ public class DenseMatrixTest1
 			}
 		}
 		DenseVector largeVector = new DenseVector(50);
-		SparseVector sparseVector = new SparseVector(50);
+		DenseVector sparseVector = new DenseVector(50);
 		for(int i = 0; i < 50; i++)
 		{
 			double x = Math.random();
@@ -145,12 +145,12 @@ public class DenseMatrixTest1
 	@Test
 	public void testSpvecSolve()
 	{
-		SparseVector small = new SparseVector(40);
+		DenseVector small = new DenseVector(40);
 		small.add(4.3,4);
 		small.add(7.8,45);
 		assertEquals(small.euclidianNorm(), Math.sqrt(4.3*4.3+7.8*7.8));
 		DenseMatrix largeDense = new DenseMatrix(50,50);
-		SparseVector largeVector = new SparseVector(50);
+		DenseVector largeVector = new DenseVector(50);
 		DenseVector largeVector2 = new DenseVector(50);
 		for(int i = 0; i < 100; i++)
 		{

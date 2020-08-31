@@ -1,10 +1,8 @@
 package basic;
 
-import linalg.Matrix;
-import linalg.Tensor;
-import linalg.Vector;
+import linalg.*;
 
-public abstract class VectorFunction implements Function<Vector, Matrix, Tensor>
+public abstract class VectorFunction implements Function<CoordinateVector, CoordinateMatrix, Tensor>
 {
 
 }
