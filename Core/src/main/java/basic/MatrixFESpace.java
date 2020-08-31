@@ -7,7 +7,7 @@ import linalg.Vector;
 import java.util.Arrays;
 import java.util.List;
 
-public interface MatrixFESpace<CT extends Cell<CT,FT,ST>, FT extends  Face<CT,FT,ST>,
+public interface MatrixFESpace<CT extends Cell<CT,FT>, FT extends  Face<CT,FT>,
 	ST extends ShapeFunction<CT,FT,ST,valueT,gradientT,hessianT>,valueT,gradientT,hessianT,
 	FST extends MatrixFESpace<CT,FT,ST,valueT,gradientT,hessianT,FST>> extends FESpace<CT,FT
 	,ST,valueT,gradientT,hessianT,FST>
@@ -27,9 +27,9 @@ public interface MatrixFESpace<CT extends Cell<CT,FT,ST>, FT extends  Face<CT,FT
 		{
 			for (CT K : smallList)
 			{
-				for (ST v : K.getShapeFunctions())
+				for (ST v : getShapeFunctionsWithSupportOnCell(K))
 				{
-					for (ST u : K.getShapeFunctions())
+					for (ST u : getShapeFunctionsWithSupportOnCell(K))
 					{
 						double integral = 0;
 						for (CellIntegral<CT,FT,ST> cellIntegral :
@@ -83,10 +83,10 @@ public interface MatrixFESpace<CT extends Cell<CT,FT,ST>, FT extends  Face<CT,FT
 		{
 			for (FT F : smallList)
 			{
-				for (ST u : F.getShapeFunctions())
+				for (ST u : getShapeFunctionsWithSupportOnFace(F))
 				{
 					
-					for (ST v : F.getShapeFunctions())
+					for (ST v : getShapeFunctionsWithSupportOnFace(F))
 					{
 						double integral = 0;
 						for (FaceIntegral<CT,FT,ST> faceIntegral :

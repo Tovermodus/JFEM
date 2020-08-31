@@ -5,7 +5,7 @@ import linalg.CoordinateVector;
 import java.util.Map;
 import java.util.Set;
 
-public interface ShapeFunction<CT extends Cell<CT,FT,ST>, FT extends Face<CT,FT,ST>, ST extends ShapeFunction<CT,FT,ST,
+public interface ShapeFunction<CT extends Cell<CT,FT>, FT extends Face<CT,FT>, ST extends ShapeFunction<CT,FT,ST,
 	valueT,gradientT,hessianT>, valueT,	gradientT,
 	hessianT> extends Function<valueT,gradientT,hessianT>, Comparable<ST>
 {

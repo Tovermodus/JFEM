@@ -8,14 +8,15 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-public interface FESpace<CT extends Cell<CT,FT,ST>, FT extends  Face<CT,FT,ST>, ST extends ShapeFunction<CT,FT,
+public interface FESpace<CT extends Cell<CT,FT>, FT extends  Face<CT,FT>, ST extends ShapeFunction<CT,FT,
 	ST,valueT,gradientT,hessianT>,valueT,gradientT,hessianT, FST extends FESpace<CT,FT,ST,valueT,gradientT,
 	hessianT,FST>>
 {
 	List<CT> getCells();
 	Map<Integer, ST> getShapeFunctions();
-	
 	List<FT> getFaces();
+	Set<ST> getShapeFunctionsWithSupportOnCell(CT cell);
+	Set<ST> getShapeFunctionsWithSupportOnFace(FT face);
 	
 	List<CoordinateVector> generatePlotPoints(int resolution);
 	default FST refine(Multimap<CT, CT> cellRefinedCellMapping,

@@ -30,6 +30,7 @@ public class CoordinateVector extends DenseVector
 		return ret;
 	}
 	
+	
 	@Override
 	public CoordinateVector add(Tensor other)
 	{
@@ -40,6 +41,18 @@ public class CoordinateVector extends DenseVector
 		CoordinateVector ret = new CoordinateVector(this);
 		for (int i = 0; i < getLength(); i++)
 			ret.entries[i] = entries[i]+((DenseVector) other).entries[i];
+		return ret;
+	}
+	@Override
+	public CoordinateVector sub(Tensor other)
+	{
+		if(!(other instanceof CoordinateVector))
+			throw new IllegalArgumentException("can't add coordinates and other vectors");
+		if(!getShape().equals(other.getShape()))
+			throw new IllegalArgumentException("Vectors are of different size");
+		CoordinateVector ret = new CoordinateVector(this);
+		for (int i = 0; i < getLength(); i++)
+			ret.entries[i] = entries[i]-((DenseVector) other).entries[i];
 		return ret;
 	}
 	

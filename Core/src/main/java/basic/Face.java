@@ -7,20 +7,18 @@ import linalg.Vector;
 import java.util.List;
 import java.util.Set;
 
-public interface Face<CT extends Cell<CT,FT,ST>,FT extends Face<CT,FT,ST>, ST extends ShapeFunction<CT,FT,ST,?,?,?>> extends Comparable<FT>
+public interface Face<CT extends Cell<CT,FT>,FT extends Face<CT,FT>> extends Comparable<FT>
 {
 	
 	int  getDimension();
 	
 	Set<CT> getCells();
 	
-	Set<ST> getShapeFunctions();
 	
 	void setBoundaryFace(boolean boundaryFace);
 	boolean isBoundaryFace();
 	
 	void addCell(CT cell);
-	void addShapeFunction(ST shapeFunction);
 	
 	VectorFunction getNormal();
 	

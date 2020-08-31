@@ -18,6 +18,12 @@ public class CoordinateMatrix extends DenseMatrix
 	}
 	
 	@Override
+	public CoordinateVector mvMul(Vector vector)
+	{
+		return (CoordinateVector) super.mvMul(vector);
+	}
+	
+	@Override
 	public CoordinateMatrix add(Tensor other)
 	{
 		if(!getShape().equals(other.getShape()))
