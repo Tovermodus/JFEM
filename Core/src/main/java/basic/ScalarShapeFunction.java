@@ -35,6 +35,9 @@ public abstract class ScalarShapeFunction<CT extends Cell<CT,FT>, FT extends Fac
 	}
 	
 	@Override
+	public abstract NodeFunctional<ScalarFunction, Double, CoordinateVector, Matrix> getNodeFunctional();
+	
+	@Override
 	public int getGlobalIndex()
 	{
 		return globalIndex;

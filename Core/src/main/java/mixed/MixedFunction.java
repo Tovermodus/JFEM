@@ -6,36 +6,60 @@ import basic.VectorFunction;
 import linalg.CoordinateVector;
 import org.jetbrains.annotations.NotNull;
 
-public class MixedFunction<PF extends ScalarFunction, VF extends VectorFunction> implements Function<MixedValue,
+public class MixedFunction implements Function<MixedValue,
 	MixedGradient,
 	MixedHessian>
 {
-	private PF pressureFunction;
-	private VF velocityFunction;
+	private final ScalarFunction pressureFunction;
+	private final VectorFunction velocityFunction;
 	
-	public MixedFunction(@NotNull PF pressureFunction)
+	public ScalarFunction getPressureFunction()
+	{
+		if(isVelocity())
+			throw new IllegalStateException("Is not pressure Function");
+		return pressureFunction;
+	}
+	
+	public VectorFunction getVelocityFunction()
+	{
+		if(isPressure())
+			throw new IllegalStateException("Is not velocity Function");
+		return velocityFunction;
+	}
+	
+	public MixedFunction(@NotNull ScalarFunction pressureFunction)
 	{
 		this.pressureFunction = pressureFunction;
 		this.velocityFunction = null;
 	}
-	public MixedFunction(@NotNull VF velocityFunction)
+	public MixedFunction(@NotNull VectorFunction velocityFunction)
 	{
 		this.pressureFunction = null;
 		this.velocityFunction = velocityFunction;
 	}
-	
+	public boolean isPressure()
+	{
+		return pressureFunction!=null;
+	}
+	public boolean isVelocity()
+	{
+		return velocityFunction!=null;
+	}
 	@Override
 	public int getDomainDimension()
 	{
-		return pressureFunction.getDomainDimension();
+		if(isPressure())
+			return pressureFunction.getDomainDimension();
+		else
+			return velocityFunction.getDomainDimension();
 	}
 	
 	@Override
 	public MixedValue value(CoordinateVector pos)
 	{
-		if(velocityFunction == null)
+		if(isPressure())
 			return new PressureValue(pressureFunction.value(pos));
-		if(pressureFunction == null)
+		if(isVelocity())
 			return new VelocityValue(velocityFunction.value(pos));
 		throw new IllegalStateException("neither pressure nor velocity function");
 	}
@@ -43,9 +67,9 @@ public class MixedFunction<PF extends ScalarFunction, VF extends VectorFunction>
 	@Override
 	public MixedGradient gradient(CoordinateVector pos)
 	{
-		if(velocityFunction == null)
+		if(isPressure())
 			return new PressureGradient(pressureFunction.gradient(pos));
-		if(pressureFunction == null)
+		if(isVelocity())
 			return new VelocityGradient(velocityFunction.gradient(pos));
 		throw new IllegalStateException("neither pressure nor velocity function");
 	}

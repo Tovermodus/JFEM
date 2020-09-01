@@ -88,7 +88,6 @@ public class TPFESpace implements MatrixFESpace<TPCell,
 			int[] lexicographicCellIndex = new int[getDimension()];
 			for(int j = 0; j < getDimension(); j++)
 				lexicographicCellIndex[j] = lexicographicFunctionIndex[j]/(polynomialDegree+1);
-			System.out.println(Ints.asList(lexicographicCellIndex));
 			TPCell supportCell = lexicographicCellNumbers.get(Ints.asList(lexicographicCellIndex));
 			TPShapeFunction function = new TPShapeFunction(supportCell,
 				oneDimensionalFunctionCombinations.get(i));
@@ -97,8 +96,6 @@ public class TPFESpace implements MatrixFESpace<TPCell,
 			for (TPFace supportFace : function.getFaces())
 				supportOnFace.put(supportFace, function);
 			Iterables.getLast(shapeFunctions).setGlobalIndex(shapeFunctions.size() - 1);
-			System.out.println(supportCell);
-			System.out.println(function);
 		}
 	}
 	private<T> int[] decomposeLexicographic(int index, List<List<T>> list)

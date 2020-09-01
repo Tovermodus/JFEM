@@ -51,6 +51,10 @@ public abstract class VectorShapeFunction<CT extends Cell<CT,FT>,FT extends Face
 	}
 	
 	@Override
+	public abstract NodeFunctional<VectorFunction, CoordinateVector,
+		CoordinateMatrix, Tensor> getNodeFunctional();
+	 
+	@Override
 	public CoordinateMatrix normalAverageInValue(FT face, CoordinateVector pos)
 	{
 		return (CoordinateMatrix) face.getNormal().value(pos).outer(jumpInValue(face,pos).mul(0.5));

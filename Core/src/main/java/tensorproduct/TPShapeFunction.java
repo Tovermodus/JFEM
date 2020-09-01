@@ -1,9 +1,6 @@
 package tensorproduct;
 
-import basic.LagrangeNodeFunctional;
-import basic.NodeFunctional;
-import basic.ScalarShapeFunction;
-import basic.ShapeFunction;
+import basic.*;
 import linalg.CoordinateComparator;
 import linalg.CoordinateVector;
 import linalg.Matrix;
@@ -70,7 +67,7 @@ public class TPShapeFunction extends ScalarShapeFunction<TPCell,TPFace,
 	}
 	
 	@Override
-	public NodeFunctional getNodeFunctional()
+	public NodeFunctional<ScalarFunction, Double, CoordinateVector, Matrix> getNodeFunctional()
 	{
 		return nodeFunctional;
 	}

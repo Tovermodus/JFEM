@@ -2,10 +2,9 @@ package tensorproduct;
 
 import basic.LagrangeNodeFunctional;
 import basic.NodeFunctional;
+import basic.ScalarFunction;
 import basic.ScalarShapeFunction;
-import linalg.CoordinateComparator;
-import linalg.CoordinateVector;
-import linalg.DenseVector;
+import linalg.*;
 import linalg.Vector;
 
 import java.util.*;
@@ -97,7 +96,7 @@ public class ContinuousTPShapeFunction extends ScalarShapeFunction<TPCell, TPFac
     }
 
     @Override
-    public NodeFunctional getNodeFunctional() {
+    public NodeFunctional<ScalarFunction, Double, CoordinateVector, Matrix> getNodeFunctional() {
         return nodeFunctional;
     }
 

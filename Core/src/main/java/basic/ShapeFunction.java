@@ -18,7 +18,7 @@ public interface ShapeFunction<CT extends Cell<CT,FT>, FT extends Face<CT,FT>, S
 	Set<CT> getCells();
 	Set<FT> getFaces();
 	
-	NodeFunctional getNodeFunctional();
+	NodeFunctional<? extends Function<valueT, gradientT, hessianT>, valueT, gradientT, hessianT> getNodeFunctional();
 	
 	void setGlobalIndex(int index);
 	int getGlobalIndex();

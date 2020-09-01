@@ -1,7 +1,7 @@
 package basic;
 
-public interface NodeFunctional
+public interface NodeFunctional<FT extends Function<valueT, gradientT, hessianT>, valueT, gradientT, hessianT>
 {
 	
-	double evaluate(ScalarFunction func);
+	double evaluate(FT func);
 }
