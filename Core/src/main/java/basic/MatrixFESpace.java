@@ -1,113 +1,71 @@
 package basic;
 
-import com.google.common.collect.Lists;
 import linalg.Matrix;
 import linalg.Vector;
 
-import java.util.Arrays;
 import java.util.List;
 
 public interface MatrixFESpace<CT extends Cell<CT,FT>, FT extends  Face<CT,FT>,
 	ST extends ShapeFunction<CT,FT,ST,valueT,gradientT,hessianT>,valueT,gradientT,hessianT,
 	FST extends MatrixFESpace<CT,FT,ST,valueT,gradientT,hessianT,FST>> extends FESpace<CT,FT
-	,ST,valueT,gradientT,hessianT,FST>
+	,ST,valueT,gradientT,hessianT,FST>, FunctionSpaceTools<CT,FT,ST>
 {
 	void initializeSystemMatrix();
+	
 	void initializeRhs();
 	
 	Vector getRhs();
 	
 	Matrix getSystemMatrix();
 	
-	default void evaluateCellIntegrals(List<CellIntegral<CT,FT,ST>> cellIntegrals,
-	                           List<RightHandSideIntegral<CT,FT,ST>> rightHandSideIntegrals)
+	default void evaluateCellIntegrals(List<CellIntegral<CT, FT, ST>> cellIntegrals,
+	                                   List<RightHandSideIntegral<CT, FT, ST>> rightHandSideIntegrals)
+	{
+		loopMatrixViaCell((K, u, v) ->
 		{
-		List<List<CT>> smallerList = Lists.partition(getCells(),getCells().size()/12+1);
-		smallerList.stream().parallel().forEach(smallList->
-		{
-			for (CT K : smallList)
+			double integral = 0;
+			for (CellIntegral<CT, FT, ST> cellIntegral :
+				cellIntegrals)
 			{
-				for (ST v : getShapeFunctionsWithSupportOnCell(K))
-				{
-					for (ST u : getShapeFunctionsWithSupportOnCell(K))
-					{
-						double integral = 0;
-						for (CellIntegral<CT,FT,ST> cellIntegral :
-							cellIntegrals)
-						{
-							integral += cellIntegral.evaluateCellIntegral(K, u, v);
-						}
-						if(integral != 0)
-							getSystemMatrix().add( integral,v.getGlobalIndex(),
-								u.getGlobalIndex());
-					}
-					double integral = 0;
-					for (RightHandSideIntegral<CT,FT,ST> rightHandSideIntegral :
-						rightHandSideIntegrals)
-					{
-						integral += rightHandSideIntegral.evaluateRightHandSideIntegral(K, v);
-					}
-					if(integral != 0)
-						getRhs().add(integral, v.getGlobalIndex());
-
-				}
+				integral += cellIntegral.evaluateCellIntegral(K, u, v);
 			}
-
-		});
+			return integral;
+		}, this);
+		loopRhsViaCell((K,  v) ->
+		{
+			double integral = 0;
+			for (RightHandSideIntegral<CT, FT, ST> rightHandSideIntegral :
+				rightHandSideIntegrals)
+			{
+				integral += rightHandSideIntegral.evaluateRightHandSideIntegral(K, v);
+			}
+			return integral;
+		}, this);
 	}
-	default void evaluateFaceIntegrals(List<FaceIntegral<CT,FT,ST>> faceIntegrals,
-	                                   List<BoundaryRightHandSideIntegral<CT,FT,ST>> boundaryRightHandSideIntegrals)
+	
+	default void evaluateFaceIntegrals(List<FaceIntegral<CT, FT, ST>> faceIntegrals,
+	                                   List<BoundaryRightHandSideIntegral<CT, FT, ST>> boundaryRightHandSideIntegrals)
 	{
 		
-		List<List<FT>> smallerList = Lists.partition(getFaces(),getFaces().size()/12+1);
-//		for (ST s: getShapeFunctions())
-//		{
-//			if(s.getGlobalIndex() == 2)
-//				s.setGlobalIndex(4);
-//			else if(s.getGlobalIndex() == 3)
-//				s.setGlobalIndex(5);
-//			else if(s.getGlobalIndex() == 4)
-//				s.setGlobalIndex(2);
-//			else if(s.getGlobalIndex() == 5)
-//				s.setGlobalIndex(3);
-//			else if(s.getGlobalIndex() == 10)
-//				s.setGlobalIndex(12);
-//			else if(s.getGlobalIndex() == 11)
-//				s.setGlobalIndex(13);
-//			else if(s.getGlobalIndex() == 12)
-//				s.setGlobalIndex(10);
-//			else if(s.getGlobalIndex() == 13)
-//				s.setGlobalIndex(11);
-//		}
-		smallerList.stream().parallel().forEach(smallList->
+		loopMatrixViaFace((F, u, v) ->
 		{
-			for (FT F : smallList)
+			double integral = 0;
+			for (FaceIntegral<CT, FT, ST> faceIntegral :
+				faceIntegrals)
 			{
-				for (ST u : getShapeFunctionsWithSupportOnFace(F))
-				{
-					
-					for (ST v : getShapeFunctionsWithSupportOnFace(F))
-					{
-						double integral = 0;
-						for (FaceIntegral<CT,FT,ST> faceIntegral :
-							faceIntegrals)
-						{
-							integral += faceIntegral.evaluateFaceIntegral(F,u,v);
-						}
-						if(integral != 0)
-							getSystemMatrix().add(integral,v.getGlobalIndex(),
-								u.getGlobalIndex());
-					}
-					double integral = 0;
-					for (BoundaryRightHandSideIntegral<CT,FT,ST> rightHandSideIntegral :
-						boundaryRightHandSideIntegrals)
-					{
-						integral += rightHandSideIntegral.evaluateBoundaryRightHandSideIntegral(F, u);
-					}
-					if(integral != 0)
-						getRhs().add(integral, u.getGlobalIndex());
-				}
+				integral += faceIntegral.evaluateFaceIntegral(F, u, v);
 			}
-		});
+			return integral;
+		}, this);
+		loopRhsViaFace((F, v) ->
+		{
+			double integral = 0;
+			for (BoundaryRightHandSideIntegral<CT, FT, ST> boundaryRightHandSideIntegral :
+				boundaryRightHandSideIntegrals)
+			{
+				integral += boundaryRightHandSideIntegral.evaluateBoundaryRightHandSideIntegral(F, v);
+			}
+			return integral;
+		}, this);
 	}
 }
