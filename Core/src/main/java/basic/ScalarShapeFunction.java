@@ -12,7 +12,7 @@ import java.util.Map;
 public abstract class ScalarShapeFunction<CT extends Cell<CT,FT>, FT extends Face<CT,FT>,
 	ST extends ScalarShapeFunction<CT,FT,ST>> extends ScalarFunction implements ShapeFunction<CT
 	,FT,ST,
-	Double, CoordinateVector, Matrix>
+	Double, CoordinateVector, Matrix>, Comparable<ST>
 {
 	protected int globalIndex;
 	

@@ -5,7 +5,7 @@ import linalg.*;
 public abstract class VectorShapeFunction<CT extends Cell<CT,FT>,FT extends Face<CT,FT>,
 	ST extends VectorShapeFunction<CT,FT,ST>> extends VectorFunction implements ShapeFunction<CT,FT
 	,ST,	CoordinateVector,
-	CoordinateMatrix, Tensor>
+	CoordinateMatrix, Tensor>, Comparable<ST>
 {
 	
 	protected int globalIndex;
