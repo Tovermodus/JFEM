@@ -8,7 +8,7 @@ import java.util.List;
 public interface MatrixFESpace<CT extends Cell<CT,FT>, FT extends  Face<CT,FT>,
 	ST extends ShapeFunction<CT,FT,ST,valueT,gradientT,hessianT>,valueT,gradientT,hessianT,
 	FST extends MatrixFESpace<CT,FT,ST,valueT,gradientT,hessianT,FST>> extends FESpace<CT,FT
-	,ST,valueT,gradientT,hessianT,FST>, FunctionSpaceTools<CT,FT,ST>
+	,ST,valueT,gradientT,hessianT,FST>, FESpaceTools<CT,FT,ST>
 {
 	void initializeSystemMatrix();
 	

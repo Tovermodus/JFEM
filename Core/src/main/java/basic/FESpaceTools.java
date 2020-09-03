@@ -7,7 +7,7 @@ import java.util.List;
 import java.util.function.BiFunction;
 import java.util.function.DoubleSupplier;
 
-public interface FunctionSpaceTools<CT extends Cell<CT,FT>, FT extends  Face<CT,FT>,
+public interface FESpaceTools<CT extends Cell<CT,FT>, FT extends  Face<CT,FT>,
 	ST extends ShapeFunction<CT,FT,ST,?,?,?>>
 {
 	default void loopMatrixViaCell(Function3<CT,ST,ST, Double> integralEvaluation,

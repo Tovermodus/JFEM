@@ -5,7 +5,7 @@ import basic.*;
 public class MixedBoundaryRightHandSideIntegral<CT extends Cell<CT,FT>, FT extends Face<CT,FT>,
 	ST extends MixedShapeFunction<CT,FT,ST,PF,VF>,
 	PF extends ScalarShapeFunction<CT,FT,PF>, VF extends VectorShapeFunction<CT,FT,VF>,
-	PI extends BoundaryRightHandSideIntegral<CT,FT,PF>, VI extends BoundaryRightHandSideIntegral<CT,FT,VF>>
+	PI extends BoundaryRightHandSideIntegral<CT,FT,PF>, VI extends BoundaryRightHandSideIntegral<CT,FT,VF>> extends BoundaryRightHandSideIntegral<CT,FT,ST>
 {
 	private final BoundaryRightHandSideIntegral<CT,FT,PF> pressureIntegral;
 	private final BoundaryRightHandSideIntegral<CT,FT,VF> velocityIntegral;
@@ -13,6 +13,7 @@ public class MixedBoundaryRightHandSideIntegral<CT extends Cell<CT,FT>, FT exten
 	private MixedBoundaryRightHandSideIntegral(BoundaryRightHandSideIntegral<CT, FT, PF> pressureIntegral,
 	                                   BoundaryRightHandSideIntegral<CT, FT, VF> velocityIntegral)
 	{
+		super();
 		this.pressureIntegral = pressureIntegral;
 		this.velocityIntegral = velocityIntegral;
 	}

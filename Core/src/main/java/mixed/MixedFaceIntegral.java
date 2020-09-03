@@ -5,7 +5,7 @@ import basic.*;
 public class MixedFaceIntegral<CT extends Cell<CT,FT>, FT extends Face<CT,FT>,
 	ST extends MixedShapeFunction<CT,FT,ST,PF,VF>,
 	PF extends ScalarShapeFunction<CT,FT,PF>, VF extends VectorShapeFunction<CT,FT,VF>,
-	PI extends FaceIntegral<CT,FT,PF>, VI extends FaceIntegral<CT,FT,VF>, PVI extends FaceIntegral<CT,FT,ST>>
+	PI extends FaceIntegral<CT,FT,PF>, VI extends FaceIntegral<CT,FT,VF>> extends FaceIntegral<CT,FT,ST>
 {
 	private final FaceIntegral<CT,FT,PF> pressureIntegral;
 	private final FaceIntegral<CT,FT,VF> velocityIntegral;
@@ -23,8 +23,7 @@ public class MixedFaceIntegral<CT extends Cell<CT,FT>, FT extends Face<CT,FT>,
 	public static<CT extends Cell<CT,FT>, FT extends Face<CT,FT>,
 		ST extends MixedShapeFunction<CT,FT,ST,PF,VF>,
 		PF extends ScalarShapeFunction<CT,FT,PF>, VF extends VectorShapeFunction<CT,FT,VF>,
-		PI extends FaceIntegral<CT,FT,PF>, VI extends FaceIntegral<CT,FT,VF>, PVI extends FaceIntegral<CT,FT,
-		ST>> MixedFaceIntegral<CT,FT,ST,PF,VF,PI,VI,PVI> fromPressureIntegral(FaceIntegral<CT,FT
+		PI extends FaceIntegral<CT,FT,PF>, VI extends FaceIntegral<CT,FT,VF>> MixedFaceIntegral<CT,FT,ST,PF,VF,PI,VI> fromPressureIntegral(FaceIntegral<CT,FT
 		,PF> pressureIntegral)
 	{
 		return new MixedFaceIntegral<>(pressureIntegral, null, null);
@@ -32,8 +31,8 @@ public class MixedFaceIntegral<CT extends Cell<CT,FT>, FT extends Face<CT,FT>,
 	public static<CT extends Cell<CT,FT>, FT extends Face<CT,FT>,
 		ST extends MixedShapeFunction<CT,FT,ST,PF,VF>,
 		PF extends ScalarShapeFunction<CT,FT,PF>, VF extends VectorShapeFunction<CT,FT,VF>,
-		PI extends FaceIntegral<CT,FT,PF>, VI extends FaceIntegral<CT,FT,VF>, PVI extends FaceIntegral<CT,FT,ST>> MixedFaceIntegral<CT,FT,ST,PF,
-		VF,PI,VI, PVI> fromVelocityIntegral(FaceIntegral<CT,FT
+		PI extends FaceIntegral<CT,FT,PF>, VI extends FaceIntegral<CT,FT,VF>> MixedFaceIntegral<CT,FT,ST,PF,
+		VF,PI,VI> fromVelocityIntegral(FaceIntegral<CT,FT
 		,VF> velocityIntegral)
 	{
 		return new MixedFaceIntegral<>( null, velocityIntegral, null);
@@ -41,8 +40,8 @@ public class MixedFaceIntegral<CT extends Cell<CT,FT>, FT extends Face<CT,FT>,
 	public static<CT extends Cell<CT,FT>, FT extends Face<CT,FT>,
 		ST extends MixedShapeFunction<CT,FT,ST,PF,VF>,
 		PF extends ScalarShapeFunction<CT,FT,PF>, VF extends VectorShapeFunction<CT,FT,VF>,
-		PI extends FaceIntegral<CT,FT,PF>, VI extends FaceIntegral<CT,FT,VF>,PVI extends FaceIntegral<CT,FT,ST>> MixedFaceIntegral<CT,FT,ST,PF,
-		VF,PI,VI,PVI> fromPressureVelocityIntegral(FaceIntegral<CT,FT
+		PI extends FaceIntegral<CT,FT,PF>, VI extends FaceIntegral<CT,FT,VF>> MixedFaceIntegral<CT,FT,ST,PF,
+		VF,PI,VI> fromPressureVelocityIntegral(FaceIntegral<CT,FT
 		,ST> pressureVelocityIntegral)
 	{
 		return new MixedFaceIntegral<>( null, null, pressureVelocityIntegral);
@@ -59,6 +58,7 @@ public class MixedFaceIntegral<CT extends Cell<CT,FT>, FT extends Face<CT,FT>,
 	{
 		return this.pressureVelocityIntegral != null;
 	}
+	@Override
 	public double evaluateFaceIntegral(FT face,
 	                                   ST shapeFunction1,
 	                                   ST shapeFunction2)

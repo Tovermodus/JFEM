@@ -5,6 +5,11 @@ public abstract class BoundaryRightHandSideIntegral<CT extends Cell<CT,FT>, FT e
 {
 	protected Function<?, ?, ?> rightHandSide;
 	protected String name;
+	public BoundaryRightHandSideIntegral()
+	{
+		rightHandSide = null;
+		name = "NotReferencedByName";
+	}
 	public BoundaryRightHandSideIntegral(Function<?, ?, ?> rightHandSide, String name)
 	{
 		this.rightHandSide = rightHandSide;

@@ -5,7 +5,7 @@ import basic.*;
 public class MixedCellIntegral<CT extends Cell<CT,FT>, FT extends Face<CT,FT>,
 	ST extends MixedShapeFunction<CT,FT,ST,PF,VF>,
 	PF extends ScalarShapeFunction<CT,FT,PF>, VF extends VectorShapeFunction<CT,FT,VF>,
-	PI extends CellIntegral<CT,FT,PF>, VI extends CellIntegral<CT,FT,VF>, PVI extends CellIntegral<CT,FT,ST>>
+	PI extends CellIntegral<CT,FT,PF>, VI extends CellIntegral<CT,FT,VF>, PVI extends CellIntegral<CT,FT,ST>> extends CellIntegral<CT,FT,ST>
 {
 	private final CellIntegral<CT,FT,PF> pressureIntegral;
 	private final CellIntegral<CT,FT,VF> velocityIntegral;
@@ -14,6 +14,7 @@ public class MixedCellIntegral<CT extends Cell<CT,FT>, FT extends Face<CT,FT>,
 	private MixedCellIntegral(CellIntegral<CT, FT, PF> pressureIntegral,
 	                          CellIntegral<CT, FT, VF> velocityIntegral, CellIntegral<CT,FT,ST> pressureVelocityIntegral)
 	{
+		super();
 		this.pressureIntegral = pressureIntegral;
 		this.velocityIntegral = velocityIntegral;
 		this.pressureVelocityIntegral = pressureVelocityIntegral;
@@ -58,6 +59,7 @@ public class MixedCellIntegral<CT extends Cell<CT,FT>, FT extends Face<CT,FT>,
 	{
 		return this.pressureVelocityIntegral != null;
 	}
+	@Override
 	public double evaluateCellIntegral(CT cell,
 	                                   ST shapeFunction1,
 	                                   ST shapeFunction2)

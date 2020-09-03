@@ -5,6 +5,11 @@ public abstract class FaceIntegral<CT extends Cell<CT,FT>, FT extends Face<CT,FT
 {
 	protected Function<?, ?, ?> weight;
 	protected String name;
+	public FaceIntegral()
+	{
+		weight = null;
+		name = "NotReferencedByName";
+	}
 	public FaceIntegral(Function<?, ?, ?> weight, String name)
 	{
 		this.weight = weight;
