@@ -154,16 +154,6 @@ public class TPShapeFunction extends ScalarShapeFunction<TPCell,TPFace,
 			return new double[pos.getLength()][pos.getLength()];
 	}
 	
-	@Override
-	public Map<Integer, Double> prolongate(Set<TPShapeFunction> refinedFunctions)
-	{
-		Map<Integer, Double> ret = new HashMap<>();
-		for(TPShapeFunction shapeFunction:refinedFunctions)
-		{
-			ret.put(shapeFunction.getGlobalIndex(), shapeFunction.getNodeFunctional().evaluate(this));
-		}
-		return ret;
-	}
 	
 	@Override
 	public Double value(CoordinateVector pos)

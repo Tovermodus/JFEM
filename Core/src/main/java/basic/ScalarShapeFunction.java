@@ -6,8 +6,10 @@ import linalg.Matrix;
 import linalg.Vector;
 import org.jetbrains.annotations.NotNull;
 
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 public abstract class ScalarShapeFunction<CT extends Cell<CT,FT>, FT extends Face<CT,FT>,
 	ST extends ScalarShapeFunction<CT,FT,ST>> extends ScalarFunction implements ShapeFunction<CT
@@ -15,6 +17,7 @@ public abstract class ScalarShapeFunction<CT extends Cell<CT,FT>, FT extends Fac
 	Double, CoordinateVector, Matrix>, Comparable<ST>
 {
 	protected int globalIndex;
+	
 	
 	public double fastValueInCell(CoordinateVector pos, CT cell)
 	{
@@ -80,5 +83,16 @@ public abstract class ScalarShapeFunction<CT extends Cell<CT,FT>, FT extends Fac
 	public Double normalAverageInDerivative(FT face, CoordinateVector pos)
 	{
 		return face.getNormal().value(pos).inner(jumpInDerivative(face, pos));
+	}
+	
+	@Override
+	public Map<Integer, Double> prolongate(Set<ST> refinedFunctions)
+	{
+		Map<Integer, Double> ret = new HashMap<>();
+		for(ST shapeFunction:refinedFunctions)
+		{
+			ret.put(shapeFunction.getGlobalIndex(), shapeFunction.getNodeFunctional().evaluate(this));
+		}
+		return ret;
 	}
 }

@@ -215,10 +215,6 @@ public class ContinuousTPShapeFunction extends ScalarShapeFunction<TPCell, TPFac
         return ret;
     }
     
-    @Override
-    public Map<Integer, Double> prolongate(Set<ContinuousTPShapeFunction> refinedFunctions) {
-        throw new UnsupportedOperationException();
-    }
     
     @Override
     public int compareTo(ContinuousTPShapeFunction o) {

@@ -2,6 +2,10 @@ package basic;
 
 import linalg.*;
 
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Set;
+
 public abstract class VectorShapeFunction<CT extends Cell<CT,FT>,FT extends Face<CT,FT>,
 	ST extends VectorShapeFunction<CT,FT,ST>> extends VectorFunction implements ShapeFunction<CT,FT
 	,ST,	CoordinateVector,
@@ -67,4 +71,15 @@ public abstract class VectorShapeFunction<CT extends Cell<CT,FT>,FT extends Face
 	}
 	public abstract double divergenceInCell( CoordinateVector pos, CT cell);
 	public abstract double divergence(CoordinateVector pos);
+	
+	@Override
+	public Map<Integer, Double> prolongate(Set<ST> refinedFunctions)
+	{
+		Map<Integer, Double> ret = new HashMap<>();
+		for(ST shapeFunction:refinedFunctions)
+		{
+			ret.put(shapeFunction.getGlobalIndex(), shapeFunction.getNodeFunctional().evaluate(this));
+		}
+		return ret;
+	}
 }

@@ -4,6 +4,7 @@ import basic.*;
 import linalg.CoordinateVector;
 import org.jetbrains.annotations.NotNull;
 
+import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
 
@@ -170,7 +171,12 @@ public abstract class MixedShapeFunction<CT extends Cell<CT,FT>,
 	@Override
 	public Map<Integer, Double> prolongate(Set<MixedShapeFunction<CT,FT,PF,VF>> refinedFunctions)
 	{
-		throw new UnsupportedOperationException("not implemented yet");
+		Map<Integer, Double> ret = new HashMap<>();
+		for(MixedShapeFunction<CT,FT,PF,VF> shapeFunction:refinedFunctions)
+		{
+			ret.put(shapeFunction.getGlobalIndex(), shapeFunction.getNodeFunctional().evaluate(this));
+		}
+		return ret;
 	}
 	
 	@Override
