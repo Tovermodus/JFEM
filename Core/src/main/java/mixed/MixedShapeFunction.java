@@ -8,12 +8,12 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
 
-public abstract class MixedShapeFunction<CT extends Cell<CT,FT>,
-	FT extends Face<CT,FT>, PF extends ScalarShapeFunction<CT,FT
-	,PF> ,
-	VF extends VectorShapeFunction<CT,FT,VF>> extends MixedFunction implements ShapeFunction<CT,
-	FT,MixedShapeFunction<CT,FT,PF,VF>,MixedValue,MixedGradient,MixedHessian>, Comparable<MixedShapeFunction<CT,
-	FT,PF,VF>>
+public abstract class MixedShapeFunction<CT extends Cell<CT, FT>,
+	FT extends Face<CT, FT>, PF extends ScalarShapeFunction<CT, FT
+	, PF>,VF extends VectorShapeFunction<CT, FT, VF>>
+	extends MixedFunction
+	implements ShapeFunction<CT, FT, MixedShapeFunction<CT, FT, PF, VF>, MixedValue, MixedGradient, MixedHessian>
+	, Comparable<MixedShapeFunction<CT, FT, PF, VF>>
 {
 	protected int globalIndex;
 	
@@ -27,6 +27,11 @@ public abstract class MixedShapeFunction<CT extends Cell<CT,FT>,
 		super(velocityFunction);
 	}
 	
+	@Override
+	public int getGlobalIndex()
+	{
+		return globalIndex;
+	}
 	
 	@Override
 	public void setGlobalIndex(int index)
@@ -35,25 +40,21 @@ public abstract class MixedShapeFunction<CT extends Cell<CT,FT>,
 	}
 	
 	@Override
-	public int getGlobalIndex()
-	{
-		return globalIndex;
-	}
-	
-	@Override
 	public Set<CT> getCells()
 	{
-		if(isPressure())
+		if (isPressure())
 			return getPressureShapeFunction().getCells();
 		else
 			return getVelocityShapeFunction().getCells();
 	}
+	
 	@SuppressWarnings("unchecked")
 	
 	public PF getPressureShapeFunction()
 	{
-			return (PF) getPressureFunction();
+		return (PF) getPressureFunction();
 	}
+	
 	@SuppressWarnings("unchecked")
 	public VF getVelocityShapeFunction()
 	{
@@ -63,7 +64,7 @@ public abstract class MixedShapeFunction<CT extends Cell<CT,FT>,
 	@Override
 	public Set<FT> getFaces()
 	{
-		if(isPressure())
+		if (isPressure())
 			return getPressureShapeFunction().getFaces();
 		else
 			return getVelocityShapeFunction().getFaces();
@@ -72,7 +73,7 @@ public abstract class MixedShapeFunction<CT extends Cell<CT,FT>,
 	@Override
 	public NodeFunctional<MixedFunction, MixedValue, MixedGradient, MixedHessian> getNodeFunctional()
 	{
-		if(isPressure())
+		if (isPressure())
 			return MixedNodeFunctional.pressureFunctional(getPressureShapeFunction().getNodeFunctional());
 		else
 			return MixedNodeFunctional.velocityFunctional(getVelocityShapeFunction().getNodeFunctional());
@@ -81,7 +82,7 @@ public abstract class MixedShapeFunction<CT extends Cell<CT,FT>,
 	@Override
 	public void addFace(FT face)
 	{
-		if(isPressure())
+		if (isPressure())
 			getPressureShapeFunction().addFace(face);
 		else
 			getVelocityShapeFunction().addFace(face);
@@ -90,7 +91,7 @@ public abstract class MixedShapeFunction<CT extends Cell<CT,FT>,
 	@Override
 	public void addCell(CT cell)
 	{
-		if(isPressure())
+		if (isPressure())
 			getPressureShapeFunction().addCell(cell);
 		else
 			getVelocityShapeFunction().addCell(cell);
@@ -99,25 +100,25 @@ public abstract class MixedShapeFunction<CT extends Cell<CT,FT>,
 	@Override
 	public MixedValue valueInCell(CoordinateVector pos, CT cell)
 	{
-		if(isPressure())
-			return new PressureValue(getPressureShapeFunction().valueInCell(pos,cell));
+		if (isPressure())
+			return new PressureValue(getPressureShapeFunction().valueInCell(pos, cell));
 		else
-			return new VelocityValue(getVelocityShapeFunction().valueInCell(pos,cell));
+			return new VelocityValue(getVelocityShapeFunction().valueInCell(pos, cell));
 	}
 	
 	@Override
 	public MixedGradient gradientInCell(CoordinateVector pos, CT cell)
 	{
-		if(isPressure())
-			return new PressureGradient(getPressureShapeFunction().gradientInCell(pos,cell));
+		if (isPressure())
+			return new PressureGradient(getPressureShapeFunction().gradientInCell(pos, cell));
 		else
-			return new VelocityGradient(getVelocityShapeFunction().gradientInCell(pos,cell));
+			return new VelocityGradient(getVelocityShapeFunction().gradientInCell(pos, cell));
 	}
 	
 	@Override
 	public MixedValue jumpInValue(FT face, CoordinateVector pos)
 	{
-		if(isPressure())
+		if (isPressure())
 			return new PressureValue(getPressureShapeFunction().jumpInValue(face, pos));
 		else
 			return new VelocityValue(getVelocityShapeFunction().jumpInValue(face, pos));
@@ -126,7 +127,7 @@ public abstract class MixedShapeFunction<CT extends Cell<CT,FT>,
 	@Override
 	public MixedGradient jumpInDerivative(FT face, CoordinateVector pos)
 	{
-		if(isPressure())
+		if (isPressure())
 			return new PressureGradient(getPressureShapeFunction().jumpInDerivative(face, pos));
 		else
 			return new VelocityGradient(getVelocityShapeFunction().jumpInDerivative(face, pos));
@@ -135,7 +136,7 @@ public abstract class MixedShapeFunction<CT extends Cell<CT,FT>,
 	@Override
 	public MixedValue averageInValue(FT face, CoordinateVector pos)
 	{
-		if(isPressure())
+		if (isPressure())
 			return new PressureValue(getPressureShapeFunction().averageInValue(face, pos));
 		else
 			return new VelocityValue(getVelocityShapeFunction().averageInValue(face, pos));
@@ -144,7 +145,7 @@ public abstract class MixedShapeFunction<CT extends Cell<CT,FT>,
 	@Override
 	public MixedGradient averageInDerivative(FT face, CoordinateVector pos)
 	{
-		if(isPressure())
+		if (isPressure())
 			return new PressureGradient(getPressureShapeFunction().averageInDerivative(face, pos));
 		else
 			return new VelocityGradient(getVelocityShapeFunction().averageInDerivative(face, pos));
@@ -153,7 +154,7 @@ public abstract class MixedShapeFunction<CT extends Cell<CT,FT>,
 	@Override
 	public MixedGradient normalAverageInValue(FT face, CoordinateVector pos)
 	{
-		if(isPressure())
+		if (isPressure())
 			return new PressureGradient(getPressureShapeFunction().normalAverageInValue(face, pos));
 		else
 			return new VelocityGradient(getVelocityShapeFunction().normalAverageInValue(face, pos));
@@ -162,17 +163,17 @@ public abstract class MixedShapeFunction<CT extends Cell<CT,FT>,
 	@Override
 	public MixedValue normalAverageInDerivative(FT face, CoordinateVector pos)
 	{
-		if(isPressure())
+		if (isPressure())
 			return new PressureValue(getPressureShapeFunction().normalAverageInDerivative(face, pos));
 		else
 			return new VelocityValue(getVelocityShapeFunction().normalAverageInDerivative(face, pos));
 	}
 	
 	@Override
-	public Map<Integer, Double> prolongate(Set<MixedShapeFunction<CT,FT,PF,VF>> refinedFunctions)
+	public Map<Integer, Double> prolongate(Set<MixedShapeFunction<CT, FT, PF, VF>> refinedFunctions)
 	{
 		Map<Integer, Double> ret = new HashMap<>();
-		for(MixedShapeFunction<CT,FT,PF,VF> shapeFunction:refinedFunctions)
+		for (MixedShapeFunction<CT, FT, PF, VF> shapeFunction : refinedFunctions)
 		{
 			ret.put(shapeFunction.getGlobalIndex(), shapeFunction.getNodeFunctional().evaluate(this));
 		}
@@ -180,13 +181,13 @@ public abstract class MixedShapeFunction<CT extends Cell<CT,FT>,
 	}
 	
 	@Override
-	public int compareTo(@NotNull MixedShapeFunction<CT,FT,PF,VF> o)
+	public int compareTo(@NotNull MixedShapeFunction<CT, FT, PF, VF> o)
 	{
-		if(o.isPressure() && isPressure())
-			return getPressureShapeFunction().compareTo( o.getPressureShapeFunction());
-		else if(o.isVelocity() && isVelocity())
-			return getVelocityShapeFunction().compareTo( o.getVelocityShapeFunction());
-		else if(o.isVelocity() && isPressure())
+		if (o.isPressure() && isPressure())
+			return getPressureShapeFunction().compareTo(o.getPressureShapeFunction());
+		else if (o.isVelocity() && isVelocity())
+			return getVelocityShapeFunction().compareTo(o.getVelocityShapeFunction());
+		else if (o.isVelocity() && isPressure())
 			return 1;
 		else
 			return -1;
