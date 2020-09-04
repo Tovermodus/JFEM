@@ -14,7 +14,7 @@ public class CoordinateVector extends DenseVector
 		if(d > 3)
 			throw new IllegalArgumentException("only 1D, 2D and 3D supported");
 	}
-	public static CoordinateVector getE(int d, int index)
+	public static CoordinateVector getUnitVector(int d, int index)
 	{
 		CoordinateVector ret = new CoordinateVector(d);
 		ret.set(index, 1);
@@ -30,6 +30,11 @@ public class CoordinateVector extends DenseVector
 		return ret;
 	}
 	
+	
+	public CoordinateMatrix outer(CoordinateVector other)
+	{
+		return (CoordinateMatrix)super.outer(other);
+	}
 	
 	@Override
 	public CoordinateVector add(Tensor other)

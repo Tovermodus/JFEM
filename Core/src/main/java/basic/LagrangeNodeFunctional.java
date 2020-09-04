@@ -5,7 +5,7 @@ import linalg.Matrix;
 
 public class LagrangeNodeFunctional implements NodeFunctional<ScalarFunction, Double, CoordinateVector, Matrix>
 {
-	private CoordinateVector point;
+	private final CoordinateVector point;
 	public LagrangeNodeFunctional(CoordinateVector point)
 	{
 		this.point = point;
