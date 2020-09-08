@@ -33,7 +33,7 @@ public class CoordinateVector extends DenseVector
 	
 	public CoordinateMatrix outer(CoordinateVector other)
 	{
-		return (CoordinateMatrix)super.outer(other);
+		return new CoordinateMatrix(super.outer(other));
 	}
 	
 	@Override

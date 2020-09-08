@@ -12,7 +12,7 @@ public class TPVectorFaceIntegral<ST extends VectorShapeFunction<TPCell,TPFace,S
 	public static String VALUE_NORMALAVERAGE_GRAD_AVERAGE = "ValueNormalaverageGradAverage";
 	public static String GRAD_AVERAGE_VALUE_NORMALAVERAGE = "GradAverageValueNormalaverage";
 	public static String VALUE_NORMALAVERAGE_VALUE_NORMALAVERAGE = "ValueNormalaverageValueNormalaverage";
-	public TPVectorFaceIntegral(Function<?,?,?> weight, String name, boolean weightIsTensorProduct)
+	public TPVectorFaceIntegral(Function<?,?,?> weight, String name)
 	{
 		super(weight,name);
 		if(name.equals(VALUE_NORMALAVERAGE_GRAD_AVERAGE) && !(weight.value(new CoordinateVector(weight.getDomainDimension())) instanceof Double))

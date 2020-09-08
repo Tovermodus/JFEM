@@ -10,7 +10,7 @@ public class TPVectorBoundaryFaceIntegral<ST extends VectorShapeFunction<TPCell,
 	ST>
 {
 	static final String VALUE="Value";
-	public TPVectorBoundaryFaceIntegral(Function<?,?,?> rightHandSide, String name, boolean weightIsTensorProduct)
+	public TPVectorBoundaryFaceIntegral(Function<?,?,?> rightHandSide, String name)
 	{
 		super(rightHandSide, name);
 		if(name.equals(VALUE) && !(rightHandSide.value(new CoordinateVector(rightHandSide.getDomainDimension())) instanceof Double))

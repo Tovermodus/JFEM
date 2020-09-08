@@ -9,7 +9,7 @@ public class TPVectorRightHandSideIntegral<ST extends VectorShapeFunction<TPCell
 	TPFace,ST>
 {
 	public static final String VALUE="Value";
-	public TPVectorRightHandSideIntegral(Function<?,?,?> rightHandSide, String name, boolean weightIsTensorProduct)
+	public TPVectorRightHandSideIntegral(Function<?,?,?> rightHandSide, String name)
 	{
 		super(rightHandSide, name);
 		if(name.equals(VALUE) && !(rightHandSide.value(new CoordinateVector(rightHandSide.getDomainDimension())) instanceof CoordinateVector))

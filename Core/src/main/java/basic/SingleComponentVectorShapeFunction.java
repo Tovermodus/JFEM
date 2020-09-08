@@ -10,6 +10,7 @@ import tensorproduct.TPFace;
 import tensorproduct.TPShapeFunction;
 
 import java.lang.reflect.InvocationTargetException;
+import java.util.Arrays;
 import java.util.Set;
 
 public class SingleComponentVectorShapeFunction<CT extends Cell<CT,FT>, FT extends Face<CT,FT>,
@@ -27,8 +28,8 @@ public class SingleComponentVectorShapeFunction<CT extends Cell<CT,FT>, FT exten
 		{
 			componentFunction =
 				componentFunctionClass.getConstructor(supportCell.getClass(),
-					Integer.class,
-					Integer.class).newInstance(supportCell, polynomialDegree, componentLocalIndex);
+					Integer.TYPE,
+					Integer.TYPE).newInstance(supportCell, polynomialDegree, componentLocalIndex);
 		} catch (InstantiationException | IllegalAccessException | InvocationTargetException | NoSuchMethodException e)
 		{
 			throw new IllegalStateException();

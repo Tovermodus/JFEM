@@ -155,13 +155,13 @@ public class TPVectorFESpace implements MatrixFESpace<TPCell, TPFace, TPVectorFu
 	}
 	
 	@Override
-	public Vector getRhs()
+	public DenseVector getRhs()
 	{
 		return rhs;
 	}
 	
 	@Override
-	public Matrix getSystemMatrix()
+	public SparseMatrix getSystemMatrix()
 	{
 		return systemMatrix;
 	}
