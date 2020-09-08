@@ -29,6 +29,19 @@ public class DenseMatrix implements Matrix, Decomposable, DirectlySolvable
 					entries[i][j] = matrix.at(i, j);
 		}
 	}
+	
+	@Override
+	public double frobeniusInner(Matrix other)
+	{
+		if(!getShape().equals(other.getShape()))
+			throw new IllegalArgumentException("Incompatible sizes");
+		double ret = 0;
+		for(int i = 0; i < getRows(); i++)
+			for(int j = 0; j < getCols(); j++)
+				ret += at(i,j)*other.at(i,j);
+		return ret;
+	}
+	
 	public static DenseMatrix squareMatrixFromValues(double... values)
 	{
 		if(Math.pow((int)Math.sqrt(values.length),2) != values.length)

@@ -82,7 +82,7 @@ public interface Matrix extends Tensor, VectorMultiplyable
 		return transpose().mvMul(vector);
 	}
 	default
-	Double frobeniusInner(Matrix other)
+	double frobeniusInner(Matrix other)
 	{
 		throw new UnsupportedOperationException("not yet implemented");
 	}
