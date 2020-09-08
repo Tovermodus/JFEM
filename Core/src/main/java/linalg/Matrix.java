@@ -81,7 +81,11 @@ public interface Matrix extends Tensor, VectorMultiplyable
 			throw new IllegalArgumentException("Incompatible sizes");
 		return transpose().mvMul(vector);
 	}
-	
+	default
+	Double frobeniusInner(Matrix other)
+	{
+		throw new UnsupportedOperationException("not yet implemented");
+	}
 	Matrix mmMul(Matrix matrix);
 	default Matrix tmMul(Matrix matrix)
 	{
