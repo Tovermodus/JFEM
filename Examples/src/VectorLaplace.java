@@ -7,6 +7,8 @@ import linalg.Vector;
 import tensorproduct.*;
 
 import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
 
 public class VectorLaplace
 {
@@ -14,9 +16,9 @@ public class VectorLaplace
 	{
 		CoordinateVector start = CoordinateVector.fromValues(-1, -1);
 		CoordinateVector end = CoordinateVector.fromValues(1, 1);
-		int polynomialDegree = 3;
+		int polynomialDegree = 1;
 		TPVectorFESpace grid = new TPVectorFESpace(start, end,
-			Ints.asList(10, 10), polynomialDegree);
+			Ints.asList(2, 2), polynomialDegree);
 		TPVectorCellIntegral<TPVectorFunction> gg =
 			new TPVectorCellIntegral<>(TPVectorCellIntegral.VALUE_VALUE);
 		TPVectorFaceIntegral<TPVectorFunction> gj =
@@ -76,5 +78,11 @@ public class VectorLaplace
 		System.out.println("solved");
 		//grid.A.print_formatted();
 		//grid.rhs.print_formatted();
+		VectorFESpaceFunction<TPVectorFunction> solut =
+			new VectorFESpaceFunction<>(
+				grid.getShapeFunctions(), solution1);
+		Map<CoordinateVector, Double> vals =
+			solut.componentValuesInPoints(grid.generatePlotPoints(50),0);
+		new PlotFrame(List.of(vals),start,end);
 	}
 }

@@ -17,7 +17,7 @@ public class CoordinateVector extends DenseVector
 	public static CoordinateVector getUnitVector(int d, int index)
 	{
 		CoordinateVector ret = new CoordinateVector(d);
-		ret.set(index, 1);
+		ret.set(1,index);
 		return ret;
 	}
 	public static CoordinateVector fromValues(double ... values)

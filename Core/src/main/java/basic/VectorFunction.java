@@ -2,6 +2,10 @@ package basic;
 
 import linalg.*;
 
+import java.util.List;
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
+
 public abstract class VectorFunction implements Function<CoordinateVector, CoordinateMatrix, Tensor>
 {
 	private double getComponentValue(CoordinateVector pos, int component)
@@ -11,6 +15,19 @@ public abstract class VectorFunction implements Function<CoordinateVector, Coord
 	private CoordinateVector getComponentGradient(CoordinateVector pos, int component)
 	{
 		return (CoordinateVector) gradient(pos).unfoldDimension(0).get(component);
+	}
+	public Map<CoordinateVector, CoordinateVector> valuesInPoints(List<CoordinateVector> points)
+	{
+		ConcurrentHashMap<CoordinateVector, CoordinateVector> ret = new ConcurrentHashMap<>();
+		points.stream().parallel().forEach(point->ret.put(point, value(point)));
+		return ret;
+	}
+	public Map<CoordinateVector, Double> componentValuesInPoints(List<CoordinateVector> points,
+	                                                                       int component)
+	{
+		ConcurrentHashMap<CoordinateVector, Double> ret = new ConcurrentHashMap<>();
+		points.stream().parallel().forEach(point->ret.put(point, value(point).at(component)));
+		return ret;
 	}
 	public ScalarFunction getComponentFunction(int component)
 	{
