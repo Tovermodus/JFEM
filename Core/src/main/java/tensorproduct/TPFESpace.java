@@ -31,6 +31,8 @@ public class TPFESpace implements MatrixFESpace<TPCell,
 	List<TPShapeFunction> shapeFunctions;
 	SparseMatrix systemMatrix;
 	DenseVector rhs;
+	volatile int cellcounter = 0;
+	volatile int facecounter = 0;
 	public TPFESpace(CoordinateVector startCoordinates, CoordinateVector endCoordinates,
 	                 List<Integer> cellsPerDimension, int polynomialDegree)
 	{
@@ -250,6 +252,18 @@ public class TPFESpace implements MatrixFESpace<TPCell,
 	                        Multimap<TPFace,TPFace> faceRefinedFaceMapping)
 	{
 		return null;
+	}
+	
+	@Override
+	public synchronized int increaseCellCounter()
+	{
+		return cellcounter++;
+	}
+	
+	@Override
+	public synchronized int increaseFaceCounter()
+	{
+		return facecounter++;
 	}
 
 

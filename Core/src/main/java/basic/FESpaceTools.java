@@ -10,6 +10,14 @@ import java.util.function.DoubleSupplier;
 public interface FESpaceTools<CT extends Cell<CT,FT>, FT extends  Face<CT,FT>,
 	ST extends ShapeFunction<CT,FT,ST,?,?,?>>
 {
+	default int increaseCellCounter()
+	{
+		return 0;
+	}
+	default int increaseFaceCounter()
+	{
+		return 0;
+	}
 	default void loopMatrixViaCell(Function3<CT,ST,ST, Double> integralEvaluation,
 	                               MatrixFESpace<CT,FT,ST,?,?,?> space){
 		List<List<CT>> smallerList = Lists.partition(space.getCells(),space.getCells().size()/12+1);
@@ -17,6 +25,7 @@ public interface FESpaceTools<CT extends Cell<CT,FT>, FT extends  Face<CT,FT>,
 		{
 			for (CT K : smallList)
 			{
+				System.out.println((int)(50.0*increaseCellCounter()/space.getCells().size())+"%");
 				for (ST v : space.getShapeFunctionsWithSupportOnCell(K))
 				{
 					for (ST u : space.getShapeFunctionsWithSupportOnCell(K))
@@ -36,6 +45,7 @@ public interface FESpaceTools<CT extends Cell<CT,FT>, FT extends  Face<CT,FT>,
 		{
 			for (CT K : smallList)
 			{
+				System.out.println((int)(50.0*increaseCellCounter()/space.getCells().size())+"%");
 				for (ST v : space.getShapeFunctionsWithSupportOnCell(K))
 				{
 					double integral = integralEvaluation.apply(K,v);
@@ -52,6 +62,7 @@ public interface FESpaceTools<CT extends Cell<CT,FT>, FT extends  Face<CT,FT>,
 		{
 			for (FT F : smallList)
 			{
+				System.out.println((int)(50.0*increaseFaceCounter()/space.getFaces().size())+"%");
 				for (ST v : space.getShapeFunctionsWithSupportOnFace(F))
 				{
 					for (ST u : space.getShapeFunctionsWithSupportOnFace(F))
@@ -71,6 +82,7 @@ public interface FESpaceTools<CT extends Cell<CT,FT>, FT extends  Face<CT,FT>,
 		{
 			for (FT F : smallList)
 			{
+				System.out.println((int)(50.0*increaseFaceCounter()/space.getFaces().size())+"%");
 				for (ST v : space.getShapeFunctionsWithSupportOnFace(F))
 				{
 					double integral = integralEvaluation.apply(F,v);

@@ -28,6 +28,8 @@ public class ContinuousTPFESpace implements MatrixFESpace<TPCell,
 	SparseMatrix systemMatrix;
 	DenseVector rhs;
 	int dimension;
+	volatile int cellcounter;
+	volatile int facecounter;
 	
 	public ContinuousTPFESpace(CoordinateVector startCoordinates, CoordinateVector endCoordinates,
 	                 List<Integer> cellsPerDimension, int polynomialDegree)
@@ -97,6 +99,17 @@ public class ContinuousTPFESpace implements MatrixFESpace<TPCell,
 		if(index != 0)
 			throw new IllegalStateException("index too high");
 		return ret;
+	}
+	@Override
+	public synchronized int increaseCellCounter()
+	{
+		return cellcounter++;
+	}
+	
+	@Override
+	public synchronized int increaseFaceCounter()
+	{
+		return facecounter++;
 	}
 	@Override
 	public void assembleCells()

@@ -18,7 +18,7 @@ public class VectorLaplace
 		CoordinateVector end = CoordinateVector.fromValues(1, 1);
 		int polynomialDegree = 3;
 		TPVectorFESpace grid = new TPVectorFESpace(start, end,
-			Ints.asList(10, 10), polynomialDegree);
+			Ints.asList(20, 20), polynomialDegree);
 		TPVectorCellIntegral<TPVectorFunction> gg =
 			new TPVectorCellIntegral<>(TPVectorCellIntegral.GRAD_GRAD);
 		TPVectorFaceIntegral<TPVectorFunction> gj =

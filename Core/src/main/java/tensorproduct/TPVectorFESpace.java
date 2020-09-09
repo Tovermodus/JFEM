@@ -28,6 +28,8 @@ public class TPVectorFESpace implements MatrixFESpace<TPCell, TPFace, TPVectorFu
 	SparseMatrix systemMatrix;
 	DenseVector rhs;
 	final int dimension;
+	volatile int cellcounter;
+	volatile int facecounter;
 	public TPVectorFESpace(CoordinateVector startCoordinates, CoordinateVector endCoordinates,
 	                 List<Integer> cellsPerDimension, int polynomialDegree)
 	{
@@ -158,6 +160,17 @@ public class TPVectorFESpace implements MatrixFESpace<TPCell, TPFace, TPVectorFu
 	public DenseVector getRhs()
 	{
 		return rhs;
+	}
+	@Override
+	public synchronized int increaseCellCounter()
+	{
+		return cellcounter++;
+	}
+	
+	@Override
+	public synchronized int increaseFaceCounter()
+	{
+		return facecounter++;
 	}
 	
 	@Override
