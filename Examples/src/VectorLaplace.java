@@ -16,11 +16,11 @@ public class VectorLaplace
 	{
 		CoordinateVector start = CoordinateVector.fromValues(-1, -1);
 		CoordinateVector end = CoordinateVector.fromValues(1, 1);
-		int polynomialDegree = 1;
+		int polynomialDegree = 3;
 		TPVectorFESpace grid = new TPVectorFESpace(start, end,
-			Ints.asList(2, 2), polynomialDegree);
+			Ints.asList(10, 10), polynomialDegree);
 		TPVectorCellIntegral<TPVectorFunction> gg =
-			new TPVectorCellIntegral<>(TPVectorCellIntegral.VALUE_VALUE);
+			new TPVectorCellIntegral<>(TPVectorCellIntegral.GRAD_GRAD);
 		TPVectorFaceIntegral<TPVectorFunction> gj =
 			new TPVectorFaceIntegral<>(ScalarFunction.constantFunction(1),
 				TPVectorFaceIntegral.GRAD_AVERAGE_VALUE_NORMALAVERAGE);
@@ -28,7 +28,7 @@ public class VectorLaplace
 			new TPVectorFaceIntegral<>(ScalarFunction.constantFunction(1),
 				TPVectorFaceIntegral.VALUE_NORMALAVERAGE_GRAD_AVERAGE);
 		TPVectorFaceIntegral<TPVectorFunction> jj =
-			new TPVectorFaceIntegral<>(ScalarFunction.constantFunction(1),
+			new TPVectorFaceIntegral<>(ScalarFunction.constantFunction(100000),
 				TPVectorFaceIntegral.VALUE_NORMALAVERAGE_VALUE_NORMALAVERAGE);
 		ArrayList<CellIntegral<TPCell, TPFace, TPVectorFunction>> cellIntegrals =
 			new ArrayList<>();

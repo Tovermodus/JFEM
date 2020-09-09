@@ -44,7 +44,7 @@ public class TPFace implements Face<TPCell, TPFace>,Comparable<TPFace>
 			{
 				CoordinateVector ret = new CoordinateVector(pos.getLength());
 				ret.set(1,flatDimension);
-				return new CoordinateVector(pos.getLength());
+				return ret;
 			}
 		};
 	}
