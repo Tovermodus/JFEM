@@ -1,16 +1,12 @@
 package tensorproduct;
 
 import basic.Face;
-import basic.ShapeFunction;
 import basic.VectorFunction;
 import com.google.common.collect.Multimap;
-import basic.Cell;
 import linalg.CoordinateComparator;
 import linalg.CoordinateVector;
-import linalg.Vector;
 import org.jetbrains.annotations.NotNull;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
 import java.util.TreeSet;
@@ -22,7 +18,7 @@ public class TPFace implements Face<TPCell, TPFace>,Comparable<TPFace>
 	int flatDimension;
 	private Set<TPCell> cells;
 	private boolean isBoundaryFace;
-	private VectorFunction normal;
+	private final VectorFunction normal;
 	
 	public TPFace(List<Cell1D> cell1Ds, int flatDimension, double otherCoordinate, boolean isBoundaryFace)
 	{

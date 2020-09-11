@@ -1,6 +1,7 @@
 package tensorproduct;
 
 import basic.*;
+import com.google.common.collect.BoundType;
 import linalg.CoordinateVector;
 
 import java.util.List;
@@ -12,6 +13,7 @@ public class TPVectorFaceIntegral<ST extends VectorShapeFunction<TPCell,TPFace,S
 	public static String VALUE_NORMALAVERAGE_GRAD_AVERAGE = "ValueNormalaverageGradAverage";
 	public static String GRAD_AVERAGE_VALUE_NORMALAVERAGE = "GradAverageValueNormalaverage";
 	public static String VALUE_NORMALAVERAGE_VALUE_NORMALAVERAGE = "ValueNormalaverageValueNormalaverage";
+	public static String BOUNDARY_VALUE = "BoundaryValue";
 	public TPVectorFaceIntegral(Function<?,?,?> weight, String name)
 	{
 		super(weight,name);
@@ -53,6 +55,17 @@ public class TPVectorFaceIntegral<ST extends VectorShapeFunction<TPCell,TPFace,S
 				face.cell1Ds,
 				face.flatDimension,
 				face.otherCoordinate);
+		}
+		if (name.equals(BOUNDARY_VALUE))
+		{
+			if (face.isBoundaryFace())
+				return TPFaceIntegral.integrateNonTensorProduct(x -> shapeFunction1.normalAverageInValue(face
+					, x).frobeniusInner(shapeFunction2.normalAverageInValue(face, x)) * (double) weight.value(x),
+					face.cell1Ds,
+					face.flatDimension,
+					face.otherCoordinate);
+			else
+				return 0;
 		}
 		throw new UnsupportedOperationException("unkown face integral name");
 	}

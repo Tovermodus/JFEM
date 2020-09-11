@@ -5,7 +5,6 @@ import io.vavr.Function3;
 
 import java.util.List;
 import java.util.function.BiFunction;
-import java.util.function.DoubleSupplier;
 
 public interface FESpaceTools<CT extends Cell<CT,FT>, FT extends  Face<CT,FT>,
 	ST extends ShapeFunction<CT,FT,ST,?,?,?>>

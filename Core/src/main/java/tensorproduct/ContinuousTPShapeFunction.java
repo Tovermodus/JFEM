@@ -16,7 +16,7 @@ public class ContinuousTPShapeFunction extends ScalarShapeFunction<TPCell, TPFac
     private final LagrangeNodeFunctional nodeFunctional;
     private final int polynomialDegree;
     private int localIndex;
-    public ContinuousTPShapeFunction(TPCell supportCell, int localIndex, int polynomialDegree)
+    public ContinuousTPShapeFunction(TPCell supportCell, int polynomialDegree,int localIndex)
     {
         cells = new TreeMap<>();
         faces = new TreeSet<>();
@@ -41,8 +41,6 @@ public class ContinuousTPShapeFunction extends ScalarShapeFunction<TPCell, TPFac
                 {
                     for (TPCell cellOfFace : face.getCells())
                     {
-                        System.out.println(face);
-                        System.out.println(cellOfFace);
                         cells.put(cellOfFace, generateBasisFunctionOnCell(cellOfFace, functionalPoint));
                         checkIfPointOnFace(functionalPoint,cellOfFace);
                     }
