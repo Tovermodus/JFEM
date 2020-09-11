@@ -20,4 +20,14 @@ public class VectorNodeFunctional implements NodeFunctional<VectorFunction, Coor
 	{
 		return componentNodeFunctional.evaluate(func.getComponentFunction(component));
 	}
+	
+	public NodeFunctional<ScalarFunction, Double, CoordinateVector, Matrix> getComponentNodeFunctional()
+	{
+		return componentNodeFunctional;
+	}
+	
+	public int getComponent()
+	{
+		return component;
+	}
 }

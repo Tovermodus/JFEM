@@ -110,7 +110,7 @@ public class SingleComponentVectorShapeFunction<CT extends Cell<CT,FT>, FT exten
 	}
 	
 	@Override
-	public NodeFunctional<VectorFunction, CoordinateVector, CoordinateMatrix, Tensor> getNodeFunctional()
+	public VectorNodeFunctional getNodeFunctional()
 	{
 		return new VectorNodeFunctional(component, componentFunction.getNodeFunctional());
 	}

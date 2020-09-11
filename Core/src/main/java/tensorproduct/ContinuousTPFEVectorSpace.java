@@ -1,8 +1,6 @@
 package tensorproduct;
 
-import basic.Assembleable;
-import basic.MatrixFESpace;
-import basic.SingleComponentVectorShapeFunction;
+import basic.*;
 import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
 import com.google.common.collect.TreeMultimap;
@@ -23,8 +21,8 @@ public class ContinuousTPFEVectorSpace implements MatrixFESpace<TPCell, TPFace, 
 	List<List<Cell1D>> cells1D;
 	List<TPCell> cells;
 	List<TPFace> faces;
-	TreeMultimap<TPCell,ContinuousTPVectorFunction> supportOnCell;
-	TreeMultimap<TPFace,ContinuousTPVectorFunction> supportOnFace;
+	TreeMultimap<TPCell, ContinuousTPVectorFunction> supportOnCell;
+	TreeMultimap<TPFace, ContinuousTPVectorFunction> supportOnFace;
 	Map<List<Integer>, TPCell> lexicographicCellNumbers;
 	TreeSet<ContinuousTPVectorFunction> shapeFunctions;
 	SparseMatrix systemMatrix;
@@ -32,10 +30,11 @@ public class ContinuousTPFEVectorSpace implements MatrixFESpace<TPCell, TPFace, 
 	final int dimension;
 	volatile int cellcounter;
 	volatile int facecounter;
+	
 	public ContinuousTPFEVectorSpace(CoordinateVector startCoordinates, CoordinateVector endCoordinates,
-	                       List<Integer> cellsPerDimension, int polynomialDegree)
+	                                 List<Integer> cellsPerDimension, int polynomialDegree)
 	{
-		if(startCoordinates.getLength() != endCoordinates.getLength()|| startCoordinates.getLength() != cellsPerDimension.size())
+		if (startCoordinates.getLength() != endCoordinates.getLength() || startCoordinates.getLength() != cellsPerDimension.size())
 			throw new IllegalArgumentException();
 		dimension = startCoordinates.getLength();
 		cells1D = new ArrayList<>();
@@ -43,7 +42,7 @@ public class ContinuousTPFEVectorSpace implements MatrixFESpace<TPCell, TPFace, 
 		supportOnCell = TreeMultimap.create();
 		supportOnFace = TreeMultimap.create();
 		QuadratureRule1D quad;
-		if(polynomialDegree < 3)
+		if (polynomialDegree < 3)
 			quad = QuadratureRule1D.Gauss5;
 		else
 			quad = QuadratureRule1D.Gauss5;
@@ -51,12 +50,12 @@ public class ContinuousTPFEVectorSpace implements MatrixFESpace<TPCell, TPFace, 
 		{
 			List<Cell1D> cellsForDirection = new ArrayList<>();
 			List<Double> coordinatesForDirection = new ArrayList<>();
-			double le = (endCoordinates.at(i) - startCoordinates.at(i))/cellsPerDimension.get(i);
+			double le = (endCoordinates.at(i) - startCoordinates.at(i)) / cellsPerDimension.get(i);
 			for (int j = 0; j < cellsPerDimension.get(i); j++)
 			{
-				coordinatesForDirection.add(startCoordinates.at(i) + le*j);
-				cellsForDirection.add(new Cell1D(startCoordinates.at(i) + le*j,
-					startCoordinates.at(i) + le*(j+1),quad, cellsForDirection.size()));
+				coordinatesForDirection.add(startCoordinates.at(i) + le * j);
+				cellsForDirection.add(new Cell1D(startCoordinates.at(i) + le * j,
+					startCoordinates.at(i) + le * (j + 1), quad, cellsForDirection.size()));
 			}
 			coordinatesForDirection.add(endCoordinates.at(i));
 			cells1D.add(cellsForDirection);
@@ -64,18 +63,20 @@ public class ContinuousTPFEVectorSpace implements MatrixFESpace<TPCell, TPFace, 
 		}
 		
 	}
-	private<T> int[] decomposeLexicographic(int index, List<List<T>> list)
+	
+	private <T> int[] decomposeLexicographic(int index, List<List<T>> list)
 	{
 		int[] ret = new int[list.size()];
-		for (int i = list.size()-1; i >= 0; i--)
+		for (int i = list.size() - 1; i >= 0; i--)
 		{
 			ret[i] = index % list.get(i).size();
-			index = index/list.get(i).size();
+			index = index / list.get(i).size();
 		}
-		if(index != 0)
+		if (index != 0)
 			throw new IllegalStateException("index too high");
 		return ret;
 	}
+	
 	@Override
 	public void assembleCells()
 	{
@@ -126,31 +127,32 @@ public class ContinuousTPFEVectorSpace implements MatrixFESpace<TPCell, TPFace, 
 			}
 		}
 	}
+	
 	@Override
 	public void assembleFunctions(int polynomialDegree)
 	{
 		
 		shapeFunctions = new TreeSet<>();
-		for(TPCell cell:cells)
+		for (TPCell cell : cells)
 		{
-			for(int i = 0; i < Math.pow(polynomialDegree+1,dimension)*dimension; i++)
+			for (int i = 0; i < Math.pow(polynomialDegree + 1, dimension) * dimension; i++)
 			{
 				ContinuousTPVectorFunction shapeFunction = new ContinuousTPVectorFunction(cell, polynomialDegree, i,
 					ContinuousTPShapeFunction.class);
 				shapeFunction.setGlobalIndex(shapeFunctions.size());
 				shapeFunctions.add(shapeFunction);
-				for(TPCell supportCell: shapeFunction.getCells())
+				for (TPCell supportCell : shapeFunction.getCells())
 					supportOnCell.put(supportCell, shapeFunction);
-				for(TPFace supportFace: shapeFunction.getFaces())
+				for (TPFace supportFace : shapeFunction.getFaces())
 					supportOnFace.put(supportFace, shapeFunction);
 			}
 		}
-		System.out.println(shapeFunctions.size()+" "+ dimension*(polynomialDegree*cells1D.get(0).size()+1)*(polynomialDegree*cells1D.get(1).size()+1));
-		if(dimension == 2)
-			if(shapeFunctions.size() != dimension*(polynomialDegree*cells1D.get(0).size()+1)*(polynomialDegree*cells1D.get(1).size()+1))
+		System.out.println(shapeFunctions.size() + " " + dimension * (polynomialDegree * cells1D.get(0).size() + 1) * (polynomialDegree * cells1D.get(1).size() + 1));
+		if (dimension == 2)
+			if (shapeFunctions.size() != dimension * (polynomialDegree * cells1D.get(0).size() + 1) * (polynomialDegree * cells1D.get(1).size() + 1))
 				throw new IllegalStateException("Identification did not work");
-		if(dimension == 3)
-			if(shapeFunctions.size() != dimension*(polynomialDegree*cells1D.get(0).size()+1)*(polynomialDegree*cells1D.get(1).size()+1)*(polynomialDegree*cells1D.get(2).size()+1))
+		if (dimension == 3)
+			if (shapeFunctions.size() != dimension * (polynomialDegree * cells1D.get(0).size() + 1) * (polynomialDegree * cells1D.get(1).size() + 1) * (polynomialDegree * cells1D.get(2).size() + 1))
 				throw new IllegalStateException("Identification did not work");
 	}
 	
@@ -158,7 +160,7 @@ public class ContinuousTPFEVectorSpace implements MatrixFESpace<TPCell, TPFace, 
 	@Override
 	public void initializeSystemMatrix()
 	{
-		systemMatrix = new SparseMatrix(shapeFunctions.size(),shapeFunctions.size());
+		systemMatrix = new SparseMatrix(shapeFunctions.size(), shapeFunctions.size());
 	}
 	
 	@Override
@@ -172,6 +174,7 @@ public class ContinuousTPFEVectorSpace implements MatrixFESpace<TPCell, TPFace, 
 	{
 		return rhs;
 	}
+	
 	@Override
 	public synchronized int increaseCellCounter()
 	{
@@ -206,7 +209,7 @@ public class ContinuousTPFEVectorSpace implements MatrixFESpace<TPCell, TPFace, 
 	public Map<Integer, ContinuousTPVectorFunction> getShapeFunctions()
 	{
 		Map<Integer, ContinuousTPVectorFunction> functionNumbers = new TreeMap<>();
-		for(ContinuousTPVectorFunction shapeFunction:shapeFunctions)
+		for (ContinuousTPVectorFunction shapeFunction : shapeFunctions)
 			functionNumbers.put(shapeFunction.getGlobalIndex(), shapeFunction);
 		return functionNumbers;
 	}
@@ -230,6 +233,7 @@ public class ContinuousTPFEVectorSpace implements MatrixFESpace<TPCell, TPFace, 
 		return supportOnFace.get(face);
 	}
 	
+	
 	@Override
 	public List<CoordinateVector> generatePlotPoints(int resolution)
 	{
@@ -242,11 +246,39 @@ public class ContinuousTPFEVectorSpace implements MatrixFESpace<TPCell, TPFace, 
 				(Iterables.getLast(doubles) - doubles.get(0)) / n;
 			for (int j = 0; j < n; j++)
 			{
-				coordinatesForDirection.add(doubles.get(0) + le * j+Math.random()*1e-5);
+				coordinatesForDirection.add(doubles.get(0) + le * j + Math.random() * 1e-5);
 			}
 			coordinatesForDirection.add(Iterables.getLast(doubles));
 			plotCoordinates1D.add(coordinatesForDirection);
 		}
 		return Lists.cartesianProduct(plotCoordinates1D).stream().map(Doubles::toArray).map(CoordinateVector::fromValues).collect(Collectors.toList());
 	}
+	public void setBoundaryValues(VectorFunction boundaryValues)
+	{
+		int progress = 0;
+		for (TPFace face : getFaces())
+		{
+			System.out.println((int)(100*progress/getFaces().size())+"%");
+			progress++;
+			if (face.isBoundaryFace())
+			{
+				for (ContinuousTPVectorFunction shapeFunction : getShapeFunctionsWithSupportOnFace(face))
+				{
+					double nodeValue = shapeFunction.getNodeFunctional().evaluate(boundaryValues);
+					if (nodeValue != 0 || face.isOnFace(shapeFunction.getNodeFunctionalPoint()))
+					{
+						int shapeFunctionIndex = shapeFunction.getGlobalIndex();
+						for (TPCell cell : shapeFunction.getCells())
+							for (ContinuousTPVectorFunction sameSupportFunction :
+								getShapeFunctionsWithSupportOnCell(cell))
+								systemMatrix.set(0, shapeFunctionIndex,
+									sameSupportFunction.getGlobalIndex());
+						getSystemMatrix().set(1, shapeFunctionIndex, shapeFunctionIndex);
+						getRhs().set(nodeValue, shapeFunctionIndex);
+					}
+				}
+			}
+		}
+	}
 }
+

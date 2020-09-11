@@ -28,7 +28,7 @@ public class ContinuousVectorLaplace
 			new TPVectorFaceIntegral<>(ScalarFunction.constantFunction(1000),
 			TPVectorFaceIntegral.BOUNDARY_VALUE);
 		ArrayList<FaceIntegral<TPCell, TPFace, ContinuousTPVectorFunction>> faceIntegrals = new ArrayList<>();
-		faceIntegrals.add(jj);
+		//faceIntegrals.add(jj);
 		TPVectorRightHandSideIntegral<ContinuousTPVectorFunction> rightHandSideIntegral =
 			new TPVectorRightHandSideIntegral<>(new VectorFunction()
 			{
@@ -56,6 +56,21 @@ public class ContinuousVectorLaplace
 		grid.evaluateCellIntegrals(cellIntegrals, rightHandSideIntegrals);
 		System.out.println("Face Integrals");
 		grid.evaluateFaceIntegrals(faceIntegrals, boundaryFaceIntegrals);
+		System.out.println("Boundary Values");
+		grid.setBoundaryValues(new VectorFunction()
+		{
+			@Override
+			public int getDomainDimension()
+			{
+				return 2;
+			}
+			
+			@Override
+			public CoordinateVector value(CoordinateVector pos)
+			{
+				return CoordinateVector.fromValues(0,0);
+			}
+		});
 		System.out.println("solve system: " + grid.getSystemMatrix().getRows() + "×" + grid.getSystemMatrix().getCols());
 		//grid.A.makeParallelReady(12);
 		if (grid.getRhs().getLength() < 50)
