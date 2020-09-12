@@ -46,11 +46,8 @@ public class PlotFrame
 				                   vals.keySet().forEach(coordinateVector -> {
 					                   // .getHeight()-100)/n+1);
 					                   double v;
-					                   if(i == 1)
 						                   v =
 							                   ( vals.get(coordinateVector) - finalMin)/(finalMax - finalMin);
-					                   else
-						                   v = (vals.get(coordinateVector)+1.5)/3;
 					                   int c = (int)(255*v);
 					                   int gr = 0;
 					                   if(c>=255)

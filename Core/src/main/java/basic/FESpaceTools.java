@@ -19,7 +19,7 @@ public interface FESpaceTools<CT extends Cell<CT,FT>, FT extends  Face<CT,FT>,
 	}
 	default void loopMatrixViaCell(Function3<CT,ST,ST, Double> integralEvaluation,
 	                               MatrixFESpace<CT,FT,ST,?,?,?> space){
-		List<List<CT>> smallerList = Lists.partition(space.getCells(),space.getCells().size()/12+1);
+		List<List<CT>> smallerList = Lists.partition(space.getCells(),space.getCells().size()/1+1);
 		smallerList.stream().parallel().forEach(smallList->
 		{
 			for (CT K : smallList)
