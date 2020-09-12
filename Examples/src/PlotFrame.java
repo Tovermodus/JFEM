@@ -52,12 +52,18 @@ public class PlotFrame
 					                   else
 						                   v = (vals.get(coordinateVector)+1.5)/3;
 					                   int c = (int)(255*v);
-					                   /*while(c<0)
-					                   	c+=256;
-					                   while(c>255)
-					                   	c-=256;
-					                   */
-					                   g.setColor(new Color(c,0,
+					                   int gr = 0;
+					                   if(c>=255)
+					                   {
+						                   gr = c - 255;
+						                   c = 255;
+					                   }
+					                   if(c <= 0)
+					                   {
+					                   	gr = -c;
+					                   	c = 0;
+					                   }
+					                   g.setColor(new Color(c,gr,
 						                   255-c));
 					                   Vector relc = coordinateVector.sub(startCoordinates);
 					                   int posx =

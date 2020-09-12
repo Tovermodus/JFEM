@@ -8,6 +8,8 @@ import java.util.List;
 
 public enum QuadratureRule1D
 {
+	Gauss0(new double[]{}, //on [-1,1]
+		new double[]{}),
 	Gauss1(new double[]{2}, //on [-1,1]
 		new double[]{0}),
 	Gauss2(new double[]{1, 1}, //on [-1,1]

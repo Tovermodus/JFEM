@@ -44,30 +44,30 @@ public class RTBasisFunction1D extends Function1D
 		if(higherDegree)
 			switch (polynomialDegree)
 			{
-				case 1:
+				case 0:
 					return QuadratureRule1D.GaussLobatto2;
-				case 2:
+				case 1:
 					return QuadratureRule1D.GaussLobatto3;
-				case 3:
+				case 2:
 					return QuadratureRule1D.GaussLobatto4;
-				case 4:
+				case 3:
 					return QuadratureRule1D.GaussLobatto5;
-				case 5:
+				case 4:
 					return QuadratureRule1D.GaussLobatto6;
 				default:
 					throw new IllegalArgumentException("bad polynomial degree");
 			}
 		switch (polynomialDegree)
 		{
-			case 1:
+			case 0:
 				return QuadratureRule1D.Gauss1;
-			case 2:
+			case 1:
 				return QuadratureRule1D.Gauss2;
-			case 3:
+			case 2:
 				return QuadratureRule1D.Gauss3;
-			case 4:
+			case 3:
 				return QuadratureRule1D.Gauss4;
-			case 5:
+			case 4:
 				return QuadratureRule1D.Gauss5;
 			default:
 				throw new IllegalArgumentException("bad polynomial degree");
@@ -75,7 +75,7 @@ public class RTBasisFunction1D extends Function1D
 	}
 	public double valueOnReferenceCell(double pos)
 	{
-		if(!cell.isInCell(pos))
+		if(pos<0 || pos > 1)
 			return 0;
 		double ret = 1;
 		for (int i = 0; i < quad.length(); i++)
@@ -91,7 +91,7 @@ public class RTBasisFunction1D extends Function1D
 	
 	public double derivativeOnReferenceCell(double pos)
 	{
-		if (!cell.isInCell(pos))
+		if(pos<0 || pos > 1)
 			return 0;
 		double derret = 0;
 		for (int j = 0; j < quad.length(); j++)
