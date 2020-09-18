@@ -1,5 +1,6 @@
 package mixed;
 
+import basic.*;
 import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
 import com.google.common.collect.TreeMultimap;
@@ -20,7 +21,7 @@ public class QkQkSpace implements MixedFESpace<TPCell, TPFace, ContinuousTPShape
 	TreeMultimap<TPCell, MixedShapeFunction<TPCell, TPFace, ContinuousTPShapeFunction,ContinuousTPVectorFunction>> supportOnCell;
 	TreeMultimap<TPFace, MixedShapeFunction<TPCell, TPFace, ContinuousTPShapeFunction,ContinuousTPVectorFunction>> supportOnFace;
 	Map<List<Integer>, TPCell> lexicographicCellNumbers;
-	List<QkQkFunction> shapeFunctions;
+	Set<QkQkFunction> shapeFunctions;
 	SparseMatrix systemMatrix;
 	DenseVector rhs;
 	final int dimension;
@@ -126,7 +127,7 @@ public class QkQkSpace implements MixedFESpace<TPCell, TPFace, ContinuousTPShape
 	@Override
 	public void assembleFunctions(int polynomialDegree)
 	{
-		shapeFunctions = new ArrayList<>();
+		shapeFunctions = new TreeSet<>();
 		assemblePressureFunctions(polynomialDegree);
 		assembleVelocityFunctions(polynomialDegree);
 	}
@@ -141,8 +142,9 @@ public class QkQkSpace implements MixedFESpace<TPCell, TPFace, ContinuousTPShape
 					polynomialDegree, i));
 				shapeFunction.setGlobalIndex(shapeFunctions.size());
 				shapeFunctions.add(shapeFunction);
-				supportOnCell.put(cell, shapeFunction);
-				for (TPFace face : cell.getFaces())
+				for(TPCell ce: shapeFunction.getCells())
+					supportOnCell.put(ce, shapeFunction);
+				for (TPFace face : shapeFunction.getFaces())
 					supportOnFace.put(face, shapeFunction);
 			}
 		}
@@ -159,9 +161,11 @@ public class QkQkSpace implements MixedFESpace<TPCell, TPFace, ContinuousTPShape
 					ContinuousTPShapeFunction.class));
 				shapeFunction.setGlobalIndex(shapeFunctions.size());
 				shapeFunctions.add(shapeFunction);
-				supportOnCell.put(cell, shapeFunction);
-				for (TPFace face : cell.getFaces())
+				for(TPCell ce: shapeFunction.getCells())
+					supportOnCell.put(ce, shapeFunction);
+				for (TPFace face : shapeFunction.getFaces())
 					supportOnFace.put(face, shapeFunction);
+				
 			}
 		}
 	}
@@ -263,4 +267,68 @@ public class QkQkSpace implements MixedFESpace<TPCell, TPFace, ContinuousTPShape
 		return Lists.cartesianProduct(plotCoordinates1D).stream().map(Doubles::toArray).map(CoordinateVector::fromValues).collect(Collectors.toList());
 	}
 	
+	public void setVelocityBoundaryValues(VectorFunction boundaryValues)
+	{
+		MixedFunction boundaryMixed = new MixedFunction(boundaryValues);
+		int progress = 0;
+		for (TPFace face : getFaces())
+		{
+			System.out.println((int)(100*progress/getFaces().size())+"%");
+			progress++;
+			if (face.isBoundaryFace())
+			{
+				for (MixedShapeFunction<TPCell,TPFace,ContinuousTPShapeFunction,ContinuousTPVectorFunction> shapeFunction :
+					getShapeFunctionsWithSupportOnFace(face))
+				{
+					if(shapeFunction.isVelocity())
+					{
+						double nodeValue = shapeFunction.getNodeFunctional().evaluate(boundaryMixed);
+						if (nodeValue != 0 || face.isOnFace(shapeFunction.getVelocityShapeFunction().getNodeFunctionalPoint()))
+						{
+							int shapeFunctionIndex = shapeFunction.getGlobalIndex();
+							for (TPCell cell : shapeFunction.getCells())
+								for (MixedShapeFunction<TPCell,TPFace,ContinuousTPShapeFunction,ContinuousTPVectorFunction> sameSupportFunction :
+									getShapeFunctionsWithSupportOnCell(cell))
+									systemMatrix.set(0, shapeFunctionIndex,
+										sameSupportFunction.getGlobalIndex());
+							getSystemMatrix().set(1, shapeFunctionIndex, shapeFunctionIndex);
+							getRhs().set(nodeValue, shapeFunctionIndex);
+						}
+					}
+				}
+			}
+		}
+	}
+	public void setPressureBoundaryValues(ScalarFunction boundaryValues)
+	{
+		MixedFunction boundaryMixed = new MixedFunction(boundaryValues);
+		int progress = 0;
+		for (TPFace face : getFaces())
+		{
+			System.out.println((int)(100*progress/getFaces().size())+"%");
+			progress++;
+			if (face.isBoundaryFace())
+			{
+				for (MixedShapeFunction<TPCell,TPFace,ContinuousTPShapeFunction,ContinuousTPVectorFunction> shapeFunction :
+					getShapeFunctionsWithSupportOnFace(face))
+				{
+					if(shapeFunction.isPressure())
+					{
+						double nodeValue = shapeFunction.getNodeFunctional().evaluate(boundaryMixed);
+						if (nodeValue != 0 || face.isOnFace(((LagrangeNodeFunctional)shapeFunction.getPressureShapeFunction().getNodeFunctional()).getPoint()))
+						{
+							int shapeFunctionIndex = shapeFunction.getGlobalIndex();
+							for (TPCell cell : shapeFunction.getCells())
+								for (MixedShapeFunction<TPCell,TPFace,ContinuousTPShapeFunction,ContinuousTPVectorFunction> sameSupportFunction :
+									getShapeFunctionsWithSupportOnCell(cell))
+									systemMatrix.set(0, shapeFunctionIndex,
+										sameSupportFunction.getGlobalIndex());
+							getSystemMatrix().set(1, shapeFunctionIndex, shapeFunctionIndex);
+							getRhs().set(nodeValue, shapeFunctionIndex);
+						}
+					}
+				}
+			}
+		}
+	}
 }

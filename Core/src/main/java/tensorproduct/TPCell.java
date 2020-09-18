@@ -28,6 +28,11 @@ public class TPCell implements Cell<TPCell, TPFace>
 		return cell1Ds.size();
 	}
 	
+	public List<Cell1D> getCell1Ds()
+	{
+		return cell1Ds;
+	}
+	
 	@Override
 	public Set<TPFace> getFaces()
 	{

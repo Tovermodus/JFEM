@@ -48,7 +48,7 @@ public class TPCellIntegral<ST extends ScalarShapeFunction<TPCell,TPFace,ST>> ex
 		if(name.equals(VALUE_GRAD) && !(weight.value(new CoordinateVector(weight.getDomainDimension())) instanceof Vector))
 			throw new IllegalArgumentException();
 	}
-	static double integrateNonTensorProduct(ToDoubleFunction<CoordinateVector> eval, List<Cell1D> cells)
+	public static double integrateNonTensorProduct(ToDoubleFunction<CoordinateVector> eval, List<Cell1D> cells)
 	{
 		int qsize = cells.get(0).points.length;
 		double ret = 0;

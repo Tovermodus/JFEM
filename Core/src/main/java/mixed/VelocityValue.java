@@ -10,6 +10,11 @@ public class VelocityValue extends MixedValue
 		super(velocity.getLength());
 		setVelocity(velocity);
 	}
+	public VelocityValue(int domainDimension)
+	{
+		super(domainDimension);
+		setVelocity(new CoordinateVector(domainDimension));
+	}
 	
 	@Override
 	public double at(int... coordinates)
