@@ -14,8 +14,8 @@ public class ConvergenceOrderEstimator
 			double lowerDiff = normL2VecDifference(functions.get(i), functions.get(functions.size()-1), points);
 			double higherDiff = normL2VecDifference(functions.get(i+1), functions.get(functions.size()-1),
 				points);
-			System.out.println(lowerDiff/higherDiff);
-			average += lowerDiff/higherDiff;
+			System.out.println((1+i)+". Estimate of convergence order:" + Math.log(lowerDiff/higherDiff)/Math.log(2));
+			average += Math.log(lowerDiff/higherDiff)/Math.log(2);
 		}
 		return average/(functions.size()-2);
 		
@@ -36,7 +36,8 @@ public class ConvergenceOrderEstimator
 		{
 			double lowerDiff = normL2Difference(functions.get(i), functions.get(functions.size()-1), points);
 			double higherDiff = normL2Difference(functions.get(i+1), functions.get(functions.size()-1), points);
-			System.out.println(lowerDiff/higherDiff);
+			System.out.println(i+"-th Estimate of convergence order:" + Math.log(lowerDiff/higherDiff)/Math.log(2));
+			average += Math.log(lowerDiff/higherDiff)/Math.log(2);
 			average += lowerDiff/higherDiff;
 		}
 		return average/(functions.size()-2);

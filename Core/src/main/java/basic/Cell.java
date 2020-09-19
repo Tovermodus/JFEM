@@ -20,6 +20,7 @@ public interface Cell<CT extends Cell<CT,FT>, FT extends Face<CT,FT>> extends Co
 	
 	boolean isInCell(CoordinateVector pos);
 	CoordinateVector center();
+	VectorFunction getOuterNormal(FT face);
 	
 	default List<CT> refine(List<FT> refinedFaces)
 	{

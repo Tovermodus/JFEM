@@ -307,32 +307,34 @@ public class MixedRTSpace implements MixedFESpace<TPCell, TPFace, ContinuousTPSh
 	{
 		MixedFunction boundaryMixed = new MixedFunction(boundaryValues);
 		int progress = 0;
-		for (TPFace face : getFaces())
+		for(MixedShapeFunction<TPCell,TPFace,ContinuousTPShapeFunction,RTShapeFunction> shapeFunction :
+			getShapeFunctions().values())
 		{
-			System.out.println((int)(100*progress/getFaces().size())+"%");
-			progress++;
-			if (face.isBoundaryFace())
+			if(!shapeFunction.isPressure())
+				continue;
+			boolean boundaryShapeFunction = false;
+			for(TPFace f: shapeFunction.getFaces())
 			{
-				for (MixedShapeFunction<TPCell,TPFace,ContinuousTPShapeFunction,RTShapeFunction> shapeFunction :
-					getShapeFunctionsWithSupportOnFace(face))
+				if(f.isBoundaryFace() && f.isOnFace(((LagrangeNodeFunctional)shapeFunction.getPressureShapeFunction().getNodeFunctional()).getPoint()))
 				{
-					if(shapeFunction.isPressure())
-					{
-						double nodeValue = shapeFunction.getNodeFunctional().evaluate(boundaryMixed);
-						if (nodeValue != 0 || face.isOnFace(((LagrangeNodeFunctional)shapeFunction.getPressureShapeFunction().getNodeFunctional()).getPoint()))
-						{
-							int shapeFunctionIndex = shapeFunction.getGlobalIndex();
-							for (TPCell cell : shapeFunction.getCells())
-								for (MixedShapeFunction<TPCell,TPFace,ContinuousTPShapeFunction,RTShapeFunction> sameSupportFunction :
-									getShapeFunctionsWithSupportOnCell(cell))
-									systemMatrix.set(0, shapeFunctionIndex,
-										sameSupportFunction.getGlobalIndex());
-							getSystemMatrix().set(1, shapeFunctionIndex, shapeFunctionIndex);
-							getRhs().set(nodeValue, shapeFunctionIndex);
-						}
-					}
+					boundaryShapeFunction = true;
+					break;
 				}
 			}
+			if(boundaryShapeFunction)
+			{
+				double nodeValue = shapeFunction.getNodeFunctional().evaluate(boundaryMixed);
+				System.out.println(shapeFunction.getGlobalIndex()+" NODEVALUE "+  nodeValue);
+				int shapeFunctionIndex = shapeFunction.getGlobalIndex();
+				for (TPCell cell : shapeFunction.getCells())
+					for (MixedShapeFunction<TPCell,TPFace,ContinuousTPShapeFunction,RTShapeFunction> sameSupportFunction :
+						getShapeFunctionsWithSupportOnCell(cell))
+						systemMatrix.set(0, shapeFunctionIndex,
+							sameSupportFunction.getGlobalIndex());
+				getSystemMatrix().set(1, shapeFunctionIndex, shapeFunctionIndex);
+				getRhs().set(nodeValue, shapeFunctionIndex);
+			}
 		}
+		
 	}
 }

@@ -2,6 +2,7 @@ package tensorproduct;
 
 import basic.Cell;
 import basic.ShapeFunction;
+import basic.VectorFunction;
 import linalg.CoordinateComparator;
 import linalg.CoordinateVector;
 import org.jetbrains.annotations.NotNull;
@@ -75,6 +76,30 @@ public class TPCell implements Cell<TPCell, TPFace>
 		for(int i = 0; i < ret.getLength(); i++)
 			ret.set(cell1Ds.get(i).center(),i);
 		return ret;
+	}
+	
+	@Override
+	public VectorFunction getOuterNormal(TPFace face)
+	{
+		if(!faces.contains(face))
+			throw new IllegalArgumentException("face does not belong to cell");
+		boolean invertNormal = (center().sub(face.center())).inner(face.getNormal().value(face.center()))>0;
+		if(invertNormal)
+			return new VectorFunction()
+			{
+				@Override
+				public int getDomainDimension()
+				{
+					return face.getNormal().getDomainDimension();
+				}
+				
+				@Override
+				public CoordinateVector value(CoordinateVector pos)
+				{
+					return face.getNormal().value(pos).mul(-1);
+				}
+			};
+		else return face.getNormal();
 	}
 	
 	@Override

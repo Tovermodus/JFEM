@@ -46,10 +46,18 @@ public class MixedBoundaryRightHandSideIntegral<CT extends Cell<CT,FT>, FT exten
 	                                                    MixedShapeFunction<CT, FT, PF, VF> shapeFunction1)
 	{
 		if (isPressureIntegral())
+		{
+			if(!shapeFunction1.isPressure())
+				return 0;
 			return pressureIntegral.evaluateBoundaryRightHandSideIntegral(face,
 				shapeFunction1.getPressureShapeFunction());
-		else
+		} else
+		{
+			if(!shapeFunction1.isVelocity())
+				return 0;
+			System.out.println(shapeFunction1.getGlobalIndex()+" NODEVALUE "+ velocityIntegral.evaluateBoundaryRightHandSideIntegral(face, shapeFunction1.getVelocityShapeFunction()));
 			return velocityIntegral.evaluateBoundaryRightHandSideIntegral(face,
 				shapeFunction1.getVelocityShapeFunction());
+		}
 	}
 }

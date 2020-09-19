@@ -40,7 +40,7 @@ public interface FESpaceTools<CT extends Cell<CT,FT>, FT extends  Face<CT,FT>,
 	}
 	default void loopRhsViaCell(BiFunction<CT,ST,Double> integralEvaluation, MatrixFESpace<CT,FT,ST,?,?,?> space){
 		List<List<CT>> smallerList = Lists.partition(space.getCells(),space.getCells().size()/12+1);
-		smallerList.stream().forEach(smallList->
+		smallerList.stream().parallel().forEach(smallList->
 		{
 			for (CT K : smallList)
 			{
@@ -77,7 +77,7 @@ public interface FESpaceTools<CT extends Cell<CT,FT>, FT extends  Face<CT,FT>,
 	}
 	default void loopRhsViaFace(BiFunction<FT,ST,Double> integralEvaluation, MatrixFESpace<CT,FT,ST,?,?,?> space){
 		List<List<FT>> smallerList = Lists.partition(space.getFaces(),space.getFaces().size()/12+1);
-		smallerList.stream().parallel().forEach(smallList->
+		smallerList.stream().forEach(smallList->
 		{
 			for (FT F : smallList)
 			{
