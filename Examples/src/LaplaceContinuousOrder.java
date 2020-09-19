@@ -27,44 +27,16 @@ public class LaplaceContinuousOrder
 		cellIntegrals.add(gg);
 		ArrayList<FaceIntegral<TPCell, TPFace, ContinuousTPVectorFunction>> faceIntegrals = new ArrayList<>();
 		TPVectorRightHandSideIntegral<ContinuousTPVectorFunction> rightHandSideIntegral =
-			new TPVectorRightHandSideIntegral<>(new VectorFunction()
-			{
-				@Override
-				public int getDomainDimension()
-				{
-					return 2;
-				}
-				
-				@Override
-				public CoordinateVector value(CoordinateVector pos)
-				{
-					return CoordinateVector.fromValues(0,
-						0);
-				}
-			},
+			new TPVectorRightHandSideIntegral<>(LaplaceReferenceSolution.vectorRightHandSide(),
 				TPVectorRightHandSideIntegral.VALUE);
 		ArrayList<RightHandSideIntegral<TPCell, TPFace, ContinuousTPVectorFunction>> rightHandSideIntegrals = new ArrayList<>();
 		rightHandSideIntegrals.add(rightHandSideIntegral);
 		ArrayList<BoundaryRightHandSideIntegral<TPCell, TPFace, ContinuousTPVectorFunction>> boundaryFaceIntegrals = new ArrayList<>();
 		
-		int polynomialDegree = 3;
+		int polynomialDegree = 2;
 		List<ScalarFunction> solutions = new ArrayList<>();
 		List<VectorFunction> solutionsVec = new ArrayList<>();
 		ContinuousTPFEVectorSpace grid = null;
-		ScalarFunction func = new ScalarFunction()
-		{
-			@Override
-			public int getDomainDimension()
-			{
-				return 2;
-			}
-			
-			@Override
-			public Double value(CoordinateVector pos)
-			{
-					return 2*(1+pos.y())/((3+pos.x())*(3+pos.x())+(1+pos.y())*(1+pos.y()));
-			}
-		};
 		for(int i = 0; i < 5; i++)
 		{
 			grid = new ContinuousTPFEVectorSpace(start, end,
@@ -75,24 +47,9 @@ public class LaplaceContinuousOrder
 			grid.initializeRhs();
 			grid.evaluateCellIntegrals(cellIntegrals, rightHandSideIntegrals);
 			grid.evaluateFaceIntegrals(faceIntegrals, boundaryFaceIntegrals);
-			grid.setBoundaryValues(new VectorFunction()
-			{
-				@Override
-				public int getDomainDimension()
-				{
-					return 2;
-				}
-				
-				@Override
-				public CoordinateVector value(CoordinateVector pos)
-				{
-					if (Math.abs(pos.x()) == 1||Math.abs(pos.y()) == 1)
-						return CoordinateVector.fromValues(func.value(pos), func.value(pos));
-					return CoordinateVector.fromValues(0,0);
-				}
-			});
+			grid.setBoundaryValues(LaplaceReferenceSolution.vectorBoundaryValues());
 			IterativeSolver<SparseMatrix> it = new IterativeSolver<>();
-			Vector solution1 = it.solveGMRES(grid.getSystemMatrix(), grid.getRhs(), 1e-9);
+			Vector solution1 = it.solveGMRES(grid.getSystemMatrix(), grid.getRhs(), 1e-11);
 			VectorFESpaceFunction<ContinuousTPVectorFunction> solut =
 				new VectorFESpaceFunction<>(
 					grid.getShapeFunctions(), solution1);
@@ -111,20 +68,7 @@ public class LaplaceContinuousOrder
 				}
 			});
 		}
-		solutionsVec.add(new VectorFunction()
-		{
-			@Override
-			public int getDomainDimension()
-			{
-				return 2;
-			}
-			
-			@Override
-			public CoordinateVector value(CoordinateVector pos)
-			{
-				return CoordinateVector.fromValues(func.value(pos), func.value(pos));
-			}
-		});
+		solutionsVec.add(LaplaceReferenceSolution.vectorReferenceSolution());
 		System.out.println(ConvergenceOrderEstimator.estimateL2Vector(solutionsVec,
 			grid.generatePlotPoints(40)));
 		
