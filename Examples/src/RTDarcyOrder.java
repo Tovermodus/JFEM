@@ -35,17 +35,22 @@ public class RTDarcyOrder
 		MixedRightHandSideIntegral<TPCell, TPFace, ContinuousTPShapeFunction, RTShapeFunction> rightHandSideIntegral =
 			MixedRightHandSideIntegral.fromPressureIntegral(
 				new TPRightHandSideIntegral<ContinuousTPShapeFunction>(
-					ScalarFunction.constantFunction(-4),TPRightHandSideIntegral.VALUE, false));
+					LaplaceReferenceSolution.scalarRightHandSide(),TPRightHandSideIntegral.VALUE, false));
 		List<RightHandSideIntegral<TPCell, TPFace, MixedShapeFunction<TPCell, TPFace,ContinuousTPShapeFunction,
 					RTShapeFunction>>> rightHandSideIntegrals = new ArrayList<>();
 		rightHandSideIntegrals.add(rightHandSideIntegral);
 		List<BoundaryRightHandSideIntegral<TPCell, TPFace, MixedShapeFunction<TPCell, TPFace,ContinuousTPShapeFunction,
 					RTShapeFunction>>> boundaryFaceIntegrals = new ArrayList<>();
+		MixedBoundaryRightHandSideIntegral<TPCell, TPFace, ContinuousTPShapeFunction, RTShapeFunction> dirichlet =
+			MixedBoundaryRightHandSideIntegral.fromVelocityIntegral(
+				new TPVectorBoundaryFaceIntegral<RTShapeFunction>(LaplaceReferenceSolution.scalarBoundaryValues(),
+					TPVectorBoundaryFaceIntegral.NORMAL_VALUE));
+		boundaryFaceIntegrals.add(dirichlet);
 		int polynomialDegree = 3;
 		List<ScalarFunction> solutions = new ArrayList<>();
 		List<VectorFunction> solutionsVec = new ArrayList<>();
 		MixedRTSpace grid = null;
-		for(int i = 0; i < 5; i++)
+		for(int i = 0; i < 4; i++)
 		{
 			grid = new MixedRTSpace(start, end,
 				Ints.asList(2*(int)Math.pow(2,i),2*(int)Math.pow(2,i)), polynomialDegree);
@@ -55,9 +60,8 @@ public class RTDarcyOrder
 			grid.initializeRhs();
 			grid.evaluateCellIntegrals(cellIntegrals, rightHandSideIntegrals);
 			grid.evaluateFaceIntegrals(faceIntegrals, boundaryFaceIntegrals);
-			grid.setPressureBoundaryValues(ScalarFunction.constantFunction(0));
 			IterativeSolver<SparseMatrix> it = new IterativeSolver<>();
-			Vector solution1 = it.solveGMRES(grid.getSystemMatrix(), grid.getRhs(), 1e-6);
+			Vector solution1 = it.solveGMRES(grid.getSystemMatrix(), grid.getRhs(), 1e-9);
 			MixedFESpaceFunction<TPCell,TPFace,ContinuousTPShapeFunction,RTShapeFunction> solut =
 				new MixedFESpaceFunction<>(
 					grid.getShapeFunctions(), solution1);
@@ -90,9 +94,9 @@ public class RTDarcyOrder
 				}
 			});
 		}
-		System.out.println(ConvergenceOrderEstimator.estimateL2Scalar(solutions, grid.generatePlotPoints(20)));
-		System.out.println(ConvergenceOrderEstimator.estimateL2Vector(solutionsVec,
-			grid.generatePlotPoints(20)));
+		solutions.add(LaplaceReferenceSolution.scalarReferenceSolution());
+		System.out.println(ConvergenceOrderEstimator.estimateL2Scalar(solutions, grid.generatePlotPoints(50)));
+		
 		
 	}
 }

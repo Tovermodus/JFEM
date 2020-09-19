@@ -34,9 +34,6 @@ public class TPVectorBoundaryFaceIntegral<ST extends VectorShapeFunction<TPCell,
 		}
 		if(name.equals(NORMAL_VALUE))
 		{
-			System.out.println(shapeFunction1.value(face.center()));
-			System.out.println(face.getNormal().value(face.center()));
-			System.out.println(rightHandSide.value(face.center()));
 			TPCell cell = Iterables.getFirst(face.getCells(), null);
 			if(cell == null)
 				throw new IllegalStateException("face has no cells");

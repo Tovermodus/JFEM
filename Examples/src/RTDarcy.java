@@ -19,7 +19,7 @@ public class RTDarcy
 		CoordinateVector end = CoordinateVector.fromValues(1, 1);
 		int polynomialDegree = 1;
 		MixedRTSpace grid = new MixedRTSpace(start, end,
-			Ints.asList(5,5), polynomialDegree);
+			Ints.asList(2,2), polynomialDegree);
 		TPVectorCellIntegral<RTShapeFunction> valueValue =
 			new TPVectorCellIntegral<>(TPVectorCellIntegral.VALUE_VALUE);
 		MixedCellIntegral<TPCell,TPFace,ContinuousTPShapeFunction, RTShapeFunction>
@@ -36,7 +36,7 @@ public class RTDarcy
 		
 		MixedRightHandSideIntegral<TPCell, TPFace, ContinuousTPShapeFunction, RTShapeFunction> rightHandSideIntegral =
 			MixedRightHandSideIntegral.fromPressureIntegral(
-				new TPRightHandSideIntegral<ContinuousTPShapeFunction>(ScalarFunction.constantFunction(-1),                                      //LaplaceReferenceSolution.scalarRightHandSide(),
+				new TPRightHandSideIntegral<ContinuousTPShapeFunction>(LaplaceReferenceSolution.scalarRightHandSide(),
 					TPRightHandSideIntegral.VALUE, false));
 		
 		
@@ -51,7 +51,7 @@ public class RTDarcy
 		
 		MixedBoundaryRightHandSideIntegral<TPCell, TPFace, ContinuousTPShapeFunction, RTShapeFunction> dirichlet =
 			MixedBoundaryRightHandSideIntegral.fromVelocityIntegral(
-				new TPVectorBoundaryFaceIntegral<RTShapeFunction>(ScalarFunction.constantFunction(1),
+				new TPVectorBoundaryFaceIntegral<RTShapeFunction>(LaplaceReferenceSolution.scalarBoundaryValues(),
 					TPVectorBoundaryFaceIntegral.NORMAL_VALUE));
 		boundaryFaceIntegrals.add(dirichlet);
 		grid.assembleCells();
@@ -82,6 +82,7 @@ public class RTDarcy
 				grid.getShapeFunctions(), solution1);
 		ArrayList<Map<CoordinateVector, Double>> valList = new ArrayList<>();
 		valList.add(solut.pressureValuesInPoints(grid.generatePlotPoints(50)));
+		valList.add(LaplaceReferenceSolution.scalarReferenceSolution().valuesInPoints(grid.generatePlotPoints(50)));
 		valList.add(solut.velocityComponentsInPoints(grid.generatePlotPoints(50), 0));
 		valList.add(solut.velocityComponentsInPoints(grid.generatePlotPoints(50), 1));
 		for(int k = 0; k < grid.getShapeFunctions().size(); k++)

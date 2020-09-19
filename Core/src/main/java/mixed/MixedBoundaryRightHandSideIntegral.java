@@ -55,7 +55,6 @@ public class MixedBoundaryRightHandSideIntegral<CT extends Cell<CT,FT>, FT exten
 		{
 			if(!shapeFunction1.isVelocity())
 				return 0;
-			System.out.println(shapeFunction1.getGlobalIndex()+" NODEVALUE "+ velocityIntegral.evaluateBoundaryRightHandSideIntegral(face, shapeFunction1.getVelocityShapeFunction()));
 			return velocityIntegral.evaluateBoundaryRightHandSideIntegral(face,
 				shapeFunction1.getVelocityShapeFunction());
 		}

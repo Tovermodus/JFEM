@@ -146,7 +146,6 @@ public class RTFESpace implements MatrixFESpace<TPCell, TPFace, RTShapeFunction,
 					supportOnFace.put(supportFace, shapeFunction);
 			}
 		}
-		System.out.println(shapeFunctions.size() + " " + dimension * (polynomialDegree * cells1D.get(0).size() + 1) * (polynomialDegree * cells1D.get(1).size() + 1));
 		/*if (dimension == 2)
 			if (shapeFunctions.size() != ((polynomialDegree + 1) * cells1D.get(0).size() + 1) * (polynomialDegree + 1) * cells1D.get(1).size()
 				+ ((polynomialDegree + 1) * cells1D.get(1).size() + 1) * (polynomialDegree + 1) * cells1D.get(0).size())

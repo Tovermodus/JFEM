@@ -36,6 +36,7 @@ public class ConvergenceOrderEstimator
 		{
 			double lowerDiff = normL2Difference(functions.get(i), functions.get(functions.size()-1), points);
 			double higherDiff = normL2Difference(functions.get(i+1), functions.get(functions.size()-1), points);
+			System.out.println(lowerDiff+" "+higherDiff);
 			System.out.println(i+"-th Estimate of convergence order:" + Math.log(lowerDiff/higherDiff)/Math.log(2));
 			average += Math.log(lowerDiff/higherDiff)/Math.log(2);
 			average += lowerDiff/higherDiff;

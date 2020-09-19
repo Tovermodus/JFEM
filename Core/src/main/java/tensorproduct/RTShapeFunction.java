@@ -19,7 +19,6 @@ public class RTShapeFunction extends VectorShapeFunction<TPCell, TPFace, RTShape
 			supportCell.getDimension()-1)));
 		int componentLocalIndex = (int) (localIndex % ((polynomialDegree+2)*Math.pow((polynomialDegree+1),
 			supportCell.getDimension()-1)));
-		System.out.println(localIndex+" "+component+" "+componentLocalIndex);
 		componentFunction = new RTComponentFunction(supportCell, polynomialDegree, componentLocalIndex,
 				component);
 	}
