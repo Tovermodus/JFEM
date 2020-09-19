@@ -1,6 +1,8 @@
 package linalg;
 
-public class CoordinateVector extends DenseVector
+import org.jetbrains.annotations.NotNull;
+
+public class CoordinateVector extends DenseVector implements Comparable<CoordinateVector>
 {
 	public CoordinateVector(Vector v)
 	{
@@ -83,5 +85,19 @@ public class CoordinateVector extends DenseVector
 	public double z()
 	{
 		return entries[2];
+	}
+	
+	@Override
+	public int compareTo(@NotNull CoordinateVector o)
+	{
+		return CoordinateComparator.comp(this, o);
+	}
+	
+	@Override
+	public boolean equals(Object obj)
+	{
+		if(obj instanceof CoordinateVector)
+			return compareTo((CoordinateVector)obj) == 0;
+		return false;
 	}
 }

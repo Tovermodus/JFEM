@@ -97,7 +97,7 @@ public class PlotFrame
 			                   @Override
 			                   public void mouseExited(MouseEvent e)
 			                   {
-				                   System.exit(0);
+				                   j.dispose();
 			                   }
 		                   }
 		

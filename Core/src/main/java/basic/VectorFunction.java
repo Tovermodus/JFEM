@@ -29,6 +29,13 @@ public abstract class VectorFunction implements Function<CoordinateVector, Coord
 		points.stream().parallel().forEach(point->ret.put(point, value(point).at(component)));
 		return ret;
 	}
+	public double divergence(CoordinateVector pos)
+	{
+		double ret = 0;
+		for(int i = 0; i < getDomainDimension(); i++)
+			ret += gradient(pos).at(i,i);
+		return ret;
+	}
 	public ScalarFunction getComponentFunction(int component)
 	{
 		int domainDimension = getDomainDimension();

@@ -9,6 +9,7 @@ import org.jetbrains.annotations.NotNull;
 
 import java.util.List;
 import java.util.Map;
+import java.util.TreeMap;
 import java.util.concurrent.ConcurrentHashMap;
 
 public class MixedFunction implements Function<MixedValue,
@@ -28,14 +29,14 @@ public class MixedFunction implements Function<MixedValue,
 	
 	public ScalarFunction getPressureFunction()
 	{
-		if(isVelocity())
+		if(!isPressure())
 			throw new IllegalStateException("Is not pressure Function");
 		return pressureFunction;
 	}
 	
 	public VectorFunction getVelocityFunction()
 	{
-		if(isPressure())
+		if(!isVelocity())
 			throw new IllegalStateException("Is not velocity Function");
 		return velocityFunction;
 	}
@@ -92,7 +93,7 @@ public class MixedFunction implements Function<MixedValue,
 	}
 	public Map<CoordinateVector, Double> pressureValuesInPoints(List<CoordinateVector> points)
 	{
-		ConcurrentHashMap<CoordinateVector, Double> ret = new ConcurrentHashMap<>();
+		TreeMap<CoordinateVector, Double> ret = new TreeMap<>();
 		points.stream().parallel().forEach(point->ret.put(point, value(point).getPressure()));
 		return ret;
 	}

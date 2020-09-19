@@ -70,7 +70,6 @@ public abstract class VectorShapeFunction<CT extends Cell<CT,FT>,FT extends Face
 		return jumpInDerivative(face, pos).mvMul(face.getNormal().value(pos));
 	}
 	public abstract double divergenceInCell( CoordinateVector pos, CT cell);
-	public abstract double divergence(CoordinateVector pos);
 	
 	@Override
 	public Map<Integer, Double> prolongate(Set<ST> refinedFunctions)
