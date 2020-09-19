@@ -57,6 +57,24 @@ public class ContinuousVectorLaplace
 		System.out.println("Face Integrals");
 		grid.evaluateFaceIntegrals(faceIntegrals, boundaryFaceIntegrals);
 		System.out.println("Boundary Values");
+		ScalarFunction func = new ScalarFunction()
+		{
+			@Override
+			public int getDomainDimension()
+			{
+				return 2;
+			}
+			
+			@Override
+			public Double value(CoordinateVector pos)
+			{
+				if (Math.abs(pos.x()) == 1)
+					return (2 - Math.max(1, 2 * Math.abs(pos.y())));
+				if (Math.abs(pos.y()) == 1)
+					return (2 - Math.max(1, 2 * Math.abs(pos.x())));
+				return (double) 0;
+			}
+		};
 		grid.setBoundaryValues(new VectorFunction()
 		{
 			@Override
@@ -68,7 +86,7 @@ public class ContinuousVectorLaplace
 			@Override
 			public CoordinateVector value(CoordinateVector pos)
 			{
-				return CoordinateVector.fromValues(0,0);
+				return CoordinateVector.fromValues(func.value(pos), func.value(pos));
 			}
 		});
 		System.out.println("solve system: " + grid.getSystemMatrix().getRows() + "×" + grid.getSystemMatrix().getCols());
@@ -80,7 +98,7 @@ public class ContinuousVectorLaplace
 		}
 		IterativeSolver<SparseMatrix> i = new IterativeSolver<>();
 		System.out.println("start stopwatch");
-		Vector solution1 = i.solveCG(grid.getSystemMatrix(), grid.getRhs(), 1e-3);
+		Vector solution1 = i.solveGMRES(grid.getSystemMatrix(), grid.getRhs(), 1e-3);
 		//Vector solution = ((DenseMatrix)grid.getSystemMatrix()).solve(grid.getRhs());
 		System.out.println("solved");
 		//grid.A.print_formatted();

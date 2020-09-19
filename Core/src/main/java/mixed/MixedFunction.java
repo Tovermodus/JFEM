@@ -93,7 +93,7 @@ public class MixedFunction implements Function<MixedValue,
 	}
 	public Map<CoordinateVector, Double> pressureValuesInPoints(List<CoordinateVector> points)
 	{
-		TreeMap<CoordinateVector, Double> ret = new TreeMap<>();
+		ConcurrentHashMap<CoordinateVector, Double> ret = new ConcurrentHashMap<>();
 		points.stream().parallel().forEach(point->ret.put(point, value(point).getPressure()));
 		return ret;
 	}

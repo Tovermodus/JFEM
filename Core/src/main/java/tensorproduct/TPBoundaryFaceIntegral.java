@@ -5,7 +5,7 @@ import linalg.CoordinateVector;
 public class TPBoundaryFaceIntegral<ST extends ScalarShapeFunction<TPCell,TPFace,ST>> extends BoundaryRightHandSideIntegral<TPCell,TPFace,
 	ST>
 {
-	static final String VALUE="Value";
+	public static final String VALUE="Value";
 	private final boolean weightIsTensorProduct;
 	public TPBoundaryFaceIntegral(Function<?,?,?> rightHandSide, String name, boolean weightIsTensorProduct)
 	{
@@ -19,6 +19,8 @@ public class TPBoundaryFaceIntegral<ST extends ScalarShapeFunction<TPCell,TPFace
 	public double evaluateBoundaryRightHandSideIntegral(TPFace face,
 	                                                    ST shapeFunction1)
 	{
+		if(!face.isBoundaryFace())
+			return 0;
 		if(name.equals(VALUE))
 		{
 				return TPFaceIntegral.integrateNonTensorProduct(x->shapeFunction1.value(x)*(Double)(rightHandSide.value(x)),face.cell1Ds, face.flatDimension, face.otherCoordinate);

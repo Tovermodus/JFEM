@@ -10,6 +10,7 @@ public class TPFaceIntegral<ST extends ScalarShapeFunction<TPCell,TPFace,ST>> ex
 	TPFace,ST>
 {
 	public static String VALUE_JUMP_VALUE_JUMP = "ValueJumpValueJump";
+	public static String INTERIOR_VALUE_JUMP_VALUE_JUMP = "InteriorValueJumpValueJump";
 	public static String GRAD_NORMALAVERAGE_VALUE_JUMP = "GradNormalaverageValueJump";
 	public static String VALUE_JUMP_GRAD_NORMALAVERAGE = "ValueJumpGradNormalaverage";
 	public static String GRAD_VALUE_NORMAL = "GradValueNormal";
@@ -71,6 +72,15 @@ public class TPFaceIntegral<ST extends ScalarShapeFunction<TPCell,TPFace,ST>> ex
 	{
 		if (name.equals(VALUE_JUMP_VALUE_JUMP))
 		{
+			return integrateNonTensorProduct(x -> shapeFunction1.jumpInValue(face, x) * shapeFunction2.jumpInValue(face, x) * (Double) weight.value(x),
+				face.cell1Ds,
+				face.flatDimension,
+				face.otherCoordinate);
+		}
+		if (name.equals(INTERIOR_VALUE_JUMP_VALUE_JUMP))
+		{
+			if(face.isBoundaryFace())
+				return 0;
 			return integrateNonTensorProduct(x -> shapeFunction1.jumpInValue(face, x) * shapeFunction2.jumpInValue(face, x) * (Double) weight.value(x),
 				face.cell1Ds,
 				face.flatDimension,

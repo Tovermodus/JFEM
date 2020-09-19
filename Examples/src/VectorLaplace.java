@@ -16,9 +16,9 @@ public class VectorLaplace
 	{
 		CoordinateVector start = CoordinateVector.fromValues(-1, -1);
 		CoordinateVector end = CoordinateVector.fromValues(1, 1);
-		int polynomialDegree = 3;
+		int polynomialDegree = 2;
 		TPVectorFESpace grid = new TPVectorFESpace(start, end,
-			Ints.asList(20, 20), polynomialDegree);
+			Ints.asList(2, 2), polynomialDegree);
 		TPVectorCellIntegral<TPVectorFunction> gg =
 			new TPVectorCellIntegral<>(TPVectorCellIntegral.GRAD_GRAD);
 		TPVectorFaceIntegral<TPVectorFunction> gj =
@@ -27,8 +27,9 @@ public class VectorLaplace
 		TPVectorFaceIntegral<TPVectorFunction> jg =
 			new TPVectorFaceIntegral<>(ScalarFunction.constantFunction(1),
 				TPVectorFaceIntegral.VALUE_NORMALAVERAGE_GRAD_AVERAGE);
+		double penalty = 100000;
 		TPVectorFaceIntegral<TPVectorFunction> jj =
-			new TPVectorFaceIntegral<>(ScalarFunction.constantFunction(100000),
+			new TPVectorFaceIntegral<>(ScalarFunction.constantFunction(penalty),
 				TPVectorFaceIntegral.VALUE_NORMALAVERAGE_VALUE_NORMALAVERAGE);
 		ArrayList<CellIntegral<TPCell, TPFace, TPVectorFunction>> cellIntegrals =
 			new ArrayList<>();
@@ -55,7 +56,40 @@ public class VectorLaplace
 				TPVectorRightHandSideIntegral.VALUE);
 		ArrayList<RightHandSideIntegral<TPCell, TPFace, TPVectorFunction>> rightHandSideIntegrals = new ArrayList<>();
 		rightHandSideIntegrals.add(rightHandSideIntegral);
+		ScalarFunction func = new ScalarFunction()
+		{
+			@Override
+			public int getDomainDimension()
+			{
+				return 2;
+			}
+			
+			@Override
+			public Double value(CoordinateVector pos)
+			{
+				if (Math.abs(pos.x()) == 1)
+					return penalty * (2 - Math.max(1, 2 * Math.abs(pos.y())));
+				if (Math.abs(pos.y()) == 1)
+					return penalty * (2 - Math.max(1, 2 * Math.abs(pos.x())));
+				return (double) 0;
+			}
+		};
+		TPVectorBoundaryFaceIntegral<TPVectorFunction> bound = new TPVectorBoundaryFaceIntegral<>(new VectorFunction()
+		{
+			@Override
+			public int getDomainDimension()
+			{
+				return 2;
+			}
+			
+			@Override
+			public CoordinateVector value(CoordinateVector pos)
+			{
+				return CoordinateVector.fromValues(func.value(pos), func.value(pos));
+			}
+		}, TPVectorBoundaryFaceIntegral.VALUE);
 		ArrayList<BoundaryRightHandSideIntegral<TPCell, TPFace, TPVectorFunction>> boundaryFaceIntegrals = new ArrayList<>();
+		boundaryFaceIntegrals.add(bound);
 		grid.assembleCells();
 		grid.assembleFunctions(polynomialDegree);
 		grid.initializeSystemMatrix();
@@ -83,6 +117,8 @@ public class VectorLaplace
 				grid.getShapeFunctions(), solution1);
 		Map<CoordinateVector, Double> vals =
 			solut.componentValuesInPoints(grid.generatePlotPoints(50),0);
-		new PlotFrame(List.of(vals),start,end);
+		Map<CoordinateVector, Double> vals2 =
+			solut.componentValuesInPoints(grid.generatePlotPoints(50),1);
+		new PlotFrame(List.of(vals, vals2),start,end);
 	}
 }

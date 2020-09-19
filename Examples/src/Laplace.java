@@ -18,13 +18,14 @@ public class Laplace
                 System.out.println("output start");
                 CoordinateVector start = CoordinateVector.fromValues(-1,-1);
                 CoordinateVector end = CoordinateVector.fromValues(1,1);
-                int polynomialDegree = 3;
+                int polynomialDegree = 2;
                 TPFESpace grid = new TPFESpace(start,end,
-                        Ints.asList(10,10),polynomialDegree);
+                        Ints.asList(10,15),polynomialDegree);
                 TPCellIntegral<TPShapeFunction> gg = new TPCellIntegral<>(ScalarFunction.constantFunction(1),
                         TPCellIntegral.GRAD_GRAD,
                         false);
-                TPFaceIntegral<TPShapeFunction> jj = new TPFaceIntegral<>(ScalarFunction.constantFunction(100000.0),
+                double penalty = 200000;
+                TPFaceIntegral<TPShapeFunction> jj = new TPFaceIntegral<>(ScalarFunction.constantFunction(penalty),
                         TPFaceIntegral.VALUE_JUMP_VALUE_JUMP, false);
                 ArrayList<CellIntegral<TPCell,TPFace,TPShapeFunction>> cellIntegrals =
                         new ArrayList<>();
@@ -32,11 +33,29 @@ public class Laplace
                 ArrayList<FaceIntegral<TPCell,TPFace,TPShapeFunction>> faceIntegrals = new ArrayList<>();
                 faceIntegrals.add(jj);
                 TPRightHandSideIntegral<TPShapeFunction> rightHandSideIntegral =
-                        new TPRightHandSideIntegral<>(ScalarFunction.constantFunction(4),TPRightHandSideIntegral.VALUE,
+                        new TPRightHandSideIntegral<>(ScalarFunction.constantFunction(0),TPRightHandSideIntegral.VALUE,
                                 true);
                 ArrayList<RightHandSideIntegral<TPCell,TPFace,TPShapeFunction>> rightHandSideIntegrals = new ArrayList<>();
                 rightHandSideIntegrals.add(rightHandSideIntegral);
+                TPBoundaryFaceIntegral<TPShapeFunction> bound = new TPBoundaryFaceIntegral<>(new ScalarFunction()
+                {
+                        @Override
+                        public int getDomainDimension()
+                        {
+                                return 2;
+                        }
+        
+                        @Override
+                        public Double value(CoordinateVector pos)
+                        {
+                                if (Math.abs(pos.x()) == 1||Math.abs(pos.y()) == 1)
+                                        return +penalty*2*(1+pos.y())/((3+pos.x())*(3+pos.x())+(1+pos.y())*(1+pos.y()));
+                                return (double) 0;
+                        }
+                },TPBoundaryFaceIntegral.VALUE,false);
+                
                 ArrayList<BoundaryRightHandSideIntegral<TPCell,TPFace,TPShapeFunction>> boundaryFaceIntegrals = new ArrayList<>();
+                boundaryFaceIntegrals.add(bound);
                 grid.assembleCells();
                 grid.assembleFunctions(polynomialDegree);
                 grid.initializeSystemMatrix();
@@ -66,7 +85,22 @@ public class Laplace
                 ScalarFESpaceFunction<TPShapeFunction> solut =
                         new ScalarFESpaceFunction<>(
                                 grid.getShapeFunctions(), solution1);
+                ScalarFunction referenceSolution = new ScalarFunction()
+                {
+                        @Override
+                        public int getDomainDimension()
+                        {
+                                return 2;
+                        }
+        
+                        @Override
+                        public Double value(CoordinateVector pos)
+                        {
+                                return 2*(1+pos.y())/((3+pos.x())*(3+pos.x())+(1+pos.y())*(1+pos.y()));
+                         }
+                };
                 Map<CoordinateVector, Double> vals = solut.valuesInPoints(grid.generatePlotPoints(50));
-                new PlotFrame(List.of(vals),start,end);
+                Map<CoordinateVector, Double> refvals = referenceSolution.valuesInPoints(grid.generatePlotPoints(50));
+                new PlotFrame(List.of(vals, refvals),start,end);
         }
 }

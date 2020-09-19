@@ -29,16 +29,18 @@ public class LaplaceContinuous
 		long startTime = System.nanoTime();
 		
 		System.out.println("output start");
-		CoordinateVector start = CoordinateVector.fromValues(0,0);
+		CoordinateVector start = CoordinateVector.fromValues(-1,-1);
 		CoordinateVector end = CoordinateVector.fromValues(1,1);
 		int polynomialDegree = 3;
 		ContinuousTPFESpace grid = new ContinuousTPFESpace(start,end,
-			Ints.asList(10,30),polynomialDegree);
+			Ints.asList(10,10),polynomialDegree);
 		TPCellIntegral<ContinuousTPShapeFunction> gg =
 			new TPCellIntegral<>(ScalarFunction.constantFunction(1),
 			TPCellIntegral.GRAD_GRAD,
 			false);
-		TPFaceIntegral<ContinuousTPShapeFunction> jj = new TPFaceIntegral<>(ScalarFunction.constantFunction(1000),
+		double penalty = 1;
+		TPFaceIntegral<ContinuousTPShapeFunction> jj =
+			new TPFaceIntegral<>(ScalarFunction.constantFunction(penalty),
 			TPFaceIntegral.BOUNDARY_VALUE, false);
 		ArrayList<CellIntegral<TPCell,TPFace,ContinuousTPShapeFunction>> cellIntegrals =
 			new ArrayList<>();

@@ -17,7 +17,7 @@ public class RTDarcy
 	{
 		CoordinateVector start = CoordinateVector.fromValues(-1, -1);
 		CoordinateVector end = CoordinateVector.fromValues(1, 1);
-		int polynomialDegree = 3;
+		int polynomialDegree = 1;
 		MixedRTSpace grid = new MixedRTSpace(start, end,
 			Ints.asList(10,10), polynomialDegree);
 		TPVectorCellIntegral<RTShapeFunction> valueValue =
@@ -54,7 +54,24 @@ public class RTDarcy
 		grid.evaluateCellIntegrals(cellIntegrals, rightHandSideIntegrals);
 		System.out.println("Face Integrals");
 		grid.evaluateFaceIntegrals(faceIntegrals, boundaryFaceIntegrals);
-		grid.setPressureBoundaryValues(ScalarFunction.constantFunction(0));
+		grid.setPressureBoundaryValues(new ScalarFunction()
+		{
+			@Override
+			public int getDomainDimension()
+			{
+				return 2;
+			}
+			
+			@Override
+			public Double value(CoordinateVector pos)
+			{
+				if(Math.abs(pos.x()) == 1)
+					return 2 - Math.max(1,2*Math.abs(pos.y()));
+				if(Math.abs(pos.y()) == 1)
+					return 2 - Math.max(1,2*Math.abs(pos.x()));
+				return (double) 0;
+			}
+		});
 		System.out.println("solve system: " + grid.getSystemMatrix().getRows() + "×" + grid.getSystemMatrix().getCols());
 		//grid.A.makeParallelReady(12);
 		if (grid.getRhs().getLength() < 100)
@@ -77,7 +94,8 @@ public class RTDarcy
 		valList.add(solut.pressureValuesInPoints(grid.generatePlotPoints(50)));
 		valList.add(solut.velocityComponentsInPoints(grid.generatePlotPoints(50), 0));
 		valList.add(solut.velocityComponentsInPoints(grid.generatePlotPoints(50), 1));
-		for(MixedShapeFunction<TPCell, TPFace, ContinuousTPShapeFunction,RTShapeFunction> shapeFunction:grid.getShapeFunctions().values())
+/*		for(MixedShapeFunction<TPCell, TPFace, ContinuousTPShapeFunction,RTShapeFunction> shapeFunction:
+		grid.getShapeFunctions().values())
 		{
 			if(shapeFunction.isPressure())
 			valList.add(shapeFunction.pressureValuesInPoints(grid.generatePlotPoints(50)));
@@ -86,7 +104,7 @@ public class RTDarcy
 				valList.add(shapeFunction.velocityComponentsInPoints(grid.generatePlotPoints(50),
 					shapeFunction.getVelocityShapeFunction().getComponent()));
 			}
-		}
+		}*/
 		new PlotFrame(valList, start, end);
 	}
 }

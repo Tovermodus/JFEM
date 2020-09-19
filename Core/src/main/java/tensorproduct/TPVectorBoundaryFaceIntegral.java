@@ -9,11 +9,11 @@ import linalg.CoordinateVector;
 public class TPVectorBoundaryFaceIntegral<ST extends VectorShapeFunction<TPCell,TPFace,ST>> extends BoundaryRightHandSideIntegral<TPCell,TPFace,
 	ST>
 {
-	static final String VALUE="Value";
+	public static final String VALUE="Value";
 	public TPVectorBoundaryFaceIntegral(Function<?,?,?> rightHandSide, String name)
 	{
 		super(rightHandSide, name);
-		if(name.equals(VALUE) && !(rightHandSide.value(new CoordinateVector(rightHandSide.getDomainDimension())) instanceof Double))
+		if(name.equals(VALUE) && !(rightHandSide.value(new CoordinateVector(rightHandSide.getDomainDimension())) instanceof CoordinateVector))
 			throw new IllegalArgumentException();
 	}
 	
@@ -21,6 +21,8 @@ public class TPVectorBoundaryFaceIntegral<ST extends VectorShapeFunction<TPCell,
 	public double evaluateBoundaryRightHandSideIntegral(TPFace face,
 	                                                    ST shapeFunction1)
 	{
+		if(!face.isBoundaryFace())
+			return 0;
 		if(name.equals(VALUE))
 		{
 				return TPFaceIntegral.integrateNonTensorProduct(x->shapeFunction1.value(x).inner((CoordinateVector)(rightHandSide.value(x))),face.cell1Ds, face.flatDimension, face.otherCoordinate);

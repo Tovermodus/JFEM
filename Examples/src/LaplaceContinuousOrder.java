@@ -38,7 +38,8 @@ public class LaplaceContinuousOrder
 				@Override
 				public CoordinateVector value(CoordinateVector pos)
 				{
-					return CoordinateVector.fromValues(4,4);
+					return CoordinateVector.fromValues(0,
+						0);
 				}
 			},
 				TPVectorRightHandSideIntegral.VALUE);
@@ -50,7 +51,21 @@ public class LaplaceContinuousOrder
 		List<ScalarFunction> solutions = new ArrayList<>();
 		List<VectorFunction> solutionsVec = new ArrayList<>();
 		ContinuousTPFEVectorSpace grid = null;
-		for(int i = 0; i < 4; i++)
+		ScalarFunction func = new ScalarFunction()
+		{
+			@Override
+			public int getDomainDimension()
+			{
+				return 2;
+			}
+			
+			@Override
+			public Double value(CoordinateVector pos)
+			{
+					return 2*(1+pos.y())/((3+pos.x())*(3+pos.x())+(1+pos.y())*(1+pos.y()));
+			}
+		};
+		for(int i = 0; i < 5; i++)
 		{
 			grid = new ContinuousTPFEVectorSpace(start, end,
 				Ints.asList(2*(int)Math.pow(2,i),2*(int)Math.pow(2,i)), polynomialDegree);
@@ -71,7 +86,9 @@ public class LaplaceContinuousOrder
 				@Override
 				public CoordinateVector value(CoordinateVector pos)
 				{
-					return new CoordinateVector(2);
+					if (Math.abs(pos.x()) == 1||Math.abs(pos.y()) == 1)
+						return CoordinateVector.fromValues(func.value(pos), func.value(pos));
+					return CoordinateVector.fromValues(0,0);
 				}
 			});
 			IterativeSolver<SparseMatrix> it = new IterativeSolver<>();
@@ -94,7 +111,22 @@ public class LaplaceContinuousOrder
 				}
 			});
 		}
+		solutionsVec.add(new VectorFunction()
+		{
+			@Override
+			public int getDomainDimension()
+			{
+				return 2;
+			}
+			
+			@Override
+			public CoordinateVector value(CoordinateVector pos)
+			{
+				return CoordinateVector.fromValues(func.value(pos), func.value(pos));
+			}
+		});
 		System.out.println(ConvergenceOrderEstimator.estimateL2Vector(solutionsVec,
-			grid.generatePlotPoints(20)));
+			grid.generatePlotPoints(40)));
+		
 	}
 }
