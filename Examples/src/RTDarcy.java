@@ -17,9 +17,9 @@ public class RTDarcy
 	{
 		CoordinateVector start = CoordinateVector.fromValues(-1, -1);
 		CoordinateVector end = CoordinateVector.fromValues(1, 1);
-		int polynomialDegree = 1;
+		int polynomialDegree = 2;
 		MixedRTSpace grid = new MixedRTSpace(start, end,
-			Ints.asList(2,2), polynomialDegree);
+			Ints.asList(20,20), polynomialDegree);
 		TPVectorCellIntegral<RTShapeFunction> valueValue =
 			new TPVectorCellIntegral<>(TPVectorCellIntegral.VALUE_VALUE);
 		MixedCellIntegral<TPCell,TPFace,ContinuousTPShapeFunction, RTShapeFunction>
@@ -70,7 +70,7 @@ public class RTDarcy
 			System.out.println(grid.getRhs());
 		}
 		IterativeSolver<SparseMatrix> i = new IterativeSolver<>();
-		Vector solution1 = i.solveGMRES(grid.getSystemMatrix(), grid.getRhs(), 1e-3);
+		Vector solution1 = i.solveGMRES(grid.getSystemMatrix(), grid.getRhs(), 1e-10);
 		//Vector solution1 = new DenseMatrix(grid.getSystemMatrix()).solve(grid.getRhs());
 		System.out.println("solved");
 		System.out.println(solution1);
@@ -81,11 +81,17 @@ public class RTDarcy
 			new MixedFESpaceFunction<>(
 				grid.getShapeFunctions(), solution1);
 		ArrayList<Map<CoordinateVector, Double>> valList = new ArrayList<>();
-		valList.add(solut.pressureValuesInPoints(grid.generatePlotPoints(50)));
+		/*valList.add(solut.pressureValuesInPoints(grid.generatePlotPoints(50)));
 		valList.add(LaplaceReferenceSolution.scalarReferenceSolution().valuesInPoints(grid.generatePlotPoints(50)));
 		valList.add(solut.velocityComponentsInPoints(grid.generatePlotPoints(50), 0));
+		valList.add(LaplaceReferenceSolution.scalarReferenceSolution().getGradientFunction().componentValuesInPoints(grid.generatePlotPoints(50),0));
 		valList.add(solut.velocityComponentsInPoints(grid.generatePlotPoints(50), 1));
-		for(int k = 0; k < grid.getShapeFunctions().size(); k++)
+		valList.add(LaplaceReferenceSolution.scalarReferenceSolution().getGradientFunction()
+		.componentValuesInPoints(grid.generatePlotPoints(50),1));*/
+		
+		valList.add(solut.getVelocityFunction().getDivergenceFunction().valuesInPoints(grid.generatePlotPoints(50)));
+		valList.add(LaplaceReferenceSolution.scalarReferenceSolution().getGradientFunction().getDivergenceFunction().valuesInPoints(grid.generatePlotPoints(50)));
+		/*for(int k = 0; k < grid.getShapeFunctions().size(); k++)
 		{
 			MixedShapeFunction<TPCell,TPFace,ContinuousTPShapeFunction,RTShapeFunction> shapeFunction =
 				grid.getShapeFunctions().get(k);
@@ -96,7 +102,7 @@ public class RTDarcy
 				valList.add(shapeFunction.velocityComponentsInPoints(grid.generatePlotPoints(50),
 					shapeFunction.getVelocityShapeFunction().getComponent()));
 			}
-		}
+		}*/
 		new PlotFrame(valList, start, end);
 	}
 }

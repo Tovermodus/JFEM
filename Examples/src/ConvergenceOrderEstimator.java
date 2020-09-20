@@ -39,7 +39,6 @@ public class ConvergenceOrderEstimator
 			System.out.println(lowerDiff+" "+higherDiff);
 			System.out.println(i+"-th Estimate of convergence order:" + Math.log(lowerDiff/higherDiff)/Math.log(2));
 			average += Math.log(lowerDiff/higherDiff)/Math.log(2);
-			average += lowerDiff/higherDiff;
 		}
 		return average/(functions.size()-2);
 		

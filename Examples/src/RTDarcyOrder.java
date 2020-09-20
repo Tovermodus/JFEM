@@ -1,9 +1,6 @@
 import basic.*;
 import com.google.common.primitives.Ints;
-import linalg.CoordinateVector;
-import linalg.IterativeSolver;
-import linalg.SparseMatrix;
-import linalg.Vector;
+import linalg.*;
 import mixed.*;
 import tensorproduct.*;
 
@@ -46,11 +43,11 @@ public class RTDarcyOrder
 				new TPVectorBoundaryFaceIntegral<RTShapeFunction>(LaplaceReferenceSolution.scalarBoundaryValues(),
 					TPVectorBoundaryFaceIntegral.NORMAL_VALUE));
 		boundaryFaceIntegrals.add(dirichlet);
-		int polynomialDegree = 3;
+		int polynomialDegree = 1;
 		List<ScalarFunction> solutions = new ArrayList<>();
 		List<VectorFunction> solutionsVec = new ArrayList<>();
 		MixedRTSpace grid = null;
-		for(int i = 0; i < 4; i++)
+		for(int i = 0; i < 5; i++)
 		{
 			grid = new MixedRTSpace(start, end,
 				Ints.asList(2*(int)Math.pow(2,i),2*(int)Math.pow(2,i)), polynomialDegree);
@@ -65,37 +62,15 @@ public class RTDarcyOrder
 			MixedFESpaceFunction<TPCell,TPFace,ContinuousTPShapeFunction,RTShapeFunction> solut =
 				new MixedFESpaceFunction<>(
 					grid.getShapeFunctions(), solution1);
-			solutions.add(new ScalarFunction()
-			{
-				@Override
-				public int getDomainDimension()
-				{
-					return solut.getDomainDimension();
-				}
-				
-				@Override
-				public Double value(CoordinateVector pos)
-				{
-					return solut.value(pos).getPressure();
-				}
-			});
-			solutionsVec.add(new VectorFunction()
-			{
-				@Override
-				public int getDomainDimension()
-				{
-					return solut.getDomainDimension();
-				}
-				
-				@Override
-				public CoordinateVector value(CoordinateVector pos)
-				{
-					return solut.value(pos).getVelocity();
-				}
-			});
+			solutions.add(solut.getPressureFunction());
+			solutionsVec.add(solut.getVelocityFunction());
 		}
 		solutions.add(LaplaceReferenceSolution.scalarReferenceSolution());
+		solutionsVec.add(LaplaceReferenceSolution.scalarReferenceSolution().getGradientFunction());
+		solutionsDiv.add(LaplaceReferenceSolution.scalarReferenceSolution().getGradientFunction().getDivergenceFunction());
 		System.out.println(ConvergenceOrderEstimator.estimateL2Scalar(solutions, grid.generatePlotPoints(50)));
+		System.out.println(ConvergenceOrderEstimator.estimateL2Vector(solutionsVec,
+			grid.generatePlotPoints(50)));
 		
 		
 	}

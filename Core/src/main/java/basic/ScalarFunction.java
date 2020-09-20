@@ -48,6 +48,29 @@ public abstract class ScalarFunction implements Function<Double, CoordinateVecto
 		points.stream().parallel().forEach(point->ret.put(point, value(point)));
 		return ret;
 	}
+	public VectorFunction getGradientFunction()
+	{
+		ScalarFunction me = this;
+		return new VectorFunction()
+		{
+			@Override
+			public int getDomainDimension()
+			{
+				return me.getDomainDimension();
+			}
+			
+			@Override
+			public CoordinateVector value(CoordinateVector pos)
+			{
+				return me.gradient(pos);
+			}
+			@Override
+			public CoordinateMatrix gradient(CoordinateVector pos)
+			{
+				return new CoordinateMatrix(me.hessian(pos));
+			}
+		};
+	}
 	public Double directionalDerivative(CoordinateVector pos, CoordinateVector direction)
 	{
 		return direction.inner(gradient(pos));

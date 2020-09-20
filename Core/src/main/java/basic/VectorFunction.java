@@ -36,6 +36,24 @@ public abstract class VectorFunction implements Function<CoordinateVector, Coord
 			ret += gradient(pos).at(i,i);
 		return ret;
 	}
+	public ScalarFunction getDivergenceFunction()
+	{
+		VectorFunction me  = this;
+		return new ScalarFunction()
+		{
+			@Override
+			public int getDomainDimension()
+			{
+				return me.getDomainDimension();
+			}
+			
+			@Override
+			public Double value(CoordinateVector pos)
+			{
+				return me.divergence(pos);
+			}
+		};
+	}
 	public ScalarFunction getComponentFunction(int component)
 	{
 		int domainDimension = getDomainDimension();
