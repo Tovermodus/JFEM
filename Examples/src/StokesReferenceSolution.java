@@ -26,9 +26,6 @@ public class StokesReferenceSolution
 					-2*PI*PI*cos(PI*pos.y())*cos(PI*pos.y())*sin(PI*pos.x())*cos(PI*pos.x())
 						+6*PI*PI*sin(PI*pos.y())*sin(PI*pos.y())*sin(PI*pos.x())*cos(PI*pos.x())+Math.sin(Math.PI * pos.x()) * Math.PI * Math.cos(Math.PI * pos.y()));
 				
-//					16 * (-1./reynolds * pow(PI,2) *  (pow(cos(PI * pos.x()) , 2)-3./4)*sin(PI*pos.y())+sin(PI*pos.x())/16)*PI*cos(PI*pos.y()),
-//					16 * (-1./reynolds * pow(PI,2) *  (pow(cos(PI * pos.y()) , 2)-3./4)*sin
-//					(PI*pos.x())+sin(PI*pos.y())/16)*PI*cos(PI*pos.x()));
 			}
 		};
 	}
@@ -45,7 +42,7 @@ public class StokesReferenceSolution
 			@Override
 			public Double value(CoordinateVector pos)
 			{
-				return Math.cos(Math.PI* pos.x())*Math.cos(Math.PI*pos.y());
+				return Math.sin(Math.PI* pos.x())*Math.sin(Math.PI*pos.y());
 			}
 			
 		};
@@ -64,8 +61,8 @@ public class StokesReferenceSolution
 			public CoordinateVector value(CoordinateVector pos)
 			{
 				return CoordinateVector.fromValues(
-					2*Math.PI*Math.sin(Math.PI*pos.x())*Math.sin(Math.PI*pos.x())*Math.cos(Math.PI*pos.y())*Math.sin(Math.PI*pos.y()),
-						2*Math.PI*Math.sin(Math.PI*pos.x())*Math.sin(Math.PI*pos.y())*Math.cos(Math.PI*pos.x())*Math.sin(Math.PI*pos.y())
+					Math.sin(Math.PI*pos.x())*Math.sin(Math.PI*pos.x())*Math.cos(Math.PI*pos.y())*Math.sin(Math.PI*pos.y()),
+					-Math.sin(Math.PI*pos.x())*Math.cos(Math.PI*pos.x())*Math.sin(Math.PI*pos.y())*Math.sin(Math.PI*pos.y())
 						);
 			}
 			

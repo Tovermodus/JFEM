@@ -13,6 +13,7 @@ public class IterativeSolver<Op extends VectorMultiplyable>
 		Vector z;
 		Vector newResiduum;
 		Vector iterate = new DenseVector(n);
+		iterate.set(Math.random(),0);
 		Vector m = operator.mvMul(iterate);
 		Vector residuum = rhs.sub(m);
 		Vector defect = new DenseVector(residuum);

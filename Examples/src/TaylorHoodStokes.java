@@ -10,6 +10,7 @@ import tensorproduct.*;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.OptionalDouble;
 
 public class TaylorHoodStokes
 {
@@ -17,9 +18,9 @@ public class TaylorHoodStokes
 	{
 		CoordinateVector start = CoordinateVector.fromValues(0, 0);
 		CoordinateVector end = CoordinateVector.fromValues(1, 1);
-		int polynomialDegree = 1;
+		int polynomialDegree = 2;
 		TaylorHoodSpace grid = new TaylorHoodSpace(start, end,
-			Ints.asList(20,20), polynomialDegree);
+			Ints.asList(12,12), polynomialDegree);
 		TPVectorCellIntegral<ContinuousTPVectorFunction> valueValue =
 			new TPVectorCellIntegral<>(ScalarFunction.constantFunction(StokesReferenceSolution.reynolds),
 				TPVectorCellIntegral.GRAD_GRAD);
@@ -61,13 +62,13 @@ public class TaylorHoodStokes
 		//grid.setPressureBoundaryValues(ScalarFunction.constantFunction(0));
 		//grid.A.makeParallelReady(12);
 		
-		/*for(int i = 0; i < grid.getShapeFunctions().size(); i++)
-		{
-			grid.getSystemMatrix().set(0,0,i);
-		}
-		grid.getSystemMatrix().set(1,0,0);
-		grid.getRhs().set(0,0);
-		*/if (grid.getRhs().getLength() < 100)
+//		for(int i = 0; i < grid.getShapeFunctions().size(); i++)
+//		{
+//			grid.getSystemMatrix().set(0,0,i);
+//		}
+//		grid.getSystemMatrix().set(1,0,0);
+//		grid.getRhs().set(0,0);
+		if (grid.getRhs().getLength() < 100)
 		{
 			System.out.println(grid.getSystemMatrix());
 			System.out.println(grid.getRhs());
@@ -76,7 +77,7 @@ public class TaylorHoodStokes
 		System.out.println("solve system: " + grid.getSystemMatrix().getRows() + "×" + grid.getSystemMatrix().getCols());
 		//DenseMatrix A = new DenseMatrix(grid.getSystemMatrix());
 		IterativeSolver<SparseMatrix> i = new IterativeSolver<>();
-		Vector solution1 = i.solveGMRES(grid.getSystemMatrix(), grid.getRhs(), 1e-7);
+		Vector solution1 = i.solveCG(grid.getSystemMatrix(), grid.getRhs(), 3.3e-6);
 		//Vector solution1 = grid.getSystemMatrix().solve(grid.getRhs());
 		//Vector solution1 = new DenseMatrix(grid.getSystemMatrix()).solve(grid.getRhs());
 		System.out.println("solved");
@@ -93,8 +94,16 @@ public class TaylorHoodStokes
 //		valList.add(StokesReferenceSolution.pressureReferenceSolution().valuesInPoints(grid.generatePlotPoints(50)));
 //		valList.add(StokesReferenceSolution.velocityReferenceSolution().componentValuesInPoints(grid.generatePlotPoints(50),0));
 //		valList.add(StokesReferenceSolution.velocityReferenceSolution().componentValuesInPoints(grid.generatePlotPoints(50),1));
+		
 		valList.add(solut.pressureValuesInPoints(grid.generatePlotPoints(50)));
-		valList.add(solut.velocityComponentsInPoints(grid.generatePlotPoints(50), 0));
+		OptionalDouble minopt = valList.get(0).values().stream().mapToDouble(Double::doubleValue).min();
+		double min = 0;
+		if(minopt.isPresent())
+			min = minopt.getAsDouble();valList.add(solut.velocityComponentsInPoints(grid.generatePlotPoints(50), 0));
+		for(Map.Entry<CoordinateVector,Double> entry:valList.get(0).entrySet())
+		{
+			entry.setValue(entry.getValue()-min);
+		}
 		valList.add(solut.velocityComponentsInPoints(grid.generatePlotPoints(50), 1));
 		/*for(MixedShapeFunction<TPCell, TPFace, ContinuousTPShapeFunction,ContinuousTPVectorFunction>
 		shapeFunction:grid.getShapeFunctions().values())
