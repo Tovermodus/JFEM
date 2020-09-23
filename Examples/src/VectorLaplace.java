@@ -18,7 +18,7 @@ public class VectorLaplace
 		CoordinateVector end = CoordinateVector.fromValues(1, 1);
 		int polynomialDegree = 2;
 		TPVectorFESpace grid = new TPVectorFESpace(start, end,
-			Ints.asList(2, 2), polynomialDegree);
+			Ints.asList(10, 10), polynomialDegree);
 		TPVectorCellIntegral<TPVectorFunction> gg =
 			new TPVectorCellIntegral<>(TPVectorCellIntegral.GRAD_GRAD);
 		TPVectorFaceIntegral<TPVectorFunction> gj =
@@ -39,21 +39,23 @@ public class VectorLaplace
 		faceIntegrals.add(gj);
 		faceIntegrals.add(jg);
 		TPVectorRightHandSideIntegral<TPVectorFunction> rightHandSideIntegral =
-			new TPVectorRightHandSideIntegral<>(new VectorFunction()
-			{
-				@Override
-				public int getDomainDimension()
-				{
-					return 2;
-				}
-				
-				@Override
-				public CoordinateVector value(CoordinateVector pos)
-				{
-					return CoordinateVector.fromValues(4,4);
-				}
-			},
+			new TPVectorRightHandSideIntegral<>(StokesReferenceSolution.rightHandSide(),
 				TPVectorRightHandSideIntegral.VALUE);
+		//new VectorFunction()
+//			{
+//				@Override
+//				public int getDomainDimension()
+//				{
+//					return 2;
+//				}
+//
+//				@Override
+//				public CoordinateVector value(CoordinateVector pos)
+//				{
+//					return CoordinateVector.fromValues(4,4);
+//				}
+//			},
+//				TPVectorRightHandSideIntegral.VALUE);
 		ArrayList<RightHandSideIntegral<TPCell, TPFace, TPVectorFunction>> rightHandSideIntegrals = new ArrayList<>();
 		rightHandSideIntegrals.add(rightHandSideIntegral);
 		ScalarFunction func = new ScalarFunction()
@@ -85,7 +87,7 @@ public class VectorLaplace
 			@Override
 			public CoordinateVector value(CoordinateVector pos)
 			{
-				return CoordinateVector.fromValues(func.value(pos), func.value(pos));
+				return CoordinateVector.fromValues(0,0);//func.value(pos), func.value(pos));
 			}
 		}, TPVectorBoundaryFaceIntegral.VALUE);
 		ArrayList<BoundaryRightHandSideIntegral<TPCell, TPFace, TPVectorFunction>> boundaryFaceIntegrals = new ArrayList<>();

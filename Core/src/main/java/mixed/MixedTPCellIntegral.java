@@ -42,7 +42,7 @@ public class MixedTPCellIntegral<PF extends ScalarShapeFunction<TPCell, TPFace, 
 		
 		if(name.equals(DIV_VALUE))
 		{
-			return TPCellIntegral.integrateNonTensorProduct(x->shapeFunction1.getVelocityShapeFunction().divergence(x)*shapeFunction2.getPressureFunction().value(x),
+			return TPCellIntegral.integrateNonTensorProduct(x->shapeFunction1.getVelocityShapeFunction().divergence(x)*shapeFunction2.getPressureFunction().value(x)*(Double)weight.value(x),
 				cell.getCell1Ds());
 		}
 		throw new IllegalStateException("Integral type not supported");

@@ -95,6 +95,28 @@ public abstract class ScalarFunction implements Function<Double, CoordinateVecto
 	{
 		throw new UnsupportedOperationException();
 	}
+	
+	public VectorFunction makeIsotropicVectorFunction()
+	{
+		ScalarFunction me = this;
+		return new VectorFunction()
+		{
+			@Override
+			public int getDomainDimension()
+			{
+				return me.getDomainDimension();
+			}
+			
+			@Override
+			public CoordinateVector value(CoordinateVector pos)
+			{
+				CoordinateVector ret = new CoordinateVector(pos.getLength());
+				for(int i = 0; i <getDomainDimension(); i++)
+					ret.set(me.value(pos), i);
+				return ret;
+			}
+		};
+	}
 //	default void plot(int pointres, String filename)
 //	{
 //		double[][] values = new double[pointres][pointres];

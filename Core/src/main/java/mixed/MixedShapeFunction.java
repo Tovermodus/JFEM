@@ -188,8 +188,8 @@ public abstract class MixedShapeFunction<CT extends Cell<CT, FT>,
 		else if (o.isVelocity() && isVelocity())
 			return getVelocityShapeFunction().compareTo(o.getVelocityShapeFunction());
 		else if (o.isVelocity() && isPressure())
-			return 1;
-		else
 			return -1;
+		else
+			return 1;
 	}
 }

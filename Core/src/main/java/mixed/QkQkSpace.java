@@ -130,6 +130,9 @@ public class QkQkSpace implements MixedFESpace<TPCell, TPFace, ContinuousTPShape
 		shapeFunctions = new TreeSet<>();
 		assemblePressureFunctions(polynomialDegree);
 		assembleVelocityFunctions(polynomialDegree);
+		int i = 0;
+		for(QkQkFunction shapeFunction:shapeFunctions)
+			shapeFunction.setGlobalIndex(i++);
 	}
 	private void assemblePressureFunctions(int polynomialDegree)
 	{
