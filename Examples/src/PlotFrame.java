@@ -1,18 +1,126 @@
+import com.google.common.collect.Iterables;
 import linalg.CoordinateVector;
 import linalg.Vector;
 
 import java.awt.*;
-import java.awt.event.MouseEvent;
-import java.awt.event.MouseListener;
+import java.awt.event.*;
+import java.awt.image.BufferedImage;
+import java.awt.image.ImageObserver;
+import java.util.*;
 import java.util.List;
-import java.util.Map;
-import java.util.OptionalDouble;
+import java.util.concurrent.*;
 
 public class PlotFrame
 {
-	public PlotFrame(List<Map<CoordinateVector, Double>> valueList, CoordinateVector startCoordinates, CoordinateVector endCoordinates)
+	CoordinateVector startCoordinates;
+	CoordinateVector endCoordinates;
+	Map<String, Map<CoordinateVector, Double>> valueList;
+	Iterator<String> current;
+	String currentTitle;
+	int units;
+	int dimension;
+	ScheduledExecutorService executorService;
+	boolean drawing = false;
+	private void drawCurrentValues(Graphics gr, int width, int height)
 	{
+		if(!drawing)
+		{
+			drawing = true;
+			Map<CoordinateVector, Double> currentValues = valueList.get(currentTitle);
+			int n = (int) (Math.pow(currentValues.size(), 1. / dimension));
+			List<CoordinateVector> drawnVectors = new ArrayList<>(currentValues.keySet());
+			double currentZ =
+				startCoordinates.at(dimension - 1) + units / 100. * (endCoordinates.at(dimension - 1) - startCoordinates.at(dimension - 1));
+			if (dimension == 3)
+			{
+				drawnVectors.sort(Comparator.comparingDouble(v -> -Math.abs(v.z() - currentZ)));
+				System.out.println(drawnVectors.get(0).z() + " " + Iterables.getLast(drawnVectors).z() + " " + currentZ);
+				drawnVectors = drawnVectors.subList(drawnVectors.size()-(int)(3*n*n),
+					drawnVectors.size()-1);
+				
+			}
+			
+			double[] range = getRange();
+			BufferedImage img = new BufferedImage(2000,2000,BufferedImage.TYPE_INT_RGB);
+			Graphics g = img.createGraphics();
+			g.setColor(Color.white);
+			g.fillRect(0,0,2000,2000);
+			drawnVectors.forEach(vector ->
+			{
+				
+				// .getHeight()-100)/n+1);
+				g.setColor(convertToColor(currentValues.get(vector),range));
+				Vector relc = vector.sub(startCoordinates);
+				int posx =
+					50 + (int) (width * relc.at(0) / (endCoordinates.at(0) - startCoordinates.at(0)));
+				int posy =
+					50 + (int) (height * relc.at(1) / (endCoordinates.at(1) - startCoordinates.at(1)));
+				g.fillRect(posx, posy, width / n + 2, height / n + 2);
+			});
+			g.setColor(Color.BLACK);
+			g.drawString("title: " + currentTitle + " max: " + range[1] + " min: " + range[0], 40, 40);
+			gr.drawImage(img, 0, 0, null);
+			drawing = false;
+		}
+	}
+	private double[] getRange()
+	{
+		Map<CoordinateVector, Double> currentValues = valueList.get(currentTitle);
+		OptionalDouble maxopt =
+			currentValues.values().stream().mapToDouble(Double::doubleValue).max();
+		double max = 0;
+		if(maxopt.isPresent())
+			max = maxopt.getAsDouble();
+		OptionalDouble minopt =
+			currentValues.values().stream().mapToDouble(Double::doubleValue).min();
+		double min = 0;
+		if(minopt.isPresent())
+			min = minopt.getAsDouble();
+		return new double[]{min, max};
+	}
+	private Color convertToColor(double value,double[] range)
+	{
+		double v =
+			( value - range[0])/(range[1] - range[0]);
+		int c = (int)(255*v);
+		int gr = 0;
+		if(c>=255)
+		{
+			gr = c - 255;
+			c = 255;
+		}
+		if(c <= 0)
+		{
+			gr = -c;
+			c = 0;
+		}
+		return new Color(c,gr,255-c);
+	}
+	public PlotFrame(List<Map<CoordinateVector, Double>> valueList, CoordinateVector startCoordinates,
+	                 CoordinateVector endCoordinates)
+	{
+		Map<String,Map<CoordinateVector, Double>> vmap= new HashMap<>();
+		for(int i = 0; i < valueList.size(); i++)
+			vmap.put("Values "+i, valueList.get(i));
+		initialize(vmap,startCoordinates,endCoordinates);
+	}
+	public PlotFrame(Map<String,Map<CoordinateVector, Double>> valueList, CoordinateVector startCoordinates,
+	                 CoordinateVector endCoordinates)
+	{
+		initialize(valueList, startCoordinates, endCoordinates);
+	}
+	private void initialize(Map<String,Map<CoordinateVector, Double>> valueList, CoordinateVector startCoordinates,
+	                        CoordinateVector endCoordinates)
+	{
+		this.startCoordinates = startCoordinates;
+		this.endCoordinates = endCoordinates;
+		this.valueList = valueList;
+		executorService = Executors.newSingleThreadScheduledExecutor();
 		
+		dimension = startCoordinates.getLength();
+		current = this.valueList.keySet().iterator();
+		currentTitle = current.next();
+		units = 0;
 		Frame j = new Frame("plot");
 		int size = 1000;
 		double maxx = endCoordinates.at(0);
@@ -22,7 +130,63 @@ public class PlotFrame
 		j.setBounds(2100,200,
 			(int)(size*(maxx-minx)),(int)(size*(maxy-miny)));
 		j.setVisible(true);
-		j.addMouseListener(new MouseListener()
+		j.addKeyListener(new KeyAdapter()
+		{
+			@Override
+			public void keyPressed(KeyEvent e)
+			{
+				if(e.getKeyCode() == KeyEvent.VK_UP)
+					units++;
+				if(e.getKeyCode() == KeyEvent.VK_DOWN)
+					units--;
+				System.out.println("KKKKKK");
+				if (units < 0)
+					units += 100;
+				if (units > 100)
+					units -= 100;
+				System.out.println(units);
+				Graphics g = j.getGraphics();
+				//g.clearRect(0,0,2000,2000);
+				executorService.schedule(new Runnable()
+				{
+					@Override
+					public void run()
+					{
+						drawCurrentValues(j.getGraphics(), j.getWidth() - 300,
+							j.getHeight() - 300);
+					}
+				},0,TimeUnit.SECONDS);
+				
+				j.setVisible(true);
+			}
+		});
+		j.addMouseWheelListener(new MouseWheelListener()
+		{
+			@Override
+			public void mouseWheelMoved(MouseWheelEvent e)
+			{
+				units += e.getWheelRotation();
+				if (units < 0)
+					units += 100;
+				if (units > 100)
+					units -= 100;
+				System.out.println(units);
+				Graphics g = j.getGraphics();
+				//g.clearRect(0,0,2000,2000);
+					executorService.schedule(new Runnable()
+					{
+						@Override
+						public void run()
+						{
+							drawCurrentValues(j.getGraphics(), j.getWidth() - 300,
+								j.getHeight() - 300);
+						}
+					},0,TimeUnit.SECONDS);
+				
+				j.setVisible(true);
+			}
+		});
+		j.addMouseListener(new MouseAdapter()
 		                   {
 			                   int i = 0;
 			                   @Override
@@ -30,74 +194,30 @@ public class PlotFrame
 			                   {
 				                   Graphics g = j.getGraphics();
 				                   g.clearRect(0,0,2000,2000);
-				                   Map<CoordinateVector, Double> vals = valueList.get(i++);
-				                   int n = (int)(Math.sqrt(vals.size()));
-				                   OptionalDouble maxopt =
-					                   vals.values().stream().mapToDouble(Double::doubleValue).max();
-				                   double max = 0;
-				                   if(maxopt.isPresent())
-					                   max = maxopt.getAsDouble();
-				                   OptionalDouble minopt = vals.values().stream().mapToDouble(Double::doubleValue).min();
-				                   double min = 0;
-				                   if(minopt.isPresent())
-					                   min = minopt.getAsDouble();
-				                   double finalMin = min;
-				                   double finalMax = max;
-				                   vals.keySet().forEach(coordinateVector -> {
-					                   // .getHeight()-100)/n+1);
-					                   double v;
-						                   v =
-							                   ( vals.get(coordinateVector) - finalMin)/(finalMax - finalMin);
-					                   int c = (int)(255*v);
-					                   int gr = 0;
-					                   if(c>=255)
+				                   if(current.hasNext())
+				                   	currentTitle = current.next();
+				                   else
+				                   	current = valueList.keySet().iterator();
+				                   executorService.schedule(new Runnable()
+				                   {
+					                   @Override
+					                   public void run()
 					                   {
-						                   gr = c - 255;
-						                   c = 255;
+						                   drawCurrentValues(j.getGraphics(), j.getWidth() - 300,
+							                   j.getHeight() - 300);
 					                   }
-					                   if(c <= 0)
-					                   {
-					                   	gr = -c;
-					                   	c = 0;
-					                   }
-					                   g.setColor(new Color(c,gr,
-						                   255-c));
-					                   Vector relc = coordinateVector.sub(startCoordinates);
-					                   int posx =
-						                   50+(int)((j.getWidth()-100)*relc.at(0)/(endCoordinates.at(0) - startCoordinates.at(0)));
-					                   int posy =
-						                   50+(int)((j.getHeight()-100)*relc.at(1)/(endCoordinates.at(1) - startCoordinates.at(1)));
-					                   g.fillRect(posx,posy,(j.getWidth()-100)/n+2,(j.getHeight()-100)/n+2);
-				                   });
-				                   g.setColor(Color.BLACK);
-				                   g.drawString("i: "+i+" max: "+ max +" min: "+ min,40,40);
+				                   },0,  TimeUnit.SECONDS);
 				                   if(i >= valueList.size())
 				                   	i = 0;
 				                   j.setVisible(true);
 			                   }
 			
-			                   @Override
-			                   public void mousePressed(MouseEvent e)
-			                   {
-				
-			                   }
-			
-			                   @Override
-			                   public void mouseReleased(MouseEvent e)
-			                   {
-				
-			                   }
-			
-			                   @Override
-			                   public void mouseEntered(MouseEvent e)
-			                   {
-				
-			                   }
 			
 			                   @Override
 			                   public void mouseExited(MouseEvent e)
 			                   {
 				                   j.dispose();
+				                   executorService.shutdown();
 			                   }
 		                   }
 		

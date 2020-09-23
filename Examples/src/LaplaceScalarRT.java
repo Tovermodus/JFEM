@@ -8,6 +8,7 @@ import linalg.Vector;
 import tensorproduct.*;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.Map;
 import java.util.TreeSet;
 
@@ -69,12 +70,12 @@ public class LaplaceScalarRT
 		ScalarFESpaceFunction<RTComponentFunction> solut =
 			new ScalarFESpaceFunction<>(
 				grid.getShapeFunctions(), solution1);
-		ArrayList<Map<CoordinateVector, Double>> valList = new ArrayList<>();
+		Map<String,Map<CoordinateVector, Double>> valList = new HashMap<>();
 		TreeSet<RTComponentFunction> shapeFunctionTreeSet =
 			new TreeSet<>(grid.getShapeFunctions().values());
-		valList.add(solut.valuesInPoints(grid.generatePlotPoints(50)));
+		valList.put("solution",solut.valuesInPoints(grid.generatePlotPoints(50)));
 		for(RTComponentFunction sf:shapeFunctionTreeSet)
-			valList.add(sf.valuesInPoints(grid.generatePlotPoints(50)));
+			valList.put("Shapefunction",sf.valuesInPoints(grid.generatePlotPoints(50)));
 		new PlotFrame(valList, start, end);
 	}
 }
