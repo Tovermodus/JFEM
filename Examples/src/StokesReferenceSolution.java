@@ -61,8 +61,8 @@ public class StokesReferenceSolution
 			public CoordinateVector value(CoordinateVector pos)
 			{
 				return CoordinateVector.fromValues(
-					Math.sin(Math.PI*pos.x())*Math.sin(Math.PI*pos.x())*Math.cos(Math.PI*pos.y())*Math.sin(Math.PI*pos.y()),
-					-Math.sin(Math.PI*pos.x())*Math.cos(Math.PI*pos.x())*Math.sin(Math.PI*pos.y())*Math.sin(Math.PI*pos.y())
+					-Math.sin(Math.PI*pos.x())*Math.sin(Math.PI*pos.x())*Math.cos(Math.PI*pos.y())*Math.sin(Math.PI*pos.y()),
+					Math.sin(Math.PI*pos.x())*Math.cos(Math.PI*pos.x())*Math.sin(Math.PI*pos.y())*Math.sin(Math.PI*pos.y())
 						);
 			}
 			

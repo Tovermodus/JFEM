@@ -95,7 +95,12 @@ public class SparseMatrix implements Matrix, DirectlySolvable, Decomposable
 		sparseYs = sparseY;
 		sparseXs = sparseX;
 	}
-	
+	public void deleteLine(int lineCoordinate)
+	{
+		for(int i = 0; i < sparseEntries; i++)
+			if(sparseYs[i] == lineCoordinate)
+				sparseValues[i] = 0;
+	}
 	@Override
 	public synchronized void set(double value, int... coordinates)
 	{
