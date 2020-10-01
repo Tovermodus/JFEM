@@ -16,11 +16,11 @@ public class TaylorHoodStokes
 {
 	public static void main(String[] args)
 	{
-		CoordinateVector start = CoordinateVector.fromValues(0, 0);
-		CoordinateVector end = CoordinateVector.fromValues(1, 1);
-		int polynomialDegree = 2;
+		CoordinateVector start = CoordinateVector.fromValues(0, 0,0);
+		CoordinateVector end = CoordinateVector.fromValues(1, 1,1);
+		int polynomialDegree = 1;
 		TaylorHoodSpace grid = new TaylorHoodSpace(start, end,
-			Ints.asList(12,12), polynomialDegree);
+			Ints.asList(3,3,3), polynomialDegree);
 		TPVectorCellIntegral<ContinuousTPVectorFunction> valueValue =
 			new TPVectorCellIntegral<>(ScalarFunction.constantFunction(StokesReferenceSolution.reynolds),
 				TPVectorCellIntegral.GRAD_GRAD);
@@ -42,7 +42,8 @@ public class TaylorHoodStokes
 		//faceIntegrals.add(jg);
 		MixedRightHandSideIntegral<TPCell, TPFace, ContinuousTPShapeFunction, ContinuousTPVectorFunction> rightHandSideIntegral =
 			MixedRightHandSideIntegral.fromVelocityIntegral(
-				new TPVectorRightHandSideIntegral<ContinuousTPVectorFunction>(StokesReferenceSolution.rightHandSide(), TPVectorRightHandSideIntegral.VALUE));
+				new TPVectorRightHandSideIntegral<ContinuousTPVectorFunction>(ScalarFunction.constantFunction(1).makeIsotropicVectorFunction(),
+					TPVectorRightHandSideIntegral.VALUE));
 		List<RightHandSideIntegral<TPCell, TPFace, MixedShapeFunction<TPCell, TPFace,ContinuousTPShapeFunction,
 			ContinuousTPVectorFunction>>> rightHandSideIntegrals = new ArrayList<>();
 		rightHandSideIntegrals.add(rightHandSideIntegral);
@@ -58,7 +59,7 @@ public class TaylorHoodStokes
 		grid.evaluateCellIntegrals(cellIntegrals, rightHandSideIntegrals);
 		System.out.println("Face Integrals");
 		grid.evaluateFaceIntegrals(faceIntegrals, boundaryFaceIntegrals);
-		grid.setVelocityBoundaryValues(StokesReferenceSolution.vectorBoundaryValues());
+		grid.setVelocityBoundaryValues(ScalarFunction.constantFunction(0).makeIsotropicVectorFunction());
 		//grid.setPressureBoundaryValues(ScalarFunction.constantFunction(0));
 		//grid.A.makeParallelReady(12);
 		
@@ -92,7 +93,7 @@ public class TaylorHoodStokes
 				grid.getShapeFunctions(), solution1);
 		ArrayList<Map<CoordinateVector, Double>> valList = new ArrayList<>();
 		
-		valList.add(solut.pressureValuesInPoints(grid.generatePlotPoints(50)));
+		valList.add(solut.pressureValuesInPoints(grid.generatePlotPoints(20)));
 		OptionalDouble minopt = valList.get(0).values().stream().mapToDouble(Double::doubleValue).min();
 		double min = 0;
 		if(minopt.isPresent())
@@ -101,11 +102,9 @@ public class TaylorHoodStokes
 		{
 			entry.setValue(entry.getValue()-min);
 		}
-		valList.add(solut.velocityComponentsInPoints(grid.generatePlotPoints(50), 0));
-		valList.add(solut.velocityComponentsInPoints(grid.generatePlotPoints(50), 1));
-		valList.add(StokesReferenceSolution.pressureReferenceSolution().valuesInPoints(grid.generatePlotPoints(50)));
-		valList.add(StokesReferenceSolution.velocityReferenceSolution().componentValuesInPoints(grid.generatePlotPoints(50),0));
-		valList.add(StokesReferenceSolution.velocityReferenceSolution().componentValuesInPoints(grid.generatePlotPoints(50),1));
+		valList.add(solut.velocityComponentsInPoints(grid.generatePlotPoints(20), 0));
+		valList.add(solut.velocityComponentsInPoints(grid.generatePlotPoints(20), 1));
+		valList.add(solut.velocityComponentsInPoints(grid.generatePlotPoints(20), 2));
 		/*for(MixedShapeFunction<TPCell, TPFace, ContinuousTPShapeFunction,ContinuousTPVectorFunction>
 		shapeFunction:grid.getShapeFunctions().values())
 		

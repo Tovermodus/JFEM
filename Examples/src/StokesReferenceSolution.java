@@ -6,7 +6,6 @@ import static java.lang.Math.*;
 public class StokesReferenceSolution
 {
 	static double reynolds = 1;
-	static double C = 2*1.70751; // integral over p
 	public static VectorFunction rightHandSide()
 	{
 		return new VectorFunction()

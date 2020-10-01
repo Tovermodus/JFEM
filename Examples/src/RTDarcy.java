@@ -17,9 +17,9 @@ public class RTDarcy
 	{
 		CoordinateVector start = CoordinateVector.fromValues(-1, -1,-1);
 		CoordinateVector end = CoordinateVector.fromValues(1, 1,1);
-		int polynomialDegree = 1;
+		int polynomialDegree = 2;
 		MixedRTSpace grid = new MixedRTSpace(start, end,
-			Ints.asList(6,6,6), polynomialDegree);
+			Ints.asList(3,3,3), polynomialDegree);
 		TPVectorCellIntegral<RTShapeFunction> valueValue =
 			new TPVectorCellIntegral<>(TPVectorCellIntegral.VALUE_VALUE);
 		MixedCellIntegral<TPCell,TPFace,ContinuousTPShapeFunction, RTShapeFunction>
@@ -36,7 +36,7 @@ public class RTDarcy
 		
 		MixedRightHandSideIntegral<TPCell, TPFace, ContinuousTPShapeFunction, RTShapeFunction> rightHandSideIntegral =
 			MixedRightHandSideIntegral.fromPressureIntegral(
-				new TPRightHandSideIntegral<ContinuousTPShapeFunction>(LaplaceReferenceSolution.scalarRightHandSide(),
+				new TPRightHandSideIntegral<ContinuousTPShapeFunction>(ScalarFunction.constantFunction(-1),
 					TPRightHandSideIntegral.VALUE, false));
 		
 		
@@ -51,7 +51,7 @@ public class RTDarcy
 		
 		MixedBoundaryRightHandSideIntegral<TPCell, TPFace, ContinuousTPShapeFunction, RTShapeFunction> dirichlet =
 			MixedBoundaryRightHandSideIntegral.fromVelocityIntegral(
-				new TPVectorBoundaryFaceIntegral<RTShapeFunction>(LaplaceReferenceSolution.scalarBoundaryValues(),
+				new TPVectorBoundaryFaceIntegral<RTShapeFunction>(ScalarFunction.constantFunction(0),
 					TPVectorBoundaryFaceIntegral.NORMAL_VALUE));
 		boundaryFaceIntegrals.add(dirichlet);
 		grid.assembleCells();
@@ -88,9 +88,11 @@ public class RTDarcy
 		valList.add(solut.velocityComponentsInPoints(grid.generatePlotPoints(50), 1));
 		valList.add(LaplaceReferenceSolution.scalarReferenceSolution().getGradientFunction()
 		.componentValuesInPoints(grid.generatePlotPoints(50),1));*/
-		
-		valList.add(solut.getVelocityFunction().getDivergenceFunction().valuesInPoints(grid.generatePlotPoints(20)));
-		valList.add(LaplaceReferenceSolution.scalarReferenceSolution().getGradientFunction().getDivergenceFunction().valuesInPoints(grid.generatePlotPoints(20)));
+		valList.add(solut.getPressureFunction().valuesInPoints(grid.generatePlotPoints(20)));
+		//valList.add(solut.getVelocityFunction().getDivergenceFunction().valuesInPoints(grid
+		// .generatePlotPoints(20)));
+		//valList.add(LaplaceReferenceSolution.scalarReferenceSolution().getGradientFunction()
+		// .getDivergenceFunction().valuesInPoints(grid.generatePlotPoints(20)));
 		/*for(int k = 0; k < grid.getShapeFunctions().size(); k++)
 		{
 			MixedShapeFunction<TPCell,TPFace,ContinuousTPShapeFunction,RTShapeFunction> shapeFunction =

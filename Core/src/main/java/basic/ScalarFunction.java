@@ -111,7 +111,7 @@ public abstract class ScalarFunction implements Function<Double, CoordinateVecto
 			public CoordinateVector value(CoordinateVector pos)
 			{
 				CoordinateVector ret = new CoordinateVector(pos.getLength());
-				for(int i = 0; i <getDomainDimension(); i++)
+				for(int i = 0; i < pos.getLength(); i++)
 					ret.set(me.value(pos), i);
 				return ret;
 			}
