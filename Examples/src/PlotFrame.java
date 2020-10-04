@@ -218,6 +218,7 @@ public class PlotFrame
 			                   {
 				                   j.dispose();
 				                   executorService.shutdown();
+				                   System.exit(0);
 			                   }
 		                   }
 		

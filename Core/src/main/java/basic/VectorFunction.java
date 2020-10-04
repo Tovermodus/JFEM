@@ -32,8 +32,22 @@ public abstract class VectorFunction implements Function<CoordinateVector, Coord
 	public double divergence(CoordinateVector pos)
 	{
 		double ret = 0;
+		CoordinateMatrix grad = gradient(pos);
 		for(int i = 0; i < getDomainDimension(); i++)
-			ret += gradient(pos).at(i,i);
+			ret += grad.at(i,i);
+		return ret;
+	}
+	public CoordinateVector curl(CoordinateVector pos)
+	{
+		if(getDomainDimension() == 2)
+		{
+			throw new IllegalStateException("wrong domain dimension");
+		}
+		CoordinateVector ret = new CoordinateVector(getDomainDimension());
+		CoordinateMatrix grad = gradient(pos);
+		ret.set(grad.at(2,1)-grad.at(1,2),0);
+		ret.set(grad.at(0,2)-grad.at(2,0),1);
+		ret.set(grad.at(1,0)-grad.at(0,1),2);
 		return ret;
 	}
 	public ScalarFunction getDivergenceFunction()

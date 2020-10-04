@@ -71,6 +71,7 @@ class GMRES extends AbstractIterativeSolver
 	 * Givens rotations for the QR factorization
 	 */
 	private GivensRotation[] rotation;
+	boolean interrupted = false;
 
 	/**
 	 * Constructor for GMRES. Uses the given vector as template for creating
@@ -136,13 +137,13 @@ class GMRES extends AbstractIterativeSolver
 		double normr = r_.euclidianNorm();
 		linalg.Vector v_[] = new linalg.DenseVector[v.length];
 		// Outer iteration
-		for (iter.setFirst(); normr > tol; iter.next()) {
+		for (iter.setFirst(); normr > tol && !interrupted; iter.next()) {
 
 			v_[0] = r_.mul(1./normr);
 			s.zero().set(0, normr);
 			int i = 0;
 			// Inner iteration
-			for (; i < restart && normr>tol; i++, iter
+			for (; i < restart && normr>tol && !interrupted; i++, iter
 				.next()) {
 				w = preconditioner.mvMul(A.mvMul(v_[i]));
 				for (int k = 0; k <= i; k++) {
@@ -162,7 +163,7 @@ class GMRES extends AbstractIterativeSolver
 
 			// Update solution in current subspace
 			new UpperTriangDenseMatrix(H, i, false).solve(s, s);
-			for (int j = 0; j < i; j++)
+			for (int j = 0; j < i && !interrupted; j++)
 				x = x.add(v_[j].mul(s.get(j)));
 
 			r_ = b.sub(A.mvMul(x));
@@ -184,13 +185,13 @@ class GMRES extends AbstractIterativeSolver
 		double normr = r_.euclidianNorm();
 		linalg.Vector v_[] = new linalg.Vector[v.length];
 		// Outer iteration
-		for (iter.setFirst(); normr > tol; iter.next()) {
+		for (iter.setFirst(); normr > tol && !interrupted; iter.next()) {
 
 			v_[0] = r_.mul(1./normr);
 			s.zero().set(0, normr);
 			int i = 0;
 			// Inner iteration
-			for (; i < restart && normr>tol; i++, iter
+			for (; i < restart && normr>tol && !interrupted; i++, iter
 				.next()) {
 				w = A.mvMul(v_[i]);
 				for (int k = 0; k <= i; k++) {
@@ -210,12 +211,12 @@ class GMRES extends AbstractIterativeSolver
 
 			// Update solution in current subspace
 			new UpperTriangDenseMatrix(H, i, false).solve(s, s);
-			for (int j = 0; j < i; j++)
+			for (int j = 0; j < i && !interrupted; j++)
 				x = x.add(v_[j].mul(s.get(j)));
 
 			r_ = b.sub(A.mvMul(x));
 			normr = r_.euclidianNorm();
-			System.out.println(normr);
+			System.out.println(normr+" "+ interrupted);
 		}
 
 		return x;

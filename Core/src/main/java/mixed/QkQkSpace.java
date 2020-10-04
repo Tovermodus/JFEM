@@ -274,64 +274,60 @@ public class QkQkSpace implements MixedFESpace<TPCell, TPFace, ContinuousTPShape
 	{
 		MixedFunction boundaryMixed = new MixedFunction(boundaryValues);
 		int progress = 0;
-		for (TPFace face : getFaces())
+		List<List<TPFace>> smallerList = Lists.partition(getFaces(),getFaces().size()/12+1);
+		smallerList.stream().parallel().forEach(smallList->
 		{
-			System.out.println((int)(100*progress/getFaces().size())+"%");
-			progress++;
-			if (face.isBoundaryFace())
+			for (TPFace F : smallList)
 			{
-				for (MixedShapeFunction<TPCell,TPFace,ContinuousTPShapeFunction,ContinuousTPVectorFunction> shapeFunction :
-					getShapeFunctionsWithSupportOnFace(face))
+				if (F.isBoundaryFace())
 				{
-					if(shapeFunction.isVelocity())
+					for (MixedShapeFunction<TPCell,TPFace,ContinuousTPShapeFunction,ContinuousTPVectorFunction> shapeFunction :
+						getShapeFunctionsWithSupportOnFace(F))
 					{
-						double nodeValue = shapeFunction.getNodeFunctional().evaluate(boundaryMixed);
-						if (nodeValue != 0 || face.isOnFace(shapeFunction.getVelocityShapeFunction().getNodeFunctionalPoint()))
+						if(shapeFunction.isVelocity())
 						{
-							int shapeFunctionIndex = shapeFunction.getGlobalIndex();
-							for (TPCell cell : shapeFunction.getCells())
-								for (MixedShapeFunction<TPCell,TPFace,ContinuousTPShapeFunction,ContinuousTPVectorFunction> sameSupportFunction :
-									getShapeFunctionsWithSupportOnCell(cell))
-									systemMatrix.set(0, shapeFunctionIndex,
-										sameSupportFunction.getGlobalIndex());
-							getSystemMatrix().set(1, shapeFunctionIndex, shapeFunctionIndex);
-							getRhs().set(nodeValue, shapeFunctionIndex);
+							double nodeValue = shapeFunction.getNodeFunctional().evaluate(boundaryMixed);
+							if (nodeValue != 0 || F.isOnFace(shapeFunction.getVelocityShapeFunction().getNodeFunctionalPoint()))
+							{
+								int shapeFunctionIndex = shapeFunction.getGlobalIndex();
+								getSystemMatrix().deleteLine(shapeFunctionIndex);
+								getSystemMatrix().set(1, shapeFunctionIndex, shapeFunctionIndex);
+								getRhs().set(nodeValue, shapeFunctionIndex);
+							}
 						}
 					}
 				}
 			}
-		}
+		});
 	}
 	public void setPressureBoundaryValues(ScalarFunction boundaryValues)
 	{
 		MixedFunction boundaryMixed = new MixedFunction(boundaryValues);
 		int progress = 0;
-		for (TPFace face : getFaces())
+		List<List<TPFace>> smallerList = Lists.partition(getFaces(),getFaces().size()/12+1);
+		smallerList.stream().parallel().forEach(smallList->
 		{
-			System.out.println((int)(100*progress/getFaces().size())+"%");
-			progress++;
-			if (face.isBoundaryFace())
+			for (TPFace F : smallList)
 			{
-				for (MixedShapeFunction<TPCell,TPFace,ContinuousTPShapeFunction,ContinuousTPVectorFunction> shapeFunction :
-					getShapeFunctionsWithSupportOnFace(face))
+				if (F.isBoundaryFace())
 				{
-					if(shapeFunction.isPressure())
+					for (MixedShapeFunction<TPCell,TPFace,ContinuousTPShapeFunction,ContinuousTPVectorFunction> shapeFunction :
+						getShapeFunctionsWithSupportOnFace(F))
 					{
-						double nodeValue = shapeFunction.getNodeFunctional().evaluate(boundaryMixed);
-						if (nodeValue != 0 || face.isOnFace(((LagrangeNodeFunctional)shapeFunction.getPressureShapeFunction().getNodeFunctional()).getPoint()))
+						if(shapeFunction.isPressure())
 						{
-							int shapeFunctionIndex = shapeFunction.getGlobalIndex();
-							for (TPCell cell : shapeFunction.getCells())
-								for (MixedShapeFunction<TPCell,TPFace,ContinuousTPShapeFunction,ContinuousTPVectorFunction> sameSupportFunction :
-									getShapeFunctionsWithSupportOnCell(cell))
-									systemMatrix.set(0, shapeFunctionIndex,
-										sameSupportFunction.getGlobalIndex());
-							getSystemMatrix().set(1, shapeFunctionIndex, shapeFunctionIndex);
-							getRhs().set(nodeValue, shapeFunctionIndex);
+							double nodeValue = shapeFunction.getNodeFunctional().evaluate(boundaryMixed);
+							if (nodeValue != 0 || F.isOnFace(((LagrangeNodeFunctional)shapeFunction.getPressureShapeFunction().getNodeFunctional()).getPoint()))
+							{
+								int shapeFunctionIndex = shapeFunction.getGlobalIndex();
+								getSystemMatrix().deleteLine(shapeFunctionIndex);
+								getSystemMatrix().set(1, shapeFunctionIndex, shapeFunctionIndex);
+								getRhs().set(nodeValue, shapeFunctionIndex);
+							}
 						}
 					}
 				}
 			}
-		}
+		});
 	}
 }
