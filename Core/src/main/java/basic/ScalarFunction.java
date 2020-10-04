@@ -28,7 +28,6 @@ public abstract class ScalarFunction implements Function<Double, CoordinateVecto
 			{
 				return constant;
 			}
-			
 			@Override
 			public CoordinateVector gradient(CoordinateVector pos)
 			{
@@ -40,6 +39,7 @@ public abstract class ScalarFunction implements Function<Double, CoordinateVecto
 			{
 				return new CoordinateMatrix((int)pos.size(), (int)pos.size());
 			}
+			
 		};
 	}
 	public Map<CoordinateVector, Double> valuesInPoints(List<CoordinateVector> points)

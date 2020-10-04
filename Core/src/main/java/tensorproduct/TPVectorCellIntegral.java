@@ -3,6 +3,8 @@ package tensorproduct;
 import basic.CellIntegral;
 import basic.Function;
 import basic.VectorShapeFunction;
+import com.google.common.base.Stopwatch;
+import linalg.CoordinateMatrix;
 import linalg.CoordinateVector;
 
 public class TPVectorCellIntegral<ST extends VectorShapeFunction<TPCell,TPFace,ST>> extends CellIntegral<TPCell,

@@ -16,6 +16,7 @@ public class PlotFrame
 	CoordinateVector endCoordinates;
 	Map<String, Map<CoordinateVector, Double>> valueList;
 	Iterator<String> current;
+	
 	String currentTitle;
 	int units;
 	int dimension;
@@ -59,6 +60,16 @@ public class PlotFrame
 			});
 			g.setColor(Color.BLACK);
 			g.drawString("title: " + currentTitle + " max: " + range[1] + " min: " + range[0], 40, 40);
+			if(dimension ==3)
+			{
+				g.drawLine(40, 50, 40, 50 + height);
+				g.drawLine(30, 50, 50, 50);
+				g.drawLine(30, 50 + height, 50, 50 + height);
+				g.drawLine(30, 50 + height, 50, 50 + height);
+				g.drawLine(30,
+					50 + (int) (height *  units/100.), 50, 50 + (int) (height * units/100.));
+			}
+			
 			gr.drawImage(img, 0, 0, null);
 			drawing = false;
 		}
@@ -99,7 +110,7 @@ public class PlotFrame
 	public PlotFrame(List<Map<CoordinateVector, Double>> valueList, CoordinateVector startCoordinates,
 	                 CoordinateVector endCoordinates)
 	{
-		Map<String,Map<CoordinateVector, Double>> vmap= new HashMap<>();
+		Map<String,Map<CoordinateVector, Double>> vmap= new TreeMap<>();
 		for(int i = 0; i < valueList.size(); i++)
 			vmap.put("Values "+i, valueList.get(i));
 		initialize(vmap,startCoordinates,endCoordinates);
@@ -136,9 +147,16 @@ public class PlotFrame
 			public void keyPressed(KeyEvent e)
 			{
 				if(e.getKeyCode() == KeyEvent.VK_UP)
-					units++;
-				if(e.getKeyCode() == KeyEvent.VK_DOWN)
 					units--;
+				if(e.getKeyCode() == KeyEvent.VK_DOWN)
+					units++;
+				if(e.getKeyCode() == KeyEvent.VK_RIGHT)
+				{
+					if(current.hasNext())
+						currentTitle = current.next();
+					else
+						current = valueList.keySet().iterator();
+				}
 				System.out.println("KKKKKK");
 				if (units < 0)
 					units += 100;

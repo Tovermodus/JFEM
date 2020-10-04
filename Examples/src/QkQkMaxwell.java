@@ -7,20 +7,17 @@ import linalg.Vector;
 import mixed.*;
 import tensorproduct.*;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 public class QkQkMaxwell
 {
 	public static void main(String[] args)
 	{
-		CoordinateVector start = CoordinateVector.fromValues(-1, -1,-1);
+		CoordinateVector start = CoordinateVector.fromValues(0, 0,0);
 		CoordinateVector end = CoordinateVector.fromValues(1, 1,1);
 		int polynomialDegree = 2;
 		QkQkSpace grid = new QkQkSpace(start, end,
-			Ints.asList(3,3,3), polynomialDegree);
+			Ints.asList(6,6,6), polynomialDegree);
 		TPVectorCellIntegral<ContinuousTPVectorFunction> valueValue =
 			new TPVectorCellIntegral<>(TPVectorCellIntegral.ROT_ROT);
 		MixedCellIntegral<TPCell,TPFace,ContinuousTPShapeFunction, ContinuousTPVectorFunction>
@@ -58,7 +55,9 @@ public class QkQkMaxwell
 		grid.evaluateCellIntegrals(cellIntegrals, rightHandSideIntegrals);
 		System.out.println("Face Integrals");
 		grid.evaluateFaceIntegrals(faceIntegrals, boundaryFaceIntegrals);
+		System.out.println("velocity Boundary");
 		grid.setVelocityBoundaryValues(MaxwellReferenceSolution.vectorBoundaryValues());
+		System.out.println("pressure Boundary");
 		grid.setPressureBoundaryValues(MaxwellReferenceSolution.pressureBoundaryValues());
 		//grid.A.makeParallelReady(12);
 		
@@ -91,10 +90,14 @@ public class QkQkMaxwell
 		MixedFESpaceFunction<TPCell,TPFace,ContinuousTPShapeFunction,ContinuousTPVectorFunction> solut =
 			new MixedFESpaceFunction<>(
 				grid.getShapeFunctions(), solution1);
-		Map<String,Map<CoordinateVector, Double>> valList = new HashMap<>();
+		Map<String,Map<CoordinateVector, Double>> valList = new TreeMap<>();
 //		valList.add(StokesReferenceSolution.pressureReferenceSolution().valuesInPoints(grid.generatePlotPoints(50)));
 //		valList.add(StokesReferenceSolution.velocityReferenceSolution().componentValuesInPoints(grid.generatePlotPoints(50),0));
 //		valList.add(StokesReferenceSolution.velocityReferenceSolution().componentValuesInPoints(grid.generatePlotPoints(50),1));
+		valList.put("x-reference",
+			MaxwellReferenceSolution.velocityReferenceSolution().componentValuesInPoints(grid.generatePlotPoints(20),0));
+		valList.put("y-reference",
+			MaxwellReferenceSolution.velocityReferenceSolution().componentValuesInPoints(grid.generatePlotPoints(20),1));
 		valList.put("z-reference",
 			MaxwellReferenceSolution.velocityReferenceSolution().componentValuesInPoints(grid.generatePlotPoints(20),2));
 		valList.put("Pressure",solut.pressureValuesInPoints(grid.generatePlotPoints(20)));

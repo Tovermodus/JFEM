@@ -80,7 +80,7 @@ public class MaxwellReferenceSolution
 			@Override
 			public Double value(CoordinateVector pos)
 			{
-				if(pos.x() == -1|| pos.x() == 1 || pos.y() == -1 || pos.y() == 1|| pos.z() == -1 || pos.z() == 1)
+				if(pos.x() == 0|| pos.x() == 1 || pos.y() == 0 || pos.y() == 1|| pos.z() == 0 || pos.z() == 1)
 					return referenceSolution.value(pos);
 				return 0.;
 			}
@@ -100,7 +100,7 @@ public class MaxwellReferenceSolution
 			@Override
 			public CoordinateVector value(CoordinateVector pos)
 			{
-				if(pos.x() == -1|| pos.x() == 1 || pos.y() == -1 || pos.y() == 1|| pos.z() == -1 || pos.z() == 1)
+				if(pos.x() == 0|| pos.x() == 1 || pos.y() == 0 || pos.y() == 1|| pos.z() == 0 || pos.z() == 1)
 					return referenceSolution.value(pos);
 				return pos.mul(0);
 			}

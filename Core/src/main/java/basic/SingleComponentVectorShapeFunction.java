@@ -128,6 +128,18 @@ public class SingleComponentVectorShapeFunction<CT extends Cell<CT,FT>, FT exten
 	}
 	
 	@Override
+	public CoordinateVector curl(CoordinateVector pos)
+	{
+		CoordinateVector ret = new CoordinateVector(getDomainDimension());
+		CoordinateVector grad = componentFunction.gradient(pos);
+		int compplus1 = (component+1)%3;
+		int compplus2 = (component+2)%3;
+		ret.set(grad.at(compplus2),compplus1);
+		ret.set(-grad.at(compplus1),compplus2);
+		return ret;
+	}
+
+	@Override
 	public CoordinateVector value(CoordinateVector pos)
 	{
 		return CoordinateVector.getUnitVector(getDomainDimension(), component).mul(componentFunction.fastValue(pos));

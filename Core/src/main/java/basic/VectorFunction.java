@@ -1,5 +1,6 @@
 package basic;
 
+import com.google.common.base.Stopwatch;
 import linalg.*;
 
 import java.util.List;
@@ -39,6 +40,7 @@ public abstract class VectorFunction implements Function<CoordinateVector, Coord
 	}
 	public CoordinateVector curl(CoordinateVector pos)
 	{
+		Stopwatch s = Stopwatch.createStarted();
 		if(getDomainDimension() == 2)
 		{
 			throw new IllegalStateException("wrong domain dimension");
