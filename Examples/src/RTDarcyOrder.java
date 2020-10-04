@@ -43,11 +43,11 @@ public class RTDarcyOrder
 				new TPVectorBoundaryFaceIntegral<RTShapeFunction>(LaplaceReferenceSolution.scalarBoundaryValues(),
 					TPVectorBoundaryFaceIntegral.NORMAL_VALUE));
 		boundaryFaceIntegrals.add(dirichlet);
-		int polynomialDegree = 1;
+		int polynomialDegree = 3;
 		List<ScalarFunction> solutions = new ArrayList<>();
 		List<VectorFunction> solutionsVec = new ArrayList<>();
 		MixedRTSpace grid = null;
-		for(int i = 0; i < 5; i++)
+		for(int i = 0; i < 3; i++)
 		{
 			grid = new MixedRTSpace(start, end,
 				Ints.asList(2*(int)Math.pow(2,i),2*(int)Math.pow(2,i)), polynomialDegree);

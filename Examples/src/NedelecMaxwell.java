@@ -7,45 +7,48 @@ import linalg.Vector;
 import mixed.*;
 import tensorproduct.*;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
+import java.util.TreeMap;
 
-public class QkQkMaxwell
+public class NedelecMaxwell
 {
 	public static void main(String[] args)
 	{
 		CoordinateVector start = CoordinateVector.fromValues(0, 0,0);
 		CoordinateVector end = CoordinateVector.fromValues(1, 1,1);
-		int polynomialDegree = 2;
-		QkQkSpace grid = new QkQkSpace(start, end,
-			Ints.asList(8,8,8), polynomialDegree);
-		TPVectorCellIntegral<ContinuousTPVectorFunction> valueValue =
+		int polynomialDegree = 1;
+		MixedNedelecSpace grid = new MixedNedelecSpace(start, end,
+			Ints.asList(7,7,7), polynomialDegree);
+		TPVectorCellIntegral<NedelecShapeFunction> valueValue =
 			new TPVectorCellIntegral<>(TPVectorCellIntegral.ROT_ROT);
-		MixedCellIntegral<TPCell,TPFace,ContinuousTPShapeFunction, ContinuousTPVectorFunction>
+		MixedCellIntegral<TPCell,TPFace,ContinuousTPShapeFunction, NedelecShapeFunction>
 			divValue =
 			new MixedTPCellIntegral<>(ScalarFunction.constantFunction(-1),
 				MixedTPCellIntegral.DIV_VALUE);
-		MixedCellIntegral<TPCell, TPFace, ContinuousTPShapeFunction, ContinuousTPVectorFunction> vv =
+		MixedCellIntegral<TPCell, TPFace, ContinuousTPShapeFunction, NedelecShapeFunction> vv =
 			MixedCellIntegral.fromVelocityIntegral(valueValue);
 		List<CellIntegral<TPCell, TPFace, MixedShapeFunction<TPCell, TPFace,ContinuousTPShapeFunction,
-			ContinuousTPVectorFunction>>> cellIntegrals =
+			NedelecShapeFunction>>> cellIntegrals =
 			new ArrayList<>();
 		cellIntegrals.add(vv);
 		cellIntegrals.add(divValue);
 		List<FaceIntegral<TPCell, TPFace, MixedShapeFunction<TPCell, TPFace,ContinuousTPShapeFunction,
-					ContinuousTPVectorFunction>>> faceIntegrals = new ArrayList<>();
+			NedelecShapeFunction>>> faceIntegrals = new ArrayList<>();
 		//faceIntegrals.add(jj);
 		//faceIntegrals.add(gj);
 		//faceIntegrals.add(jg);
-		MixedRightHandSideIntegral<TPCell, TPFace, ContinuousTPShapeFunction, ContinuousTPVectorFunction> rightHandSideIntegral =
+		MixedRightHandSideIntegral<TPCell, TPFace, ContinuousTPShapeFunction, NedelecShapeFunction> rightHandSideIntegral =
 			MixedRightHandSideIntegral.fromVelocityIntegral(
-				new TPVectorRightHandSideIntegral<ContinuousTPVectorFunction>(MaxwellReferenceSolution.rightHandSide(),
+				new TPVectorRightHandSideIntegral<NedelecShapeFunction>(MaxwellReferenceSolution.rightHandSide(),
 					TPVectorRightHandSideIntegral.VALUE));
 		List<RightHandSideIntegral<TPCell, TPFace, MixedShapeFunction<TPCell, TPFace,ContinuousTPShapeFunction,
-			ContinuousTPVectorFunction>>> rightHandSideIntegrals = new ArrayList<>();
+			NedelecShapeFunction>>> rightHandSideIntegrals = new ArrayList<>();
 		rightHandSideIntegrals.add(rightHandSideIntegral);
 		
 		List<BoundaryRightHandSideIntegral<TPCell, TPFace, MixedShapeFunction<TPCell, TPFace,ContinuousTPShapeFunction,
-			ContinuousTPVectorFunction>>> boundaryFaceIntegrals =
+			NedelecShapeFunction>>> boundaryFaceIntegrals =
 			new ArrayList<>();
 		grid.assembleCells();
 		grid.assembleFunctions(polynomialDegree);
@@ -87,7 +90,7 @@ public class QkQkMaxwell
 		System.out.println("rhs2"+grid.getSystemMatrix().mvMul(solution1));
 		//grid.A.print_formatted();
 		//grid.rhs.print_formatted();
-		MixedFESpaceFunction<TPCell,TPFace,ContinuousTPShapeFunction,ContinuousTPVectorFunction> solut =
+		MixedFESpaceFunction<TPCell,TPFace,ContinuousTPShapeFunction,NedelecShapeFunction> solut =
 			new MixedFESpaceFunction<>(
 				grid.getShapeFunctions(), solution1);
 		Map<String,Map<CoordinateVector, Double>> valList = new TreeMap<>();

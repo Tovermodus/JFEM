@@ -1,48 +1,53 @@
 package mixed;
 
-import basic.*;
+import basic.LagrangeNodeFunctional;
+import basic.ScalarFunction;
+import basic.VectorFunction;
 import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
 import com.google.common.collect.TreeMultimap;
 import com.google.common.primitives.Doubles;
 import com.google.common.primitives.Ints;
-import linalg.*;
+import linalg.CoordinateVector;
+import linalg.DenseVector;
+import linalg.SparseMatrix;
 import tensorproduct.*;
 
 import java.util.*;
 import java.util.stream.Collectors;
-public class QkQkSpace implements MixedFESpace<TPCell, TPFace, ContinuousTPShapeFunction, ContinuousTPVectorFunction>
+
+public class MixedNedelecSpace implements MixedFESpace<TPCell, TPFace, ContinuousTPShapeFunction, NedelecShapeFunction>
 {
 	
 	List<List<Double>> coordinates1D;
 	List<List<Cell1D>> cells1D;
 	List<TPCell> cells;
 	List<TPFace> faces;
-	TreeMultimap<TPCell, MixedShapeFunction<TPCell, TPFace, ContinuousTPShapeFunction,ContinuousTPVectorFunction>> supportOnCell;
-	TreeMultimap<TPFace, MixedShapeFunction<TPCell, TPFace, ContinuousTPShapeFunction,ContinuousTPVectorFunction>> supportOnFace;
+	TreeMultimap<TPCell, MixedShapeFunction<TPCell, TPFace, ContinuousTPShapeFunction,NedelecShapeFunction>> supportOnCell;
+	TreeMultimap<TPFace, MixedShapeFunction<TPCell, TPFace, ContinuousTPShapeFunction,NedelecShapeFunction>> supportOnFace;
 	Map<List<Integer>, TPCell> lexicographicCellNumbers;
-	Set<QkQkFunction> shapeFunctions;
+	Set<NedelecMixedFunction> shapeFunctions;
 	SparseMatrix systemMatrix;
 	DenseVector rhs;
-	Set<Integer> boundaryNodes;
 	final int dimension;
 	volatile int cellcounter;
+	Set<Integer> boundaryNodes;
 	volatile int facecounter;
 	
-	public QkQkSpace(CoordinateVector startCoordinates, CoordinateVector endCoordinates,
-	                 List<Integer> cellsPerDimension, int polynomialDegree)
+	public MixedNedelecSpace(CoordinateVector startCoordinates, CoordinateVector endCoordinates,
+	                         List<Integer> cellsPerDimension, int polynomialDegree)
 	{
 		if (startCoordinates.getLength() != endCoordinates.getLength() || startCoordinates.getLength() != cellsPerDimension.size())
 			throw new IllegalArgumentException();
 		dimension = startCoordinates.getLength();
 		cells1D = new ArrayList<>();
+		boundaryNodes = new TreeSet<>();
 		coordinates1D = new ArrayList<>();
 		supportOnCell = TreeMultimap.create();
 		supportOnFace = TreeMultimap.create();
-		boundaryNodes = new TreeSet<>();
 		QuadratureRule1D quad;
-		if (polynomialDegree <= 3)
-			quad = QuadratureRule1D.Gauss3;
+		if (polynomialDegree < 3)
+			quad = QuadratureRule1D.Gauss5;
 		else
 			quad = QuadratureRule1D.Gauss5;
 		for (int i = 0; i < startCoordinates.getLength(); i++)
@@ -127,20 +132,11 @@ public class QkQkSpace implements MixedFESpace<TPCell, TPFace, ContinuousTPShape
 	}
 	
 	@Override
-	public Set<Integer> getFixedNodeIndices()
-	{
-		return boundaryNodes;
-	}
-	
-	@Override
 	public void assembleFunctions(int polynomialDegree)
 	{
 		shapeFunctions = new TreeSet<>();
 		assemblePressureFunctions(polynomialDegree);
 		assembleVelocityFunctions(polynomialDegree);
-		int i = 0;
-		for(QkQkFunction shapeFunction:shapeFunctions)
-			shapeFunction.setGlobalIndex(i++);
 	}
 	private void assemblePressureFunctions(int polynomialDegree)
 	{
@@ -149,7 +145,7 @@ public class QkQkSpace implements MixedFESpace<TPCell, TPFace, ContinuousTPShape
 		{
 			for (int i = 0; i < Math.pow(polynomialDegree + 1, dimension); i++)
 			{
-				QkQkFunction shapeFunction = new QkQkFunction(new ContinuousTPShapeFunction(cell,
+				NedelecMixedFunction shapeFunction = new NedelecMixedFunction(new ContinuousTPShapeFunction(cell,
 					polynomialDegree, i));
 				shapeFunction.setGlobalIndex(shapeFunctions.size());
 				shapeFunctions.add(shapeFunction);
@@ -165,11 +161,10 @@ public class QkQkSpace implements MixedFESpace<TPCell, TPFace, ContinuousTPShape
 		
 		for (TPCell cell : cells)
 		{
-			for (int i = 0; i < Math.pow(polynomialDegree + 1, dimension) * dimension; i++)
+			for (int i = 0; i < Math.pow(polynomialDegree + 2, dimension-1)*(polynomialDegree+1) * dimension; i++)
 			{
-				QkQkFunction shapeFunction = new QkQkFunction(new ContinuousTPVectorFunction(cell,
-					polynomialDegree, i,
-					ContinuousTPShapeFunction.class));
+				NedelecMixedFunction shapeFunction = new NedelecMixedFunction(new NedelecShapeFunction(cell,
+					polynomialDegree, i));
 				shapeFunction.setGlobalIndex(shapeFunctions.size());
 				shapeFunctions.add(shapeFunction);
 				for(TPCell ce: shapeFunction.getCells())
@@ -181,6 +176,11 @@ public class QkQkSpace implements MixedFESpace<TPCell, TPFace, ContinuousTPShape
 		}
 	}
 	
+	@Override
+	public Set<Integer> getFixedNodeIndices()
+	{
+		return boundaryNodes;
+	}
 	@Override
 	public void initializeSystemMatrix()
 	{
@@ -230,10 +230,10 @@ public class QkQkSpace implements MixedFESpace<TPCell, TPFace, ContinuousTPShape
 	}
 	
 	@Override
-	public Map<Integer, MixedShapeFunction<TPCell, TPFace, ContinuousTPShapeFunction, ContinuousTPVectorFunction>> getShapeFunctions()
+	public Map<Integer, MixedShapeFunction<TPCell, TPFace, ContinuousTPShapeFunction, NedelecShapeFunction>> getShapeFunctions()
 	{
-		Map<Integer, MixedShapeFunction<TPCell,TPFace,ContinuousTPShapeFunction,ContinuousTPVectorFunction>> functionNumbers = new TreeMap<>();
-		for (MixedShapeFunction<TPCell,TPFace,ContinuousTPShapeFunction,ContinuousTPVectorFunction> shapeFunction : shapeFunctions)
+		Map<Integer, MixedShapeFunction<TPCell,TPFace,ContinuousTPShapeFunction,NedelecShapeFunction>> functionNumbers = new TreeMap<>();
+		for (MixedShapeFunction<TPCell,TPFace,ContinuousTPShapeFunction,NedelecShapeFunction> shapeFunction : shapeFunctions)
 			functionNumbers.put(shapeFunction.getGlobalIndex(), shapeFunction);
 		return functionNumbers;
 	}
@@ -246,13 +246,13 @@ public class QkQkSpace implements MixedFESpace<TPCell, TPFace, ContinuousTPShape
 	}
 	
 	@Override
-	public Collection<MixedShapeFunction<TPCell, TPFace, ContinuousTPShapeFunction, ContinuousTPVectorFunction>> getShapeFunctionsWithSupportOnCell(TPCell cell)
+	public Collection<MixedShapeFunction<TPCell, TPFace, ContinuousTPShapeFunction, NedelecShapeFunction>> getShapeFunctionsWithSupportOnCell(TPCell cell)
 	{
 		return supportOnCell.get(cell);
 	}
 	
 	@Override
-	public Collection<MixedShapeFunction<TPCell, TPFace, ContinuousTPShapeFunction, ContinuousTPVectorFunction>> getShapeFunctionsWithSupportOnFace(TPFace face)
+	public Collection<MixedShapeFunction<TPCell, TPFace, ContinuousTPShapeFunction, NedelecShapeFunction>> getShapeFunctionsWithSupportOnFace(TPFace face)
 	{
 		return supportOnFace.get(face);
 	}
@@ -282,53 +282,60 @@ public class QkQkSpace implements MixedFESpace<TPCell, TPFace, ContinuousTPShape
 	{
 		MixedFunction boundaryMixed = new MixedFunction(boundaryValues);
 		int progress = 0;
-		for (TPFace F : getBoundaryFaces())
+		for (TPFace face : getFaces())
 		{
-			System.out.println((int) (100. * progress++ / getBoundaryFaces().size()));
-			for (MixedShapeFunction<TPCell, TPFace, ContinuousTPShapeFunction, ContinuousTPVectorFunction> shapeFunction :
-				getShapeFunctionsWithSupportOnFace(F))
+			System.out.println((int)(100*progress/getFaces().size())+"%");
+			progress++;
+			if (face.isBoundaryFace())
 			{
-				if (shapeFunction.isVelocity())
+				for (MixedShapeFunction<TPCell,TPFace,ContinuousTPShapeFunction,NedelecShapeFunction> shapeFunction :
+					getShapeFunctionsWithSupportOnFace(face))
 				{
-					double nodeValue = shapeFunction.getNodeFunctional().evaluate(boundaryMixed);
-					if (nodeValue != 0 || F.isOnFace(shapeFunction.getVelocityShapeFunction().getNodeFunctionalPoint()))
+					if(shapeFunction.isVelocity())
 					{
-						int shapeFunctionIndex = shapeFunction.getGlobalIndex();
-						boundaryNodes.add(shapeFunctionIndex);
-						getSystemMatrix().deleteLine(shapeFunctionIndex);
-						getSystemMatrix().set(1, shapeFunctionIndex, shapeFunctionIndex);
-						getRhs().set(nodeValue, shapeFunctionIndex);
+						double nodeValue = shapeFunction.getNodeFunctional().evaluate(boundaryMixed);
+						if (nodeValue != 0 || face.isOnFace(shapeFunction.getVelocityShapeFunction().getNodeFunctionalPoint()))
+						{
+							int shapeFunctionIndex = shapeFunction.getGlobalIndex();
+							boundaryNodes.add(shapeFunctionIndex);
+							systemMatrix.deleteLine(shapeFunctionIndex);
+							getSystemMatrix().set(1, shapeFunctionIndex, shapeFunctionIndex);
+							getRhs().set(nodeValue, shapeFunctionIndex);
+						}
 					}
 				}
 			}
-			
 		}
 	}
-	
 	public void setPressureBoundaryValues(ScalarFunction boundaryValues)
 	{
 		MixedFunction boundaryMixed = new MixedFunction(boundaryValues);
 		int progress = 0;
-		for (TPFace F : getBoundaryFaces())
+		for(MixedShapeFunction<TPCell,TPFace,ContinuousTPShapeFunction,NedelecShapeFunction> shapeFunction :
+			getShapeFunctions().values())
 		{
-			System.out.println((int) (100. * progress++ / getBoundaryFaces().size()));
-			for (MixedShapeFunction<TPCell, TPFace, ContinuousTPShapeFunction, ContinuousTPVectorFunction> shapeFunction :
-				getShapeFunctionsWithSupportOnFace(F))
+			if(!shapeFunction.isPressure())
+				continue;
+			boolean boundaryShapeFunction = false;
+			for(TPFace f: shapeFunction.getFaces())
 			{
-				if (shapeFunction.isPressure())
+				if(f.isBoundaryFace() && f.isOnFace(((LagrangeNodeFunctional)shapeFunction.getPressureShapeFunction().getNodeFunctional()).getPoint()))
 				{
-					double nodeValue = shapeFunction.getNodeFunctional().evaluate(boundaryMixed);
-					if (nodeValue != 0 || F.isOnFace(((LagrangeNodeFunctional) shapeFunction.getPressureShapeFunction().getNodeFunctional()).getPoint()))
-					{
-						int shapeFunctionIndex = shapeFunction.getGlobalIndex();
-						boundaryNodes.add(shapeFunctionIndex);
-						getSystemMatrix().deleteLine(shapeFunctionIndex);
-						getSystemMatrix().set(1, shapeFunctionIndex, shapeFunctionIndex);
-						getRhs().set(nodeValue, shapeFunctionIndex);
-					}
+					boundaryShapeFunction = true;
+					break;
 				}
 			}
-			
+			if(boundaryShapeFunction)
+			{
+				double nodeValue = shapeFunction.getNodeFunctional().evaluate(boundaryMixed);
+				System.out.println(shapeFunction.getGlobalIndex()+" NODEVALUE "+  nodeValue);
+				int shapeFunctionIndex = shapeFunction.getGlobalIndex();
+				boundaryNodes.add(shapeFunctionIndex);
+				systemMatrix.deleteLine(shapeFunctionIndex);
+				getSystemMatrix().set(1, shapeFunctionIndex, shapeFunctionIndex);
+				getRhs().set(nodeValue, shapeFunctionIndex);
+			}
 		}
+		
 	}
 }

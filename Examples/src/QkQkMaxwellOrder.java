@@ -1,24 +1,30 @@
 import basic.*;
 import com.google.common.primitives.Ints;
-import linalg.*;
+import linalg.CoordinateVector;
+import linalg.IterativeSolver;
+import linalg.SparseMatrix;
+import linalg.Vector;
 import mixed.*;
 import tensorproduct.*;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
+import java.util.TreeMap;
 
-
-public class QkQkDarcyOrder
+public class QkQkMaxwellOrder
 {
 	public static void main(String[] args)
 	{
-		
-		CoordinateVector start = CoordinateVector.fromValues(-1, -1);
-		CoordinateVector end = CoordinateVector.fromValues(1, 1);
+		CoordinateVector start = CoordinateVector.fromValues(0, 0,0);
+		CoordinateVector end = CoordinateVector.fromValues(1, 1,1);
+		int polynomialDegree = 2;
 		TPVectorCellIntegral<ContinuousTPVectorFunction> valueValue =
-			new TPVectorCellIntegral<>(TPVectorCellIntegral.VALUE_VALUE);
-		MixedCellIntegral<TPCell, TPFace,ContinuousTPShapeFunction, ContinuousTPVectorFunction>
-			divValue = new MixedTPCellIntegral<>(MixedTPCellIntegral.DIV_VALUE);
+			new TPVectorCellIntegral<>(TPVectorCellIntegral.ROT_ROT);
+		MixedCellIntegral<TPCell,TPFace,ContinuousTPShapeFunction, ContinuousTPVectorFunction>
+			divValue =
+			new MixedTPCellIntegral<>(ScalarFunction.constantFunction(-1),
+				MixedTPCellIntegral.DIV_VALUE);
 		MixedCellIntegral<TPCell, TPFace, ContinuousTPShapeFunction, ContinuousTPVectorFunction> vv =
 			MixedCellIntegral.fromVelocityIntegral(valueValue);
 		List<CellIntegral<TPCell, TPFace, MixedShapeFunction<TPCell, TPFace,ContinuousTPShapeFunction,
@@ -29,47 +35,49 @@ public class QkQkDarcyOrder
 		List<FaceIntegral<TPCell, TPFace, MixedShapeFunction<TPCell, TPFace,ContinuousTPShapeFunction,
 			ContinuousTPVectorFunction>>> faceIntegrals = new ArrayList<>();
 		MixedRightHandSideIntegral<TPCell, TPFace, ContinuousTPShapeFunction, ContinuousTPVectorFunction> rightHandSideIntegral =
-			MixedRightHandSideIntegral.fromPressureIntegral(
-				new TPRightHandSideIntegral<ContinuousTPShapeFunction>(
-					LaplaceReferenceSolution.scalarRightHandSide(),TPRightHandSideIntegral.VALUE, false));
+			MixedRightHandSideIntegral.fromVelocityIntegral(
+				new TPVectorRightHandSideIntegral<ContinuousTPVectorFunction>(MaxwellReferenceSolution.rightHandSide(),
+					TPVectorRightHandSideIntegral.VALUE));
 		List<RightHandSideIntegral<TPCell, TPFace, MixedShapeFunction<TPCell, TPFace,ContinuousTPShapeFunction,
 			ContinuousTPVectorFunction>>> rightHandSideIntegrals = new ArrayList<>();
 		rightHandSideIntegrals.add(rightHandSideIntegral);
+		
 		List<BoundaryRightHandSideIntegral<TPCell, TPFace, MixedShapeFunction<TPCell, TPFace,ContinuousTPShapeFunction,
-			ContinuousTPVectorFunction>>> boundaryFaceIntegrals = new ArrayList<>();
-		MixedBoundaryRightHandSideIntegral<TPCell, TPFace, ContinuousTPShapeFunction, ContinuousTPVectorFunction> dirichlet =
-			MixedBoundaryRightHandSideIntegral.fromVelocityIntegral(
-				new TPVectorBoundaryFaceIntegral<ContinuousTPVectorFunction>(LaplaceReferenceSolution.scalarBoundaryValues(),
-					TPVectorBoundaryFaceIntegral.NORMAL_VALUE));
-		boundaryFaceIntegrals.add(dirichlet);
-		int polynomialDegree = 3;
+			ContinuousTPVectorFunction>>> boundaryFaceIntegrals =
+			new ArrayList<>();
+		QkQkSpace grid = null;
 		List<ScalarFunction> solutions = new ArrayList<>();
 		List<VectorFunction> solutionsVec = new ArrayList<>();
-		QkQkSpace grid = null;
 		for(int i = 0; i < 3; i++)
 		{
 			grid = new QkQkSpace(start, end,
-				Ints.asList(2*(int)Math.pow(2,i),2*(int)Math.pow(2,i)), polynomialDegree);
+				Ints.asList(3*(int)Math.pow(2,i), 3*(int)Math.pow(2,i), 3*(int)Math.pow(2,i)),
+				polynomialDegree);
 			grid.assembleCells();
 			grid.assembleFunctions(polynomialDegree);
 			grid.initializeSystemMatrix();
 			grid.initializeRhs();
+			System.out.println("velocity Boundary");
+			grid.setVelocityBoundaryValues(MaxwellReferenceSolution.vectorBoundaryValues());
+			System.out.println("pressure Boundary");
+			grid.setPressureBoundaryValues(MaxwellReferenceSolution.pressureBoundaryValues());
+			System.out.println("Cell Integrals");
 			grid.evaluateCellIntegrals(cellIntegrals, rightHandSideIntegrals);
+			System.out.println("Face Integrals");
 			grid.evaluateFaceIntegrals(faceIntegrals, boundaryFaceIntegrals);
+			System.out.println("solve system: " + grid.getSystemMatrix().getRows() + "×" + grid.getSystemMatrix().getCols());
 			IterativeSolver<SparseMatrix> it = new IterativeSolver<>();
-			Vector solution1 = it.solveGMRES(grid.getSystemMatrix(), grid.getRhs(), 1e-9);
+			Vector solution1 = it.solveGMRES(grid.getSystemMatrix(), grid.getRhs(), 1e-7);
 			MixedFESpaceFunction<TPCell,TPFace,ContinuousTPShapeFunction,ContinuousTPVectorFunction> solut =
 				new MixedFESpaceFunction<>(
 					grid.getShapeFunctions(), solution1);
 			solutions.add(solut.getPressureFunction());
 			solutionsVec.add(solut.getVelocityFunction());
 		}
-		solutions.add(LaplaceReferenceSolution.scalarReferenceSolution());
-		solutionsVec.add(LaplaceReferenceSolution.scalarReferenceSolution().getGradientFunction());
-		System.out.println(ConvergenceOrderEstimator.estimateL2Scalar(solutions, grid.generatePlotPoints(50)));
+		solutions.add(MaxwellReferenceSolution.pressureReferenceSolution());
+		solutionsVec.add(MaxwellReferenceSolution.velocityReferenceSolution());
 		System.out.println(ConvergenceOrderEstimator.estimateL2Vector(solutionsVec,
-			grid.generatePlotPoints(50)));
-		
-		
+			grid.generatePlotPoints(20)));
+		System.out.println(ConvergenceOrderEstimator.estimateL2Scalar(solutions, grid.generatePlotPoints(20)));
 	}
 }

@@ -27,8 +27,14 @@ public interface FESpaceTools<CT extends Cell<CT,FT>, FT extends  Face<CT,FT>,
 				System.out.println((int)(50.0*increaseCellCounter()/space.getCells().size())+"%");
 				for (ST v : space.getShapeFunctionsWithSupportOnCell(K))
 				{
+					if(space.getFixedNodeIndices().contains(v.getGlobalIndex()))
+						continue;
 					for (ST u : space.getShapeFunctionsWithSupportOnCell(K))
 					{
+						if(space.getFixedNodeIndices().contains(u.getGlobalIndex()))
+							continue;
+						if(space.getFixedNodeIndices().contains(u.getGlobalIndex()))
+							continue;
 						double integral = integralEvaluation.apply(K,u,v);
 						if(integral != 0)
 							space.getSystemMatrix().add( integral,v.getGlobalIndex(),
@@ -47,6 +53,8 @@ public interface FESpaceTools<CT extends Cell<CT,FT>, FT extends  Face<CT,FT>,
 				System.out.println((int)(50.0*increaseCellCounter()/space.getCells().size())+"%");
 				for (ST v : space.getShapeFunctionsWithSupportOnCell(K))
 				{
+					if(space.getFixedNodeIndices().contains(v.getGlobalIndex()))
+						continue;
 					double integral = integralEvaluation.apply(K,v);
 					if(integral != 0)
 						space.getRhs().add( integral,v.getGlobalIndex());
@@ -64,8 +72,12 @@ public interface FESpaceTools<CT extends Cell<CT,FT>, FT extends  Face<CT,FT>,
 				System.out.println((int)(50.0*increaseFaceCounter()/space.getFaces().size())+"%");
 				for (ST v : space.getShapeFunctionsWithSupportOnFace(F))
 				{
+					if(space.getFixedNodeIndices().contains(v.getGlobalIndex()))
+						continue;
 					for (ST u : space.getShapeFunctionsWithSupportOnFace(F))
 					{
+						if(space.getFixedNodeIndices().contains(u.getGlobalIndex()))
+							continue;
 						double integral = integralEvaluation.apply(F,u,v);
 						if(integral != 0)
 							space.getSystemMatrix().add( integral,v.getGlobalIndex(),
@@ -84,6 +96,8 @@ public interface FESpaceTools<CT extends Cell<CT,FT>, FT extends  Face<CT,FT>,
 				System.out.println((int)(50.0*increaseFaceCounter()/space.getFaces().size())+"%");
 				for (ST v : space.getShapeFunctionsWithSupportOnFace(F))
 				{
+					if(space.getFixedNodeIndices().contains(v.getGlobalIndex()))
+						continue;
 					double integral = integralEvaluation.apply(F,v);
 					if(integral != 0)
 						space.getRhs().add( integral,v.getGlobalIndex());

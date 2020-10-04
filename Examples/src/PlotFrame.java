@@ -1,3 +1,4 @@
+import basic.ScalarFunction;
 import com.google.common.collect.Iterables;
 import linalg.CoordinateVector;
 import linalg.Vector;
@@ -107,12 +108,21 @@ public class PlotFrame
 		}
 		return new Color(c,gr,255-c);
 	}
-	public PlotFrame(List<Map<CoordinateVector, Double>> valueList, CoordinateVector startCoordinates,
+	public PlotFrame(List<Map<CoordinateVector, Double>> valueMapList, CoordinateVector startCoordinates,
 	                 CoordinateVector endCoordinates)
 	{
 		Map<String,Map<CoordinateVector, Double>> vmap= new TreeMap<>();
-		for(int i = 0; i < valueList.size(); i++)
-			vmap.put("Values "+i, valueList.get(i));
+		for(int i = 0; i < valueMapList.size(); i++)
+			vmap.put("Values "+i, valueMapList.get(i));
+		initialize(vmap,startCoordinates,endCoordinates);
+	}
+	public PlotFrame(List<ScalarFunction> functions, List<CoordinateVector> points,
+	                 CoordinateVector startCoordinates,
+	                 CoordinateVector endCoordinates)
+	{
+		Map<String,Map<CoordinateVector, Double>> vmap= new TreeMap<>();
+		for(int i = 0; i < functions.size(); i++)
+			vmap.put("Values "+i, functions.get(i).valuesInPoints(points));
 		initialize(vmap,startCoordinates,endCoordinates);
 	}
 	public PlotFrame(Map<String,Map<CoordinateVector, Double>> valueList, CoordinateVector startCoordinates,

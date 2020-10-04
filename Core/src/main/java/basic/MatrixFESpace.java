@@ -1,12 +1,14 @@
 package basic;
 
-import com.google.common.base.Stopwatch;
+
+import java.util.Set;
 import linalg.Matrix;
 import linalg.Vector;
 import mixed.MixedCellIntegral;
 import mixed.MixedTPCellIntegral;
 
 import java.util.List;
+import java.util.TreeSet;
 
 public interface MatrixFESpace<CT extends Cell<CT,FT>, FT extends  Face<CT,FT>,
 	ST extends ShapeFunction<CT,FT,ST,valueT,gradientT,hessianT>,valueT,gradientT,hessianT
@@ -20,7 +22,10 @@ public interface MatrixFESpace<CT extends Cell<CT,FT>, FT extends  Face<CT,FT>,
 	Vector getRhs();
 	
 	Matrix getSystemMatrix();
-	
+	default Set<Integer> getFixedNodeIndices()
+	{
+		return new TreeSet<Integer>();
+	}
 	default void evaluateCellIntegrals(List<CellIntegral<CT, FT, ST>> cellIntegrals,
 	                                   List<RightHandSideIntegral<CT, FT, ST>> rightHandSideIntegrals)
 	{
