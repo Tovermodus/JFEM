@@ -11,7 +11,7 @@ import java.util.List;
 import java.util.Set;
 import java.util.TreeSet;
 
-public class TPFace implements Face<TPCell, TPFace>,Comparable<TPFace>
+public class TPFace implements Face<TPCell, TPFace, TPEdge>,Comparable<TPFace>
 {
 	double otherCoordinate;
 	List<Cell1D> cell1Ds;

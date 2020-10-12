@@ -1,32 +1,36 @@
 package mixed;
 
 import basic.*;
+import org.checkerframework.checker.units.qual.C;
 
-public class MixedBoundaryRightHandSideIntegral<CT extends Cell<CT,FT>, FT extends Face<CT,FT>,
-	PF extends ScalarShapeFunction<CT,FT,PF>, VF extends VectorShapeFunction<CT,FT,VF>> extends BoundaryRightHandSideIntegral<CT,FT,MixedShapeFunction<CT,FT,PF,VF>>
+public class MixedBoundaryRightHandSideIntegral<CT extends Cell<CT,FT,ET>,FT extends Face<CT,FT,ET>,
+	ET extends Edge<CT,FT,ET>,
+	PF extends ScalarShapeFunction<CT,FT,ET,PF>, VF extends VectorShapeFunction<CT,FT,ET,VF>> extends BoundaryRightHandSideIntegral<FT,MixedShapeFunction<CT,FT,ET,PF,VF>>
 {
-	private final BoundaryRightHandSideIntegral<CT, FT, PF> pressureIntegral;
-	private final BoundaryRightHandSideIntegral<CT, FT, VF> velocityIntegral;
+	private final BoundaryRightHandSideIntegral<FT, PF> pressureIntegral;
+	private final BoundaryRightHandSideIntegral<FT, VF> velocityIntegral;
 	
-	private MixedBoundaryRightHandSideIntegral(BoundaryRightHandSideIntegral<CT, FT, PF> pressureIntegral,
-	                                           BoundaryRightHandSideIntegral<CT, FT, VF> velocityIntegral)
+	private MixedBoundaryRightHandSideIntegral(BoundaryRightHandSideIntegral<FT, PF> pressureIntegral,
+	                                           BoundaryRightHandSideIntegral<FT, VF> velocityIntegral)
 	{
 		super();
 		this.pressureIntegral = pressureIntegral;
 		this.velocityIntegral = velocityIntegral;
 	}
 	
-	public static <CT extends Cell<CT, FT>, FT extends Face<CT, FT>,
-		PF extends ScalarShapeFunction<CT, FT, PF>, VF extends VectorShapeFunction<CT, FT, VF>
-		> MixedBoundaryRightHandSideIntegral<CT, FT, PF, VF> fromPressureIntegral(BoundaryRightHandSideIntegral<CT, FT
+	public static <CT extends Cell<CT, FT, ET>, FT extends Face<CT, FT, ET>, ET extends Edge<CT, FT, ET>,
+		PF extends ScalarShapeFunction<CT, FT, ET, PF>, VF extends VectorShapeFunction<CT, FT, ET, VF>
+		> MixedBoundaryRightHandSideIntegral<CT, FT, ET, PF,
+		VF> fromPressureIntegral(BoundaryRightHandSideIntegral<FT
 		, PF> pressureIntegral)
 	{
 		return new MixedBoundaryRightHandSideIntegral<>(pressureIntegral, null);
 	}
 	
-	public static <CT extends Cell<CT, FT>, FT extends Face<CT, FT>,
-		PF extends ScalarShapeFunction<CT, FT, PF>, VF extends VectorShapeFunction<CT, FT, VF>> MixedBoundaryRightHandSideIntegral<CT, FT, PF,
-		VF> fromVelocityIntegral(BoundaryRightHandSideIntegral<CT, FT
+	public static <CT extends Cell<CT, FT, ET>, FT extends Face<CT, FT, ET>, ET extends Edge<CT, FT, ET>,
+		PF extends ScalarShapeFunction<CT, FT, ET, PF>, VF extends VectorShapeFunction<CT, FT, ET, VF>
+		> MixedBoundaryRightHandSideIntegral<CT, FT, ET, PF,
+		VF> fromVelocityIntegral(BoundaryRightHandSideIntegral<FT
 		, VF> velocityIntegral)
 	{
 		return new MixedBoundaryRightHandSideIntegral<>(null, velocityIntegral);
@@ -43,17 +47,17 @@ public class MixedBoundaryRightHandSideIntegral<CT extends Cell<CT,FT>, FT exten
 	}
 	
 	public double evaluateBoundaryRightHandSideIntegral(FT face,
-	                                                    MixedShapeFunction<CT, FT, PF, VF> shapeFunction1)
+	                                                    MixedShapeFunction<CT, FT, ET, PF, VF> shapeFunction1)
 	{
 		if (isPressureIntegral())
 		{
-			if(!shapeFunction1.isPressure())
+			if (!shapeFunction1.isPressure())
 				return 0;
 			return pressureIntegral.evaluateBoundaryRightHandSideIntegral(face,
 				shapeFunction1.getPressureShapeFunction());
 		} else
 		{
-			if(!shapeFunction1.isVelocity())
+			if (!shapeFunction1.isVelocity())
 				return 0;
 			return velocityIntegral.evaluateBoundaryRightHandSideIntegral(face,
 				shapeFunction1.getVelocityShapeFunction());

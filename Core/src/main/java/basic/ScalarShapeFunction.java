@@ -11,9 +11,10 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-public abstract class ScalarShapeFunction<CT extends Cell<CT,FT>, FT extends Face<CT,FT>,
-	ST extends ScalarShapeFunction<CT,FT,ST>> extends ScalarFunction implements ShapeFunction<CT
-	,FT,ST,
+public abstract class ScalarShapeFunction<CT extends Cell<CT,FT,ET>, FT extends Face<CT,FT,ET>, ET extends Edge<CT,FT
+	,ET>,
+	ST extends ScalarShapeFunction<CT,FT,ET,ST>> extends ScalarFunction implements ShapeFunction<CT
+	,FT,ET,ST,
 	Double, CoordinateVector, Matrix>, Comparable<ST>
 {
 	protected int globalIndex;

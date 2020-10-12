@@ -16,7 +16,7 @@ import java.util.stream.Collectors;
 Workflow of this finite element is: first generate 1D cells, then
  */
 public class TPFESpace implements MatrixFESpace<TPCell,
-	TPFace,
+	TPFace,TPEdge,
 	TPShapeFunction,Double, CoordinateVector,Matrix>,
 	Assembleable
 {

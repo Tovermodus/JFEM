@@ -31,17 +31,17 @@ public class LaplaceScalarRT
 			false);
 		TPFaceIntegral<RTComponentFunction> jj = new TPFaceIntegral<>(ScalarFunction.constantFunction(10),
 			TPFaceIntegral.VALUE_JUMP_VALUE_JUMP, false);
-		ArrayList<CellIntegral<TPCell,TPFace,RTComponentFunction>> cellIntegrals =
+		ArrayList<CellIntegral<TPCell,RTComponentFunction>> cellIntegrals =
 			new ArrayList<>();
 		cellIntegrals.add(gg);
-		ArrayList<FaceIntegral<TPCell,TPFace,RTComponentFunction>> faceIntegrals = new ArrayList<>();
+		ArrayList<FaceIntegral<TPFace,RTComponentFunction>> faceIntegrals = new ArrayList<>();
 		faceIntegrals.add(jj);
 		TPRightHandSideIntegral<RTComponentFunction> rightHandSideIntegral =
 			new TPRightHandSideIntegral<>(ScalarFunction.constantFunction(4),TPRightHandSideIntegral.VALUE,
 				true);
-		ArrayList<RightHandSideIntegral<TPCell,TPFace,RTComponentFunction>> rightHandSideIntegrals = new ArrayList<>();
+		ArrayList<RightHandSideIntegral<TPCell,RTComponentFunction>> rightHandSideIntegrals = new ArrayList<>();
 		rightHandSideIntegrals.add(rightHandSideIntegral);
-		ArrayList<BoundaryRightHandSideIntegral<TPCell,TPFace,RTComponentFunction>> boundaryFaceIntegrals = new ArrayList<>();
+		ArrayList<BoundaryRightHandSideIntegral<TPFace,RTComponentFunction>> boundaryFaceIntegrals = new ArrayList<>();
 		grid.assembleCells();
 		grid.assembleFunctions(polynomialDegree);
 		grid.initializeSystemMatrix();

@@ -9,7 +9,7 @@ package tensorproduct;
 	
 	import java.util.*;
 
-public class RTComponentFunction extends ScalarShapeFunction<TPCell, TPFace,RTComponentFunction> implements Comparable<RTComponentFunction> {
+public class RTComponentFunction extends ScalarShapeFunction<TPCell, TPFace,TPEdge,RTComponentFunction> implements Comparable<RTComponentFunction> {
 	
 	private Map<TPCell, List<RTBasisFunction1D>> cells;
 	private Set<TPFace> faces;

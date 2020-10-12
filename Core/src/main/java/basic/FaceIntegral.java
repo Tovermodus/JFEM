@@ -1,7 +1,6 @@
 package basic;
 
-public abstract class FaceIntegral<CT extends Cell<CT,FT>, FT extends Face<CT,FT>, ST extends ShapeFunction<CT,
-	FT,ST,?,?,?>>
+public abstract class FaceIntegral<FT extends Face<?,FT,?>, ST extends ShapeFunction<?,	FT,?,ST,?,?,?>>
 {
 	protected Function<?, ?, ?> weight;
 	protected String name;

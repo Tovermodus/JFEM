@@ -3,7 +3,7 @@ package tensorproduct;
 import basic.*;
 import linalg.CoordinateVector;
 
-public class TPRightHandSideIntegral<ST extends ScalarShapeFunction<TPCell,TPFace,ST>> extends RightHandSideIntegral<TPCell,TPFace,ST>
+public class TPRightHandSideIntegral<ST extends ScalarShapeFunction<TPCell,TPFace,TPEdge,ST>> extends RightHandSideIntegral<TPCell,ST>
 {
 	public static final String VALUE="Value";
 	private final boolean weightIsTensorProduct;

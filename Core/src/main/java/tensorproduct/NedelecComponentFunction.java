@@ -10,7 +10,7 @@ import linalg.Matrix;
 
 import java.util.*;
 
-public class NedelecComponentFunction extends ScalarShapeFunction<TPCell, TPFace, NedelecComponentFunction> implements Comparable<NedelecComponentFunction> {
+public class NedelecComponentFunction extends ScalarShapeFunction<TPCell, TPFace, TPEdge,NedelecComponentFunction> implements Comparable<NedelecComponentFunction> {
 	
 	private final Map<TPCell, List<RTBasisFunction1D>> cells;
 	private Set<TPFace> faces;

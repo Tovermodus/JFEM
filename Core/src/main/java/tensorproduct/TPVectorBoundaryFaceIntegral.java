@@ -7,7 +7,7 @@ import basic.VectorShapeFunction;
 import com.google.common.collect.Iterables;
 import linalg.CoordinateVector;
 
-public class TPVectorBoundaryFaceIntegral<ST extends VectorShapeFunction<TPCell,TPFace,ST>> extends BoundaryRightHandSideIntegral<TPCell,TPFace,
+public class TPVectorBoundaryFaceIntegral<ST extends VectorShapeFunction<TPCell,TPFace,TPEdge,ST>> extends BoundaryRightHandSideIntegral<TPFace,
 	ST>
 {
 	public static final String VALUE="Value";

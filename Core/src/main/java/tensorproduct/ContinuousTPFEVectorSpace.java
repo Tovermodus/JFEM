@@ -12,7 +12,8 @@ import linalg.Vector;
 import java.util.*;
 import java.util.stream.Collectors;
 
-public class ContinuousTPFEVectorSpace implements MatrixFESpace<TPCell, TPFace, ContinuousTPVectorFunction,CoordinateVector,
+public class ContinuousTPFEVectorSpace implements MatrixFESpace<TPCell, TPFace, TPEdge,ContinuousTPVectorFunction,
+	CoordinateVector,
 	CoordinateMatrix,
 	Tensor>,
 	Assembleable

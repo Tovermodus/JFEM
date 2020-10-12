@@ -12,7 +12,7 @@ import java.util.Map;
 import java.util.TreeMap;
 import java.util.concurrent.ConcurrentHashMap;
 
-public class MixedFunction implements Function<MixedValue,
+public class MixedFunction implements Function < MixedValue,
 	MixedGradient,
 	MixedHessian>
 {

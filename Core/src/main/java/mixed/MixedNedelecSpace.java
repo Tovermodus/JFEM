@@ -16,15 +16,18 @@ import tensorproduct.*;
 import java.util.*;
 import java.util.stream.Collectors;
 
-public class MixedNedelecSpace implements MixedFESpace<TPCell, TPFace, ContinuousTPShapeFunction, NedelecShapeFunction>
+public class MixedNedelecSpace implements MixedFESpace<TPCell, TPFace,TPEdge, ContinuousTPShapeFunction,
+	NedelecShapeFunction>
 {
 	
 	List<List<Double>> coordinates1D;
 	List<List<Cell1D>> cells1D;
 	List<TPCell> cells;
 	List<TPFace> faces;
-	TreeMultimap<TPCell, MixedShapeFunction<TPCell, TPFace, ContinuousTPShapeFunction,NedelecShapeFunction>> supportOnCell;
-	TreeMultimap<TPFace, MixedShapeFunction<TPCell, TPFace, ContinuousTPShapeFunction,NedelecShapeFunction>> supportOnFace;
+	TreeMultimap<TPCell, MixedShapeFunction<TPCell, TPFace, TPEdge, ContinuousTPShapeFunction,
+		NedelecShapeFunction>> supportOnCell;
+	TreeMultimap<TPFace, MixedShapeFunction<TPCell, TPFace,TPEdge, ContinuousTPShapeFunction,
+	NedelecShapeFunction>> supportOnFace;
 	Map<List<Integer>, TPCell> lexicographicCellNumbers;
 	Set<NedelecMixedFunction> shapeFunctions;
 	SparseMatrix systemMatrix;
@@ -230,10 +233,12 @@ public class MixedNedelecSpace implements MixedFESpace<TPCell, TPFace, Continuou
 	}
 	
 	@Override
-	public Map<Integer, MixedShapeFunction<TPCell, TPFace, ContinuousTPShapeFunction, NedelecShapeFunction>> getShapeFunctions()
+	public Map<Integer, MixedShapeFunction<TPCell, TPFace,TPEdge, ContinuousTPShapeFunction,
+	NedelecShapeFunction>> getShapeFunctions()
 	{
-		Map<Integer, MixedShapeFunction<TPCell,TPFace,ContinuousTPShapeFunction,NedelecShapeFunction>> functionNumbers = new TreeMap<>();
-		for (MixedShapeFunction<TPCell,TPFace,ContinuousTPShapeFunction,NedelecShapeFunction> shapeFunction : shapeFunctions)
+		Map<Integer, MixedShapeFunction<TPCell,TPFace,TPEdge,ContinuousTPShapeFunction,NedelecShapeFunction>> functionNumbers = new TreeMap<>();
+		for (MixedShapeFunction<TPCell,TPFace,TPEdge,ContinuousTPShapeFunction,NedelecShapeFunction> shapeFunction
+			: shapeFunctions)
 			functionNumbers.put(shapeFunction.getGlobalIndex(), shapeFunction);
 		return functionNumbers;
 	}
@@ -246,13 +251,13 @@ public class MixedNedelecSpace implements MixedFESpace<TPCell, TPFace, Continuou
 	}
 	
 	@Override
-	public Collection<MixedShapeFunction<TPCell, TPFace, ContinuousTPShapeFunction, NedelecShapeFunction>> getShapeFunctionsWithSupportOnCell(TPCell cell)
+	public Collection<MixedShapeFunction<TPCell, TPFace, TPEdge,ContinuousTPShapeFunction, NedelecShapeFunction>> getShapeFunctionsWithSupportOnCell(TPCell cell)
 	{
 		return supportOnCell.get(cell);
 	}
 	
 	@Override
-	public Collection<MixedShapeFunction<TPCell, TPFace, ContinuousTPShapeFunction, NedelecShapeFunction>> getShapeFunctionsWithSupportOnFace(TPFace face)
+	public Collection<MixedShapeFunction<TPCell, TPFace, TPEdge,ContinuousTPShapeFunction, NedelecShapeFunction>> getShapeFunctionsWithSupportOnFace(TPFace face)
 	{
 		return supportOnFace.get(face);
 	}
@@ -288,7 +293,8 @@ public class MixedNedelecSpace implements MixedFESpace<TPCell, TPFace, Continuou
 			progress++;
 			if (face.isBoundaryFace())
 			{
-				for (MixedShapeFunction<TPCell,TPFace,ContinuousTPShapeFunction,NedelecShapeFunction> shapeFunction :
+				for (MixedShapeFunction<TPCell,TPFace,TPEdge,ContinuousTPShapeFunction,
+					NedelecShapeFunction> shapeFunction :
 					getShapeFunctionsWithSupportOnFace(face))
 				{
 					if(shapeFunction.isVelocity())
@@ -311,7 +317,7 @@ public class MixedNedelecSpace implements MixedFESpace<TPCell, TPFace, Continuou
 	{
 		MixedFunction boundaryMixed = new MixedFunction(boundaryValues);
 		int progress = 0;
-		for(MixedShapeFunction<TPCell,TPFace,ContinuousTPShapeFunction,NedelecShapeFunction> shapeFunction :
+		for(MixedShapeFunction<TPCell,TPFace,TPEdge,ContinuousTPShapeFunction,NedelecShapeFunction> shapeFunction :
 			getShapeFunctions().values())
 		{
 			if(!shapeFunction.isPressure())

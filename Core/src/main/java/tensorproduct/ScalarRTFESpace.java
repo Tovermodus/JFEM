@@ -16,7 +16,7 @@ import java.util.*;
 import java.util.stream.Collectors;
 
 public class ScalarRTFESpace implements MatrixFESpace<TPCell,
-	TPFace,RTComponentFunction,Double, CoordinateVector, Matrix>, Assembleable
+	TPFace,TPEdge,RTComponentFunction,Double, CoordinateVector, Matrix>, Assembleable
 {
 	List<List<Double>> coordinates1D;
 	List<List<Cell1D>> cells1D;

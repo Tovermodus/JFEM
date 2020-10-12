@@ -5,7 +5,7 @@ import linalg.CoordinateVector;
 import java.util.List;
 import java.util.Set;
 
-public interface Cell<CT extends Cell<CT,FT>, FT extends Face<CT,FT>> extends Comparable<CT>
+public interface Cell<CT extends Cell<CT,FT, ET>, FT extends Face<CT,FT, ET>, ET extends Edge<CT,FT,ET>> extends Comparable<CT>
 {
 	int  getDimension();
 	

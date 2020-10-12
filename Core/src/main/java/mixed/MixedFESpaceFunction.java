@@ -10,14 +10,15 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.ConcurrentHashMap;
 
-public class MixedFESpaceFunction<CT extends Cell<CT,FT>, FT extends Face<CT,FT>, PF extends ScalarShapeFunction<CT,FT,
+public class MixedFESpaceFunction<CT extends Cell<CT,FT,ET>, FT extends Face<CT,FT,ET>, ET extends Edge<CT,FT,ET>,
+	PF extends ScalarShapeFunction<CT,FT,ET,
 	PF>,
-	VF extends VectorShapeFunction<CT,FT,VF>> extends MixedFunction
+	VF extends VectorShapeFunction<CT,FT,ET,VF>> extends MixedFunction
 {
-	private HashMap<MixedShapeFunction<CT,FT,PF,VF>, Double> coefficients;
-	Map<MixedShapeFunction<CT, FT, PF, VF>, Double> pressureCoefficients;
-	Map<MixedShapeFunction<CT, FT, PF, VF>, Double> velocityCoefficients;
-	public MixedFESpaceFunction(MixedShapeFunction<CT,FT,PF,VF>[] functions, double[] coefficients)
+	private HashMap<MixedShapeFunction<CT,FT,ET,PF,VF>, Double> coefficients;
+	Map<MixedShapeFunction<CT, FT,ET, PF, VF>, Double> pressureCoefficients;
+	Map<MixedShapeFunction<CT, FT,ET, PF, VF>, Double> velocityCoefficients;
+	public MixedFESpaceFunction(MixedShapeFunction<CT,FT,ET,PF,VF>[] functions, double[] coefficients)
 	{
 		super();
 		assert(functions.length == coefficients.length);
@@ -28,11 +29,11 @@ public class MixedFESpaceFunction<CT extends Cell<CT,FT>, FT extends Face<CT,FT>
 		}
 		initializeFunctionSets();
 	}
-	public MixedFESpaceFunction(Map<Integer, MixedShapeFunction<CT,FT,PF,VF>> functions, Vector coefficients)
+	public MixedFESpaceFunction(Map<Integer, MixedShapeFunction<CT,FT,ET,PF,VF>> functions, Vector coefficients)
 	{
 		assert(functions.size() == coefficients.size());
 		this.coefficients = new HashMap<>();
-		for(Map.Entry<Integer,MixedShapeFunction<CT,FT,PF,VF>> function:functions.entrySet())
+		for(Map.Entry<Integer,MixedShapeFunction<CT,FT,ET,PF,VF>> function:functions.entrySet())
 		{
 			this.coefficients.put(function.getValue(), coefficients.at(function.getKey()));
 		}
@@ -42,7 +43,7 @@ public class MixedFESpaceFunction<CT extends Cell<CT,FT>, FT extends Face<CT,FT>
 	{
 		pressureCoefficients = new ConcurrentHashMap<>();
 		velocityCoefficients = new ConcurrentHashMap<>();
-		for (MixedShapeFunction<CT, FT, PF, VF> shapeFunction : coefficients.keySet())
+		for (MixedShapeFunction<CT, FT,ET, PF, VF> shapeFunction : coefficients.keySet())
 		{
 			if (shapeFunction.isPressure())
 				pressureCoefficients.put(shapeFunction, coefficients.get(shapeFunction));
@@ -60,7 +61,7 @@ public class MixedFESpaceFunction<CT extends Cell<CT,FT>, FT extends Face<CT,FT>
 	@Override
 	public ScalarFunction getPressureFunction()
 	{
-		MixedFESpaceFunction<CT, FT, PF, VF> me = this;
+		MixedFESpaceFunction<CT, FT,ET, PF, VF> me = this;
 		return new ScalarFunction()
 		{
 			@Override
@@ -86,7 +87,7 @@ public class MixedFESpaceFunction<CT extends Cell<CT,FT>, FT extends Face<CT,FT>
 	@Override
 	public VectorFunction getVelocityFunction()
 	{
-		MixedFESpaceFunction<CT, FT, PF, VF> me = this;
+		MixedFESpaceFunction<CT, FT, ET,PF, VF> me = this;
 		return new VectorFunction()
 		{
 			@Override

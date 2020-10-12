@@ -117,37 +117,5 @@ public abstract class ScalarFunction implements Function<Double, CoordinateVecto
 			}
 		};
 	}
-//	default void plot(int pointres, String filename)
-//	{
-//		double[][] values = new double[pointres][pointres];
-//		for (int k = 0; k < pointres; k++)
-//		{
-//			for (int j = 0; j < pointres; j++)
-//			{
-//				DoubleTensor pos = DoubleTensor.vectorFromValues(1.0 / (pointres - 1) * k,
-//					1.0 / (pointres - 1) * j);
-//
-//				values[k][j] = value(pos);
-//			}
-//		}
-//		try
-//		{
-//			BufferedWriter plotWriter = new BufferedWriter(new FileWriter(filename));
-//			for (int i = 0; i < pointres; i++)
-//			{
-//				for (int j = 0; j < pointres; j++)
-//				{
-//					plotWriter.write(values[i][j] + " ");
-//				}
-//				plotWriter.newLine();
-//			}
-//			plotWriter.flush();
-//			plotWriter.close();
-//		} catch (
-//			IOException e)
-//		{
-//			e.printStackTrace();
-//		}
-//	}
 
 }

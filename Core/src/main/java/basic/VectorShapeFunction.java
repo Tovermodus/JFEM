@@ -6,8 +6,9 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
 
-public abstract class VectorShapeFunction<CT extends Cell<CT,FT>,FT extends Face<CT,FT>,
-	ST extends VectorShapeFunction<CT,FT,ST>> extends VectorFunction implements ShapeFunction<CT,FT
+public abstract class VectorShapeFunction<CT extends Cell<CT,FT, ET>,FT extends Face<CT,FT, ET>, ET extends Edge<CT,
+	FT,ET>,
+	ST extends VectorShapeFunction<CT,FT,ET,ST>> extends VectorFunction implements ShapeFunction<CT,FT,ET
 	,ST,	CoordinateVector,
 	CoordinateMatrix, Tensor>, Comparable<ST>
 {

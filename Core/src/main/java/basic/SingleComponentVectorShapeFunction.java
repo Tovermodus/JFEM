@@ -2,19 +2,14 @@ package basic;
 
 import linalg.CoordinateMatrix;
 import linalg.CoordinateVector;
-import linalg.Matrix;
-import linalg.Tensor;
 import org.jetbrains.annotations.NotNull;
-import tensorproduct.TPCell;
-import tensorproduct.TPFace;
-import tensorproduct.TPShapeFunction;
 
 import java.lang.reflect.InvocationTargetException;
-import java.util.Arrays;
 import java.util.Set;
 
-public class SingleComponentVectorShapeFunction<CT extends Cell<CT,FT>, FT extends Face<CT,FT>,
-	ST extends ScalarShapeFunction<CT,FT,ST>, VST extends SingleComponentVectorShapeFunction<CT,FT,ST,VST>> extends VectorShapeFunction<CT,FT,
+public class SingleComponentVectorShapeFunction<CT extends Cell<CT,FT,ET>, FT extends Face<CT,FT,ET>,
+	ET extends Edge<CT,FT,ET>,
+	ST extends ScalarShapeFunction<CT,FT,ET,ST>, VST extends SingleComponentVectorShapeFunction<CT,FT,ET,ST,VST>> extends VectorShapeFunction<CT,FT,ET,
 	VST>
 {
 	private final ST componentFunction;

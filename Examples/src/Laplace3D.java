@@ -31,15 +31,15 @@ public class Laplace3D
                 double penalty = 200000;
                 TPFaceIntegral<TPShapeFunction> jj = new TPFaceIntegral<>(ScalarFunction.constantFunction(penalty),
                         TPFaceIntegral.VALUE_JUMP_VALUE_JUMP, false);
-                ArrayList<CellIntegral<TPCell,TPFace,TPShapeFunction>> cellIntegrals =
+                ArrayList<CellIntegral<TPCell,TPShapeFunction>> cellIntegrals =
                         new ArrayList<>();
                 cellIntegrals.add(gg);
-                ArrayList<FaceIntegral<TPCell,TPFace,TPShapeFunction>> faceIntegrals = new ArrayList<>();
+                ArrayList<FaceIntegral<TPFace,TPShapeFunction>> faceIntegrals = new ArrayList<>();
                 faceIntegrals.add(jj);
                 TPRightHandSideIntegral<TPShapeFunction> rightHandSideIntegral =
                         new TPRightHandSideIntegral<>(ScalarFunction.constantFunction(1),TPRightHandSideIntegral.VALUE,
                                 true);
-                ArrayList<RightHandSideIntegral<TPCell,TPFace,TPShapeFunction>> rightHandSideIntegrals = new ArrayList<>();
+                ArrayList<RightHandSideIntegral<TPCell,TPShapeFunction>> rightHandSideIntegrals = new ArrayList<>();
                 rightHandSideIntegrals.add(rightHandSideIntegral);
                 TPBoundaryFaceIntegral<TPShapeFunction> bound = new TPBoundaryFaceIntegral<>(new ScalarFunction()
                 {
@@ -56,7 +56,7 @@ public class Laplace3D
                         }
                 },TPBoundaryFaceIntegral.VALUE,false);
                 
-                ArrayList<BoundaryRightHandSideIntegral<TPCell,TPFace,TPShapeFunction>> boundaryFaceIntegrals = new ArrayList<>();
+                ArrayList<BoundaryRightHandSideIntegral<TPFace,TPShapeFunction>> boundaryFaceIntegrals = new ArrayList<>();
                 boundaryFaceIntegrals.add(bound);
                 grid.assembleCells();
                 grid.assembleFunctions(polynomialDegree);

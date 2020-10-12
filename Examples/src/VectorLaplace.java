@@ -31,10 +31,10 @@ public class VectorLaplace
 		TPVectorFaceIntegral<TPVectorFunction> jj =
 			new TPVectorFaceIntegral<>(ScalarFunction.constantFunction(penalty),
 				TPVectorFaceIntegral.VALUE_NORMALAVERAGE_VALUE_NORMALAVERAGE);
-		ArrayList<CellIntegral<TPCell, TPFace, TPVectorFunction>> cellIntegrals =
+		ArrayList<CellIntegral<TPCell,  TPVectorFunction>> cellIntegrals =
 			new ArrayList<>();
 		cellIntegrals.add(gg);
-		ArrayList<FaceIntegral<TPCell, TPFace, TPVectorFunction>> faceIntegrals = new ArrayList<>();
+		ArrayList<FaceIntegral< TPFace, TPVectorFunction>> faceIntegrals = new ArrayList<>();
 		faceIntegrals.add(jj);
 		faceIntegrals.add(gj);
 		faceIntegrals.add(jg);
@@ -56,7 +56,7 @@ public class VectorLaplace
 //				}
 //			},
 //				TPVectorRightHandSideIntegral.VALUE);
-		ArrayList<RightHandSideIntegral<TPCell, TPFace, TPVectorFunction>> rightHandSideIntegrals = new ArrayList<>();
+		ArrayList<RightHandSideIntegral<TPCell,  TPVectorFunction>> rightHandSideIntegrals = new ArrayList<>();
 		rightHandSideIntegrals.add(rightHandSideIntegral);
 		ScalarFunction func = new ScalarFunction()
 		{
@@ -90,7 +90,7 @@ public class VectorLaplace
 				return CoordinateVector.fromValues(0,0);//func.value(pos), func.value(pos));
 			}
 		}, TPVectorBoundaryFaceIntegral.VALUE);
-		ArrayList<BoundaryRightHandSideIntegral<TPCell, TPFace, TPVectorFunction>> boundaryFaceIntegrals = new ArrayList<>();
+		ArrayList<BoundaryRightHandSideIntegral< TPFace, TPVectorFunction>> boundaryFaceIntegrals = new ArrayList<>();
 		boundaryFaceIntegrals.add(bound);
 		grid.assembleCells();
 		grid.assembleFunctions(polynomialDegree);

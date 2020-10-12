@@ -8,12 +8,13 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
 
-public abstract class MixedShapeFunction<CT extends Cell<CT, FT>,
-	FT extends Face<CT, FT>, PF extends ScalarShapeFunction<CT, FT
-	, PF>,VF extends VectorShapeFunction<CT, FT, VF>>
+public abstract class MixedShapeFunction<CT extends Cell<CT, FT,ET>,
+	FT extends Face<CT, FT,ET>, ET extends Edge<CT,FT,ET>, PF extends ScalarShapeFunction<CT, FT, ET
+	, PF>,VF extends VectorShapeFunction<CT, FT,ET, VF>>
 	extends MixedFunction
-	implements ShapeFunction<CT, FT, MixedShapeFunction<CT, FT, PF, VF>, MixedValue, MixedGradient, MixedHessian>
-	, Comparable<MixedShapeFunction<CT, FT, PF, VF>>
+	implements ShapeFunction<CT, FT, ET,MixedShapeFunction<CT, FT,ET, PF, VF>, MixedValue, MixedGradient,
+	MixedHessian>
+	, Comparable<MixedShapeFunction<CT, FT,ET, PF, VF>>
 {
 	protected int globalIndex;
 	
@@ -170,10 +171,10 @@ public abstract class MixedShapeFunction<CT extends Cell<CT, FT>,
 	}
 	
 	@Override
-	public Map<Integer, Double> prolongate(Set<MixedShapeFunction<CT, FT, PF, VF>> refinedFunctions)
+	public Map<Integer, Double> prolongate(Set<MixedShapeFunction<CT, FT,ET, PF, VF>> refinedFunctions)
 	{
 		Map<Integer, Double> ret = new HashMap<>();
-		for (MixedShapeFunction<CT, FT, PF, VF> shapeFunction : refinedFunctions)
+		for (MixedShapeFunction<CT, FT,ET, PF, VF> shapeFunction : refinedFunctions)
 		{
 			ret.put(shapeFunction.getGlobalIndex(), shapeFunction.getNodeFunctional().evaluate(this));
 		}
@@ -181,7 +182,7 @@ public abstract class MixedShapeFunction<CT extends Cell<CT, FT>,
 	}
 	
 	@Override
-	public int compareTo(@NotNull MixedShapeFunction<CT, FT, PF, VF> o)
+	public int compareTo(@NotNull MixedShapeFunction<CT, FT,ET, PF, VF> o)
 	{
 		if (o.isPressure() && isPressure())
 			return getPressureShapeFunction().compareTo(o.getPressureShapeFunction());

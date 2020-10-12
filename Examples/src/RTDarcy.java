@@ -22,34 +22,36 @@ public class RTDarcy
 			Ints.asList(3,3,3), polynomialDegree);
 		TPVectorCellIntegral<RTShapeFunction> valueValue =
 			new TPVectorCellIntegral<>(TPVectorCellIntegral.VALUE_VALUE);
-		MixedCellIntegral<TPCell,TPFace,ContinuousTPShapeFunction, RTShapeFunction>
+		MixedCellIntegral<TPCell,TPFace,TPEdge,ContinuousTPShapeFunction, RTShapeFunction>
 			divValue = new MixedTPCellIntegral<>(MixedTPCellIntegral.DIV_VALUE);
-		MixedCellIntegral<TPCell, TPFace, ContinuousTPShapeFunction, RTShapeFunction> vv =
+		MixedCellIntegral<TPCell, TPFace,TPEdge, ContinuousTPShapeFunction, RTShapeFunction> vv =
 			MixedCellIntegral.fromVelocityIntegral(valueValue);
-		List<CellIntegral<TPCell, TPFace, MixedShapeFunction<TPCell, TPFace,ContinuousTPShapeFunction,
+		List<CellIntegral<TPCell,  MixedShapeFunction<TPCell, TPFace,TPEdge,ContinuousTPShapeFunction,
 			RTShapeFunction>>> cellIntegrals =
 			new ArrayList<>();
 		cellIntegrals.add(vv);
 		cellIntegrals.add(divValue);
-		List<FaceIntegral<TPCell, TPFace, MixedShapeFunction<TPCell, TPFace,ContinuousTPShapeFunction,
+		List<FaceIntegral< TPFace, MixedShapeFunction<TPCell, TPFace,TPEdge,ContinuousTPShapeFunction,
 			RTShapeFunction>>> faceIntegrals = new ArrayList<>();
 		
-		MixedRightHandSideIntegral<TPCell, TPFace, ContinuousTPShapeFunction, RTShapeFunction> rightHandSideIntegral =
+		MixedRightHandSideIntegral<TPCell, TPFace,TPEdge, ContinuousTPShapeFunction, RTShapeFunction> rightHandSideIntegral =
 			MixedRightHandSideIntegral.fromPressureIntegral(
 				new TPRightHandSideIntegral<ContinuousTPShapeFunction>(ScalarFunction.constantFunction(-1),
 					TPRightHandSideIntegral.VALUE, false));
 		
 		
-		List<RightHandSideIntegral<TPCell, TPFace, MixedShapeFunction<TPCell, TPFace,ContinuousTPShapeFunction,
+		List<RightHandSideIntegral<TPCell,  MixedShapeFunction<TPCell, TPFace,TPEdge,
+			ContinuousTPShapeFunction,
 			RTShapeFunction>>> rightHandSideIntegrals = new ArrayList<>();
 		rightHandSideIntegrals.add(rightHandSideIntegral);
 		
 		
-		List<BoundaryRightHandSideIntegral<TPCell, TPFace, MixedShapeFunction<TPCell, TPFace,ContinuousTPShapeFunction,
+		List<BoundaryRightHandSideIntegral< TPFace, MixedShapeFunction<TPCell, TPFace,
+			TPEdge,ContinuousTPShapeFunction,
 			RTShapeFunction>>> boundaryFaceIntegrals =
 			new ArrayList<>();
 		
-		MixedBoundaryRightHandSideIntegral<TPCell, TPFace, ContinuousTPShapeFunction, RTShapeFunction> dirichlet =
+		MixedBoundaryRightHandSideIntegral<TPCell, TPFace, TPEdge,ContinuousTPShapeFunction, RTShapeFunction> dirichlet =
 			MixedBoundaryRightHandSideIntegral.fromVelocityIntegral(
 				new TPVectorBoundaryFaceIntegral<RTShapeFunction>(ScalarFunction.constantFunction(0),
 					TPVectorBoundaryFaceIntegral.NORMAL_VALUE));
@@ -77,7 +79,7 @@ public class RTDarcy
 		System.out.println(grid.getSystemMatrix().mvMul(solution1));
 		//grid.A.print_formatted();
 		//grid.rhs.print_formatted();
-		MixedFESpaceFunction<TPCell,TPFace,ContinuousTPShapeFunction,RTShapeFunction> solut =
+		MixedFESpaceFunction<TPCell,TPFace,TPEdge,ContinuousTPShapeFunction,RTShapeFunction> solut =
 			new MixedFESpaceFunction<>(
 				grid.getShapeFunctions(), solution1);
 		ArrayList<Map<CoordinateVector, Double>> valList = new ArrayList<>();

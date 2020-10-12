@@ -12,7 +12,7 @@ import linalg.Vector;
 import java.util.*;
 import java.util.stream.Collectors;
 
-public class RTFESpace implements MatrixFESpace<TPCell, TPFace, RTShapeFunction,CoordinateVector,
+public class RTFESpace implements MatrixFESpace<TPCell, TPFace, TPEdge,RTShapeFunction,CoordinateVector,
 	CoordinateMatrix,
 	Tensor>,
 	Assembleable

@@ -6,7 +6,7 @@ import basic.VectorNodeFunctional;
 import linalg.CoordinateVector;
 
 public class ContinuousTPVectorFunction extends SingleComponentVectorShapeFunction<TPCell,
-	TPFace, ContinuousTPShapeFunction, ContinuousTPVectorFunction>
+	TPFace, TPEdge,ContinuousTPShapeFunction, ContinuousTPVectorFunction>
 {
 	public ContinuousTPVectorFunction(TPCell supportCell, int polynomialDegree, int localIndex,
 	         Class<ContinuousTPShapeFunction> componentFunctionClass)

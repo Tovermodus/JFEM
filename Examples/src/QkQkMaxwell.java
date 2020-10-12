@@ -20,31 +20,31 @@ public class QkQkMaxwell
 			Ints.asList(8,8,8), polynomialDegree);
 		TPVectorCellIntegral<ContinuousTPVectorFunction> valueValue =
 			new TPVectorCellIntegral<>(TPVectorCellIntegral.ROT_ROT);
-		MixedCellIntegral<TPCell,TPFace,ContinuousTPShapeFunction, ContinuousTPVectorFunction>
+		MixedCellIntegral<TPCell,TPFace,TPEdge,ContinuousTPShapeFunction, ContinuousTPVectorFunction>
 			divValue =
 			new MixedTPCellIntegral<>(ScalarFunction.constantFunction(-1),
 				MixedTPCellIntegral.DIV_VALUE);
-		MixedCellIntegral<TPCell, TPFace, ContinuousTPShapeFunction, ContinuousTPVectorFunction> vv =
+		MixedCellIntegral<TPCell, TPFace, TPEdge,ContinuousTPShapeFunction, ContinuousTPVectorFunction> vv =
 			MixedCellIntegral.fromVelocityIntegral(valueValue);
-		List<CellIntegral<TPCell, TPFace, MixedShapeFunction<TPCell, TPFace,ContinuousTPShapeFunction,
+		List<CellIntegral<TPCell,  MixedShapeFunction<TPCell, TPFace,TPEdge,ContinuousTPShapeFunction,
 			ContinuousTPVectorFunction>>> cellIntegrals =
 			new ArrayList<>();
 		cellIntegrals.add(vv);
 		cellIntegrals.add(divValue);
-		List<FaceIntegral<TPCell, TPFace, MixedShapeFunction<TPCell, TPFace,ContinuousTPShapeFunction,
-					ContinuousTPVectorFunction>>> faceIntegrals = new ArrayList<>();
-		//faceIntegrals.add(jj);
-		//faceIntegrals.add(gj);
-		//faceIntegrals.add(jg);
-		MixedRightHandSideIntegral<TPCell, TPFace, ContinuousTPShapeFunction, ContinuousTPVectorFunction> rightHandSideIntegral =
+		List<FaceIntegral<TPFace, MixedShapeFunction<TPCell, TPFace,TPEdge,ContinuousTPShapeFunction,
+			ContinuousTPVectorFunction>>> faceIntegrals = new ArrayList<>();
+		MixedRightHandSideIntegral<TPCell, TPFace, TPEdge,ContinuousTPShapeFunction,
+			ContinuousTPVectorFunction> rightHandSideIntegral =
 			MixedRightHandSideIntegral.fromVelocityIntegral(
 				new TPVectorRightHandSideIntegral<ContinuousTPVectorFunction>(MaxwellReferenceSolution.rightHandSide(),
 					TPVectorRightHandSideIntegral.VALUE));
-		List<RightHandSideIntegral<TPCell, TPFace, MixedShapeFunction<TPCell, TPFace,ContinuousTPShapeFunction,
+		List<RightHandSideIntegral<TPCell, MixedShapeFunction<TPCell, TPFace,TPEdge,
+			ContinuousTPShapeFunction,
 			ContinuousTPVectorFunction>>> rightHandSideIntegrals = new ArrayList<>();
 		rightHandSideIntegrals.add(rightHandSideIntegral);
 		
-		List<BoundaryRightHandSideIntegral<TPCell, TPFace, MixedShapeFunction<TPCell, TPFace,ContinuousTPShapeFunction,
+		List<BoundaryRightHandSideIntegral< TPFace, MixedShapeFunction<TPCell, TPFace,
+			TPEdge,ContinuousTPShapeFunction,
 			ContinuousTPVectorFunction>>> boundaryFaceIntegrals =
 			new ArrayList<>();
 		grid.assembleCells();
@@ -87,7 +87,7 @@ public class QkQkMaxwell
 		System.out.println("rhs2"+grid.getSystemMatrix().mvMul(solution1));
 		//grid.A.print_formatted();
 		//grid.rhs.print_formatted();
-		MixedFESpaceFunction<TPCell,TPFace,ContinuousTPShapeFunction,ContinuousTPVectorFunction> solut =
+		MixedFESpaceFunction<TPCell,TPFace,TPEdge,ContinuousTPShapeFunction,ContinuousTPVectorFunction> solut =
 			new MixedFESpaceFunction<>(
 				grid.getShapeFunctions(), solution1);
 		Map<String,Map<CoordinateVector, Double>> valList = new TreeMap<>();

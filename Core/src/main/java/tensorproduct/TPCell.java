@@ -11,7 +11,7 @@ import java.util.List;
 import java.util.Set;
 import java.util.TreeSet;
 
-public class TPCell implements Cell<TPCell, TPFace>
+public class TPCell implements Cell<TPCell, TPFace, TPEdge>
 {
 	List<Cell1D> cell1Ds;
 	Set<TPFace> faces;

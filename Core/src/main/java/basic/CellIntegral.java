@@ -3,8 +3,8 @@ package basic;
 import linalg.Tensor;
 import linalg.Vector;
 
-public abstract class CellIntegral<CT extends Cell<CT,FT>, FT extends Face<CT,FT>, ST extends ShapeFunction<CT,
-	FT,ST,?,?,?>>
+public abstract class CellIntegral<CT extends Cell<CT,?,?>, ST extends ShapeFunction<CT,
+	?,?,ST,?,?,?>>
 {
 	protected Function<?,?,?> weight;
 	protected String name;

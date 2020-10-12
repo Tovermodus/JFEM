@@ -3,14 +3,15 @@ package mixed;
 import basic.*;
 import com.google.common.base.Stopwatch;
 
-public class MixedCellIntegral<CT extends Cell<CT,FT>, FT extends Face<CT,FT>,
-	PF extends ScalarShapeFunction<CT,FT,PF>, VF extends VectorShapeFunction<CT,FT,VF>> extends CellIntegral<CT,FT,MixedShapeFunction<CT,FT,PF,VF>>
+public class MixedCellIntegral<CT extends Cell<CT,FT,ET>, FT extends Face<CT,FT,ET>, ET extends Edge<CT,FT,ET>,
+	PF extends ScalarShapeFunction<CT,FT,ET,PF>, VF extends VectorShapeFunction<CT,FT,ET,VF>> extends CellIntegral<CT
+	,MixedShapeFunction<CT,FT,ET,PF,VF>>
 {
-	private final CellIntegral<CT, FT, PF> pressureIntegral;
-	private final CellIntegral<CT, FT, VF> velocityIntegral;
+	private final CellIntegral<CT, PF> pressureIntegral;
+	private final CellIntegral<CT, VF> velocityIntegral;
 	
-	protected MixedCellIntegral(CellIntegral<CT, FT, PF> pressureIntegral,
-	                            CellIntegral<CT, FT, VF> velocityIntegral)
+	protected MixedCellIntegral(CellIntegral<CT, PF> pressureIntegral,
+	                            CellIntegral<CT, VF> velocityIntegral)
 	{
 		super();
 		this.pressureIntegral = pressureIntegral;
@@ -31,17 +32,19 @@ public class MixedCellIntegral<CT extends Cell<CT,FT>, FT extends Face<CT,FT>,
 		this.velocityIntegral = null;
 	}
 	
-	public static <CT extends Cell<CT, FT>, FT extends Face<CT, FT>,
-		PF extends ScalarShapeFunction<CT, FT, PF>, VF extends VectorShapeFunction<CT, FT, VF>> MixedCellIntegral<CT, FT, PF, VF> fromPressureIntegral(CellIntegral<CT, FT
+	public static <CT extends Cell<CT,FT,ET>, FT extends Face<CT,FT,ET>, ET extends Edge<CT,FT,ET>,
+		PF extends ScalarShapeFunction<CT,
+		FT,ET
+		, PF>,
+		VF extends VectorShapeFunction<CT,FT,ET, VF>> MixedCellIntegral<CT,FT,ET, PF, VF> fromPressureIntegral(CellIntegral<CT
 		, PF> pressureIntegral)
 	{
 		return new MixedCellIntegral<>(pressureIntegral, null);
 	}
 	
-	public static <CT extends Cell<CT, FT>, FT extends Face<CT, FT>,
-		ST extends MixedShapeFunction<CT, FT, PF, VF>,
-		PF extends ScalarShapeFunction<CT, FT, PF>, VF extends VectorShapeFunction<CT, FT, VF>> MixedCellIntegral<CT, FT, PF,
-		VF> fromVelocityIntegral(CellIntegral<CT, FT
+	public static <CT extends Cell<CT,FT,ET>, FT extends Face<CT,FT,ET>, ET extends Edge<CT,FT,ET>,
+		PF extends ScalarShapeFunction<CT,FT,ET, PF>, VF extends VectorShapeFunction<CT,FT,ET, VF>> MixedCellIntegral<CT,FT,ET, PF,
+		VF> fromVelocityIntegral(CellIntegral<CT
 		, VF> velocityIntegral)
 	{
 		return new MixedCellIntegral<>(null, velocityIntegral);
@@ -63,16 +66,16 @@ public class MixedCellIntegral<CT extends Cell<CT,FT>, FT extends Face<CT,FT>,
 	}
 	
 	protected double evaluatePressureVelocityIntegral(CT cell,
-	                                                  MixedShapeFunction<CT, FT, PF, VF> pressureShapeFunction,
-	                                                  MixedShapeFunction<CT, FT, PF, VF> velocityShapeFunction)
+	                                                  MixedShapeFunction<CT,FT,ET, PF, VF> pressureShapeFunction,
+	                                                  MixedShapeFunction<CT,FT,ET, PF, VF> velocityShapeFunction)
 	{
 		throw new UnsupportedOperationException("needs to be overwritten");
 	}
 	
 	@Override
 	public double evaluateCellIntegral(CT cell,
-	                                   MixedShapeFunction<CT, FT, PF, VF> shapeFunction1,
-	                                   MixedShapeFunction<CT, FT, PF, VF> shapeFunction2)
+	                                   MixedShapeFunction<CT,FT,ET, PF, VF> shapeFunction1,
+	                                   MixedShapeFunction<CT,FT,ET, PF, VF> shapeFunction2)
 	{
 		if (isPressureIntegral())
 		{

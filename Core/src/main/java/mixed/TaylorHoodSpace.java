@@ -16,15 +16,18 @@ import tensorproduct.*;
 import java.util.*;
 import java.util.stream.Collectors;
 
-public class TaylorHoodSpace implements MixedFESpace<TPCell, TPFace, ContinuousTPShapeFunction, ContinuousTPVectorFunction>
+public class TaylorHoodSpace implements MixedFESpace<TPCell, TPFace, TPEdge,ContinuousTPShapeFunction,
+	ContinuousTPVectorFunction>
 {
 	
 	List<List<Double>> coordinates1D;
 	List<List<Cell1D>> cells1D;
 	List<TPCell> cells;
 	List<TPFace> faces;
-	TreeMultimap<TPCell, MixedShapeFunction<TPCell, TPFace, ContinuousTPShapeFunction,ContinuousTPVectorFunction>> supportOnCell;
-	TreeMultimap<TPFace, MixedShapeFunction<TPCell, TPFace, ContinuousTPShapeFunction,ContinuousTPVectorFunction>> supportOnFace;
+	TreeMultimap<TPCell, MixedShapeFunction<TPCell, TPFace, TPEdge,ContinuousTPShapeFunction,
+		ContinuousTPVectorFunction>> supportOnCell;
+	TreeMultimap<TPFace, MixedShapeFunction<TPCell, TPFace, TPEdge,ContinuousTPShapeFunction,
+		ContinuousTPVectorFunction>> supportOnFace;
 	Map<List<Integer>, TPCell> lexicographicCellNumbers;
 	Set<QkQkFunction> shapeFunctions;
 	SparseMatrix systemMatrix;
@@ -227,10 +230,12 @@ public class TaylorHoodSpace implements MixedFESpace<TPCell, TPFace, ContinuousT
 	}
 	
 	@Override
-	public Map<Integer, MixedShapeFunction<TPCell, TPFace, ContinuousTPShapeFunction, ContinuousTPVectorFunction>> getShapeFunctions()
+	public Map<Integer, MixedShapeFunction<TPCell, TPFace, TPEdge,ContinuousTPShapeFunction,
+		ContinuousTPVectorFunction>> getShapeFunctions()
 	{
-		Map<Integer, MixedShapeFunction<TPCell,TPFace,ContinuousTPShapeFunction,ContinuousTPVectorFunction>> functionNumbers = new TreeMap<>();
-		for (MixedShapeFunction<TPCell,TPFace,ContinuousTPShapeFunction,ContinuousTPVectorFunction> shapeFunction : shapeFunctions)
+		Map<Integer,
+			MixedShapeFunction<TPCell,TPFace,TPEdge,ContinuousTPShapeFunction,ContinuousTPVectorFunction>> functionNumbers = new TreeMap<>();
+		for (MixedShapeFunction<TPCell,TPFace,TPEdge,ContinuousTPShapeFunction,ContinuousTPVectorFunction> shapeFunction : shapeFunctions)
 			functionNumbers.put(shapeFunction.getGlobalIndex(), shapeFunction);
 		return functionNumbers;
 	}
@@ -243,13 +248,15 @@ public class TaylorHoodSpace implements MixedFESpace<TPCell, TPFace, ContinuousT
 	}
 	
 	@Override
-	public Collection<MixedShapeFunction<TPCell, TPFace, ContinuousTPShapeFunction, ContinuousTPVectorFunction>> getShapeFunctionsWithSupportOnCell(TPCell cell)
+	public Collection<MixedShapeFunction<TPCell, TPFace, TPEdge,ContinuousTPShapeFunction,
+		ContinuousTPVectorFunction>> getShapeFunctionsWithSupportOnCell(TPCell cell)
 	{
 		return supportOnCell.get(cell);
 	}
 	
 	@Override
-	public Collection<MixedShapeFunction<TPCell, TPFace, ContinuousTPShapeFunction, ContinuousTPVectorFunction>> getShapeFunctionsWithSupportOnFace(TPFace face)
+	public Collection<MixedShapeFunction<TPCell, TPFace, TPEdge,ContinuousTPShapeFunction,
+		ContinuousTPVectorFunction>> getShapeFunctionsWithSupportOnFace(TPFace face)
 	{
 		return supportOnFace.get(face);
 	}
@@ -286,7 +293,8 @@ public class TaylorHoodSpace implements MixedFESpace<TPCell, TPFace, ContinuousT
 			{
 				if (F.isBoundaryFace())
 				{
-					for (MixedShapeFunction<TPCell,TPFace,ContinuousTPShapeFunction,ContinuousTPVectorFunction> shapeFunction :
+					for (MixedShapeFunction<TPCell,TPFace,TPEdge,ContinuousTPShapeFunction,
+						ContinuousTPVectorFunction> shapeFunction :
 						getShapeFunctionsWithSupportOnFace(F))
 					{
 						if(shapeFunction.isVelocity())
@@ -315,7 +323,8 @@ public class TaylorHoodSpace implements MixedFESpace<TPCell, TPFace, ContinuousT
 			progress++;
 			if (face.isBoundaryFace())
 			{
-				for (MixedShapeFunction<TPCell,TPFace,ContinuousTPShapeFunction,ContinuousTPVectorFunction> shapeFunction :
+				for (MixedShapeFunction<TPCell,TPFace,TPEdge,ContinuousTPShapeFunction,
+					ContinuousTPVectorFunction> shapeFunction :
 					getShapeFunctionsWithSupportOnFace(face))
 				{
 					if(shapeFunction.isPressure())
@@ -325,7 +334,9 @@ public class TaylorHoodSpace implements MixedFESpace<TPCell, TPFace, ContinuousT
 						{
 							int shapeFunctionIndex = shapeFunction.getGlobalIndex();
 							for (TPCell cell : shapeFunction.getCells())
-								for (MixedShapeFunction<TPCell,TPFace,ContinuousTPShapeFunction,ContinuousTPVectorFunction> sameSupportFunction :
+								for (MixedShapeFunction<TPCell,TPFace,
+									TPEdge,ContinuousTPShapeFunction,
+									ContinuousTPVectorFunction> sameSupportFunction :
 									getShapeFunctionsWithSupportOnCell(cell))
 									systemMatrix.set(0, shapeFunctionIndex,
 										sameSupportFunction.getGlobalIndex());

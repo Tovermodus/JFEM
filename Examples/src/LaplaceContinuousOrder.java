@@ -22,16 +22,17 @@ public class LaplaceContinuousOrder
 		
 		TPVectorCellIntegral<ContinuousTPVectorFunction> gg =
 			new TPVectorCellIntegral<>(TPVectorCellIntegral.GRAD_GRAD);
-		ArrayList<CellIntegral<TPCell, TPFace, ContinuousTPVectorFunction>> cellIntegrals =
+		ArrayList<CellIntegral<TPCell,ContinuousTPVectorFunction>> cellIntegrals =
 			new ArrayList<>();
 		cellIntegrals.add(gg);
-		ArrayList<FaceIntegral<TPCell, TPFace, ContinuousTPVectorFunction>> faceIntegrals = new ArrayList<>();
+		ArrayList<FaceIntegral< TPFace,ContinuousTPVectorFunction>> faceIntegrals =
+			new ArrayList<>();
 		TPVectorRightHandSideIntegral<ContinuousTPVectorFunction> rightHandSideIntegral =
 			new TPVectorRightHandSideIntegral<>(LaplaceReferenceSolution.vectorRightHandSide(),
 				TPVectorRightHandSideIntegral.VALUE);
-		ArrayList<RightHandSideIntegral<TPCell, TPFace, ContinuousTPVectorFunction>> rightHandSideIntegrals = new ArrayList<>();
+		ArrayList<RightHandSideIntegral<TPCell, ContinuousTPVectorFunction>> rightHandSideIntegrals = new ArrayList<>();
 		rightHandSideIntegrals.add(rightHandSideIntegral);
-		ArrayList<BoundaryRightHandSideIntegral<TPCell, TPFace, ContinuousTPVectorFunction>> boundaryFaceIntegrals = new ArrayList<>();
+		ArrayList<BoundaryRightHandSideIntegral<TPFace, ContinuousTPVectorFunction>> boundaryFaceIntegrals = new ArrayList<>();
 		
 		int polynomialDegree = 2;
 		List<ScalarFunction> solutions = new ArrayList<>();

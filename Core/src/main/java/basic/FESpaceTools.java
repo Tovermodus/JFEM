@@ -6,8 +6,8 @@ import io.vavr.Function3;
 import java.util.List;
 import java.util.function.BiFunction;
 
-public interface FESpaceTools<CT extends Cell<CT,FT>, FT extends  Face<CT,FT>,
-	ST extends ShapeFunction<CT,FT,ST,?,?,?>>
+public interface FESpaceTools<CT extends Cell<CT,FT,ET>, FT extends  Face<CT,FT,ET>, ET extends Edge<CT,FT,ET>,
+	ST extends ShapeFunction<CT,FT,ET,ST,?,?,?>>
 {
 	default int increaseCellCounter()
 	{
@@ -18,7 +18,7 @@ public interface FESpaceTools<CT extends Cell<CT,FT>, FT extends  Face<CT,FT>,
 		return 0;
 	}
 	default void loopMatrixViaCell(Function3<CT,ST,ST, Double> integralEvaluation,
-	                               MatrixFESpace<CT,FT,ST,?,?,?> space){
+	                               MatrixFESpace<CT,FT,ET,ST,?,?,?> space){
 		List<List<CT>> smallerList = Lists.partition(space.getCells(),space.getCells().size()/12+1);
 		smallerList.stream().parallel().forEach(smallList->
 		{
@@ -44,7 +44,8 @@ public interface FESpaceTools<CT extends Cell<CT,FT>, FT extends  Face<CT,FT>,
 			}
 		});
 	}
-	default void loopRhsViaCell(BiFunction<CT,ST,Double> integralEvaluation, MatrixFESpace<CT,FT,ST,?,?,?> space){
+	default void loopRhsViaCell(BiFunction<CT,ST,Double> integralEvaluation,
+	                            MatrixFESpace<CT,FT,ET, ST,?,?,?> space){
 		List<List<CT>> smallerList = Lists.partition(space.getCells(),space.getCells().size()/12+1);
 		smallerList.stream().parallel().forEach(smallList->
 		{
@@ -63,7 +64,7 @@ public interface FESpaceTools<CT extends Cell<CT,FT>, FT extends  Face<CT,FT>,
 		});
 	}
 	default void loopMatrixViaFace(Function3<FT,ST,ST,Double> integralEvaluation,
-	                               MatrixFESpace<CT,FT,ST,?,?,?> space){
+	                               MatrixFESpace<CT,FT,ET,ST,?,?,?> space){
 		List<List<FT>> smallerList = Lists.partition(space.getFaces(),space.getFaces().size()/12+1);
 		smallerList.stream().parallel().forEach(smallList->
 		{
@@ -87,7 +88,8 @@ public interface FESpaceTools<CT extends Cell<CT,FT>, FT extends  Face<CT,FT>,
 			}
 		});
 	}
-	default void loopRhsViaFace(BiFunction<FT,ST,Double> integralEvaluation, MatrixFESpace<CT,FT,ST,?,?,?> space){
+	default void loopRhsViaFace(BiFunction<FT,ST,Double> integralEvaluation,
+	                            MatrixFESpace<CT,FT,ET,ST,?,?,?> space){
 		List<List<FT>> smallerList = Lists.partition(space.getFaces(),space.getFaces().size()/12+1);
 		smallerList.stream().parallel().forEach(smallList->
 		{

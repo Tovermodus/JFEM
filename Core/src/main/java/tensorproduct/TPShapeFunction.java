@@ -9,7 +9,7 @@ import org.jetbrains.annotations.NotNull;
 
 import java.util.*;
 
-public class TPShapeFunction extends ScalarShapeFunction<TPCell,TPFace,
+public class TPShapeFunction extends ScalarShapeFunction<TPCell,TPFace,TPEdge,
 	TPShapeFunction> implements Comparable<TPShapeFunction>
 {
 	List<LagrangeBasisFunction1D> function1Ds;

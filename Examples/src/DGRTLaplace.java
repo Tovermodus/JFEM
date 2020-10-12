@@ -30,10 +30,10 @@ public class DGRTLaplace
 		TPVectorFaceIntegral<RTShapeFunction> jj =
 			new TPVectorFaceIntegral<>(ScalarFunction.constantFunction(100000),
 				TPVectorFaceIntegral.VALUE_NORMALAVERAGE_VALUE_NORMALAVERAGE);
-		ArrayList<CellIntegral<TPCell, TPFace, RTShapeFunction>> cellIntegrals =
+		ArrayList<CellIntegral<TPCell, RTShapeFunction>> cellIntegrals =
 			new ArrayList<>();
 		cellIntegrals.add(gg);
-		ArrayList<FaceIntegral<TPCell, TPFace, RTShapeFunction>> faceIntegrals = new ArrayList<>();
+		ArrayList<FaceIntegral<TPFace, RTShapeFunction>> faceIntegrals = new ArrayList<>();
 		//faceIntegrals.add(jj);
 		//faceIntegrals.add(gj);
 		//faceIntegrals.add(jg);
@@ -53,9 +53,9 @@ public class DGRTLaplace
 				}
 			},
 				TPVectorRightHandSideIntegral.VALUE);
-		ArrayList<RightHandSideIntegral<TPCell, TPFace, RTShapeFunction>> rightHandSideIntegrals = new ArrayList<>();
+		ArrayList<RightHandSideIntegral<TPCell, RTShapeFunction>> rightHandSideIntegrals = new ArrayList<>();
 		rightHandSideIntegrals.add(rightHandSideIntegral);
-		ArrayList<BoundaryRightHandSideIntegral<TPCell, TPFace, RTShapeFunction>> boundaryFaceIntegrals = new ArrayList<>();
+		ArrayList<BoundaryRightHandSideIntegral< TPFace, RTShapeFunction>> boundaryFaceIntegrals = new ArrayList<>();
 		grid.assembleCells();
 		grid.assembleFunctions(polynomialDegree);
 		grid.initializeSystemMatrix();

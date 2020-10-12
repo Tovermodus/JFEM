@@ -10,10 +10,10 @@ import mixed.MixedTPCellIntegral;
 import java.util.List;
 import java.util.TreeSet;
 
-public interface MatrixFESpace<CT extends Cell<CT,FT>, FT extends  Face<CT,FT>,
-	ST extends ShapeFunction<CT,FT,ST,valueT,gradientT,hessianT>,valueT,gradientT,hessianT
-	> extends FESpace<CT,FT
-	,ST,valueT,gradientT,hessianT, MatrixFESpace<CT,FT,ST,valueT,gradientT,hessianT>>, FESpaceTools<CT,FT,ST>
+public interface MatrixFESpace<CT extends Cell<CT,FT,ET>, FT extends  Face<CT,FT,ET>, ET extends Edge<CT,FT,ET>,
+	ST extends ShapeFunction<CT,FT,ET,ST,valueT,gradientT,hessianT>,valueT,gradientT,hessianT
+	> extends FESpace<CT,FT,ET
+	,ST,valueT,gradientT,hessianT, MatrixFESpace<CT,FT,ET,ST,valueT,gradientT,hessianT>>, FESpaceTools<CT,FT,ET,ST>
 {
 	void initializeSystemMatrix();
 	
@@ -26,13 +26,13 @@ public interface MatrixFESpace<CT extends Cell<CT,FT>, FT extends  Face<CT,FT>,
 	{
 		return new TreeSet<Integer>();
 	}
-	default void evaluateCellIntegrals(List<CellIntegral<CT, FT, ST>> cellIntegrals,
-	                                   List<RightHandSideIntegral<CT, FT, ST>> rightHandSideIntegrals)
+	default void evaluateCellIntegrals(List<CellIntegral<CT, ST>> cellIntegrals,
+	                                   List<RightHandSideIntegral<CT, ST>> rightHandSideIntegrals)
 	{
 		loopMatrixViaCell((K, u, v) ->
 		{
 			double integral = 0;
-			for (CellIntegral<CT, FT, ST> cellIntegral :
+			for (CellIntegral<CT, ST> cellIntegral :
 				cellIntegrals)
 			{
 				integral += cellIntegral.evaluateCellIntegral(K, u, v);
@@ -42,7 +42,7 @@ public interface MatrixFESpace<CT extends Cell<CT,FT>, FT extends  Face<CT,FT>,
 		loopRhsViaCell((K,  v) ->
 		{
 			double integral = 0;
-			for (RightHandSideIntegral<CT, FT, ST> rightHandSideIntegral :
+			for (RightHandSideIntegral<CT, ST> rightHandSideIntegral :
 				rightHandSideIntegrals)
 			{
 				integral += rightHandSideIntegral.evaluateRightHandSideIntegral(K, v);
@@ -51,14 +51,14 @@ public interface MatrixFESpace<CT extends Cell<CT,FT>, FT extends  Face<CT,FT>,
 		}, this);
 	}
 	
-	default void evaluateFaceIntegrals(List<FaceIntegral<CT, FT, ST>> faceIntegrals,
-	                                   List<BoundaryRightHandSideIntegral<CT, FT, ST>> boundaryRightHandSideIntegrals)
+	default void evaluateFaceIntegrals(List<FaceIntegral<FT, ST>> faceIntegrals,
+	                                   List<BoundaryRightHandSideIntegral<FT, ST>> boundaryRightHandSideIntegrals)
 	{
 		
 		loopMatrixViaFace((F, u, v) ->
 		{
 			double integral = 0;
-			for (FaceIntegral<CT, FT, ST> faceIntegral :
+			for (FaceIntegral<FT, ST> faceIntegral :
 				faceIntegrals)
 			{
 				integral += faceIntegral.evaluateFaceIntegral(F, u, v);
@@ -68,7 +68,7 @@ public interface MatrixFESpace<CT extends Cell<CT,FT>, FT extends  Face<CT,FT>,
 		loopRhsViaFace((F, v) ->
 		{
 			double integral = 0;
-			for (BoundaryRightHandSideIntegral<CT, FT, ST> boundaryRightHandSideIntegral :
+			for (BoundaryRightHandSideIntegral<FT, ST> boundaryRightHandSideIntegral :
 				boundaryRightHandSideIntegrals)
 			{
 				integral += boundaryRightHandSideIntegral.evaluateBoundaryRightHandSideIntegral(F, v);

@@ -9,7 +9,7 @@ import org.jetbrains.annotations.NotNull;
 
 import java.util.Set;
 
-public class RTShapeFunction extends VectorShapeFunction<TPCell, TPFace, RTShapeFunction>
+public class RTShapeFunction extends VectorShapeFunction<TPCell, TPFace,TPEdge, RTShapeFunction>
 {
 	private final RTComponentFunction componentFunction;
 	private final int component;

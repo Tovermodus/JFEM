@@ -1,7 +1,8 @@
 package basic;
 
-public abstract class RightHandSideIntegral<CT extends Cell<CT,FT>, FT extends Face<CT,FT>, ST extends ShapeFunction<CT,
-	FT,ST,?,?,?>>
+public abstract class RightHandSideIntegral<CT extends Cell<CT,?,?>,
+	ST extends ShapeFunction<CT,
+	?,?,ST,?,?,?>>
 {
 	protected Function<?, ?, ?> rightHandSide;
 	protected String name;

@@ -5,8 +5,8 @@ import basic.RightHandSideIntegral;
 import basic.VectorShapeFunction;
 import linalg.CoordinateVector;
 
-public class TPVectorRightHandSideIntegral<ST extends VectorShapeFunction<TPCell,TPFace,ST>> extends RightHandSideIntegral<TPCell,
-	TPFace,ST>
+public class TPVectorRightHandSideIntegral<ST extends VectorShapeFunction<TPCell,TPFace,TPEdge,ST>> extends RightHandSideIntegral<TPCell,
+	ST>
 {
 	public static final String VALUE="Value";
 	public TPVectorRightHandSideIntegral(Function<?,?,?> rightHandSide, String name)

@@ -16,15 +16,15 @@ import tensorproduct.*;
 import java.util.*;
 import java.util.stream.Collectors;
 
-public class MixedRTSpace implements MixedFESpace<TPCell, TPFace, ContinuousTPShapeFunction, RTShapeFunction>
+public class MixedRTSpace implements MixedFESpace<TPCell, TPFace, TPEdge,ContinuousTPShapeFunction, RTShapeFunction>
 {
 	
 	List<List<Double>> coordinates1D;
 	List<List<Cell1D>> cells1D;
 	List<TPCell> cells;
 	List<TPFace> faces;
-	TreeMultimap<TPCell, MixedShapeFunction<TPCell, TPFace, ContinuousTPShapeFunction,RTShapeFunction>> supportOnCell;
-	TreeMultimap<TPFace, MixedShapeFunction<TPCell, TPFace, ContinuousTPShapeFunction,RTShapeFunction>> supportOnFace;
+	TreeMultimap<TPCell, MixedShapeFunction<TPCell, TPFace, TPEdge,ContinuousTPShapeFunction,RTShapeFunction>> supportOnCell;
+	TreeMultimap<TPFace, MixedShapeFunction<TPCell, TPFace, TPEdge,ContinuousTPShapeFunction,RTShapeFunction>> supportOnFace;
 	Map<List<Integer>, TPCell> lexicographicCellNumbers;
 	Set<RTMixedFunction> shapeFunctions;
 	SparseMatrix systemMatrix;
@@ -223,10 +223,12 @@ public class MixedRTSpace implements MixedFESpace<TPCell, TPFace, ContinuousTPSh
 	}
 	
 	@Override
-	public Map<Integer, MixedShapeFunction<TPCell, TPFace, ContinuousTPShapeFunction, RTShapeFunction>> getShapeFunctions()
+	public Map<Integer, MixedShapeFunction<TPCell, TPFace,TPEdge, ContinuousTPShapeFunction,
+	RTShapeFunction>> getShapeFunctions()
 	{
-		Map<Integer, MixedShapeFunction<TPCell,TPFace,ContinuousTPShapeFunction,RTShapeFunction>> functionNumbers = new TreeMap<>();
-		for (MixedShapeFunction<TPCell,TPFace,ContinuousTPShapeFunction,RTShapeFunction> shapeFunction : shapeFunctions)
+		Map<Integer, MixedShapeFunction<TPCell,TPFace,TPEdge,ContinuousTPShapeFunction,RTShapeFunction>> functionNumbers = new TreeMap<>();
+		for (MixedShapeFunction<TPCell,TPFace,TPEdge,ContinuousTPShapeFunction,RTShapeFunction> shapeFunction :
+			shapeFunctions)
 			functionNumbers.put(shapeFunction.getGlobalIndex(), shapeFunction);
 		return functionNumbers;
 	}
@@ -239,13 +241,13 @@ public class MixedRTSpace implements MixedFESpace<TPCell, TPFace, ContinuousTPSh
 	}
 	
 	@Override
-	public Collection<MixedShapeFunction<TPCell, TPFace, ContinuousTPShapeFunction, RTShapeFunction>> getShapeFunctionsWithSupportOnCell(TPCell cell)
+	public Collection<MixedShapeFunction<TPCell, TPFace, TPEdge,ContinuousTPShapeFunction, RTShapeFunction>> getShapeFunctionsWithSupportOnCell(TPCell cell)
 	{
 		return supportOnCell.get(cell);
 	}
 	
 	@Override
-	public Collection<MixedShapeFunction<TPCell, TPFace, ContinuousTPShapeFunction, RTShapeFunction>> getShapeFunctionsWithSupportOnFace(TPFace face)
+	public Collection<MixedShapeFunction<TPCell, TPFace, TPEdge,ContinuousTPShapeFunction, RTShapeFunction>> getShapeFunctionsWithSupportOnFace(TPFace face)
 	{
 		return supportOnFace.get(face);
 	}
@@ -281,7 +283,8 @@ public class MixedRTSpace implements MixedFESpace<TPCell, TPFace, ContinuousTPSh
 			progress++;
 			if (face.isBoundaryFace())
 			{
-				for (MixedShapeFunction<TPCell,TPFace,ContinuousTPShapeFunction,RTShapeFunction> shapeFunction :
+				for (MixedShapeFunction<TPCell,TPFace,TPEdge,ContinuousTPShapeFunction,
+					RTShapeFunction> shapeFunction :
 					getShapeFunctionsWithSupportOnFace(face))
 				{
 					if(shapeFunction.isVelocity())
@@ -291,7 +294,9 @@ public class MixedRTSpace implements MixedFESpace<TPCell, TPFace, ContinuousTPSh
 						{
 							int shapeFunctionIndex = shapeFunction.getGlobalIndex();
 							for (TPCell cell : shapeFunction.getCells())
-								for (MixedShapeFunction<TPCell,TPFace,ContinuousTPShapeFunction,RTShapeFunction> sameSupportFunction :
+								for (MixedShapeFunction<TPCell,TPFace,
+									TPEdge,ContinuousTPShapeFunction,
+									RTShapeFunction> sameSupportFunction :
 									getShapeFunctionsWithSupportOnCell(cell))
 									systemMatrix.set(0, shapeFunctionIndex,
 										sameSupportFunction.getGlobalIndex());
@@ -307,7 +312,7 @@ public class MixedRTSpace implements MixedFESpace<TPCell, TPFace, ContinuousTPSh
 	{
 		MixedFunction boundaryMixed = new MixedFunction(boundaryValues);
 		int progress = 0;
-		for(MixedShapeFunction<TPCell,TPFace,ContinuousTPShapeFunction,RTShapeFunction> shapeFunction :
+		for(MixedShapeFunction<TPCell,TPFace,TPEdge,ContinuousTPShapeFunction,RTShapeFunction> shapeFunction :
 			getShapeFunctions().values())
 		{
 			if(!shapeFunction.isPressure())
@@ -326,7 +331,8 @@ public class MixedRTSpace implements MixedFESpace<TPCell, TPFace, ContinuousTPSh
 				double nodeValue = shapeFunction.getNodeFunctional().evaluate(boundaryMixed);
 				int shapeFunctionIndex = shapeFunction.getGlobalIndex();
 				for (TPCell cell : shapeFunction.getCells())
-					for (MixedShapeFunction<TPCell,TPFace,ContinuousTPShapeFunction,RTShapeFunction> sameSupportFunction :
+					for (MixedShapeFunction<TPCell,TPFace,TPEdge,ContinuousTPShapeFunction,
+						RTShapeFunction> sameSupportFunction :
 						getShapeFunctionsWithSupportOnCell(cell))
 						systemMatrix.set(0, shapeFunctionIndex,
 							sameSupportFunction.getGlobalIndex());

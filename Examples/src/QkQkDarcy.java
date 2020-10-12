@@ -14,35 +14,38 @@ public class QkQkDarcy
 	{
 		CoordinateVector start = CoordinateVector.fromValues(-1, -1);
 		CoordinateVector end = CoordinateVector.fromValues(1, 1);
-		int polynomialDegree = 3;
+		int polynomialDegree = 1;
 		QkQkSpace grid = new QkQkSpace(start, end,
-			Ints.asList(10, 10), polynomialDegree);
-		TPVectorCellIntegral<ContinuousTPVectorFunction> valueValue =
-			new TPVectorCellIntegral<>(TPVectorCellIntegral.VALUE_VALUE);
-		MixedCellIntegral<TPCell,TPFace,ContinuousTPShapeFunction, ContinuousTPVectorFunction>
+			Ints.asList(10, 10), polynomialDegree);TPVectorCellIntegral<ContinuousTPVectorFunction> valueValue =
+		new TPVectorCellIntegral<>(TPVectorCellIntegral.VALUE_VALUE);
+		MixedCellIntegral<TPCell, TPFace,TPEdge,ContinuousTPShapeFunction, ContinuousTPVectorFunction>
 			divValue = new MixedTPCellIntegral<>(MixedTPCellIntegral.DIV_VALUE);
-		MixedCellIntegral<TPCell, TPFace, ContinuousTPShapeFunction, ContinuousTPVectorFunction> vv =
+		MixedCellIntegral<TPCell, TPFace,TPEdge, ContinuousTPShapeFunction, ContinuousTPVectorFunction> vv =
 			MixedCellIntegral.fromVelocityIntegral(valueValue);
-		List<CellIntegral<TPCell, TPFace, MixedShapeFunction<TPCell, TPFace,ContinuousTPShapeFunction,
+		List<CellIntegral<TPCell, MixedShapeFunction<TPCell, TPFace,TPEdge,ContinuousTPShapeFunction,
 			ContinuousTPVectorFunction>>> cellIntegrals =
 			new ArrayList<>();
 		cellIntegrals.add(vv);
 		cellIntegrals.add(divValue);
-		List<FaceIntegral<TPCell, TPFace, MixedShapeFunction<TPCell, TPFace,ContinuousTPShapeFunction,
-					ContinuousTPVectorFunction>>> faceIntegrals = new ArrayList<>();
-		//faceIntegrals.add(jj);
-		//faceIntegrals.add(gj);
-		//faceIntegrals.add(jg);
-		MixedRightHandSideIntegral<TPCell, TPFace, ContinuousTPShapeFunction, ContinuousTPVectorFunction> rightHandSideIntegral =
+		List<FaceIntegral< TPFace, MixedShapeFunction<TPCell, TPFace,TPEdge,ContinuousTPShapeFunction,
+			ContinuousTPVectorFunction>>> faceIntegrals = new ArrayList<>();
+		MixedRightHandSideIntegral<TPCell, TPFace,TPEdge, ContinuousTPShapeFunction,
+			ContinuousTPVectorFunction> rightHandSideIntegral =
 			MixedRightHandSideIntegral.fromPressureIntegral(
 				new TPRightHandSideIntegral<ContinuousTPShapeFunction>(
-					ScalarFunction.constantFunction(-4),TPRightHandSideIntegral.VALUE, false));
-		List<RightHandSideIntegral<TPCell, TPFace, MixedShapeFunction<TPCell, TPFace,ContinuousTPShapeFunction,
+					LaplaceReferenceSolution.scalarRightHandSide(),TPRightHandSideIntegral.VALUE, false));
+		List<RightHandSideIntegral<TPCell, MixedShapeFunction<TPCell, TPFace,TPEdge,ContinuousTPShapeFunction,
 			ContinuousTPVectorFunction>>> rightHandSideIntegrals = new ArrayList<>();
 		rightHandSideIntegrals.add(rightHandSideIntegral);
-		List<BoundaryRightHandSideIntegral<TPCell, TPFace, MixedShapeFunction<TPCell, TPFace,ContinuousTPShapeFunction,
-			ContinuousTPVectorFunction>>> boundaryFaceIntegrals =
-			new ArrayList<>();
+		List<BoundaryRightHandSideIntegral< TPFace, MixedShapeFunction<TPCell, TPFace,
+			TPEdge,ContinuousTPShapeFunction,
+			ContinuousTPVectorFunction>>> boundaryFaceIntegrals = new ArrayList<>();
+		MixedBoundaryRightHandSideIntegral<TPCell, TPFace, TPEdge,ContinuousTPShapeFunction,
+			ContinuousTPVectorFunction> dirichlet =
+			MixedBoundaryRightHandSideIntegral.fromVelocityIntegral(
+				new TPVectorBoundaryFaceIntegral<ContinuousTPVectorFunction>(LaplaceReferenceSolution.scalarBoundaryValues(),
+					TPVectorBoundaryFaceIntegral.NORMAL_VALUE));
+		boundaryFaceIntegrals.add(dirichlet);
 		grid.assembleCells();
 		grid.assembleFunctions(polynomialDegree);
 		grid.initializeSystemMatrix();
@@ -67,14 +70,14 @@ public class QkQkDarcy
 		System.out.println(grid.getSystemMatrix().mvMul(solution1));
 		//grid.A.print_formatted();
 		//grid.rhs.print_formatted();
-		MixedFESpaceFunction<TPCell,TPFace,ContinuousTPShapeFunction,ContinuousTPVectorFunction> solut =
+		MixedFESpaceFunction<TPCell,TPFace,TPEdge,ContinuousTPShapeFunction,ContinuousTPVectorFunction> solut =
 			new MixedFESpaceFunction<>(
 				grid.getShapeFunctions(), solution1);
 		ArrayList<Map<CoordinateVector, Double>> valList = new ArrayList<>();
 		valList.add(solut.pressureValuesInPoints(grid.generatePlotPoints(50)));
 		valList.add(solut.velocityComponentsInPoints(grid.generatePlotPoints(50), 0));
 		valList.add(solut.velocityComponentsInPoints(grid.generatePlotPoints(50), 1));
-		for(MixedShapeFunction<TPCell, TPFace, ContinuousTPShapeFunction,ContinuousTPVectorFunction> shapeFunction:grid.getShapeFunctions().values())
+		for(MixedShapeFunction<TPCell, TPFace,TPEdge, ContinuousTPShapeFunction,ContinuousTPVectorFunction> shapeFunction:grid.getShapeFunctions().values())
 		{
 			if(shapeFunction.isPressure())
 			valList.add(shapeFunction.pressureValuesInPoints(grid.generatePlotPoints(50)));

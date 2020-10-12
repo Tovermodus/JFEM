@@ -4,21 +4,16 @@ import basic.CellIntegral;
 import basic.Function;
 import basic.ScalarShapeFunction;
 import basic.VectorShapeFunction;
-import tensorproduct.ScalarRTFESpace;
-import tensorproduct.TPCell;
-import tensorproduct.TPCellIntegral;
-import tensorproduct.TPFace;
+import tensorproduct.*;
 
-public class MixedTPCellIntegral<PF extends ScalarShapeFunction<TPCell, TPFace, PF>,
-	VF extends VectorShapeFunction<TPCell, TPFace, VF>> extends MixedCellIntegral<TPCell,
-	TPFace,
-	PF, VF>
+public class MixedTPCellIntegral<PF extends ScalarShapeFunction<TPCell, TPFace, TPEdge, PF>,
+	VF extends VectorShapeFunction<TPCell, TPFace,TPEdge, VF>> extends MixedCellIntegral<TPCell, TPFace, TPEdge,PF, VF>
 {
 	
 	public static final String DIV_VALUE = "DivValue";
 	public static final String VALUE_GRAD = "ValueGrad";
-	private MixedTPCellIntegral(CellIntegral<TPCell, TPFace, PF> pressureIntegral,
-	                            CellIntegral<TPCell, TPFace, VF> velocityIntegral)
+	private MixedTPCellIntegral(CellIntegral<TPCell, PF> pressureIntegral,
+	                            CellIntegral<TPCell, VF> velocityIntegral)
 	{
 		super(pressureIntegral, velocityIntegral);
 	}
@@ -34,7 +29,9 @@ public class MixedTPCellIntegral<PF extends ScalarShapeFunction<TPCell, TPFace, 
 	}
 	
 	@Override
-	protected double evaluatePressureVelocityIntegral(TPCell cell, MixedShapeFunction<TPCell, TPFace, PF, VF> shapeFunction1, MixedShapeFunction<TPCell, TPFace, PF, VF> shapeFunction2)
+	protected double evaluatePressureVelocityIntegral(TPCell cell,
+	                                                  MixedShapeFunction<TPCell, TPFace, TPEdge,PF, VF> shapeFunction1
+		, MixedShapeFunction<TPCell, TPFace,TPEdge, PF, VF> shapeFunction2)
 	{
 		if(!isPressureVelocityIntegral())
 			throw new IllegalStateException("not a pressure velocity integral");

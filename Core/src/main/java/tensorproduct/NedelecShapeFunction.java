@@ -11,7 +11,7 @@ import org.jetbrains.annotations.NotNull;
 import java.util.List;
 import java.util.Set;
 
-public class NedelecShapeFunction extends VectorShapeFunction<TPCell, TPFace, NedelecShapeFunction>
+public class NedelecShapeFunction extends VectorShapeFunction<TPCell, TPFace, TPEdge,NedelecShapeFunction>
 {
 	private final NedelecComponentFunction componentFunction;
 	private final int component;
