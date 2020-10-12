@@ -328,7 +328,6 @@ public class MixedNedelecSpace implements MixedFESpace<TPCell, TPFace, Continuou
 			if(boundaryShapeFunction)
 			{
 				double nodeValue = shapeFunction.getNodeFunctional().evaluate(boundaryMixed);
-				System.out.println(shapeFunction.getGlobalIndex()+" NODEVALUE "+  nodeValue);
 				int shapeFunctionIndex = shapeFunction.getGlobalIndex();
 				boundaryNodes.add(shapeFunctionIndex);
 				systemMatrix.deleteLine(shapeFunctionIndex);

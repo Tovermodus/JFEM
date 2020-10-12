@@ -324,7 +324,6 @@ public class MixedRTSpace implements MixedFESpace<TPCell, TPFace, ContinuousTPSh
 			if(boundaryShapeFunction)
 			{
 				double nodeValue = shapeFunction.getNodeFunctional().evaluate(boundaryMixed);
-				System.out.println(shapeFunction.getGlobalIndex()+" NODEVALUE "+  nodeValue);
 				int shapeFunctionIndex = shapeFunction.getGlobalIndex();
 				for (TPCell cell : shapeFunction.getCells())
 					for (MixedShapeFunction<TPCell,TPFace,ContinuousTPShapeFunction,RTShapeFunction> sameSupportFunction :

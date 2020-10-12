@@ -3,10 +3,12 @@ package tensorproduct;
 import basic.LagrangeNodeFunctional;
 import basic.VectorNodeFunctional;
 import basic.VectorShapeFunction;
+import com.google.common.base.Stopwatch;
 import linalg.CoordinateMatrix;
 import linalg.CoordinateVector;
 import org.jetbrains.annotations.NotNull;
 
+import java.util.List;
 import java.util.Set;
 
 public class NedelecShapeFunction extends VectorShapeFunction<TPCell, TPFace, NedelecShapeFunction>
@@ -69,11 +71,32 @@ public class NedelecShapeFunction extends VectorShapeFunction<TPCell, TPFace, Ne
 	public CoordinateVector curl(CoordinateVector pos)
 	{
 		CoordinateVector ret = new CoordinateVector(getDomainDimension());
-		CoordinateVector grad = componentFunction.gradient(pos);
-		int compplus1 = (component+1)%3;
-		int compplus2 = (component+2)%3;
-		ret.set(grad.at(compplus2),compplus1);
-		ret.set(-grad.at(compplus1),compplus2);
+		int compplus1 = (component + 1) % 3;
+		int compplus2 = (component + 2) % 3;
+		List<? extends Function1D> function1Ds = null;
+		for (TPCell cell : componentFunction.getCells())
+			if (cell.isInCell(pos))
+			{
+				function1Ds = componentFunction.get1DFunctionsInCell(cell);
+				break;
+			}
+		if (function1Ds == null)
+			return ret;
+		double component1 = 1;
+		double component2 = 1;
+		for (int j = 0; j < pos.getLength(); j++)
+		{
+			if (compplus1 == j)
+				component1 *= function1Ds.get(j).derivative(pos.at(j));
+			else
+				component1 *= function1Ds.get(j).value(pos.at(j));
+			if (compplus2 == j)
+				component2 *= function1Ds.get(j).derivative(pos.at(j));
+			else
+				component2 *= function1Ds.get(j).value(pos.at(j));
+		}
+		ret.set(component2, compplus1);
+		ret.set(-component1, compplus2);
 		return ret;
 	}
 	@Override
@@ -132,7 +155,6 @@ public class NedelecShapeFunction extends VectorShapeFunction<TPCell, TPFace, Ne
 	{
 		return CoordinateVector.getUnitVector(getDomainDimension(), component).mul(componentFunction.fastValue(pos));
 	}
-	
 	@Override
 	public CoordinateMatrix gradient(CoordinateVector pos)
 	{

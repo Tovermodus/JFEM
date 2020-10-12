@@ -18,7 +18,8 @@ public class IterativeSolver<Op extends VectorMultiplyable>
 	public Vector solveCG(Op operator, Vector rhs, double tol)
 	{
 		ex = Executors.newSingleThreadExecutor();
-		ex.execute(new Interruptor());
+		Interruptor i = new Interruptor();
+		ex.execute(i);
 		Stopwatch s = Stopwatch.createStarted();
 		int n = rhs.getLength();
 		Vector z;
@@ -41,14 +42,17 @@ public class IterativeSolver<Op extends VectorMultiplyable>
 			residuum = newResiduum;
 			System.out.println(residuum.euclidianNorm());
 		}
+		interrupted = true;
 		ex.shutdown();
+		
 		return iterate;
 	}
 	public <T extends VectorMultiplyable> Vector solvePGMRES(Op operator, T preconditioner, Vector rhs,
 	                                                              double tol)
 	{
 		ex = Executors.newSingleThreadExecutor();
-		ex.execute(new Interruptor());
+		Interruptor i = new Interruptor();
+		ex.execute(i);
 		int n = rhs.getLength();
 		DenseVector v = new DenseVector(n);
 		Vector x = null;
@@ -60,13 +64,15 @@ public class IterativeSolver<Op extends VectorMultiplyable>
 		{
 			e.printStackTrace();
 		}
+		interrupted = true;
 		ex.shutdown();
 		return x;
 	}
 	public Vector solveGMRES(Op operator, Vector rightHandSide, double tol)
 	{
 		ex = Executors.newSingleThreadExecutor();
-		ex.execute(new Interruptor());
+		Interruptor i = new Interruptor();
+		ex.execute(i);
 		int n = rightHandSide.getLength();
 		DenseVector v = new DenseVector(n);
 		Vector x = null;
@@ -78,13 +84,15 @@ public class IterativeSolver<Op extends VectorMultiplyable>
 		{
 			e.printStackTrace();
 		}
+		interrupted = true;
 		ex.shutdown();
 		return x;
 	}
 	public Vector solveBiCGStab(Op operator, Vector rhs, double tol)
 	{
 		ex = Executors.newSingleThreadExecutor();
-		ex.execute(new Interruptor());
+		Interruptor i = new Interruptor();
+		ex.execute(i);
 		int n = rhs.getLength();
 		Vector v;
 		Vector s;
@@ -113,6 +121,7 @@ public class IterativeSolver<Op extends VectorMultiplyable>
 			p = residuum.add(p.mul(beta)).sub(v.mul(omega*beta));
 			System.out.println(residuum.euclidianNorm());
 		}
+		interrupted = true;
 		ex.shutdown();
 		return iterate;
 
@@ -122,7 +131,8 @@ public class IterativeSolver<Op extends VectorMultiplyable>
 	                                                                 double tol)
 	{
 		ex = Executors.newSingleThreadExecutor();
-		ex.execute(new Interruptor());
+		Interruptor i = new Interruptor();
+		ex.execute(i);
 		int n = rhs.getLength();
 		Vector v;
 		Vector vP;
@@ -159,6 +169,7 @@ public class IterativeSolver<Op extends VectorMultiplyable>
 			beta = alpha/omega*rho/rhoLast;
 			pP = residuumP.add(pP.mul(beta)).sub(vP.mul(omega*beta));
 		}
+		interrupted = true;
 		ex.shutdown();
 		return iterate;
 
@@ -166,13 +177,16 @@ public class IterativeSolver<Op extends VectorMultiplyable>
 	}
 	class Interruptor implements Runnable
 	{
+		private JFrame f;
 		@Override
 		public void run()
 		{
-			JFrame f = new JFrame("Interrupt Solver");
+			f = new JFrame("Interrupt Solver");
 			JButton b = new JButton("Interrupt!");
 			f.setLayout(new GridLayout());
 			f.add(b);
+			f.setBounds(0,0,300,300);
+			f.setVisible(true);
 			b.addActionListener(new ActionListener()
 			{
 				@Override
@@ -186,8 +200,11 @@ public class IterativeSolver<Op extends VectorMultiplyable>
 					f.dispose();
 				}
 			});
-			f.setBounds(0,0,300,300);
-			f.setVisible(true);
+			while(true)
+			{
+				if(interrupted)
+					f.dispose();
+			}
 		}
 		
 	}

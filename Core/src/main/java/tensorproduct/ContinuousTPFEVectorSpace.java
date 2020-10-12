@@ -147,7 +147,6 @@ public class ContinuousTPFEVectorSpace implements MatrixFESpace<TPCell, TPFace, 
 					supportOnFace.put(supportFace, shapeFunction);
 			}
 		}
-		System.out.println(shapeFunctions.size() + " " + dimension * (polynomialDegree * cells1D.get(0).size() + 1) * (polynomialDegree * cells1D.get(1).size() + 1));
 		if (dimension == 2)
 			if (shapeFunctions.size() != dimension * (polynomialDegree * cells1D.get(0).size() + 1) * (polynomialDegree * cells1D.get(1).size() + 1))
 				throw new IllegalStateException("Identification did not work");

@@ -12,7 +12,7 @@ import java.util.*;
 
 public class NedelecComponentFunction extends ScalarShapeFunction<TPCell, TPFace, NedelecComponentFunction> implements Comparable<NedelecComponentFunction> {
 	
-	private Map<TPCell, List<RTBasisFunction1D>> cells;
+	private final Map<TPCell, List<RTBasisFunction1D>> cells;
 	private Set<TPFace> faces;
 	private final LagrangeNodeFunctional nodeFunctional;
 	private final int polynomialDegree;
@@ -98,7 +98,10 @@ public class NedelecComponentFunction extends ScalarShapeFunction<TPCell, TPFace
 		}
 		return ret;
 	}
-	
+	public List<RTBasisFunction1D> get1DFunctionsInCell(TPCell cell)
+	{
+		return cells.get(cell);
+	}
 	@Override
 	public int getDomainDimension()
 	{

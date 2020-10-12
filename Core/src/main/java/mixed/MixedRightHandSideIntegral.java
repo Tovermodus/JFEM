@@ -52,10 +52,8 @@ public class MixedRightHandSideIntegral<CT extends Cell<CT,FT>, FT extends Face<
 		}
 		else
 		{
-			System.out.println(shapeFunction1.isPressure()+" "+shapeFunction1.getGlobalIndex());
 			if(shapeFunction1.isPressure())
 				return 0;
-			System.out.println(shapeFunction1.getGlobalIndex());
 			return velocityIntegral.evaluateRightHandSideIntegral(cell, shapeFunction1.getVelocityShapeFunction());
 		}
 	}
