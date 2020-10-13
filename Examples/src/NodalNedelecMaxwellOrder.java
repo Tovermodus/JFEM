@@ -12,47 +12,47 @@ import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
 
-public class NedelecMaxwellOrder
+public class NodalNedelecMaxwellOrder
 {
 	public static void main(String[] args)
 	{
 		CoordinateVector start = CoordinateVector.fromValues(0, 0,0);
 		CoordinateVector end = CoordinateVector.fromValues(1, 1,1);
 		int polynomialDegree = 2;
-		TPVectorCellIntegral<NedelecShapeFunction> valueValue =
+		TPVectorCellIntegral<NodalNedelecShapeFunction> valueValue =
 			new TPVectorCellIntegral<>(TPVectorCellIntegral.ROT_ROT);
-		MixedCellIntegral<TPCell,TPFace,TPEdge, ContinuousTPShapeFunction, NedelecShapeFunction>
+		MixedCellIntegral<TPCell,TPFace,TPEdge, ContinuousTPShapeFunction, NodalNedelecShapeFunction>
 			divValue =
 			new MixedTPCellIntegral<>(ScalarFunction.constantFunction(-1),
 				MixedTPCellIntegral.DIV_VALUE);
-		MixedCellIntegral<TPCell, TPFace, TPEdge,ContinuousTPShapeFunction, NedelecShapeFunction> vv =
+		MixedCellIntegral<TPCell, TPFace, TPEdge,ContinuousTPShapeFunction, NodalNedelecShapeFunction> vv =
 			MixedCellIntegral.fromVelocityIntegral(valueValue);
 		List<CellIntegral<TPCell, MixedShapeFunction<TPCell, TPFace,TPEdge,ContinuousTPShapeFunction,
-			NedelecShapeFunction>>> cellIntegrals =
+			NodalNedelecShapeFunction>>> cellIntegrals =
 			new ArrayList<>();
 		cellIntegrals.add(vv);
 		cellIntegrals.add(divValue);
 		List<FaceIntegral<TPFace, MixedShapeFunction<TPCell, TPFace,TPEdge,ContinuousTPShapeFunction,
-			NedelecShapeFunction>>> faceIntegrals = new ArrayList<>();
-		MixedRightHandSideIntegral<TPCell, TPFace, TPEdge, ContinuousTPShapeFunction, NedelecShapeFunction> rightHandSideIntegral =
+			NodalNedelecShapeFunction>>> faceIntegrals = new ArrayList<>();
+		MixedRightHandSideIntegral<TPCell, TPFace, TPEdge, ContinuousTPShapeFunction, NodalNedelecShapeFunction> rightHandSideIntegral =
 			MixedRightHandSideIntegral.fromVelocityIntegral(
-				new TPVectorRightHandSideIntegral<NedelecShapeFunction>(MaxwellReferenceSolution.rightHandSide(),
+				new TPVectorRightHandSideIntegral<NodalNedelecShapeFunction>(MaxwellReferenceSolution.rightHandSide(),
 					TPVectorRightHandSideIntegral.VALUE));
 		List<RightHandSideIntegral<TPCell, MixedShapeFunction<TPCell, TPFace,TPEdge,
 			ContinuousTPShapeFunction,
-			NedelecShapeFunction>>> rightHandSideIntegrals = new ArrayList<>();
+			NodalNedelecShapeFunction>>> rightHandSideIntegrals = new ArrayList<>();
 		rightHandSideIntegrals.add(rightHandSideIntegral);
 		
 		List<BoundaryRightHandSideIntegral< TPFace, MixedShapeFunction<TPCell, TPFace,
 			TPEdge,ContinuousTPShapeFunction,
-			NedelecShapeFunction>>> boundaryFaceIntegrals =
+			NodalNedelecShapeFunction>>> boundaryFaceIntegrals =
 			new ArrayList<>();
-		MixedNedelecSpace grid = null;
+		MixedNodalNedelecSpace grid = null;
 		List<ScalarFunction> solutions = new ArrayList<>();
 		List<VectorFunction> solutionsVec = new ArrayList<>();
 		for(int i = 0; i < 3; i++)
 		{
-			grid = new MixedNedelecSpace(start, end,
+			grid = new MixedNodalNedelecSpace(start, end,
 				Ints.asList(3*(int)Math.pow(2,i), 3*(int)Math.pow(2,i), 3*(int)Math.pow(2,i)),
 				polynomialDegree);
 			grid.assembleCells();
@@ -70,7 +70,7 @@ public class NedelecMaxwellOrder
 			System.out.println("solve system: " + grid.getSystemMatrix().getRows() + "×" + grid.getSystemMatrix().getCols());
 			IterativeSolver<SparseMatrix> it = new IterativeSolver<>();
 			Vector solution1 = it.solveGMRES(grid.getSystemMatrix(), grid.getRhs(), 1e-7);
-			MixedFESpaceFunction<TPCell,TPFace,TPEdge,ContinuousTPShapeFunction,NedelecShapeFunction> solut =
+			MixedFESpaceFunction<TPCell,TPFace,TPEdge,ContinuousTPShapeFunction, NodalNedelecShapeFunction> solut =
 				new MixedFESpaceFunction<>(
 					grid.getShapeFunctions(), solution1);
 			solutions.add(solut.getPressureFunction());

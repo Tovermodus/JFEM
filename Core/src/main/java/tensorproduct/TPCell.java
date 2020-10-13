@@ -15,6 +15,7 @@ public class TPCell implements Cell<TPCell, TPFace, TPEdge>
 {
 	List<Cell1D> cell1Ds;
 	Set<TPFace> faces;
+	Set<TPEdge> edges;
 	boolean refined;
 	
 	public TPCell(List<Cell1D> cell1Ds)
@@ -128,6 +129,13 @@ public class TPCell implements Cell<TPCell, TPFace, TPEdge>
 		if(o.getDimension() > getDimension())
 			return 1;
 		return CoordinateComparator.comp(center().getEntries(), o.center().getEntries());
+	}
+	@Override
+	public void addEdge(TPEdge tpEdge)
+	{
+		
+		if(edges.add(tpEdge))
+			tpEdge.addCell(this);
 	}
 	
 	//	@Override

@@ -10,7 +10,7 @@ import linalg.Matrix;
 
 import java.util.*;
 
-public class NedelecComponentFunction extends ScalarShapeFunction<TPCell, TPFace, TPEdge,NedelecComponentFunction> implements Comparable<NedelecComponentFunction> {
+public class NodalNedelecComponentFunction extends ScalarShapeFunction<TPCell, TPFace, TPEdge, NodalNedelecComponentFunction> implements Comparable<NodalNedelecComponentFunction> {
 	
 	private final Map<TPCell, List<RTBasisFunction1D>> cells;
 	private Set<TPFace> faces;
@@ -19,8 +19,8 @@ public class NedelecComponentFunction extends ScalarShapeFunction<TPCell, TPFace
 	private int localIndex;
 	private final int lowDegreeDimension;
 	private final int dimension;
-	public NedelecComponentFunction(TPCell supportCell, int polynomialDegree, int localIndex,
-	                                int lowDegreeDimension)
+	public NodalNedelecComponentFunction(TPCell supportCell, int polynomialDegree, int localIndex,
+	                                     int lowDegreeDimension)
 	{
 		cells = new TreeMap<>();
 		faces = new TreeSet<>();
@@ -241,7 +241,7 @@ public class NedelecComponentFunction extends ScalarShapeFunction<TPCell, TPFace
 	
 	
 	@Override
-	public int compareTo(NedelecComponentFunction o) {
+	public int compareTo(NodalNedelecComponentFunction o) {
 		return CoordinateComparator.comp(nodeFunctional.getPoint(), o.nodeFunctional.getPoint());
 	}
 	
@@ -253,9 +253,9 @@ public class NedelecComponentFunction extends ScalarShapeFunction<TPCell, TPFace
 	@Override
 	public boolean equals(Object obj)
 	{
-		if(obj instanceof NedelecComponentFunction)
+		if(obj instanceof NodalNedelecComponentFunction)
 			return CoordinateComparator.comp(nodeFunctional.getPoint(),
-				((NedelecComponentFunction) obj).nodeFunctional.getPoint()) == 0;
+				((NodalNedelecComponentFunction) obj).nodeFunctional.getPoint()) == 0;
 		return false;
 	}
 	

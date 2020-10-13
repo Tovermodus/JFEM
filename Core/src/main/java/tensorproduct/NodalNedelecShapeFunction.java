@@ -3,7 +3,6 @@ package tensorproduct;
 import basic.LagrangeNodeFunctional;
 import basic.VectorNodeFunctional;
 import basic.VectorShapeFunction;
-import com.google.common.base.Stopwatch;
 import linalg.CoordinateMatrix;
 import linalg.CoordinateVector;
 import org.jetbrains.annotations.NotNull;
@@ -11,17 +10,17 @@ import org.jetbrains.annotations.NotNull;
 import java.util.List;
 import java.util.Set;
 
-public class NedelecShapeFunction extends VectorShapeFunction<TPCell, TPFace, TPEdge,NedelecShapeFunction>
+public class NodalNedelecShapeFunction extends VectorShapeFunction<TPCell, TPFace, TPEdge, NodalNedelecShapeFunction>
 {
-	private final NedelecComponentFunction componentFunction;
+	private final NodalNedelecComponentFunction componentFunction;
 	private final int component;
-	public NedelecShapeFunction(TPCell supportCell, int polynomialDegree, int localIndex)
+	public NodalNedelecShapeFunction(TPCell supportCell, int polynomialDegree, int localIndex)
 	{
 		component = (int) (localIndex / ((polynomialDegree+1)*Math.pow((polynomialDegree+2),
 			supportCell.getDimension()-1)));
 		int componentLocalIndex = (int) (localIndex % ((polynomialDegree+1)*Math.pow((polynomialDegree+2),
 			supportCell.getDimension()-1)));
-		componentFunction = new NedelecComponentFunction(supportCell, polynomialDegree, componentLocalIndex,
+		componentFunction = new NodalNedelecComponentFunction(supportCell, polynomialDegree, componentLocalIndex,
 				component);
 	}
 	@Override
@@ -100,7 +99,7 @@ public class NedelecShapeFunction extends VectorShapeFunction<TPCell, TPFace, TP
 		return ret;
 	}
 	@Override
-	public int compareTo(@NotNull NedelecShapeFunction o)
+	public int compareTo(@NotNull NodalNedelecShapeFunction o)
 	{
 		if(o.getComponent() < getComponent())
 			return 1;
@@ -121,7 +120,7 @@ public class NedelecShapeFunction extends VectorShapeFunction<TPCell, TPFace, TP
 		return component;
 	}
 	
-	public NedelecComponentFunction getComponentFunction()
+	public NodalNedelecComponentFunction getComponentFunction()
 	{
 		return componentFunction;
 	}

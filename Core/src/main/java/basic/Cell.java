@@ -1,6 +1,7 @@
 package basic;
 
 import linalg.CoordinateVector;
+import tensorproduct.TPEdge;
 
 import java.util.List;
 import java.util.Set;
@@ -26,5 +27,6 @@ public interface Cell<CT extends Cell<CT,FT, ET>, FT extends Face<CT,FT, ET>, ET
 	{
 		throw new UnsupportedOperationException();
 	}
-
+	
+	void addEdge(TPEdge tpEdge);
 }

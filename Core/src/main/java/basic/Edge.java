@@ -2,6 +2,8 @@ package basic;
 
 import com.google.common.collect.Multimap;
 import linalg.CoordinateVector;
+import tensorproduct.TPCell;
+import tensorproduct.TPFace;
 
 import java.util.List;
 import java.util.Set;
@@ -9,9 +11,14 @@ import java.util.Set;
 public interface Edge<CT extends Cell<CT,FT,ET>,FT extends Face<CT,FT,ET>, ET extends Edge<CT,FT,ET>> extends Comparable<ET>
 {
 	
+	void addCell(TPCell cell);
+	
+	void addFace(TPFace cell);
+	
 	int  getDimension();
 	
 	Set<CT> getCells();
+	Set<FT> getFaces();
 	
 	VectorFunction getTangent();
 	

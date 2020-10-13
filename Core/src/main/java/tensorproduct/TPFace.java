@@ -16,7 +16,9 @@ public class TPFace implements Face<TPCell, TPFace, TPEdge>,Comparable<TPFace>
 	double otherCoordinate;
 	List<Cell1D> cell1Ds;
 	int flatDimension;
+	
 	private Set<TPCell> cells;
+	private Set<TPEdge> edges;
 	private boolean isBoundaryFace;
 	private final VectorFunction normal;
 	
@@ -76,6 +78,11 @@ public class TPFace implements Face<TPCell, TPFace, TPEdge>,Comparable<TPFace>
 			cell.addFace(this);
 	}
 	
+	
+	public List<Cell1D> getCell1Ds()
+	{
+		return cell1Ds;
+	}
 	
 	@Override
 	public VectorFunction getNormal()
@@ -213,6 +220,12 @@ public class TPFace implements Face<TPCell, TPFace, TPEdge>,Comparable<TPFace>
 		if(o.otherCoordinate > otherCoordinate)
 			return 1;
 		return CoordinateComparator.comp(center().getEntries(), o.center().getEntries());
+	}
+	@Override
+	public void addEdge(TPEdge tpEdge)
+	{
+		if(edges.add(tpEdge))
+			tpEdge.addFace(this);
 	}
 //	@Override
 //	public List<Face<TPCell, TPShapeFunction>> refine(Multimap<TPCell, TPCell> cellMap)
