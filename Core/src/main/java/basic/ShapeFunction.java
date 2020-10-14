@@ -37,6 +37,7 @@ public interface ShapeFunction<CT extends Cell<CT,FT, ET>, FT extends Face<CT,FT
 		throw new UnsupportedOperationException();
 	}
 	
+	
 	valueT jumpInValue(FT face, CoordinateVector pos);
 	
 	gradientT jumpInDerivative(FT face, CoordinateVector pos);

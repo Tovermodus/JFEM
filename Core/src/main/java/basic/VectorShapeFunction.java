@@ -15,6 +15,25 @@ public abstract class VectorShapeFunction<CT extends Cell<CT,FT, ET>,FT extends 
 	
 	protected int globalIndex;
 	
+	
+	@Override
+	public CoordinateVector value(CoordinateVector pos)
+	{
+		for(CT cell: getCells())
+			if(cell.isInCell(pos))
+				return valueInCell(pos, cell);
+		return new CoordinateVector(pos.getLength());
+	}
+	
+	@Override
+	public CoordinateMatrix gradient(CoordinateVector pos)
+	{
+		for(CT cell: getCells())
+			if(cell.isInCell(pos))
+				return gradientInCell(pos, cell);
+		return new CoordinateMatrix(pos.getLength(),pos.getLength());
+	}
+	
 	@
 		Override
 	public void setGlobalIndex(int index)
@@ -70,7 +89,13 @@ public abstract class VectorShapeFunction<CT extends Cell<CT,FT, ET>,FT extends 
 	{
 		return jumpInDerivative(face, pos).mvMul(face.getNormal().value(pos));
 	}
-	public abstract double divergenceInCell( CoordinateVector pos, CT cell);
+	public double divergenceInCell( CoordinateVector pos, CT cell)
+	{
+		if(cell.isInCell(pos))
+			return divergence(pos);
+		else
+			return 0;
+	}
 	
 	@Override
 	public Map<Integer, Double> prolongate(Set<ST> refinedFunctions)

@@ -48,6 +48,23 @@ public abstract class ScalarShapeFunction<CT extends Cell<CT,FT,ET>, FT extends 
 	}
 	
 	@Override
+	public Double value(CoordinateVector pos)
+	{
+		for(CT cell: getCells())
+			if(cell.isInCell(pos))
+				return valueInCell(pos, cell);
+		return 0.;
+	}
+	
+	@Override
+	public CoordinateVector gradient(CoordinateVector pos)
+	{
+		for(CT cell: getCells())
+			if(cell.isInCell(pos))
+				return gradientInCell(pos, cell);
+		return new CoordinateVector(pos.getLength());
+	}
+	@Override
 	public Double jumpInValue(FT face, CoordinateVector pos)
 	{
 		return valueInCell(pos, face.getNormalUpstreamCell(pos)) - valueInCell(pos,
