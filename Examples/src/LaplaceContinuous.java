@@ -33,7 +33,7 @@ public class LaplaceContinuous
 		CoordinateVector end = CoordinateVector.fromValues(1,1);
 		int polynomialDegree = 3;
 		ContinuousTPFESpace grid = new ContinuousTPFESpace(start,end,
-			Ints.asList(10,10),polynomialDegree);
+			Ints.asList(3,3),polynomialDegree);
 		TPCellIntegral<ContinuousTPShapeFunction> gg =
 			new TPCellIntegral<>(ScalarFunction.constantFunction(1),
 			TPCellIntegral.GRAD_GRAD,

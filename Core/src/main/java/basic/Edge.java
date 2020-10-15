@@ -20,6 +20,9 @@ public interface Edge<CT extends Cell<CT,FT,ET>,FT extends Face<CT,FT,ET>, ET ex
 	Set<CT> getCells();
 	Set<FT> getFaces();
 	
+	void setBoundaryFace(boolean boundaryFace);
+	boolean isBoundaryEdge();
+	
 	VectorFunction getTangent();
 	
 	CoordinateVector center();

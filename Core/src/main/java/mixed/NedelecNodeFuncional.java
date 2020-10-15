@@ -4,11 +4,15 @@ import basic.*;
 import linalg.CoordinateMatrix;
 import linalg.CoordinateVector;
 import linalg.Tensor;
+import org.jetbrains.annotations.NotNull;
 import tensorproduct.*;
 
+import java.util.Collection;
+import java.util.Collections;
 import java.util.List;
 
-public class NedelecNodeFuncional implements NodeFunctional<VectorFunction, CoordinateVector, CoordinateMatrix, Tensor>
+public class NedelecNodeFuncional implements NodeFunctional<VectorFunction, CoordinateVector, CoordinateMatrix,
+	Tensor>, Comparable<NedelecNodeFuncional>
 {
 	public static final int EDGETYPE = 0;
 	public static final int FACETYPE = 1;
@@ -17,6 +21,7 @@ public class NedelecNodeFuncional implements NodeFunctional<VectorFunction, Coor
 	private final TPFace f;
 	
 	private final TPCell c;
+	Collection<TPCell> cells;
 	List<LagrangeBasisFunction1D> testFunctions;
 	int testComponent;
 	
@@ -25,6 +30,7 @@ public class NedelecNodeFuncional implements NodeFunctional<VectorFunction, Coor
 		this.e = e;
 		this.f = null;
 		this.c = null;
+		this.cells = e.getCells();
 		testFunctions = List.of(new LagrangeBasisFunction1D(polynomialDegree - 1, number, e.getCell()));
 		testComponent = 0;
 	}
@@ -38,6 +44,7 @@ public class NedelecNodeFuncional implements NodeFunctional<VectorFunction, Coor
 		int numberInComponent = number % ((polynomialDegree - 1) * polynomialDegree);
 		int testFunctionIndex1 = numberInComponent / (polynomialDegree - 1); //from 0 to polynomialDegree
 		int testFunctionIndex2 = numberInComponent % (polynomialDegree - 1);// from 0 to polynomialDegree- 1
+		this.cells = f.getCells();
 		if (testComponent == 0)
 			testFunctions = List.of(
 				new LagrangeBasisFunction1D(polynomialDegree - 2, testFunctionIndex2,
@@ -65,6 +72,7 @@ public class NedelecNodeFuncional implements NodeFunctional<VectorFunction, Coor
 		numberInComponent = numberInComponent % ((polynomialDegree - 1) * (polynomialDegree - 1));
 		int testFunctionIndex2 = numberInComponent % (polynomialDegree - 1);// from 0 to polynomialDegree- 1
 		int testFunctionIndex3 = numberInComponent / (polynomialDegree - 1);// from 0 to polynomialDegree- 1
+		this.cells = List.of(c);
 		if (testComponent == 0)
 			testFunctions = List.of(
 				new LagrangeBasisFunction1D(polynomialDegree - 1, testFunctionIndex1,
@@ -90,20 +98,30 @@ public class NedelecNodeFuncional implements NodeFunctional<VectorFunction, Coor
 				new LagrangeBasisFunction1D(polynomialDegree - 1, testFunctionIndex3,
 					c.getCell1Ds().get(2)));
 	}
-	
+	public Collection<TPCell> getCells()
+	{
+		return cells;
+	}
 	
 	public TPEdge getE()
 	{
+		
+		if(getType() != EDGETYPE)
+			throw new IllegalStateException("not an edge functional");
 		return e;
 	}
 	
 	public TPFace getF()
 	{
+		if(getType() != FACETYPE)
+			throw new IllegalStateException("not a face functional");
 		return f;
 	}
 	
 	public TPCell getC()
 	{
+		if(getType() != CELLTYPE)
+			throw new IllegalStateException("not a cell functional");
 		return c;
 	}
 	
@@ -163,5 +181,18 @@ public class NedelecNodeFuncional implements NodeFunctional<VectorFunction, Coor
 				return func.value(x).at(testComponent) * testFunctionComponentValue;
 			}, c.getCell1Ds());
 		}
+	}
+	
+	@Override
+	public int compareTo(@NotNull NedelecNodeFuncional o)
+	{
+		if(getType() != o.getType())
+			return Integer.compare(getType(), o.getType());
+		else if(getType() == EDGETYPE)
+			return getE().compareTo(o.getE());
+		else if(getType() == FACETYPE)
+			return getF().compareTo(o.getF());
+		else
+			return getC().compareTo(o.getC());
 	}
 }

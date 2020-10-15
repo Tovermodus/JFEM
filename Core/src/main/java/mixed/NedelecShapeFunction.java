@@ -1,14 +1,15 @@
-package tensorproduct;
+package mixed;
 
 import basic.FEBaseTransformation;
-import basic.NodeFunctional;
 import basic.VectorFunction;
 import basic.VectorShapeFunction;
 import linalg.CoordinateMatrix;
 import linalg.CoordinateVector;
 import linalg.Tensor;
-import mixed.NedelecNodeFuncional;
 import org.jetbrains.annotations.NotNull;
+import tensorproduct.TPCell;
+import tensorproduct.TPEdge;
+import tensorproduct.TPFace;
 
 import java.util.Map;
 import java.util.Set;
@@ -35,7 +36,6 @@ public class NedelecShapeFunction extends VectorShapeFunction<TPCell, TPFace, TP
 		faces.add(face);
 		cells.addAll(face.getCells());
 		nodeFuncional = funcional;
-		
 	}
 	public NedelecShapeFunction(TPEdge edge, NedelecNodeFuncional funcional)
 	{
@@ -44,14 +44,11 @@ public class NedelecShapeFunction extends VectorShapeFunction<TPCell, TPFace, TP
 		cells.addAll(edge.getCells());
 		faces.addAll(edge.getFaces());
 		nodeFuncional = funcional;
-		
-		
 	}
-	public void addTransformationMaps(Map<TPCell, FEBaseTransformation<VectorFunction, NedelecNodeFuncional,
-		CoordinateVector, CoordinateMatrix, Tensor>> allTransformationMaps)
+	public void addTransformationMap(FEBaseTransformation<VectorFunction, NedelecNodeFuncional,
+		CoordinateVector, CoordinateMatrix, Tensor> transformation, TPCell cell)
 	{
-		for(TPCell cell:getCells())
-			transformationMap.put(cell,allTransformationMaps.get(cell));
+		transformationMap.put(cell,transformation);
 	}
 	@Override
 	public Set<TPCell> getCells()
@@ -102,16 +99,6 @@ public class NedelecShapeFunction extends VectorShapeFunction<TPCell, TPFace, TP
 	@Override
 	public int compareTo(@NotNull NedelecShapeFunction o)
 	{
-		if(nodeFuncional.getType()>o.nodeFuncional.getType())
-			return 1;
-		if(nodeFuncional.getType()<o.nodeFuncional.getType())
-			return -1;
-		if(nodeFuncional.getType() == NedelecNodeFuncional.EDGETYPE)
-			return nodeFuncional.getE().compareTo(o.nodeFuncional.getE());
-		if(nodeFuncional.getType() == NedelecNodeFuncional.FACETYPE)
-			return nodeFuncional.getF().compareTo(o.nodeFuncional.getF());
-		if(nodeFuncional.getType() == NedelecNodeFuncional.CELLTYPE)
-			return nodeFuncional.getC().compareTo(o.nodeFuncional.getC());
-		return  1;
+		return nodeFuncional.compareTo(o.nodeFuncional);
 	}
 }

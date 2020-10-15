@@ -17,6 +17,7 @@ public class TPEdge implements Edge<TPCell, TPFace, TPEdge>
 	private Set<TPCell> cells;
 	private Set<TPFace> faces;
 	private final VectorFunction tangent;
+	boolean isBoundaryFace = false;
 	
 	public TPEdge(Cell1D cell, double [] otherCoordinates, int tangentialDimension)
 	{
@@ -42,7 +43,36 @@ public class TPEdge implements Edge<TPCell, TPFace, TPEdge>
 			}
 		};
 	}
-	
+	public static TPEdge createEdgeFromFace(TPFace face, int eliminatedDirection,  boolean leftSide)
+	{
+		int retainedDirection = 0;
+		for(int d = 0; d < 3; d ++)
+			if(d != face.getFlatDimension() && d != eliminatedDirection)
+				retainedDirection = d;
+		Cell1D retainedCell = face.getCell1Ds().get(retainedDirection);
+		Cell1D eliminatedCell = face.getCell1Ds().get(eliminatedDirection);
+		
+		double otherCoordinates[] = new double[]{-1,-1};
+		if(eliminatedDirection < face.getFlatDimension())
+		{
+			if(leftSide)
+				otherCoordinates[0] = eliminatedCell.getStart();
+			else
+				otherCoordinates[0] = eliminatedCell.getEnd();
+			otherCoordinates[1] = face.getOtherCoordinate();
+		}
+		if(eliminatedDirection > face.getFlatDimension())
+		{
+			if(leftSide)
+				otherCoordinates[1] = eliminatedCell.getStart();
+			else
+				otherCoordinates[1] = eliminatedCell.getEnd();
+			otherCoordinates[0] = face.getOtherCoordinate();
+		}
+		TPEdge e = new TPEdge(retainedCell, otherCoordinates, retainedDirection);
+		e.addFace(face);
+		return e;
+	}
 	@Override
 	public void addCell(TPCell cell)
 	{
@@ -52,6 +82,14 @@ public class TPEdge implements Edge<TPCell, TPFace, TPEdge>
 	@Override
 	public void addFace(TPFace face)
 	{
+		for(TPCell c: face.getCells())
+			addCell(c);
+		for(TPCell c: getCells())
+			for(TPFace f: c.getFaces())
+				if(f.isOnFace(center()))
+					addFace(f);
+		if(face.isBoundaryFace())
+			this.setBoundaryFace(true);
 		if(faces.add(face))
 			face.addEdge(this);
 	}
@@ -132,6 +170,18 @@ public class TPEdge implements Edge<TPCell, TPFace, TPEdge>
 		if(o.otherCoordinates[1] > otherCoordinates[1])
 			return 1;
 		return CoordinateComparator.comp(center().getEntries(), o.center().getEntries());
+	}
+	
+	@Override
+	public void setBoundaryFace(boolean boundaryFace)
+	{
+		isBoundaryFace = boundaryFace;
+	}
+	
+	@Override
+	public boolean isBoundaryEdge()
+	{
+		return isBoundaryFace;
 	}
 	
 	public Cell1D getCell()
