@@ -49,8 +49,9 @@ public class TPEdge implements Edge<TPCell, TPFace, TPEdge>
 		for(int d = 0; d < 3; d ++)
 			if(d != face.getFlatDimension() && d != eliminatedDirection)
 				retainedDirection = d;
-		Cell1D retainedCell = face.getCell1Ds().get(retainedDirection);
-		Cell1D eliminatedCell = face.getCell1Ds().get(eliminatedDirection);
+		
+		Cell1D retainedCell = face.getCell1Ds().get(retainedDirection>eliminatedDirection?1:0);
+		Cell1D eliminatedCell = face.getCell1Ds().get(retainedDirection>eliminatedDirection?0:1);
 		
 		double otherCoordinates[] = new double[]{-1,-1};
 		if(eliminatedDirection < face.getFlatDimension())
@@ -82,16 +83,19 @@ public class TPEdge implements Edge<TPCell, TPFace, TPEdge>
 	@Override
 	public void addFace(TPFace face)
 	{
-		for(TPCell c: face.getCells())
-			addCell(c);
-		for(TPCell c: getCells())
-			for(TPFace f: c.getFaces())
-				if(f.isOnFace(center()))
-					addFace(f);
 		if(face.isBoundaryFace())
 			this.setBoundaryFace(true);
 		if(faces.add(face))
 			face.addEdge(this);
+		for(TPCell c: face.getCells())
+			for(TPFace f: c.getFaces())
+				if(f.isOnFace(center()))
+					if(!faces.contains(f))
+					{
+						addFace(f);
+					}
+		for(TPCell c: face.getCells())
+			addCell(c);
 	}
 	@Override
 	public int getDimension()

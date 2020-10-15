@@ -18,7 +18,7 @@ public class FEBaseTransformation<F extends Function<valueT,	gradientT,	hessianT
 	public  FEBaseTransformation(List<F> functions, List<NT> nodeFunctionals)
 	{
 		if(nodeFunctionals.size() != functions.size())
-			throw new IllegalArgumentException("need same number of nodefunctionals as basisfunctions");
+			throw new IllegalArgumentException("need same number of nodefunctionals as basisfunctions"+ functions.size()+ " "+ nodeFunctionals.size());
 		originalBasis = functions;
 		this.nodeFunctionals = nodeFunctionals;
 		DenseMatrix nodeValuesOfFunctions = new DenseMatrix(nodeFunctionals.size(), functions.size());

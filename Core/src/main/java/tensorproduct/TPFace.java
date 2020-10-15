@@ -28,6 +28,7 @@ public class TPFace implements Face<TPCell, TPFace, TPEdge>,Comparable<TPFace>
 		this.flatDimension = flatDimension;
 		this.isBoundaryFace = isBoundaryFace;
 		this.cell1Ds = cell1Ds;
+		this.edges = new TreeSet<>();
 		this.cells = new TreeSet<>();
 		this.normal = new VectorFunction()
 		{

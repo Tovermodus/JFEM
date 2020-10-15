@@ -22,6 +22,7 @@ public class TPCell implements Cell<TPCell, TPFace, TPEdge>
 	{
 		this.cell1Ds = cell1Ds;
 		this.faces = new TreeSet<>();
+		this.edges = new TreeSet<>();
 		this.refined = false;
 	}
 	@Override

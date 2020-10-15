@@ -13,6 +13,7 @@ import tensorproduct.TPFace;
 
 import java.util.Map;
 import java.util.Set;
+import java.util.TreeMap;
 import java.util.TreeSet;
 public class NedelecShapeFunction extends VectorShapeFunction<TPCell, TPFace, TPEdge, NedelecShapeFunction>
 {
@@ -27,6 +28,7 @@ public class NedelecShapeFunction extends VectorShapeFunction<TPCell, TPFace, TP
 		faces = new TreeSet<>();
 		cells.add(cell);
 		faces.addAll(cell.getFaces());
+		transformationMap = new TreeMap<>();
 		nodeFuncional = funcional;
 	}
 	public NedelecShapeFunction(TPFace face, NedelecNodeFuncional funcional)
@@ -35,6 +37,7 @@ public class NedelecShapeFunction extends VectorShapeFunction<TPCell, TPFace, TP
 		faces = new TreeSet<>();
 		faces.add(face);
 		cells.addAll(face.getCells());
+		transformationMap = new TreeMap<>();
 		nodeFuncional = funcional;
 	}
 	public NedelecShapeFunction(TPEdge edge, NedelecNodeFuncional funcional)
@@ -43,6 +46,7 @@ public class NedelecShapeFunction extends VectorShapeFunction<TPCell, TPFace, TP
 		faces = new TreeSet<>();
 		cells.addAll(edge.getCells());
 		faces.addAll(edge.getFaces());
+		transformationMap = new TreeMap<>();
 		nodeFuncional = funcional;
 	}
 	public void addTransformationMap(FEBaseTransformation<VectorFunction, NedelecNodeFuncional,

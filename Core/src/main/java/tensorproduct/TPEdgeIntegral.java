@@ -20,7 +20,7 @@ public class TPEdgeIntegral
 			for (int j = 0; j < 3; j++)
 			{
 				if (j == e.tangentialDimension)
-					point[j] = x.at(e.tangentialDimension);
+					point[j] = x.at(0);
 				else
 					point[j] = e.otherCoordinates[subd++];
 			}

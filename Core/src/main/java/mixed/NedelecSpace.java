@@ -4,10 +4,7 @@ import basic.FEBaseTransformation;
 import basic.LagrangeNodeFunctional;
 import basic.ScalarFunction;
 import basic.VectorFunction;
-import com.google.common.collect.BiMap;
-import com.google.common.collect.Iterables;
-import com.google.common.collect.Lists;
-import com.google.common.collect.TreeMultimap;
+import com.google.common.collect.*;
 import com.google.common.primitives.Doubles;
 import com.google.common.primitives.Ints;
 import linalg.*;
@@ -55,6 +52,8 @@ public class NedelecSpace implements MixedFESpace<TPCell, TPFace, TPEdge, Contin
 		supportOnFace = TreeMultimap.create();
 		functionalsOnCell = TreeMultimap.create();
 		allTransformationMaps = new TreeMap<>();
+		boundaryNodes = new TreeSet<>();
+		functionalShapeFunctionMap = HashBiMap.create();
 		QuadratureRule1D quad;
 		if (polynomialDegree < 3)
 			quad = QuadratureRule1D.Gauss5;
@@ -254,10 +253,10 @@ public class NedelecSpace implements MixedFESpace<TPCell, TPFace, TPEdge, Contin
 	private List<VectorFunction> assembleOriginalFunctionSpaceOnCell(int polynomialDegree, TPCell cell)
 	{
 		List<VectorFunction> functions = new ArrayList<>();
-		for (int i = 0; i < Math.pow(polynomialDegree + 2, dimension-1)*(polynomialDegree+1) * dimension; i++)
+		for (int i = 0; i < Math.pow(polynomialDegree + 1, dimension-1)*(polynomialDegree) * dimension; i++)
 		{
 			DGNodalNedelecShapeFunction shapeFunction =new DGNodalNedelecShapeFunction(cell,
-				polynomialDegree, i);
+				polynomialDegree-1, i);
 			functions.add(shapeFunction);
 		}
 		return functions;
