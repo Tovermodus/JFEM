@@ -24,7 +24,7 @@ public class FEBaseTransformation<F extends Function<valueT,	gradientT,	hessianT
 		DenseMatrix nodeValuesOfFunctions = new DenseMatrix(nodeFunctionals.size(), functions.size());
 		for(int i = 0; i < nodeFunctionals.size(); i++)
 			for(int j = 0; j < functions.size(); j++)
-				nodeValuesOfFunctions.set(nodeFunctionals.get(i).evaluate(functions.get(j)),i,j);
+				nodeValuesOfFunctions.set(nodeFunctionals.get(i).evaluate(functions.get(j)), j, i);
 		transformationMatrix = nodeValuesOfFunctions.inverse();
 	}
 	public double scalarBasisFunctionValue(NT nodeFunctional, CoordinateVector pos)
@@ -43,11 +43,17 @@ public class FEBaseTransformation<F extends Function<valueT,	gradientT,	hessianT
 	{
 		return vectorBasisFunctionGradient(nodeFunctionals.indexOf(nodeFunctional), pos);
 	}
+	public double vectorBasisFunctionDivergence(NT nodeFunctional, CoordinateVector pos)
+	{
+		return vectorBasisFunctionDivergence(nodeFunctionals.indexOf(nodeFunctional), pos);
+	}
 	public double scalarBasisFunctionValue(int index, CoordinateVector pos)
 	{
 		double ret = 0;
 		for(int i = 0; i < originalBasis.size(); i++)
-			ret += (double)originalBasis.get(i).value(pos)*transformationMatrix.at(index,i);
+		{
+			ret += (double) originalBasis.get(i).value(pos) * transformationMatrix.at(index, i);
+		}
 		return ret;
 	}
 	public CoordinateVector scalarBasisFunctionGradient(int index, CoordinateVector pos)
@@ -63,18 +69,37 @@ public class FEBaseTransformation<F extends Function<valueT,	gradientT,	hessianT
 	{
 		CoordinateVector ret = new CoordinateVector(pos.getLength());
 		for(int i = 0; i < originalBasis.size(); i++)
+		{
+			//System.out.println(ret);
 			ret =
-				ret.add (((CoordinateVector)originalBasis.get(i).value(pos)).mul(transformationMatrix.at(index
-					,i)));
+				ret.add(((CoordinateVector) originalBasis.get(i).value(pos)).mul(transformationMatrix.at(index
+					, i)));
+		}
 		return ret;
 	}
 	public CoordinateMatrix vectorBasisFunctionGradient(int index, CoordinateVector pos)
 	{
 		CoordinateMatrix ret = new CoordinateMatrix(pos.getLength(), pos.getLength());
 		for(int i = 0; i < originalBasis.size(); i++)
+		{
+			//System.out.println(originalBasis.get(i).gradient(pos)+" orig");
 			ret =
-				ret.add (((CoordinateMatrix)originalBasis.get(i).gradient(pos)).mul(transformationMatrix.at(index
-					,i)));
+				ret.add(((CoordinateMatrix) originalBasis.get(i).gradient(pos)).mul(transformationMatrix.at(index
+					, i)));
+		}
+		//System.out.println(ret);
+		return ret;
+	}
+	public Double vectorBasisFunctionDivergence(int index, CoordinateVector pos)
+	{
+		double ret = 0;
+		for(int i = 0; i < originalBasis.size(); i++)
+		{
+			//System.out.println(((VectorFunction)originalBasis.get(i)).divergence(pos)+" orig");
+			ret +=((VectorFunction)originalBasis.get(i)).divergence(pos)*transformationMatrix.at(index
+					, i);
+		}
+		//System.out.println(ret);
 		return ret;
 	}
 }

@@ -7,7 +7,6 @@ import linalg.Vector;
 import tensorproduct.*;
 
 import java.util.ArrayList;
-import java.util.List;
 import java.util.Map;
 
 public class DGRTLaplace

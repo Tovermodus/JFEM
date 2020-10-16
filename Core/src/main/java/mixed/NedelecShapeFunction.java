@@ -83,7 +83,19 @@ public class NedelecShapeFunction extends VectorShapeFunction<TPCell, TPFace, TP
 	{
 		cells.add(cell);
 	}
-	
+	@Override
+	public double divergenceInCell(CoordinateVector pos,TPCell cell)
+	{
+		return transformationMap.get(cell).vectorBasisFunctionDivergence(nodeFuncional,pos);
+	}
+	@Override
+	public double divergence(CoordinateVector pos)
+	{
+		for(TPCell cell:getCells())
+			if(cell.isInCell(pos))
+				return divergenceInCell(pos,cell);
+		return 0;
+	}
 	@Override
 	public CoordinateVector valueInCell(CoordinateVector pos, TPCell cell)
 	{

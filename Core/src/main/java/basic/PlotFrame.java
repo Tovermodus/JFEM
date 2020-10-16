@@ -1,3 +1,5 @@
+package basic;
+
 import basic.ScalarFunction;
 import com.google.common.collect.Iterables;
 import linalg.CoordinateVector;

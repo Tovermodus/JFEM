@@ -146,6 +146,8 @@ public class DGNodalNedelecShapeFunction extends VectorShapeFunction<TPCell, TPF
 	@Override
 	public double divergence(CoordinateVector pos)
 	{
+		
+		//System.out.println(componentFunction.gradient(pos)+" "+ component);
 		return componentFunction.gradient(pos).at(component);
 	}
 	

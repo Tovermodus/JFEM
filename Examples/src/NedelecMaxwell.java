@@ -1,9 +1,6 @@
 import basic.*;
 import com.google.common.primitives.Ints;
-import linalg.CoordinateVector;
-import linalg.IterativeSolver;
-import linalg.SparseMatrix;
-import linalg.Vector;
+import linalg.*;
 import mixed.*;
 import tensorproduct.*;
 
@@ -18,9 +15,9 @@ public class NedelecMaxwell
 	{
 		CoordinateVector start = CoordinateVector.fromValues(0, 0,0);
 		CoordinateVector end = CoordinateVector.fromValues(1, 1,1);
-		int polynomialDegree = 1;
+		int polynomialDegree = 2;
 		NedelecSpace grid = new NedelecSpace(start, end,
-			Ints.asList(3,3,3), polynomialDegree);
+			Ints.asList(2,2,2), polynomialDegree);
 		TPVectorCellIntegral<NedelecShapeFunction> valueValue =
 			new TPVectorCellIntegral<>(TPVectorCellIntegral.ROT_ROT);
 		MixedCellIntegral<TPCell,TPFace,TPEdge,ContinuousTPShapeFunction, NedelecShapeFunction>
@@ -83,9 +80,9 @@ public class NedelecMaxwell
 		System.out.println("solve system: " + grid.getSystemMatrix().getRows() + "×" + grid.getSystemMatrix().getCols());
 		//DenseMatrix A = new DenseMatrix(grid.getSystemMatrix());
 		IterativeSolver<SparseMatrix> i = new IterativeSolver<>();
-		Vector solution1 = i.solveGMRES(grid.getSystemMatrix(), grid.getRhs(), 1e-6);
+		//Vector solution1 = i.solveGMRES(grid.getSystemMatrix(), grid.getRhs(), 1e-6);
 		//Vector solution1 = grid.getSystemMatrix().solve(grid.getRhs());
-		//Vector solution1 = new DenseMatrix(grid.getSystemMatrix()).solve(grid.getRhs());
+		Vector solution1 = new DenseMatrix(grid.getSystemMatrix()).solve(grid.getRhs());
 		System.out.println("solved");
 		System.out.println("sol"+solution1);
 		System.out.println("rhs"+grid.getRhs());
@@ -111,18 +108,24 @@ public class NedelecMaxwell
 		valList.put("y-velocity",solut.velocityComponentsInPoints(grid.generatePlotPoints(20), 1));
 		valList.put("z-velocity",solut.velocityComponentsInPoints(grid.generatePlotPoints(20), 2));
 		
-		/*for(MixedShapeFunction<TPCell, TPFace, ContinuousTPShapeFunction,ContinuousTPVectorFunction>
+		int k = 0;
+		for(MixedShapeFunction<TPCell, TPFace,TPEdge, ContinuousTPShapeFunction,NedelecShapeFunction>
 		shapeFunction:grid.getShapeFunctions().values())
-		
+
 		{
-			if(shapeFunction.isPressure())
-			valList.add(shapeFunction.pressureValuesInPoints(grid.generatePlotPoints(50)));
+			//if(shapeFunction.isPressure())
+			//	valList.put("function"+shapeFunction.getGlobalIndex(),
+			//		shapeFunction.pressureValuesInPoints(grid.generatePlotPoints(20)));
 			if(shapeFunction.isVelocity())
 			{
-				valList.add(shapeFunction.velocityComponentsInPoints(grid.generatePlotPoints(50),
-					shapeFunction.getVelocityShapeFunction().getComponent()));
+				valList.put("functionx"+shapeFunction.getGlobalIndex(),
+					shapeFunction.velocityComponentsInPoints(grid.generatePlotPoints(20),0));
+				valList.put("functiony"+shapeFunction.getGlobalIndex(),
+					shapeFunction.velocityComponentsInPoints(grid.generatePlotPoints(20),1));
+				valList.put("functionz"+shapeFunction.getGlobalIndex(),
+					shapeFunction.velocityComponentsInPoints(grid.generatePlotPoints(20),2));
 			}
-		}*/
+		}
 		new PlotFrame(valList, start, end);
 	}
 }

@@ -22,7 +22,7 @@ public class NedelecSpace implements MixedFESpace<TPCell, TPFace, TPEdge, Contin
 	List<TPCell> cells;
 	List<TPFace> faces;
 	Set<TPEdge> edges;
-	Set<NedelecNodeFuncional> nodeFuncionals;
+	List<NedelecNodeFuncional> nodeFuncionals;
 	Set<Integer> boundaryNodes;
 	TreeMultimap<TPCell, MixedShapeFunction<TPCell, TPFace, TPEdge,ContinuousTPShapeFunction,
 		NedelecShapeFunction>> supportOnCell;
@@ -165,19 +165,24 @@ public class NedelecSpace implements MixedFESpace<TPCell, TPFace, TPEdge, Contin
 	public void assembleFunctions(int polynomialDegree)
 	{
 		shapeFunctions = new TreeSet<>();
-		nodeFuncionals = new TreeSet<>();
-		for(TPCell c: getCells())
-			for(int i = 0; i <3*polynomialDegree*Math.pow(polynomialDegree-1,2); i++)
-				nodeFuncionals.add(new NedelecNodeFuncional(polynomialDegree,c,i));
-		for(TPFace f: getFaces())
-			for(int i = 0; i < 2*polynomialDegree*(polynomialDegree-1); i++)
-				nodeFuncionals.add(new NedelecNodeFuncional(polynomialDegree,f,i));
-		for(TPEdge e: getEdges())
-			for(int i = 0; i < polynomialDegree;i++)
-				nodeFuncionals.add(new NedelecNodeFuncional(polynomialDegree,e,i));
-		for(NedelecNodeFuncional n: nodeFuncionals)
-			for(TPCell c: n.getCells())
-				this.functionalsOnCell.put(c,n);
+		nodeFuncionals = new ArrayList<>();
+		for (TPCell c : getCells())
+			for (int i = 0; i < 3 * polynomialDegree * Math.pow(polynomialDegree - 1, 2); i++)
+				nodeFuncionals.add(new NedelecNodeFuncional(polynomialDegree, c, i));
+		for (TPFace f : getFaces())
+			for (int i = 0; i < 2 * polynomialDegree * (polynomialDegree - 1); i++)
+				nodeFuncionals.add(new NedelecNodeFuncional(polynomialDegree, f, i));
+		for (TPEdge e : getEdges())
+			for (int i = 0; i < polynomialDegree; i++)
+				nodeFuncionals.add(new NedelecNodeFuncional(polynomialDegree, e, i));
+		for (NedelecNodeFuncional n : nodeFuncionals)
+		{
+			//System.out.println(n.getCells().size()+" "+n.getType());
+			for (TPCell c : n.getCells())
+				this.functionalsOnCell.put(c, n);
+		}
+		//for(TPCell c:getCells())
+		//	System.out.println(this.functionalsOnCell.get(c).size());
 		assemblePressureFunctions(polynomialDegree);
 		assembleVelocityFunctions(polynomialDegree);
 		int i = 0;
@@ -195,10 +200,10 @@ public class NedelecSpace implements MixedFESpace<TPCell, TPFace, TPEdge, Contin
 		
 		for (TPCell cell : cells)
 		{
-			for (int i = 0; i < Math.pow(polynomialDegree + 1, dimension); i++)
+			for (int i = 0; i < Math.pow(polynomialDegree , dimension); i++)
 			{
 				MixedNedelecFunction shapeFunction = new MixedNedelecFunction(new ContinuousTPShapeFunction(cell,
-					polynomialDegree, i));
+					polynomialDegree-1, i));
 				shapeFunction.setGlobalIndex(shapeFunctions.size());
 				shapeFunctions.add(shapeFunction);
 				for(TPCell ce: shapeFunction.getCells())
@@ -248,6 +253,10 @@ public class NedelecSpace implements MixedFESpace<TPCell, TPFace, TPEdge, Contin
 			}
 			
 		}
+//		for(NedelecNodeFuncional n: functionalShapeFunctionMap.keySet())
+//		{
+//			System.out.println(n.evaluate(functionalShapeFunctionMap.get(n)));
+//		}
 		
 	}
 	private List<VectorFunction> assembleOriginalFunctionSpaceOnCell(int polynomialDegree, TPCell cell)
@@ -321,6 +330,11 @@ public class NedelecSpace implements MixedFESpace<TPCell, TPFace, TPEdge, Contin
 		return functionNumbers;
 	}
 	
+	@Override
+	public Set<Integer> getFixedNodeIndices()
+	{
+		return boundaryNodes;
+	}
 	
 	@Override
 	public List<TPFace> getFaces()
@@ -412,6 +426,7 @@ public class NedelecSpace implements MixedFESpace<TPCell, TPFace, TPEdge, Contin
 			}
 			if(boundaryShapeFunction)
 			{
+				System.out.println(shapeFunction.getGlobalIndex());
 				double nodeValue = shapeFunction.getNodeFunctional().evaluate(boundaryMixed);
 				int shapeFunctionIndex = shapeFunction.getGlobalIndex();
 				boundaryNodes.add(shapeFunctionIndex);

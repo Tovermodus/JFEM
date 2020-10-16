@@ -19,7 +19,7 @@ public class NedelecNodeFuncional implements NodeFunctional<VectorFunction, Coor
 	public static final int CELLTYPE = 2;
 	private final TPEdge e;
 	private final TPFace f;
-	
+	private final int number;
 	private final TPCell c;
 	Collection<TPCell> cells;
 	List<LagrangeBasisFunction1D> testFunctions;
@@ -33,6 +33,7 @@ public class NedelecNodeFuncional implements NodeFunctional<VectorFunction, Coor
 		this.cells = e.getCells();
 		testFunctions = List.of(new LagrangeBasisFunction1D(polynomialDegree - 1, number, e.getCell()));
 		testComponent = 0;
+		this.number = number;
 	}
 	
 	public NedelecNodeFuncional(int polynomialDegree, TPFace f, int number)
@@ -53,11 +54,12 @@ public class NedelecNodeFuncional implements NodeFunctional<VectorFunction, Coor
 					f.getCell1Ds().get(1)));
 		else
 			testFunctions = List.of(
-				new LagrangeBasisFunction1D(polynomialDegree - 1, testFunctionIndex2,
+				new LagrangeBasisFunction1D(polynomialDegree - 1, testFunctionIndex1,
 					f.getCell1Ds().get(0)),
-				new LagrangeBasisFunction1D(polynomialDegree - 2, testFunctionIndex1,
+				new LagrangeBasisFunction1D(polynomialDegree - 2, testFunctionIndex2,
 					f.getCell1Ds().get(1)));
 		
+		this.number = number;
 	}
 	
 	public NedelecNodeFuncional(int polynomialDegree, TPCell c, int number)
@@ -95,8 +97,9 @@ public class NedelecNodeFuncional implements NodeFunctional<VectorFunction, Coor
 					c.getCell1Ds().get(0)),
 				new LagrangeBasisFunction1D(polynomialDegree - 2, testFunctionIndex2,
 					c.getCell1Ds().get(1)),
-				new LagrangeBasisFunction1D(polynomialDegree - 1, testFunctionIndex3,
+				new LagrangeBasisFunction1D(polynomialDegree - 1, testFunctionIndex1,
 					c.getCell1Ds().get(2)));
+		this.number = number;
 	}
 	public Collection<TPCell> getCells()
 	{
@@ -186,6 +189,8 @@ public class NedelecNodeFuncional implements NodeFunctional<VectorFunction, Coor
 	@Override
 	public int compareTo(@NotNull NedelecNodeFuncional o)
 	{
+		if (number != o.number)
+			return Integer.compare(number, o.number);
 		if(getType() != o.getType())
 			return Integer.compare(getType(), o.getType());
 		else if(getType() == EDGETYPE)
@@ -194,5 +199,10 @@ public class NedelecNodeFuncional implements NodeFunctional<VectorFunction, Coor
 			return getF().compareTo(o.getF());
 		else
 			return getC().compareTo(o.getC());
+	}
+	
+	public double getNumber()
+	{
+		return number;
 	}
 }

@@ -4,15 +4,8 @@ import com.google.common.primitives.Ints;
 import linalg.*;
 import tensorproduct.*;
 
-import javax.swing.*;
-import java.awt.*;
-import java.awt.event.MouseEvent;
-import java.awt.event.MouseListener;
-import java.awt.event.WindowEvent;
-import java.awt.event.WindowListener;
 import java.util.ArrayList;
 import java.util.Map;
-import java.util.OptionalDouble;
 import java.util.TreeSet;
 
 public class LaplaceContinuous
