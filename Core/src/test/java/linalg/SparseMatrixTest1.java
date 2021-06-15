@@ -33,11 +33,7 @@ public class SparseMatrixTest1
 			largeDense.add(v,y,x);
 			largeDense2.add(v,y,x);
 		}
-		for(int i = 0; i < 100; i ++)
-		{
-			for(int j = 0; j < 100; j++)
-				assertEquals(largeDense.at(i,j),largeDense2.at(i,j));
-		}
+		assertTrue(largeDense.almostEqual(largeDense2));
 		assertEquals(largeDense, largeDense2);
 		SparseMatrix largeDense3 = (SparseMatrix)largeDense.add(largeDense);
 		assertEquals(largeDense, largeDense2);
@@ -47,11 +43,7 @@ public class SparseMatrixTest1
 		assertTrue(largeDense4.isSparse());
 		assertEquals(largeDense, largeDense2);
 		
-		for(int i = 0; i < 100; i ++)
-		{
-			for(int j = 0; j < 100; j++)
-				assertEquals(largeDense.at(i,j),largeDense2.at(i,j));
-		}
+		assertTrue(largeDense.almostEqual(largeDense2));
 		for(int i = 0; i < 100; i ++)
 		{
 			for(int j = 0; j < 100; j++)
@@ -132,7 +124,7 @@ public class SparseMatrixTest1
 	{
 		DenseVector small = new DenseVector(40);
 		small.add(4.3,4);
-		small.add(7.8,45);
+		small.add(7.8,5);
 		assertEquals(small.euclidianNorm(), Math.sqrt(4.3*4.3+7.8*7.8));
 		SparseMatrix largeDense = new SparseMatrix(500,500);
 		DenseVector largeVector = new DenseVector(500);

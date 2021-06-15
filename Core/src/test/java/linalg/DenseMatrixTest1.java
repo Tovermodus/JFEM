@@ -147,7 +147,7 @@ public class DenseMatrixTest1
 	{
 		DenseVector small = new DenseVector(40);
 		small.add(4.3,4);
-		small.add(7.8,45);
+		small.add(7.8,5);
 		assertEquals(small.euclidianNorm(), Math.sqrt(4.3*4.3+7.8*7.8));
 		DenseMatrix largeDense = new DenseMatrix(50,50);
 		DenseVector largeVector = new DenseVector(50);
