@@ -12,7 +12,7 @@ import java.util.concurrent.Executors;
 
 public class IterativeSolver<Op extends VectorMultiplyable>
 {
-	private boolean interrupted = false;
+	private volatile boolean interrupted = false;
 	private GMRES gm;
 	ExecutorService ex;
 	public Vector solveCG(Op operator, Vector rhs, double tol)

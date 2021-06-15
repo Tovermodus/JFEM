@@ -1,5 +1,6 @@
 package linalg;
 
+import com.google.common.collect.ImmutableList;
 import com.google.common.primitives.Ints;
 
 import java.util.*;
@@ -8,12 +9,8 @@ import java.util.stream.IntStream;
 public interface Tensor
 {
 	double at(int... coordinates);
-	void set(double value, int... coordinates);
-	void add(double value, int...coordinates);
 	
 	Tensor add(Tensor other);
-	void addInPlace(Tensor other);
-	void subInPlace(Tensor other);
 	default Tensor sub(Tensor other)
 	{
 		if(Ints.toArray(getShape()) != Ints.toArray(other.getShape()))
@@ -29,7 +26,7 @@ public interface Tensor
 	boolean isSparse();
 	
 	int getOrder();
-	List<Integer> getShape();
+	ImmutableList<Integer> getShape();
 	default long size()
 	{
 		Optional<Long> ret = getShape().stream().map(Integer::longValue).reduce(Math::multiplyExact);
