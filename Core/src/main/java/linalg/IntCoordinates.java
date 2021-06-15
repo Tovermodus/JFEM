@@ -7,11 +7,14 @@ import java.util.Comparator;
 import java.util.Iterator;
 import java.util.List;
 
-public class IntCoordinates implements Comparable<IntCoordinates>
+public class IntCoordinates implements Comparable<IntCoordinates>, Cloneable
 {
 	final private int [] coordinates;
 	public IntCoordinates(int ... coordinates) {
 		this.coordinates = coordinates;
+	}
+	public IntCoordinates(IntCoordinates source) {
+		this.coordinates = source.coordinates.clone();
 	}
 	public int [] getCoordinates() {
 		return coordinates;
@@ -24,11 +27,11 @@ public class IntCoordinates implements Comparable<IntCoordinates>
 		ret[getDimension() - 1]++;
 		return new IntCoordinates(ret);
 	}
-	private IntCoordinates wrap(int[] lowerBounds, int[] upperBounds) {
+	private IntCoordinates wrap(IntCoordinates lowerBounds, IntCoordinates upperBounds) {
 		for(int d = getDimension() - 1; d > 0; d--)
-			if(coordinates[d] == upperBounds[d])
+			if(coordinates[d] == upperBounds.coordinates[d])
 			{
-				coordinates[d] = lowerBounds[d];
+				coordinates[d] = lowerBounds.coordinates[d];
 				coordinates[d-1]++;
 			}
 		return this;
@@ -78,13 +81,25 @@ public class IntCoordinates implements Comparable<IntCoordinates>
 		}
 		return 0;
 	}
-	public class Range implements Iterable<IntCoordinates>, Iterator<IntCoordinates>
+	
+	public static class Range implements Iterable<IntCoordinates>, Iterator<IntCoordinates>
 	{
-		final int[] lowerBounds;
-		final int[] upperBounds;
+		final IntCoordinates lowerBounds;
+		final IntCoordinates upperBounds;
 		IntCoordinates pointer;
 		public Range(int[] lowerBounds, int[] upperBounds)
 		{
+			this(new IntCoordinates(lowerBounds), new IntCoordinates(upperBounds));
+		}
+		public Range(IntCoordinates lowerBounds, IntCoordinates upperBounds)
+		{
+			if(lowerBounds.getDimension() != upperBounds.getDimension())
+				throw new IllegalArgumentException("Range: bounds must have same length!");
+			for (int i = 0; i < lowerBounds.getDimension(); i++)
+			{
+				if(lowerBounds.getCoordinates()[i] >= upperBounds.getCoordinates()[i])
+					throw new IllegalArgumentException("Range: lower index higher than upper!");
+			}
 			this.lowerBounds = lowerBounds;
 			this.upperBounds = upperBounds;
 			pointer = new IntCoordinates(lowerBounds);
@@ -94,17 +109,15 @@ public class IntCoordinates implements Comparable<IntCoordinates>
 		@Override
 		public Iterator<IntCoordinates> iterator()
 		{
-			pointer = new IntCoordinates(lowerBounds);
+			pointer = lowerBounds;
 			return this;
 		}
 		
 		@Override
 		public boolean hasNext()
 		{
-			return Arrays.equals(pointer.increaseLastDimension().wrap(lowerBounds, upperBounds).coordinates,
-				upperBounds);
+			return pointer.increaseLastDimension().wrap(lowerBounds, upperBounds).equals(upperBounds);
 		}
-		
 		@Override
 		public IntCoordinates next()
 		{
