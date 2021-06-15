@@ -1,6 +1,9 @@
 package linalg;
 
+import com.google.common.collect.ImmutableMap;
 import com.google.common.primitives.Ints;
+
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
@@ -14,9 +17,9 @@ public interface Vector extends Tensor
 		return 1;
 	}
 	@Override
-	default Map<List<Integer>,Double> getCoordinateEntryList()
+	default ImmutableMap<IntCoordinates,Double> getCoordinateEntryList()
 	{
-		Map<List<Integer>,Double> ret = new TreeMap<>(new CoordinateComparator());
+		Map<List<Integer>,Double> ret = new HashMap<>();
 		for(int i = 0; i < getLength(); i++)
 			if(at(i) != 0)
 				ret.put(Ints.asList(i), at(i));
@@ -40,29 +43,6 @@ public interface Vector extends Tensor
 			throw new IllegalArgumentException("Vectors are of different size");
 		return add(other.mul(-1.));
 	}
-	
-	@Override
-	default void addInPlace(Tensor other)
-	{
-		if(!getShape().equals(other.getShape()))
-			throw new IllegalArgumentException("Vectors are of different size");
-		for (int i = 0; i < getLength(); i++)
-		{
-			set(at(i)+other.at(i),i);
-		}
-	}
-	
-	@Override
-	default void subInPlace(Tensor other)
-	{
-		if(!getShape().equals(other.getShape()))
-			throw new IllegalArgumentException("Vectors are of different size");
-		for (int i = 0; i < getLength(); i++)
-		{
-			set(at(i)-other.at(i),i);
-		}
-	}
-	
 	@Override
 	Vector mul(double scalar);
 	Matrix outer(Vector other);
@@ -80,10 +60,6 @@ public interface Vector extends Tensor
 	{
 		return matrix.tvMul(this);
 	}
-//	{
-//		assert getShape().get(0).equals(matrix.getShape().get(0));
-//		return IntStream.range(0,matrix.getShape().get(1)).parallel().mapToDouble(i->matrix.unfoldDimension(1).get(i).inner(this)).sum();
-//	}
 	@Override
 	default String printFormatted(double...tol)
 	{

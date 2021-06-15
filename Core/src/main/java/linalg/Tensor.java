@@ -1,6 +1,7 @@
 package linalg;
 
 import com.google.common.collect.ImmutableList;
+import com.google.common.collect.ImmutableMap;
 import com.google.common.primitives.Ints;
 
 import java.util.*;
@@ -8,7 +9,10 @@ import java.util.stream.IntStream;
 
 public interface Tensor
 {
-	double at(int... coordinates);
+	double at(IntCoordinates coordinates);
+	//default double at(int ... coordinates){
+	//	return at(new IntCoordinates(coordinates));
+	//}
 	
 	Tensor add(Tensor other);
 	default Tensor sub(Tensor other)
@@ -19,7 +23,7 @@ public interface Tensor
 	}
 	Tensor mul(double scalar);
 	
-	Map<List<Integer>,Double> getCoordinateEntryList();
+	ImmutableMap<IntCoordinates,Double> getCoordinateEntryList();
 	List<? extends Tensor> unfoldDimension(int dimension);
 	
 	int getSparseEntryCount();
