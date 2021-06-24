@@ -6,7 +6,8 @@ import linalg.Vector;
 
 import java.util.*;
 
-public class RTComponentFunction extends ScalarShapeFunction<TPCell, TPFace,TPEdge,RTComponentFunction> implements Comparable<RTComponentFunction> {
+public class RTComponentFunction implements ScalarShapeFunction<TPCell, TPFace,TPEdge,RTComponentFunction>,
+	Comparable<RTComponentFunction> {
 	
 	private Map<TPCell, List<RTBasisFunction1D>> cells;
 	private Set<TPFace> faces;
@@ -113,8 +114,20 @@ public class RTComponentFunction extends ScalarShapeFunction<TPCell, TPFace,TPEd
 	}
 	
 	@Override
-	public NodeFunctional<ScalarFunction, Double, CoordinateVector, Matrix> getNodeFunctional() {
+	public NodeFunctional<ScalarFunction, Double, CoordinateVector, CoordinateMatrix> getNodeFunctional() {
 		return nodeFunctional;
+	}
+	
+	@Override
+	public void setGlobalIndex(int index)
+	{
+		throw new UnsupportedOperationException("not implemented yet");
+	}
+	
+	@Override
+	public int getGlobalIndex()
+	{
+		throw new UnsupportedOperationException("not implemented yet");
 	}
 	
 	@Override

@@ -17,7 +17,7 @@ Workflow of this finite element is: first generate 1D cells, then
  */
 public class TPFESpace implements MatrixFESpace<TPCell,
 	TPFace,TPEdge,
-	TPShapeFunction,Double, CoordinateVector,Matrix>,
+	TPShapeFunction,Double, CoordinateVector,CoordinateMatrix>,
 	Assembleable
 {
 	List<List<Double>> coordinates1D;

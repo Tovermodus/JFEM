@@ -15,7 +15,7 @@ import java.util.*;
 import java.util.stream.Collectors;
 
 public class ContinuousTPFESpace implements MatrixFESpace<TPCell,
-	TPFace,TPEdge,ContinuousTPShapeFunction,Double, CoordinateVector, Matrix>, Assembleable
+	TPFace,TPEdge,ContinuousTPShapeFunction,Double, CoordinateVector, CoordinateMatrix>, Assembleable
 {
 	List<List<Double>> coordinates1D;
 	List<List<Cell1D>> cells1D;

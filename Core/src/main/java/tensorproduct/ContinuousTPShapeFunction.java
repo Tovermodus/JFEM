@@ -9,7 +9,8 @@ import linalg.Vector;
 
 import java.util.*;
 
-public class ContinuousTPShapeFunction extends ScalarShapeFunction<TPCell, TPFace,TPEdge,ContinuousTPShapeFunction> implements Comparable<ContinuousTPShapeFunction> {
+public class ContinuousTPShapeFunction implements ScalarShapeFunction<TPCell, TPFace,TPEdge,
+        ContinuousTPShapeFunction>, Comparable<ContinuousTPShapeFunction> {
     
     private Map<TPCell, List<LagrangeBasisFunction1D>> cells;
     private Set<TPFace> faces;
@@ -94,10 +95,22 @@ public class ContinuousTPShapeFunction extends ScalarShapeFunction<TPCell, TPFac
     }
 
     @Override
-    public NodeFunctional<ScalarFunction, Double, CoordinateVector, Matrix> getNodeFunctional() {
+    public NodeFunctional<ScalarFunction, Double, CoordinateVector, CoordinateMatrix> getNodeFunctional() {
         return nodeFunctional;
     }
-
+    
+    @Override
+    public void setGlobalIndex(int index)
+    {
+        throw new UnsupportedOperationException("not implemented yet");
+    }
+    
+    @Override
+    public int getGlobalIndex()
+    {
+        throw new UnsupportedOperationException("not implemented yet");
+    }
+    
     @Override
     public void addFace(TPFace face) {
         faces.add(face);

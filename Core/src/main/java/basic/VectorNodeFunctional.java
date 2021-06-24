@@ -8,9 +8,9 @@ import linalg.Tensor;
 public class VectorNodeFunctional implements NodeFunctional<VectorFunction, CoordinateVector, CoordinateMatrix, Tensor>
 {
 	final int component;
-	final NodeFunctional<ScalarFunction, Double, CoordinateVector, Matrix> componentNodeFunctional;
+	final NodeFunctional<ScalarFunction, Double, CoordinateVector, CoordinateMatrix> componentNodeFunctional;
 	
-	public VectorNodeFunctional(int component, NodeFunctional<ScalarFunction, Double, CoordinateVector, Matrix> componentNodeFunctional)
+	public VectorNodeFunctional(int component, NodeFunctional<ScalarFunction, Double, CoordinateVector, CoordinateMatrix> componentNodeFunctional)
 	{
 		this.component = component;
 		this.componentNodeFunctional = componentNodeFunctional;
@@ -21,7 +21,7 @@ public class VectorNodeFunctional implements NodeFunctional<VectorFunction, Coor
 		return componentNodeFunctional.evaluate(func.getComponentFunction(component));
 	}
 	
-	public NodeFunctional<ScalarFunction, Double, CoordinateVector, Matrix> getComponentNodeFunctional()
+	public NodeFunctional<ScalarFunction, Double, CoordinateVector, CoordinateMatrix> getComponentNodeFunctional()
 	{
 		return componentNodeFunctional;
 	}

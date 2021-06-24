@@ -5,12 +5,14 @@ import basic.NodeFunctional;
 import basic.ScalarFunction;
 import basic.ScalarShapeFunction;
 import linalg.CoordinateComparator;
+import linalg.CoordinateMatrix;
 import linalg.CoordinateVector;
 import linalg.Matrix;
 
 import java.util.*;
 
-public class DGNodalNedelecComponentFunction extends ScalarShapeFunction<TPCell, TPFace, TPEdge, DGNodalNedelecComponentFunction> implements Comparable<DGNodalNedelecComponentFunction> {
+public class DGNodalNedelecComponentFunction implements ScalarShapeFunction<TPCell, TPFace, TPEdge,
+	DGNodalNedelecComponentFunction>, Comparable<DGNodalNedelecComponentFunction> {
 	
 	private final Map<TPCell, List<RTBasisFunction1D>> cells;
 	private final TPCell supportCell;
@@ -104,8 +106,20 @@ public class DGNodalNedelecComponentFunction extends ScalarShapeFunction<TPCell,
 	}
 	
 	@Override
-	public NodeFunctional<ScalarFunction, Double, CoordinateVector, Matrix> getNodeFunctional() {
+	public NodeFunctional<ScalarFunction, Double, CoordinateVector, CoordinateMatrix> getNodeFunctional() {
 		return nodeFunctional;
+	}
+	
+	@Override
+	public void setGlobalIndex(int index)
+	{
+		throw new UnsupportedOperationException("not implemented yet");
+	}
+	
+	@Override
+	public int getGlobalIndex()
+	{
+		throw new UnsupportedOperationException("not implemented yet");
 	}
 	
 	@Override

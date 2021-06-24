@@ -8,10 +8,10 @@ import linalg.*;
 public class MixedNodeFunctional implements NodeFunctional<MixedFunction, MixedValue, MixedGradient,
 	MixedHessian>
 {
-	private final NodeFunctional<ScalarFunction,Double, CoordinateVector, Matrix> pressureFunctional;
+	private final NodeFunctional<ScalarFunction,Double, CoordinateVector, CoordinateMatrix> pressureFunctional;
 	private final NodeFunctional<VectorFunction,CoordinateVector, CoordinateMatrix, Tensor> velocityFunctional;
 	
-	private MixedNodeFunctional(NodeFunctional<ScalarFunction, Double, CoordinateVector, Matrix> pressureFunctional,
+	private MixedNodeFunctional(NodeFunctional<ScalarFunction, Double, CoordinateVector, CoordinateMatrix> pressureFunctional,
 	                      NodeFunctional<VectorFunction, CoordinateVector, CoordinateMatrix, Tensor> velocityFunctional)
 	{
 		this.pressureFunctional = pressureFunctional;
@@ -20,7 +20,7 @@ public class MixedNodeFunctional implements NodeFunctional<MixedFunction, MixedV
 	
 	public  static MixedNodeFunctional pressureFunctional(NodeFunctional<ScalarFunction, Double,
 		CoordinateVector,
-		Matrix> pressureFunctional)
+		CoordinateMatrix> pressureFunctional)
 	{
 		return new MixedNodeFunctional(pressureFunctional, null);
 	}

@@ -5,9 +5,9 @@ import linalg.Vector;
 
 import java.util.*;
 
-public class ScalarFESpaceFunction<ST extends ScalarShapeFunction<?,?,?,ST>> extends ScalarFunction
+public class ScalarFESpaceFunction<ST extends ScalarShapeFunction<?,?,?,ST>> implements ScalarFunction
 {
-	private HashMap<ST, Double> coefficients;
+	private final HashMap<ST, Double> coefficients;
 	public ScalarFESpaceFunction(ST[] functions, double[] coefficients)
 	{
 		assert(functions.length == coefficients.length);

@@ -7,16 +7,13 @@ import com.google.common.collect.Lists;
 import com.google.common.collect.TreeMultimap;
 import com.google.common.primitives.Doubles;
 import com.google.common.primitives.Ints;
-import linalg.CoordinateVector;
-import linalg.DenseVector;
-import linalg.Matrix;
-import linalg.SparseMatrix;
+import linalg.*;
 
 import java.util.*;
 import java.util.stream.Collectors;
 
 public class ScalarRTFESpace implements MatrixFESpace<TPCell,
-	TPFace,TPEdge,RTComponentFunction,Double, CoordinateVector, Matrix>, Assembleable
+	TPFace,TPEdge,RTComponentFunction,Double, CoordinateVector, CoordinateMatrix>, Assembleable
 {
 	List<List<Double>> coordinates1D;
 	List<List<Cell1D>> cells1D;
