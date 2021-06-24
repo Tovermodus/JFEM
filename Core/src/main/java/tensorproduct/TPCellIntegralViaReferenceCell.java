@@ -9,6 +9,7 @@ import linalg.Vector;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.ToDoubleFunction;
 
 public class TPCellIntegralViaReferenceCell<ST extends ScalarShapeFunctionWithReferenceShapeFunction<TPCell,TPFace,TPEdge,ST>> extends TPCellIntegral<ST>
@@ -17,13 +18,12 @@ public class TPCellIntegralViaReferenceCell<ST extends ScalarShapeFunctionWithRe
 	public TPCellIntegralViaReferenceCell(Function<?, ?, ?> weight, String name, boolean weightIsTensorProduct)
 	{
 		super(weight, name, weightIsTensorProduct);
-		savedValues = new HashMap<>();
+		savedValues = new ConcurrentHashMap<>();
 	}
-	
 	public TPCellIntegralViaReferenceCell(String name)
 	{
 		super(name);
-		savedValues = new HashMap<>();
+		savedValues = new ConcurrentHashMap<>();
 	}
 	@Override
 	public double evaluateCellIntegral(TPCell cell, ST shapeFunction1,

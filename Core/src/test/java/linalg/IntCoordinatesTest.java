@@ -79,22 +79,22 @@ public class IntCoordinatesTest
 	public void testSet() {
 		Set<IntCoordinates> hash = new HashSet<>(10);
 		hash.add(new IntCoordinates(1,2,3,4));
-		hash.add(new IntCoordinates(0));
-		hash.add(new IntCoordinates(0));
-		hash.add(new IntCoordinates(1,2,3,4,5,6,7,8,9,0));
-		hash.add(new IntCoordinates(1,2,3,4,5,6,7,8,9,0));
+		hash.add(new IntCoordinates(0,0,0,0));
+		hash.add(new IntCoordinates(0,0,0,0));
+		hash.add(new IntCoordinates(7,8,9,0));
+		hash.add(new IntCoordinates(7,8,9,0));
 		hash.add(new IntCoordinates(1,2,3,4));
-		hash.add(new IntCoordinates(1,2,3,4,5,6,7,8,9,0));
+		hash.add(new IntCoordinates(7,8,9,0));
 		hash.add(new IntCoordinates(1,2,3,4));
 		assertEquals(hash.size(), 3);
 		Set<IntCoordinates> tree = new TreeSet<>();
 		tree.add(new IntCoordinates(1,2,3,4));
-		tree.add(new IntCoordinates(0));
-		tree.add(new IntCoordinates(0));
-		tree.add(new IntCoordinates(1,2,3,4,5,6,7,8,9,0));
-		tree.add(new IntCoordinates(1,2,3,4,5,6,7,8,9,0));
+		tree.add(new IntCoordinates(0,0,0,0));
+		tree.add(new IntCoordinates(0,0,0,0));
+		tree.add(new IntCoordinates(7,8,9,0));
+		tree.add(new IntCoordinates(7,8,9,0));
 		tree.add(new IntCoordinates(1,2,3,4));
-		tree.add(new IntCoordinates(1,2,3,4,5,6,7,8,9,0));
+		tree.add(new IntCoordinates(7,8,9,0));
 		tree.add(new IntCoordinates(1,2,3,4));
 		assertEquals(tree.size(), 3);
 	}
@@ -116,10 +116,10 @@ public class IntCoordinatesTest
 		IntCoordinates coordinates = new IntCoordinates(0,0,0);
 		for(IntCoordinates c:new IntCoordinates.Range(lowerBounds,upperBounds))
 		{
-			tree.add(c);
+			tree.add(new IntCoordinates(c));
 			assertNotEquals(coordinates, c);
 			assertEquals(-1, coordinates.compareTo(c));
-			coordinates = c;
+			coordinates = new IntCoordinates(c);
 		}
 		assertEquals(2 * 3 * 4, tree.size());
 		tree = new TreeSet<>();
@@ -128,7 +128,6 @@ public class IntCoordinatesTest
 		for(IntCoordinates c:new IntCoordinates.Range(upperBounds))
 		{
 			tree.add(c);
-			assertNotEquals(coordinates, c);
 			assertTrue(0 >= coordinates.compareTo(c));
 			coordinates = c;
 		}
@@ -138,9 +137,8 @@ public class IntCoordinatesTest
 	public void testRangeStream() {
 		final Set<IntCoordinates> tree = new TreeSet<>();
 		IntCoordinates lowerBounds = new IntCoordinates(0,0,1);
-		IntCoordinates upperBounds = new IntCoordinates(2,3,5);
-		IntCoordinates coordinates = new IntCoordinates(0,0,0);
+		IntCoordinates upperBounds = new IntCoordinates(1,3,5);
 		new IntCoordinates.Range(lowerBounds,upperBounds).stream().forEach(tree::add);
-		assertEquals(2 * 3 * 4, tree.size());
+		assertEquals(1 * 3 * 4, tree.size());
 	}
 }

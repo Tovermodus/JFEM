@@ -23,7 +23,7 @@ public class PerformanceArguments
 	}
 	public static PerformanceArguments getInstance() {
 		if(INSTANCE == null)
-			throw new IllegalStateException("Instance does not exist");
+			createInstance(null, null, null);
 		return INSTANCE;
 	}
 }

@@ -26,24 +26,25 @@ public class IntCoordinates implements Comparable<IntCoordinates>, Cloneable
 		return coordinates.length;
 	}
 	public IntCoordinates zerosLike() {
-		int [] zeros = asArray();
+		int [] zeros = new int[coordinates.length];
 		for(int i = 0; i < getDimension(); i++)
 			zeros[i] = 0;
 		return new IntCoordinates(zeros);
 	}
 	private IntCoordinates increaseLastDimension() {
-		int [] ret = coordinates;
-		ret[getDimension() - 1]++;
-		return new IntCoordinates(ret);
+		IntCoordinates ret = new IntCoordinates(this);
+		ret.coordinates[getDimension() - 1]++;
+		return ret;
 	}
 	private IntCoordinates wrap(IntCoordinates lowerBounds, IntCoordinates upperBounds) {
+		IntCoordinates ret = new IntCoordinates(this);
 		for(int d = getDimension() - 1; d > 0; d--)
-			if(coordinates[d] == upperBounds.coordinates[d])
+			if(ret.coordinates[d] == upperBounds.coordinates[d])
 			{
-				coordinates[d] = lowerBounds.coordinates[d];
-				coordinates[d-1]++;
+				ret.coordinates[d] = lowerBounds.coordinates[d];
+				ret.coordinates[d-1]++;
 			}
-		return this;
+		return ret;
 	}
 	@Override
 	public int hashCode()
@@ -62,7 +63,11 @@ public class IntCoordinates implements Comparable<IntCoordinates>, Cloneable
 	public boolean equals(Object obj)
 	{
 		if(obj instanceof IntCoordinates)
+		{
+			if(((IntCoordinates) obj).getDimension() != getDimension())
+				return false;
 			return this.compareTo((IntCoordinates) obj) == 0;
+		}
 		return false;
 	}
 	
@@ -108,6 +113,13 @@ public class IntCoordinates implements Comparable<IntCoordinates>, Cloneable
 		final IntCoordinates lowerBounds;
 		final IntCoordinates upperBounds;
 		IntCoordinates pointer;
+		private int distanceFromUpper()
+		{
+			int ret = 0;
+			for(int i = 0; i < upperBounds.getDimension(); i++)
+				ret+=upperBounds.get(i) - pointer.get(i);
+			return ret;
+		}
 		public Range(int[] lowerBounds, int[] upperBounds)
 		{
 			this(new IntCoordinates(lowerBounds), new IntCoordinates(upperBounds));
@@ -115,29 +127,19 @@ public class IntCoordinates implements Comparable<IntCoordinates>, Cloneable
 		public Range(IntCoordinates lowerBounds, IntCoordinates upperBounds)
 		{
 			if(lowerBounds.getDimension() != upperBounds.getDimension())
-				throw new IllegalArgumentException("Range: bounds must have same length!");
+				throw new IllegalArgumentException("Range: bounds must have same length!" + lowerBounds + " , " + upperBounds);
 			for (int i = 0; i < lowerBounds.getDimension(); i++)
 			{
 				if(lowerBounds.asArray()[i] >= upperBounds.asArray()[i])
-					throw new IllegalArgumentException("Range: lower index higher than upper!");
+					throw new IllegalArgumentException("Range: lower index higher than upper! " +
+						"But difference must be at least one" + lowerBounds + " >= " + upperBounds);
 			}
 			this.lowerBounds = lowerBounds;
 			this.upperBounds = upperBounds;
-			pointer = new IntCoordinates(lowerBounds);
 		}
 		public Range(IntCoordinates upperBounds)
 		{
-			IntCoordinates lowerBounds = upperBounds.zerosLike();
-			if(lowerBounds.getDimension() != upperBounds.getDimension())
-				throw new IllegalArgumentException("Range: bounds must have same length!");
-			for (int i = 0; i < lowerBounds.getDimension(); i++)
-			{
-				if(lowerBounds.asArray()[i] >= upperBounds.asArray()[i])
-					throw new IllegalArgumentException("Range: lower index higher than upper!");
-			}
-			this.lowerBounds = lowerBounds;
-			this.upperBounds = upperBounds;
-			pointer = new IntCoordinates(lowerBounds);
+			this(upperBounds.zerosLike(), upperBounds);
 		}
 		public Stream<IntCoordinates> stream()
 		{
@@ -147,19 +149,21 @@ public class IntCoordinates implements Comparable<IntCoordinates>, Cloneable
 		@Override
 		public Iterator<IntCoordinates> iterator()
 		{
-			pointer = lowerBounds;
+			pointer = new IntCoordinates(lowerBounds);
+			pointer.coordinates[pointer.getDimension()-1]--;
 			return this;
 		}
 		
 		@Override
 		public boolean hasNext()
 		{
-			return pointer.increaseLastDimension().wrap(lowerBounds, upperBounds).equals(upperBounds);
+			return distanceFromUpper() > 3;
 		}
 		@Override
 		public IntCoordinates next()
 		{
-			return pointer.increaseLastDimension().wrap(lowerBounds, upperBounds);
+			pointer = pointer.increaseLastDimension().wrap(lowerBounds,upperBounds);
+			return pointer;
 		}
 	}
 	

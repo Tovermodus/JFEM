@@ -16,14 +16,14 @@ public class Laplace3D
         public static void main(String[] args)
         {
         
-                PerformanceArguments.createInstance(false,12,true);
+                PerformanceArguments.createInstance(true,12,true);
 
                 long startTime = System.nanoTime();
 
                 System.out.println("output start");
                 CoordinateVector start = CoordinateVector.fromValues(-1,-1,-1);
                 CoordinateVector end = CoordinateVector.fromValues(1,1,1);
-                int polynomialDegree = 4;
+                int polynomialDegree = 2;
                 TPFESpace grid = new TPFESpace(start,end,
                         Ints.asList(6,6,6),polynomialDegree);
                 TPCellIntegral<TPShapeFunction> gg = new TPCellIntegral<>(ScalarFunction.constantFunction(1),
