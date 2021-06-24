@@ -149,6 +149,15 @@ public class TPCell implements CellWithReferenceCell<TPCell, TPFace, TPEdge>
 		return new TPCell(cells);
 	}
 	
+	@Override
+	public double getGradGradConversionFactor()
+	{
+		double ret = 1;
+		for(Cell1D c: cell1Ds)
+			ret*=c.getEnd() - c.getStart();
+		return ret;
+	}
+	
 	//	@Override
 //	public  List<TPCell> refine(List<TPFace> refinedFaces)
 //	{

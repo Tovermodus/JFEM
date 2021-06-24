@@ -18,7 +18,7 @@ public class TPCellIntegral<ST extends ScalarShapeFunction<TPCell,TPFace,TPEdge,
 	public static final String VALUE_VALUE = "ValueValue";
 	public static final String GRAD_VALUE = "GradValue";
 	public static final String VALUE_GRAD = "ValueGrad";
-	private final boolean weightIsTensorProduct;
+	final boolean weightIsTensorProduct;
 	public TPCellIntegral(Function<?,?,?> weight, String name, boolean weightIsTensorProduct)
 	{
 		super(weight,name);

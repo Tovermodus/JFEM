@@ -1,17 +1,23 @@
 package tensorproduct;
 
-import basic.*;
+import basic.LagrangeNodeFunctional;
+import basic.NodeFunctional;
+import basic.ScalarFunction;
+import basic.ScalarShapeFunctionWithReferenceShapeFunction;
 import linalg.CoordinateComparator;
+import linalg.CoordinateMatrix;
 import linalg.CoordinateVector;
-import linalg.Matrix;
-import linalg.Vector;
 import org.jetbrains.annotations.NotNull;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
 
-public class TPShapeFunction extends ScalarShapeFunction<TPCell,TPFace,TPEdge,
-	TPShapeFunction> implements Comparable<TPShapeFunction>
+public class TPShapeFunction implements ScalarShapeFunctionWithReferenceShapeFunction<TPCell,TPFace,TPEdge,
+	TPShapeFunction>, Comparable<TPShapeFunction>
 {
+	private final int polynomialDegree;
 	List<LagrangeBasisFunction1D> function1Ds;
 	TPCell supportCell;
 	LagrangeNodeFunctional nodeFunctional;
@@ -23,6 +29,7 @@ public class TPShapeFunction extends ScalarShapeFunction<TPCell,TPFace,TPEdge,
 	}
 	public TPShapeFunction(TPCell supportCell, int polynomialDegree, int[] localIndices)
 	{
+		this.polynomialDegree = polynomialDegree;
 		function1Ds = new ArrayList<>();
 		this.supportCell = supportCell;
 		for (int i = 0; i < localIndices.length; i++)
@@ -36,6 +43,7 @@ public class TPShapeFunction extends ScalarShapeFunction<TPCell,TPFace,TPEdge,
 	}
 	public TPShapeFunction(TPCell supportCell, List<LagrangeBasisFunction1D> function1Ds)
 	{
+		this.polynomialDegree = function1Ds.get(0).getPolynomialDegree();
 		this.function1Ds = function1Ds;
 		this.supportCell = supportCell;
 		CoordinateVector functional_point =
@@ -67,9 +75,21 @@ public class TPShapeFunction extends ScalarShapeFunction<TPCell,TPFace,TPEdge,
 	}
 	
 	@Override
-	public NodeFunctional<ScalarFunction, Double, CoordinateVector, Matrix> getNodeFunctional()
+	public NodeFunctional<ScalarFunction, Double, CoordinateVector, CoordinateMatrix> getNodeFunctional()
 	{
 		return nodeFunctional;
+	}
+	
+	@Override
+	public void setGlobalIndex(int index)
+	{
+		throw new UnsupportedOperationException("not implemented yet");
+	}
+	
+	@Override
+	public int getGlobalIndex()
+	{
+		throw new UnsupportedOperationException("not implemented yet");
 	}
 	
 	@Override
@@ -112,7 +132,7 @@ public class TPShapeFunction extends ScalarShapeFunction<TPCell,TPFace,TPEdge,
 	}
 	
 	@Override
-	public Matrix hessianInCell(CoordinateVector pos, TPCell cell)
+	public CoordinateMatrix hessianInCell(CoordinateVector pos, TPCell cell)
 	{
 		if(cell == null)
 			return hessian(pos).mul(0);
@@ -164,7 +184,6 @@ public class TPShapeFunction extends ScalarShapeFunction<TPCell,TPFace,TPEdge,
 	@Override
 	public CoordinateVector gradient(CoordinateVector pos)
 	{
-		CoordinateVector ret = new CoordinateVector(pos.getLength());
 		return CoordinateVector.fromValues(fastGradient(pos));
 	}
 	
@@ -220,4 +239,12 @@ public class TPShapeFunction extends ScalarShapeFunction<TPCell,TPFace,TPEdge,
 	{
 		return "Cell: ".concat(supportCell.toString()).concat(", Node point: ").concat(nodeFunctional.getPoint().toString()).concat(", global Index: ").concat(getGlobalIndex()+"");
 	}
+	
+	@Override
+	public TPShapeFunction getReferenceShapeFunctionRelativeTo(TPCell cell)
+	{
+		return new TPShapeFunction(cell, polynomialDegree,
+			function1Ds.stream().mapToInt(LagrangeBasisFunction1D::getLocalFunctionNumber).toArray());
+	}
+	
 }

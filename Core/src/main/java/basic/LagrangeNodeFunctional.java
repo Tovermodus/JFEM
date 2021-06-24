@@ -1,9 +1,10 @@
 package basic;
 
+import linalg.CoordinateMatrix;
 import linalg.CoordinateVector;
 import linalg.Matrix;
 
-public class LagrangeNodeFunctional implements NodeFunctional<ScalarFunction, Double, CoordinateVector, Matrix>
+public class LagrangeNodeFunctional implements NodeFunctional<ScalarFunction, Double, CoordinateVector, CoordinateMatrix>
 {
 	private final CoordinateVector point;
 	public LagrangeNodeFunctional(CoordinateVector point)

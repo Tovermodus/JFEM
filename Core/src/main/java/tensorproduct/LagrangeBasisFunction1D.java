@@ -29,7 +29,14 @@ public class LagrangeBasisFunction1D extends Function1D
 		this.polynomialDegree = polynomialDegree;
 		this.degreeOfFreedom = degreeOfFreedom; //equidistant
 	}
-	
+	public int getLocalFunctionNumber()
+	{
+		return localFunctionNumber;
+	}
+	public int getPolynomialDegree()
+	{
+		return polynomialDegree;
+	}
 	public double valueOnReferenceCell(double pos)
 	{
 		switch (this.polynomialDegree)

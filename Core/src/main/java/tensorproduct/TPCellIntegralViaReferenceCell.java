@@ -6,22 +6,24 @@ import linalg.CoordinateVector;
 import linalg.Matrix;
 import linalg.Vector;
 
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.function.ToDoubleFunction;
 
 public class TPCellIntegralViaReferenceCell<ST extends ScalarShapeFunctionWithReferenceShapeFunction<TPCell,TPFace,TPEdge,ST>> extends TPCellIntegral<ST>
 {
-	Map<ReferenceCellIdentificationTriplet<TPCell, TPFace, TPEdge, ST, Double, CoordinateVector,
-		CoordinateMatrix>, Double> savedValues;
+	Map<ReferenceCellIdentificationTriplet<TPCell, TPFace, TPEdge, ST>, Double> savedValues;
 	public TPCellIntegralViaReferenceCell(Function<?, ?, ?> weight, String name, boolean weightIsTensorProduct)
 	{
 		super(weight, name, weightIsTensorProduct);
+		savedValues = new HashMap<>();
 	}
 	
 	public TPCellIntegralViaReferenceCell(String name)
 	{
 		super(name);
+		savedValues = new HashMap<>();
 	}
 	@Override
 	public double evaluateCellIntegral(TPCell cell, ST shapeFunction1,
@@ -29,11 +31,18 @@ public class TPCellIntegralViaReferenceCell<ST extends ScalarShapeFunctionWithRe
 	{
 		if(name.equals(GRAD_GRAD))
 		{
-			if(Double.isNaN(valueOnReferenceCell))
-				valueOnReferenceCell =
-					TPCellIntegral.integrateNonTensorProduct(x->shapeFunction1.gr(x).inner(shapeFunction2.gradient(x))*(Double)weight.value(x),
-					cell.getReferenceCell());
-			return valueOnReferenceCell*;
+			ReferenceCellIdentificationTriplet<TPCell,TPFace,TPEdge, ST> key =
+				new ReferenceCellIdentificationTriplet<>(shapeFunction1.getReferenceShapeFunctionRelativeTo(cell),
+					shapeFunction2.getReferenceShapeFunctionRelativeTo(cell),
+					cell);
+			if(savedValues.containsKey(key))
+				return savedValues.get(key);
+			else{
+				double conversionFactor = cell.getGradGradConversionFactor();
+				TPCellIntegral<ST> refIntegral = new TPCellIntegral<ST>(weight, name, weightIsTensorProduct);
+				savedValues.put(key, refIntegral.evaluateCellIntegral(cell, shapeFunction1,
+					shapeFunction2)*conversionFactor);
+			}
 		}
 		return super.evaluateCellIntegral(cell,shapeFunction1,shapeFunction2);
 	}
