@@ -16,6 +16,7 @@ public class LaplaceScalarRT
 {
 	public static void main(String[] args)
 	{
+		PerformanceArguments.createInstance(true,12,true);
 		
 		long startTime = System.nanoTime();
 		

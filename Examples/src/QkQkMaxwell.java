@@ -13,6 +13,7 @@ public class QkQkMaxwell
 {
 	public static void main(String[] args)
 	{
+		PerformanceArguments.createInstance(true,12,true);
 		CoordinateVector start = CoordinateVector.fromValues(0, 0,0);
 		CoordinateVector end = CoordinateVector.fromValues(1, 1,1);
 		int polynomialDegree = 2;

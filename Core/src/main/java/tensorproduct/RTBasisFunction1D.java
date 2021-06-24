@@ -1,5 +1,7 @@
 package tensorproduct;
 
+import basic.PerformanceArguments;
+
 public class RTBasisFunction1D extends Function1D
 {
 	private final Cell1D cell;
@@ -20,6 +22,7 @@ public class RTBasisFunction1D extends Function1D
 	public RTBasisFunction1D(int polynomialDegree, double degreeOfFreedom, Cell1D cell, boolean higherDegree)
 	{
 		this.cell = cell;
+		if (PerformanceArguments.getInstance().executeChecks)
 		if (!cell.isInCell(degreeOfFreedom))
 			throw new IllegalArgumentException("degree of freedom is not in given cell");
 		this.quad = obtainquadPoints(polynomialDegree, higherDegree);

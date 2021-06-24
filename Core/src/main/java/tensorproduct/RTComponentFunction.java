@@ -1,9 +1,6 @@
 package tensorproduct;
 
-import basic.LagrangeNodeFunctional;
-import basic.NodeFunctional;
-import basic.ScalarFunction;
-import basic.ScalarShapeFunction;
+import basic.*;
 import linalg.*;
 import linalg.Vector;
 
@@ -67,6 +64,7 @@ public class RTComponentFunction extends ScalarShapeFunction<TPCell, TPFace,TPEd
 	private List<RTBasisFunction1D> generateBasisFunctionOnCell(TPCell cell,
 	                                                                  CoordinateVector functionalPoint)
 	{
+		if (PerformanceArguments.getInstance().executeChecks)
 		if(!cell.isInCell(functionalPoint))
 			throw new IllegalArgumentException("functional point is not in cell");
 		List<RTBasisFunction1D> function1Ds = new ArrayList<>();
