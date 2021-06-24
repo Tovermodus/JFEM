@@ -178,7 +178,7 @@ class GMRES extends AbstractIterativeSolver
 	                                                          double tol)
 		throws IterativeSolverNotConvergedException
 	{
-		linalg.Vector x = new linalg.DenseVector(b.getShape().get(0));
+		MutableVector x = new linalg.DenseVector(b.getShape().get(0));
 		x.set(Math.random(),0);
 		linalg.Vector r_ = b.sub(A.mvMul(x));
 		linalg.Vector w;
@@ -212,7 +212,7 @@ class GMRES extends AbstractIterativeSolver
 			// Update solution in current subspace
 			new UpperTriangDenseMatrix(H, i, false).solve(s, s);
 			for (int j = 0; j < i && !interrupted; j++)
-				x = x.add(v_[j].mul(s.get(j)));
+				x.addInPlace(v_[j].mul(s.get(j)));
 
 			r_ = b.sub(A.mvMul(x));
 			normr = r_.euclidianNorm();

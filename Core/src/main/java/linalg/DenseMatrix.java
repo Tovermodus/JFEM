@@ -1,101 +1,138 @@
 package linalg;
 
+import basic.PerformanceArguments;
 import com.google.common.primitives.Ints;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
-public class DenseMatrix implements Matrix, Decomposable, DirectlySolvable
+public class DenseMatrix implements MutableMatrix, Decomposable, DirectlySolvable
 {
 	volatile double[][] entries;
 	private org.ujmp.core.Matrix ujmpmat = null;
+	
 	public DenseMatrix(int i, int j)
 	{
 		entries = new double[i][j];
 	}
+	
 	public DenseMatrix(Matrix matrix)
 	{
 		entries = new double[matrix.getRows()][matrix.getCols()];
-			for (int i = 0; i < getRows(); i++)
-				for (int j = 0; j < getCols(); j++)
-					entries[i][j] = matrix.at(i, j);
+		for (int i = 0; i < getRows(); i++)
+			for (int j = 0; j < getCols(); j++)
+				entries[i][j] = matrix.at(i, j);
 	}
 	
 	@Override
 	public double frobeniusInner(Matrix other)
 	{
-		if(!getShape().equals(other.getShape()))
-			throw new IllegalArgumentException("Incompatible sizes");
+		if (PerformanceArguments.getInstance().executeChecks)
+			if (!getShape().equals(other.getShape()))
+				throw new IllegalArgumentException("Incompatible sizes");
 		double ret = 0;
-		for(int i = 0; i < getRows(); i++)
-			for(int j = 0; j < getCols(); j++)
-				ret += at(i,j)*other.at(i,j);
+		for (int i = 0; i < getRows(); i++)
+			for (int j = 0; j < getCols(); j++)
+				ret += at(i, j) * other.at(i, j);
 		return ret;
 	}
 	
 	public static DenseMatrix squareMatrixFromValues(double... values)
 	{
-		if(Math.pow((int)Math.sqrt(values.length),2) != values.length)
-			throw new UnsupportedOperationException("nope");
-		DenseMatrix ret = new DenseMatrix((int)Math.sqrt(values.length),(int)Math.sqrt(values.length));
-		for(int i = 0; i < ret.getRows(); i++)
-			for(int j = 0; j < ret.getCols(); j++)
-				ret.set(values[i*ret.getRows()+j],i,j);
+		if (PerformanceArguments.getInstance().executeChecks)
+			if (Math.pow((int) Math.sqrt(values.length), 2) != values.length)
+				throw new UnsupportedOperationException("nope");
+		DenseMatrix ret = new DenseMatrix((int) Math.sqrt(values.length), (int) Math.sqrt(values.length));
+		for (int i = 0; i < ret.getRows(); i++)
+			for (int j = 0; j < ret.getCols(); j++)
+				ret.set(values[i * ret.getRows() + j], i, j);
 		return ret;
 	}
+	
 	public static DenseMatrix identity(int n)
 	{
-		DenseMatrix ret = new DenseMatrix(n,n);
-		for(int  i = 0; i < n; i++)
-			ret.add(1,i,i);
+		DenseMatrix ret = new DenseMatrix(n, n);
+		for (int i = 0; i < n; i++)
+			ret.add(1, i, i);
 		return ret;
 	}
+	
 	@Override
 	public double at(int... coordinates)
 	{
-		if(coordinates.length != 2)
-			throw new IllegalArgumentException("Wrong number of coordinates");
+		if (PerformanceArguments.getInstance().executeChecks)
+			if (coordinates.length != 2)
+				throw new IllegalArgumentException("Wrong number of coordinates");
 		return entries[coordinates[0]][coordinates[1]];
 	}
 	
 	@Override
 	public void set(double value, int... coordinates)
 	{
-		if(coordinates.length != 2)
-			throw new IllegalArgumentException("Wrong number of coordinates");
+		if (PerformanceArguments.getInstance().executeChecks)
+			if (coordinates.length != 2)
+				throw new IllegalArgumentException("Wrong number of coordinates");
 		entries[coordinates[0]][coordinates[1]] = value;
 	}
 	
 	@Override
 	public void add(double value, int... coordinates)
 	{
-		if(coordinates.length != 2)
-			throw new IllegalArgumentException("Wrong number of coordinates");
+		if (PerformanceArguments.getInstance().executeChecks)
+			if (coordinates.length != 2)
+				throw new IllegalArgumentException("Wrong number of coordinates");
 		entries[coordinates[0]][coordinates[1]] += value;
+	}
+	
+	@Override
+	public void addInPlace(Tensor other)
+	{
+		for (int i = 0; i < getRows(); i++)
+			for (int j = 0; j < getCols(); j++)
+				entries[i][j] += other.at(i, j);
+	}
+	
+	@Override
+	public void subInPlace(Tensor other)
+	{
+		for (int i = 0; i < getRows(); i++)
+			for (int j = 0; j < getCols(); j++)
+				entries[i][j] -= other.at(i, j);
+	}
+	
+	@Override
+	public void mulInPlace(double scalar)
+	{
+		for (int i = 0; i < getRows(); i++)
+			for (int j = 0; j < getCols(); j++)
+				entries[i][j] *= scalar;
 	}
 	
 	@Override
 	public DenseMatrix add(Tensor other)
 	{
-		if(!getShape().equals(other.getShape()))
-			throw new IllegalArgumentException("Incompatible sizes");
+		if (PerformanceArguments.getInstance().executeChecks)
+			if (!getShape().equals(other.getShape()))
+				throw new IllegalArgumentException("Incompatible sizes");
 		DenseMatrix ret = new DenseMatrix(this);
-		for(int i = 0; i < ret.getRows(); i++)
-			for(int j = 0; j < ret.getCols(); j++)
-				ret.add(other.at(i,j),i,j);
+		for (int i = 0; i < ret.getRows(); i++)
+			for (int j = 0; j < ret.getCols(); j++)
+				ret.add(other.at(i, j), i, j);
 		return ret;
 	}
 	
 	@Override
-	public DenseMatrix sub(Tensor other){
+	public DenseMatrix sub(Tensor other)
+	{
 		
-		if(!getShape().equals(other.getShape()))
-			throw new IllegalArgumentException("Incompatible sizes");
+		if (PerformanceArguments.getInstance().executeChecks)
+			if (!getShape().equals(other.getShape()))
+				throw new IllegalArgumentException("Incompatible sizes");
 		DenseMatrix ret = new DenseMatrix(this);
-		for(int i = 0; i < ret.getRows(); i++)
-			for(int j = 0; j < ret.getCols(); j++)
-				ret.add(-other.at(i,j),i,j);
+		for (int i = 0; i < ret.getRows(); i++)
+			for (int j = 0; j < ret.getCols(); j++)
+				ret.add(-other.at(i, j), i, j);
 		return ret;
 	}
 	
@@ -104,34 +141,36 @@ public class DenseMatrix implements Matrix, Decomposable, DirectlySolvable
 	{
 		
 		DenseMatrix ret = new DenseMatrix(entries.length, entries[0].length);
-		for(int i = 0; i < ret.getRows(); i++)
-			for(int j = 0; j < ret.getCols(); j++)
-				ret.set(scalar*at(i,j),i,j);
+		for (int i = 0; i < ret.getRows(); i++)
+			for (int j = 0; j < ret.getCols(); j++)
+				ret.set(scalar * at(i, j), i, j);
 		return ret;
 	}
 	
 	@Override
 	public List<Vector> unfoldDimension(int dimension)
 	{
-		if(dimension > 1)
-			throw new IllegalArgumentException("Matrix is two dimensional");
+		if (PerformanceArguments.getInstance().executeChecks)
+			if (dimension > 1)
+				throw new IllegalArgumentException("Matrix is two dimensional");
 		List<Vector> ret = new ArrayList<>();
-		if(dimension == 0)
+		if (dimension == 0)
 		{
 			for (int i = 0; i < getRows(); i++)
 			{
-				ret.add(new DenseVector(getShape().get(1 )));
+				DenseVector vec = new DenseVector(getCols());
 				for (int j = 0; j < getCols(); j++)
-					ret.get(i).add(at(i,j),j);
+					vec.add(at(i, j), j);
+				ret.add(vec);
 			}
-		}
-		else
+		} else
 		{
 			for (int i = 0; i < getCols(); i++)
 			{
-				ret.add(new DenseVector(getRows()));
+				DenseVector vec = new DenseVector(getRows());
 				for (int j = 0; j < getRows(); j++)
-					ret.get(i).add(at(j, i), j);
+					vec.add(at(j, i), j);
+				ret.add(vec);
 			}
 		}
 		return ret;
@@ -150,15 +189,15 @@ public class DenseMatrix implements Matrix, Decomposable, DirectlySolvable
 	}
 	
 	@Override
-	public List<Integer> getShape()
+	public IntCoordinates getShape()
 	{
-		return Ints.asList(entries.length, entries[0].length);
+		return new IntCoordinates(entries.length, entries[0].length);
 	}
 	
 	@Override
 	public long size()
 	{
-		return entries.length*entries[0].length;
+		return entries.length * entries[0].length;
 	}
 	
 	
@@ -166,46 +205,49 @@ public class DenseMatrix implements Matrix, Decomposable, DirectlySolvable
 	public DenseMatrix transpose()
 	{
 		DenseMatrix ret = new DenseMatrix(entries[0].length, entries.length);
-		for(int i = 0; i < ret.getRows(); i++)
-			for(int j = 0; j < ret.getCols(); j++)
-				ret.set(at(j,i),i,j);
+		for (int i = 0; i < ret.getRows(); i++)
+			for (int j = 0; j < ret.getCols(); j++)
+				ret.set(at(j, i), i, j);
 		return ret;
 	}
 	
 	@Override
 	public DenseVector mvMul(Vector vector)
 	{
-		if(getCols()!=(vector.getLength()))
-			throw new IllegalArgumentException("Incompatible sizes");
+		if (PerformanceArguments.getInstance().executeChecks)
+			if (getCols() != (vector.getLength()))
+				throw new IllegalArgumentException("Incompatible sizes");
 		DenseVector ret = new DenseVector(getRows());
-		for(int i = 0; i < getRows(); i++)
-			for(int k = 0; k < getCols(); k++)
-				ret.add(at(i,k)*vector.at(k),i);
+		for (int i = 0; i < getRows(); i++)
+			for (int k = 0; k < getCols(); k++)
+				ret.add(at(i, k) * vector.at(k), i);
 		return ret;
 	}
 	
 	@Override
 	public DenseVector tvMul(Vector vector)
 	{
-		if(getRows()!=(vector.getLength()))
-			throw new IllegalArgumentException("Incompatible sizes");
+		if (PerformanceArguments.getInstance().executeChecks)
+			if (getRows() != (vector.getLength()))
+				throw new IllegalArgumentException("Incompatible sizes");
 		DenseVector ret = new DenseVector(getCols());
-		for(int i = 0; i < getCols(); i++)
-			for(int k = 0; k < getRows(); k++)
-				ret.add(at(k,i)*vector.at(k),i);
+		for (int i = 0; i < getCols(); i++)
+			for (int k = 0; k < getRows(); k++)
+				ret.add(at(k, i) * vector.at(k), i);
 		return ret;
 	}
 	
 	@Override
 	public DenseMatrix mmMul(Matrix matrix)
 	{
-		if(getCols()!=(matrix.getRows()))
-			throw new IllegalArgumentException("Incompatible sizes");
+		if (PerformanceArguments.getInstance().executeChecks)
+			if (getCols() != (matrix.getRows()))
+				throw new IllegalArgumentException("Incompatible sizes");
 		DenseMatrix ret = new DenseMatrix(getRows(), matrix.getCols());
-		for(int i = 0; i < getRows(); i++)
-			for(int j = 0; j < matrix.getCols(); j++)
-				for(int k = 0; k < getCols(); k++)
-					ret.add(at(i,k)*matrix.at(k,j),i,j);
+		for (int i = 0; i < getRows(); i++)
+			for (int j = 0; j < matrix.getCols(); j++)
+				for (int k = 0; k < getCols(); k++)
+					ret.add(at(i, k) * matrix.at(k, j), i, j);
 		return ret;
 	}
 	
@@ -213,39 +255,44 @@ public class DenseMatrix implements Matrix, Decomposable, DirectlySolvable
 	@Override
 	public DenseMatrix getLowerTriangleMatrix()
 	{
-		if(getRows() != getCols())
-			throw new UnsupportedOperationException("cant get triangle from rectangle");
+		if (PerformanceArguments.getInstance().executeChecks)
+			if (getRows() != getCols())
+				throw new UnsupportedOperationException("cant get triangle from rectangle");
 		DenseMatrix ret = new DenseMatrix(getRows(), getCols());
 		for (int i = 0; i < getRows(); i++)
-			for(int j = 0; j < i; j++)
-				ret.add(at(i,j),i,j);
+			for (int j = 0; j < i; j++)
+				ret.add(at(i, j), i, j);
 		return ret;
 	}
+	
 	@Override
 	public DenseMatrix getUpperTriangleMatrix()
 	{
-		if(getRows() != getCols())
-			throw new UnsupportedOperationException("cant get triangle from rectangle");
+		if (PerformanceArguments.getInstance().executeChecks)
+			if (getRows() != getCols())
+				throw new UnsupportedOperationException("cant get triangle from rectangle");
 		DenseMatrix ret = new DenseMatrix(getRows(), getCols());
 		for (int i = 0; i < getRows(); i++)
-			for(int j = i+1; j < getCols(); j++)
-				ret.add(at(i,j),i,j);
+			for (int j = i + 1; j < getCols(); j++)
+				ret.add(at(i, j), i, j);
 		return ret;
 	}
 	
 	@Override
 	public DenseMatrix getDiagonalMatrix()
 	{
-		if(getRows() != getCols())
-			throw new UnsupportedOperationException("cant get triangle from rectangle");
+		if (PerformanceArguments.getInstance().executeChecks)
+			if (getRows() != getCols())
+				throw new UnsupportedOperationException("cant get triangle from rectangle");
 		DenseMatrix ret = new DenseMatrix(getRows(), getCols());
 		for (int i = 0; i < getRows(); i++)
-			ret.add(at(i,i),i,i);
+			ret.add(at(i, i), i, i);
 		return ret;
 	}
+	
 	private org.ujmp.core.Matrix toUJMPMatrix()
 	{
-		if(ujmpmat == null)
+		if (ujmpmat == null)
 		{
 			ujmpmat = org.ujmp.core.DenseMatrix.Factory.zeros(getRows(), getCols());
 			for (int i = 0; i < getRows(); i++)
@@ -254,15 +301,17 @@ public class DenseMatrix implements Matrix, Decomposable, DirectlySolvable
 		}
 		return ujmpmat;
 	}
+	
 	private static DenseMatrix fromUJMPMatrix(org.ujmp.core.Matrix matrix)
 	{
-		DenseMatrix ret = new DenseMatrix((int)matrix.getRowCount(), (int)matrix.getColumnCount());
+		DenseMatrix ret = new DenseMatrix((int) matrix.getRowCount(), (int) matrix.getColumnCount());
 		
-		for(int i = 0; i < ret.getRows(); i++)
-			for(int j = 0; j < ret.getCols(); j++)
-				ret.set(matrix.getAsDouble(i,j), i, j);
+		for (int i = 0; i < ret.getRows(); i++)
+			for (int j = 0; j < ret.getCols(); j++)
+				ret.set(matrix.getAsDouble(i, j), i, j);
 		return ret;
 	}
+	
 	@Override
 	public DenseMatrix inverse()
 	{
@@ -284,7 +333,7 @@ public class DenseMatrix implements Matrix, Decomposable, DirectlySolvable
 	@Override
 	public boolean equals(Object obj)
 	{
-		if(!(obj instanceof Matrix))
+		if (!(obj instanceof Matrix))
 			return false;
 		return almostEqual((Tensor) obj);
 	}

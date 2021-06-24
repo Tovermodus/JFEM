@@ -13,10 +13,9 @@ import java.util.*;
 public class NodalNedelecComponentFunction extends ScalarShapeFunction<TPCell, TPFace, TPEdge, NodalNedelecComponentFunction> implements Comparable<NodalNedelecComponentFunction> {
 	
 	private final Map<TPCell, List<RTBasisFunction1D>> cells;
-	private Set<TPFace> faces;
+	private final Set<TPFace> faces;
 	private final LagrangeNodeFunctional nodeFunctional;
 	private final int polynomialDegree;
-	private int localIndex;
 	private final int lowDegreeDimension;
 	private final int dimension;
 	public NodalNedelecComponentFunction(TPCell supportCell, int polynomialDegree, int localIndex,
@@ -25,7 +24,6 @@ public class NodalNedelecComponentFunction extends ScalarShapeFunction<TPCell, T
 		cells = new TreeMap<>();
 		faces = new TreeSet<>();
 		this.polynomialDegree = polynomialDegree;
-		this.localIndex = localIndex;
 		this.lowDegreeDimension = lowDegreeDimension;
 		dimension = supportCell.getDimension();
 		List<RTBasisFunction1D> supportCellFunctions = generateBasisFunctionOnCell(supportCell,

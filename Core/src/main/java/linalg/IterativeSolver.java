@@ -24,7 +24,7 @@ public class IterativeSolver<Op extends VectorMultiplyable>
 		int n = rhs.getLength();
 		Vector z;
 		Vector newResiduum;
-		Vector iterate = new DenseVector(n);
+		DenseVector iterate = new DenseVector(n);
 		iterate.set(Math.random(),0);
 		Vector m = operator.mvMul(iterate);
 		Vector residuum = rhs.sub(m);

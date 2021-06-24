@@ -12,9 +12,9 @@ public class IntCoordinatesTest
 		IntCoordinates a1 = new IntCoordinates(1,2,3,4);
 		IntCoordinates a2 = new IntCoordinates(0);
 		IntCoordinates a3 = new IntCoordinates(1,2,3,4,5,6,7,8,9,0);
-		assertArrayEquals(a1.getCoordinates(), new int[]{1, 2, 3, 4});
-		assertArrayEquals(a2.getCoordinates(), new int[]{0});
-		assertArrayEquals(a3.getCoordinates(), new int[]{1,2,3,4,5,6,7,8,9,0});
+		assertArrayEquals(a1.asArray(), new int[]{1, 2, 3, 4});
+		assertArrayEquals(a2.asArray(), new int[]{0});
+		assertArrayEquals(a3.asArray(), new int[]{1,2,3,4,5,6,7,8,9,0});
 	}
 	@Test
 	public void testGetDimension() {
@@ -24,6 +24,13 @@ public class IntCoordinatesTest
 		assertEquals(a1.getDimension(), 4);
 		assertEquals(a2.getDimension(), 1);
 		assertEquals(a3.getDimension(), 10);
+	}
+	@Test
+	public void testGetSize() {
+		IntCoordinates a1 = new IntCoordinates(1,2,3,4);
+		IntCoordinates a2 = new IntCoordinates(2,3,4);
+		assertSame(a1.size(), a2.size());
+		assertEquals(2*3*4, a1.size());
 	}
 	@Test
 	public void testHashCode() {
@@ -112,8 +119,28 @@ public class IntCoordinatesTest
 			tree.add(c);
 			assertNotEquals(coordinates, c);
 			assertEquals(-1, coordinates.compareTo(c));
+			coordinates = c;
 		}
 		assertEquals(2 * 3 * 4, tree.size());
-		
+		tree = new TreeSet<>();
+		upperBounds = new IntCoordinates(2,3,4);
+		coordinates = new IntCoordinates(0,0,0);
+		for(IntCoordinates c:new IntCoordinates.Range(upperBounds))
+		{
+			tree.add(c);
+			assertNotEquals(coordinates, c);
+			assertTrue(0 >= coordinates.compareTo(c));
+			coordinates = c;
+		}
+		assertEquals(2 * 3 * 4, tree.size());
+	}
+	@Test
+	public void testRangeStream() {
+		final Set<IntCoordinates> tree = new TreeSet<>();
+		IntCoordinates lowerBounds = new IntCoordinates(0,0,1);
+		IntCoordinates upperBounds = new IntCoordinates(2,3,5);
+		IntCoordinates coordinates = new IntCoordinates(0,0,0);
+		new IntCoordinates.Range(lowerBounds,upperBounds).stream().forEach(tree::add);
+		assertEquals(2 * 3 * 4, tree.size());
 	}
 }

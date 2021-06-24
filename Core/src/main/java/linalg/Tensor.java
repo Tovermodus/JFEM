@@ -1,43 +1,50 @@
 package linalg;
 
+import basic.PerformanceArguments;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.primitives.Ints;
-
 import java.util.*;
 import java.util.stream.IntStream;
 
 public interface Tensor
 {
-	double at(IntCoordinates coordinates);
-	//default double at(int ... coordinates){
-	//	return at(new IntCoordinates(coordinates));
-	//}
+	double at(int ... coordinates);
+	default double at(IntCoordinates coordinates)
+	{
+		return at(coordinates.asArray());
+	}
 	
 	Tensor add(Tensor other);
 	default Tensor sub(Tensor other)
 	{
-		if(Ints.toArray(getShape()) != Ints.toArray(other.getShape()))
-			throw new IllegalArgumentException("Tensors are of different size");
+		if(PerformanceArguments.getInstance().executeChecks)
+			if (getShape() != other.getShape())
+				throw new IllegalArgumentException("Tensors are of different size");
 		return add(other.mul(-1.));
 	}
 	Tensor mul(double scalar);
 	
-	ImmutableMap<IntCoordinates,Double> getCoordinateEntryList();
+	default int getOrder()
+	{
+		return getShape().getDimension();
+	}
+	default ImmutableMap<IntCoordinates,Double> getCoordinateEntryList(){
+		Map<IntCoordinates,Double> ret = new HashMap<>();
+		for(IntCoordinates c: getShape().range())
+			if(at(c) != 0)
+				ret.put(c, at(c));
+		return ImmutableMap.copyOf(ret);
+	}
 	List<? extends Tensor> unfoldDimension(int dimension);
 	
 	int getSparseEntryCount();
 	boolean isSparse();
 	
-	int getOrder();
-	ImmutableList<Integer> getShape();
+	IntCoordinates getShape();
 	default long size()
 	{
-		Optional<Long> ret = getShape().stream().map(Integer::longValue).reduce(Math::multiplyExact);
-		if(ret.isPresent())
-			return ret.get();
-		else
-			return 0;
+		return getShape().size();
 	}
 	
 	default double absMaxElement()
@@ -54,10 +61,13 @@ public interface Tensor
 	
 	default boolean almostEqual(Tensor other, double... tol)
 	{
-		if(!getShape().equals(other.getShape()))
-			throw new IllegalArgumentException("Tensors are of different size");
-		if(tol.length > 1)
-			throw new IllegalArgumentException("Only one Tolerance accepted");
+		if(PerformanceArguments.getInstance().executeChecks)
+		{
+			if (!getShape().equals(other.getShape()))
+				throw new IllegalArgumentException("Tensors are of different size");
+			if (tol.length > 1)
+				throw new IllegalArgumentException("Only one Tolerance accepted");
+		}
 		double[] finalTol;
 		if(tol.length == 0)
 			finalTol = new double[]{0};

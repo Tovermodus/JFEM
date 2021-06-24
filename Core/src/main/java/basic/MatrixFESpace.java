@@ -3,6 +3,8 @@ package basic;
 
 import java.util.Set;
 import linalg.Matrix;
+import linalg.MutableMatrix;
+import linalg.MutableVector;
 import linalg.Vector;
 import mixed.MixedCellIntegral;
 import mixed.MixedTPCellIntegral;
@@ -19,9 +21,9 @@ public interface MatrixFESpace<CT extends Cell<CT,FT,ET>, FT extends  Face<CT,FT
 	
 	void initializeRhs();
 	
-	Vector getRhs();
+	MutableVector getRhs();
 	
-	Matrix getSystemMatrix();
+	MutableMatrix getSystemMatrix();
 	default Set<Integer> getFixedNodeIndices()
 	{
 		return new TreeSet<Integer>();

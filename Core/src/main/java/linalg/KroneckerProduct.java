@@ -2,8 +2,9 @@ package linalg;
 
 import java.util.List;
 
-public class KroneckerProduct implements Matrix
+public class KroneckerProduct
 {
+	/*
 	@Override
 	public double at(int... coordinates)
 	{
@@ -75,4 +76,6 @@ public class KroneckerProduct implements Matrix
 	{
 		throw new UnsupportedOperationException("not implemented yet");
 	}
+	
+	 */
 }

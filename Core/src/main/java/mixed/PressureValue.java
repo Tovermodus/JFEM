@@ -1,9 +1,8 @@
 package mixed;
 
 import linalg.CoordinateVector;
+import linalg.IntCoordinates;
 import linalg.Tensor;
-
-import java.util.List;
 
 public class PressureValue extends MixedValue
 {
@@ -84,7 +83,7 @@ public class PressureValue extends MixedValue
 	}
 	
 	@Override
-	public List<Integer> getVelocityShape()
+	public IntCoordinates getVelocityShape()
 	{
 		throw new IllegalStateException("Not a Velocity vector");
 	}

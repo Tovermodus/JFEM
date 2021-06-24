@@ -3,9 +3,9 @@ package linalg;
 import java.util.ArrayList;
 import java.util.List;
 
-public class KroneckerMatrix implements Matrix
+public class KroneckerMatrix
 {
-	KroneckerProduct[] addends;
+/*	KroneckerProduct[] addends;
 	public KroneckerMatrix(List<KroneckerProduct> addends) {
 		this.addends = addends.toArray(new KroneckerProduct[0]);
 	}
@@ -89,4 +89,6 @@ public class KroneckerMatrix implements Matrix
 	{
 		throw new UnsupportedOperationException("not implemented yet");
 	}
+	
+ */
 }

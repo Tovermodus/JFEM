@@ -1,11 +1,10 @@
 package linalg;
 
+import com.google.common.collect.Streams;
 import org.jetbrains.annotations.NotNull;
 
-import java.util.Arrays;
-import java.util.Comparator;
 import java.util.Iterator;
-import java.util.List;
+import java.util.stream.Stream;
 
 public class IntCoordinates implements Comparable<IntCoordinates>, Cloneable
 {
@@ -16,11 +15,21 @@ public class IntCoordinates implements Comparable<IntCoordinates>, Cloneable
 	public IntCoordinates(IntCoordinates source) {
 		this.coordinates = source.coordinates.clone();
 	}
-	public int [] getCoordinates() {
+	public int [] asArray() {
 		return coordinates;
+	}
+	public int get(int d)
+	{
+		return coordinates[d];
 	}
 	public int getDimension() {
 		return coordinates.length;
+	}
+	public IntCoordinates zerosLike() {
+		int [] zeros = asArray();
+		for(int i = 0; i < getDimension(); i++)
+			zeros[i] = 0;
+		return new IntCoordinates(zeros);
 	}
 	private IntCoordinates increaseLastDimension() {
 		int [] ret = coordinates;
@@ -82,6 +91,18 @@ public class IntCoordinates implements Comparable<IntCoordinates>, Cloneable
 		return 0;
 	}
 	
+	public int size()
+	{
+		int ret = 1;
+		for(int i = 0; i < getDimension(); i++)
+			ret *= coordinates[i];
+		return ret;
+	}
+	public Range range()
+	{
+		return new Range(this);
+	}
+	
 	public static class Range implements Iterable<IntCoordinates>, Iterator<IntCoordinates>
 	{
 		final IntCoordinates lowerBounds;
@@ -97,14 +118,31 @@ public class IntCoordinates implements Comparable<IntCoordinates>, Cloneable
 				throw new IllegalArgumentException("Range: bounds must have same length!");
 			for (int i = 0; i < lowerBounds.getDimension(); i++)
 			{
-				if(lowerBounds.getCoordinates()[i] >= upperBounds.getCoordinates()[i])
+				if(lowerBounds.asArray()[i] >= upperBounds.asArray()[i])
 					throw new IllegalArgumentException("Range: lower index higher than upper!");
 			}
 			this.lowerBounds = lowerBounds;
 			this.upperBounds = upperBounds;
 			pointer = new IntCoordinates(lowerBounds);
 		}
-		
+		public Range(IntCoordinates upperBounds)
+		{
+			IntCoordinates lowerBounds = upperBounds.zerosLike();
+			if(lowerBounds.getDimension() != upperBounds.getDimension())
+				throw new IllegalArgumentException("Range: bounds must have same length!");
+			for (int i = 0; i < lowerBounds.getDimension(); i++)
+			{
+				if(lowerBounds.asArray()[i] >= upperBounds.asArray()[i])
+					throw new IllegalArgumentException("Range: lower index higher than upper!");
+			}
+			this.lowerBounds = lowerBounds;
+			this.upperBounds = upperBounds;
+			pointer = new IntCoordinates(lowerBounds);
+		}
+		public Stream<IntCoordinates> stream()
+		{
+			return Streams.stream((Iterable<IntCoordinates>) this);
+		}
 		@NotNull
 		@Override
 		public Iterator<IntCoordinates> iterator()

@@ -1,11 +1,12 @@
 package mixed;
 
+import basic.PerformanceArguments;
 import linalg.*;
 import org.checkerframework.checker.units.qual.C;
 
 import java.util.List;
 
-public class MixedGradient implements Matrix
+public class MixedGradient implements MutableMatrix
 {
 	private CoordinateVector pressureGradient;
 	private CoordinateMatrix velocityGradient;
@@ -15,6 +16,7 @@ public class MixedGradient implements Matrix
 		pressureGradient = new CoordinateVector(domainDimension);
 		velocityGradient = new CoordinateMatrix(domainDimension, domainDimension);
 	}
+	
 	public MixedGradient(MixedGradient mixedGradient)
 	{
 		this.pressureGradient = new CoordinateVector(mixedGradient.pressureGradient);
@@ -30,6 +32,7 @@ public class MixedGradient implements Matrix
 	{
 		this.pressureGradient = pressureGradient;
 	}
+	
 	public void addPressureGradient(CoordinateVector pressureGradient)
 	{
 		this.setPressureGradient(getPressureGradient().add(pressureGradient));
@@ -44,6 +47,7 @@ public class MixedGradient implements Matrix
 	{
 		this.velocityGradient = velocityGradient;
 	}
+	
 	public void addVelocityGradient(CoordinateMatrix velocityGradient)
 	{
 		this.setVelocityGradient(getVelocityGradient().add(velocityGradient));
@@ -51,55 +55,81 @@ public class MixedGradient implements Matrix
 	
 	@Override
 	public double at(int... coordinates)
-	{if (coordinates.length != 2)
-		throw new IllegalArgumentException("Wrong number of coordinates");
-		if(coordinates[0] == 0)
+	{
+		if (PerformanceArguments.getInstance().executeChecks) if (coordinates.length != 2)
+			throw new IllegalArgumentException("Wrong number of coordinates");
+		if (coordinates[0] == 0)
 			return pressureGradient.at(coordinates[1]);
 		else
-			return velocityGradient.at(coordinates[0]-1, coordinates[1]);
-			
+			return velocityGradient.at(coordinates[0] - 1, coordinates[1]);
+		
 	}
 	
 	@Override
 	public void set(double value, int... coordinates)
-	{if (coordinates.length != 2)
-		throw new IllegalArgumentException("Wrong number of coordinates");
-		if(coordinates[0] == 0)
+	{
+		if (coordinates.length != 2)
+			throw new IllegalArgumentException("Wrong number of coordinates");
+		if (coordinates[0] == 0)
 			pressureGradient.set(value, coordinates[1]);
 		else
-			velocityGradient.set(value, coordinates[0]-1, coordinates[1]);
+			velocityGradient.set(value, coordinates[0] - 1, coordinates[1]);
 	}
 	
 	@Override
 	public void add(double value, int... coordinates)
-	{if (coordinates.length != 2)
-		throw new IllegalArgumentException("Wrong number of coordinates");
+	{
+		if (PerformanceArguments.getInstance().executeChecks) if (coordinates.length != 2)
+			throw new IllegalArgumentException("Wrong number of coordinates");
 		
-		if(coordinates[0] == 0)
+		if (coordinates[0] == 0)
 			pressureGradient.add(value, coordinates[1]);
 		else
-			velocityGradient.add(value, coordinates[0]-1, coordinates[1]);
+			velocityGradient.add(value, coordinates[0] - 1, coordinates[1]);
+	}
+	
+	@Override
+	public void addInPlace(Tensor other)
+	{
+	
+	}
+	
+	@Override
+	public void subInPlace(Tensor other)
+	{
+		MutableMatrix.super.subInPlace(other);
+	}
+	
+	@Override
+	public void mulInPlace(double scalar)
+	{
+	
 	}
 	
 	
 	@Override
 	public MixedGradient add(Tensor other)
 	{
-		if(!(other instanceof MixedGradient))
-			throw new IllegalArgumentException("can only add other mixedgradient");
-		if (!getShape().equals(other.getShape()))
-			throw new IllegalArgumentException("Wrong domain dimension");
+		if (PerformanceArguments.getInstance().executeChecks)
+		{
+			if (!(other instanceof MixedGradient))
+				throw new IllegalArgumentException("can only add other mixedgradient");
+			if (!getShape().equals(other.getShape()))
+				throw new IllegalArgumentException("Wrong domain dimension");
+		}
 		MixedGradient ret = new MixedGradient(this);
-		if(!(other instanceof PressureGradient))
+		if (!(other instanceof PressureGradient))
 			ret.addVelocityGradient(((MixedGradient) other).getVelocityGradient());
-		if(!(other instanceof VelocityGradient))
+		if (!(other instanceof VelocityGradient))
 			ret.addPressureGradient(((MixedGradient) other).getPressureGradient());
 		return ret;
 	}
+	
 	public int getDomainDimension()
 	{
 		return pressureGradient.getLength();
 	}
+	
 	@Override
 	public MixedGradient mul(double scalar)
 	{
@@ -128,9 +158,9 @@ public class MixedGradient implements Matrix
 	}
 	
 	@Override
-	public List<Integer> getShape()
+	public IntCoordinates getShape()
 	{
-		return List.of(velocityGradient.getShape().get(0)+1,velocityGradient.getShape().get(1)+1);
+		return new IntCoordinates(velocityGradient.getShape().get(0) + 1, velocityGradient.getShape().get(1) + 1);
 	}
 	
 	@Override

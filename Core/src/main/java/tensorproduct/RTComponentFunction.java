@@ -1,13 +1,13 @@
 package tensorproduct;
 
-	import basic.LagrangeNodeFunctional;
-	import basic.NodeFunctional;
-	import basic.ScalarFunction;
-	import basic.ScalarShapeFunction;
-	import linalg.*;
-	import linalg.Vector;
-	
-	import java.util.*;
+import basic.LagrangeNodeFunctional;
+import basic.NodeFunctional;
+import basic.ScalarFunction;
+import basic.ScalarShapeFunction;
+import linalg.*;
+import linalg.Vector;
+
+import java.util.*;
 
 public class RTComponentFunction extends ScalarShapeFunction<TPCell, TPFace,TPEdge,RTComponentFunction> implements Comparable<RTComponentFunction> {
 	

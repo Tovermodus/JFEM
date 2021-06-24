@@ -1,10 +1,11 @@
 package linalg;
 
+import basic.PerformanceArguments;
 import com.google.common.primitives.Ints;
 
 import java.util.List;
 
-public class BlockVector implements Vector
+public class BlockVector implements MutableVector
 {
 	DenseVector[] blocks;
 	public BlockVector(int blockSize, int blockN)
@@ -54,6 +55,7 @@ public class BlockVector implements Vector
 	}
 	static BlockVector fromBlocks(DenseVector[] blocks)
 	{
+		if (PerformanceArguments.getInstance().executeChecks)
 		for(int i = 1; i < blocks.length; i++)
 			if(blocks[i].size() != blocks[0].size())
 				throw new IllegalArgumentException("Blocks are not the same size");
@@ -75,14 +77,15 @@ public class BlockVector implements Vector
 	}
 	
 	@Override
-	public List<Integer> getShape()
+	public IntCoordinates getShape()
 	{
-		return Ints.asList(getBlockN()*getBlockSize());
+		return new IntCoordinates(getBlockN()*getBlockSize());
 	}
 	
 	@Override
 	public double at(int... coordinates)
 	{
+		if (PerformanceArguments.getInstance().executeChecks)
 		if(coordinates.length != 1)
 			throw new IllegalArgumentException("Wrong number of coordinates");
 		int[] cs = blockCoords(coordinates);
@@ -92,6 +95,7 @@ public class BlockVector implements Vector
 	@Override
 	public void set(double value, int... coordinates)
 	{
+		if (PerformanceArguments.getInstance().executeChecks)
 		if(coordinates.length != 1)
 			throw new IllegalArgumentException("Wrong number of coordinates");
 		int[] cs = blockCoords(coordinates);
@@ -101,6 +105,7 @@ public class BlockVector implements Vector
 	@Override
 	public void add(double value, int... coordinates)
 	{
+		if (PerformanceArguments.getInstance().executeChecks)
 		if(coordinates.length != 1)
 			throw new IllegalArgumentException("Wrong number of coordinates");
 		int[] cs = blockCoords(coordinates);
@@ -108,9 +113,22 @@ public class BlockVector implements Vector
 	}
 	
 	@Override
-	public Vector add(Tensor other)
+	public void addInPlace(Tensor other)
 	{
-		if(Ints.toArray(getShape()) != Ints.toArray(other.getShape()))
+		this.blocks = this.add(other).blocks;
+	}
+	
+	@Override
+	public void mulInPlace(double scalar)
+	{
+		this.blocks = this.mul(scalar).blocks;
+	}
+	
+	@Override
+	public BlockVector add(Tensor other)
+	{
+		if (PerformanceArguments.getInstance().executeChecks)
+		if(getShape() != other.getShape())
 			throw new IllegalArgumentException("Vectors are of different size");
 		BlockVector ret = new BlockVector(this);
 		if(!other.isSparse())
@@ -119,14 +137,15 @@ public class BlockVector implements Vector
 				ret.add(other.at(i),i);
 			}
 		else
-			for(List<Integer> key: other.getCoordinateEntryList().keySet())
-				ret.add(other.getCoordinateEntryList().get(key), Ints.toArray(key));
+			for(IntCoordinates key: other.getCoordinateEntryList().keySet())
+				ret.add(other.getCoordinateEntryList().get(key), key);
 		return ret;
 	}
 	@Override
-	public Vector sub(Tensor other)
+	public BlockVector sub(Tensor other)
 	{
-		if(Ints.toArray(getShape()) != Ints.toArray(other.getShape()))
+		if (PerformanceArguments.getInstance().executeChecks)
+		if(getShape() != other.getShape())
 			throw new IllegalArgumentException("Vectors are of different size");
 		BlockVector ret = new BlockVector(this);
 		if(!other.isSparse())
@@ -135,12 +154,12 @@ public class BlockVector implements Vector
 				ret.add(-other.at(i),i);
 			}
 		else
-			for(List<Integer> key: other.getCoordinateEntryList().keySet())
-				ret.add(-other.getCoordinateEntryList().get(key), Ints.toArray(key));
+			for(IntCoordinates key: other.getCoordinateEntryList().keySet())
+				ret.add(-other.getCoordinateEntryList().get(key), key);
 		return ret;
 	}
 	@Override
-	public Vector mul(double scalar)
+	public BlockVector mul(double scalar)
 	{
 		BlockVector ret = new BlockVector(getBlockSize(),getBlockN());
 		for (int i = 0; i < getLength(); i++)
