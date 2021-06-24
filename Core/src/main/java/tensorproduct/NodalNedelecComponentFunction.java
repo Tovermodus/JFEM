@@ -20,6 +20,8 @@ public class NodalNedelecComponentFunction implements ScalarShapeFunction<TPCell
 	private final int polynomialDegree;
 	private final int lowDegreeDimension;
 	private final int dimension;
+	private int globalIndex;
+	
 	public NodalNedelecComponentFunction(TPCell supportCell, int polynomialDegree, int localIndex,
 	                                     int lowDegreeDimension)
 	{
@@ -127,13 +129,13 @@ public class NodalNedelecComponentFunction implements ScalarShapeFunction<TPCell
 	@Override
 	public void setGlobalIndex(int index)
 	{
-		throw new UnsupportedOperationException("not implemented yet");
+		globalIndex = index;
 	}
 	
 	@Override
 	public int getGlobalIndex()
 	{
-		throw new UnsupportedOperationException("not implemented yet");
+		return globalIndex;
 	}
 	
 	@Override

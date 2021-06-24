@@ -17,6 +17,8 @@ public class ContinuousTPShapeFunction implements ScalarShapeFunction<TPCell, TP
     private final LagrangeNodeFunctional nodeFunctional;
     private final int polynomialDegree;
     private int localIndex;
+    private int globalIndex;
+    
     public ContinuousTPShapeFunction(TPCell supportCell, int polynomialDegree,int localIndex)
     {
         cells = new TreeMap<>();
@@ -102,13 +104,13 @@ public class ContinuousTPShapeFunction implements ScalarShapeFunction<TPCell, TP
     @Override
     public void setGlobalIndex(int index)
     {
-        throw new UnsupportedOperationException("not implemented yet");
+        globalIndex = index;
     }
     
     @Override
     public int getGlobalIndex()
     {
-        throw new UnsupportedOperationException("not implemented yet");
+        return globalIndex;
     }
     
     @Override

@@ -21,6 +21,7 @@ public class TPShapeFunction implements ScalarShapeFunctionWithReferenceShapeFun
 	List<LagrangeBasisFunction1D> function1Ds;
 	TPCell supportCell;
 	LagrangeNodeFunctional nodeFunctional;
+	private int globalIndex;
 	
 	public TPShapeFunction(TPCell supportCell, int polynomialDegree, int localIndex)
 	{
@@ -83,13 +84,13 @@ public class TPShapeFunction implements ScalarShapeFunctionWithReferenceShapeFun
 	@Override
 	public void setGlobalIndex(int index)
 	{
-		throw new UnsupportedOperationException("not implemented yet");
+		globalIndex = index;
 	}
 	
 	@Override
 	public int getGlobalIndex()
 	{
-		throw new UnsupportedOperationException("not implemented yet");
+		return globalIndex;
 	}
 	
 	@Override

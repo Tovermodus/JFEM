@@ -16,6 +16,8 @@ public class RTComponentFunction implements ScalarShapeFunction<TPCell, TPFace,T
 	private int localIndex;
 	private final int highDegreeDimension;
 	private final int dimension;
+	private int globalIndex;
+	
 	public RTComponentFunction(TPCell supportCell, int polynomialDegree,int localIndex, int highDegreeDimension)
 	{
 		cells = new TreeMap<>();
@@ -121,13 +123,13 @@ public class RTComponentFunction implements ScalarShapeFunction<TPCell, TPFace,T
 	@Override
 	public void setGlobalIndex(int index)
 	{
-		throw new UnsupportedOperationException("not implemented yet");
+		globalIndex = index;
 	}
 	
 	@Override
 	public int getGlobalIndex()
 	{
-		throw new UnsupportedOperationException("not implemented yet");
+		return globalIndex;
 	}
 	
 	@Override
