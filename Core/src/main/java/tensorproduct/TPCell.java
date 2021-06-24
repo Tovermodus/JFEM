@@ -7,6 +7,7 @@ import linalg.CoordinateComparator;
 import linalg.CoordinateVector;
 import org.jetbrains.annotations.NotNull;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
 import java.util.TreeSet;
@@ -137,6 +138,13 @@ public class TPCell implements Cell<TPCell, TPFace, TPEdge>
 		
 		if(edges.add(tpEdge))
 			tpEdge.addCell(this);
+	}
+	public TPCell getReferenceCell()
+	{
+		List<Cell1D> cells = new ArrayList<>(getDimension());
+		for(int i = 0; i < getDimension(); i++)
+			cells.add(new Cell1D(0,1));
+		return new TPCell(cells);
 	}
 	
 	//	@Override

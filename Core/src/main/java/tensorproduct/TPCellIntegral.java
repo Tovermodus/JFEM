@@ -71,6 +71,11 @@ public class TPCellIntegral<ST extends ScalarShapeFunction<TPCell,TPFace,TPEdge,
 		}
 		return ret;
 	}
+	public static double integrateNonTensorProduct(ToDoubleFunction<CoordinateVector> eval, TPCell cell)
+	{
+		List<Cell1D> cells = cell.cell1Ds;
+		return integrateNonTensorProduct(eval, cells);
+	}
 	@Override
 	public double evaluateCellIntegral(TPCell cell, ST shapeFunction1,
 	                                   ST shapeFunction2)
