@@ -1,6 +1,7 @@
 package tensorproduct;
 
 import basic.Cell;
+import basic.CellWithReferenceCell;
 import basic.ShapeFunction;
 import basic.VectorFunction;
 import linalg.CoordinateComparator;
@@ -12,7 +13,7 @@ import java.util.List;
 import java.util.Set;
 import java.util.TreeSet;
 
-public class TPCell implements Cell<TPCell, TPFace, TPEdge>
+public class TPCell implements CellWithReferenceCell<TPCell, TPFace, TPEdge>
 {
 	List<Cell1D> cell1Ds;
 	Set<TPFace> faces;
@@ -139,6 +140,7 @@ public class TPCell implements Cell<TPCell, TPFace, TPEdge>
 		if(edges.add(tpEdge))
 			tpEdge.addCell(this);
 	}
+	@Override
 	public TPCell getReferenceCell()
 	{
 		List<Cell1D> cells = new ArrayList<>(getDimension());

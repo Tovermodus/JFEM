@@ -11,44 +11,31 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-public abstract class ScalarShapeFunction<CT extends Cell<CT,FT,ET>, FT extends Face<CT,FT,ET>, ET extends Edge<CT,FT
+public interface ScalarShapeFunction<CT extends Cell<CT,FT,ET>, FT extends Face<CT,FT,ET>, ET extends Edge<CT,FT
 	,ET>,
-	ST extends ScalarShapeFunction<CT,FT,ET,ST>> extends ScalarFunction implements ShapeFunction<CT
+	ST extends ScalarShapeFunction<CT,FT,ET,ST>> extends ScalarFunction, ShapeFunction<CT
 	,FT,ET,ST,
-	Double, CoordinateVector, Matrix>, Comparable<ST>
+	Double, CoordinateVector, CoordinateMatrix>, Comparable<ST>
 {
-	protected int globalIndex;
-	
-	
-	public double fastValueInCell(CoordinateVector pos, CT cell)
+	default double fastValueInCell(CoordinateVector pos, CT cell)
 	{
 		throw new UnsupportedOperationException();
 	}
-	public double[] fastGradientInCell(CoordinateVector pos, CT cell)
+	default double[] fastGradientInCell(CoordinateVector pos, CT cell)
 	{
 		throw new UnsupportedOperationException();
 	}
-	public double[][] fastHessianInCell(CoordinateVector pos, CT cell)
+	default double[][] fastHessianInCell(CoordinateVector pos, CT cell)
 	{
 		throw new UnsupportedOperationException();
 	}
-	@Override
-	public void setGlobalIndex(int index)
-	{
-		globalIndex = index;
-	}
 	
 	@Override
-	public abstract NodeFunctional<ScalarFunction, Double, CoordinateVector, Matrix> getNodeFunctional();
+	NodeFunctional<ScalarFunction, Double, CoordinateVector, CoordinateMatrix> getNodeFunctional();
+	
 	
 	@Override
-	public int getGlobalIndex()
-	{
-		return globalIndex;
-	}
-	
-	@Override
-	public Double value(CoordinateVector pos)
+	default Double value(CoordinateVector pos)
 	{
 		for(CT cell: getCells())
 			if(cell.isInCell(pos))
@@ -57,7 +44,7 @@ public abstract class ScalarShapeFunction<CT extends Cell<CT,FT,ET>, FT extends 
 	}
 	
 	@Override
-	public CoordinateVector gradient(CoordinateVector pos)
+	default CoordinateVector gradient(CoordinateVector pos)
 	{
 		for(CT cell: getCells())
 			if(cell.isInCell(pos))
@@ -65,46 +52,46 @@ public abstract class ScalarShapeFunction<CT extends Cell<CT,FT,ET>, FT extends 
 		return new CoordinateVector(pos.getLength());
 	}
 	@Override
-	public Double jumpInValue(FT face, CoordinateVector pos)
+	default Double jumpInValue(FT face, CoordinateVector pos)
 	{
 		return valueInCell(pos, face.getNormalUpstreamCell(pos)) - valueInCell(pos,
 			face.getNormalDownstreamCell(pos));
 	}
 	@Override
-	public CoordinateVector jumpInDerivative(FT face, CoordinateVector pos)
+	default CoordinateVector jumpInDerivative(FT face, CoordinateVector pos)
 	{
 		return gradientInCell(pos,face.getNormalUpstreamCell(pos)).sub(
 			gradientInCell(pos, face.getNormalDownstreamCell(pos)));
 	}
 	
 	@Override
-	public Double averageInValue(FT face, CoordinateVector pos)
+	default Double averageInValue(FT face, CoordinateVector pos)
 	{
 		return  0.5*(valueInCell(pos,face.getNormalUpstreamCell(pos))+valueInCell(pos,
 			face.getNormalDownstreamCell(pos)));
 	}
 	
 	@Override
-	public CoordinateVector averageInDerivative(FT face, CoordinateVector pos)
+	default CoordinateVector averageInDerivative(FT face, CoordinateVector pos)
 	{
 		return gradientInCell(pos,face.getNormalUpstreamCell(pos)).add(
 			gradientInCell(pos,face.getNormalDownstreamCell(pos))).mul(0.5);
 	}
 	
 	@Override
-	public CoordinateVector normalAverageInValue(FT face, CoordinateVector pos)
+	default CoordinateVector normalAverageInValue(FT face, CoordinateVector pos)
 	{
 		return face.getNormal().value(pos).mul(0.5*jumpInValue(face,pos));
 	}
 	
 	@Override
-	public Double normalAverageInDerivative(FT face, CoordinateVector pos)
+	default Double normalAverageInDerivative(FT face, CoordinateVector pos)
 	{
 		return face.getNormal().value(pos).inner(jumpInDerivative(face, pos));
 	}
 	
 	@Override
-	public Map<Integer, Double> prolongate(Set<ST> refinedFunctions)
+	default Map<Integer, Double> prolongate(Set<ST> refinedFunctions)
 	{
 		Map<Integer, Double> ret = new HashMap<>();
 		for(ST shapeFunction:refinedFunctions)

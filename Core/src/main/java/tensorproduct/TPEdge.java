@@ -1,6 +1,6 @@
 package tensorproduct;
 
-import basic.Edge;
+import basic.EdgeWithReferenceEdge;
 import basic.VectorFunction;
 import linalg.CoordinateComparator;
 import linalg.CoordinateVector;
@@ -9,13 +9,13 @@ import org.jetbrains.annotations.NotNull;
 import java.util.Set;
 import java.util.TreeSet;
 
-public class TPEdge implements Edge<TPCell, TPFace, TPEdge>
+public class TPEdge implements EdgeWithReferenceEdge<TPCell, TPFace, TPEdge>
 {
 	double[] otherCoordinates;
 	Cell1D cell;
 	int tangentialDimension;
-	private Set<TPCell> cells;
-	private Set<TPFace> faces;
+	private final Set<TPCell> cells;
+	private final Set<TPFace> faces;
 	private final VectorFunction tangent;
 	boolean isBoundaryFace = false;
 	
@@ -53,7 +53,7 @@ public class TPEdge implements Edge<TPCell, TPFace, TPEdge>
 		Cell1D retainedCell = face.getCell1Ds().get(retainedDirection>eliminatedDirection?1:0);
 		Cell1D eliminatedCell = face.getCell1Ds().get(retainedDirection>eliminatedDirection?0:1);
 		
-		double otherCoordinates[] = new double[]{-1,-1};
+		double[] otherCoordinates = new double[]{-1,-1};
 		if(eliminatedDirection < face.getFlatDimension())
 		{
 			if(leftSide)
@@ -196,5 +196,12 @@ public class TPEdge implements Edge<TPCell, TPFace, TPEdge>
 	public int getTangentialDimension()
 	{
 		return tangentialDimension;
+	}
+	
+	@Override
+	public TPEdge getReferenceEdge()
+	{
+		double [] othercoordinates = {0,0};
+		return new TPEdge(new Cell1D(0,1), othercoordinates, tangentialDimension);
 	}
 }

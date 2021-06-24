@@ -1,17 +1,19 @@
 package tensorproduct;
 
-import basic.CellIntegral;
-import basic.Function;
-import basic.ScalarShapeFunction;
+import basic.*;
+import linalg.CoordinateMatrix;
 import linalg.CoordinateVector;
+import linalg.Matrix;
 import linalg.Vector;
 
 import java.util.List;
+import java.util.Map;
 import java.util.function.ToDoubleFunction;
 
-public class TPCellIntegralViaReferenceCell<ST extends ScalarShapeFunction<TPCell,TPFace,TPEdge,ST>> extends TPCellIntegral<ST>
+public class TPCellIntegralViaReferenceCell<ST extends ScalarShapeFunctionWithReferenceShapeFunction<TPCell,TPFace,TPEdge,ST>> extends TPCellIntegral<ST>
 {
-	private double valueOnReferenceCell = Double.NaN;
+	Map<ReferenceCellIdentificationTriplet<TPCell, TPFace, TPEdge, ST, Double, CoordinateVector,
+		CoordinateMatrix>, Double> savedValues;
 	public TPCellIntegralViaReferenceCell(Function<?, ?, ?> weight, String name, boolean weightIsTensorProduct)
 	{
 		super(weight, name, weightIsTensorProduct);

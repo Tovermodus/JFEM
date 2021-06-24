@@ -4,4 +4,5 @@ public interface NodeFunctional<FT extends Function<valueT, gradientT, hessianT>
 {
 	
 	double evaluate(FT func);
+	
 }

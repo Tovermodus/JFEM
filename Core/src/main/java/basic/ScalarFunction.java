@@ -1,19 +1,16 @@
 package basic;
 
-import linalg.*;
+import linalg.CoordinateMatrix;
+import linalg.CoordinateVector;
+import linalg.Matrix;
 
-import java.io.BufferedWriter;
-import java.io.FileWriter;
-import java.io.IOException;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.stream.DoubleStream;
 
-public abstract class ScalarFunction implements Function<Double, CoordinateVector, Matrix>
+public interface ScalarFunction extends Function<Double, CoordinateVector, CoordinateMatrix>
 {
-	public static ScalarFunction constantFunction(double constant)
+	static ScalarFunction constantFunction(double constant)
 	{
 		return new ScalarFunction()
 		{
@@ -42,13 +39,13 @@ public abstract class ScalarFunction implements Function<Double, CoordinateVecto
 			
 		};
 	}
-	public Map<CoordinateVector, Double> valuesInPoints(List<CoordinateVector> points)
+	default Map<CoordinateVector, Double> valuesInPoints(List<CoordinateVector> points)
 	{
 		ConcurrentHashMap<CoordinateVector, Double> ret = new ConcurrentHashMap<>();
 		points.stream().parallel().forEach(point->ret.put(point, value(point)));
 		return ret;
 	}
-	public VectorFunction getGradientFunction()
+	default VectorFunction getGradientFunction()
 	{
 		ScalarFunction me = this;
 		return new VectorFunction()
@@ -71,32 +68,32 @@ public abstract class ScalarFunction implements Function<Double, CoordinateVecto
 			}
 		};
 	}
-	public Double directionalDerivative(CoordinateVector pos, CoordinateVector direction)
+	default Double directionalDerivative(CoordinateVector pos, CoordinateVector direction)
 	{
 		return direction.inner(gradient(pos));
 	}
-	public Double delI(CoordinateVector pos, int i)
+	default Double delI(CoordinateVector pos, int i)
 	{
 		return gradient(pos).at(i);
 	}
-	public boolean hasFastEvaluation()
+	default boolean hasFastEvaluation()
 	{
 		return false;
 	}
-	public double fastValue(CoordinateVector pos)
+	default double fastValue(CoordinateVector pos)
 	{
 		throw new UnsupportedOperationException();
 	}
-	public double[] fastGradient(CoordinateVector pos)
+	default double[] fastGradient(CoordinateVector pos)
 	{
 		throw new UnsupportedOperationException();
 	}
-	public double[][] fastHessian(CoordinateVector pos)
+	default double[][] fastHessian(CoordinateVector pos)
 	{
 		throw new UnsupportedOperationException();
 	}
 	
-	public VectorFunction makeIsotropicVectorFunction()
+	default VectorFunction makeIsotropicVectorFunction()
 	{
 		ScalarFunction me = this;
 		return new VectorFunction()

@@ -1,24 +1,26 @@
 package tensorproduct;
 
 import basic.Face;
+import basic.FaceWithReferenceFace;
 import basic.VectorFunction;
 import com.google.common.collect.Multimap;
 import linalg.CoordinateComparator;
 import linalg.CoordinateVector;
 import org.jetbrains.annotations.NotNull;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
 import java.util.TreeSet;
 
-public class TPFace implements Face<TPCell, TPFace, TPEdge>,Comparable<TPFace>
+public class TPFace implements FaceWithReferenceFace<TPCell, TPFace, TPEdge>,Comparable<TPFace>
 {
 	double otherCoordinate;
 	List<Cell1D> cell1Ds;
 	int flatDimension;
 	
-	private Set<TPCell> cells;
-	private Set<TPEdge> edges;
+	private final Set<TPCell> cells;
+	private final Set<TPEdge> edges;
 	private boolean isBoundaryFace;
 	private final VectorFunction normal;
 	
@@ -227,6 +229,15 @@ public class TPFace implements Face<TPCell, TPFace, TPEdge>,Comparable<TPFace>
 	{
 		if(edges.add(tpEdge))
 			tpEdge.addFace(this);
+	}
+	
+	@Override
+	public TPFace getReferenceFace()
+	{
+		List<Cell1D> cells = new ArrayList<>(getDimension()-1);
+		for(int i = 0; i < getDimension(); i++)
+			cells.add(new Cell1D(0,1));
+		return new TPFace(cells, flatDimension, 0, isBoundaryFace);
 	}
 //	@Override
 //	public List<Face<TPCell, TPShapeFunction>> refine(Multimap<TPCell, TPCell> cellMap)
