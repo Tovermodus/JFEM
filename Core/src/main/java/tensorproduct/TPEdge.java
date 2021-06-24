@@ -177,6 +177,26 @@ public class TPEdge implements EdgeWithReferenceEdge<TPCell, TPFace, TPEdge>
 	}
 	
 	@Override
+	public int hashCode()
+	{
+		int ret = 0;
+		ret += Math.pow(7, 1) * cell.center();
+		ret += Math.pow(7, 2) * cell.getStart();
+		ret += Math.pow(7, 3) * cell.getEnd();
+		ret -= 141*otherCoordinates[0];
+		ret -= 141*141*otherCoordinates[1];
+		return ret;
+	}
+	
+	@Override
+	public boolean equals(Object obj)
+	{
+		if (obj instanceof TPEdge)
+			return 0 == compareTo((TPEdge) obj);
+		else
+			return false;
+	}
+	@Override
 	public void setBoundaryFace(boolean boundaryFace)
 	{
 		isBoundaryFace = boundaryFace;

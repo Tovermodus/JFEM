@@ -3,6 +3,7 @@ package linalg;
 import basic.PerformanceArguments;
 import com.google.common.primitives.Ints;
 import org.ujmp.core.Matrix;
+import tensorproduct.TPEdge;
 
 import java.util.List;
 
@@ -224,6 +225,14 @@ public class DenseVector implements MutableVector, MutableTensor
 		return almostEqual((Tensor) obj);
 	}
 	
+	@Override
+	public int hashCode()
+	{
+		int ret = -1024*entries.length;
+		for(int i = 0; i < entries.length; i++)
+			ret += entries[i]*Math.pow(2, i%30);
+		return ret;
+	}
 	@Override
 	public String toString()
 	{

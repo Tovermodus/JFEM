@@ -133,6 +133,29 @@ public class TPCell implements CellWithReferenceCell<TPCell, TPFace, TPEdge>
 			return 1;
 		return CoordinateComparator.comp(center().getEntries(), o.center().getEntries());
 	}
+	
+	@Override
+	public int hashCode()
+	{
+		int ret = 0;
+		for(int i = 0; i < cell1Ds.size(); i++)
+		{
+			ret += Math.pow(7, 3*i) * cell1Ds.get(i).center();
+			ret += Math.pow(7, 3*i+1) * cell1Ds.get(i).getStart();
+			ret += Math.pow(7, 3*i+2) * cell1Ds.get(i).getEnd();
+		}
+		return ret;
+	}
+	
+	@Override
+	public boolean equals(Object obj)
+	{
+		if (obj instanceof TPCell)
+			return 0 == compareTo((TPCell) obj);
+		else
+			return false;
+	}
+	
 	@Override
 	public void addEdge(TPEdge tpEdge)
 	{

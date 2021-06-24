@@ -227,6 +227,10 @@ public class TPShapeFunction implements ScalarShapeFunctionWithReferenceShapeFun
 	@Override
 	public int compareTo(@NotNull TPShapeFunction o)
 	{
+		if(polynomialDegree > o.polynomialDegree)
+			return 1;
+		if(polynomialDegree < o.polynomialDegree)
+			return -1;
 		if(CoordinateComparator.comp(nodeFunctional.getPoint().getEntries(),
 			o.nodeFunctional.getPoint().getEntries())==0)
 			return CoordinateComparator.comp(supportCell.center().getEntries(),
@@ -236,6 +240,20 @@ public class TPShapeFunction implements ScalarShapeFunctionWithReferenceShapeFun
 	}
 	
 	@Override
+	public int hashCode()
+	{
+		return nodeFunctional.getPoint().hashCode();
+	}
+	
+	@Override
+	public boolean equals(Object obj)
+	{
+		if (obj instanceof TPShapeFunction)
+			return 0 == compareTo((TPShapeFunction) obj);
+		else
+			return false;
+	}
+	@Override
 	public String toString()
 	{
 		return "Cell: ".concat(supportCell.toString()).concat(", Node point: ").concat(nodeFunctional.getPoint().toString()).concat(", global Index: ").concat(getGlobalIndex()+"");
@@ -244,7 +262,7 @@ public class TPShapeFunction implements ScalarShapeFunctionWithReferenceShapeFun
 	@Override
 	public TPShapeFunction getReferenceShapeFunctionRelativeTo(TPCell cell)
 	{
-		return new TPShapeFunction(cell, polynomialDegree,
+		return new TPShapeFunction(cell.getReferenceCell(), polynomialDegree,
 			function1Ds.stream().mapToInt(LagrangeBasisFunction1D::getLocalFunctionNumber).toArray());
 	}
 	

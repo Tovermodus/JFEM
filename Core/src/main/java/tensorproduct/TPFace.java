@@ -225,6 +225,29 @@ public class TPFace implements FaceWithReferenceFace<TPCell, TPFace, TPEdge>,Com
 		return CoordinateComparator.comp(center().getEntries(), o.center().getEntries());
 	}
 	@Override
+	public int hashCode()
+	{
+		int ret = 0;
+		for(int i = 0; i < cell1Ds.size(); i++)
+		{
+			ret += Math.pow(7, 3*i) * cell1Ds.get(i).center();
+			ret += Math.pow(7, 3*i+1) * cell1Ds.get(i).getStart();
+			ret += Math.pow(7, 3*i+2) * cell1Ds.get(i).getEnd();
+		}
+		ret -= 141*otherCoordinate;
+		ret*=(flatDimension+19);
+		return ret;
+	}
+	
+	@Override
+	public boolean equals(Object obj)
+	{
+		if (obj instanceof TPFace)
+			return 0 == compareTo((TPFace) obj);
+		else
+			return false;
+	}
+	@Override
 	public void addEdge(TPEdge tpEdge)
 	{
 		if(edges.add(tpEdge))

@@ -34,7 +34,7 @@ public class TPCellIntegralViaReferenceCell<ST extends ScalarShapeFunctionWithRe
 			ReferenceCellIdentificationTriplet<TPCell,TPFace,TPEdge, ST> key =
 				new ReferenceCellIdentificationTriplet<>(shapeFunction1.getReferenceShapeFunctionRelativeTo(cell),
 					shapeFunction2.getReferenceShapeFunctionRelativeTo(cell),
-					cell);
+					cell.getReferenceCell());
 			if(savedValues.containsKey(key))
 				return savedValues.get(key);
 			else{
