@@ -34,8 +34,7 @@ public abstract class VectorShapeFunction<CT extends Cell<CT,FT, ET>,FT extends 
 		return new CoordinateMatrix(pos.getLength(),pos.getLength());
 	}
 	
-	@
-		Override
+	
 	public void setGlobalIndex(int index)
 	{
 		globalIndex = index;

@@ -9,7 +9,7 @@ import java.util.Set;
 
 public class SingleComponentVectorShapeFunction<CT extends Cell<CT,FT,ET>, FT extends Face<CT,FT,ET>,
 	ET extends Edge<CT,FT,ET>,
-	ST extends ScalarShapeFunction<CT,FT,ET,ST>, VST extends SingleComponentVectorShapeFunction<CT,FT,ET,ST,VST>> extends VectorShapeFunction<CT,FT,ET,
+	ST extends FastEvaluatedScalarShapeFunction<CT,FT,ET,ST>, VST extends SingleComponentVectorShapeFunction<CT,FT,ET,ST,VST>> extends VectorShapeFunction<CT,FT,ET,
 	VST>
 {
 	private final ST componentFunction;
@@ -59,18 +59,6 @@ public class SingleComponentVectorShapeFunction<CT extends Cell<CT,FT,ET>, FT ex
 		return componentFunction.getFaces();
 	}
 	
-	
-	@Override
-	public void addFace(FT face)
-	{
-		componentFunction.addFace(face);
-	}
-	
-	@Override
-	public void addCell(CT cell)
-	{
-		componentFunction.addCell(cell);
-	}
 	
 	@Override
 	public CoordinateVector valueInCell(CoordinateVector pos, CT cell)

@@ -72,16 +72,18 @@ public class NedelecShapeFunction extends VectorShapeFunction<TPCell, TPFace, TP
 		return nodeFuncional;
 	}
 	
-	@Override
 	public void addFace(TPFace face)
 	{
-		faces.add(face);
+		throw new IllegalArgumentException();
+		
+		//faces.add(face);
 	}
 	
-	@Override
 	public void addCell(TPCell cell)
 	{
-		cells.add(cell);
+		
+		throw new IllegalArgumentException();
+		//cells.add(cell);
 	}
 	@Override
 	public double divergenceInCell(CoordinateVector pos,TPCell cell)

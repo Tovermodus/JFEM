@@ -1,9 +1,6 @@
 package tensorproduct;
 
-import basic.LagrangeNodeFunctional;
-import basic.NodeFunctional;
-import basic.ScalarFunction;
-import basic.ScalarShapeFunctionWithReferenceShapeFunction;
+import basic.*;
 import linalg.CoordinateComparator;
 import linalg.CoordinateMatrix;
 import linalg.CoordinateVector;
@@ -15,7 +12,8 @@ import java.util.List;
 import java.util.Set;
 
 public class TPShapeFunction implements ScalarShapeFunctionWithReferenceShapeFunction<TPCell,TPFace,TPEdge,
-	TPShapeFunction>, Comparable<TPShapeFunction>
+	TPShapeFunction>, FastEvaluatedScalarShapeFunction<TPCell, TPFace, TPEdge, TPShapeFunction>,
+	Comparable<TPShapeFunction>
 {
 	private final int polynomialDegree;
 	List<LagrangeBasisFunction1D> function1Ds;
@@ -81,7 +79,6 @@ public class TPShapeFunction implements ScalarShapeFunctionWithReferenceShapeFun
 		return nodeFunctional;
 	}
 	
-	@Override
 	public void setGlobalIndex(int index)
 	{
 		globalIndex = index;
@@ -93,15 +90,10 @@ public class TPShapeFunction implements ScalarShapeFunctionWithReferenceShapeFun
 		return globalIndex;
 	}
 	
-	@Override
-	public void addFace(TPFace face)
-	{
-		throw new UnsupportedOperationException("TPShapefunctions do not live on faces");
-	}
-	
-	@Override
 	public void addCell(TPCell cell)
 	{
+		if(true)
+			throw new IllegalArgumentException();
 		if(supportCell != cell)
 		{
 			if(supportCell != null)
@@ -110,45 +102,16 @@ public class TPShapeFunction implements ScalarShapeFunctionWithReferenceShapeFun
 		}
 	}
 	
-	@Override
-	public Double valueInCell(CoordinateVector pos, TPCell cell)
-	{
-		if(cell == null)
-			return 0.;
-		if(cell.equals(supportCell))
-			return value(pos);
-		else
-			return 0.;
-	}
 	
-	@Override
-	public CoordinateVector gradientInCell(CoordinateVector pos, TPCell cell)
-	{
-		if(cell == null)
-			return gradient(pos).mul(0);
-		if(cell.equals(supportCell))
-			return gradient(pos);
-		else
-			return gradient(pos).mul(0);
-	}
-	
-	@Override
-	public CoordinateMatrix hessianInCell(CoordinateVector pos, TPCell cell)
-	{
-		if(cell == null)
-			return hessian(pos).mul(0);
-		if(cell.equals(supportCell))
-			return hessian(pos);
-		else
-			return hessian(pos).mul(0);
-	}
 	@Override
 	public double fastValueInCell(CoordinateVector pos, TPCell cell)
 	{
 		if(cell == null)
 			return 0.;
 		if(cell.equals(supportCell))
+		{
 			return fastValue(pos);
+		}
 		else
 			return 0.;
 	}
@@ -164,39 +127,12 @@ public class TPShapeFunction implements ScalarShapeFunctionWithReferenceShapeFun
 			return new double[pos.getLength()];
 	}
 	
-	@Override
-	public double[][] fastHessianInCell(CoordinateVector pos, TPCell cell)
-	{
-		if(cell == null)
-			return new double[pos.getLength()][pos.getLength()];
-		if(cell.equals(supportCell))
-			return fastHessian(pos);
-		else
-			return new double[pos.getLength()][pos.getLength()];
-	}
-	
-	
-	@Override
-	public Double value(CoordinateVector pos)
-	{
-		return fastValue(pos);
-	}
-	
-	@Override
-	public CoordinateVector gradient(CoordinateVector pos)
-	{
-		return CoordinateVector.fromValues(fastGradient(pos));
-	}
-	
-	@Override
-	public boolean hasFastEvaluation()
-	{
-		return true;
-	}
 	
 	@Override
 	public double fastValue(CoordinateVector pos)
 	{
+		if(!supportCell.isInCell(pos))
+			return 0;
 		double ret = 1;
 		for(int i = 0; i < pos.getLength(); i++)
 		{
@@ -208,6 +144,8 @@ public class TPShapeFunction implements ScalarShapeFunctionWithReferenceShapeFun
 	@Override
 	public double[] fastGradient(CoordinateVector pos)
 	{
+		if(!supportCell.isInCell(pos))
+			return new double[pos.getLength()];
 		double[] ret = new double[pos.getLength()];
 		for (int i = 0; i < pos.getLength(); i++)
 		{

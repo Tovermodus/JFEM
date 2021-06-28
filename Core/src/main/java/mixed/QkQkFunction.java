@@ -14,5 +14,14 @@ public class QkQkFunction extends MixedShapeFunction<TPCell, TPFace,TPEdge, Cont
 	public QkQkFunction(@NotNull ContinuousTPVectorFunction velocityFunction)
 	{
 		super(velocityFunction);
+	}int globalIndex;
+	@Override
+	public int getGlobalIndex()
+	{
+		return globalIndex;
+	}
+	public void setGlobalIndex(int index)
+	{
+		globalIndex = index;
 	}
 }

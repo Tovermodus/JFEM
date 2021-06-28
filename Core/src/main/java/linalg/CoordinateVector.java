@@ -16,6 +16,10 @@ public class CoordinateVector extends DenseVector implements Comparable<Coordina
 		if(d > 3)
 			throw new IllegalArgumentException("only 1D, 2D and 3D supported");
 	}
+	public CoordinateVector(double [] vector)
+	{
+		super(vector);
+	}
 	public static CoordinateVector getUnitVector(int d, int index)
 	{
 		CoordinateVector ret = new CoordinateVector(d);

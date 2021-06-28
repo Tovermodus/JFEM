@@ -14,5 +14,14 @@ public class NodalNedelecMixedFunction extends MixedShapeFunction<TPCell, TPFace
 	public NodalNedelecMixedFunction(@NotNull NodalNedelecShapeFunction velocityFunction)
 	{
 		super(velocityFunction);
+	}int globalIndex;
+	@Override
+	public int getGlobalIndex()
+	{
+		return globalIndex;
+	}
+	public void setGlobalIndex(int index)
+	{
+		globalIndex = index;
 	}
 }

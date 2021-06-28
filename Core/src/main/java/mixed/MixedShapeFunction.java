@@ -16,7 +16,6 @@ public abstract class MixedShapeFunction<CT extends Cell<CT, FT,ET>,
 	MixedHessian>
 	, Comparable<MixedShapeFunction<CT, FT,ET, PF, VF>>
 {
-	protected int globalIndex;
 	
 	public MixedShapeFunction(@NotNull PF pressureFunction)
 	{
@@ -28,17 +27,6 @@ public abstract class MixedShapeFunction<CT extends Cell<CT, FT,ET>,
 		super(velocityFunction);
 	}
 	
-	@Override
-	public int getGlobalIndex()
-	{
-		return globalIndex;
-	}
-	
-	@Override
-	public void setGlobalIndex(int index)
-	{
-		globalIndex = index;
-	}
 	
 	@Override
 	public Set<CT> getCells()
@@ -78,24 +66,6 @@ public abstract class MixedShapeFunction<CT extends Cell<CT, FT,ET>,
 			return MixedNodeFunctional.pressureFunctional(getPressureShapeFunction().getNodeFunctional());
 		else
 			return MixedNodeFunctional.velocityFunctional(getVelocityShapeFunction().getNodeFunctional());
-	}
-	
-	@Override
-	public void addFace(FT face)
-	{
-		if (isPressure())
-			getPressureShapeFunction().addFace(face);
-		else
-			getVelocityShapeFunction().addFace(face);
-	}
-	
-	@Override
-	public void addCell(CT cell)
-	{
-		if (isPressure())
-			getPressureShapeFunction().addCell(cell);
-		else
-			getVelocityShapeFunction().addCell(cell);
 	}
 	
 	@Override

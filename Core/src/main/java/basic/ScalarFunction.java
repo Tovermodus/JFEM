@@ -76,22 +76,6 @@ public interface ScalarFunction extends Function<Double, CoordinateVector, Coord
 	{
 		return gradient(pos).at(i);
 	}
-	default boolean hasFastEvaluation()
-	{
-		return false;
-	}
-	default double fastValue(CoordinateVector pos)
-	{
-		throw new UnsupportedOperationException();
-	}
-	default double[] fastGradient(CoordinateVector pos)
-	{
-		throw new UnsupportedOperationException();
-	}
-	default double[][] fastHessian(CoordinateVector pos)
-	{
-		throw new UnsupportedOperationException();
-	}
 	
 	default VectorFunction makeIsotropicVectorFunction()
 	{

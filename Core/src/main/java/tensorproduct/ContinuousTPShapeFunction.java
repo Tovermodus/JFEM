@@ -1,15 +1,12 @@
 package tensorproduct;
 
-import basic.LagrangeNodeFunctional;
-import basic.NodeFunctional;
-import basic.ScalarFunction;
-import basic.ScalarShapeFunction;
+import basic.*;
 import linalg.*;
 import linalg.Vector;
 
 import java.util.*;
 
-public class ContinuousTPShapeFunction implements ScalarShapeFunction<TPCell, TPFace,TPEdge,
+public class ContinuousTPShapeFunction implements FastEvaluatedScalarShapeFunction<TPCell, TPFace,TPEdge,
         ContinuousTPShapeFunction>, Comparable<ContinuousTPShapeFunction> {
     
     private Map<TPCell, List<LagrangeBasisFunction1D>> cells;
@@ -101,7 +98,6 @@ public class ContinuousTPShapeFunction implements ScalarShapeFunction<TPCell, TP
         return nodeFunctional;
     }
     
-    @Override
     public void setGlobalIndex(int index)
     {
         globalIndex = index;
@@ -113,76 +109,7 @@ public class ContinuousTPShapeFunction implements ScalarShapeFunction<TPCell, TP
         return globalIndex;
     }
     
-    @Override
-    public void addFace(TPFace face) {
-        faces.add(face);
-    }
 
-    @Override
-    public void addCell(TPCell cell) {
-        if(!cells.containsKey(cell))
-        {
-            cells.put(cell, generateBasisFunctionOnCell(cell, nodeFunctional.getPoint()));
-        }
-    }
-
-
-    @Override
-    public boolean hasFastEvaluation() {
-        return true;
-    }
-    
-    @Override
-    public Double value(CoordinateVector pos)
-    {
-        for(TPCell  c:cells.keySet())
-        {
-            if(c.isInCell(pos))
-                return valueInCell(pos,c);
-        }
-        return 0.;
-    }
-    
-    @Override
-    public CoordinateVector gradient(CoordinateVector pos)
-    {
-        for(TPCell  c:cells.keySet())
-        {
-            if(c.isInCell(pos))
-                return gradientInCell(pos,c);
-        }
-        return new CoordinateVector(pos.getLength());
-    }
-    @Override
-    public double fastValue(CoordinateVector pos) {
-        for(TPCell  c:cells.keySet())
-        {
-            if(c.isInCell(pos))
-                return fastValueInCell(pos,c);
-        }
-        return 0.;
-    }
-
-    @Override
-    public double[] fastGradient(CoordinateVector pos) {
-        for(TPCell  c:cells.keySet())
-        {
-            if(c.isInCell(pos))
-                return fastGradientInCell(pos,c);
-        }
-        return new double[pos.getLength()];
-    }
-
-    @Override
-    public Double valueInCell(CoordinateVector pos, TPCell cell) {
-        return fastValueInCell(pos,cell);
-    }
-    
-    @Override
-    public CoordinateVector gradientInCell(CoordinateVector pos, TPCell cell) {
-        return CoordinateVector.fromValues(fastGradientInCell(pos,cell));
-    }
-    
     @Override
     public double fastValueInCell(CoordinateVector pos, TPCell cell)
     {

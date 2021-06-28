@@ -36,15 +36,17 @@ public class DGNodalNedelecShapeFunction extends VectorShapeFunction<TPCell, TPF
 	}
 	
 	
-	@Override
 	public void addFace(TPFace face)
 	{
-		componentFunction.addFace(face);
+		
+		if(true)
+			throw new IllegalArgumentException();componentFunction.addFace(face);
 	}
 	
-	@Override
 	public void addCell(TPCell cell)
 	{
+		if(true)
+			throw new IllegalArgumentException();
 		componentFunction.addCell(cell);
 	}
 	@Override

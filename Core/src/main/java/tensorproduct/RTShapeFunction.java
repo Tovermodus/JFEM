@@ -35,16 +35,18 @@ public class RTShapeFunction extends VectorShapeFunction<TPCell, TPFace,TPEdge, 
 	}
 	
 	
-	@Override
 	public void addFace(TPFace face)
 	{
-		componentFunction.addFace(face);
+		
+		if(true)
+			throw new IllegalArgumentException();componentFunction.addFace(face);
 	}
 	
-	@Override
 	public void addCell(TPCell cell)
 	{
-		componentFunction.addCell(cell);
+		
+		if(true)
+			throw new IllegalArgumentException();componentFunction.addCell(cell);
 	}
 	@Override
 	public CoordinateVector valueInCell(CoordinateVector pos, TPCell cell)

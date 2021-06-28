@@ -9,10 +9,7 @@ public interface ShapeFunctionWithReferenceShapeFunction<CT extends CellWithRefe
 	hessianT> extends ShapeFunction<CT,FT,ET,ST,valueT,gradientT,hessianT>
 {
 	
-	default ST getReferenceShapeFunctionRelativeTo(CT cell)
-	{
-		throw new UnsupportedOperationException("not implemented yet");
-	}
+	ST getReferenceShapeFunctionRelativeTo(CT cell);
 	default ST getReferenceShapeFunctionRelativeTo(FT face)
 	{
 		throw new UnsupportedOperationException("not implemented yet");

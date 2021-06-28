@@ -2,12 +2,8 @@ package basic;
 
 import linalg.CoordinateMatrix;
 import linalg.CoordinateVector;
-import linalg.Matrix;
-import linalg.Vector;
-import org.jetbrains.annotations.NotNull;
 
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
@@ -17,18 +13,6 @@ public interface ScalarShapeFunction<CT extends Cell<CT,FT,ET>, FT extends Face<
 	,FT,ET,ST,
 	Double, CoordinateVector, CoordinateMatrix>, Comparable<ST>
 {
-	default double fastValueInCell(CoordinateVector pos, CT cell)
-	{
-		throw new UnsupportedOperationException();
-	}
-	default double[] fastGradientInCell(CoordinateVector pos, CT cell)
-	{
-		throw new UnsupportedOperationException();
-	}
-	default double[][] fastHessianInCell(CoordinateVector pos, CT cell)
-	{
-		throw new UnsupportedOperationException();
-	}
 	
 	@Override
 	NodeFunctional<ScalarFunction, Double, CoordinateVector, CoordinateMatrix> getNodeFunctional();
@@ -49,7 +33,15 @@ public interface ScalarShapeFunction<CT extends Cell<CT,FT,ET>, FT extends Face<
 		for(CT cell: getCells())
 			if(cell.isInCell(pos))
 				return gradientInCell(pos, cell);
-		return new CoordinateVector(pos.getLength());
+		return new CoordinateVector(getDomainDimension());
+	}
+	@Override
+	default CoordinateMatrix hessian(CoordinateVector pos)
+	{
+		for(CT cell: getCells())
+			if(cell.isInCell(pos))
+				return hessianInCell(pos, cell);
+		return new CoordinateMatrix(getDomainDimension(), getDomainDimension());
 	}
 	@Override
 	default Double jumpInValue(FT face, CoordinateVector pos)

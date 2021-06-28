@@ -25,6 +25,11 @@ public class DenseMatrix implements MutableMatrix, Decomposable, DirectlySolvabl
 				entries[i][j] = matrix.at(i, j);
 	}
 	
+	public DenseMatrix(double [][] matrix)
+	{
+		entries = matrix;
+	}
+	
 	@Override
 	public double frobeniusInner(Matrix other)
 	{

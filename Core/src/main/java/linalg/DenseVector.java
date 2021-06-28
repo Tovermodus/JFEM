@@ -27,6 +27,11 @@ public class DenseVector implements MutableVector, MutableTensor
 		}
 	}
 	
+	public DenseVector(double[] vect)
+	{
+		entries = vect;
+	}
+	
 	public static DenseVector vectorFromValues(double... values)
 	{
 		DenseVector ret = new DenseVector(values.length);

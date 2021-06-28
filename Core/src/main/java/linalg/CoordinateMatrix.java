@@ -16,6 +16,10 @@ public class CoordinateMatrix extends DenseMatrix
 		if(matrix.getShape().get(0) > 3|| matrix.getShape().get(1) > 3)
 			throw new IllegalArgumentException("only 1D, 2D and 3D supported");
 	}
+	public CoordinateMatrix(double [][] matrix)
+	{
+		super(matrix);
+	}
 	
 	@Override
 	public CoordinateVector mvMul(Vector vector)
