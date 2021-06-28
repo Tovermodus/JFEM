@@ -9,11 +9,14 @@ import java.util.Set;
 
 public class SingleComponentVectorShapeFunction<CT extends Cell<CT,FT,ET>, FT extends Face<CT,FT,ET>,
 	ET extends Edge<CT,FT,ET>,
-	ST extends FastEvaluatedScalarShapeFunction<CT,FT,ET,ST>, VST extends SingleComponentVectorShapeFunction<CT,FT,ET,ST,VST>> extends VectorShapeFunction<CT,FT,ET,
+	ST extends FastEvaluatedScalarShapeFunction<CT,FT,ET,ST>, VST extends SingleComponentVectorShapeFunction<CT,
+	FT,ET,ST,VST>> implements VectorShapeFunction<CT,FT,ET,
 	VST>
 {
 	private final ST componentFunction;
 	private final int component;
+	private int globalIndex;
+	
 	public SingleComponentVectorShapeFunction(CT supportCell, int polynomialDegree, int localIndex,
 	                             Class<ST> componentFunctionClass)
 	{
@@ -133,5 +136,16 @@ public class SingleComponentVectorShapeFunction<CT extends Cell<CT,FT,ET>, FT ex
 	{
 		return componentFunction.gradient(pos).outer(CoordinateVector.getUnitVector(getDomainDimension(),
 			component));
+	}
+	
+	@Override
+	public int getGlobalIndex()
+	{
+		return globalIndex;
+	}
+	
+	public void setGlobalIndex(int globalIndex)
+	{
+		this.globalIndex = globalIndex;
 	}
 }

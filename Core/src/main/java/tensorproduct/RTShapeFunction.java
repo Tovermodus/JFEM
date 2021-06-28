@@ -9,7 +9,7 @@ import org.jetbrains.annotations.NotNull;
 
 import java.util.Set;
 
-public class RTShapeFunction extends VectorShapeFunction<TPCell, TPFace,TPEdge, RTShapeFunction>
+public class RTShapeFunction implements VectorShapeFunction<TPCell, TPFace,TPEdge, RTShapeFunction>
 {
 	private final RTComponentFunction componentFunction;
 	private final int component;
@@ -34,20 +34,6 @@ public class RTShapeFunction extends VectorShapeFunction<TPCell, TPFace,TPEdge, 
 		return componentFunction.getFaces();
 	}
 	
-	
-	public void addFace(TPFace face)
-	{
-		
-		if(true)
-			throw new IllegalArgumentException();componentFunction.addFace(face);
-	}
-	
-	public void addCell(TPCell cell)
-	{
-		
-		if(true)
-			throw new IllegalArgumentException();componentFunction.addCell(cell);
-	}
 	@Override
 	public CoordinateVector valueInCell(CoordinateVector pos, TPCell cell)
 	{
@@ -104,6 +90,15 @@ public class RTShapeFunction extends VectorShapeFunction<TPCell, TPFace,TPEdge, 
 	public VectorNodeFunctional getNodeFunctional()
 	{
 		return new VectorNodeFunctional(component, componentFunction.getNodeFunctional());
+	}
+	public void setGlobalIndex(int index)
+	{
+		componentFunction.setGlobalIndex(index);
+	}
+	@Override
+	public int getGlobalIndex()
+	{
+		return componentFunction.getGlobalIndex();
 	}
 	
 	@Override

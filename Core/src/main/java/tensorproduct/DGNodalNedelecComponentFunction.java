@@ -118,21 +118,6 @@ public class DGNodalNedelecComponentFunction implements FastEvaluatedScalarShape
 		throw new UnsupportedOperationException("not implemented yet");
 	}
 	
-	public void addFace(TPFace face) {
-		
-		if(true)
-			throw new IllegalArgumentException();faces.add(face);
-	}
-	
-	public void addCell(TPCell cell) {
-		if(true)
-			throw new IllegalArgumentException();
-		if(!cells.containsKey(cell))
-		{
-			cells.put(cell, generateBasisFunctionOnCell(cell, nodeFunctional.getPoint()));
-		}
-	}
-	
 	@Override
 	public double fastValue(CoordinateVector pos) {
 		for(TPCell  c:cells.keySet())

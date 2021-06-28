@@ -90,17 +90,6 @@ public class TPShapeFunction implements ScalarShapeFunctionWithReferenceShapeFun
 		return globalIndex;
 	}
 	
-	public void addCell(TPCell cell)
-	{
-		if(true)
-			throw new IllegalArgumentException();
-		if(supportCell != cell)
-		{
-			if(supportCell != null)
-				throw new UnsupportedOperationException();
-			supportCell = cell;
-		}
-	}
 	
 	
 	@Override

@@ -7,7 +7,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
-public abstract class VectorFunction implements Function<CoordinateVector, CoordinateMatrix, Tensor>
+public interface VectorFunction extends Function<CoordinateVector, CoordinateMatrix, Tensor>
 {
 	private double getComponentValue(CoordinateVector pos, int component)
 	{
@@ -17,20 +17,20 @@ public abstract class VectorFunction implements Function<CoordinateVector, Coord
 	{
 		return (CoordinateVector) gradient(pos).unfoldDimension(0).get(component);
 	}
-	public Map<CoordinateVector, CoordinateVector> valuesInPoints(List<CoordinateVector> points)
+	default Map<CoordinateVector, CoordinateVector> valuesInPoints(List<CoordinateVector> points)
 	{
 		ConcurrentHashMap<CoordinateVector, CoordinateVector> ret = new ConcurrentHashMap<>();
 		points.stream().parallel().forEach(point->ret.put(point, value(point)));
 		return ret;
 	}
-	public Map<CoordinateVector, Double> componentValuesInPoints(List<CoordinateVector> points,
+	default Map<CoordinateVector, Double> componentValuesInPoints(List<CoordinateVector> points,
 	                                                                       int component)
 	{
 		ConcurrentHashMap<CoordinateVector, Double> ret = new ConcurrentHashMap<>();
 		points.stream().parallel().forEach(point->ret.put(point, value(point).at(component)));
 		return ret;
 	}
-	public double divergence(CoordinateVector pos)
+	default double divergence(CoordinateVector pos)
 	{
 		double ret = 0;
 		CoordinateMatrix grad = gradient(pos);
@@ -38,7 +38,7 @@ public abstract class VectorFunction implements Function<CoordinateVector, Coord
 			ret += grad.at(i,i);
 		return ret;
 	}
-	public CoordinateVector curl(CoordinateVector pos)
+	default CoordinateVector curl(CoordinateVector pos)
 	{
 		Stopwatch s = Stopwatch.createStarted();
 		if(getDomainDimension() == 2)
@@ -52,7 +52,7 @@ public abstract class VectorFunction implements Function<CoordinateVector, Coord
 		ret.set(grad.at(1,0)-grad.at(0,1),2);
 		return ret;
 	}
-	public ScalarFunction getDivergenceFunction()
+	default ScalarFunction getDivergenceFunction()
 	{
 		VectorFunction me  = this;
 		return new ScalarFunction()
@@ -70,7 +70,7 @@ public abstract class VectorFunction implements Function<CoordinateVector, Coord
 			}
 		};
 	}
-	public ScalarFunction getComponentFunction(int component)
+	default ScalarFunction getComponentFunction(int component)
 	{
 		int domainDimension = getDomainDimension();
 		return new ScalarFunction()

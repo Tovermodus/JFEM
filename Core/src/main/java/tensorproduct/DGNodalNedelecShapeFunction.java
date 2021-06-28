@@ -10,7 +10,7 @@ import org.jetbrains.annotations.NotNull;
 import java.util.List;
 import java.util.Set;
 
-public class DGNodalNedelecShapeFunction extends VectorShapeFunction<TPCell, TPFace, TPEdge, DGNodalNedelecShapeFunction>
+public class DGNodalNedelecShapeFunction implements VectorShapeFunction<TPCell, TPFace, TPEdge, DGNodalNedelecShapeFunction>
 {
 	private final DGNodalNedelecComponentFunction componentFunction;
 	private final int component;
@@ -35,19 +35,14 @@ public class DGNodalNedelecShapeFunction extends VectorShapeFunction<TPCell, TPF
 		return componentFunction.getFaces();
 	}
 	
-	
-	public void addFace(TPFace face)
+	public void setGlobalIndex(int index)
 	{
-		
-		if(true)
-			throw new IllegalArgumentException();componentFunction.addFace(face);
+		componentFunction.setGlobalIndex(index);
 	}
-	
-	public void addCell(TPCell cell)
+	@Override
+	public int getGlobalIndex()
 	{
-		if(true)
-			throw new IllegalArgumentException();
-		componentFunction.addCell(cell);
+		return componentFunction.getGlobalIndex();
 	}
 	@Override
 	public CoordinateVector valueInCell(CoordinateVector pos, TPCell cell)

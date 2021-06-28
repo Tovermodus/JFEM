@@ -131,20 +131,6 @@ public class RTComponentFunction implements FastEvaluatedScalarShapeFunction<TPC
 		return globalIndex;
 	}
 	
-	public void addFace(TPFace face) {
-		
-		if(true)
-			throw new IllegalArgumentException();faces.add(face);
-	}
-	
-	public void addCell(TPCell cell) {
-		if(true)
-			throw new IllegalArgumentException();
-		if(!cells.containsKey(cell))
-		{
-			cells.put(cell, generateBasisFunctionOnCell(cell, nodeFunctional.getPoint()));
-		}
-	}
 	
 	@Override
 	public double fastValueInCell(CoordinateVector pos, TPCell cell)

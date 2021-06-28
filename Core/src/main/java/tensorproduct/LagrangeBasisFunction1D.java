@@ -1,7 +1,5 @@
 package tensorproduct;
 
-import org.jetbrains.annotations.NotNull;
-
 public class LagrangeBasisFunction1D extends Function1D
 {
 	private final Cell1D cell;

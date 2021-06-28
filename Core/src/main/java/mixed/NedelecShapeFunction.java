@@ -15,12 +15,13 @@ import java.util.Map;
 import java.util.Set;
 import java.util.TreeMap;
 import java.util.TreeSet;
-public class NedelecShapeFunction extends VectorShapeFunction<TPCell, TPFace, TPEdge, NedelecShapeFunction>
+public class NedelecShapeFunction implements VectorShapeFunction<TPCell, TPFace, TPEdge, NedelecShapeFunction>
 {
 	Set<TPCell> cells;
 	Set<TPFace> faces;
 	NedelecNodeFuncional nodeFuncional;
 	Map<TPCell, FEBaseTransformation<VectorFunction, NedelecNodeFuncional, CoordinateVector, CoordinateMatrix, Tensor>> transformationMap;
+	private int globalIndex;
 	
 	public NedelecShapeFunction(TPCell cell, NedelecNodeFuncional funcional)
 	{
@@ -72,18 +73,15 @@ public class NedelecShapeFunction extends VectorShapeFunction<TPCell, TPFace, TP
 		return nodeFuncional;
 	}
 	
-	public void addFace(TPFace face)
-	{
-		throw new IllegalArgumentException();
-		
-		//faces.add(face);
-	}
 	
-	public void addCell(TPCell cell)
+	public void setGlobalIndex(int index)
 	{
-		
-		throw new IllegalArgumentException();
-		//cells.add(cell);
+		globalIndex = index;
+	}
+	@Override
+	public int getGlobalIndex()
+	{
+		return globalIndex;
 	}
 	@Override
 	public double divergenceInCell(CoordinateVector pos,TPCell cell)
