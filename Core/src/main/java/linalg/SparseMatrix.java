@@ -86,33 +86,22 @@ public class SparseMatrix implements MutableMatrix, DirectlySolvable, Decomposab
 	
 	private synchronized void resizeSparse()
 	{
-		double [] sparseVals = new double[sparseValues.length*2];
-		int [] sparseX  = new int[sparseValues.length*2];
-		int [] sparseY =  new int[sparseValues.length*2];
-		for(int i = 0; i < sparseEntries; i++)
-		{
-			sparseVals[i] = sparseValues[i];
-			sparseX[i] = sparseXs[i];
-			sparseY[i] = sparseYs[i];
-		}
-		sparseValues = sparseVals;
-		sparseYs = sparseY;
-		sparseXs = sparseX;
-		/*
-		TreeMap<IntCoordinates, Double> sparseEntries = new TreeMap<>(getCoordinateEntryList());
+		TreeMap<IntCoordinates, Double> sparseEntriesMap = new TreeMap<>(getCoordinateEntryList());
 		double [] sparseVals = new double[sparseValues.length*2];
 		int [] sparseX  = new int[sparseValues.length*2];
 		int [] sparseY =  new int[sparseValues.length*2];
 		int i = 0;
-		for(Map.Entry<IntCoordinates, Double> entry: sparseEntries.entrySet())
+		for(Map.Entry<IntCoordinates, Double> entry: sparseEntriesMap.entrySet())
 		{
 			sparseVals[i] = entry.getValue();
 			sparseX[i] = entry.getKey().get(1);
 			sparseY[i] = entry.getKey().get(0);
+			i++;
 		}
+		sparseEntries = sparseEntriesMap.size();
 		sparseValues = sparseVals;
 		sparseYs = sparseY;
-		sparseXs = sparseX;*/
+		sparseXs = sparseX;
 	}
 	public void deleteLine(int lineCoordinate)
 	{
