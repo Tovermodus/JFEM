@@ -117,7 +117,6 @@ public class SparseMatrix implements MutableMatrix, DirectlySolvable, Decomposab
 		sparseXs[sparseEntries] = coordinates[1];
 		sparseEntries++;
 	}
-	
 	@Override
 	public synchronized void add(double value, int... coordinates)
 	{
@@ -186,7 +185,11 @@ public class SparseMatrix implements MutableMatrix, DirectlySolvable, Decomposab
 		Map<IntCoordinates,Double> list = new HashMap<>();
 		for (int i = 0; i < sparseEntries; i++)
 		{
-			list.put(new IntCoordinates(sparseYs[i],sparseXs[i]),sparseValues[i]);
+			IntCoordinates coordinates = new IntCoordinates(sparseYs[i],sparseXs[i]);
+			double value = sparseValues[i];
+			if(list.containsKey(coordinates))
+				value += list.get(coordinates);
+			list.put(coordinates,value);
 		}
 		return ImmutableMap.copyOf(list);
 	}
@@ -317,7 +320,33 @@ public class SparseMatrix implements MutableMatrix, DirectlySolvable, Decomposab
 		}
 		return mat;
 	}
-	
+	@Override
+	public boolean almostEqual(Tensor other, double tol)
+	{
+		
+		if(PerformanceArguments.getInstance().executeChecks)
+		{
+			if (!getShape().equals(other.getShape()))
+				throw new IllegalArgumentException("Tensors are of different size");
+		}
+		if(!(other instanceof SparseMatrix))
+			return other.almostEqual(this, tol);
+		ImmutableMap<IntCoordinates, Double> myValues = getCoordinateEntryList();
+		ImmutableMap<IntCoordinates, Double> otherValues = other.getCoordinateEntryList();
+		
+		double absmax = absMaxElement() + other.absMaxElement();
+		for(Map.Entry<IntCoordinates, Double> entry:myValues.entrySet())
+		{
+			if(otherValues.containsKey(entry.getKey()))
+			{
+				if(Math.abs(entry.getValue() - otherValues.get(entry.getKey()))>tol*(1+absmax))
+					return false;
+			}
+			else
+				return false;
+		}
+		return otherValues.size() == myValues.size();
+	}
 	@Override
 	public boolean equals(Object obj)
 	{

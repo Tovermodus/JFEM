@@ -15,35 +15,35 @@ import java.util.function.ToDoubleFunction;
 public class TPCellIntegralViaReferenceCell<ST extends ScalarShapeFunctionWithReferenceShapeFunction<TPCell,TPFace,TPEdge,ST>> extends TPCellIntegral<ST>
 {
 	Map<ReferenceCellIdentificationTriplet<TPCell, TPFace, TPEdge, ST>, Double> savedValues;
-	public TPCellIntegralViaReferenceCell(Function<?, ?, ?> weight, String name, boolean weightIsTensorProduct)
+	
+	public TPCellIntegralViaReferenceCell(double weight, String name, boolean weightIsTensorProduct)
 	{
-		super(weight, name, weightIsTensorProduct);
+		super(ScalarFunction.constantFunction(weight), name, weightIsTensorProduct);
 		savedValues = new ConcurrentHashMap<>();
 	}
+	
 	public TPCellIntegralViaReferenceCell(String name)
 	{
 		super(name);
 		savedValues = new ConcurrentHashMap<>();
 	}
+	
 	@Override
 	public double evaluateCellIntegral(TPCell cell, ST shapeFunction1,
 	                                   ST shapeFunction2)
 	{
-		if(name.equals(GRAD_GRAD))
+		ST referenceShapeFunction1 = shapeFunction1.getReferenceShapeFunctionRelativeTo(cell);
+		ST referenceShapeFunction2 = shapeFunction2.getReferenceShapeFunctionRelativeTo(cell);
+		ReferenceCellIdentificationTriplet<TPCell, TPFace, TPEdge, ST> key =
+			new ReferenceCellIdentificationTriplet<>(referenceShapeFunction1,
+				referenceShapeFunction2,
+				cell.getReferenceCell());
+		if (savedValues.containsKey(key))
+			return savedValues.get(key);
+		else
 		{
-			ReferenceCellIdentificationTriplet<TPCell,TPFace,TPEdge, ST> key =
-				new ReferenceCellIdentificationTriplet<>(shapeFunction1.getReferenceShapeFunctionRelativeTo(cell),
-					shapeFunction2.getReferenceShapeFunctionRelativeTo(cell),
-					cell.getReferenceCell());
-			if(savedValues.containsKey(key))
-				return savedValues.get(key);
-			else{
-				double conversionFactor = cell.getGradGradConversionFactor();
-				TPCellIntegral<ST> refIntegral = new TPCellIntegral<ST>(weight, name, weightIsTensorProduct);
-				savedValues.put(key, refIntegral.evaluateCellIntegral(cell, shapeFunction1,
-					shapeFunction2)*conversionFactor);
-			}
+			savedValues.put(key, super.evaluateCellIntegral(cell, shapeFunction1, shapeFunction2));
+			return savedValues.get(key);
 		}
-		return super.evaluateCellIntegral(cell,shapeFunction1,shapeFunction2);
 	}
 }

@@ -14,12 +14,7 @@ public class PerformanceArguments
 		this.executeChecks = Objects.requireNonNullElse(executeChecks, false);
 	}
 	public static void createInstance(Boolean parallelizeThreads, Integer threadNumber, Boolean executeChecks) {
-		if(INSTANCE == null) {
-			INSTANCE = new PerformanceArguments(parallelizeThreads, threadNumber, executeChecks);
-		}
-		else {
-			throw new IllegalStateException("Instance already exists");
-		}
+		INSTANCE = new PerformanceArguments(parallelizeThreads, threadNumber, executeChecks);
 	}
 	public static PerformanceArguments getInstance() {
 		if(INSTANCE == null)

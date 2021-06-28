@@ -5,6 +5,7 @@ import basic.CellWithReferenceCell;
 import basic.ShapeFunction;
 import basic.VectorFunction;
 import linalg.CoordinateComparator;
+import linalg.CoordinateMatrix;
 import linalg.CoordinateVector;
 import org.jetbrains.annotations.NotNull;
 
@@ -172,12 +173,22 @@ public class TPCell implements CellWithReferenceCell<TPCell, TPFace, TPEdge>
 		return new TPCell(cells);
 	}
 	
+	
 	@Override
-	public double getGradGradConversionFactor()
+	public CoordinateMatrix getReferenceTransformationJacobian()
 	{
-		double ret = 1;
-		for(Cell1D c: cell1Ds)
-			ret*=c.getEnd() - c.getStart();
+		CoordinateMatrix ret = new CoordinateMatrix(getDimension(), getDimension());
+		for(int i = 0; i < getDimension(); i++)
+		{
+			/*double val = 1;
+			for (int j = 0; j < getDimension(); j++)
+			{
+				if (j != i)
+					val*=cell1Ds.get(j).getEnd() - cell1Ds.get(j).getStart();
+			}
+			ret.set(val, i, i);*/
+			ret.set(cell1Ds.get(i).getEnd() - cell1Ds.get(i).getStart(), i, i);
+		}
 		return ret;
 	}
 	

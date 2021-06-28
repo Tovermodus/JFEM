@@ -12,45 +12,45 @@ public class SparseMatrixTest1
 	@Test
 	public void testLarge()
 	{
-		SparseMatrix largeDense = new SparseMatrix(100,100);
+		SparseMatrix largeSparse = new SparseMatrix(100,100);
 		DenseMatrix largeDense2 = new DenseMatrix(100,100);
 		for(int i = 0; i < 100; i++)
 		{
 			int x = (int) (Math.random() * 100);
 			int y = (int) (Math.random() * 100);
 			double v =  (Math.random() * 4000);
-			largeDense.set(v,y,x);
+			largeSparse.set(v,y,x);
 			largeDense2.set(v,y,x);
 		}
-		assertTrue(largeDense.almostEqual(largeDense2));
+		assertTrue(largeSparse.almostEqual(largeDense2));
 		for(int i = 0; i < 1000; i++)
 		{
 			int x = (int) (Math.random() * 100);
 			int y = (int) (Math.random() * 100);
 			double v = (int) (Math.random() * 4000);
-			largeDense.add(v,y,x);
+			largeSparse.add(v,y,x);
 			largeDense2.add(v,y,x);
-			largeDense.add(v,y,x);
+			largeSparse.add(v,y,x);
 			largeDense2.add(v,y,x);
 		}
-		assertTrue(largeDense.almostEqual(largeDense2));
-		assertEquals(largeDense, largeDense2);
-		SparseMatrix largeDense3 = (SparseMatrix)largeDense.add(largeDense);
-		assertEquals(largeDense, largeDense2);
-		SparseMatrix largeDense4 = largeDense.mul(0.1);
+		assertTrue(largeSparse.almostEqual(largeDense2));
+		assertEquals(largeSparse, largeDense2);
+		SparseMatrix largeDense3 = (SparseMatrix)largeSparse.add(largeSparse);
+		assertEquals(largeSparse, largeDense2);
+		SparseMatrix largeDense4 = largeSparse.mul(0.1);
 		SparseMatrix largeDenseRec =
-			(SparseMatrix)largeDense.getLowerTriangleMatrix().add(largeDense.getDiagonalMatrix()).add(largeDense.getUpperTriangleMatrix());
+			(SparseMatrix)largeSparse.getLowerTriangleMatrix().add(largeSparse.getDiagonalMatrix()).add(largeSparse.getUpperTriangleMatrix());
 		assertTrue(largeDense4.isSparse());
-		assertEquals(largeDense, largeDense2);
+		assertEquals(largeSparse, largeDense2);
 		
-		assertTrue(largeDense.almostEqual(largeDense2));
+		assertTrue(largeSparse.almostEqual(largeDense2));
 		for(int i = 0; i < 100; i ++)
 		{
 			for(int j = 0; j < 100; j++)
 			{
-				assertTrue(Math.abs(largeDense4.at(i, j)- 0.1*largeDense.at(i, j)) < 1e-10);
-				assertEquals(largeDenseRec.at(i, j), largeDense.at(i, j));
-				assertEquals(largeDense3.at(i, j), 2*largeDense2.at(i, j));
+				assertTrue(Math.abs(largeDense4.at(i, j)- 0.1*largeSparse.at(i, j)) < 1e-10);
+				assertTrue(Math.abs(largeDense3.at(i, j)- 2*largeDense2.at(i, j)) < 1e-10);
+				assertEquals(largeDenseRec.at(i, j), largeSparse.at(i, j));
 			}
 		}
 		DenseVector largeVector = new DenseVector(100);
@@ -61,22 +61,22 @@ public class SparseMatrixTest1
 			largeVector.set(x,i);
 			DenseVector.set(x,i);
 		}
-		Vector mul1 = largeDense.mvMul(largeVector);
+		Vector mul1 = largeSparse.mvMul(largeVector);
 		Vector mul2 = largeDense3.mvMul(largeVector);
-		Vector smul1 = largeDense.mvMul(DenseVector);
+		Vector smul1 = largeSparse.mvMul(DenseVector);
 		Vector smul2 = largeDense3.mvMul(DenseVector);
-		assertEquals(largeDense, largeDense3.mul(0.5));
+		assertEquals(largeSparse, largeDense3.mul(0.5));
 		assertEquals(mul1.mul(2),mul2);
 		assertTrue(mul1.almostEqual(mul2.mul(0.5),1e-14));
 		for(int i = 0; i < 100; i++)
 		{
 			largeVector.add(Math.random(),i);
 		}
-		assertEquals(largeDense.transpose().transpose(), largeDense);
-		assertTrue(largeDense.tvMul(largeVector).almostEqual(largeDense2.transpose().mvMul(largeVector),
+		assertEquals(largeSparse.transpose().transpose(), largeSparse);
+		assertTrue(largeSparse.tvMul(largeVector).almostEqual(largeDense2.transpose().mvMul(largeVector),
 			1e-12));
-		Matrix m1 = largeDense.mmMul(largeDense2);
-		Matrix m2 = largeDense2.mmMul(largeDense);
+		Matrix m1 = largeSparse.mmMul(largeDense2);
+		Matrix m2 = largeDense2.mmMul(largeSparse);
 		assertTrue(m1.almostEqual(m2,1e-12));
 	}
 	@Test

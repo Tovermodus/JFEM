@@ -80,26 +80,5 @@ public interface Vector extends Tensor
 		return ret;
 	}
 	
-	@Override
-	default boolean almostEqual(Tensor other, double... tol)
-	{
-		if (PerformanceArguments.getInstance().executeChecks)
-		{
-			if (!getShape().equals(other.getShape()))
-				throw new IllegalArgumentException("Vectors are of different size");
-			if (tol.length > 1)
-				throw new IllegalArgumentException("Only one Tolerance accepted");
-		}
-		double[] finalTol;
-		if (tol.length == 0)
-			finalTol = new double[]{0};
-		else
-			finalTol = tol;
-		double absmax = absMaxElement() + other.absMaxElement();
-		if (!(other instanceof Vector))
-			return false;
-		return getShape().range().stream().allMatch(c -> Math.abs(at(c) - other.at(c)) < finalTol[0] * absmax);
-		
-	}
 	
 }

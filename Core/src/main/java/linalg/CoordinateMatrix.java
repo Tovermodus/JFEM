@@ -46,7 +46,9 @@ public class CoordinateMatrix extends DenseMatrix
 				ret.add(-other.at(i,j),i,j);
 		return ret;
 	}
-	
+	public CoordinateMatrix inverse(){
+		return new CoordinateMatrix(super.inverse());
+	}
 	@Override
 	public CoordinateMatrix mul(double scalar)
 	{
@@ -56,5 +58,21 @@ public class CoordinateMatrix extends DenseMatrix
 			for(int j = 0; j < ret.getCols(); j++)
 				ret.set(scalar*at(i,j),i,j);
 		return ret;
+	}
+	
+	public double determinant()
+	{
+		if(this.getCols() == 1)
+			return at(0,0);
+		if(this.getCols() == 2)
+			return at(0,0)*at(1,1) - at(1,0)*at(0,1);
+		if(this.getCols() == 3)
+			return at(0,0)*at(1,1)*at(2,2)
+				+ at(0,1)*at(1,2)*at(2,0)
+			+at(0,2)*at(1,0)*at(2,1)
+			-at(0,0)*at(1,2)*at(2,1)
+			-at(1,0)*at(2,2)*at(0,1)
+			-at(2,0)*at(0,2)*at(1,1);
+		throw new IllegalStateException("Dimension not allowed");
 	}
 }

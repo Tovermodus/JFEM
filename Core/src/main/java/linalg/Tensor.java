@@ -59,24 +59,23 @@ public interface Tensor
 	
 	String printFormatted(double... tol);
 	
-	default boolean almostEqual(Tensor other, double... tol)
+	default boolean almostEqual(Tensor other)
+	{
+		return almostEqual(other, 1e-15);
+	}
+	default boolean almostEqual(Tensor other, double tol)
 	{
 		if(PerformanceArguments.getInstance().executeChecks)
 		{
 			if (!getShape().equals(other.getShape()))
 				throw new IllegalArgumentException("Tensors are of different size");
-			if (tol.length > 1)
-				throw new IllegalArgumentException("Only one Tolerance accepted");
 		}
-		double[] finalTol;
-		if(tol.length == 0)
-			finalTol = new double[]{0};
-		else
-			finalTol=tol;
 		double absmax = absMaxElement() + other.absMaxElement();
-		List<? extends Tensor> unfolded = unfoldDimension(0);
-		List<? extends Tensor> otherUnfolded = other.unfoldDimension(0);
-		return IntStream.range(0,unfolded.size()).parallel().allMatch(i -> ((Tensor) unfolded.get(i)).almostEqual((Tensor) otherUnfolded.get(i),
-			finalTol[0]+absmax*1e-14));
+		for(IntCoordinates c: getShape().range())
+		{
+			if(Math.abs(at(c) - other.at(c)) > tol*(1+absmax))
+				return false;
+		}
+		return true;
 	}
 }
