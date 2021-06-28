@@ -3,6 +3,7 @@ package linalg;
 import basic.PerformanceArguments;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.primitives.Ints;
+import kotlin.Pair;
 
 import java.util.*;
 
@@ -97,6 +98,21 @@ public class SparseMatrix implements MutableMatrix, DirectlySolvable, Decomposab
 		sparseValues = sparseVals;
 		sparseYs = sparseY;
 		sparseXs = sparseX;
+		/*
+		TreeMap<IntCoordinates, Double> sparseEntries = new TreeMap<>(getCoordinateEntryList());
+		double [] sparseVals = new double[sparseValues.length*2];
+		int [] sparseX  = new int[sparseValues.length*2];
+		int [] sparseY =  new int[sparseValues.length*2];
+		int i = 0;
+		for(Map.Entry<IntCoordinates, Double> entry: sparseEntries.entrySet())
+		{
+			sparseVals[i] = entry.getValue();
+			sparseX[i] = entry.getKey().get(1);
+			sparseY[i] = entry.getKey().get(0);
+		}
+		sparseValues = sparseVals;
+		sparseYs = sparseY;
+		sparseXs = sparseX;*/
 	}
 	public void deleteLine(int lineCoordinate)
 	{
@@ -188,7 +204,9 @@ public class SparseMatrix implements MutableMatrix, DirectlySolvable, Decomposab
 			IntCoordinates coordinates = new IntCoordinates(sparseYs[i],sparseXs[i]);
 			double value = sparseValues[i];
 			if(list.containsKey(coordinates))
+			{
 				value += list.get(coordinates);
+			}
 			list.put(coordinates,value);
 		}
 		return ImmutableMap.copyOf(list);

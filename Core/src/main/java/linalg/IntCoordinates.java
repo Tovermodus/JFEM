@@ -157,7 +157,7 @@ public class IntCoordinates implements Comparable<IntCoordinates>, Cloneable
 		@Override
 		public boolean hasNext()
 		{
-			return distanceFromUpper() > 3;
+			return distanceFromUpper() > pointer.getDimension();
 		}
 		@Override
 		public IntCoordinates next()

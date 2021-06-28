@@ -12,21 +12,33 @@ public class SparseMatrixTest1
 	@Test
 	public void testLarge()
 	{
-		SparseMatrix largeSparse = new SparseMatrix(100,100);
-		DenseMatrix largeDense2 = new DenseMatrix(100,100);
-		for(int i = 0; i < 100; i++)
+		int n =100;
+		SparseMatrix largeSparse = new SparseMatrix(n,n);
+		DenseMatrix largeDense2 = new DenseMatrix(n,n);
+		for(int i = 0; i < n*4; i++)
 		{
-			int x = (int) (Math.random() * 100);
-			int y = (int) (Math.random() * 100);
+			int x = (int) (Math.random() * n);
+			int y = (int) (Math.random() * n);
 			double v =  (Math.random() * 4000);
 			largeSparse.set(v,y,x);
 			largeDense2.set(v,y,x);
 		}
+		largeSparse.set(123,0,0);
+		largeDense2.set(123,0,0);
+		largeSparse.set(1224,0,0);
+		largeDense2.set(1224,0,0);
+		int nonzeros = 0;
+		for(IntCoordinates c:largeDense2.getShape().range())
+			if(largeDense2.at(c) != 0)
+			{
+				nonzeros++;
+			}
+		assertEquals(largeSparse.getCoordinateEntryList().size(), nonzeros);
 		assertTrue(largeSparse.almostEqual(largeDense2));
 		for(int i = 0; i < 1000; i++)
 		{
-			int x = (int) (Math.random() * 100);
-			int y = (int) (Math.random() * 100);
+			int x = (int) (Math.random() * n);
+			int y = (int) (Math.random() * n);
 			double v = (int) (Math.random() * 4000);
 			largeSparse.add(v,y,x);
 			largeDense2.add(v,y,x);
@@ -44,18 +56,18 @@ public class SparseMatrixTest1
 		assertEquals(largeSparse, largeDense2);
 		
 		assertTrue(largeSparse.almostEqual(largeDense2));
-		for(int i = 0; i < 100; i ++)
+		for(int i = 0; i < n; i ++)
 		{
-			for(int j = 0; j < 100; j++)
+			for(int j = 0; j < n; j++)
 			{
 				assertTrue(Math.abs(largeDense4.at(i, j)- 0.1*largeSparse.at(i, j)) < 1e-10);
 				assertTrue(Math.abs(largeDense3.at(i, j)- 2*largeDense2.at(i, j)) < 1e-10);
 				assertEquals(largeDenseRec.at(i, j), largeSparse.at(i, j));
 			}
 		}
-		DenseVector largeVector = new DenseVector(100);
-		DenseVector DenseVector = new DenseVector(100);
-		for(int i = 0; i < 100; i++)
+		DenseVector largeVector = new DenseVector(n);
+		DenseVector DenseVector = new DenseVector(n);
+		for(int i = 0; i < n; i++)
 		{
 			double x = Math.random();
 			largeVector.set(x,i);
@@ -68,7 +80,7 @@ public class SparseMatrixTest1
 		assertEquals(largeSparse, largeDense3.mul(0.5));
 		assertEquals(mul1.mul(2),mul2);
 		assertTrue(mul1.almostEqual(mul2.mul(0.5),1e-14));
-		for(int i = 0; i < 100; i++)
+		for(int i = 0; i < n; i++)
 		{
 			largeVector.add(Math.random(),i);
 		}

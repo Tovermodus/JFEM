@@ -152,25 +152,56 @@ public class TestReferenceIntegral
 		cell1DList.add(new Cell1D(0, 1));
 		TPCell c = new TPCell(cell1DList);
 		for(int k = 0; k < 5; k++)
-		for (int i = 0; i < (k + 1) * (k + 1); i++)
-			for (int j = 0; j < (k + 1) * (k + 1); j++)
-			{
-				System.out.println("--------------" + i + " " + j + " k " + k);
-				TPShapeFunction f1 = new TPShapeFunction(c, k, i);
-				TPShapeFunction f2 = new TPShapeFunction(c, k, j);
-				System.out.println(f1);
-				System.out.println(f2);
-				TPCellIntegral<TPShapeFunction> gg = new TPCellIntegral<>(ScalarFunction.constantFunction(1),
-					TPCellIntegral.GRAD_GRAD,
-					false);
-				TPCellIntegral<TPShapeFunction> gg2 = new TPCellIntegralViaReferenceCell<>(1,
-					TPCellIntegral.GRAD_GRAD, false);
-				System.out.println("normal int " + gg.evaluateCellIntegral(c, f1, f2));
-				System.out.println("reference int " + gg2.evaluateCellIntegral(c, f1, f2));
-				assertTrue(Math.abs(gg.evaluateCellIntegral(c, f1, f2) - gg2.evaluateCellIntegral(c,
-					f1, f2)) < 1e-12, "Difference of "+Math.abs(gg.evaluateCellIntegral(c, f1,
-					f2) - gg2.evaluateCellIntegral(c,
-					f1, f2))+ " for polynomial degree " + k + " and functions " + i+" and " + j);
-			}
+			for (int i = 0; i < (k + 1) * (k + 1); i++)
+				for (int j = 0; j < (k + 1) * (k + 1); j++)
+				{
+					System.out.println("--------------" + i + " " + j + " k " + k);
+					TPShapeFunction f1 = new TPShapeFunction(c, k, i);
+					TPShapeFunction f2 = new TPShapeFunction(c, k, j);
+					System.out.println(f1);
+					System.out.println(f2);
+					TPCellIntegral<TPShapeFunction> gg = new TPCellIntegral<>(ScalarFunction.constantFunction(1),
+						TPCellIntegral.GRAD_GRAD,
+						false);
+					TPCellIntegral<TPShapeFunction> gg2 = new TPCellIntegralViaReferenceCell<>(1,
+						TPCellIntegral.GRAD_GRAD, false);
+					System.out.println("normal int " + gg.evaluateCellIntegral(c, f1, f2));
+					System.out.println("reference int " + gg2.evaluateCellIntegral(c, f1, f2));
+					assertTrue(Math.abs(gg.evaluateCellIntegral(c, f1, f2) - gg2.evaluateCellIntegral(c,
+						f1, f2)) < 1e-12, "Difference of "+Math.abs(gg.evaluateCellIntegral(c, f1,
+						f2) - gg2.evaluateCellIntegral(c,
+						f1, f2))+ " for polynomial degree " + k + " and functions " + i+" and " + j);
+				}
+	}
+	@Test
+	public void test3DValueValue()
+	{
+		PerformanceArguments.createInstance(false, 12, true);
+		ArrayList<Cell1D> cell1DList = new ArrayList<>();
+		cell1DList.add(new Cell1D(0, 2));
+		cell1DList.add(new Cell1D(0, 1));
+		cell1DList.add(new Cell1D(0, 1));
+		TPCell c = new TPCell(cell1DList);
+		for(int k = 0; k < 5; k++)
+			for (int i = 0; i < (k + 1) * (k + 1); i++)
+				for (int j = 0; j < (k + 1) * (k + 1); j++)
+				{
+					System.out.println("--------------" + i + " " + j + " k " + k);
+					TPShapeFunction f1 = new TPShapeFunction(c, k, i);
+					TPShapeFunction f2 = new TPShapeFunction(c, k, j);
+					System.out.println(f1);
+					System.out.println(f2);
+					TPCellIntegral<TPShapeFunction> gg = new TPCellIntegral<>(ScalarFunction.constantFunction(1),
+						TPCellIntegral.VALUE_VALUE,
+						false);
+					TPCellIntegral<TPShapeFunction> gg2 = new TPCellIntegralViaReferenceCell<>(1,
+						TPCellIntegral.VALUE_VALUE, false);
+					System.out.println("normal int " + gg.evaluateCellIntegral(c, f1, f2));
+					System.out.println("reference int " + gg2.evaluateCellIntegral(c, f1, f2));
+					assertTrue(Math.abs(gg.evaluateCellIntegral(c, f1, f2) - gg2.evaluateCellIntegral(c,
+						f1, f2)) < 1e-12, "Difference of "+Math.abs(gg.evaluateCellIntegral(c, f1,
+						f2) - gg2.evaluateCellIntegral(c,
+						f1, f2))+ " for polynomial degree " + k + " and functions " + i+" and " + j);
+				}
 	}
 }
