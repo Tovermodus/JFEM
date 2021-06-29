@@ -29,7 +29,7 @@ public class DenseVector implements MutableVector, MutableTensor
 	
 	public DenseVector(double[] vect)
 	{
-		entries = vect;
+		entries = vect.clone();
 	}
 	
 	public static DenseVector vectorFromValues(double... values)

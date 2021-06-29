@@ -33,6 +33,7 @@ public interface Vector extends Tensor
 				throw new IllegalArgumentException("Vectors are of different size");
 		return add(other.mul(-1.));
 	}
+	
 	@Override
 	Vector mul(double scalar);
 	

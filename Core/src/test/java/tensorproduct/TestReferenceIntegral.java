@@ -15,7 +15,9 @@ public class TestReferenceIntegral
 	@Test
 	public void test2DGradGradMatrix()
 	{
-		PerformanceArguments.createInstance(false, 12, true);
+		PerformanceArguments.PerformanceArgumentBuilder builder =
+			new PerformanceArguments.PerformanceArgumentBuilder();
+		builder.parallelizeThreads = false;
 		long startTime = System.nanoTime();
 		Matrix referenceMatrix;
 		CoordinateVector start = CoordinateVector.fromValues(-1, -10);
@@ -119,7 +121,9 @@ public class TestReferenceIntegral
 	@Test
 	public void test2DGradGrad()
 	{
-		PerformanceArguments.createInstance(false, 12, true);
+		PerformanceArguments.PerformanceArgumentBuilder builder =
+			new PerformanceArguments.PerformanceArgumentBuilder();
+		builder.parallelizeThreads = false;
 		ArrayList<Cell1D> cell1DList = new ArrayList<>();
 		cell1DList.add(new Cell1D(3, 5)); //2/3, 5/6, 10/9, 17/12, 26/15, 37/18
 		cell1DList.add(new Cell1D(0, 4));// 2/3, 13/18 5/6 29/30 10/9 53/42
@@ -145,7 +149,9 @@ public class TestReferenceIntegral
 	@Test
 	public void test3DGradGrad()
 	{
-		PerformanceArguments.createInstance(false, 12, true);
+		PerformanceArguments.PerformanceArgumentBuilder builder =
+			new PerformanceArguments.PerformanceArgumentBuilder();
+		builder.parallelizeThreads = false;
 		ArrayList<Cell1D> cell1DList = new ArrayList<>();
 		cell1DList.add(new Cell1D(0, 2));
 		cell1DList.add(new Cell1D(0, 1));
@@ -176,7 +182,9 @@ public class TestReferenceIntegral
 	@Test
 	public void test3DValueValue()
 	{
-		PerformanceArguments.createInstance(false, 12, true);
+		PerformanceArguments.PerformanceArgumentBuilder builder =
+			new PerformanceArguments.PerformanceArgumentBuilder();
+		builder.parallelizeThreads = false;
 		ArrayList<Cell1D> cell1DList = new ArrayList<>();
 		cell1DList.add(new Cell1D(0, 2));
 		cell1DList.add(new Cell1D(0, 1));
