@@ -177,7 +177,7 @@ public class DenseVector implements MutableVector, MutableTensor
 		DenseVector ret = new DenseVector(entries.length);
 		for (int i = 0; i < getLength(); i++)
 		{
-			ret.set(at(i) * scalar, i);
+			ret.entries[i] = entries[i]*scalar;
 		}
 		return ret;
 	}
