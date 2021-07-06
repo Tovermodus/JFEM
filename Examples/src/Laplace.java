@@ -27,8 +27,8 @@ public class Laplace
                         TPCellIntegral.GRAD_GRAD,
                         false);
                 double penalty = 200000;
-                TPFaceIntegral<TPShapeFunction> jj = new TPFaceIntegral<>(ScalarFunction.constantFunction(penalty),
-                        TPFaceIntegral.VALUE_JUMP_VALUE_JUMP, false);
+                TPFaceIntegral<TPShapeFunction> jj = new TPFaceIntegralViaReferenceFace<>(penalty,
+                        TPFaceIntegral.VALUE_JUMP_VALUE_JUMP, true);
                 ArrayList<CellIntegral<TPCell,TPShapeFunction>> cellIntegrals =
                         new ArrayList<>();
                 cellIntegrals.add(gg);

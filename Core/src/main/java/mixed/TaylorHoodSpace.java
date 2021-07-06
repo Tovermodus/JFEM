@@ -60,7 +60,7 @@ public class TaylorHoodSpace implements MixedFESpace<TPCell, TPFace, TPEdge,Cont
 			{
 				coordinatesForDirection.add(startCoordinates.at(i) + le * j);
 				cellsForDirection.add(new Cell1D(startCoordinates.at(i) + le * j,
-					startCoordinates.at(i) + le * (j + 1), quad, cellsForDirection.size()));
+					startCoordinates.at(i) + le * (j + 1), quad));
 			}
 			coordinatesForDirection.add(endCoordinates.at(i));
 			cells1D.add(cellsForDirection);

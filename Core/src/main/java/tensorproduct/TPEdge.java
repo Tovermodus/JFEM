@@ -24,8 +24,8 @@ public class TPEdge implements EdgeWithReferenceEdge<TPCell, TPFace, TPEdge>
 		if(otherCoordinates.length != 2)
 			throw new IllegalArgumentException("onlly in 3D");
 		this.tangentialDimension = tangentialDimension;
-		this.cell = cell;
-		this.otherCoordinates = otherCoordinates;
+		this.cell = new Cell1D(cell);
+		this.otherCoordinates = otherCoordinates.clone();
 		this.cells = new TreeSet<>();
 		this.faces = new TreeSet<>();
 		this.tangent = new VectorFunction()

@@ -29,7 +29,9 @@ public class TPFace implements FaceWithReferenceFace<TPCell, TPFace, TPEdge>,Com
 		this.otherCoordinate = otherCoordinate;
 		this.flatDimension = flatDimension;
 		this.isBoundaryFace = isBoundaryFace;
-		this.cell1Ds = cell1Ds;
+		this.cell1Ds = new ArrayList<>();
+		for(Cell1D c: cell1Ds)
+			this.cell1Ds.add(new Cell1D(c));
 		this.edges = new TreeSet<>();
 		this.cells = new TreeSet<>();
 		this.normal = new VectorFunction()
@@ -37,7 +39,7 @@ public class TPFace implements FaceWithReferenceFace<TPCell, TPFace, TPEdge>,Com
 			@Override
 			public int getDomainDimension()
 			{
-				return getDimension()+1;
+				return getDimension();
 			}
 			
 			@Override
@@ -53,7 +55,7 @@ public class TPFace implements FaceWithReferenceFace<TPCell, TPFace, TPEdge>,Com
 	@Override
 	public int getDimension()
 	{
-		return cell1Ds.size();
+		return cell1Ds.size()+1;
 	}
 	
 	@Override
@@ -91,6 +93,10 @@ public class TPFace implements FaceWithReferenceFace<TPCell, TPFace, TPEdge>,Com
 	public VectorFunction getNormal()
 	{
 		return normal;
+	}
+	public boolean isNormalDownstream(CoordinateVector pos)
+	{
+		return getNormal().value(center()).inner(pos.sub(center()))>0;
 	}
 	public TPCell getUpStreamCell(CoordinateVector direction)
 	{
@@ -135,9 +141,9 @@ public class TPFace implements FaceWithReferenceFace<TPCell, TPFace, TPEdge>,Com
 	@Override
 	public CoordinateVector center()
 	{
-		CoordinateVector ret = new CoordinateVector(getDimension()+1);
+		CoordinateVector ret = new CoordinateVector(getDimension());
 		int subd = 0;
-		for(int d = 0; d < getDimension()+1; d++)
+		for(int d = 0; d < getDimension(); d++)
 		{
 			if(d == flatDimension)
 				ret.set(otherCoordinate, d);
@@ -151,7 +157,7 @@ public class TPFace implements FaceWithReferenceFace<TPCell, TPFace, TPEdge>,Com
 	public boolean isOnFace(CoordinateVector pos)
 	{
 		int subd = 0;
-		for(int d = 0; d < getDimension()+1; d++)
+		for(int d = 0; d < getDimension(); d++)
 		{
 			if(d == flatDimension)
 			{
@@ -189,7 +195,7 @@ public class TPFace implements FaceWithReferenceFace<TPCell, TPFace, TPEdge>,Com
 	{
 		String ret = "";
 		int subd = 0;
-		for(int d = 0; d < getDimension()+1; d++)
+		for(int d = 0; d < getDimension(); d++)
 		{
 			if(d == flatDimension)
 				ret = ret.concat(otherCoordinate+"");
@@ -251,10 +257,33 @@ public class TPFace implements FaceWithReferenceFace<TPCell, TPFace, TPEdge>,Com
 	@Override
 	public TPFace getReferenceFace()
 	{
-		List<Cell1D> cells = new ArrayList<>(getDimension()-1);
-		for(int i = 0; i < getDimension(); i++)
-			cells.add(new Cell1D(0,1));
-		return new TPFace(cells, flatDimension, 0, isBoundaryFace);
+		List<Cell1D> cells1 = new ArrayList<>(getDimension()-1);
+		for(int i = 0; i < getDimension()-1; i++)
+		{
+			cells1.add(new Cell1D(0, 1));
+		}
+		TPFace refFace =
+			new TPFace(cells1, flatDimension, 0, isBoundaryFace);
+		cells1 = new ArrayList<>(getDimension()-1);
+		List<Cell1D> cells2 = new ArrayList<>(getDimension()-1);
+		for (int i = 0; i < getDimension(); i++)
+		{
+			if(i != flatDimension)
+			{
+				cells1.add(new Cell1D(0, 1));
+				cells2.add(new Cell1D(0, 1));
+			}
+			else
+			{
+				cells1.add(new Cell1D(0, 1));
+				cells2.add(new Cell1D(-1, 0));
+			}
+		}
+		TPCell downstreamCell = new TPCell(cells1);
+		refFace.addCell(downstreamCell);
+		TPCell upstreamCell = new TPCell(cells2);
+		refFace.addCell(upstreamCell);
+		return refFace;
 	}
 //	@Override
 //	public List<Face<TPCell, TPShapeFunction>> refine(Multimap<TPCell, TPCell> cellMap)

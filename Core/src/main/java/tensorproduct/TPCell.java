@@ -23,7 +23,9 @@ public class TPCell implements CellWithReferenceCell<TPCell, TPFace, TPEdge>
 	
 	public TPCell(List<Cell1D> cell1Ds)
 	{
-		this.cell1Ds = cell1Ds;
+		this.cell1Ds = new ArrayList<>();
+		for(Cell1D c: cell1Ds)
+			this.cell1Ds.add(new Cell1D(c));
 		this.faces = new TreeSet<>();
 		this.edges = new TreeSet<>();
 		this.refined = false;

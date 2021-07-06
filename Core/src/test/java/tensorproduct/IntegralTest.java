@@ -24,8 +24,8 @@ public class IntegralTest
 		double[] testValuesvg = new double[]{-0.02, -0.15, 0.154, 0.016, 0.074, -0.263, 0.125, 0.063, -0.179, -0.163, 0.304, 0.038, -0.054, -0.323, 0.246, 0.131};
 		double[] testValuesgv = new double[]{-0.02, 0.074, -0.179, -0.054, -0.15, -0.263, -0.163, -0.323, 0.154, 0.125, 0.304, 0.246, 0.016, 0.063, 0.038, 0.131};
 		
-		Cell1D c2 = new Cell1D(0,1,QuadratureRule1D.Gauss3,0);
-		Cell1D c1 = new Cell1D(2.3,3.1,QuadratureRule1D.Gauss3,0);
+		Cell1D c2 = new Cell1D(0,1,QuadratureRule1D.Gauss3);
+		Cell1D c1 = new Cell1D(2.3,3.1,QuadratureRule1D.Gauss3);
 		TPCell cell = new TPCell(List.of(c1,c2));
 		List<TPShapeFunction> shapeFunctions = new ArrayList<>();
 		for (int i = 0; i < Math.pow(polynomialDegree+1,2); i++)
@@ -98,8 +98,8 @@ public class IntegralTest
 		double[] testValuesvg = new double[]{-0.02, -0.15, 0.154, 0.016, 0.074, -0.263, 0.125, 0.063, -0.179, -0.163, 0.304, 0.038, -0.054, -0.323, 0.246, 0.131};
 		double[] testValuesgv = new double[]{-0.02, 0.074, -0.179, -0.054, -0.15, -0.263, -0.163, -0.323, 0.154, 0.125, 0.304, 0.246, 0.016, 0.063, 0.038, 0.131};
 		
-		Cell1D c2 = new Cell1D(0,1,QuadratureRule1D.Gauss5,0);
-		Cell1D c1 = new Cell1D(2.3,3.1,QuadratureRule1D.Gauss5,0);
+		Cell1D c2 = new Cell1D(0,1,QuadratureRule1D.Gauss5);
+		Cell1D c1 = new Cell1D(2.3,3.1,QuadratureRule1D.Gauss5);
 		TPCell cell = new TPCell(List.of(c1,c2));
 		List<TPShapeFunction> shapeFunctions = new ArrayList<>();
 		for (int i = 0; i < Math.pow(polynomialDegree+1,2); i++)
@@ -172,8 +172,8 @@ public class IntegralTest
 		double[] testValuesvg = new double[]{0.009, -0.047, 0.018, 0.047, -0.004, -0.002, -0.023, 0.0, 0.001, 0.038, -0.048, -0.086, 0.04, 0.167, -0.016, -0.019, -0.083, 0.006, -0.012, 0.071, -0.086, -0.018, 0.063, 0.009, 0.008, -0.03, -0.005, -0.037, -0.044, 0.021, 0.026, -0.178, 0.069, 0.129, 0.041, -0.027, 0.0, -0.216, -0.071, 0.141, -0.193, -0.332, 0.076, 0.551, 0.043, 0.005, 0.008, -0.097, -0.045, 0.272, -0.336, -0.041, 0.114, 0.119, 0.019, 0.021, -0.01, -0.126, -0.081, 0.044, 0.132, 0.02, -0.019, 0.001, 0.108, 0.034, -0.045, -0.6, -0.121, 0.093, 0.527, 0.002, -0.003, -0.003, 0.047, 0.03, -0.05, -0.2, -0.046, 0.147, 0.078};
 		double[] testValuesgv = new double[]{0.009, 0.038, -0.012, -0.037, 0.0, 0.005, 0.019, 0.001, -0.003, -0.047, -0.048, 0.071, -0.044, -0.216, 0.008, 0.021, 0.108, -0.003, 0.018, -0.086, -0.086, 0.021, -0.071, -0.097, -0.01, 0.034, 0.047, 0.047, 0.04, -0.018, 0.026, 0.141, -0.045, -0.126, -0.045, 0.03, -0.004, 0.167, 0.063, -0.178, -0.193, 0.272, -0.081, -0.6, -0.05, -0.002, -0.016, 0.009, 0.069, -0.332, -0.336, 0.044, -0.121, -0.2, -0.023, -0.019, 0.008, 0.129, 0.076, -0.041, 0.132, 0.093, -0.046, 0.0, -0.083, -0.03, 0.041, 0.551, 0.114, 0.02, 0.527, 0.147, 0.001, 0.006, -0.005, -0.027, 0.043, 0.119, -0.019, 0.002, 0.078};
 		
-		Cell1D c2 = new Cell1D(0,1,QuadratureRule1D.Gauss5,0);
-		Cell1D c1 = new Cell1D(2.3,3.1,QuadratureRule1D.Gauss5,0);
+		Cell1D c2 = new Cell1D(0,1,QuadratureRule1D.Gauss5);
+		Cell1D c1 = new Cell1D(2.3,3.1,QuadratureRule1D.Gauss5);
 		TPCell cell = new TPCell(List.of(c1,c2));
 		List<TPShapeFunction> shapeFunctions = new ArrayList<>();
 		for (int i = 0; i < Math.pow(polynomialDegree+1,2); i++)

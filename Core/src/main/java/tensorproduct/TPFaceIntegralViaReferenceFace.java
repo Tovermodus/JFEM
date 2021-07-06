@@ -5,6 +5,7 @@ import linalg.CoordinateVector;
 
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.ToDoubleFunction;
 
 public class TPFaceIntegralViaReferenceFace<ST extends ScalarShapeFunctionWithReferenceShapeFunction<TPCell,TPFace,
@@ -14,10 +15,12 @@ public class TPFaceIntegralViaReferenceFace<ST extends ScalarShapeFunctionWithRe
 	public TPFaceIntegralViaReferenceFace(double weight, String name, boolean weightIsTensorProduct)
 	{
 		super(ScalarFunction.constantFunction(weight),name, weightIsTensorProduct);
+		savedValues = new ConcurrentHashMap<>();
 	}
 	public TPFaceIntegralViaReferenceFace(String name)
 	{
 		super(name);
+		savedValues = new ConcurrentHashMap<>();
 	}
 	
 	@Override
@@ -31,7 +34,9 @@ public class TPFaceIntegralViaReferenceFace<ST extends ScalarShapeFunctionWithRe
 				referenceShapeFunction2,
 				face.getReferenceFace());
 		if (savedValues.containsKey(key))
+		{
 			return savedValues.get(key);
+		}
 		else
 		{
 			savedValues.put(key, super.evaluateFaceIntegral(face, shapeFunction1, shapeFunction2));

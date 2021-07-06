@@ -11,8 +11,10 @@ public class Cell1D implements Comparable<Cell1D>
         double[] points;
         double[] weights;
         public ArrayList<LagrangeBasisFunction1D> shapefunctions;
-        public Cell1D(double start, double end, QuadratureRule1D quadratureRule, int indexInDimension)
+        QuadratureRule1D quadratureRule1D;
+        public Cell1D(double start, double end, QuadratureRule1D quadratureRule)
         {
+                this.quadratureRule1D = quadratureRule;
                 this.start = start;
                 this.end = end;
                 points = new double[quadratureRule.length()];
@@ -23,9 +25,13 @@ public class Cell1D implements Comparable<Cell1D>
                         weights[i] = quadratureRule.getReferenceWeights().get(i)*length();
                 }
         }
+        public Cell1D(Cell1D cell)
+        {
+                this(cell.start, cell.end, cell.quadratureRule1D);
+        }
         public Cell1D(double start, double end)
         {
-                this(start,end, QuadratureRule1D.Gauss5, -1);
+                this(start,end, QuadratureRule1D.Gauss5);
         }
         public double getStart()
         {

@@ -65,7 +65,6 @@ public class HeatEquation
 		grid.evaluateCellIntegrals(cellIntegrals,rightHandSideIntegrals);
 		System.out.println("Face Integrals");
 		grid.evaluateFaceIntegrals(faceIntegrals,boundaryFaceIntegrals);
-		System.out.println(((1.0*System.nanoTime() - startTime)/1e9));
 		System.out.println("solve system: "+grid.getSystemMatrix().getRows()+"×"+grid.getSystemMatrix().getCols());
 		//grid.A.makeParallelReady(12);
 		if(grid.getRhs().getLength() < 50)

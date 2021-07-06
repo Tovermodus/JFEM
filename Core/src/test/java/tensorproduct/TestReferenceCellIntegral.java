@@ -10,7 +10,7 @@ import java.util.ArrayList;
 
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-public class TestReferenceIntegral
+public class TestReferenceCellIntegral
 {
 	@Test
 	public void test2DGradGradMatrix()

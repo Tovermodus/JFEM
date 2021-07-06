@@ -195,9 +195,13 @@ public class TPShapeFunction implements ScalarShapeFunctionWithReferenceShapeFun
 	@Override
 	public TPShapeFunction getReferenceShapeFunctionRelativeTo(TPFace face)
 	{
-		if(face.getNormal().value(face.center()).inner(nodeFunctional.getPoint().sub(face.center()))>0)
-			return new TPShapeFunction(face.getNormalDownstreamCell(), polynomialDegree,
+		if(face.isNormalDownstream(supportCell.center()))
+			return new TPShapeFunction(face.getReferenceFace().getNormalDownstreamCell(), polynomialDegree,
 				function1Ds.stream().mapToInt(LagrangeBasisFunction1D::getLocalFunctionNumber).toArray());
+		else
+			return new TPShapeFunction(face.getReferenceFace().getNormalUpstreamCell(), polynomialDegree,
+				function1Ds.stream().mapToInt(LagrangeBasisFunction1D::getLocalFunctionNumber).toArray());
+			
 	}
 	
 }

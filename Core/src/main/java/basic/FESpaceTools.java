@@ -77,6 +77,7 @@ public interface FESpaceTools<CT extends Cell<CT,FT,ET>, FT extends  Face<CT,FT,
 		Stream<List<FT>> stream = smallerList.stream();
 		if(PerformanceArguments.getInstance().parallelizeThreads)
 			stream = stream.parallel();
+		
 		stream.forEach(smallList->
 		{
 			for (FT F : smallList)
