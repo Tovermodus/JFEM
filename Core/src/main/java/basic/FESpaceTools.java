@@ -30,7 +30,7 @@ public interface FESpaceTools<CT extends Cell<CT,FT,ET>, FT extends  Face<CT,FT,
 		{
 			for (CT K : smallList)
 			{
-				System.out.println((int)(100.0*increaseCellCounter()/space.getCells().size())+"%");
+				//System.out.println((int)(100.0*increaseCellCounter()/space.getCells().size())+"%");
 				for (ST v : space.getShapeFunctionsWithSupportOnCell(K))
 				{
 					if(space.getFixedNodeIndices().contains(v.getGlobalIndex()))
@@ -82,7 +82,7 @@ public interface FESpaceTools<CT extends Cell<CT,FT,ET>, FT extends  Face<CT,FT,
 		{
 			for (FT F : smallList)
 			{
-				System.out.println((int)(50.0*increaseFaceCounter()/space.getFaces().size())+"%");
+				//System.out.println((int)(50.0*increaseFaceCounter()/space.getFaces().size())+"%");
 				for (ST v : space.getShapeFunctionsWithSupportOnFace(F))
 				{
 					if(space.getFixedNodeIndices().contains(v.getGlobalIndex()))
@@ -110,7 +110,7 @@ public interface FESpaceTools<CT extends Cell<CT,FT,ET>, FT extends  Face<CT,FT,
 		{
 			for (FT F : smallList)
 			{
-				System.out.println((int)(50.0*increaseFaceCounter()/space.getFaces().size())+"%");
+				//System.out.println((int)(50.0*increaseFaceCounter()/space.getFaces().size())+"%");
 				for (ST v : space.getShapeFunctionsWithSupportOnFace(F))
 				{
 					if(space.getFixedNodeIndices().contains(v.getGlobalIndex()))

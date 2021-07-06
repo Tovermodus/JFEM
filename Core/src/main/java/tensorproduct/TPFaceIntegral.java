@@ -17,6 +17,10 @@ public class TPFaceIntegral<ST extends ScalarShapeFunction<TPCell,TPFace,TPEdge,
 	public static String VALUE_VALUE = "ValueValue";
 	public static String BOUNDARY_VALUE = "BoundaryValue";
 	private final boolean weightIsTensorProduct;
+	public TPFaceIntegral(double weight, String name, boolean weightIsTensorProduct)
+	{
+		this(ScalarFunction.constantFunction(weight), name, weightIsTensorProduct);
+	}
 	public TPFaceIntegral(Function<?,?,?> weight, String name, boolean weightIsTensorProduct)
 	{
 		super(weight,name);

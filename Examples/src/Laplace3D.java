@@ -27,11 +27,11 @@ public class Laplace3D
                 int polynomialDegree = 2;
                 TPFESpace grid = new TPFESpace(start,end,
                         Ints.asList(6,6,6),polynomialDegree);
-                TPCellIntegral<TPShapeFunction> gg = new TPCellIntegral<>(ScalarFunction.constantFunction(1),
+                TPCellIntegral<TPShapeFunction> gg = new TPCellIntegralViaReferenceCell<>(1,
                         TPCellIntegral.GRAD_GRAD,
                         false);
                 double penalty = 200000;
-                TPFaceIntegral<TPShapeFunction> jj = new TPFaceIntegral<>(ScalarFunction.constantFunction(penalty),
+                TPFaceIntegral<TPShapeFunction> jj = new TPFaceIntegralViaReferenceFace<>(penalty,
                         TPFaceIntegral.VALUE_JUMP_VALUE_JUMP, false);
                 ArrayList<CellIntegral<TPCell,TPShapeFunction>> cellIntegrals =
                         new ArrayList<>();

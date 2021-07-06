@@ -39,6 +39,7 @@ public class TPFaceIntegralViaReferenceFace<ST extends ScalarShapeFunctionWithRe
 		}
 		else
 		{
+			System.out.println(savedValues.size());
 			savedValues.put(key, super.evaluateFaceIntegral(face, shapeFunction1, shapeFunction2));
 			return savedValues.get(key);
 		}

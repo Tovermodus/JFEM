@@ -2,6 +2,7 @@ package tensorproduct;
 
 import basic.CellIntegral;
 import basic.Function;
+import basic.ScalarFunction;
 import basic.ScalarShapeFunction;
 import com.google.common.primitives.Doubles;
 import linalg.CoordinateVector;
@@ -19,6 +20,10 @@ public class TPCellIntegral<ST extends ScalarShapeFunction<TPCell,TPFace,TPEdge,
 	public static final String GRAD_VALUE = "GradValue";
 	public static final String VALUE_GRAD = "ValueGrad";
 	final boolean weightIsTensorProduct;
+	public TPCellIntegral(double weight, String name, boolean weightIsTensorProduct)
+	{
+		this(ScalarFunction.constantFunction(weight), name, weightIsTensorProduct);
+	}
 	public TPCellIntegral(Function<?,?,?> weight, String name, boolean weightIsTensorProduct)
 	{
 		super(weight,name);
