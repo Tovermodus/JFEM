@@ -35,28 +35,28 @@ public interface VectorShapeFunction<CT extends Cell<CT,FT, ET>,FT extends Face<
 	@Override
 	default CoordinateVector jumpInValue(FT face, CoordinateVector pos)
 	{
-		return valueInCell(pos, face.getNormalUpstreamCell(pos)).sub(valueInCell(pos,
-			face.getNormalDownstreamCell(pos)));
+		return valueInCell(pos, face.getNormalUpstreamCell()).sub(valueInCell(pos,
+			face.getNormalDownstreamCell()));
 	}
 	@Override
 	default CoordinateMatrix jumpInDerivative(FT face, CoordinateVector pos)
 	{
-		return gradientInCell(pos,face.getNormalUpstreamCell(pos)).sub(
-			gradientInCell(pos, face.getNormalDownstreamCell(pos)));
+		return gradientInCell(pos,face.getNormalUpstreamCell()).sub(
+			gradientInCell(pos, face.getNormalDownstreamCell()));
 	}
 	
 	@Override
 	default CoordinateVector averageInValue(FT face, CoordinateVector pos)
 	{
-		return  valueInCell(pos,face.getNormalUpstreamCell(pos)).add(valueInCell(pos,
-			face.getNormalDownstreamCell(pos))).mul(0.5);
+		return  valueInCell(pos,face.getNormalUpstreamCell()).add(valueInCell(pos,
+			face.getNormalDownstreamCell())).mul(0.5);
 	}
 	
 	@Override
 	default CoordinateMatrix averageInDerivative(FT face, CoordinateVector pos)
 	{
-		return gradientInCell(pos,face.getNormalUpstreamCell(pos)).add(
-			gradientInCell(pos,face.getNormalDownstreamCell(pos))).mul(0.5);
+		return gradientInCell(pos,face.getNormalUpstreamCell()).add(
+			gradientInCell(pos,face.getNormalDownstreamCell())).mul(0.5);
 	}
 	
 	@Override

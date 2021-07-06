@@ -23,8 +23,8 @@ public interface Face<CT extends Cell<CT,FT, ET>,FT extends Face<CT,FT, ET>, ET 
 	
 	VectorFunction getNormal();
 	
-	CT getNormalDownstreamCell(CoordinateVector pos);
-	CT getNormalUpstreamCell(CoordinateVector pos);
+	CT getNormalDownstreamCell();
+	CT getNormalUpstreamCell();
 	
 	CoordinateVector center();
 	

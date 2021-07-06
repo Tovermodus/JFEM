@@ -10,10 +10,7 @@ public interface ShapeFunctionWithReferenceShapeFunction<CT extends CellWithRefe
 {
 	
 	ST getReferenceShapeFunctionRelativeTo(CT cell);
-	default ST getReferenceShapeFunctionRelativeTo(FT face)
-	{
-		throw new UnsupportedOperationException("not implemented yet");
-	}
+	ST getReferenceShapeFunctionRelativeTo(FT face);
 	default ST getReferenceShapeFunctionRelativeTo(ET edge)
 	{
 		throw new UnsupportedOperationException("not implemented yet");

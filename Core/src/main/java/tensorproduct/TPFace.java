@@ -92,47 +92,41 @@ public class TPFace implements FaceWithReferenceFace<TPCell, TPFace, TPEdge>,Com
 	{
 		return normal;
 	}
-	public TPCell getUpStreamCell(CoordinateVector pos, CoordinateVector direction)
+	public TPCell getUpStreamCell(CoordinateVector direction)
 	{
-		if(normal.value(pos).inner(direction)>0)
-			return getNormalUpstreamCell(pos);
+		if(normal.value(center()).inner(direction)>0)
+			return getNormalUpstreamCell();
 		else
-			return getNormalDownstreamCell(pos);
+			return getNormalDownstreamCell();
 	}
-	public TPCell getDownStreamCell(CoordinateVector pos, CoordinateVector direction)
+	public TPCell getDownStreamCell(CoordinateVector direction)
 	{
-		if(normal.value(pos).inner(direction)<0)
-			return getNormalUpstreamCell(pos);
+		if(normal.value(center()).inner(direction)<0)
+			return getNormalUpstreamCell();
 		else
-			return getNormalDownstreamCell(pos);
+			return getNormalDownstreamCell();
 	}
 	
 	@Override
-	public TPCell getNormalDownstreamCell(CoordinateVector pos)
+	public TPCell getNormalDownstreamCell()
 	{
 		for(TPCell cell:cells)
 		{
-			if(cell.isInCell(pos))
+			if (cell.center().at(flatDimension) > otherCoordinate)
 			{
-				if (cell.center().at(flatDimension) > otherCoordinate)
-				{
-					return cell;
-				}
+				return cell;
 			}
 		}
 		return null;
 	}
 	@Override
-	public TPCell getNormalUpstreamCell(CoordinateVector pos)
+	public TPCell getNormalUpstreamCell()
 	{
 		for(TPCell cell:cells)
 		{
-			if(cell.isInCell(pos))
+			if (cell.center().at(flatDimension) < otherCoordinate)
 			{
-				if (cell.center().at(flatDimension) < otherCoordinate)
-				{
-					return cell;
-				}
+				return cell;
 			}
 		}
 		return null;

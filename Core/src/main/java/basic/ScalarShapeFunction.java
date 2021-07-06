@@ -46,28 +46,28 @@ public interface ScalarShapeFunction<CT extends Cell<CT,FT,ET>, FT extends Face<
 	@Override
 	default Double jumpInValue(FT face, CoordinateVector pos)
 	{
-		return valueInCell(pos, face.getNormalUpstreamCell(pos)) - valueInCell(pos,
-			face.getNormalDownstreamCell(pos));
+		return valueInCell(pos, face.getNormalUpstreamCell()) - valueInCell(pos,
+			face.getNormalDownstreamCell());
 	}
 	@Override
 	default CoordinateVector jumpInDerivative(FT face, CoordinateVector pos)
 	{
-		return gradientInCell(pos,face.getNormalUpstreamCell(pos)).sub(
-			gradientInCell(pos, face.getNormalDownstreamCell(pos)));
+		return gradientInCell(pos,face.getNormalUpstreamCell()).sub(
+			gradientInCell(pos, face.getNormalDownstreamCell()));
 	}
 	
 	@Override
 	default Double averageInValue(FT face, CoordinateVector pos)
 	{
-		return  0.5*(valueInCell(pos,face.getNormalUpstreamCell(pos))+valueInCell(pos,
-			face.getNormalDownstreamCell(pos)));
+		return  0.5*(valueInCell(pos,face.getNormalUpstreamCell())+valueInCell(pos,
+			face.getNormalDownstreamCell()));
 	}
 	
 	@Override
 	default CoordinateVector averageInDerivative(FT face, CoordinateVector pos)
 	{
-		return gradientInCell(pos,face.getNormalUpstreamCell(pos)).add(
-			gradientInCell(pos,face.getNormalDownstreamCell(pos))).mul(0.5);
+		return gradientInCell(pos,face.getNormalUpstreamCell()).add(
+			gradientInCell(pos,face.getNormalDownstreamCell())).mul(0.5);
 	}
 	
 	@Override
