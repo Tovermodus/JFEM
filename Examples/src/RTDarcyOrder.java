@@ -14,8 +14,10 @@ public class RTDarcyOrder
 	public static void main(String[] args)
 	{
 		
-		PerformanceArguments.createInstance(true,12,true);
-		CoordinateVector start = CoordinateVector.fromValues(-1, -1);
+		
+		PerformanceArguments.PerformanceArgumentBuilder builder =
+			new PerformanceArguments.PerformanceArgumentBuilder();
+		builder.build();CoordinateVector start = CoordinateVector.fromValues(-1, -1);
 		CoordinateVector end = CoordinateVector.fromValues(1, 1);
 		TPVectorCellIntegral<RTShapeFunction> valueValue =
 			new TPVectorCellIntegral<>(TPVectorCellIntegral.VALUE_VALUE);

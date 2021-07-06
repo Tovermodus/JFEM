@@ -2,10 +2,8 @@ package basic;
 
 
 import java.util.Set;
-import linalg.Matrix;
-import linalg.MutableMatrix;
-import linalg.MutableVector;
-import linalg.Vector;
+
+import linalg.*;
 import mixed.MixedCellIntegral;
 import mixed.MixedTPCellIntegral;
 
@@ -31,6 +29,12 @@ public interface MatrixFESpace<CT extends Cell<CT,FT,ET>, FT extends  Face<CT,FT
 	default void evaluateCellIntegrals(List<CellIntegral<CT, ST>> cellIntegrals,
 	                                   List<RightHandSideIntegral<CT, ST>> rightHandSideIntegrals)
 	{
+		writeCellIntegralsToMatrix(cellIntegrals, getSystemMatrix());
+		writeCellIntegralsToRhs(rightHandSideIntegrals, getRhs());
+	}
+	default void writeCellIntegralsToMatrix(List<CellIntegral<CT, ST>> cellIntegrals,
+	                                   MutableMatrix s)
+	{
 		loopMatrixViaCell((K, u, v) ->
 		{
 			double integral = 0;
@@ -40,7 +44,11 @@ public interface MatrixFESpace<CT extends Cell<CT,FT,ET>, FT extends  Face<CT,FT
 				integral += cellIntegral.evaluateCellIntegral(K, u, v);
 			}
 			return integral;
-		}, this);
+		}, this, s);
+	}
+	default void writeCellIntegralsToRhs(List<RightHandSideIntegral<CT, ST>> rightHandSideIntegrals,
+	                                   MutableVector d)
+	{
 		loopRhsViaCell((K,  v) ->
 		{
 			double integral = 0;
@@ -50,11 +58,16 @@ public interface MatrixFESpace<CT extends Cell<CT,FT,ET>, FT extends  Face<CT,FT
 				integral += rightHandSideIntegral.evaluateRightHandSideIntegral(K, v);
 			}
 			return integral;
-		}, this);
+		}, this, d);
 	}
 	
 	default void evaluateFaceIntegrals(List<FaceIntegral<FT, ST>> faceIntegrals,
 	                                   List<BoundaryRightHandSideIntegral<FT, ST>> boundaryRightHandSideIntegrals)
+	{
+		writeFaceIntegralsToMatrix(faceIntegrals, getSystemMatrix());
+		writeFaceIntegralsToRhs(boundaryRightHandSideIntegrals, getRhs());
+	}
+	default void writeFaceIntegralsToMatrix(List<FaceIntegral<FT, ST>> faceIntegrals, MutableMatrix s)
 	{
 		
 		loopMatrixViaFace((F, u, v) ->
@@ -66,7 +79,11 @@ public interface MatrixFESpace<CT extends Cell<CT,FT,ET>, FT extends  Face<CT,FT
 				integral += faceIntegral.evaluateFaceIntegral(F, u, v);
 			}
 			return integral;
-		}, this);
+		}, this, s);
+	}
+	default void writeFaceIntegralsToRhs(List<BoundaryRightHandSideIntegral<FT, ST>> boundaryRightHandSideIntegrals
+		, MutableVector d)
+	{
 		loopRhsViaFace((F, v) ->
 		{
 			double integral = 0;
@@ -76,6 +93,6 @@ public interface MatrixFESpace<CT extends Cell<CT,FT,ET>, FT extends  Face<CT,FT
 				integral += boundaryRightHandSideIntegral.evaluateBoundaryRightHandSideIntegral(F, v);
 			}
 			return integral;
-		}, this);
+		}, this, d);
 	}
 }

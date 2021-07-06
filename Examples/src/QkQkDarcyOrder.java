@@ -12,8 +12,10 @@ public class QkQkDarcyOrder
 {
 	public static void main(String[] args)
 	{
-		PerformanceArguments.createInstance(true,12,true);
 		
+		PerformanceArguments.PerformanceArgumentBuilder builder =
+			new PerformanceArguments.PerformanceArgumentBuilder();
+		builder.build();
 		CoordinateVector start = CoordinateVector.fromValues(-1, -1);
 		CoordinateVector end = CoordinateVector.fromValues(1, 1);
 		TPVectorCellIntegral<ContinuousTPVectorFunction> valueValue =

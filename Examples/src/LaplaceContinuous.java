@@ -13,7 +13,9 @@ public class LaplaceContinuous
 	public static void main(String[] args)
 	{
 		
-		PerformanceArguments.createInstance(true,12,true);
+		PerformanceArguments.PerformanceArgumentBuilder builder =
+			new PerformanceArguments.PerformanceArgumentBuilder();
+		builder.build();
 	
 //[+6.667e+02  +1.667e+02  +1.667e+02  -3.333e-03
 //		+1.667e+02  +6.667e+02  -3.333e-03  +1.667e+02
