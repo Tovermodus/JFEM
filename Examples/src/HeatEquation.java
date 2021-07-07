@@ -16,7 +16,7 @@ public class HeatEquation
 		builder.build();
 		CoordinateVector start = CoordinateVector.fromValues(-1,-1);
 		CoordinateVector end = CoordinateVector.fromValues(1,1);
-		int polynomialDegree = 1;
+		int polynomialDegree = 2;
 		TPFESpace grid = new TPFESpace(start,end,
 			Ints.asList(12,12),polynomialDegree);
 		grid.assembleCells();
@@ -50,7 +50,7 @@ public class HeatEquation
 		};
 		TPRightHandSideIntegral<TPShapeFunction> src =new TPRightHandSideIntegral<>(sourceFun
 			, TPRightHandSideIntegral.VALUE, false);
-		double dt = 0.001;
+		double dt = 0.1;
 		int n = grid.getShapeFunctions().size();
 		Vector iterate = new DenseVector(n);
 		ScalarFESpaceFunction<TPShapeFunction> u_t;
@@ -59,34 +59,47 @@ public class HeatEquation
 		grid.writeFaceIntegralsToMatrix(List.of(jj), M);
 		SparseMatrix A = new SparseMatrix(n,n);
 		grid.writeCellIntegralsToMatrix(List.of(gg), A);
-		grid.writeFaceIntegralsToMatrix(List.of(jj), A);
+		//grid.writeFaceIntegralsToMatrix(List.of(jj), A);
 		A.mulInPlace(dt);
+		Matrix MA = M.add(A);
 		DenseVector source = new DenseVector(n);
 		grid.writeCellIntegralsToRhs(List.of(src), source);
 		source.mulInPlace(dt);
 		System.out.println("source"+source);
 		//System.out.println("M"+M);
 		//System.out.println("A"+A);
-		int timesteps = 40;
+		int timesteps = 50;
 		Map<CoordinateVector, Double> vals;
-		List<CoordinateVector> points = grid.generatePlotPoints(timesteps);
+		List<CoordinateVector> points = grid.generatePlotPoints(30);
 		vals = (new ScalarFESpaceFunction<>(
 			grid.getShapeFunctions(), iterate)
 			.valuesInPointsAtTime(points,0));
 		System.out.println("x"+iterate);
+		boolean implicit = true;
 		for (int i = 0; i < timesteps; i++)
 		{
-			System.out.println("Ax"+A.mvMul(iterate));
-			System.out.println("Mx"+M.mvMul(iterate));
-			DenseVector rhs = source.add(M.mvMul(iterate)).sub(A.mvMul(iterate));
-			IterativeSolver<SparseMatrix> its = new IterativeSolver<>();
-			iterate = its.solveCG(M,rhs,1e-10);
-			System.out.println("x"+iterate);
+			//System.out.println("Ax"+A.mvMul(iterate));
+			//System.out.println("Mx"+M.mvMul(iterate));
+			
+			IterativeSolver<Matrix> its = new IterativeSolver<>();
+			its.showProgress = false;
+			if(implicit)
+			{
+				DenseVector rhs = source.add(M.mvMul(iterate));
+				iterate = its.solveCG(MA, rhs, 1e-10);
+			}
+			else
+			{
+				DenseVector rhs = source.add(M.mvMul(iterate)).sub(A.mvMul(iterate));
+				iterate = its.solveCG(M, rhs, 1e-10);
+			}
+			//System.out.println("x"+iterate);
+			System.out.println(i);
 			vals.putAll(new ScalarFESpaceFunction<>(
 				grid.getShapeFunctions(), iterate)
 				.valuesInPointsAtTime(points, dt*i));
 		}
-		new PlotFrame(List.of(vals),start.addTime(0),end.addTime(timesteps*dt));
+		new PlotFrame(List.of(vals),start.addTime(0),end.addTime(timesteps*dt), timesteps);
 		
 		
 	}

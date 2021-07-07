@@ -15,11 +15,13 @@ public class IterativeSolver<Op extends VectorMultiplyable>
 	private volatile boolean interrupted = false;
 	private GMRES gm;
 	ExecutorService ex;
+	public boolean showProgress = true;
 	public Vector solveCG(Op operator, Vector rhs, double tol)
 	{
 		ex = Executors.newSingleThreadExecutor();
 		Interruptor i = new Interruptor();
-		ex.execute(i);
+		if(showProgress)
+			ex.execute(i);
 		Stopwatch s = Stopwatch.createStarted();
 		int n = rhs.getLength();
 		Vector z;
@@ -40,7 +42,8 @@ public class IterativeSolver<Op extends VectorMultiplyable>
 			beta = newResiduum.inner(newResiduum)/residuum.inner(residuum);
 			defect = newResiduum.add(defect.mul(beta));
 			residuum = newResiduum;
-			//System.out.println(residuum.euclidianNorm());
+			if(showProgress)
+			System.out.println(residuum.euclidianNorm());
 		}
 		interrupted = true;
 		ex.shutdown();
@@ -52,6 +55,7 @@ public class IterativeSolver<Op extends VectorMultiplyable>
 	{
 		ex = Executors.newSingleThreadExecutor();
 		Interruptor i = new Interruptor();
+		if(showProgress)
 		ex.execute(i);
 		int n = rhs.getLength();
 		DenseVector v = new DenseVector(n);
@@ -72,6 +76,7 @@ public class IterativeSolver<Op extends VectorMultiplyable>
 	{
 		ex = Executors.newSingleThreadExecutor();
 		Interruptor i = new Interruptor();
+		if(showProgress)
 		ex.execute(i);
 		int n = rightHandSide.getLength();
 		DenseVector v = new DenseVector(n);
@@ -92,6 +97,7 @@ public class IterativeSolver<Op extends VectorMultiplyable>
 	{
 		ex = Executors.newSingleThreadExecutor();
 		Interruptor i = new Interruptor();
+		if(showProgress)
 		ex.execute(i);
 		int n = rhs.getLength();
 		Vector v;
@@ -119,6 +125,7 @@ public class IterativeSolver<Op extends VectorMultiplyable>
 			rho = residuum.inner(startResiduum);
 			beta = alpha/omega*rho/rhoLast;
 			p = residuum.add(p.mul(beta)).sub(v.mul(omega*beta));
+			if(showProgress)
 			System.out.println(residuum.euclidianNorm());
 		}
 		interrupted = true;
@@ -132,6 +139,7 @@ public class IterativeSolver<Op extends VectorMultiplyable>
 	{
 		ex = Executors.newSingleThreadExecutor();
 		Interruptor i = new Interruptor();
+		if(showProgress)
 		ex.execute(i);
 		int n = rhs.getLength();
 		Vector v;

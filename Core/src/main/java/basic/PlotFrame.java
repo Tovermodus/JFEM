@@ -3,6 +3,8 @@ package basic;
 import basic.ScalarFunction;
 import com.google.common.collect.Iterables;
 import linalg.CoordinateVector;
+import linalg.IntCoordinates;
+import linalg.IterativeSolver;
 import linalg.Vector;
 
 import java.awt.*;
@@ -18,6 +20,7 @@ public class PlotFrame
 	CoordinateVector startCoordinates;
 	CoordinateVector endCoordinates;
 	Map<String, Map<CoordinateVector, Double>> valueList;
+	Map<String, IntCoordinates> pointsPerDimension;
 	Iterator<String> current;
 	
 	String currentTitle;
@@ -31,15 +34,27 @@ public class PlotFrame
 		{
 			drawing = true;
 			Map<CoordinateVector, Double> currentValues = valueList.get(currentTitle);
-			int gridPointsPerSpaceDim = (int) (Math.pow(currentValues.size(), 1. / dimension));
+			IntCoordinates pointsPerDim;
+			if(pointsPerDimension.containsKey(currentTitle))
+				pointsPerDim = pointsPerDimension.get(currentTitle);
+			else
+			{
+				int [] ppd = new int[dimension];
+				for(int i = 0; i < dimension; i++)
+					ppd[i] = (int) (Math.pow(currentValues.size(), 1. / dimension));
+				pointsPerDim = new IntCoordinates(ppd);
+			}
 			List<CoordinateVector> drawnVectors = new ArrayList<>(currentValues.keySet());
 			double currentZ =
 				startCoordinates.at(dimension - 1) + units / 100. * (endCoordinates.at(dimension - 1) - startCoordinates.at(dimension - 1));
 			if (dimension == 3)
 			{
 				drawnVectors.sort(Comparator.comparingDouble(v -> -Math.abs(v.z() - currentZ)));
-				System.out.println(drawnVectors.get(0).z() + " " + Iterables.getLast(drawnVectors).z() + " " + currentZ);
-				drawnVectors = drawnVectors.subList(drawnVectors.size()-(int)(3*gridPointsPerSpaceDim*gridPointsPerSpaceDim),
+				//System.out.println(drawnVectors.get(0).z() + " " + Iterables.getLast(drawnVectors)
+				// .z() + " " + currentZ);
+				int multipleToSecureNoWhitespace = 3;
+				drawnVectors =
+					drawnVectors.subList(drawnVectors.size()-multipleToSecureNoWhitespace*(pointsPerDim.get(0)*pointsPerDim.get(1)),
 					drawnVectors.size()-1);
 			}
 			
@@ -58,7 +73,8 @@ public class PlotFrame
 					50 + (int) (width * relativeCoords.at(0) / (endCoordinates.at(0) - startCoordinates.at(0)));
 				int posy =
 					50 + (int) (height * relativeCoords.at(1) / (endCoordinates.at(1) - startCoordinates.at(1)));
-				g.fillRect(posx, posy, width / gridPointsPerSpaceDim + 2, height / gridPointsPerSpaceDim + 2);
+				g.fillRect(posx, posy, width / pointsPerDim.get(0) + 2,
+					height / pointsPerDim.get(1) + 2);
 			});
 			g.setColor(Color.BLACK);
 			g.drawString("title: " + currentTitle + " max: " + range[1] + " min: " + range[0], 40, 40);
@@ -117,6 +133,25 @@ public class PlotFrame
 			vmap.put("Values "+i, valueMapList.get(i));
 		initialize(vmap,startCoordinates,endCoordinates);
 	}
+	public PlotFrame(List<Map<CoordinateVector, Double>> valueMapList, CoordinateVector startCoordinates,
+	                 CoordinateVector endCoordinates, int timepoints)
+	{
+		Map<String,Map<CoordinateVector, Double>> vmap= new TreeMap<>();
+		for(int i = 0; i < valueMapList.size(); i++)
+			vmap.put("Values "+i, valueMapList.get(i));
+		pointsPerDimension = new HashMap<>();
+		int [] ppd = new int[startCoordinates.getLength()];
+		ppd[ppd.length-1] = timepoints;
+		int n = (int)(Math.pow((int)(Iterables.getLast(vmap.entrySet()).getValue().size()/timepoints),
+			1./(startCoordinates.getLength()-1)));
+		for (int i = 0; i < ppd.length-1; i++)
+		{
+			ppd[i] = n;
+		}
+		for (String title:vmap.keySet())
+			pointsPerDimension.put(title, new IntCoordinates(ppd));
+		initialize(vmap, startCoordinates, endCoordinates);
+	}
 	public PlotFrame(List<ScalarFunction> functions, List<CoordinateVector> points,
 	                 CoordinateVector startCoordinates,
 	                 CoordinateVector endCoordinates)
@@ -126,19 +161,53 @@ public class PlotFrame
 			vmap.put("Values "+i, functions.get(i).valuesInPoints(points));
 		initialize(vmap,startCoordinates,endCoordinates);
 	}
+	public PlotFrame(List<ScalarFunction> functions, List<CoordinateVector> points,
+	                 CoordinateVector startCoordinates,
+	                 CoordinateVector endCoordinates, int timepoints)
+	{
+		Map<String,Map<CoordinateVector, Double>> vmap= new TreeMap<>();
+		for(int i = 0; i < functions.size(); i++)
+			vmap.put("Values "+i, functions.get(i).valuesInPoints(points));
+		pointsPerDimension = new HashMap<>();
+		int [] ppd = new int[startCoordinates.getLength()];
+		ppd[ppd.length-1] = timepoints;
+		int n = (int)(Math.pow((int)(Iterables.getLast(vmap.entrySet()).getValue().size()/timepoints),
+			1./(startCoordinates.getLength()-1)));
+		for (int i = 0; i < ppd.length-1; i++)
+		{
+			ppd[i] = n;
+		}
+		for (String title:vmap.keySet())
+			pointsPerDimension.put(title, new IntCoordinates(ppd));
+		initialize(vmap, startCoordinates, endCoordinates);
+	}
 	public PlotFrame(Map<String,Map<CoordinateVector, Double>> valueList, CoordinateVector startCoordinates,
 	                 CoordinateVector endCoordinates)
 	{
 		initialize(valueList, startCoordinates, endCoordinates);
 	}
-	public PlotFrame(Map<String,Map<CoordinateVector, Double>> valueList, CoordinateVector startCoordinates,
-	                 CoordinateVector endCoordinates, double startTime, double endTime)
+	public PlotFrame(Map<String,Map<CoordinateVector, Double>> vmap, CoordinateVector startCoordinates,
+	                 CoordinateVector endCoordinates, int timepoints)
 	{
-		initialize(valueList, startCoordinates, endCoordinates);
+		pointsPerDimension = new HashMap<>();
+		int [] ppd = new int[startCoordinates.getLength()];
+		ppd[ppd.length-1] = timepoints;
+		int n = (int)(Math.pow((int)(Iterables.getLast(vmap.entrySet()).getValue().size()/timepoints),
+			1./(startCoordinates.getLength()-1)));
+		for (int i = 0; i < ppd.length-1; i++)
+		{
+			ppd[i] = n;
+		}
+		for (String title:vmap.keySet())
+			pointsPerDimension.put(title, new IntCoordinates(ppd));
+		initialize(vmap, startCoordinates, endCoordinates);
+		
 	}
 	private void initialize(Map<String,Map<CoordinateVector, Double>> valueList, CoordinateVector startCoordinates,
 	                        CoordinateVector endCoordinates)
 	{
+		if(pointsPerDimension == null)
+			pointsPerDimension = new HashMap<>();
 		this.startCoordinates = startCoordinates;
 		this.endCoordinates = endCoordinates;
 		this.valueList = valueList;
@@ -173,12 +242,12 @@ public class PlotFrame
 					else
 						current = valueList.keySet().iterator();
 				}
-				System.out.println("KKKKKK");
+				//System.out.println("KKKKKK");
 				if (units < 0)
 					units += 100;
 				if (units > 100)
 					units -= 100;
-				System.out.println(units);
+				//System.out.println(units);
 				Graphics g = j.getGraphics();
 				//g.clearRect(0,0,2000,2000);
 				executorService.schedule(new Runnable()
@@ -204,7 +273,7 @@ public class PlotFrame
 					units += 100;
 				if (units > 100)
 					units -= 100;
-				System.out.println(units);
+				//System.out.println(units);
 				Graphics g = j.getGraphics();
 				//g.clearRect(0,0,2000,2000);
 					executorService.schedule(new Runnable()
