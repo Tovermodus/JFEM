@@ -7,14 +7,14 @@ public class CoordinateVector extends DenseVector implements Comparable<Coordina
 	public CoordinateVector(Vector v)
 	{
 		super(v);
-		if(v.getLength()>3)
-			throw new IllegalArgumentException("only 1D, 2D and 3D supported");
+		if(v.getLength()>4)
+			throw new IllegalArgumentException("only 1D, 2D, 3D and 4D supported");
 	}
 	public CoordinateVector(int d)
 	{
 		super(d);
-		if(d > 3)
-			throw new IllegalArgumentException("only 1D, 2D and 3D supported");
+		if(d > 4)
+			throw new IllegalArgumentException("only 1D, 2D, 3D and 4D supported");
 	}
 	public CoordinateVector(double [] vector)
 	{
@@ -36,7 +36,16 @@ public class CoordinateVector extends DenseVector implements Comparable<Coordina
 		return ret;
 	}
 	
-	
+	public CoordinateVector addTime(double time)
+	{
+		CoordinateVector ret = new CoordinateVector(getLength()+1);
+		for (int i = 0; i < getLength(); i++)
+		{
+			ret.set(at(i),i);
+		}
+		ret.set(time, getLength());
+		return ret;
+	}
 	public CoordinateMatrix outer(CoordinateVector other)
 	{
 		return new CoordinateMatrix(super.outer(other));
@@ -89,6 +98,10 @@ public class CoordinateVector extends DenseVector implements Comparable<Coordina
 	public double z()
 	{
 		return entries[2];
+	}
+	public double t()
+	{
+		return entries[entries.length-1];
 	}
 	
 	@Override

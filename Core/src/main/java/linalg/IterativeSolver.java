@@ -40,7 +40,7 @@ public class IterativeSolver<Op extends VectorMultiplyable>
 			beta = newResiduum.inner(newResiduum)/residuum.inner(residuum);
 			defect = newResiduum.add(defect.mul(beta));
 			residuum = newResiduum;
-			System.out.println(residuum.euclidianNorm());
+			//System.out.println(residuum.euclidianNorm());
 		}
 		interrupted = true;
 		ex.shutdown();

@@ -31,7 +31,7 @@ public class PlotFrame
 		{
 			drawing = true;
 			Map<CoordinateVector, Double> currentValues = valueList.get(currentTitle);
-			int n = (int) (Math.pow(currentValues.size(), 1. / dimension));
+			int gridPointsPerSpaceDim = (int) (Math.pow(currentValues.size(), 1. / dimension));
 			List<CoordinateVector> drawnVectors = new ArrayList<>(currentValues.keySet());
 			double currentZ =
 				startCoordinates.at(dimension - 1) + units / 100. * (endCoordinates.at(dimension - 1) - startCoordinates.at(dimension - 1));
@@ -39,9 +39,8 @@ public class PlotFrame
 			{
 				drawnVectors.sort(Comparator.comparingDouble(v -> -Math.abs(v.z() - currentZ)));
 				System.out.println(drawnVectors.get(0).z() + " " + Iterables.getLast(drawnVectors).z() + " " + currentZ);
-				drawnVectors = drawnVectors.subList(drawnVectors.size()-(int)(3*n*n),
+				drawnVectors = drawnVectors.subList(drawnVectors.size()-(int)(3*gridPointsPerSpaceDim*gridPointsPerSpaceDim),
 					drawnVectors.size()-1);
-				
 			}
 			
 			double[] range = getRange();
@@ -52,14 +51,14 @@ public class PlotFrame
 			drawnVectors.forEach(vector ->
 			{
 				
-				// .getHeight()-100)/n+1);
+				// .getHeight()-100)/gridPointsPerSpaceDim+1);
 				g.setColor(convertToColor(currentValues.get(vector),range));
-				Vector relc = vector.sub(startCoordinates);
+				Vector relativeCoords = vector.sub(startCoordinates);
 				int posx =
-					50 + (int) (width * relc.at(0) / (endCoordinates.at(0) - startCoordinates.at(0)));
+					50 + (int) (width * relativeCoords.at(0) / (endCoordinates.at(0) - startCoordinates.at(0)));
 				int posy =
-					50 + (int) (height * relc.at(1) / (endCoordinates.at(1) - startCoordinates.at(1)));
-				g.fillRect(posx, posy, width / n + 2, height / n + 2);
+					50 + (int) (height * relativeCoords.at(1) / (endCoordinates.at(1) - startCoordinates.at(1)));
+				g.fillRect(posx, posy, width / gridPointsPerSpaceDim + 2, height / gridPointsPerSpaceDim + 2);
 			});
 			g.setColor(Color.BLACK);
 			g.drawString("title: " + currentTitle + " max: " + range[1] + " min: " + range[0], 40, 40);
@@ -129,6 +128,11 @@ public class PlotFrame
 	}
 	public PlotFrame(Map<String,Map<CoordinateVector, Double>> valueList, CoordinateVector startCoordinates,
 	                 CoordinateVector endCoordinates)
+	{
+		initialize(valueList, startCoordinates, endCoordinates);
+	}
+	public PlotFrame(Map<String,Map<CoordinateVector, Double>> valueList, CoordinateVector startCoordinates,
+	                 CoordinateVector endCoordinates, double startTime, double endTime)
 	{
 		initialize(valueList, startCoordinates, endCoordinates);
 	}

@@ -45,6 +45,12 @@ public interface ScalarFunction extends Function<Double, CoordinateVector, Coord
 		points.stream().parallel().forEach(point->ret.put(point, value(point)));
 		return ret;
 	}
+	default Map<CoordinateVector, Double> valuesInPointsAtTime(List<CoordinateVector> points, double t)
+	{
+		ConcurrentHashMap<CoordinateVector, Double> ret = new ConcurrentHashMap<>();
+		points.stream().parallel().forEach(point->ret.put(point.addTime(t), value(point)));
+		return ret;
+	}
 	default VectorFunction getGradientFunction()
 	{
 		ScalarFunction me = this;
