@@ -89,7 +89,7 @@ public class Laplace3D
                 ScalarFESpaceFunction<TPShapeFunction> solut =
                         new ScalarFESpaceFunction<>(
                                 grid.getShapeFunctions(), solution1);
-                Map<CoordinateVector, Double> vals = solut.valuesInPoints(grid.generatePlotPoints(20));
-                new PlotFrame(List.of(vals),start,end);
+                PlotWindow p = new PlotWindow();
+                p.addPlot(new ScalarPlot3D(solut, grid.generatePlotPoints(20),20));
         }
 }

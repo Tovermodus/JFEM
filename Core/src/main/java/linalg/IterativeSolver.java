@@ -12,7 +12,6 @@ import java.util.concurrent.Executors;
 
 public class IterativeSolver<Op extends VectorMultiplyable>
 {
-	private volatile boolean interrupted = false;
 	private GMRES gm;
 	ExecutorService ex;
 	public boolean showProgress = true;
@@ -33,7 +32,7 @@ public class IterativeSolver<Op extends VectorMultiplyable>
 		Vector defect = new DenseVector(residuum);
 		double alpha;
 		double beta;
-		for(int iter = 0; iter < n && residuum.euclidianNorm() > tol && !interrupted; iter++)
+		for(int iter = 0; iter < n && residuum.euclidianNorm() > tol && i.running; iter++)
 		{
 			z = operator.mvMul(defect);
 			alpha = residuum.inner(residuum)/defect.inner(z);
@@ -45,7 +44,7 @@ public class IterativeSolver<Op extends VectorMultiplyable>
 			if(showProgress)
 			System.out.println(residuum.euclidianNorm());
 		}
-		interrupted = true;
+		i.running = false;
 		ex.shutdown();
 		
 		return iterate;
@@ -68,7 +67,7 @@ public class IterativeSolver<Op extends VectorMultiplyable>
 		{
 			e.printStackTrace();
 		}
-		interrupted = true;
+		i.running = false;
 		ex.shutdown();
 		return x;
 	}
@@ -89,7 +88,7 @@ public class IterativeSolver<Op extends VectorMultiplyable>
 		{
 			e.printStackTrace();
 		}
-		interrupted = true;
+		i.running = false;
 		ex.shutdown();
 		return x;
 	}
@@ -112,7 +111,7 @@ public class IterativeSolver<Op extends VectorMultiplyable>
 		double rho = residuum.inner(residuum);
 		double rhoLast;
 		double beta;
-		for(int iter = 0; iter < n && residuum.euclidianNorm() > tol&& !interrupted; iter++)
+		for(int iter = 0; iter < n && residuum.euclidianNorm() > tol&& i.running; iter++)
 		{
 			v = operator.mvMul(p);
 			alpha = rho/v.inner(startResiduum);
@@ -128,7 +127,7 @@ public class IterativeSolver<Op extends VectorMultiplyable>
 			if(showProgress)
 			System.out.println(residuum.euclidianNorm());
 		}
-		interrupted = true;
+		i.running = false;
 		ex.shutdown();
 		return iterate;
 
@@ -159,7 +158,7 @@ public class IterativeSolver<Op extends VectorMultiplyable>
 		double rho = residuumP.inner(residuumP);
 		double rhoLast;
 		double beta;
-		for(int iter = 0; iter < n && residuum.euclidianNorm() > tol&& !interrupted; iter++)
+		for(int iter = 0; iter < n && residuum.euclidianNorm() > tol&& i.running; iter++)
 		{
 			v = operator.mvMul(pP);
 			vP = preconditioner.mvMul(v);
@@ -177,7 +176,7 @@ public class IterativeSolver<Op extends VectorMultiplyable>
 			beta = alpha/omega*rho/rhoLast;
 			pP = residuumP.add(pP.mul(beta)).sub(vP.mul(omega*beta));
 		}
-		interrupted = true;
+		i.running = false;
 		ex.shutdown();
 		return iterate;
 
@@ -186,6 +185,7 @@ public class IterativeSolver<Op extends VectorMultiplyable>
 	class Interruptor implements Runnable
 	{
 		private JFrame f;
+		private volatile boolean running = true;
 		@Override
 		public void run()
 		{
@@ -201,18 +201,24 @@ public class IterativeSolver<Op extends VectorMultiplyable>
 				public void actionPerformed(ActionEvent e)
 				{
 					System.out.println("Interrupt!!!");
-					interrupted = true;
+					running = false;
 					if(gm != null)
 						gm.interrupted = true;
 					f.setVisible(false);
 					f.dispose();
 				}
 			});
-			while(true)
+			while(running)
 			{
-				if(interrupted)
-					f.dispose();
+				try
+				{
+					Thread.sleep(30);
+				} catch (InterruptedException e)
+				{
+					e.printStackTrace();
+				}
 			}
+			f.dispose();
 		}
 		
 	}

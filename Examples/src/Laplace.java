@@ -22,7 +22,7 @@ public class Laplace
                 CoordinateVector end = CoordinateVector.fromValues(1,1);
                 int polynomialDegree = 2;
                 TPFESpace grid = new TPFESpace(start,end,
-                        Ints.asList(10,15),polynomialDegree);
+                        Ints.asList(10,5),polynomialDegree);
                 TPCellIntegral<TPShapeFunction> gg = new TPCellIntegral<>(ScalarFunction.constantFunction(1),
                         TPCellIntegral.GRAD_GRAD,
                         false);
@@ -101,8 +101,11 @@ public class Laplace
                                 return 2*(1+pos.y())/((3+pos.x())*(3+pos.x())+(1+pos.y())*(1+pos.y()));
                          }
                 };
-                Map<CoordinateVector, Double> vals = solut.valuesInPoints(grid.generatePlotPoints(50));
-                Map<CoordinateVector, Double> refvals = referenceSolution.valuesInPoints(grid.generatePlotPoints(50));
-                new PlotFrame(List.of(vals, refvals),start,end);
+                PlotWindow p = new PlotWindow();
+                p.addPlot(new ScalarPlot2D(solut, grid.generatePlotPoints(20),20));
+                p.addPlot(new ScalarPlot2D(solut, grid.generatePlotPoints(50),50));
+                //Map<CoordinateVector, Double> vals = solut.valuesInPoints(grid.generatePlotPoints(50));
+                //Map<CoordinateVector, Double> refvals = referenceSolution.valuesInPoints(grid.generatePlotPoints(50));
+                //new PlotFrame(List.of(vals, refvals),start,end);
         }
 }
