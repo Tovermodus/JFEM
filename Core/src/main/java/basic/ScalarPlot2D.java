@@ -10,15 +10,18 @@ import java.util.Optional;
 
 public class ScalarPlot2D implements Plot
 {
-	final Map<CoordinateVector, Double> values;
-	final int pointsPerDimension;
-	final double minValue;
-	final double maxValue;
-	final double minX;
-	final double minY;
-	final double maxX;
-	final double maxY;
-	final String title;
+	final public Map<CoordinateVector, Double> values;
+	final public int pointsPerDimension;
+	final public double minValue;
+	final public double maxValue;
+	final public double minX;
+	final public double minY;
+	final public double maxX;
+	final public double maxY;
+	public int pixelWidth;
+	public int pixelHeight;
+	public double maxValueDifference;
+	public final String title;
 	public ScalarPlot2D(ScalarFunction function, List<CoordinateVector> points, int pointsPerDimension)
 	{
 		this(function.valuesInPoints(points), pointsPerDimension, "Unnamed");
@@ -58,12 +61,12 @@ public class ScalarPlot2D implements Plot
 	@Override
 	public void drawValues(Graphics g, int width, int height, double slider)
 	{
-		int pixelWidth = (width-150)/pointsPerDimension+1;
-		int pixelHeight = (height-150)/pointsPerDimension+1;
-		double maxValueDifference = maxValue - minValue;
+		pixelWidth = (width-150)/pointsPerDimension+1;
+		pixelHeight = (height-150)/pointsPerDimension+1;
+		maxValueDifference = maxValue - minValue;
 		for(Map.Entry<CoordinateVector, Double> entry:values.entrySet())
 		{
-			int red = (int)((entry.getValue())/maxValueDifference*255);
+			int red = (int)((entry.getValue() - minValue)/maxValueDifference*255);
 			int green = 0;
 			int blue = (int)((maxValue - entry.getValue())/maxValueDifference*255);
 			Color c = new Color(red,green,blue);
