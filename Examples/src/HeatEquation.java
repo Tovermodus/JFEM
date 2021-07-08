@@ -78,9 +78,6 @@ public class HeatEquation
 		boolean implicit = true;
 		for (int i = 0; i < timesteps; i++)
 		{
-			//System.out.println("Ax"+A.mvMul(iterate));
-			//System.out.println("Mx"+M.mvMul(iterate));
-			
 			IterativeSolver<Matrix> its = new IterativeSolver<>();
 			its.showProgress = false;
 			if(implicit)

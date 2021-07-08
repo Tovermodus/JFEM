@@ -10,6 +10,7 @@ import com.google.common.primitives.Doubles;
 import com.google.common.primitives.Ints;
 import linalg.CoordinateVector;
 import linalg.DenseVector;
+import linalg.Matrix;
 import linalg.SparseMatrix;
 import tensorproduct.*;
 
@@ -24,9 +25,9 @@ public class TaylorHoodSpace implements MixedFESpace<TPCell, TPFace, TPEdge,Cont
 	List<List<Cell1D>> cells1D;
 	List<TPCell> cells;
 	List<TPFace> faces;
-	TreeMultimap<TPCell, MixedShapeFunction<TPCell, TPFace, TPEdge,ContinuousTPShapeFunction,
+	TreeMultimap<TPCell, MixedShapeFunction<TPCell, TPFace, TPEdge, ContinuousTPShapeFunction,
 		ContinuousTPVectorFunction>> supportOnCell;
-	TreeMultimap<TPFace, MixedShapeFunction<TPCell, TPFace, TPEdge,ContinuousTPShapeFunction,
+	TreeMultimap<TPFace, MixedShapeFunction<TPCell, TPFace, TPEdge, ContinuousTPShapeFunction,
 		ContinuousTPVectorFunction>> supportOnFace;
 	Map<List<Integer>, TPCell> lexicographicCellNumbers;
 	Set<QkQkFunction> shapeFunctions;
@@ -81,6 +82,7 @@ public class TaylorHoodSpace implements MixedFESpace<TPCell, TPFace, TPEdge,Cont
 			throw new IllegalStateException("index too high");
 		return ret;
 	}
+	
 	@Override
 	public void assembleCells()
 	{
@@ -139,9 +141,10 @@ public class TaylorHoodSpace implements MixedFESpace<TPCell, TPFace, TPEdge,Cont
 		assemblePressureFunctions(polynomialDegree);
 		assembleVelocityFunctions(polynomialDegree);
 		int i = 0;
-		for(QkQkFunction shapeFunction:shapeFunctions)
+		for (QkQkFunction shapeFunction : shapeFunctions)
 			shapeFunction.setGlobalIndex(i++);
 	}
+	
 	private void assemblePressureFunctions(int polynomialDegree)
 	{
 		
@@ -153,13 +156,14 @@ public class TaylorHoodSpace implements MixedFESpace<TPCell, TPFace, TPEdge,Cont
 					polynomialDegree, i));
 				shapeFunction.setGlobalIndex(shapeFunctions.size());
 				shapeFunctions.add(shapeFunction);
-				for(TPCell ce: shapeFunction.getCells())
+				for (TPCell ce : shapeFunction.getCells())
 					supportOnCell.put(ce, shapeFunction);
 				for (TPFace face : shapeFunction.getFaces())
 					supportOnFace.put(face, shapeFunction);
 			}
 		}
 	}
+	
 	private void assembleVelocityFunctions(int polynomialDegree)
 	{
 		
@@ -168,11 +172,11 @@ public class TaylorHoodSpace implements MixedFESpace<TPCell, TPFace, TPEdge,Cont
 			for (int i = 0; i < Math.pow(polynomialDegree + 2, dimension) * dimension; i++)
 			{
 				QkQkFunction shapeFunction = new QkQkFunction(new ContinuousTPVectorFunction(cell,
-					polynomialDegree+1, i,
+					polynomialDegree + 1, i,
 					ContinuousTPShapeFunction.class));
 				shapeFunction.setGlobalIndex(shapeFunctions.size());
 				shapeFunctions.add(shapeFunction);
-				for(TPCell ce: shapeFunction.getCells())
+				for (TPCell ce : shapeFunction.getCells())
 					supportOnCell.put(ce, shapeFunction);
 				for (TPFace face : shapeFunction.getFaces())
 					supportOnFace.put(face, shapeFunction);
@@ -230,12 +234,12 @@ public class TaylorHoodSpace implements MixedFESpace<TPCell, TPFace, TPEdge,Cont
 	}
 	
 	@Override
-	public Map<Integer, MixedShapeFunction<TPCell, TPFace, TPEdge,ContinuousTPShapeFunction,
+	public Map<Integer, MixedShapeFunction<TPCell, TPFace, TPEdge, ContinuousTPShapeFunction,
 		ContinuousTPVectorFunction>> getShapeFunctions()
 	{
 		Map<Integer,
-			MixedShapeFunction<TPCell,TPFace,TPEdge,ContinuousTPShapeFunction,ContinuousTPVectorFunction>> functionNumbers = new TreeMap<>();
-		for (MixedShapeFunction<TPCell,TPFace,TPEdge,ContinuousTPShapeFunction,ContinuousTPVectorFunction> shapeFunction : shapeFunctions)
+			MixedShapeFunction<TPCell, TPFace, TPEdge, ContinuousTPShapeFunction, ContinuousTPVectorFunction>> functionNumbers = new TreeMap<>();
+		for (MixedShapeFunction<TPCell, TPFace, TPEdge, ContinuousTPShapeFunction, ContinuousTPVectorFunction> shapeFunction : shapeFunctions)
 			functionNumbers.put(shapeFunction.getGlobalIndex(), shapeFunction);
 		return functionNumbers;
 	}
@@ -248,14 +252,14 @@ public class TaylorHoodSpace implements MixedFESpace<TPCell, TPFace, TPEdge,Cont
 	}
 	
 	@Override
-	public Collection<MixedShapeFunction<TPCell, TPFace, TPEdge,ContinuousTPShapeFunction,
+	public Collection<MixedShapeFunction<TPCell, TPFace, TPEdge, ContinuousTPShapeFunction,
 		ContinuousTPVectorFunction>> getShapeFunctionsWithSupportOnCell(TPCell cell)
 	{
 		return supportOnCell.get(cell);
 	}
 	
 	@Override
-	public Collection<MixedShapeFunction<TPCell, TPFace, TPEdge,ContinuousTPShapeFunction,
+	public Collection<MixedShapeFunction<TPCell, TPFace, TPEdge, ContinuousTPShapeFunction,
 		ContinuousTPVectorFunction>> getShapeFunctionsWithSupportOnFace(TPFace face)
 	{
 		return supportOnFace.get(face);
@@ -284,28 +288,32 @@ public class TaylorHoodSpace implements MixedFESpace<TPCell, TPFace, TPEdge,Cont
 	
 	public void setVelocityBoundaryValues(VectorFunction boundaryValues)
 	{
+		setVelocityBoundaryValues(boundaryValues, getSystemMatrix());
+		setVelocityBoundaryValues(boundaryValues, getRhs());
+	}
+	public void setVelocityBoundaryValues(VectorFunction boundaryValues, SparseMatrix s)
+	{
 		MixedFunction boundaryMixed = new MixedFunction(boundaryValues);
 		int progress = 0;
-		List<List<TPFace>> smallerList = Lists.partition(getFaces(),getFaces().size()/12+1);
-		smallerList.stream().parallel().forEach(smallList->
+		List<List<TPFace>> smallerList = Lists.partition(getFaces(), getFaces().size() / 12 + 1);
+		smallerList.stream().parallel().forEach(smallList ->
 		{
 			for (TPFace F : smallList)
 			{
 				if (F.isBoundaryFace())
 				{
-					for (MixedShapeFunction<TPCell,TPFace,TPEdge,ContinuousTPShapeFunction,
+					for (MixedShapeFunction<TPCell, TPFace, TPEdge, ContinuousTPShapeFunction,
 						ContinuousTPVectorFunction> shapeFunction :
 						getShapeFunctionsWithSupportOnFace(F))
 					{
-						if(shapeFunction.isVelocity())
+						if (shapeFunction.isVelocity())
 						{
 							double nodeValue = shapeFunction.getNodeFunctional().evaluate(boundaryMixed);
 							if (nodeValue != 0 || F.isOnFace(shapeFunction.getVelocityShapeFunction().getNodeFunctionalPoint()))
 							{
 								int shapeFunctionIndex = shapeFunction.getGlobalIndex();
-								getSystemMatrix().deleteLine(shapeFunctionIndex);
-								getSystemMatrix().set(1, shapeFunctionIndex, shapeFunctionIndex);
-								getRhs().set(nodeValue, shapeFunctionIndex);
+								s.deleteLine(shapeFunctionIndex);
+								s.set(1, shapeFunctionIndex, shapeFunctionIndex);
 							}
 						}
 					}
@@ -313,29 +321,59 @@ public class TaylorHoodSpace implements MixedFESpace<TPCell, TPFace, TPEdge,Cont
 			}
 		});
 	}
+	public void setVelocityBoundaryValues(VectorFunction boundaryValues, DenseVector d)
+	{
+		MixedFunction boundaryMixed = new MixedFunction(boundaryValues);
+		int progress = 0;
+		List<List<TPFace>> smallerList = Lists.partition(getFaces(), getFaces().size() / 12 + 1);
+		smallerList.stream().parallel().forEach(smallList ->
+		{
+			for (TPFace F : smallList)
+			{
+				if (F.isBoundaryFace())
+				{
+					for (MixedShapeFunction<TPCell, TPFace, TPEdge, ContinuousTPShapeFunction,
+						ContinuousTPVectorFunction> shapeFunction :
+						getShapeFunctionsWithSupportOnFace(F))
+					{
+						if (shapeFunction.isVelocity())
+						{
+							double nodeValue = shapeFunction.getNodeFunctional().evaluate(boundaryMixed);
+							if (nodeValue != 0 || F.isOnFace(shapeFunction.getVelocityShapeFunction().getNodeFunctionalPoint()))
+							{
+								int shapeFunctionIndex = shapeFunction.getGlobalIndex();
+								d.set(nodeValue, shapeFunctionIndex);
+							}
+						}
+					}
+				}
+			}
+		});
+	}
+	
 	public void setPressureBoundaryValues(ScalarFunction boundaryValues)
 	{
 		MixedFunction boundaryMixed = new MixedFunction(boundaryValues);
 		int progress = 0;
 		for (TPFace face : getFaces())
 		{
-			System.out.println((int)(100*progress/getFaces().size())+"%");
+			System.out.println((int) (100 * progress / getFaces().size()) + "%");
 			progress++;
 			if (face.isBoundaryFace())
 			{
-				for (MixedShapeFunction<TPCell,TPFace,TPEdge,ContinuousTPShapeFunction,
+				for (MixedShapeFunction<TPCell, TPFace, TPEdge, ContinuousTPShapeFunction,
 					ContinuousTPVectorFunction> shapeFunction :
 					getShapeFunctionsWithSupportOnFace(face))
 				{
-					if(shapeFunction.isPressure())
+					if (shapeFunction.isPressure())
 					{
 						double nodeValue = shapeFunction.getNodeFunctional().evaluate(boundaryMixed);
-						if (nodeValue != 0 || face.isOnFace(((LagrangeNodeFunctional)shapeFunction.getPressureShapeFunction().getNodeFunctional()).getPoint()))
+						if (nodeValue != 0 || face.isOnFace(((LagrangeNodeFunctional) shapeFunction.getPressureShapeFunction().getNodeFunctional()).getPoint()))
 						{
 							int shapeFunctionIndex = shapeFunction.getGlobalIndex();
 							for (TPCell cell : shapeFunction.getCells())
-								for (MixedShapeFunction<TPCell,TPFace,
-									TPEdge,ContinuousTPShapeFunction,
+								for (MixedShapeFunction<TPCell, TPFace,
+									TPEdge, ContinuousTPShapeFunction,
 									ContinuousTPVectorFunction> sameSupportFunction :
 									getShapeFunctionsWithSupportOnCell(cell))
 									systemMatrix.set(0, shapeFunctionIndex,
@@ -348,4 +386,5 @@ public class TaylorHoodSpace implements MixedFESpace<TPCell, TPFace, TPEdge,Cont
 			}
 		}
 	}
+	
 }

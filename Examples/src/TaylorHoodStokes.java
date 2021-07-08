@@ -19,7 +19,8 @@ public class TaylorHoodStokes
 		
 		PerformanceArguments.PerformanceArgumentBuilder builder =
 			new PerformanceArguments.PerformanceArgumentBuilder();
-		builder.build();CoordinateVector start = CoordinateVector.fromValues(0, 0,0);
+		builder.build();
+		CoordinateVector start = CoordinateVector.fromValues(0, 0,0);
 		CoordinateVector end = CoordinateVector.fromValues(1, 1,1);
 		int polynomialDegree = 1;
 		TaylorHoodSpace grid = new TaylorHoodSpace(start, end,

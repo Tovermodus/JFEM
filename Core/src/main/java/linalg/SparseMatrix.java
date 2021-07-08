@@ -171,15 +171,35 @@ public class SparseMatrix implements MutableMatrix, DirectlySolvable, Decomposab
 	public Matrix add(Tensor other)
 	{
 		if(PerformanceArguments.getInstance().executeChecks)
-		if(!getShape().equals(other.getShape()))
-			throw new IllegalArgumentException("Incompatible sizes");
+			if(!getShape().equals(other.getShape()))
+				throw new IllegalArgumentException("Incompatible sizes");
 		if(!(other instanceof SparseMatrix))
 			return ((Matrix)other).add(this);
+		return add((SparseMatrix) other);
+	}
+	public SparseMatrix add(SparseMatrix other)
+	{
+		if(PerformanceArguments.getInstance().executeChecks)
+			if(!getShape().equals(other.getShape()))
+				throw new IllegalArgumentException("Incompatible sizes");
 		SparseMatrix ret = new SparseMatrix(this);
-		for (int i = 0; i < ((SparseMatrix) other).sparseEntries; i++)
+		for (int i = 0; i < other.sparseEntries; i++)
 		{
-			ret.add(((SparseMatrix) other).sparseValues[i],((SparseMatrix) other).sparseYs[i],
-				((SparseMatrix) other).sparseXs[i]);
+			ret.add(other.sparseValues[i], other.sparseYs[i],
+				other.sparseXs[i]);
+		}
+		return ret;
+	}
+	public SparseMatrix sub(SparseMatrix other)
+	{
+		if(PerformanceArguments.getInstance().executeChecks)
+			if(!getShape().equals(other.getShape()))
+				throw new IllegalArgumentException("Incompatible sizes");
+		SparseMatrix ret = new SparseMatrix(this);
+		for (int i = 0; i < other.sparseEntries; i++)
+		{
+			ret.add(-other.sparseValues[i], other.sparseYs[i],
+				other.sparseXs[i]);
 		}
 		return ret;
 	}
