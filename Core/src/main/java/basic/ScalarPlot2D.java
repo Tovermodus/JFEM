@@ -1,12 +1,11 @@
 package basic;
 
+import com.google.common.collect.Iterables;
 import linalg.CoordinateVector;
 
 import java.awt.*;
-import java.util.Comparator;
+import java.util.*;
 import java.util.List;
-import java.util.Map;
-import java.util.Optional;
 
 public class ScalarPlot2D implements Plot
 {
@@ -14,13 +13,10 @@ public class ScalarPlot2D implements Plot
 	final public int pointsPerDimension;
 	final public double minValue;
 	final public double maxValue;
-	final public double minX;
-	final public double minY;
-	final public double maxX;
-	final public double maxY;
+	final public CoordinateVector min;
+	final public CoordinateVector max;
 	public int pixelWidth;
 	public int pixelHeight;
-	public double maxValueDifference;
 	public final String title;
 	public ScalarPlot2D(ScalarFunction function, List<CoordinateVector> points, int pointsPerDimension)
 	{
@@ -39,43 +35,67 @@ public class ScalarPlot2D implements Plot
 				throw new IllegalArgumentException("Not 2D");
 		this.values = values;
 		this.pointsPerDimension = pointsPerDimension;
-		Optional<Double> maV = values.values().stream().parallel().max(Double::compare);
-		Optional<Double> miV = values.values().stream().parallel().min(Double::compare);
-		Optional<CoordinateVector> maX =
-			values.keySet().stream().parallel().max(Comparator.comparingDouble(CoordinateVector::x));
-		Optional<CoordinateVector> miX =
-			values.keySet().stream().parallel().min(Comparator.comparingDouble(CoordinateVector::x));
-		Optional<CoordinateVector> maY =
-			values.keySet().stream().parallel().max(Comparator.comparingDouble(CoordinateVector::y));
-		Optional<CoordinateVector> miY =
-			values.keySet().stream().parallel().min(Comparator.comparingDouble(CoordinateVector::y));
-		maxValue = maV.orElse(0.0);
-		minValue = miV.orElse(0.0);
-		maxX = maX.orElse(new CoordinateVector(2)).x();
-		minX = miX.orElse(new CoordinateVector(2)).x();
-		maxY = maY.orElse(new CoordinateVector(2)).y();
-		minY = miY.orElse(new CoordinateVector(2)).y();
+		maxValue = values.values().stream().parallel().max(Double::compare).orElse(0.0);
+		minValue = values.values().stream().parallel().min(Double::compare).orElse(0.0);
+		max = getMaxCoordinates(values.keySet());
+		min = getMinCoordinates(values.keySet());
 		this.title = title;
 	}
-	
 	@Override
 	public void drawValues(Graphics g, int width, int height, double slider)
 	{
 		pixelWidth = (width-150)/pointsPerDimension+1;
 		pixelHeight = (height-150)/pointsPerDimension+1;
-		maxValueDifference = maxValue - minValue;
 		for(Map.Entry<CoordinateVector, Double> entry:values.entrySet())
 		{
-			int red = (int)((entry.getValue() - minValue)/maxValueDifference*255);
-			int green = 0;
-			int blue = (int)((maxValue - entry.getValue())/maxValueDifference*255);
-			Color c = new Color(red,green,blue);
-			int x = (int)((entry.getKey().x() - minX)/(maxX-minX)*(width-150)+75 - pixelWidth/2);
-			int y =
-				(int)(height - ((entry.getKey().y() - minY)/(maxY-minY)*(height-150)+75 + pixelHeight/2));
-			g.setColor(c);
-			g.fillRect(x,y,pixelWidth,pixelHeight);
+			drawSinglePoint(g, width, height, entry.getKey(), entry.getValue(), minValue, maxValue, min,
+				max,
+				pixelWidth,
+				pixelHeight);
 		}
+	}
+	public static CoordinateVector getMinCoordinates(Collection<CoordinateVector> coordinates)
+	{
+		int dim = Iterables.getLast(coordinates).getLength();
+		CoordinateVector ret = new CoordinateVector(dim);
+		for (int i = 0; i < dim; i++)
+		{
+			int finalI = i;
+			Optional<Double> min =
+				coordinates.stream().parallel().map(c->c.at(finalI)).min(Double::compare);
+			ret.set(min.orElse(0.0),i);
+		}
+		return ret;
+	}
+	public static CoordinateVector getMaxCoordinates(Collection<CoordinateVector> coordinates)
+	{
+		int dim = Iterables.getLast(coordinates).getLength();
+		CoordinateVector ret = new CoordinateVector(dim);
+		for (int i = 0; i < dim; i++)
+		{
+			int finalI = i;
+			Optional<Double> min =
+				coordinates.stream().parallel().map(c->c.at(finalI)).max(Double::compare);
+			ret.set(min.orElse(0.0),i);
+		}
+		return ret;
+	}
+	public static void drawSinglePoint(Graphics g, int width, int height,
+	                                    CoordinateVector coord, double val, double minValue,
+	                                    double maxValue, CoordinateVector mins, CoordinateVector maxs,
+	                                    int pixelWidth, int pixelHeight)
+	{
+		
+		double maxValueDifference = maxValue - minValue;
+		int red = (int)((val - minValue)/maxValueDifference*255);
+		int green = 0;
+		int blue = (int)((maxValue - val)/maxValueDifference*255);
+		Color c = new Color(red,green,blue);
+		int x = (int)((coord.x() - mins.x())/(maxs.x()-mins.x())*(width -150)+75 - pixelWidth/2);
+		int y =
+			(int)(height - ((coord.y() - mins.y())/(maxs.y()-mins.y())*(height -150)+75 + pixelHeight/2));
+		g.setColor(c);
+		g.fillRect(x,y,pixelWidth,pixelHeight);
 	}
 	
 	@Override

@@ -98,32 +98,7 @@ public class TaylorHoodStokes
 		MixedFESpaceFunction<TPCell,TPFace,TPEdge,ContinuousTPShapeFunction,ContinuousTPVectorFunction> solut =
 			new MixedFESpaceFunction<>(
 				grid.getShapeFunctions(), solution1);
-		ArrayList<Map<CoordinateVector, Double>> valList = new ArrayList<>();
-		
-		valList.add(solut.pressureValuesInPoints(grid.generatePlotPoints(20)));
-		OptionalDouble minopt = valList.get(0).values().stream().mapToDouble(Double::doubleValue).min();
-		double min = 0;
-		if(minopt.isPresent())
-			min = minopt.getAsDouble();
-		for(Map.Entry<CoordinateVector,Double> entry:valList.get(0).entrySet())
-		{
-			entry.setValue(entry.getValue()-min);
-		}
-		valList.add(solut.velocityComponentsInPoints(grid.generatePlotPoints(20), 0));
-		valList.add(solut.velocityComponentsInPoints(grid.generatePlotPoints(20), 1));
-		valList.add(solut.velocityComponentsInPoints(grid.generatePlotPoints(20), 2));
-		/*for(MixedShapeFunction<TPCell, TPFace, ContinuousTPShapeFunction,ContinuousTPVectorFunction>
-		shapeFunction:grid.getShapeFunctions().values())
-		
-		{
-			if(shapeFunction.isPressure())
-			valList.add(shapeFunction.pressureValuesInPoints(grid.generatePlotPoints(50)));
-			if(shapeFunction.isVelocity())
-			{
-				valList.add(shapeFunction.velocityComponentsInPoints(grid.generatePlotPoints(50),
-					shapeFunction.getVelocityShapeFunction().getComponent()));
-			}
-		}*/
-		new PlotFrame(valList, start, end);
+		PlotWindow p = new PlotWindow();
+		p.addPlot(new MixedPlot3D(solut,grid.generatePlotPoints(20),20));
 	}
 }
