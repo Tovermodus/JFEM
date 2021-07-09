@@ -118,4 +118,12 @@ public class MixedFunction implements Function < MixedValue,
 			value(point).getVelocity().at(component)));
 		return ret;
 	}
+	public Map<CoordinateVector, CoordinateVector> velocityValuesInPointsAtTime(List<CoordinateVector> points,
+	                                                                      double t)
+	{
+		ConcurrentHashMap<CoordinateVector, CoordinateVector> ret = new ConcurrentHashMap<>();
+		points.stream().parallel().forEach(point->ret.put(point.addTime(t),
+			value(point).getVelocity().addTime(t)));
+		return ret;
+	}
 }

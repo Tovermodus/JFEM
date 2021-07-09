@@ -96,7 +96,8 @@ public class HeatEquation
 				grid.getShapeFunctions(), iterate)
 				.valuesInPointsAtTime(points, dt*i));
 		}
-		new PlotFrame(List.of(vals),start.addTime(0),end.addTime(timesteps*dt), timesteps);
+		PlotWindow p = new PlotWindow();
+		p.addPlot(new ScalarPlot2DTime(vals, 30,""));
 		
 		
 	}

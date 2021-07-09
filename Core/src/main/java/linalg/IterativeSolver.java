@@ -92,7 +92,12 @@ public class IterativeSolver<Op extends VectorMultiplyable>
 		ex.shutdown();
 		return x;
 	}
+	
 	public Vector solveBiCGStab(Op operator, Vector rhs, double tol)
+	{
+		return solveBiCGStab(operator, rhs, new DenseVector(rhs.getLength()), tol);
+	}
+	public Vector solveBiCGStab(Op operator, Vector rhs, Vector startIterate, double tol)
 	{
 		ex = Executors.newSingleThreadExecutor();
 		Interruptor i = new Interruptor();
@@ -102,7 +107,7 @@ public class IterativeSolver<Op extends VectorMultiplyable>
 		Vector v;
 		Vector s;
 		Vector t;
-		Vector iterate = new DenseVector(n);
+		Vector iterate = new DenseVector(startIterate);
 		Vector startResiduum = rhs.sub(operator.mvMul(iterate));
 		Vector residuum = new DenseVector(startResiduum);
 		Vector p = new DenseVector(residuum);

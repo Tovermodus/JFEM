@@ -61,8 +61,8 @@ public class ScalarPlot3D implements Plot
 	@Override
 	public void drawValues(Graphics g, int width, int height, double slider)
 	{
-		int pixelWidth = (width-150)/pointsPerDimension+1;
-		int pixelHeight = (height-150)/pointsPerDimension+1;
+		pixelWidth = (width-150)/pointsPerDimension+1;
+		pixelHeight = (height-150)/pointsPerDimension+1;
 		
 		for(CoordinateVector co:getClosestPoints(slider))
 		{

@@ -293,8 +293,16 @@ public class TaylorHoodSpace implements MixedFESpace<TPCell, TPFace, TPEdge,Cont
 	}
 	public void setVelocityBoundaryValues(VectorFunction boundaryValues, SparseMatrix s)
 	{
+		setVelocityBoundaryValues(boundaryValues, ScalarFunction.constantFunction(1),s);
+	}
+	public void setVelocityBoundaryValues(VectorFunction boundaryValues, DenseVector d)
+	{
+		setVelocityBoundaryValues(boundaryValues, ScalarFunction.constantFunction(1),d);
+	}
+	public void setVelocityBoundaryValues(VectorFunction boundaryValues,
+	                                      ScalarFunction indicatorFunction, SparseMatrix s)
+	{
 		MixedFunction boundaryMixed = new MixedFunction(boundaryValues);
-		int progress = 0;
 		List<List<TPFace>> smallerList = Lists.partition(getFaces(), getFaces().size() / 12 + 1);
 		smallerList.stream().parallel().forEach(smallList ->
 		{
@@ -302,18 +310,22 @@ public class TaylorHoodSpace implements MixedFESpace<TPCell, TPFace, TPEdge,Cont
 			{
 				if (F.isBoundaryFace())
 				{
-					for (MixedShapeFunction<TPCell, TPFace, TPEdge, ContinuousTPShapeFunction,
-						ContinuousTPVectorFunction> shapeFunction :
-						getShapeFunctionsWithSupportOnFace(F))
+					if(TPFaceIntegral.integrateNonTensorProduct(indicatorFunction::value,
+						F.getCell1Ds(),F.getFlatDimension(),F.getOtherCoordinate()) > 0)
 					{
-						if (shapeFunction.isVelocity())
+						for (MixedShapeFunction<TPCell, TPFace, TPEdge, ContinuousTPShapeFunction,
+							ContinuousTPVectorFunction> shapeFunction :
+							getShapeFunctionsWithSupportOnFace(F))
 						{
-							double nodeValue = shapeFunction.getNodeFunctional().evaluate(boundaryMixed);
-							if (nodeValue != 0 || F.isOnFace(shapeFunction.getVelocityShapeFunction().getNodeFunctionalPoint()))
+							if (shapeFunction.isVelocity())
 							{
-								int shapeFunctionIndex = shapeFunction.getGlobalIndex();
-								s.deleteLine(shapeFunctionIndex);
-								s.set(1, shapeFunctionIndex, shapeFunctionIndex);
+								double nodeValue = shapeFunction.getNodeFunctional().evaluate(boundaryMixed);
+								if (F.isOnFace(shapeFunction.getVelocityShapeFunction().getNodeFunctionalPoint()))
+								{
+									int shapeFunctionIndex = shapeFunction.getGlobalIndex();
+									s.deleteLine(shapeFunctionIndex);
+									s.set(1, shapeFunctionIndex, shapeFunctionIndex);
+								}
 							}
 						}
 					}
@@ -321,7 +333,8 @@ public class TaylorHoodSpace implements MixedFESpace<TPCell, TPFace, TPEdge,Cont
 			}
 		});
 	}
-	public void setVelocityBoundaryValues(VectorFunction boundaryValues, DenseVector d)
+	public void setVelocityBoundaryValues(VectorFunction boundaryValues,
+	                                      ScalarFunction indicatorFunction, DenseVector d)
 	{
 		MixedFunction boundaryMixed = new MixedFunction(boundaryValues);
 		int progress = 0;
@@ -332,17 +345,21 @@ public class TaylorHoodSpace implements MixedFESpace<TPCell, TPFace, TPEdge,Cont
 			{
 				if (F.isBoundaryFace())
 				{
-					for (MixedShapeFunction<TPCell, TPFace, TPEdge, ContinuousTPShapeFunction,
-						ContinuousTPVectorFunction> shapeFunction :
-						getShapeFunctionsWithSupportOnFace(F))
+					if(TPFaceIntegral.integrateNonTensorProduct(indicatorFunction::value,
+						F.getCell1Ds(),F.getFlatDimension(),F.getOtherCoordinate()) > 0)
 					{
-						if (shapeFunction.isVelocity())
+						for (MixedShapeFunction<TPCell, TPFace, TPEdge, ContinuousTPShapeFunction,
+							ContinuousTPVectorFunction> shapeFunction :
+							getShapeFunctionsWithSupportOnFace(F))
 						{
-							double nodeValue = shapeFunction.getNodeFunctional().evaluate(boundaryMixed);
-							if (nodeValue != 0 || F.isOnFace(shapeFunction.getVelocityShapeFunction().getNodeFunctionalPoint()))
+							if (shapeFunction.isVelocity())
 							{
-								int shapeFunctionIndex = shapeFunction.getGlobalIndex();
-								d.set(nodeValue, shapeFunctionIndex);
+								double nodeValue = shapeFunction.getNodeFunctional().evaluate(boundaryMixed);
+								if (F.isOnFace(shapeFunction.getVelocityShapeFunction().getNodeFunctionalPoint()))
+								{
+									int shapeFunctionIndex = shapeFunction.getGlobalIndex();
+									d.set(nodeValue, shapeFunctionIndex);
+								}
 							}
 						}
 					}
