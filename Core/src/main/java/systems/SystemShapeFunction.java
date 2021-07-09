@@ -24,7 +24,7 @@ public class SystemShapeFunction<CT extends Cell<CT,FT,ET>, FT extends Face<CT,F
 	}
 	
 	@Override
-	public NodeFunctional<? extends Function<SystemValue, SystemGradient, SystemHessian>, SystemValue, SystemGradient, SystemHessian> getNodeFunctional()
+	public SystemNodeFunctional getNodeFunctional()
 	{
 		throw new UnsupportedOperationException("not implemented yet");
 	}

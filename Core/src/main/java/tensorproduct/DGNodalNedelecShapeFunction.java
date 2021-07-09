@@ -141,6 +141,12 @@ public class DGNodalNedelecShapeFunction implements VectorShapeFunction<TPCell, 
 	}
 	
 	@Override
+	public int getRangeDimension()
+	{
+		return getDomainDimension();
+	}
+	
+	@Override
 	public double divergence(CoordinateVector pos)
 	{
 		

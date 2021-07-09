@@ -31,7 +31,7 @@ public class NedelecSpace implements MixedFESpace<TPCell, TPFace, TPEdge, Contin
 	TreeMultimap<TPCell, NedelecNodeFuncional> functionalsOnCell;
 	Map<List<Integer>, TPCell> lexicographicCellNumbers;
 	Map<TPCell, FEBaseTransformation<VectorFunction, NedelecNodeFuncional,
-			CoordinateVector, CoordinateMatrix, Tensor>> allTransformationMaps;
+			CoordinateVector, CoordinateMatrix, CoordinateTensor>> allTransformationMaps;
 	BiMap<NedelecNodeFuncional, NedelecShapeFunction> functionalShapeFunctionMap;
 	Set<MixedNedelecFunction> shapeFunctions;
 	SparseMatrix systemMatrix;
@@ -236,7 +236,7 @@ public class NedelecSpace implements MixedFESpace<TPCell, TPFace, TPEdge, Contin
 		for (TPCell cell : cells)
 		{
 			FEBaseTransformation<VectorFunction, NedelecNodeFuncional,
-				CoordinateVector, CoordinateMatrix, Tensor> transformationMap =
+				CoordinateVector, CoordinateMatrix, CoordinateTensor> transformationMap =
 				new FEBaseTransformation<>(assembleOriginalFunctionSpaceOnCell(polynomialDegree,
 					cell), new ArrayList<>(functionalsOnCell.get(cell)));
 			allTransformationMaps.put(cell, transformationMap);

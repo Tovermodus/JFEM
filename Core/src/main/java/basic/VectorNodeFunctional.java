@@ -1,11 +1,8 @@
 package basic;
 
-import linalg.CoordinateMatrix;
-import linalg.CoordinateVector;
-import linalg.Matrix;
-import linalg.Tensor;
+import linalg.*;
 
-public class VectorNodeFunctional implements NodeFunctional<VectorFunction, CoordinateVector, CoordinateMatrix, Tensor>
+public class VectorNodeFunctional implements NodeFunctional<VectorFunction, CoordinateVector, CoordinateMatrix, CoordinateTensor>
 {
 	final int component;
 	final NodeFunctional<ScalarFunction, Double, CoordinateVector, CoordinateMatrix> componentNodeFunctional;

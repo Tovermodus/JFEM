@@ -43,6 +43,11 @@ public class DGRTLaplace
 			new TPVectorRightHandSideIntegral<>(new VectorFunction()
 			{
 				@Override
+				public int getRangeDimension()
+				{
+					return 2;
+				}
+				@Override
 				public int getDomainDimension()
 				{
 					return 2;
@@ -68,6 +73,11 @@ public class DGRTLaplace
 		grid.evaluateFaceIntegrals(faceIntegrals, boundaryFaceIntegrals);
 		grid.setBoundaryValues(new VectorFunction()
 		{
+			@Override
+			public int getRangeDimension()
+			{
+				return 2;
+			}
 			@Override
 			public int getDomainDimension()
 			{

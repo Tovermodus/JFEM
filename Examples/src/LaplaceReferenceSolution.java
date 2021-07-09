@@ -27,6 +27,12 @@ public class LaplaceReferenceSolution
 		return new VectorFunction()
 		{
 			@Override
+			public int getRangeDimension()
+			{
+				return 2;
+			}
+			
+			@Override
 			public int getDomainDimension()
 			{
 				return 2;
@@ -87,6 +93,12 @@ public class LaplaceReferenceSolution
 		return new VectorFunction()
 		{
 			@Override
+			public int getRangeDimension()
+			{
+				return 2;
+			}
+			
+			@Override
 			public int getDomainDimension()
 			{
 				return 2;
@@ -125,6 +137,12 @@ public class LaplaceReferenceSolution
 		ScalarFunction referenceSolution = scalarBoundaryValues();
 		return new VectorFunction()
 		{
+			@Override
+			public int getRangeDimension()
+			{
+				return 2;
+			}
+			
 			@Override
 			public int getDomainDimension()
 			{

@@ -39,4 +39,10 @@ public class VectorFESpaceFunction<ST extends VectorShapeFunction<?,?,?,ST>> imp
 	{
 		return coefficients.entrySet().stream().parallel().map(entry->entry.getKey().value(pos).mul(entry.getValue())).reduce(new CoordinateVector(getDomainDimension()), CoordinateVector::add);
 	}
+	
+	@Override
+	public int getRangeDimension()
+	{
+		return coefficients.keySet().iterator().next().getRangeDimension();
+	}
 }

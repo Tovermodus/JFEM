@@ -73,6 +73,20 @@ public class SystemGradient extends DenseMatrix
 				entries[starts[componentY]+i][starts[componentX]+j] = c.at(i, j);
 		}
 	}
+	public void setComponent(double c, int componentY, int componentX)
+	{
+		if (PerformanceArguments.getInstance().executeChecks)
+		{
+			if (componentX >= ends.length || componentX < 0)
+				throw new IllegalArgumentException("Component does not exist");
+			if (componentY >= ends.length || componentY < 0)
+				throw new IllegalArgumentException("Component does not exist");
+			if (!new IntCoordinates(ends[componentY] - starts[componentY],
+				ends[componentX] - starts[componentX]).equals(new IntCoordinates(1,1)))
+				throw new IllegalArgumentException("Vectors have different size");
+		}
+		entries[starts[componentY]][starts[componentX]] = c;
+	}
 	
 	
 	

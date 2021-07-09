@@ -9,6 +9,12 @@ public class MaxwellReferenceSolution
 		return new VectorFunction()
 		{
 			@Override
+			public int getRangeDimension()
+			{
+				return 3;
+			}
+			
+			@Override
 			public int getDomainDimension()
 			{
 				return 3;
@@ -49,6 +55,12 @@ public class MaxwellReferenceSolution
 	{
 		return new VectorFunction()
 		{
+			@Override
+			public int getRangeDimension()
+			{
+				return 3;
+			}
+			
 			@Override
 			public int getDomainDimension()
 			{
@@ -91,6 +103,12 @@ public class MaxwellReferenceSolution
 		VectorFunction referenceSolution = velocityReferenceSolution();
 		return new VectorFunction()
 		{
+			@Override
+			public int getRangeDimension()
+			{
+				return 3;
+			}
+			
 			@Override
 			public int getDomainDimension()
 			{

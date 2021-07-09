@@ -108,6 +108,12 @@ public class SingleComponentVectorShapeFunction<CT extends Cell<CT,FT,ET>, FT ex
 	}
 	
 	@Override
+	public int getRangeDimension()
+	{
+		return getDomainDimension();
+	}
+	
+	@Override
 	public double divergence(CoordinateVector pos)
 	{
 		return componentFunction.gradient(pos).at(component);

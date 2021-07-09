@@ -92,6 +92,12 @@ public class MixedFESpaceFunction<CT extends Cell<CT,FT,ET>, FT extends Face<CT,
 		return new VectorFunction()
 		{
 			@Override
+			public int getRangeDimension()
+			{
+				return me.value(new CoordinateVector(getDomainDimension())).getLength();
+			}
+			
+			@Override
 			public int getDomainDimension()
 			{
 				return me.getDomainDimension();

@@ -14,7 +14,7 @@ import java.util.stream.Collectors;
 
 public class RTFESpace implements MatrixFESpace<TPCell, TPFace, TPEdge,RTShapeFunction,CoordinateVector,
 	CoordinateMatrix,
-	Tensor>,
+	CoordinateTensor>,
 	Assembleable
 {
 	List<List<Double>> coordinates1D;

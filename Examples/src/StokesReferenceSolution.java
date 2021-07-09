@@ -11,6 +11,12 @@ public class StokesReferenceSolution
 		return new VectorFunction()
 		{
 			@Override
+			public int getRangeDimension()
+			{
+				return 2;
+			}
+			
+			@Override
 			public int getDomainDimension()
 			{
 				return 2;
@@ -50,6 +56,11 @@ public class StokesReferenceSolution
 	{
 		return new VectorFunction()
 		{
+			@Override
+			public int getRangeDimension()
+			{
+				return 2;
+			}
 			@Override
 			public int getDomainDimension()
 			{
@@ -92,6 +103,11 @@ public class StokesReferenceSolution
 		VectorFunction referenceSolution = velocityReferenceSolution();
 		return new VectorFunction()
 		{
+			@Override
+			public int getRangeDimension()
+			{
+				return 2;
+			}
 			@Override
 			public int getDomainDimension()
 			{

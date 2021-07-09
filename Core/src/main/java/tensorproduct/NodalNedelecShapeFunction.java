@@ -141,6 +141,12 @@ public class NodalNedelecShapeFunction implements VectorShapeFunction<TPCell, TP
 	}
 	
 	@Override
+	public int getRangeDimension()
+	{
+		return getDomainDimension();
+	}
+	
+	@Override
 	public double divergence(CoordinateVector pos)
 	{
 		return componentFunction.gradient(pos).at(component);

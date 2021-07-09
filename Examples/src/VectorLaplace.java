@@ -83,6 +83,12 @@ public class VectorLaplace
 		TPVectorBoundaryFaceIntegral<TPVectorFunction> bound = new TPVectorBoundaryFaceIntegral<>(new VectorFunction()
 		{
 			@Override
+			public int getRangeDimension()
+			{
+				return 2;
+			}
+			
+			@Override
 			public int getDomainDimension()
 			{
 				return 2;

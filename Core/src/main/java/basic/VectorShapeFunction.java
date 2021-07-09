@@ -8,9 +8,10 @@ import java.util.Set;
 
 public interface VectorShapeFunction<CT extends Cell<CT,FT, ET>,FT extends Face<CT,FT, ET>, ET extends Edge<CT,
 	FT,ET>,
-	ST extends VectorShapeFunction<CT,FT,ET,ST>> extends VectorFunction, ShapeFunction<CT,FT,ET
+	ST extends VectorShapeFunction<CT,FT,ET,ST>>
+	extends VectorFunction, ShapeFunction<CT,FT,ET
 	,ST,	CoordinateVector,
-	CoordinateMatrix, Tensor>, Comparable<ST>
+	CoordinateMatrix, CoordinateTensor>, Comparable<ST>
 {
 	
 	
@@ -61,7 +62,7 @@ public interface VectorShapeFunction<CT extends Cell<CT,FT, ET>,FT extends Face<
 	
 	@Override
 	NodeFunctional<VectorFunction, CoordinateVector,
-		CoordinateMatrix, Tensor> getNodeFunctional();
+		CoordinateMatrix, CoordinateTensor> getNodeFunctional();
 	 
 	@Override
 	default CoordinateMatrix normalAverageInValue(FT face, CoordinateVector pos)

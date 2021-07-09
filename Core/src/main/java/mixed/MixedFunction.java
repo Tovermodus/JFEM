@@ -69,6 +69,36 @@ public class MixedFunction implements Function < MixedValue,
 	}
 	
 	@Override
+	public MixedValue defaultValue()
+	{
+		if(velocityFunction != null)
+			return new MixedValue(velocityFunction.getRangeDimension()+1);
+		if(pressureFunction != null)
+			return new MixedValue(pressureFunction.getDomainDimension()+1);
+		return new MixedValue(0);
+	}
+	
+	@Override
+	public MixedGradient defaultGradient()
+	{
+		if(velocityFunction != null)
+			return new MixedGradient(velocityFunction.getRangeDimension()+1);
+		if(pressureFunction != null)
+			return new MixedGradient(pressureFunction.getDomainDimension()+1);
+		return new MixedGradient(0);
+	}
+	
+	@Override
+	public MixedHessian defaultHessian()
+	{
+		if(velocityFunction != null)
+			return new MixedHessian(velocityFunction.getRangeDimension()+1);
+		if(pressureFunction != null)
+			return new MixedHessian(pressureFunction.getDomainDimension()+1);
+		return new MixedHessian(0);
+	}
+	
+	@Override
 	public MixedValue value(CoordinateVector pos)
 	{
 		if(isPressure())

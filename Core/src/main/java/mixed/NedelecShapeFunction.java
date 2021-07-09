@@ -4,6 +4,7 @@ import basic.FEBaseTransformation;
 import basic.VectorFunction;
 import basic.VectorShapeFunction;
 import linalg.CoordinateMatrix;
+import linalg.CoordinateTensor;
 import linalg.CoordinateVector;
 import linalg.Tensor;
 import org.jetbrains.annotations.NotNull;
@@ -20,7 +21,8 @@ public class NedelecShapeFunction implements VectorShapeFunction<TPCell, TPFace,
 	Set<TPCell> cells;
 	Set<TPFace> faces;
 	NedelecNodeFuncional nodeFuncional;
-	Map<TPCell, FEBaseTransformation<VectorFunction, NedelecNodeFuncional, CoordinateVector, CoordinateMatrix, Tensor>> transformationMap;
+	Map<TPCell,
+		FEBaseTransformation<VectorFunction, NedelecNodeFuncional, CoordinateVector, CoordinateMatrix, CoordinateTensor>> transformationMap;
 	private int globalIndex;
 	
 	public NedelecShapeFunction(TPCell cell, NedelecNodeFuncional funcional)
@@ -51,7 +53,7 @@ public class NedelecShapeFunction implements VectorShapeFunction<TPCell, TPFace,
 		nodeFuncional = funcional;
 	}
 	public void addTransformationMap(FEBaseTransformation<VectorFunction, NedelecNodeFuncional,
-		CoordinateVector, CoordinateMatrix, Tensor> transformation, TPCell cell)
+		CoordinateVector, CoordinateMatrix, CoordinateTensor> transformation, TPCell cell)
 	{
 		transformationMap.put(cell,transformation);
 	}
@@ -88,6 +90,13 @@ public class NedelecShapeFunction implements VectorShapeFunction<TPCell, TPFace,
 	{
 		return transformationMap.get(cell).vectorBasisFunctionDivergence(nodeFuncional,pos);
 	}
+	
+	@Override
+	public int getRangeDimension()
+	{
+		return getDomainDimension();
+	}
+	
 	@Override
 	public double divergence(CoordinateVector pos)
 	{

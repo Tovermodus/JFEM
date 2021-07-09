@@ -37,6 +37,12 @@ public class TPFace implements FaceWithReferenceFace<TPCell, TPFace, TPEdge>,Com
 		this.normal = new VectorFunction()
 		{
 			@Override
+			public int getRangeDimension()
+			{
+				return getDimension();
+			}
+			
+			@Override
 			public int getDomainDimension()
 			{
 				return getDimension();

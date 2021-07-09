@@ -2,6 +2,7 @@ package mixed;
 
 import basic.*;
 import linalg.CoordinateMatrix;
+import linalg.CoordinateTensor;
 import linalg.CoordinateVector;
 import linalg.Tensor;
 import org.jetbrains.annotations.NotNull;
@@ -12,7 +13,7 @@ import java.util.Collections;
 import java.util.List;
 
 public class NedelecNodeFuncional implements NodeFunctional<VectorFunction, CoordinateVector, CoordinateMatrix,
-	Tensor>, Comparable<NedelecNodeFuncional>
+	CoordinateTensor>, Comparable<NedelecNodeFuncional>
 {
 	public static final int EDGETYPE = 0;
 	public static final int FACETYPE = 1;

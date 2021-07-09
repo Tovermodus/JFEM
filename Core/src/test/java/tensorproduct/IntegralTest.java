@@ -49,6 +49,12 @@ public class IntegralTest
 		VectorFunction vweight = new VectorFunction()
 		{
 			@Override
+			public int getRangeDimension()
+			{
+				return 2;
+			}
+			
+			@Override
 			public int getDomainDimension()
 			{
 				return 2;
@@ -123,6 +129,12 @@ public class IntegralTest
 		VectorFunction vweight = new VectorFunction()
 		{
 			@Override
+			public int getRangeDimension()
+			{
+				return 2;
+			}
+			
+			@Override
 			public int getDomainDimension()
 			{
 				return 2;
@@ -196,6 +208,12 @@ public class IntegralTest
 		};
 		VectorFunction vweight = new VectorFunction()
 		{
+			@Override
+			public int getRangeDimension()
+			{
+				return 2;
+			}
+			
 			@Override
 			public int getDomainDimension()
 			{

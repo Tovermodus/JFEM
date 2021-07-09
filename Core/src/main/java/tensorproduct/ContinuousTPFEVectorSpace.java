@@ -15,7 +15,7 @@ import java.util.stream.Collectors;
 public class ContinuousTPFEVectorSpace implements MatrixFESpace<TPCell, TPFace, TPEdge,ContinuousTPVectorFunction,
 	CoordinateVector,
 	CoordinateMatrix,
-	Tensor>,
+	CoordinateTensor>,
 	Assembleable
 {
 	List<List<Double>> coordinates1D;

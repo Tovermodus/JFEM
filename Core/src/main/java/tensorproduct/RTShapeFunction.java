@@ -108,6 +108,12 @@ public class RTShapeFunction implements VectorShapeFunction<TPCell, TPFace,TPEdg
 	}
 	
 	@Override
+	public int getRangeDimension()
+	{
+		return getDomainDimension();
+	}
+	
+	@Override
 	public double divergence(CoordinateVector pos)
 	{
 		return componentFunction.gradient(pos).at(component);

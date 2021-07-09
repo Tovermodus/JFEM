@@ -95,6 +95,12 @@ public class TPCell implements CellWithReferenceCell<TPCell, TPFace, TPEdge>
 			return new VectorFunction()
 			{
 				@Override
+				public int getRangeDimension()
+				{
+					return face.getNormal().getRangeDimension();
+				}
+				
+				@Override
 				public int getDomainDimension()
 				{
 					return face.getNormal().getDomainDimension();

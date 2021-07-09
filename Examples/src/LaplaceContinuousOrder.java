@@ -59,6 +59,11 @@ public class LaplaceContinuousOrder
 			solutionsVec.add(new VectorFunction()
 			{
 				@Override
+				public int getRangeDimension()
+				{
+					return solut.getRangeDimension();
+				}
+				@Override
 				public int getDomainDimension()
 				{
 					return solut.getDomainDimension();

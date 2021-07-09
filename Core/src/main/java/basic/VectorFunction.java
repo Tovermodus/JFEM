@@ -7,7 +7,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
-public interface VectorFunction extends Function<CoordinateVector, CoordinateMatrix, Tensor>
+public interface VectorFunction extends Function<CoordinateVector, CoordinateMatrix, CoordinateTensor>
 {
 	private double getComponentValue(CoordinateVector pos, int component)
 	{
@@ -17,6 +17,27 @@ public interface VectorFunction extends Function<CoordinateVector, CoordinateMat
 	{
 		return (CoordinateVector) gradient(pos).unfoldDimension(0).get(component);
 	}
+	
+	int getRangeDimension();
+	
+	@Override
+	default CoordinateVector defaultValue()
+	{
+		return new CoordinateVector(getRangeDimension());
+	}
+	
+	@Override
+	default CoordinateMatrix defaultGradient()
+	{
+		return new CoordinateMatrix(getRangeDimension(), getDomainDimension());
+	}
+	
+	@Override
+	default CoordinateTensor defaultHessian()
+	{
+		return new CoordinateTensor(getRangeDimension(), getDomainDimension(), getDomainDimension());
+	}
+	
 	default Map<CoordinateVector, CoordinateVector> valuesInPoints(List<CoordinateVector> points)
 	{
 		ConcurrentHashMap<CoordinateVector, CoordinateVector> ret = new ConcurrentHashMap<>();

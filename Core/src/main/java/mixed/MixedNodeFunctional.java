@@ -9,10 +9,10 @@ public class MixedNodeFunctional implements NodeFunctional<MixedFunction, MixedV
 	MixedHessian>
 {
 	private final NodeFunctional<ScalarFunction,Double, CoordinateVector, CoordinateMatrix> pressureFunctional;
-	private final NodeFunctional<VectorFunction,CoordinateVector, CoordinateMatrix, Tensor> velocityFunctional;
+	private final NodeFunctional<VectorFunction,CoordinateVector, CoordinateMatrix, CoordinateTensor> velocityFunctional;
 	
 	private MixedNodeFunctional(NodeFunctional<ScalarFunction, Double, CoordinateVector, CoordinateMatrix> pressureFunctional,
-	                      NodeFunctional<VectorFunction, CoordinateVector, CoordinateMatrix, Tensor> velocityFunctional)
+	                      NodeFunctional<VectorFunction, CoordinateVector, CoordinateMatrix, CoordinateTensor> velocityFunctional)
 	{
 		this.pressureFunctional = pressureFunctional;
 		this.velocityFunctional = velocityFunctional;
@@ -26,7 +26,7 @@ public class MixedNodeFunctional implements NodeFunctional<MixedFunction, MixedV
 	}
 	public  static MixedNodeFunctional velocityFunctional(NodeFunctional<VectorFunction,
 		CoordinateVector,
-		CoordinateMatrix, Tensor> velocityFunctional)
+		CoordinateMatrix, CoordinateTensor> velocityFunctional)
 	{
 		return new MixedNodeFunctional(null,velocityFunctional);
 	}

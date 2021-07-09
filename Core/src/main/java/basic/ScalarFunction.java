@@ -57,6 +57,12 @@ public interface ScalarFunction extends Function<Double, CoordinateVector, Coord
 		return new VectorFunction()
 		{
 			@Override
+			public int getRangeDimension()
+			{
+				return me.getDomainDimension();
+			}
+			
+			@Override
 			public int getDomainDimension()
 			{
 				return me.getDomainDimension();
@@ -89,6 +95,12 @@ public interface ScalarFunction extends Function<Double, CoordinateVector, Coord
 		return new VectorFunction()
 		{
 			@Override
+			public int getRangeDimension()
+			{
+				return me.getDomainDimension();
+			}
+			
+			@Override
 			public int getDomainDimension()
 			{
 				return me.getDomainDimension();
@@ -104,5 +116,22 @@ public interface ScalarFunction extends Function<Double, CoordinateVector, Coord
 			}
 		};
 	}
-
+	
+	@Override
+	default Double defaultValue()
+	{
+		return 0.0;
+	}
+	
+	@Override
+	default CoordinateVector defaultGradient()
+	{
+		return new CoordinateVector(getDomainDimension());
+	}
+	
+	@Override
+	default CoordinateMatrix defaultHessian()
+	{
+		return new CoordinateMatrix(getDomainDimension(), getDomainDimension());
+	}
 }

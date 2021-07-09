@@ -87,6 +87,17 @@ public class SystemValue extends DenseVector
 			entries[starts[component]+i] = c.at(i);
 		}
 	}
+	public void setComponent(double c, int component)
+	{
+		if (PerformanceArguments.getInstance().executeChecks)
+		{
+			if (component >= ends.length || component < 0)
+				throw new IllegalArgumentException("Component does not exist");
+			if (ends[component] - starts[component] != 1)
+				throw new IllegalArgumentException("Vectors have different size");
+		}
+			entries[starts[component]] = c;
+	}
 	
 	@Override
 	public String toString()

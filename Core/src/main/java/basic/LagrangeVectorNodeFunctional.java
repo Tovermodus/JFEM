@@ -1,11 +1,12 @@
 package basic;
 
 import linalg.CoordinateMatrix;
+import linalg.CoordinateTensor;
 import linalg.CoordinateVector;
 import linalg.Tensor;
 
 public class LagrangeVectorNodeFunctional implements NodeFunctional<VectorFunction, CoordinateVector, CoordinateMatrix,
-	Tensor>
+	CoordinateTensor>
 {
 	
 	private CoordinateVector point;

@@ -17,6 +17,11 @@ public class StokesTime
 		return new VectorFunction()
 		{
 			@Override
+			public int getRangeDimension()
+			{
+				return 2;
+			}
+			@Override
 			public int getDomainDimension()
 			{
 				return 2;

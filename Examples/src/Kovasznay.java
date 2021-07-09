@@ -18,6 +18,11 @@ public class Kovasznay
 		return new VectorFunction()
 		{
 			@Override
+			public int getRangeDimension()
+			{
+				return 2;
+			}
+			@Override
 			public int getDomainDimension()
 			{
 				return 2;
@@ -58,6 +63,11 @@ public class Kovasznay
 		return new VectorFunction()
 		{
 			@Override
+			public int getRangeDimension()
+			{
+				return 2;
+			}
+			@Override
 			public int getDomainDimension()
 			{
 				return 2;
@@ -97,6 +107,11 @@ public class Kovasznay
 		VectorFunction referenceSolution = velocityReferenceSolution();
 		return new VectorFunction()
 		{
+			@Override
+			public int getRangeDimension()
+			{
+				return 2;
+			}
 			@Override
 			public int getDomainDimension()
 			{

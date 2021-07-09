@@ -1,14 +1,12 @@
-package mixed;
-
-import linalg.IntCoordinates;
-import linalg.Tensor;
+package linalg;
 
 import java.util.List;
 
-public class MixedHessian implements Tensor
+public class CoordinateTensor implements Tensor
 {
-	public MixedHessian(int i)
+	public CoordinateTensor(int rangeDimension, int domainDimension, int domainDimension1)
 	{
+	
 	}
 	
 	@Override

@@ -31,6 +31,12 @@ public class TPEdge implements EdgeWithReferenceEdge<TPCell, TPFace, TPEdge>
 		this.tangent = new VectorFunction()
 		{
 			@Override
+			public int getRangeDimension()
+			{
+				return 3;
+			}
+			
+			@Override
 			public int getDomainDimension()
 			{
 				return 3;
