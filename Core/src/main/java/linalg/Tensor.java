@@ -50,7 +50,7 @@ public interface Tensor
 	default double absMaxElement()
 	{
 		OptionalDouble max =
-			getCoordinateEntryList().values().stream().parallel().mapToDouble(Double::doubleValue).max();
+			getCoordinateEntryList().values().stream().parallel().mapToDouble(Double::doubleValue).map(Math::abs).max();
 		if(max.isPresent())
 			return max.getAsDouble();
 		else
@@ -73,8 +73,12 @@ public interface Tensor
 		double absmax = absMaxElement() + other.absMaxElement();
 		for(IntCoordinates c: getShape().range())
 		{
-			if(Math.abs(at(c) - other.at(c)) > tol*(1+absmax))
+			if(Math.abs(at(c) - other.at(c)) > Math.abs(tol*(1+absmax)))
+			{
+				System.out.println(at(c)+" != " +other.at(c)+" with tol " +  tol*(1+absmax)+ " " +
+					" difference: " + Math.abs(at(c) - other.at(c)) + " ");
 				return false;
+			}
 		}
 		return true;
 	}

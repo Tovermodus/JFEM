@@ -4,12 +4,13 @@ import basic.PerformanceArguments;
 import com.google.common.primitives.Ints;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 
 public class DenseMatrix implements MutableMatrix, Decomposable, DirectlySolvable
 {
-	volatile double[][] entries;
+	protected volatile double[][] entries;
 	private org.ujmp.core.Matrix ujmpmat = null;
 	
 	public DenseMatrix(int i, int j)
@@ -341,6 +342,11 @@ public class DenseMatrix implements MutableMatrix, Decomposable, DirectlySolvabl
 		if (!(obj instanceof Matrix))
 			return false;
 		return almostEqual((Tensor) obj);
+	}
+	@Override
+	public int hashCode()
+	{
+		return Arrays.stream(entries).mapToInt(e -> Arrays.stream(e).mapToInt(f->(int)(1e8*f)).sum()).sum();
 	}
 	
 	@Override

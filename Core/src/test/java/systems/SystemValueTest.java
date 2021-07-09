@@ -22,7 +22,7 @@ public class SystemValueTest
 		assertEquals(v.getComponent(2), new CoordinateVector(2));
 		assertEquals(v.getComponent(3), new CoordinateVector(1));
 		assertThrows(IllegalArgumentException.class, ()->v.getComponent(-1));
-		assertThrows(IllegalArgumentException.class, ()->v.getComponent(5));
+		assertThrows(IllegalArgumentException.class, ()->v.getComponent(4));
 	}
 	@Test
 	public void testGetComponent()
