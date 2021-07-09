@@ -14,7 +14,7 @@ public class PerformanceArguments
 	                             Integer cacheSize) {
 		this.parallelizeThreads = Objects.requireNonNullElse(parallelizeThreads, true);
 		this.threadNumber = Objects.requireNonNullElse(threadNumber, 12);
-		this.executeChecks = Objects.requireNonNullElse(executeChecks, false);
+		this.executeChecks = Objects.requireNonNullElse(executeChecks, true);
 		this.cacheSize = Objects.requireNonNullElse(cacheSize, 50000);
 	}
 	public static void createInstance(Boolean parallelizeThreads, Integer threadNumber, Boolean executeChecks,

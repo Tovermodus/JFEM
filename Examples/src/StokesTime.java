@@ -66,9 +66,9 @@ public class StokesTime
 		grid.assembleCells();
 		grid.assembleFunctions(polynomialDegree);
 		int n = grid.getShapeFunctions().size();
-		double reynolds = 0.0000001;
+		double reynolds = 0.01;
 		double dt = 0.1;
-		int timesteps = 150;
+		int timesteps = 450;
 		
 		ScalarFunction indicatorFunction = new ScalarFunction()
 		{
