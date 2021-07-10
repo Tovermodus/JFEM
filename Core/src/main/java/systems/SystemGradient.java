@@ -10,15 +10,15 @@ import java.util.stream.IntStream;
 
 public class SystemGradient extends DenseMatrix
 {
-	int[] starts;
-	int[] ends;
-	protected SystemGradient(SystemGradient mv)
+	final int[] starts;
+	final int[] ends;
+	public SystemGradient(SystemGradient mv)
 	{
 		super(mv);
-		starts = mv.starts.clone();
-		ends = mv.ends.clone();
+		starts = mv.starts;
+		ends = mv.ends;
 	}
-	protected SystemGradient(int [] ends, int d)
+	public SystemGradient(int [] ends, int d)
 	{
 		super(ends[ends.length-1], d);
 		starts = new int[ends.length];
@@ -28,9 +28,17 @@ public class SystemGradient extends DenseMatrix
 			starts[i+1] = ends[i];
 		}
 	}
-	protected SystemGradient(int d)
+	public SystemGradient(int d)
 	{
-		this(SystemParameters.getInstance().ends, d);
+		super(SystemParameters.getInstance().ends[SystemParameters.getInstance().ends.length-1],d);
+		starts = SystemParameters.getInstance().starts;
+		ends = SystemParameters.getInstance().ends;
+	}
+	public SystemGradient(DenseMatrix d, boolean wrap)
+	{
+		super(d, wrap);
+		starts = SystemParameters.getInstance().starts;
+		ends = SystemParameters.getInstance().ends;
 	}
 	
 	public int getNumberOfComponents()

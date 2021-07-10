@@ -18,6 +18,13 @@ public class DenseVector implements MutableVector, MutableTensor
 		entries = new double[size];
 	}
 	
+	public DenseVector(DenseVector vect, boolean wrap)
+	{
+		if(wrap)
+			entries = vect.entries;
+		else
+			entries = vect.entries.clone();
+	}
 	public DenseVector(Vector vect)
 	{
 		entries = new double[vect.getLength()];

@@ -2,14 +2,13 @@ package mixed;
 
 import basic.Function;
 import basic.ScalarFunction;
-import basic.ScalarShapeFunction;
 import basic.VectorFunction;
 import linalg.CoordinateVector;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.List;
 import java.util.Map;
-import java.util.TreeMap;
+import java.util.Objects;
 import java.util.concurrent.ConcurrentHashMap;
 
 public class MixedFunction implements Function < MixedValue,
@@ -63,9 +62,9 @@ public class MixedFunction implements Function < MixedValue,
 	public int getDomainDimension()
 	{
 		if(isPressure())
-			return pressureFunction.getDomainDimension();
+			return Objects.requireNonNull(pressureFunction).getDomainDimension();
 		else
-			return velocityFunction.getDomainDimension();
+			return Objects.requireNonNull(velocityFunction).getDomainDimension();
 	}
 	
 	@Override
@@ -102,9 +101,9 @@ public class MixedFunction implements Function < MixedValue,
 	public MixedValue value(CoordinateVector pos)
 	{
 		if(isPressure())
-			return new PressureValue(pressureFunction.value(pos));
+			return new PressureValue(Objects.requireNonNull(pressureFunction).value(pos));
 		if(isVelocity())
-			return new VelocityValue(velocityFunction.value(pos));
+			return new VelocityValue(Objects.requireNonNull(velocityFunction).value(pos));
 		if(overridesValue)
 			throw new IllegalStateException("needs to override value");
 		throw new IllegalStateException("neither pressure nor velocity function");
@@ -114,9 +113,9 @@ public class MixedFunction implements Function < MixedValue,
 	public MixedGradient gradient(CoordinateVector pos)
 	{
 		if(isPressure())
-			return new PressureGradient(pressureFunction.gradient(pos));
+			return new PressureGradient(Objects.requireNonNull(pressureFunction).gradient(pos));
 		if(isVelocity())
-			return new VelocityGradient(velocityFunction.gradient(pos));
+			return new VelocityGradient(Objects.requireNonNull(velocityFunction).gradient(pos));
 		if(overridesValue)
 			throw new IllegalStateException("needs to override gradient");
 		throw new IllegalStateException("neither pressure nor velocity function");

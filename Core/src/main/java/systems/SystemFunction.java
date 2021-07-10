@@ -9,7 +9,7 @@ public class SystemFunction implements Function<SystemValue,
 	SystemGradient,
 	SystemHessian>
 {
-	private final Function<?,?,?>[] functions;
+	protected final Function<?,?,?>[] functions;
 	public SystemFunction(Function<?,?,?>[] functions)
 	{
 		this.functions = functions;
@@ -18,12 +18,16 @@ public class SystemFunction implements Function<SystemValue,
 			for (int i = 0; i < functions.length; i++)
 			{
 				Function<?, ?, ?> f = functions[i];
-				if (SystemParameters.getInstance().signatures[i].getValueT().isInstance(f.defaultValue()))
-					throw new IllegalArgumentException("function does not fit signature");
-				if (SystemParameters.getInstance().signatures[i].getGradientT().isInstance(f.defaultGradient()))
-					throw new IllegalArgumentException("function does not fit signature");
-				if (SystemParameters.getInstance().signatures[i].getHessianT().isInstance(f.defaultHessian()))
-					throw new IllegalArgumentException("function does not fit signature");
+				if (!SystemParameters.getInstance().signatures[i].getValueT().isInstance(f.defaultValue()))
+					throw new IllegalArgumentException("function does not fit signature in value");
+				if (!SystemParameters.getInstance().signatures[i].getGradientT().isInstance(f.defaultGradient()))
+					throw new IllegalArgumentException("function does not fit signature in " +
+						"gradient");
+				if (!SystemParameters.getInstance().signatures[i].getHessianT().isInstance(f.defaultHessian()))
+					throw new IllegalArgumentException("function does not fit signature in " +
+						"hessian");
+				if(f.getDomainDimension() != getDomainDimension())
+					throw new IllegalArgumentException("Domain Dimensions do not fit");
 			}
 			if(functions.length == 0)
 				throw new IllegalArgumentException("No functions given");
@@ -77,10 +81,10 @@ public class SystemFunction implements Function<SystemValue,
 		SystemGradient ret = new SystemGradient(getDomainDimension());
 		for(int i = 0; i < functions.length; i++)
 		{
-			if(CoordinateVector.class.isAssignableFrom(SystemParameters.getInstance().signatures[i].getValueT()))
-				ret.setComponent((CoordinateVector) functions[i].value(pos), i);
-			if(CoordinateMatrix.class.isAssignableFrom(SystemParameters.getInstance().signatures[i].getValueT()))
-				ret.setComponent((CoordinateMatrix) functions[i].value(pos), i);
+			if(CoordinateVector.class.isAssignableFrom(SystemParameters.getInstance().signatures[i].getGradientT()))
+				ret.setComponent((CoordinateVector) functions[i].gradient(pos), i);
+			if(CoordinateMatrix.class.isAssignableFrom(SystemParameters.getInstance().signatures[i].getGradientT()))
+				ret.setComponent((CoordinateMatrix) functions[i].gradient(pos), i);
 		}
 		return ret;
 	}

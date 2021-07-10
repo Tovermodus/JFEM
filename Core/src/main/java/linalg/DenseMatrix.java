@@ -31,6 +31,19 @@ public class DenseMatrix implements MutableMatrix, Decomposable, DirectlySolvabl
 		entries = matrix;
 	}
 	
+	public DenseMatrix(DenseMatrix d, boolean wrap)
+	{
+		if(wrap)
+			this.entries = d.entries;
+		else
+		{
+			entries = new double[d.getRows()][d.getCols()];
+			for (int i = 0; i < getRows(); i++)
+				for (int j = 0; j < getCols(); j++)
+					entries[i][j] = d.at(i, j);
+		}
+	}
+	
 	@Override
 	public double frobeniusInner(Matrix other)
 	{

@@ -14,13 +14,19 @@ import java.util.stream.IntStream;
 
 public class SystemValue extends DenseVector
 {
-	int[] starts;
-	int[] ends;
+	final int[] starts;
+	final int[] ends;
 	public SystemValue(SystemValue mv)
 	{
 		super(mv);
-		starts = mv.starts.clone();
-		ends = mv.ends.clone();
+		starts = mv.starts;
+		ends = mv.ends;
+	}
+	public SystemValue(DenseVector mv, boolean wrap)
+	{
+		super(mv, wrap);
+		this.ends = SystemParameters.getInstance().ends;
+		this.starts = SystemParameters.getInstance().starts;
 	}
 	public SystemValue(int [] ends, double[] values){
 		super(values);
@@ -46,11 +52,15 @@ public class SystemValue extends DenseVector
 	}
 	public SystemValue()
 	{
-		this(SystemParameters.getInstance().ends);
+		super(SystemParameters.getInstance().ends[SystemParameters.getInstance().ends.length-1]);
+		this.ends = SystemParameters.getInstance().ends;
+		this.starts = SystemParameters.getInstance().starts;
 	}
 	public SystemValue(double [] values)
 	{
-		this(SystemParameters.getInstance().ends, values);
+		super(values);
+		this.ends = SystemParameters.getInstance().ends;
+		this.starts = SystemParameters.getInstance().starts;
 	}
 	public SystemValue(int component, CoordinateVector componentValues)
 	{
