@@ -1,14 +1,9 @@
 package systems;
 
 import basic.Function;
-import basic.FunctionIdentifier;
 import basic.PerformanceArguments;
-import basic.ScalarFunction;
 import linalg.CoordinateMatrix;
 import linalg.CoordinateVector;
-import org.netlib.lapack.Dlabad;
-
-import java.util.Map;
 
 public class SystemFunction implements Function<SystemValue,
 	SystemGradient,
@@ -80,7 +75,6 @@ public class SystemFunction implements Function<SystemValue,
 	public SystemGradient gradient(CoordinateVector pos)
 	{
 		SystemGradient ret = new SystemGradient(getDomainDimension());
-		for(int j = 0; j < functions.length; j++)
 		for(int i = 0; i < functions.length; i++)
 		{
 			if(CoordinateVector.class.isAssignableFrom(SystemParameters.getInstance().signatures[i].getValueT()))

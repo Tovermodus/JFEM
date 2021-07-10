@@ -83,11 +83,11 @@ public class SystemGradientTest
 	public void testSetComponent() {
 		SystemGradient v = createSystemGradient();
 		CoordinateMatrix c2 = CoordinateMatrix.fromValues(2,3,9.0,0.0,0.0,9.0, 9.0,0.0);
-		CoordinateVector c1 = CoordinateVector.fromValues(-1000.0,-2000.0,-3000.0);
+		CoordinateMatrix c1 = CoordinateVector.fromValues(-1000.0,-2000.0,-3000.0).asCoordinateMatrix().transpose();
 		v.setComponent(c1, 0);
 		v.setComponent(c2,1);
 		assertEquals(v.getNumberOfComponents(), 2);
-		assertEquals(v.getComponent(0), c1.asCoordinateMatrix().transpose());
+		assertEquals(v.getComponent(0), c1);
 		assertEquals(v.getComponent(1), c2);
 		assertThrows(IllegalArgumentException.class, ()->v.getComponent(-1));
 		assertThrows(IllegalArgumentException.class, ()->v.getComponent(3));
