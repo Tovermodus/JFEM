@@ -98,8 +98,9 @@ public class SystemValueTest
 		int [] ends = new int[]{1,4,6,7};
 		double [] values = new double[]{0.1,0.5,0.4,0.3,0.8,0.7,1.0};
 		SystemValue v = new SystemValue(ends, values);
+		v.setComponent(-0.1,0);
 		assertEquals(v.getNumberOfComponents(), 4);
-		assertEquals(v.getComponent(0), CoordinateVector.fromValues(0.1));
+		assertEquals(v.getComponent(0), CoordinateVector.fromValues(-0.1));
 		assertEquals(v.getComponent(1), CoordinateVector.fromValues(0.5,0.4,0.3));
 		assertEquals(v.getComponent(2), CoordinateVector.fromValues(0.8,0.7));
 		assertEquals(v.getComponent(3), CoordinateVector.fromValues(1.0));
@@ -110,7 +111,7 @@ public class SystemValueTest
 		v.setComponent(c1,2);
 		v.setComponent(c2,1);
 		assertEquals(v.getNumberOfComponents(), 4);
-		assertEquals(v.getComponent(0), CoordinateVector.fromValues(0.1));
+		assertEquals(v.getComponent(0), CoordinateVector.fromValues(-0.1));
 		assertEquals(v.getComponent(1), c2);
 		assertEquals(v.getComponent(2), c1);
 		assertEquals(v.getComponent(3), CoordinateVector.fromValues(1.0));

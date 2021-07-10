@@ -1,6 +1,5 @@
 package basic
 
-data class FunctionIdentifier<valueT, gradientT, hessianT>(val vT: Class<valueT>,
-                                                              val gT: Class<gradientT>,
-                                                              val hT: Class<hessianT>,
-                                                              val number: Int)
+data class FunctionIdentifier<T>(val type: Class<T>, val number: Int)
+
+data class FunctionSignature(val valueT:Class<*>,val gradientT: Class<*>, val hessianT: Class<*>)

@@ -18,9 +18,9 @@ public class SystemGradient extends DenseMatrix
 		starts = mv.starts.clone();
 		ends = mv.ends.clone();
 	}
-	protected SystemGradient(int [] ends)
+	protected SystemGradient(int [] ends, int d)
 	{
-		super(ends[ends.length-1], ends[ends.length-1]);
+		super(ends[ends.length-1], d);
 		starts = new int[ends.length];
 		this.ends = ends.clone();
 		for (int i = 0; i < ends.length - 1; i++)
@@ -28,66 +28,60 @@ public class SystemGradient extends DenseMatrix
 			starts[i+1] = ends[i];
 		}
 	}
-	protected SystemGradient()
+	protected SystemGradient(int d)
 	{
-		this(SystemParameters.getInstance().ends);
+		this(SystemParameters.getInstance().ends, d);
 	}
 	
 	public int getNumberOfComponents()
 	{
 		return ends.length;
 	}
-	public CoordinateMatrix getComponent(int componentY, int componentX)
+	public CoordinateMatrix getComponent(int component)
 	{
 		if (PerformanceArguments.getInstance().executeChecks)
 		{
-			if (componentX >= ends.length || componentX < 0)
-				throw new IllegalArgumentException("Component does not exist");
-			if (componentY >= ends.length || componentY < 0)
+			if (component >= ends.length || component < 0)
 				throw new IllegalArgumentException("Component does not exist");
 		}
-		CoordinateMatrix ret = new CoordinateMatrix(ends[componentY] - starts[componentY],
-			ends[componentX] - starts[componentX]);
+		CoordinateMatrix ret = new CoordinateMatrix(ends[component] - starts[component],getCols());
 		for (int i = 0; i < ret.getRows(); i++)
 		{
 			for (int j = 0; j < ret.getCols(); j++)
-				ret.set(entries[starts[componentY]+i][starts[componentX]+j], i, j);
+				ret.set(entries[starts[component]+i][j], i, j);
 		}
 		return ret;
 	}
-	public void setComponent(CoordinateMatrix c, int componentY, int componentX)
+	public void setComponent(CoordinateMatrix c, int component)
 	{
 		if (PerformanceArguments.getInstance().executeChecks)
 		{
-			if (componentX >= ends.length || componentX < 0)
+			if (component >= ends.length || component < 0)
 				throw new IllegalArgumentException("Component does not exist");
-			if (componentY >= ends.length || componentY < 0)
-				throw new IllegalArgumentException("Component does not exist");
-			if (!new IntCoordinates(ends[componentY] - starts[componentY],
-				ends[componentX] - starts[componentX]).equals(c.getShape()))
+			if (!new IntCoordinates(ends[component] - starts[component],getCols()).equals(c.getShape()))
 				throw new IllegalArgumentException("Vectors have different size");
 		}
 		for (int i = 0; i < c.getRows(); i++)
 		{
 			for (int j = 0; j < c.getCols(); j++)
-				entries[starts[componentY]+i][starts[componentX]+j] = c.at(i, j);
+				entries[starts[component]+i][j] = c.at(i, j);
 		}
 	}
-	public void setComponent(double c, int componentY, int componentX)
+	public void setComponent(CoordinateVector c, int component)
 	{
 		if (PerformanceArguments.getInstance().executeChecks)
 		{
-			if (componentX >= ends.length || componentX < 0)
+			if (component >= ends.length || component < 0)
 				throw new IllegalArgumentException("Component does not exist");
-			if (componentY >= ends.length || componentY < 0)
-				throw new IllegalArgumentException("Component does not exist");
-			if (!new IntCoordinates(ends[componentY] - starts[componentY],
-				ends[componentX] - starts[componentX]).equals(new IntCoordinates(1,1)))
+			if (ends[component] - starts[component]!= 1)
 				throw new IllegalArgumentException("Vectors have different size");
 		}
-		entries[starts[componentY]][starts[componentX]] = c;
+		for (int i = 0; i < c.getLength(); i++)
+		{
+			entries[starts[component]][i] = c.at(i);
+		}
+		
 	}
-	
 	
 	
 	@Override

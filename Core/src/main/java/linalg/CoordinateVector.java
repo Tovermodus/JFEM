@@ -1,5 +1,6 @@
 package linalg;
 
+import basic.PerformanceArguments;
 import org.jetbrains.annotations.NotNull;
 
 public class CoordinateVector extends DenseVector implements Comparable<CoordinateVector>
@@ -7,12 +8,14 @@ public class CoordinateVector extends DenseVector implements Comparable<Coordina
 	public CoordinateVector(Vector v)
 	{
 		super(v);
+		if(PerformanceArguments.getInstance().executeChecks)
 		if(v.getLength()>4)
 			throw new IllegalArgumentException("only 1D, 2D, 3D and 4D supported");
 	}
 	public CoordinateVector(int d)
 	{
 		super(d);
+		if(PerformanceArguments.getInstance().executeChecks)
 		if(d > 4)
 			throw new IllegalArgumentException("only 1D, 2D, 3D and 4D supported");
 	}
@@ -50,14 +53,25 @@ public class CoordinateVector extends DenseVector implements Comparable<Coordina
 	{
 		return new CoordinateMatrix(super.outer(other));
 	}
-	
+	public CoordinateMatrix asCoordinateMatrix()
+	{
+		CoordinateMatrix ret = new CoordinateMatrix(entries.length, 1);
+		for (int i = 0; i < getLength(); i++)
+		{
+			ret.set(entries[i], i,0);
+		}
+		return ret;
+	}
 	@Override
 	public CoordinateVector add(Tensor other)
 	{
-		if(!(other instanceof CoordinateVector))
-			throw new IllegalArgumentException("can't add coordinates and other vectors");
-		if(!getShape().equals(other.getShape()))
-			throw new IllegalArgumentException("Vectors are of different size");
+		if(PerformanceArguments.getInstance().executeChecks)
+		{
+			if (!(other instanceof CoordinateVector))
+				throw new IllegalArgumentException("can't add coordinates and other vectors");
+			if (!getShape().equals(other.getShape()))
+				throw new IllegalArgumentException("Vectors are of different size");
+		}
 		CoordinateVector ret = new CoordinateVector(this);
 		for (int i = 0; i < getLength(); i++)
 			ret.entries[i] = entries[i]+((DenseVector) other).entries[i];
@@ -66,10 +80,13 @@ public class CoordinateVector extends DenseVector implements Comparable<Coordina
 	@Override
 	public CoordinateVector sub(Tensor other)
 	{
-		if(!(other instanceof CoordinateVector))
-			throw new IllegalArgumentException("can't add coordinates and other vectors");
-		if(!getShape().equals(other.getShape()))
-			throw new IllegalArgumentException("Vectors are of different size");
+		if(PerformanceArguments.getInstance().executeChecks)
+		{
+			if (!(other instanceof CoordinateVector))
+				throw new IllegalArgumentException("can't add coordinates and other vectors");
+			if (!getShape().equals(other.getShape()))
+				throw new IllegalArgumentException("Vectors are of different size");
+		}
 		CoordinateVector ret = new CoordinateVector(this);
 		for (int i = 0; i < getLength(); i++)
 			ret.entries[i] = entries[i]-((DenseVector) other).entries[i];

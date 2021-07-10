@@ -11,6 +11,11 @@ public class SystemShapeFunction<CT extends Cell<CT,FT,ET>, FT extends Face<CT,F
 	extends SystemFunction
 	implements ShapeFunction<CT,FT,ET,SystemShapeFunction<CT,FT,ET>,SystemValue, SystemGradient, SystemHessian>
 {
+	public SystemShapeFunction(Function<?, ?, ?>[] functions)
+	{
+		super(functions);
+	}
+	
 	@Override
 	public Set<CT> getCells()
 	{
