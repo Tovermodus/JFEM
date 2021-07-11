@@ -2,7 +2,7 @@ package basic;
 
 public abstract class RightHandSideIntegral<CT extends Cell<CT,?,?>,
 	ST extends ShapeFunction<CT,
-	?,?,ST,?,?,?>>
+	?,?,?,?,?,?>>
 {
 	protected Function<?, ?, ?> rightHandSide;
 	protected String name;

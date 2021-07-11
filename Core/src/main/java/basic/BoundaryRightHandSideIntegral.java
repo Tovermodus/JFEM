@@ -1,7 +1,7 @@
 package basic;
 
 public abstract class BoundaryRightHandSideIntegral<FT extends Face<?,FT,?>, ST extends ShapeFunction<?,
-	FT,?,ST,?,?,?>>
+	FT,?,?,?,?,?>>
 {
 	protected Function<?, ?, ?> rightHandSide;
 	protected String name;
