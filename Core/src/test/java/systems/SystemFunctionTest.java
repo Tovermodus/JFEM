@@ -121,6 +121,31 @@ public class SystemFunctionTest
 		SystemParameters.deleteInstance();
 	}
 	@Test
+	public void testValueSingleComponent() {
+		SystemParameters.createInstance(new int[]{1,4,5,7}, new FunctionSignature[]{
+			new FunctionSignature(Double.class, CoordinateVector.class, CoordinateMatrix.class),
+			new FunctionSignature(CoordinateVector.class, CoordinateMatrix.class, CoordinateTensor.class),
+			new FunctionSignature(Double.class, CoordinateVector.class, CoordinateMatrix.class),
+			new FunctionSignature(CoordinateVector.class, CoordinateMatrix.class, CoordinateTensor.class)
+		});
+		SystemFunction f = new SystemFunction(new ScalarFunction()
+		{
+			@Override
+			public int getDomainDimension()
+			{
+				return 2;
+			}
+			
+			@Override
+			public Double value(CoordinateVector pos)
+			{
+				return 7.8;
+			}
+		}, 2);
+		assertEquals(f.value(new CoordinateVector(2)), DenseVector.vectorFromValues(0,0,0,0,7.8,0,0));
+		SystemParameters.deleteInstance();
+	}
+	@Test
 	public void testGradient() {
 		SystemParameters.createInstance(new int[]{1,4,5,7}, new FunctionSignature[]{
 			new FunctionSignature(Double.class, CoordinateVector.class, CoordinateMatrix.class),

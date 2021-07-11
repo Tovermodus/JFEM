@@ -140,6 +140,12 @@ public class NedelecNodeFuncional implements NodeFunctional<VectorFunction, Coor
 	}
 	
 	@Override
+	public FunctionSignature getFunctionSignature()
+	{
+		return new FunctionSignature(CoordinateVector.class, CoordinateMatrix.class, CoordinateTensor.class);
+	}
+	
+	@Override
 	public double evaluate(VectorFunction func)
 	{
 		if (e != null)

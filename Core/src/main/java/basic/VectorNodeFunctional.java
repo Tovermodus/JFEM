@@ -23,6 +23,11 @@ public class VectorNodeFunctional implements NodeFunctional<VectorFunction, Coor
 		return componentNodeFunctional;
 	}
 	
+	@Override
+	public FunctionSignature getFunctionSignature()
+	{
+		return new FunctionSignature(CoordinateVector.class, CoordinateMatrix.class, CoordinateTensor.class);
+	}
 	public int getComponent()
 	{
 		return component;

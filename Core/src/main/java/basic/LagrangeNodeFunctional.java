@@ -18,6 +18,12 @@ public class LagrangeNodeFunctional implements NodeFunctional<ScalarFunction, Do
 	}
 	
 	@Override
+	public FunctionSignature getFunctionSignature()
+	{
+		return new FunctionSignature(Double.class, CoordinateVector.class, CoordinateMatrix.class);
+	}
+	
+	@Override
 	public double evaluate(ScalarFunction func)
 	{
 		 return func.value(point);

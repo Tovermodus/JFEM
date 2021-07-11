@@ -11,31 +11,40 @@ import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
-
-public class SystemShapeFunction<CT extends Cell<CT,FT,ET>, FT extends Face<CT,FT,ET>, ET extends Edge<CT,FT,ET>>
-	extends SystemFunction
-	implements ShapeFunction<CT,FT,ET,SystemShapeFunction<CT,FT,ET>,SystemValue, SystemGradient, SystemHessian>
+class SystemShapeFunction<CT extends Cell<CT,FT,ET>, FT extends Face<CT,FT,ET>, ET extends Edge<CT,FT,ET>,
+	CST extends ShapeFunction<CT,FT,ET,CST,?,?,?>> extends SystemShapeF<CT,FT,ET,SystemShapeFunction<CT,FT,ET,
+	CST>,CST>
 {
-	Set<CT> cells;
-	Set<FT> faces;
 	
-	public SystemShapeFunction(ShapeFunction<CT,FT,ET, ?, ?, ?, ?>[] functions)
+	public SystemShapeFunction(CST function, int component)
 	{
-		super(functions);
-		cells = Arrays.stream(functions).map(ShapeFunction::getCells).reduce(Sets::union).orElse(new HashSet<>());
-		faces = Arrays.stream(functions).map(ShapeFunction::getFaces).reduce(Sets::union).orElse(new HashSet<>());
+		super(function, component);
 	}
-	
+}
+
+abstract class SystemShapeF<CT extends Cell<CT,FT,ET>, FT extends Face<CT,FT,ET>, ET extends Edge<CT
+	,FT,ET>,
+	ST extends SystemShapeF<CT,FT,ET,ST,CST>,
+	CST extends ShapeFunction<CT,FT,ET,CST,?,?,?>>
+	extends SystemFunction
+	implements ShapeFunction<CT, FT, ET,ST, SystemValue, SystemGradient, SystemHessian>
+{
+	protected final CST function;
+	public SystemShapeF(CST function, int component)
+	{
+		super(function, component);
+		this.function = function;
+	}
 	@Override
 	public Set<CT> getCells()
 	{
-		return cells;
+		return function.getCells();
 	}
 	
 	@Override
 	public Set<FT> getFaces()
 	{
-		return faces;
+		return function.getFaces();
 	}
 	
 	@Override
@@ -51,36 +60,24 @@ public class SystemShapeFunction<CT extends Cell<CT,FT,ET>, FT extends Face<CT,F
 	}
 	
 	@Override
-	@SuppressWarnings("unchecked")
 	public SystemValue valueInCell(CoordinateVector pos, CT cell)
 	{
 		SystemValue ret = new SystemValue();
-		for(int i = 0; i < functions.length; i++)
-		{
-			if(Double.class.isAssignableFrom(SystemParameters.getInstance().signatures[i].getValueT()))
-				ret.setComponent(((ShapeFunction<CT,FT,ET,?,Double,CoordinateVector,
-					CoordinateMatrix>) functions[i]).valueInCell(pos, cell), i);
-			if(CoordinateVector.class.isAssignableFrom(SystemParameters.getInstance().signatures[i].getValueT()))
-				ret.setComponent(((ShapeFunction<CT,FT,ET,?,CoordinateVector,
-					CoordinateMatrix, CoordinateTensor>) functions[i]).valueInCell(pos, cell), i);
-		}
+		if(Double.class.isAssignableFrom(SystemParameters.getInstance().signatures[nonNullComponent].getValueT()))
+			ret.setComponent((Double)function.valueInCell(pos, cell), nonNullComponent);
+		if(CoordinateVector.class.isAssignableFrom(SystemParameters.getInstance().signatures[nonNullComponent].getValueT()))
+			ret.setComponent((CoordinateVector) function.valueInCell(pos, cell), nonNullComponent);
 		return ret;
 	}
 	
 	@Override
-	@SuppressWarnings("unchecked")
 	public SystemGradient gradientInCell(CoordinateVector pos, CT cell)
 	{
 		SystemGradient ret = new SystemGradient(getDomainDimension());
-		for(int i = 0; i < functions.length; i++)
-		{
-			if(Double.class.isAssignableFrom(SystemParameters.getInstance().signatures[i].getValueT()))
-				ret.setComponent(((ShapeFunction<CT,FT,ET,?,Double,CoordinateVector,
-					CoordinateMatrix>) functions[i]).gradientInCell(pos, cell), i);
-			if(CoordinateVector.class.isAssignableFrom(SystemParameters.getInstance().signatures[i].getValueT()))
-				ret.setComponent(((ShapeFunction<CT,FT,ET,?,CoordinateVector,
-					CoordinateMatrix, CoordinateTensor>) functions[i]).gradientInCell(pos, cell), i);
-		}
+		if(CoordinateVector.class.isAssignableFrom(SystemParameters.getInstance().signatures[nonNullComponent].getGradientT()))
+			ret.setComponent((CoordinateVector) function.gradientInCell(pos, cell), nonNullComponent);
+		if(CoordinateMatrix.class.isAssignableFrom(SystemParameters.getInstance().signatures[nonNullComponent].getGradientT()))
+			ret.setComponent((CoordinateMatrix) function.gradientInCell(pos, cell), nonNullComponent);
 		return ret;
 	}
 	
@@ -125,23 +122,17 @@ public class SystemShapeFunction<CT extends Cell<CT,FT,ET>, FT extends Face<CT,F
 	}
 	
 	@Override
-	public Map<Integer, Double> prolongate(Set<SystemShapeFunction<CT, FT, ET>> refinedFunctions)
+	public Map<Integer, Double> prolongate(Set<ST> refinedFunctions)
 	{
 		throw new UnsupportedOperationException("not implemented yet");
 	}
 	
+	
 	@Override
-	@SuppressWarnings("unchecked")
-	public int compareTo(@NotNull SystemShapeFunction<CT, FT, ET> o)
+	public int compareTo(@NotNull ST o)
 	{
-		int comp = 0;
-		int i = 0;
-		while (comp == 0)
-		{
-			comp = ((ShapeFunction<?, ?, ?, ShapeFunction, ?, ?, ?>) functions[i]).compareTo((ShapeFunction<?, ?, ?,
-				ShapeFunction, ?, ?, ?>) (o.functions[i]));
-			i++;
-		}
-		return comp;
+		if(nonNullComponent != o.nonNullComponent)
+			return Integer.compare(nonNullComponent, o.nonNullComponent);
+		return function.compareTo(o.function);
 	}
 }

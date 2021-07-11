@@ -17,6 +17,11 @@ public class LagrangeVectorNodeFunctional implements NodeFunctional<VectorFuncti
 		this.component = component;
 	}
 	
+	@Override
+	public FunctionSignature getFunctionSignature()
+	{
+		return new FunctionSignature(CoordinateVector.class, CoordinateMatrix.class, CoordinateTensor.class);
+	}
 	public CoordinateVector getPoint()
 	{
 		return point;

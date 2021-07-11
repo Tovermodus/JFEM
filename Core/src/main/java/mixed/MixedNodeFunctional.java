@@ -1,9 +1,13 @@
 package mixed;
 
+import basic.FunctionSignature;
 import basic.NodeFunctional;
 import basic.ScalarFunction;
 import basic.VectorFunction;
 import linalg.*;
+import systems.SystemGradient;
+import systems.SystemHessian;
+import systems.SystemValue;
 
 public class MixedNodeFunctional implements NodeFunctional<MixedFunction, MixedValue, MixedGradient,
 	MixedHessian>
@@ -39,6 +43,13 @@ public class MixedNodeFunctional implements NodeFunctional<MixedFunction, MixedV
 	{
 		return pressureFunctional == null;
 	}
+	
+	@Override
+	public FunctionSignature getFunctionSignature()
+	{
+		return new FunctionSignature(MixedValue.class, MixedGradient.class, MixedHessian.class);
+	}
+	
 	@Override
 	public double evaluate(MixedFunction func)
 	{

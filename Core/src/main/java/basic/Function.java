@@ -17,8 +17,9 @@ public interface Function<valueT, gradientT, hessianT>
 	{
 		throw new UnsupportedOperationException();
 	}
-	default FunctionIdentifier<?> createIdentifier(int number)
+	default FunctionSignature getFunctionSignature()
 	{
-		return new FunctionIdentifier<>(this.getClass(), number);
+		return new FunctionSignature(defaultValue().getClass(), defaultGradient().getClass(),
+			defaultHessian().getClass());
 	}
 }
