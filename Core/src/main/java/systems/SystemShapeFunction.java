@@ -11,26 +11,15 @@ import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
-class SystemShapeFunction<CT extends Cell<CT,FT,ET>, FT extends Face<CT,FT,ET>, ET extends Edge<CT,FT,ET>,
-	CST extends ShapeFunction<CT,FT,ET,CST,?,?,?>> extends SystemShapeF<CT,FT,ET,SystemShapeFunction<CT,FT,ET,
-	CST>,CST>
-{
-	
-	public SystemShapeFunction(CST function, int component)
-	{
-		super(function, component);
-	}
-}
 
-abstract class SystemShapeF<CT extends Cell<CT,FT,ET>, FT extends Face<CT,FT,ET>, ET extends Edge<CT
-	,FT,ET>,
-	ST extends SystemShapeF<CT,FT,ET,ST,CST>,
-	CST extends ShapeFunction<CT,FT,ET,CST,?,?,?>>
+public class SystemShapeFunction<CT extends Cell<CT,FT,ET>, FT extends Face<CT,FT,ET>, ET extends Edge<CT,FT,ET>,
+	ST extends ShapeFunction<CT,FT,ET,ST,?, ?, ?>>
 	extends SystemFunction
-	implements ShapeFunction<CT, FT, ET,ST, SystemValue, SystemGradient, SystemHessian>
+	implements ShapeFunction<CT, FT, ET,SystemShapeFunction<CT,FT,ET,ST>, SystemValue, SystemGradient,
+	SystemHessian>
 {
-	protected final CST function;
-	public SystemShapeF(CST function, int component)
+	private final ST function;
+	public SystemShapeFunction(ST function, int component)
 	{
 		super(function, component);
 		this.function = function;
@@ -122,17 +111,16 @@ abstract class SystemShapeF<CT extends Cell<CT,FT,ET>, FT extends Face<CT,FT,ET>
 	}
 	
 	@Override
-	public Map<Integer, Double> prolongate(Set<ST> refinedFunctions)
+	public Map<Integer, Double> prolongate(Set<SystemShapeFunction<CT, FT, ET, ST>> refinedFunctions)
 	{
 		throw new UnsupportedOperationException("not implemented yet");
 	}
-	
-	
 	@Override
-	public int compareTo(@NotNull ST o)
+	public int compareTo(@NotNull SystemShapeFunction<CT, FT, ET, ST> o)
 	{
 		if(nonNullComponent != o.nonNullComponent)
 			return Integer.compare(nonNullComponent, o.nonNullComponent);
 		return function.compareTo(o.function);
 	}
+	
 }
