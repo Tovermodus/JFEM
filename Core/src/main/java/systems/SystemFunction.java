@@ -1,7 +1,6 @@
 package systems;
 
 import basic.Function;
-import basic.FunctionSignature;
 import basic.PerformanceArguments;
 import linalg.CoordinateMatrix;
 import linalg.CoordinateVector;
@@ -11,10 +10,10 @@ public class SystemFunction implements Function<SystemValue,
 	SystemHessian>
 {
 	protected final Function<?,?,?>[] functions;
-	public final int nonNullComponent;
+	public final int mainComponent;
 	public SystemFunction(Function<?,?,?> function, int component)
 	{
-		nonNullComponent = component;
+		mainComponent = component;
 		Function<?,?,?>[] functions = new Function[SystemParameters.getInstance().signatures.length];
 		functions[component] = function;
 		this.functions = functions;
@@ -36,7 +35,7 @@ public class SystemFunction implements Function<SystemValue,
 	public SystemFunction(Function<?,?,?>[] functions)
 	{
 		this.functions = functions;
-		nonNullComponent = 0;
+		mainComponent = 0;
 		if(PerformanceArguments.getInstance().executeChecks)
 		{
 			for (int i = 0; i < functions.length; i++)
@@ -66,7 +65,7 @@ public class SystemFunction implements Function<SystemValue,
 	@Override
 	public int getDomainDimension()
 	{
-		return functions[nonNullComponent].getDomainDimension();
+		return functions[mainComponent].getDomainDimension();
 	}
 	
 	@Override

@@ -27,9 +27,10 @@ public class SystemCellIntegralTest
 		TPCell c = new TPCell(List.of(c1,c2));
 		SystemShapeFunction<TPCell, TPFace, TPEdge, TPShapeFunction> f1
 			= new SystemShapeFunction<>(new TPShapeFunction(c,1,0),0);
-		SystemShapeFunction<TPCell, TPFace, TPEdge, RTShapeFunction> f2
-			= new SystemShapeFunction<>(new RTShapeFunction(c,2,0),3);
-		SystemMixedCellIntegral<TPCell> integral = new SystemMixedCellIntegral<>();
+		SystemShapeFunction<TPCell, TPFace, TPEdge, TPShapeFunction> f2
+			= new SystemShapeFunction<>(new TPShapeFunction(c,1,0),2);
+		SystemMixedCellIntegral<TPCell> integral =
+			new SystemMixedCellIntegral<>(SystemMixedCellIntegral.VALUE_VALUE,0,2);
 		System.out.println(integral.evaluateCellIntegral(c,f1,f2));
 		SystemParameters.deleteInstance();
 	}

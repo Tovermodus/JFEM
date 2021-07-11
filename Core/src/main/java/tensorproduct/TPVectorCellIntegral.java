@@ -16,11 +16,11 @@ public class TPVectorCellIntegral<ST extends VectorShapeFunction<TPCell,TPFace,T
 	public TPVectorCellIntegral(Function<?,?,?> weight, String name)
 	{
 		super(weight, name);
-		if(name.equals(GRAD_GRAD) && !(weight.value(new CoordinateVector(weight.getDomainDimension())) instanceof Double))
+		if(name.equals(GRAD_GRAD) && !(weight.defaultValue() instanceof Double))
 			throw new IllegalArgumentException();
-		if(name.equals(VALUE_VALUE) && !(weight.value(new CoordinateVector(weight.getDomainDimension())) instanceof Double))
+		if(name.equals(VALUE_VALUE) && !(weight.defaultValue() instanceof Double))
 			throw new IllegalArgumentException();
-		if(name.equals(ROT_ROT) && !(weight.value(new CoordinateVector(weight.getDomainDimension())) instanceof Double))
+		if(name.equals(ROT_ROT) && !(weight.defaultValue() instanceof Double))
 			throw new IllegalArgumentException();
 	}
 	public TPVectorCellIntegral(String name)

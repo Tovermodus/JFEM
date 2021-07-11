@@ -28,13 +28,13 @@ public class TPCellIntegral<ST extends ScalarShapeFunction<TPCell,TPFace,TPEdge,
 	{
 		super(weight,name);
 		this.weightIsTensorProduct = weightIsTensorProduct;
-		if(name.equals(GRAD_GRAD) && !(weight.value(new CoordinateVector(weight.getDomainDimension())) instanceof Double))
+		if(name.equals(GRAD_GRAD) && !(weight.defaultValue() instanceof Double))
 			throw new IllegalArgumentException();
-		if(name.equals(VALUE_VALUE) && !(weight.value(new CoordinateVector(weight.getDomainDimension())) instanceof Double))
+		if(name.equals(VALUE_VALUE) && !(weight.defaultValue() instanceof Double))
 			throw new IllegalArgumentException();
-		if(name.equals(GRAD_VALUE) && !(weight.value(new CoordinateVector(weight.getDomainDimension())) instanceof Vector))
+		if(name.equals(GRAD_VALUE) && !(weight.defaultValue() instanceof Vector))
 			throw new IllegalArgumentException();
-		if(name.equals(VALUE_GRAD) && !(weight.value(new CoordinateVector(weight.getDomainDimension())) instanceof Vector))
+		if(name.equals(VALUE_GRAD) && !(weight.defaultValue() instanceof Vector))
 			throw new IllegalArgumentException();
 			
 	}
@@ -42,13 +42,13 @@ public class TPCellIntegral<ST extends ScalarShapeFunction<TPCell,TPFace,TPEdge,
 	{
 		super(name);
 		this.weightIsTensorProduct = true;
-		if(name.equals(GRAD_GRAD) && !(weight.value(new CoordinateVector(weight.getDomainDimension())) instanceof Double))
+		if(name.equals(GRAD_GRAD) && !(weight.defaultValue() instanceof Double))
 			throw new IllegalArgumentException();
-		if(name.equals(VALUE_VALUE) && !(weight.value(new CoordinateVector(weight.getDomainDimension())) instanceof Double))
+		if(name.equals(VALUE_VALUE) && !(weight.defaultValue() instanceof Double))
 			throw new IllegalArgumentException();
-		if(name.equals(GRAD_VALUE) && !(weight.value(new CoordinateVector(weight.getDomainDimension())) instanceof Vector))
+		if(name.equals(GRAD_VALUE) && !(weight.defaultValue() instanceof Vector))
 			throw new IllegalArgumentException();
-		if(name.equals(VALUE_GRAD) && !(weight.value(new CoordinateVector(weight.getDomainDimension())) instanceof Vector))
+		if(name.equals(VALUE_GRAD) && !(weight.defaultValue() instanceof Vector))
 			throw new IllegalArgumentException();
 	}
 	public static double integrateNonTensorProduct(ToDoubleFunction<CoordinateVector> eval, List<Cell1D> cells)

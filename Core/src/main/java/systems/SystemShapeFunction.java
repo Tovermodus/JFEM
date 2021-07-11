@@ -1,14 +1,10 @@
 package systems;
 
 import basic.*;
-import com.google.common.collect.Sets;
 import linalg.CoordinateMatrix;
-import linalg.CoordinateTensor;
 import linalg.CoordinateVector;
 import org.jetbrains.annotations.NotNull;
 
-import java.util.Arrays;
-import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 
@@ -52,10 +48,10 @@ public class SystemShapeFunction<CT extends Cell<CT,FT,ET>, FT extends Face<CT,F
 	public SystemValue valueInCell(CoordinateVector pos, CT cell)
 	{
 		SystemValue ret = new SystemValue();
-		if(Double.class.isAssignableFrom(SystemParameters.getInstance().signatures[nonNullComponent].getValueT()))
-			ret.setComponent((Double)function.valueInCell(pos, cell), nonNullComponent);
-		if(CoordinateVector.class.isAssignableFrom(SystemParameters.getInstance().signatures[nonNullComponent].getValueT()))
-			ret.setComponent((CoordinateVector) function.valueInCell(pos, cell), nonNullComponent);
+		if(Double.class.isAssignableFrom(SystemParameters.getInstance().signatures[mainComponent].getValueT()))
+			ret.setComponent((Double)function.valueInCell(pos, cell), mainComponent);
+		if(CoordinateVector.class.isAssignableFrom(SystemParameters.getInstance().signatures[mainComponent].getValueT()))
+			ret.setComponent((CoordinateVector) function.valueInCell(pos, cell), mainComponent);
 		return ret;
 	}
 	
@@ -63,10 +59,10 @@ public class SystemShapeFunction<CT extends Cell<CT,FT,ET>, FT extends Face<CT,F
 	public SystemGradient gradientInCell(CoordinateVector pos, CT cell)
 	{
 		SystemGradient ret = new SystemGradient(getDomainDimension());
-		if(CoordinateVector.class.isAssignableFrom(SystemParameters.getInstance().signatures[nonNullComponent].getGradientT()))
-			ret.setComponent((CoordinateVector) function.gradientInCell(pos, cell), nonNullComponent);
-		if(CoordinateMatrix.class.isAssignableFrom(SystemParameters.getInstance().signatures[nonNullComponent].getGradientT()))
-			ret.setComponent((CoordinateMatrix) function.gradientInCell(pos, cell), nonNullComponent);
+		if(CoordinateVector.class.isAssignableFrom(SystemParameters.getInstance().signatures[mainComponent].getGradientT()))
+			ret.setComponent((CoordinateVector) function.gradientInCell(pos, cell), mainComponent);
+		if(CoordinateMatrix.class.isAssignableFrom(SystemParameters.getInstance().signatures[mainComponent].getGradientT()))
+			ret.setComponent((CoordinateMatrix) function.gradientInCell(pos, cell), mainComponent);
 		return ret;
 	}
 	
@@ -118,9 +114,20 @@ public class SystemShapeFunction<CT extends Cell<CT,FT,ET>, FT extends Face<CT,F
 	@Override
 	public int compareTo(@NotNull SystemShapeFunction<CT, FT, ET, ST> o)
 	{
-		if(nonNullComponent != o.nonNullComponent)
-			return Integer.compare(nonNullComponent, o.nonNullComponent);
+		if(mainComponent != o.mainComponent)
+			return Integer.compare(mainComponent, o.mainComponent);
 		return function.compareTo(o.function);
 	}
 	
+	@Override
+	public ST getComponentFunction(int component)
+	{
+		return function;
+	}
+	
+	@Override
+	public String toString()
+	{
+		return "component: " + mainComponent + " " + function.getClass() + " function: " + function;
+	}
 }
