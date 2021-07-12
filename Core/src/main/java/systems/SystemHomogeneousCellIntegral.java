@@ -2,12 +2,7 @@ package systems;
 
 import basic.Cell;
 import basic.CellIntegral;
-import basic.Function;
 import basic.ShapeFunction;
-import linalg.CoordinateMatrix;
-import linalg.CoordinateVector;
-import tensorproduct.TPCell;
-import tensorproduct.TPCellIntegral;
 
 public class SystemHomogeneousCellIntegral<CT extends Cell<CT,?,?>, ST extends ShapeFunction<CT,?,?,ST,?,?,?>>
 	extends CellIntegral<CT, SystemShapeFunction<CT,?,?,ST>>
