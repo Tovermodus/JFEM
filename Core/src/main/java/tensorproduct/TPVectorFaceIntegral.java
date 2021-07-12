@@ -7,7 +7,7 @@ import linalg.CoordinateVector;
 import java.util.List;
 import java.util.function.ToDoubleFunction;
 
-public class TPVectorFaceIntegral<ST extends VectorShapeFunction<TPCell,TPFace,TPEdge,ST>> extends FaceIntegral<TPFace,ST>
+public class TPVectorFaceIntegral<ST extends VectorShapeFunction<TPCell,TPFace,TPEdge>> extends FaceIntegral<TPFace,ST>
 {
 	public static String VALUE_NORMALAVERAGE_GRAD_AVERAGE = "ValueNormalaverageGradAverage";
 	public static String GRAD_AVERAGE_VALUE_NORMALAVERAGE = "GradAverageValueNormalaverage";

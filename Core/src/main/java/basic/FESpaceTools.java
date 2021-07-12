@@ -9,7 +9,7 @@ import java.util.function.BiFunction;
 import java.util.stream.Stream;
 
 public interface FESpaceTools<CT extends Cell<CT,FT,ET>, FT extends  Face<CT,FT,ET>, ET extends Edge<CT,FT,ET>,
-	ST extends ShapeFunction<CT,FT,ET,ST,?,?,?>>
+	ST extends ShapeFunction<CT,FT,ET,?,?,?>>
 {
 	default int increaseCellCounter()
 	{

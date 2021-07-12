@@ -1,15 +1,18 @@
 package tensorproduct;
 
 import basic.LagrangeNodeFunctional;
+import basic.ShapeFunction;
 import basic.VectorNodeFunctional;
 import basic.VectorShapeFunction;
 import linalg.CoordinateMatrix;
+import linalg.CoordinateTensor;
 import linalg.CoordinateVector;
 import org.jetbrains.annotations.NotNull;
 
+import java.util.Map;
 import java.util.Set;
 
-public class RTShapeFunction implements VectorShapeFunction<TPCell, TPFace,TPEdge, RTShapeFunction>
+public class RTShapeFunction implements VectorShapeFunction<TPCell, TPFace,TPEdge>
 {
 	private final RTComponentFunction componentFunction;
 	private final int component;
@@ -48,12 +51,12 @@ public class RTShapeFunction implements VectorShapeFunction<TPCell, TPFace,TPEdg
 	}
 	
 	
+	
 	public CoordinateVector getNodeFunctionalPoint()
 	{
 		return ((LagrangeNodeFunctional)getNodeFunctional().getComponentNodeFunctional()).getPoint();
 	}
 	
-	@Override
 	public int compareTo(@NotNull RTShapeFunction o)
 	{
 		if(o.getComponent() < getComponent())
@@ -131,4 +134,5 @@ public class RTShapeFunction implements VectorShapeFunction<TPCell, TPFace,TPEdg
 		return componentFunction.gradient(pos).outer(CoordinateVector.getUnitVector(getDomainDimension(),
 			component));
 	}
+	
 }

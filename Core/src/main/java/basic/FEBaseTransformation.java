@@ -7,8 +7,7 @@ import linalg.DenseMatrix;
 import java.util.List;
 
 public class FEBaseTransformation<F extends Function<valueT,	gradientT,	hessianT>,
-	NT extends NodeFunctional<F,
-	valueT,
+	NT extends NodeFunctional<valueT,
 	gradientT,hessianT>, valueT,
 	gradientT, hessianT>
 {

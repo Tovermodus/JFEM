@@ -4,7 +4,7 @@ import linalg.Tensor;
 import linalg.Vector;
 
 public abstract class CellIntegral<CT extends Cell<CT,?,?>, ST extends ShapeFunction<CT,
-	?,?,?,?,?,?>>
+	?,?,?,?,?>>
 {
 	protected Function<?,?,?> weight;
 	protected String name;

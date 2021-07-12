@@ -1,6 +1,7 @@
 package mixed;
 
 import basic.FEBaseTransformation;
+import basic.ShapeFunction;
 import basic.VectorFunction;
 import basic.VectorShapeFunction;
 import linalg.CoordinateMatrix;
@@ -16,7 +17,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.TreeMap;
 import java.util.TreeSet;
-public class NedelecShapeFunction implements VectorShapeFunction<TPCell, TPFace, TPEdge, NedelecShapeFunction>
+public class NedelecShapeFunction implements VectorShapeFunction<TPCell, TPFace, TPEdge>
 {
 	Set<TPCell> cells;
 	Set<TPFace> faces;
@@ -121,9 +122,10 @@ public class NedelecShapeFunction implements VectorShapeFunction<TPCell, TPFace,
 		return transformationMap.get(cell).vectorBasisFunctionGradient(nodeFuncional, pos);
 	}
 	
-	@Override
+	
 	public int compareTo(@NotNull NedelecShapeFunction o)
 	{
 		return nodeFuncional.compareTo(o.nodeFuncional);
 	}
+	
 }

@@ -4,7 +4,7 @@ import linalg.CoordinateMatrix;
 import linalg.CoordinateVector;
 import linalg.Matrix;
 
-public class LagrangeNodeFunctional implements NodeFunctional<ScalarFunction, Double, CoordinateVector, CoordinateMatrix>
+public class LagrangeNodeFunctional implements NodeFunctional<Double, CoordinateVector, CoordinateMatrix>
 {
 	private final CoordinateVector point;
 	public LagrangeNodeFunctional(CoordinateVector point)
@@ -24,7 +24,7 @@ public class LagrangeNodeFunctional implements NodeFunctional<ScalarFunction, Do
 	}
 	
 	@Override
-	public double evaluate(ScalarFunction func)
+	public double evaluate(Function<Double, CoordinateVector, CoordinateMatrix> func)
 	{
 		 return func.value(point);
 	}

@@ -6,7 +6,7 @@ import linalg.CoordinateVector;
 import java.util.List;
 import java.util.function.ToDoubleFunction;
 
-public class TPFaceIntegral<ST extends ScalarShapeFunction<TPCell,TPFace,TPEdge,ST>> extends FaceIntegral<TPFace,ST>
+public class TPFaceIntegral<ST extends ScalarShapeFunction<TPCell,TPFace,TPEdge>> extends FaceIntegral<TPFace,ST>
 {
 	public static String VALUE_JUMP_VALUE_JUMP = "ValueJumpValueJump";
 	public static String INTERIOR_VALUE_JUMP_VALUE_JUMP = "InteriorValueJumpValueJump";

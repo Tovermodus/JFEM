@@ -1,16 +1,18 @@
 package tensorproduct;
 
 import basic.LagrangeNodeFunctional;
+import basic.ShapeFunction;
 import basic.VectorNodeFunctional;
 import basic.VectorShapeFunction;
 import linalg.CoordinateMatrix;
+import linalg.CoordinateTensor;
 import linalg.CoordinateVector;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.List;
 import java.util.Set;
 
-public class DGNodalNedelecShapeFunction implements VectorShapeFunction<TPCell, TPFace, TPEdge, DGNodalNedelecShapeFunction>
+public class DGNodalNedelecShapeFunction implements VectorShapeFunction<TPCell, TPFace, TPEdge>
 {
 	private final DGNodalNedelecComponentFunction componentFunction;
 	private final int component;
@@ -95,7 +97,6 @@ public class DGNodalNedelecShapeFunction implements VectorShapeFunction<TPCell, 
 		ret.set(-component1, compplus2);
 		return ret;
 	}
-	@Override
 	public int compareTo(@NotNull DGNodalNedelecShapeFunction o)
 	{
 		if(o.getComponent() < getComponent())
@@ -165,4 +166,5 @@ public class DGNodalNedelecShapeFunction implements VectorShapeFunction<TPCell, 
 		return componentFunction.gradient(pos).outer(CoordinateVector.getUnitVector(getDomainDimension(),
 			component));
 	}
+	
 }

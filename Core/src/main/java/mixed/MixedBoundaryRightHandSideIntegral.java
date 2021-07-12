@@ -5,7 +5,7 @@ import org.checkerframework.checker.units.qual.C;
 
 public class MixedBoundaryRightHandSideIntegral<CT extends Cell<CT,FT,ET>,FT extends Face<CT,FT,ET>,
 	ET extends Edge<CT,FT,ET>,
-	PF extends ScalarShapeFunction<CT,FT,ET,PF>, VF extends VectorShapeFunction<CT,FT,ET,VF>> extends BoundaryRightHandSideIntegral<FT,MixedShapeFunction<CT,FT,ET,PF,VF>>
+	PF extends ScalarShapeFunction<CT,FT,ET>, VF extends VectorShapeFunction<CT,FT,ET>> extends BoundaryRightHandSideIntegral<FT,MixedShapeFunction<CT,FT,ET,PF,VF>>
 {
 	private final BoundaryRightHandSideIntegral<FT, PF> pressureIntegral;
 	private final BoundaryRightHandSideIntegral<FT, VF> velocityIntegral;
@@ -19,7 +19,7 @@ public class MixedBoundaryRightHandSideIntegral<CT extends Cell<CT,FT,ET>,FT ext
 	}
 	
 	public static <CT extends Cell<CT, FT, ET>, FT extends Face<CT, FT, ET>, ET extends Edge<CT, FT, ET>,
-		PF extends ScalarShapeFunction<CT, FT, ET, PF>, VF extends VectorShapeFunction<CT, FT, ET, VF>
+		PF extends ScalarShapeFunction<CT, FT, ET>, VF extends VectorShapeFunction<CT, FT, ET>
 		> MixedBoundaryRightHandSideIntegral<CT, FT, ET, PF,
 		VF> fromPressureIntegral(BoundaryRightHandSideIntegral<FT
 		, PF> pressureIntegral)
@@ -28,7 +28,7 @@ public class MixedBoundaryRightHandSideIntegral<CT extends Cell<CT,FT,ET>,FT ext
 	}
 	
 	public static <CT extends Cell<CT, FT, ET>, FT extends Face<CT, FT, ET>, ET extends Edge<CT, FT, ET>,
-		PF extends ScalarShapeFunction<CT, FT, ET, PF>, VF extends VectorShapeFunction<CT, FT, ET, VF>
+		PF extends ScalarShapeFunction<CT, FT, ET>, VF extends VectorShapeFunction<CT, FT, ET>
 		> MixedBoundaryRightHandSideIntegral<CT, FT, ET, PF,
 		VF> fromVelocityIntegral(BoundaryRightHandSideIntegral<FT
 		, VF> velocityIntegral)

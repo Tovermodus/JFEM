@@ -2,18 +2,16 @@ package tensorproduct;
 
 import basic.*;
 import linalg.*;
-import linalg.Vector;
+import org.jetbrains.annotations.NotNull;
 
 import java.util.*;
 
-public class ContinuousTPShapeFunction implements FastEvaluatedScalarShapeFunction<TPCell, TPFace,TPEdge,
-        ContinuousTPShapeFunction>, Comparable<ContinuousTPShapeFunction> {
+public class ContinuousTPShapeFunction implements FastEvaluatedScalarShapeFunction<TPCell, TPFace,TPEdge>{
     
-    private Map<TPCell, List<LagrangeBasisFunction1D>> cells;
-    private Set<TPFace> faces;
+    private final Map<TPCell, List<LagrangeBasisFunction1D>> cells;
+    private final Set<TPFace> faces;
     private final LagrangeNodeFunctional nodeFunctional;
     private final int polynomialDegree;
-    private int localIndex;
     private int globalIndex;
     
     public ContinuousTPShapeFunction(TPCell supportCell, int polynomialDegree,int localIndex)
@@ -21,7 +19,6 @@ public class ContinuousTPShapeFunction implements FastEvaluatedScalarShapeFuncti
         cells = new TreeMap<>();
         faces = new TreeSet<>();
         this.polynomialDegree = polynomialDegree;
-        this.localIndex = localIndex;
         List<LagrangeBasisFunction1D> supportCellFunctions = generateBasisFunctionOnCell(supportCell,
                  localIndex);
         CoordinateVector functionalPoint =
@@ -94,7 +91,7 @@ public class ContinuousTPShapeFunction implements FastEvaluatedScalarShapeFuncti
     }
 
     @Override
-    public NodeFunctional<ScalarFunction, Double, CoordinateVector, CoordinateMatrix> getNodeFunctional() {
+    public NodeFunctional<Double, CoordinateVector, CoordinateMatrix> getNodeFunctional() {
         return nodeFunctional;
     }
     
@@ -109,7 +106,7 @@ public class ContinuousTPShapeFunction implements FastEvaluatedScalarShapeFuncti
         return globalIndex;
     }
     
-
+    
     @Override
     public double fastValueInCell(CoordinateVector pos, TPCell cell)
     {
@@ -156,10 +153,6 @@ public class ContinuousTPShapeFunction implements FastEvaluatedScalarShapeFuncti
     }
     
     
-    @Override
-    public int compareTo(ContinuousTPShapeFunction o) {
-        return CoordinateComparator.comp(nodeFunctional.getPoint(), o.nodeFunctional.getPoint());
-    }
 
     @Override
     public String toString() {
@@ -175,4 +168,13 @@ public class ContinuousTPShapeFunction implements FastEvaluatedScalarShapeFuncti
         return false;
     }
     
+    public int compareTo(ContinuousTPShapeFunction o)
+    {
+            if(polynomialDegree > o.polynomialDegree)
+                return 1;
+            if(polynomialDegree < o.polynomialDegree)
+                return -1;
+            return CoordinateComparator.comp(nodeFunctional.getPoint().getEntries(),
+                    o.nodeFunctional.getPoint().getEntries());
+    }
 }

@@ -12,9 +12,10 @@ import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.ToDoubleFunction;
 
-public class TPCellIntegralViaReferenceCell<ST extends ScalarShapeFunctionWithReferenceShapeFunction<TPCell,TPFace,TPEdge,ST>> extends TPCellIntegral<ST>
+public class TPCellIntegralViaReferenceCell<ST extends ScalarShapeFunctionWithReferenceShapeFunction<TPCell,TPFace,TPEdge>> extends TPCellIntegral<ST>
 {
-	Map<ReferenceCellIdentificationTriplet<TPCell, TPFace, TPEdge, ST>, Double> savedValues;
+	Map<ReferenceCellIdentificationTriplet<TPCell, TPFace, TPEdge, ScalarShapeFunctionWithReferenceShapeFunction<TPCell,TPFace,TPEdge>>,
+		Double> savedValues;
 	
 	public TPCellIntegralViaReferenceCell(double weight, String name, boolean weightIsTensorProduct)
 	{
@@ -32,9 +33,12 @@ public class TPCellIntegralViaReferenceCell<ST extends ScalarShapeFunctionWithRe
 	public double evaluateCellIntegral(TPCell cell, ST shapeFunction1,
 	                                   ST shapeFunction2)
 	{
-		ST referenceShapeFunction1 = shapeFunction1.getReferenceShapeFunctionRelativeTo(cell);
-		ST referenceShapeFunction2 = shapeFunction2.getReferenceShapeFunctionRelativeTo(cell);
-		ReferenceCellIdentificationTriplet<TPCell, TPFace, TPEdge, ST> key =
+		ScalarShapeFunctionWithReferenceShapeFunction<TPCell,TPFace,TPEdge> referenceShapeFunction1
+			= shapeFunction1.getReferenceShapeFunctionRelativeTo(cell);
+		ScalarShapeFunctionWithReferenceShapeFunction<TPCell,TPFace,TPEdge> referenceShapeFunction2
+			= shapeFunction2.getReferenceShapeFunctionRelativeTo(cell);
+		ReferenceCellIdentificationTriplet<TPCell, TPFace, TPEdge,
+			ScalarShapeFunctionWithReferenceShapeFunction<TPCell,TPFace,TPEdge>> key =
 			new ReferenceCellIdentificationTriplet<>(referenceShapeFunction1,
 				referenceShapeFunction2,
 				cell.getReferenceCell());

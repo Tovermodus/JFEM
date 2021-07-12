@@ -12,9 +12,8 @@ import java.util.Optional;
 import java.util.concurrent.ConcurrentHashMap;
 
 public class MixedFESpaceFunction<CT extends Cell<CT,FT,ET>, FT extends Face<CT,FT,ET>, ET extends Edge<CT,FT,ET>,
-	PF extends ScalarShapeFunction<CT,FT,ET,
-	PF>,
-	VF extends VectorShapeFunction<CT,FT,ET,VF>> extends MixedFunction
+	PF extends ScalarShapeFunction<CT,FT,ET>,
+	VF extends VectorShapeFunction<CT,FT,ET>> extends MixedFunction
 {
 	private HashMap<MixedShapeFunction<CT,FT,ET,PF,VF>, Double> coefficients;
 	Map<MixedShapeFunction<CT, FT,ET, PF, VF>, Double> pressureCoefficients;

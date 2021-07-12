@@ -5,7 +5,7 @@ import basic.CellIntegral;
 import basic.RightHandSideIntegral;
 import basic.ShapeFunction;
 
-public class SystemHomogeneousRhsIntegral<CT extends Cell<CT,?,?>, ST extends ShapeFunction<CT,?,?,ST,?,?,?>>
+public class SystemHomogeneousRhsIntegral<CT extends Cell<CT,?,?>, ST extends ShapeFunction<CT,?,?,?,?,?>>
 	extends RightHandSideIntegral<CT, SystemShapeFunction<CT,?,?,ST>>
 {
 	private final RightHandSideIntegral<CT, ST> cellIntegral;

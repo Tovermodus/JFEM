@@ -1,35 +1,31 @@
 package mixed;
 
-import basic.FunctionSignature;
-import basic.NodeFunctional;
-import basic.ScalarFunction;
-import basic.VectorFunction;
+import basic.*;
 import linalg.*;
 import systems.SystemGradient;
 import systems.SystemHessian;
 import systems.SystemValue;
 
-public class MixedNodeFunctional implements NodeFunctional<MixedFunction, MixedValue, MixedGradient,
+public class MixedNodeFunctional implements NodeFunctional<MixedValue, MixedGradient,
 	MixedHessian>
 {
-	private final NodeFunctional<ScalarFunction,Double, CoordinateVector, CoordinateMatrix> pressureFunctional;
-	private final NodeFunctional<VectorFunction,CoordinateVector, CoordinateMatrix, CoordinateTensor> velocityFunctional;
+	private final NodeFunctional<Double, CoordinateVector, CoordinateMatrix> pressureFunctional;
+	private final NodeFunctional<CoordinateVector, CoordinateMatrix, CoordinateTensor> velocityFunctional;
 	
-	private MixedNodeFunctional(NodeFunctional<ScalarFunction, Double, CoordinateVector, CoordinateMatrix> pressureFunctional,
-	                      NodeFunctional<VectorFunction, CoordinateVector, CoordinateMatrix, CoordinateTensor> velocityFunctional)
+	private MixedNodeFunctional(NodeFunctional<Double, CoordinateVector, CoordinateMatrix> pressureFunctional,
+	                      NodeFunctional<CoordinateVector, CoordinateMatrix, CoordinateTensor> velocityFunctional)
 	{
 		this.pressureFunctional = pressureFunctional;
 		this.velocityFunctional = velocityFunctional;
 	}
 	
-	public  static MixedNodeFunctional pressureFunctional(NodeFunctional<ScalarFunction, Double,
+	public  static MixedNodeFunctional pressureFunctional(NodeFunctional<Double,
 		CoordinateVector,
 		CoordinateMatrix> pressureFunctional)
 	{
 		return new MixedNodeFunctional(pressureFunctional, null);
 	}
-	public  static MixedNodeFunctional velocityFunctional(NodeFunctional<VectorFunction,
-		CoordinateVector,
+	public  static MixedNodeFunctional velocityFunctional(NodeFunctional<CoordinateVector,
 		CoordinateMatrix, CoordinateTensor> velocityFunctional)
 	{
 		return new MixedNodeFunctional(null,velocityFunctional);
@@ -51,6 +47,11 @@ public class MixedNodeFunctional implements NodeFunctional<MixedFunction, MixedV
 	}
 	
 	@Override
+	public double evaluate(Function<MixedValue, MixedGradient, MixedHessian> func)
+	{
+		return evaluate(MixedFunction.fromRawFunction(func));
+	}
+	
 	public double evaluate(MixedFunction func)
 	{
 		if(func.isPressure() && isPressureFunctional())

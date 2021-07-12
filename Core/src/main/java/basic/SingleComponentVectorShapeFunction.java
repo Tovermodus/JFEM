@@ -1,27 +1,27 @@
 package basic;
 
 import linalg.CoordinateMatrix;
+import linalg.CoordinateTensor;
 import linalg.CoordinateVector;
 import org.jetbrains.annotations.NotNull;
 
 import java.lang.reflect.InvocationTargetException;
+import java.util.Map;
 import java.util.Set;
 
 public class SingleComponentVectorShapeFunction<CT extends Cell<CT,FT,ET>, FT extends Face<CT,FT,ET>,
 	ET extends Edge<CT,FT,ET>,
-	ST extends FastEvaluatedScalarShapeFunction<CT,FT,ET,ST>, VST extends SingleComponentVectorShapeFunction<CT,
-	FT,ET,ST,VST>> implements VectorShapeFunction<CT,FT,ET,
-	VST>
+	CST extends FastEvaluatedScalarShapeFunction<CT,FT,ET>> implements VectorShapeFunction<CT,FT,ET>
 {
-	private final ST componentFunction;
+	private final CST componentFunction;
 	private final int component;
 	private int globalIndex;
 	
 	public SingleComponentVectorShapeFunction(CT supportCell, int polynomialDegree, int localIndex,
-	                             Class<ST> componentFunctionClass)
+	                                          Class<CST> componentFunctionClass)
 	{
-		component = (int) (localIndex / Math.pow((polynomialDegree+1), supportCell.getDimension()));
-		int componentLocalIndex = (int) (localIndex % Math.pow((polynomialDegree+1), supportCell.getDimension()));
+		component = (int) (localIndex / Math.pow((polynomialDegree + 1), supportCell.getDimension()));
+		int componentLocalIndex = (int) (localIndex % Math.pow((polynomialDegree + 1), supportCell.getDimension()));
 		try
 		{
 			componentFunction =
@@ -34,7 +34,7 @@ public class SingleComponentVectorShapeFunction<CT extends Cell<CT,FT,ET>, FT ex
 		}
 	}
 	
-	public ST getComponentFunction()
+	public CST getComponentFunction()
 	{
 		return componentFunction;
 	}
@@ -77,22 +77,10 @@ public class SingleComponentVectorShapeFunction<CT extends Cell<CT,FT,ET>, FT ex
 	}
 	
 	
-	
-	@Override
-	public int compareTo(@NotNull VST o)
-	{
-		if(o.getComponent() < getComponent())
-			return 1;
-		else if(o.getComponent() > getComponent())
-			return -1;
-		else
-			return componentFunction.compareTo(o.getComponentFunction());
-	}
-	
 	@Override
 	public String toString()
 	{
-		return "Component: "+ component+ componentFunction.toString();
+		return "Component: " + component + componentFunction.toString();
 	}
 	
 	@Override
@@ -124,13 +112,13 @@ public class SingleComponentVectorShapeFunction<CT extends Cell<CT,FT,ET>, FT ex
 	{
 		CoordinateVector ret = new CoordinateVector(getDomainDimension());
 		CoordinateVector grad = componentFunction.gradient(pos);
-		int compplus1 = (component+1)%3;
-		int compplus2 = (component+2)%3;
-		ret.set(grad.at(compplus2),compplus1);
-		ret.set(-grad.at(compplus1),compplus2);
+		int compplus1 = (component + 1) % 3;
+		int compplus2 = (component + 2) % 3;
+		ret.set(grad.at(compplus2), compplus1);
+		ret.set(-grad.at(compplus1), compplus2);
 		return ret;
 	}
-
+	
 	@Override
 	public CoordinateVector value(CoordinateVector pos)
 	{
@@ -154,4 +142,15 @@ public class SingleComponentVectorShapeFunction<CT extends Cell<CT,FT,ET>, FT ex
 	{
 		this.globalIndex = globalIndex;
 	}
+	
+	public int compareTo(SingleComponentVectorShapeFunction<CT, FT, ET, CST> o)
+	{
+		if (o.getComponent() < getComponent())
+			return 1;
+		else if (o.getComponent() > getComponent())
+			return -1;
+		else
+			return componentFunction.compareTo(o.getComponentFunction());
+	}
+	
 }

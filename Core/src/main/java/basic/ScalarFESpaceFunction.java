@@ -5,7 +5,7 @@ import linalg.Vector;
 
 import java.util.*;
 
-public class ScalarFESpaceFunction<ST extends ScalarShapeFunction<?,?,?,ST>> implements ScalarFunction
+public class ScalarFESpaceFunction<ST extends ScalarShapeFunction<?,?,?>> implements ScalarFunction
 {
 	private final Map<ST, Double> coefficients;
 	public ScalarFESpaceFunction(ST[] functions, double[] coefficients)

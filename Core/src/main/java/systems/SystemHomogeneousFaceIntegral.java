@@ -2,7 +2,7 @@ package systems;
 
 import basic.*;
 
-public class SystemHomogeneousFaceIntegral<FT extends Face<?,FT,?>, ST extends ShapeFunction<?,FT,?,ST,?,?,?>>
+public class SystemHomogeneousFaceIntegral<FT extends Face<?,FT,?>, ST extends ShapeFunction<?,FT,?,?,?,?>>
 	extends FaceIntegral<FT, SystemShapeFunction<?,FT,?,ST>>
 {
 	private final FaceIntegral<FT, ST> faceIntegral;

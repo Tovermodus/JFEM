@@ -3,14 +3,14 @@ package basic;
 import com.google.common.collect.Iterables;
 import com.google.common.collect.Sets;
 import linalg.CoordinateVector;
+import org.jetbrains.annotations.NotNull;
 
 import java.util.Map;
 import java.util.Set;
 
 public interface ShapeFunction<CT extends Cell<CT,FT, ET>, FT extends Face<CT,FT, ET>,
-	ET extends Edge<CT,FT,ET>, ST extends ShapeFunction<CT,FT,ET, ST,
-	valueT,gradientT,hessianT>, valueT,	gradientT,
-	hessianT> extends Function<valueT,gradientT,hessianT>, Comparable<ST>
+	ET extends Edge<CT,FT,ET>, valueT,	gradientT,
+	hessianT> extends Function<valueT,gradientT,hessianT>, Comparable<ShapeFunction<CT,FT,ET,?,?,?>>
 {
 	@Override
 	default int getDomainDimension()
@@ -22,7 +22,7 @@ public interface ShapeFunction<CT extends Cell<CT,FT, ET>, FT extends Face<CT,FT
 	
 	Set<FT> getFaces();
 	
-	NodeFunctional<? extends Function<valueT, gradientT, hessianT>, valueT, gradientT, hessianT> getNodeFunctional();
+	NodeFunctional<valueT, gradientT, hessianT> getNodeFunctional();
 	
 	int getGlobalIndex();
 	
@@ -47,6 +47,14 @@ public interface ShapeFunction<CT extends Cell<CT,FT, ET>, FT extends Face<CT,FT
 	
 	valueT normalAverageInDerivative(FT face, CoordinateVector pos);
 	
-	Map<Integer, Double> prolongate(Set<ST> refinedFunctions);
+	<ST extends ShapeFunction<CT,FT,ET,valueT,gradientT,hessianT>> Map<Integer, Double> prolongate(Set<ST> refinedFunctions);
 	
+	@Override
+	default int compareTo(@NotNull ShapeFunction<CT, FT, ET, ?, ?, ?> o)
+	{
+		int ret = getClass().getName().compareTo(o.getClass().getName());
+		if(ret == 0)
+			throw new IllegalStateException("compareTo Must be overwritten");
+		return ret;
+	}
 }

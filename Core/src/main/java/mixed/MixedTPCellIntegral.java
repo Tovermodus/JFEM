@@ -6,8 +6,8 @@ import basic.ScalarShapeFunction;
 import basic.VectorShapeFunction;
 import tensorproduct.*;
 
-public class MixedTPCellIntegral<PF extends ScalarShapeFunction<TPCell, TPFace, TPEdge, PF>,
-	VF extends VectorShapeFunction<TPCell, TPFace,TPEdge, VF>> extends MixedCellIntegral<TPCell, TPFace, TPEdge,PF, VF>
+public class MixedTPCellIntegral<PF extends ScalarShapeFunction<TPCell, TPFace, TPEdge>,
+	VF extends VectorShapeFunction<TPCell, TPFace,TPEdge>> extends MixedCellIntegral<TPCell, TPFace, TPEdge,PF, VF>
 {
 	
 	public static final String DIV_VALUE = "DivValue";

@@ -20,6 +20,41 @@ public interface VectorFunction extends Function<CoordinateVector, CoordinateMat
 	
 	int getRangeDimension();
 	
+	static VectorFunction fromRawFunction(Function<CoordinateVector, CoordinateMatrix, CoordinateTensor> function)
+	{
+		return new VectorFunction()
+		{
+			@Override
+			public int getRangeDimension()
+			{
+				return function.defaultValue().getLength();
+			}
+			
+			@Override
+			public int getDomainDimension()
+			{
+				return function.getDomainDimension();
+			}
+			
+			@Override
+			public CoordinateVector value(CoordinateVector pos)
+			{
+				return function.value(pos);
+			}
+			@Override
+			public CoordinateMatrix gradient(CoordinateVector pos)
+			{
+				return function.gradient(pos);
+			}
+			
+			@Override
+			public CoordinateTensor hessian(CoordinateVector pos)
+			{
+				return function.hessian(pos);
+			}
+			
+		};
+	}
 	@Override
 	default CoordinateVector defaultValue()
 	{

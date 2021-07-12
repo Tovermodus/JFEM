@@ -1,19 +1,25 @@
 package basic;
 
 import linalg.*;
+import org.jetbrains.annotations.NotNull;
 
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
 
 public interface VectorShapeFunction<CT extends Cell<CT,FT, ET>,FT extends Face<CT,FT, ET>, ET extends Edge<CT,
-	FT,ET>,
-	ST extends VectorShapeFunction<CT,FT,ET,ST>>
+	FT,ET>>
 	extends VectorFunction, ShapeFunction<CT,FT,ET
-	,ST,	CoordinateVector,
-	CoordinateMatrix, CoordinateTensor>, Comparable<ST>
+	,	CoordinateVector,
+	CoordinateMatrix, CoordinateTensor>
 {
 	
+	@Override
+	default <ST extends ShapeFunction<CT, FT, ET, CoordinateVector, CoordinateMatrix, CoordinateTensor>> Map<Integer,
+	Double> prolongate(Set<ST> refinedFunctions)
+	{
+		throw new UnsupportedOperationException("Not Yet Implemented");
+	}
 	
 	@Override
 	default CoordinateVector value(CoordinateVector pos)
@@ -61,7 +67,7 @@ public interface VectorShapeFunction<CT extends Cell<CT,FT, ET>,FT extends Face<
 	}
 	
 	@Override
-	NodeFunctional<VectorFunction, CoordinateVector,
+	NodeFunctional<CoordinateVector,
 		CoordinateMatrix, CoordinateTensor> getNodeFunctional();
 	 
 	@Override
@@ -83,7 +89,7 @@ public interface VectorShapeFunction<CT extends Cell<CT,FT, ET>,FT extends Face<
 			return 0;
 	}
 	
-	@Override
+	/*@Override
 	default Map<Integer, Double> prolongate(Set<ST> refinedFunctions)
 	{
 		Map<Integer, Double> ret = new HashMap<>();
@@ -92,5 +98,5 @@ public interface VectorShapeFunction<CT extends Cell<CT,FT, ET>,FT extends Face<
 			ret.put(shapeFunction.getGlobalIndex(), shapeFunction.getNodeFunctional().evaluate(this));
 		}
 		return ret;
-	}
+	}*/
 }

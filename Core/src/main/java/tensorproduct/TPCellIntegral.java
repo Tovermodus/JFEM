@@ -13,7 +13,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.function.ToDoubleFunction;
 
-public class TPCellIntegral<ST extends ScalarShapeFunction<TPCell,TPFace,TPEdge,ST>> extends CellIntegral<TPCell,ST>
+public class TPCellIntegral<ST extends ScalarShapeFunction<TPCell,TPFace,TPEdge>> extends CellIntegral<TPCell,ST>
 {
 	public static final String GRAD_GRAD = "GradGrad";
 	public static final String VALUE_VALUE = "ValueValue";

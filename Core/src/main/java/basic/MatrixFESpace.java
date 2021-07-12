@@ -11,7 +11,7 @@ import java.util.List;
 import java.util.TreeSet;
 
 public interface MatrixFESpace<CT extends Cell<CT,FT,ET>, FT extends  Face<CT,FT,ET>, ET extends Edge<CT,FT,ET>,
-	ST extends ShapeFunction<CT,FT,ET,ST,valueT,gradientT,hessianT>,valueT,gradientT,hessianT
+	ST extends ShapeFunction<CT,FT,ET,valueT,gradientT,hessianT>,valueT,gradientT,hessianT
 	> extends FESpace<CT,FT,ET
 	,ST,valueT,gradientT,hessianT, MatrixFESpace<CT,FT,ET,ST,valueT,gradientT,hessianT>>, FESpaceTools<CT,FT,ET,ST>
 {

@@ -3,9 +3,8 @@ package basic;
 import linalg.CoordinateMatrix;
 import linalg.CoordinateTensor;
 import linalg.CoordinateVector;
-import linalg.Tensor;
 
-public class LagrangeVectorNodeFunctional implements NodeFunctional<VectorFunction, CoordinateVector, CoordinateMatrix,
+public class LagrangeVectorNodeFunctional implements NodeFunctional<CoordinateVector, CoordinateMatrix,
 	CoordinateTensor>
 {
 	
@@ -22,6 +21,13 @@ public class LagrangeVectorNodeFunctional implements NodeFunctional<VectorFuncti
 	{
 		return new FunctionSignature(CoordinateVector.class, CoordinateMatrix.class, CoordinateTensor.class);
 	}
+	
+	@Override
+	public double evaluate(Function<CoordinateVector, CoordinateMatrix, CoordinateTensor> func)
+	{
+		return func.value(point).at(component);
+	}
+	
 	public CoordinateVector getPoint()
 	{
 		return point;
@@ -29,10 +35,5 @@ public class LagrangeVectorNodeFunctional implements NodeFunctional<VectorFuncti
 	public int getComponent()
 	{
 		return component;
-	}
-	@Override
-	public double evaluate(VectorFunction func)
-	{
-		return func.value(point).at(component);
 	}
 }

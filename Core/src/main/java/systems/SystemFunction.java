@@ -1,6 +1,7 @@
 package systems;
 
 import basic.Function;
+import basic.FunctionSignature;
 import basic.PerformanceArguments;
 import linalg.CoordinateMatrix;
 import linalg.CoordinateVector;
@@ -57,7 +58,6 @@ public class SystemFunction implements Function<SystemValue,
 		}
 		
 	}
-	
 	public Function<?,?,?> getComponentFunction(int component)
 	{
 		return functions[component];

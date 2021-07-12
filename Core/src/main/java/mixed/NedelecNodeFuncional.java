@@ -12,7 +12,7 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 
-public class NedelecNodeFuncional implements NodeFunctional<VectorFunction, CoordinateVector, CoordinateMatrix,
+public class NedelecNodeFuncional implements NodeFunctional<CoordinateVector, CoordinateMatrix,
 	CoordinateTensor>, Comparable<NedelecNodeFuncional>
 {
 	public static final int EDGETYPE = 0;
@@ -146,7 +146,7 @@ public class NedelecNodeFuncional implements NodeFunctional<VectorFunction, Coor
 	}
 	
 	@Override
-	public double evaluate(VectorFunction func)
+	public double evaluate(Function<CoordinateVector, CoordinateMatrix, CoordinateTensor> func)
 	{
 		if (e != null)
 		{

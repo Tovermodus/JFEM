@@ -9,9 +9,10 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.ToDoubleFunction;
 
 public class TPFaceIntegralViaReferenceFace<ST extends ScalarShapeFunctionWithReferenceShapeFunction<TPCell,TPFace,
-	TPEdge,ST>> extends TPFaceIntegral<ST>
+	TPEdge>> extends TPFaceIntegral<ST>
 {
-	Map<ReferenceFaceIdentificationTriplet<TPCell, TPFace, TPEdge, ST>, Double> savedValues;
+	Map<ReferenceFaceIdentificationTriplet<TPCell, TPFace, TPEdge, ScalarShapeFunctionWithReferenceShapeFunction<TPCell,TPFace,
+		TPEdge>>, Double> savedValues;
 	public TPFaceIntegralViaReferenceFace(double weight, String name, boolean weightIsTensorProduct)
 	{
 		super(ScalarFunction.constantFunction(weight),name, weightIsTensorProduct);
@@ -27,9 +28,12 @@ public class TPFaceIntegralViaReferenceFace<ST extends ScalarShapeFunctionWithRe
 	public double evaluateFaceIntegral(TPFace face, ST shapeFunction1,
 	                                   ST shapeFunction2)
 	{
-		ST referenceShapeFunction1 = shapeFunction1.getReferenceShapeFunctionRelativeTo(face);
-		ST referenceShapeFunction2 = shapeFunction2.getReferenceShapeFunctionRelativeTo(face);
-		ReferenceFaceIdentificationTriplet<TPCell, TPFace, TPEdge, ST> key =
+		ScalarShapeFunctionWithReferenceShapeFunction<TPCell,TPFace,
+			TPEdge> referenceShapeFunction1 = shapeFunction1.getReferenceShapeFunctionRelativeTo(face);
+		ScalarShapeFunctionWithReferenceShapeFunction<TPCell,TPFace,
+			TPEdge> referenceShapeFunction2 = shapeFunction2.getReferenceShapeFunctionRelativeTo(face);
+		ReferenceFaceIdentificationTriplet<TPCell, TPFace, TPEdge, ScalarShapeFunctionWithReferenceShapeFunction<TPCell,TPFace,
+			TPEdge>> key =
 			new ReferenceFaceIdentificationTriplet<>(referenceShapeFunction1,
 				referenceShapeFunction2,
 				face.getReferenceFace());

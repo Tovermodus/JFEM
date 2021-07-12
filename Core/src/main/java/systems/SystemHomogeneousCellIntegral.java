@@ -4,7 +4,7 @@ import basic.Cell;
 import basic.CellIntegral;
 import basic.ShapeFunction;
 
-public class SystemHomogeneousCellIntegral<CT extends Cell<CT,?,?>, ST extends ShapeFunction<CT,?,?,ST,?,?,?>>
+public class SystemHomogeneousCellIntegral<CT extends Cell<CT,?,?>, ST extends ShapeFunction<CT,?,?,?,?,?>>
 	extends CellIntegral<CT, SystemShapeFunction<CT,?,?,ST>>
 {
 	private final CellIntegral<CT, ST> cellIntegral;

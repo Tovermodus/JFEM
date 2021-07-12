@@ -3,7 +3,8 @@ package mixed;
 import basic.*;
 
 public class MixedRightHandSideIntegral<CT extends Cell<CT,FT,ET>,FT extends Face<CT,FT, ET>, ET extends Edge<CT,FT,ET>,
-	PF extends ScalarShapeFunction<CT,FT,ET,PF>, VF extends VectorShapeFunction<CT,FT,ET,VF>> extends RightHandSideIntegral<CT,MixedShapeFunction<CT,FT,ET,PF,VF>>
+	PF extends ScalarShapeFunction<CT,FT,ET>, VF extends VectorShapeFunction<CT,FT,ET>>
+	extends RightHandSideIntegral<CT,MixedShapeFunction<CT,FT,ET,PF,VF>>
 {
 	private final RightHandSideIntegral<CT, PF> pressureIntegral;
 	private final RightHandSideIntegral<CT, VF> velocityIntegral;
@@ -17,13 +18,13 @@ public class MixedRightHandSideIntegral<CT extends Cell<CT,FT,ET>,FT extends Fac
 	}
 	
 	public static <CT extends Cell<CT,FT,ET>,FT extends Face<CT,FT, ET>, ET extends Edge<CT,FT,ET>,
-		PF extends ScalarShapeFunction<CT,FT,ET, PF>, VF extends VectorShapeFunction<CT,FT,ET, VF>> MixedRightHandSideIntegral<CT,FT,ET, PF, VF> fromPressureIntegral(RightHandSideIntegral<CT, PF> pressureIntegral)
+		PF extends ScalarShapeFunction<CT,FT,ET>, VF extends VectorShapeFunction<CT,FT,ET>> MixedRightHandSideIntegral<CT,FT,ET, PF, VF> fromPressureIntegral(RightHandSideIntegral<CT, PF> pressureIntegral)
 	{
 		return new MixedRightHandSideIntegral<>(pressureIntegral, null);
 	}
 	
 	public static <CT extends Cell<CT,FT,ET>,FT extends Face<CT,FT, ET>, ET extends Edge<CT,FT,ET>,
-		PF extends ScalarShapeFunction<CT,FT,ET, PF>, VF extends VectorShapeFunction<CT,FT,ET, VF>> MixedRightHandSideIntegral<CT,FT,ET ,PF,
+		PF extends ScalarShapeFunction<CT,FT,ET>, VF extends VectorShapeFunction<CT,FT,ET>> MixedRightHandSideIntegral<CT,FT,ET ,PF,
 		VF> fromVelocityIntegral(RightHandSideIntegral<CT
 		, VF> velocityIntegral)
 	{

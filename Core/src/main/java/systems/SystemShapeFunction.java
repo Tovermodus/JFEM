@@ -9,13 +9,13 @@ import java.util.Map;
 import java.util.Set;
 
 public class SystemShapeFunction<CT extends Cell<CT,FT,ET>, FT extends Face<CT,FT,ET>, ET extends Edge<CT,FT,ET>,
-	ST extends ShapeFunction<CT,FT,ET,ST,?, ?, ?>>
+	CST extends ShapeFunction<CT,FT,ET,?, ?, ?>>
 	extends SystemFunction
-	implements ShapeFunction<CT, FT, ET,SystemShapeFunction<CT,FT,ET,ST>, SystemValue, SystemGradient,
+	implements ShapeFunction<CT, FT, ET, SystemValue, SystemGradient,
 	SystemHessian>
 {
-	private final ST function;
-	public SystemShapeFunction(ST function, int component)
+	private final CST function;
+	public SystemShapeFunction(CST function, int component)
 	{
 		super(function, component);
 		this.function = function;
@@ -107,20 +107,14 @@ public class SystemShapeFunction<CT extends Cell<CT,FT,ET>, FT extends Face<CT,F
 	}
 	
 	@Override
-	public Map<Integer, Double> prolongate(Set<SystemShapeFunction<CT, FT, ET, ST>> refinedFunctions)
+	public <ST extends ShapeFunction<CT, FT, ET, SystemValue, SystemGradient, SystemHessian>> Map<Integer, Double> prolongate(Set<ST> refinedFunctions)
 	{
 		throw new UnsupportedOperationException("not implemented yet");
 	}
-	@Override
-	public int compareTo(@NotNull SystemShapeFunction<CT, FT, ET, ST> o)
-	{
-		if(mainComponent != o.mainComponent)
-			return Integer.compare(mainComponent, o.mainComponent);
-		return function.compareTo(o.function);
-	}
+	
 	
 	@Override
-	public ST getComponentFunction(int component)
+	public CST getComponentFunction(int component)
 	{
 		return function;
 	}
@@ -130,4 +124,12 @@ public class SystemShapeFunction<CT extends Cell<CT,FT,ET>, FT extends Face<CT,F
 	{
 		return "component: " + mainComponent + " " + function.getClass() + " function: " + function;
 	}
+	
+	public int compareTo(SystemShapeFunction<CT,FT,ET,CST> o)
+	{
+		if(o.mainComponent == mainComponent)
+			return function.compareTo(o.function);
+		return Integer.compare(mainComponent, o.mainComponent);
+	}
+	
 }

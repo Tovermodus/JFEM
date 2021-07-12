@@ -39,6 +39,35 @@ public interface ScalarFunction extends Function<Double, CoordinateVector, Coord
 			
 		};
 	}
+	static ScalarFunction fromRawFunction(Function<Double, CoordinateVector, CoordinateMatrix> function)
+	{
+		return new ScalarFunction()
+		{
+			@Override
+			public int getDomainDimension()
+			{
+				return function.getDomainDimension();
+			}
+			
+			@Override
+			public Double value(CoordinateVector pos)
+			{
+				return function.value(pos);
+			}
+			@Override
+			public CoordinateVector gradient(CoordinateVector pos)
+			{
+				return function.gradient(pos);
+			}
+			
+			@Override
+			public CoordinateMatrix hessian(CoordinateVector pos)
+			{
+				return function.hessian(pos);
+			}
+			
+		};
+	}
 	default Map<CoordinateVector, Double> valuesInPoints(List<CoordinateVector> points)
 	{
 		ConcurrentHashMap<CoordinateVector, Double> ret = new ConcurrentHashMap<>();

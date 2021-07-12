@@ -2,7 +2,7 @@ package tensorproduct;
 import basic.*;
 import linalg.CoordinateVector;
 
-public class TPBoundaryFaceIntegral<ST extends ScalarShapeFunction<TPCell,TPFace,TPEdge,ST>> extends BoundaryRightHandSideIntegral<TPFace,
+public class TPBoundaryFaceIntegral<ST extends ScalarShapeFunction<TPCell,TPFace,TPEdge>> extends BoundaryRightHandSideIntegral<TPFace,
 	ST>
 {
 	public static final String VALUE="Value";

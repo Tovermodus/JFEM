@@ -7,7 +7,7 @@ import com.google.common.base.Stopwatch;
 import linalg.CoordinateMatrix;
 import linalg.CoordinateVector;
 
-public class TPVectorCellIntegral<ST extends VectorShapeFunction<TPCell,TPFace,TPEdge,ST>> extends CellIntegral<TPCell,
+public class TPVectorCellIntegral<ST extends VectorShapeFunction<TPCell,TPFace,TPEdge>> extends CellIntegral<TPCell,
 	ST>
 {
 	public static final String GRAD_GRAD = "GradGrad";

@@ -5,7 +5,7 @@ import basic.Face;
 import basic.FaceIntegral;
 import basic.ShapeFunction;
 
-public class SystemHomogeneousBoundaryRhsIntegral<FT extends Face<?,FT,?>, ST extends ShapeFunction<?,FT,?,ST,?,?,?>>
+public class SystemHomogeneousBoundaryRhsIntegral<FT extends Face<?,FT,?>, ST extends ShapeFunction<?,FT,?,?,?,?>>
 	extends BoundaryRightHandSideIntegral<FT, SystemShapeFunction<?,FT,?,ST>>
 {
 	private final BoundaryRightHandSideIntegral<FT, ST> faceIntegral;

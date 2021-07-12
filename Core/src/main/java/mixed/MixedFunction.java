@@ -3,6 +3,7 @@ package mixed;
 import basic.Function;
 import basic.ScalarFunction;
 import basic.VectorFunction;
+import linalg.CoordinateMatrix;
 import linalg.CoordinateVector;
 import org.jetbrains.annotations.NotNull;
 
@@ -26,6 +27,40 @@ public class MixedFunction implements Function < MixedValue,
 		velocityFunction = null;
 	}
 	
+	static MixedFunction fromRawFunction(Function<MixedValue, MixedGradient, MixedHessian> function)
+	{
+		return new MixedFunction(){
+			@Override
+			public MixedValue value(CoordinateVector pos)
+			{
+				return function.value(pos);
+			}
+			
+			@Override
+			public MixedGradient gradient(CoordinateVector pos)
+			{
+				return function.gradient(pos);
+			}
+			
+			@Override
+			public MixedValue defaultValue()
+			{
+				return function.defaultValue();
+			}
+			
+			@Override
+			public MixedGradient defaultGradient()
+			{
+				return function.defaultGradient();
+			}
+			
+			@Override
+			public int getDomainDimension()
+			{
+				return function.getDomainDimension();
+			}
+		};
+	}
 	public ScalarFunction getPressureFunction()
 	{
 		if(!isPressure())

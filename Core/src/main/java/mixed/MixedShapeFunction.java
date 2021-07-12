@@ -10,11 +10,10 @@ import java.util.Set;
 
 public abstract class MixedShapeFunction<CT extends Cell<CT, FT,ET>,
 	FT extends Face<CT, FT,ET>, ET extends Edge<CT,FT,ET>, PF extends ScalarShapeFunction<CT, FT, ET
-	, PF>,VF extends VectorShapeFunction<CT, FT,ET, VF>>
+	>,VF extends VectorShapeFunction<CT, FT,ET>>
 	extends MixedFunction
-	implements ShapeFunction<CT, FT, ET,MixedShapeFunction<CT, FT,ET, PF, VF>, MixedValue, MixedGradient,
+	implements ShapeFunction<CT, FT, ET, MixedValue, MixedGradient,
 	MixedHessian>
-	, Comparable<MixedShapeFunction<CT, FT,ET, PF, VF>>
 {
 	
 	public MixedShapeFunction(@NotNull PF pressureFunction)
@@ -60,7 +59,7 @@ public abstract class MixedShapeFunction<CT extends Cell<CT, FT,ET>,
 	}
 	
 	@Override
-	public NodeFunctional<MixedFunction, MixedValue, MixedGradient, MixedHessian> getNodeFunctional()
+	public NodeFunctional<MixedValue, MixedGradient, MixedHessian> getNodeFunctional()
 	{
 		if (isPressure())
 			return MixedNodeFunctional.pressureFunctional(getPressureShapeFunction().getNodeFunctional());
@@ -140,19 +139,19 @@ public abstract class MixedShapeFunction<CT extends Cell<CT, FT,ET>,
 			return new VelocityValue(getVelocityShapeFunction().normalAverageInDerivative(face, pos));
 	}
 	
+	
 	@Override
-	public Map<Integer, Double> prolongate(Set<MixedShapeFunction<CT, FT,ET, PF, VF>> refinedFunctions)
+	public <ST extends ShapeFunction<CT, FT, ET, MixedValue, MixedGradient, MixedHessian>> Map<Integer, Double> prolongate(Set<ST> refinedFunctions)
 	{
 		Map<Integer, Double> ret = new HashMap<>();
-		for (MixedShapeFunction<CT, FT,ET, PF, VF> shapeFunction : refinedFunctions)
+		for (ST shapeFunction : refinedFunctions)
 		{
-			ret.put(shapeFunction.getGlobalIndex(), shapeFunction.getNodeFunctional().evaluate(this));
+			ret.put(shapeFunction.getGlobalIndex(),
+				shapeFunction.getNodeFunctional().evaluate(this));
 		}
 		return ret;
 	}
-	
-	@Override
-	public int compareTo(@NotNull MixedShapeFunction<CT, FT,ET, PF, VF> o)
+	public int compareTo(MixedShapeFunction<CT,FT,ET,PF,VF> o)
 	{
 		if (o.isPressure() && isPressure())
 			return getPressureShapeFunction().compareTo(o.getPressureShapeFunction());

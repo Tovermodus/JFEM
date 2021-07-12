@@ -6,7 +6,7 @@ import linalg.Vector;
 import java.util.HashMap;
 import java.util.Map;
 
-public class VectorFESpaceFunction<ST extends VectorShapeFunction<?,?,?,ST>> implements VectorFunction
+public class VectorFESpaceFunction<ST extends VectorShapeFunction<?,?,?>> implements VectorFunction
 {
 	private HashMap<ST, Double> coefficients;
 	public VectorFESpaceFunction(ST[] functions, double[] coefficients)

@@ -3,11 +3,11 @@ package tensorproduct;
 import basic.*;
 import linalg.*;
 import linalg.Vector;
+import org.jetbrains.annotations.NotNull;
 
 import java.util.*;
 
-public class RTComponentFunction implements FastEvaluatedScalarShapeFunction<TPCell, TPFace,TPEdge,RTComponentFunction>,
-	Comparable<RTComponentFunction> {
+public class RTComponentFunction implements FastEvaluatedScalarShapeFunction<TPCell, TPFace,TPEdge>{
 	
 	private Map<TPCell, List<RTBasisFunction1D>> cells;
 	private Set<TPFace> faces;
@@ -116,7 +116,7 @@ public class RTComponentFunction implements FastEvaluatedScalarShapeFunction<TPC
 	}
 	
 	@Override
-	public NodeFunctional<ScalarFunction, Double, CoordinateVector, CoordinateMatrix> getNodeFunctional() {
+	public NodeFunctional<Double, CoordinateVector, CoordinateMatrix> getNodeFunctional() {
 		return nodeFunctional;
 	}
 	
@@ -177,8 +177,6 @@ public class RTComponentFunction implements FastEvaluatedScalarShapeFunction<TPC
 		return ret;
 	}
 	
-	
-	@Override
 	public int compareTo(RTComponentFunction o) {
 		return CoordinateComparator.comp(nodeFunctional.getPoint(), o.nodeFunctional.getPoint());
 	}

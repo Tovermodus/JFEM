@@ -2,23 +2,22 @@ package basic;
 
 import linalg.*;
 
-public class VectorNodeFunctional implements NodeFunctional<VectorFunction, CoordinateVector, CoordinateMatrix, CoordinateTensor>
+public class VectorNodeFunctional implements NodeFunctional<CoordinateVector, CoordinateMatrix, CoordinateTensor>
 {
 	final int component;
-	final NodeFunctional<ScalarFunction, Double, CoordinateVector, CoordinateMatrix> componentNodeFunctional;
+	final NodeFunctional<Double, CoordinateVector, CoordinateMatrix> componentNodeFunctional;
 	
-	public VectorNodeFunctional(int component, NodeFunctional<ScalarFunction, Double, CoordinateVector, CoordinateMatrix> componentNodeFunctional)
+	public VectorNodeFunctional(int component, NodeFunctional<Double, CoordinateVector, CoordinateMatrix> componentNodeFunctional)
 	{
 		this.component = component;
 		this.componentNodeFunctional = componentNodeFunctional;
 	}
-	@Override
 	public double evaluate(VectorFunction func)
 	{
 		return componentNodeFunctional.evaluate(func.getComponentFunction(component));
 	}
 	
-	public NodeFunctional<ScalarFunction, Double, CoordinateVector, CoordinateMatrix> getComponentNodeFunctional()
+	public NodeFunctional<Double, CoordinateVector, CoordinateMatrix> getComponentNodeFunctional()
 	{
 		return componentNodeFunctional;
 	}
@@ -28,6 +27,13 @@ public class VectorNodeFunctional implements NodeFunctional<VectorFunction, Coor
 	{
 		return new FunctionSignature(CoordinateVector.class, CoordinateMatrix.class, CoordinateTensor.class);
 	}
+	
+	@Override
+	public double evaluate(Function<CoordinateVector, CoordinateMatrix, CoordinateTensor> func)
+	{
+		return evaluate(VectorFunction.fromRawFunction(func));
+	}
+	
 	public int getComponent()
 	{
 		return component;

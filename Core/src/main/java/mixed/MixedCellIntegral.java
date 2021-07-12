@@ -3,8 +3,10 @@ package mixed;
 import basic.*;
 import com.google.common.base.Stopwatch;
 
+import java.util.Objects;
+
 public class MixedCellIntegral<CT extends Cell<CT,FT,ET>, FT extends Face<CT,FT,ET>, ET extends Edge<CT,FT,ET>,
-	PF extends ScalarShapeFunction<CT,FT,ET,PF>, VF extends VectorShapeFunction<CT,FT,ET,VF>> extends CellIntegral<CT
+	PF extends ScalarShapeFunction<CT,FT,ET>, VF extends VectorShapeFunction<CT,FT,ET>> extends CellIntegral<CT
 	,MixedShapeFunction<CT,FT,ET,PF,VF>>
 {
 	private final CellIntegral<CT, PF> pressureIntegral;
@@ -34,16 +36,15 @@ public class MixedCellIntegral<CT extends Cell<CT,FT,ET>, FT extends Face<CT,FT,
 	
 	public static <CT extends Cell<CT,FT,ET>, FT extends Face<CT,FT,ET>, ET extends Edge<CT,FT,ET>,
 		PF extends ScalarShapeFunction<CT,
-		FT,ET
-		, PF>,
-		VF extends VectorShapeFunction<CT,FT,ET, VF>> MixedCellIntegral<CT,FT,ET, PF, VF> fromPressureIntegral(CellIntegral<CT
+		FT,ET>,
+		VF extends VectorShapeFunction<CT,FT,ET>> MixedCellIntegral<CT,FT,ET, PF, VF> fromPressureIntegral(CellIntegral<CT
 		, PF> pressureIntegral)
 	{
 		return new MixedCellIntegral<>(pressureIntegral, null);
 	}
 	
 	public static <CT extends Cell<CT,FT,ET>, FT extends Face<CT,FT,ET>, ET extends Edge<CT,FT,ET>,
-		PF extends ScalarShapeFunction<CT,FT,ET, PF>, VF extends VectorShapeFunction<CT,FT,ET, VF>> MixedCellIntegral<CT,FT,ET, PF,
+		PF extends ScalarShapeFunction<CT,FT,ET>, VF extends VectorShapeFunction<CT,FT,ET>> MixedCellIntegral<CT,FT,ET, PF,
 		VF> fromVelocityIntegral(CellIntegral<CT
 		, VF> velocityIntegral)
 	{
@@ -81,13 +82,13 @@ public class MixedCellIntegral<CT extends Cell<CT,FT,ET>, FT extends Face<CT,FT,
 		{
 			if (shapeFunction1.isVelocity() || shapeFunction2.isVelocity())
 				return 0;
-			return pressureIntegral.evaluateCellIntegral(cell, shapeFunction1.getPressureShapeFunction(),
+			return Objects.requireNonNull(pressureIntegral).evaluateCellIntegral(cell, shapeFunction1.getPressureShapeFunction(),
 				shapeFunction2.getPressureShapeFunction());
 		} else if (isVelocityIntegral())
 		{
 			if (shapeFunction1.isPressure() || shapeFunction2.isPressure())
 				return 0;
-			return velocityIntegral.evaluateCellIntegral(cell, shapeFunction1.getVelocityShapeFunction(),
+			return Objects.requireNonNull(velocityIntegral).evaluateCellIntegral(cell, shapeFunction1.getVelocityShapeFunction(),
 				shapeFunction2.getVelocityShapeFunction());
 		} else
 		{
