@@ -6,7 +6,8 @@ import org.jetbrains.annotations.NotNull;
 
 import java.util.*;
 
-public class ContinuousTPShapeFunction implements FastEvaluatedScalarShapeFunction<TPCell, TPFace,TPEdge>{
+public class ContinuousTPShapeFunction implements FastEvaluatedScalarShapeFunction<TPCell, TPFace,TPEdge>,
+        Comparable<ContinuousTPShapeFunction>{
     
     private final Map<TPCell, List<LagrangeBasisFunction1D>> cells;
     private final Set<TPFace> faces;

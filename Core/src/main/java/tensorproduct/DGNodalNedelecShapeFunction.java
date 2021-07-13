@@ -12,7 +12,7 @@ import org.jetbrains.annotations.NotNull;
 import java.util.List;
 import java.util.Set;
 
-public class DGNodalNedelecShapeFunction implements VectorShapeFunction<TPCell, TPFace, TPEdge>
+public class DGNodalNedelecShapeFunction implements VectorShapeFunction<TPCell, TPFace, TPEdge>, Comparable<DGNodalNedelecShapeFunction>
 {
 	private final DGNodalNedelecComponentFunction componentFunction;
 	private final int component;

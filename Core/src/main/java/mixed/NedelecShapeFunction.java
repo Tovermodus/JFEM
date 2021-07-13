@@ -17,7 +17,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.TreeMap;
 import java.util.TreeSet;
-public class NedelecShapeFunction implements VectorShapeFunction<TPCell, TPFace, TPEdge>
+public class NedelecShapeFunction implements VectorShapeFunction<TPCell, TPFace, TPEdge>, Comparable<NedelecShapeFunction>
 {
 	Set<TPCell> cells;
 	Set<TPFace> faces;

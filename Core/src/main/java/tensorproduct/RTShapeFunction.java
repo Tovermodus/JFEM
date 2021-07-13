@@ -12,7 +12,7 @@ import org.jetbrains.annotations.NotNull;
 import java.util.Map;
 import java.util.Set;
 
-public class RTShapeFunction implements VectorShapeFunction<TPCell, TPFace,TPEdge>
+public class RTShapeFunction implements VectorShapeFunction<TPCell, TPFace,TPEdge>, Comparable<RTShapeFunction>
 {
 	private final RTComponentFunction componentFunction;
 	private final int component;

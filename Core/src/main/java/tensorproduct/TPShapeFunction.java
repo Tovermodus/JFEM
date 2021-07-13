@@ -9,7 +9,7 @@ import org.jetbrains.annotations.NotNull;
 import java.util.*;
 
 public class TPShapeFunction implements ScalarShapeFunctionWithReferenceShapeFunction<TPCell,TPFace,TPEdge>,
-	FastEvaluatedScalarShapeFunction<TPCell, TPFace, TPEdge>
+	FastEvaluatedScalarShapeFunction<TPCell, TPFace, TPEdge>, Comparable<TPShapeFunction>
 {
 	private final int polynomialDegree;
 	List<LagrangeBasisFunction1D> function1Ds;

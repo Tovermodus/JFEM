@@ -10,10 +10,10 @@ import java.util.Set;
 
 public abstract class MixedShapeFunction<CT extends Cell<CT, FT,ET>,
 	FT extends Face<CT, FT,ET>, ET extends Edge<CT,FT,ET>, PF extends ScalarShapeFunction<CT, FT, ET
-	>,VF extends VectorShapeFunction<CT, FT,ET>>
+	>, VF extends VectorShapeFunction<CT, FT,ET>>
 	extends MixedFunction
 	implements ShapeFunction<CT, FT, ET, MixedValue, MixedGradient,
-	MixedHessian>
+	MixedHessian>, Comparable<MixedShapeFunction<CT,FT,ET,PF,VF>>
 {
 	
 	public MixedShapeFunction(@NotNull PF pressureFunction)
@@ -151,12 +151,13 @@ public abstract class MixedShapeFunction<CT extends Cell<CT, FT,ET>,
 		}
 		return ret;
 	}
+	@SuppressWarnings("unchecked")
 	public int compareTo(MixedShapeFunction<CT,FT,ET,PF,VF> o)
 	{
 		if (o.isPressure() && isPressure())
-			return getPressureShapeFunction().compareTo(o.getPressureShapeFunction());
+			return ((Comparable<PF>)getPressureShapeFunction()).compareTo(o.getPressureShapeFunction());
 		else if (o.isVelocity() && isVelocity())
-			return getVelocityShapeFunction().compareTo(o.getVelocityShapeFunction());
+			return ((Comparable<VF>)getVelocityShapeFunction()).compareTo(o.getVelocityShapeFunction());
 		else if (o.isVelocity() && isPressure())
 			return -1;
 		else

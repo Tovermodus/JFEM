@@ -10,7 +10,7 @@ import java.util.Set;
 
 public interface ShapeFunction<CT extends Cell<CT,FT, ET>, FT extends Face<CT,FT, ET>,
 	ET extends Edge<CT,FT,ET>, valueT,	gradientT,
-	hessianT> extends Function<valueT,gradientT,hessianT>, Comparable<ShapeFunction<CT,FT,ET,?,?,?>>
+	hessianT> extends Function<valueT,gradientT,hessianT>
 {
 	@Override
 	default int getDomainDimension()
@@ -48,13 +48,4 @@ public interface ShapeFunction<CT extends Cell<CT,FT, ET>, FT extends Face<CT,FT
 	valueT normalAverageInDerivative(FT face, CoordinateVector pos);
 	
 	<ST extends ShapeFunction<CT,FT,ET,valueT,gradientT,hessianT>> Map<Integer, Double> prolongate(Set<ST> refinedFunctions);
-	
-	@Override
-	default int compareTo(@NotNull ShapeFunction<CT, FT, ET, ?, ?, ?> o)
-	{
-		int ret = getClass().getName().compareTo(o.getClass().getName());
-		if(ret == 0)
-			throw new IllegalStateException("compareTo Must be overwritten");
-		return ret;
-	}
 }

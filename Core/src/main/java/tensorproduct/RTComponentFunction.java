@@ -7,7 +7,8 @@ import org.jetbrains.annotations.NotNull;
 
 import java.util.*;
 
-public class RTComponentFunction implements FastEvaluatedScalarShapeFunction<TPCell, TPFace,TPEdge>{
+public class RTComponentFunction implements FastEvaluatedScalarShapeFunction<TPCell, TPFace,TPEdge>,
+	Comparable<RTComponentFunction>{
 	
 	private Map<TPCell, List<RTBasisFunction1D>> cells;
 	private Set<TPFace> faces;

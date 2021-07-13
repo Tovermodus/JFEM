@@ -9,10 +9,10 @@ import java.util.Map;
 import java.util.Set;
 
 public class SystemShapeFunction<CT extends Cell<CT,FT,ET>, FT extends Face<CT,FT,ET>, ET extends Edge<CT,FT,ET>,
-	CST extends ShapeFunction<CT,FT,ET,?, ?, ?>>
+	CST extends ShapeFunction<CT,FT,ET, ?, ?, ?>>
 	extends SystemFunction
 	implements ShapeFunction<CT, FT, ET, SystemValue, SystemGradient,
-	SystemHessian>
+	SystemHessian>, Comparable<SystemShapeFunction<CT,FT,ET, CST>>
 {
 	private final CST function;
 	public SystemShapeFunction(CST function, int component)
@@ -124,11 +124,11 @@ public class SystemShapeFunction<CT extends Cell<CT,FT,ET>, FT extends Face<CT,F
 	{
 		return "component: " + mainComponent + " " + function.getClass() + " function: " + function;
 	}
-	
+	@SuppressWarnings("unchecked")
 	public int compareTo(SystemShapeFunction<CT,FT,ET,CST> o)
 	{
 		if(o.mainComponent == mainComponent)
-			return function.compareTo(o.function);
+			return ((Comparable<CST>)function).compareTo(o.function);
 		return Integer.compare(mainComponent, o.mainComponent);
 	}
 	

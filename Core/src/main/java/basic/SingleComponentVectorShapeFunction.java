@@ -11,7 +11,8 @@ import java.util.Set;
 
 public class SingleComponentVectorShapeFunction<CT extends Cell<CT,FT,ET>, FT extends Face<CT,FT,ET>,
 	ET extends Edge<CT,FT,ET>,
-	CST extends FastEvaluatedScalarShapeFunction<CT,FT,ET>> implements VectorShapeFunction<CT,FT,ET>
+	CST extends FastEvaluatedScalarShapeFunction<CT,FT,ET>> implements VectorShapeFunction<CT,FT,ET>,
+	Comparable<SingleComponentVectorShapeFunction<CT,FT,ET, CST>>
 {
 	private final CST componentFunction;
 	private final int component;
@@ -143,6 +144,7 @@ public class SingleComponentVectorShapeFunction<CT extends Cell<CT,FT,ET>, FT ex
 		this.globalIndex = globalIndex;
 	}
 	
+	@SuppressWarnings("unchecked")
 	public int compareTo(SingleComponentVectorShapeFunction<CT, FT, ET, CST> o)
 	{
 		if (o.getComponent() < getComponent())
@@ -150,7 +152,7 @@ public class SingleComponentVectorShapeFunction<CT extends Cell<CT,FT,ET>, FT ex
 		else if (o.getComponent() > getComponent())
 			return -1;
 		else
-			return componentFunction.compareTo(o.getComponentFunction());
+			return ((Comparable<CST>)componentFunction).compareTo(o.getComponentFunction());
 	}
 	
 }

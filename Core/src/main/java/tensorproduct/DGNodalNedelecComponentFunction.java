@@ -9,7 +9,8 @@ import org.jetbrains.annotations.NotNull;
 
 import java.util.*;
 
-public class DGNodalNedelecComponentFunction implements FastEvaluatedScalarShapeFunction<TPCell, TPFace, TPEdge>
+public class DGNodalNedelecComponentFunction implements FastEvaluatedScalarShapeFunction<TPCell, TPFace, TPEdge>,
+	Comparable<DGNodalNedelecComponentFunction>
 {
 	
 	private final Map<TPCell, List<RTBasisFunction1D>> cells;
