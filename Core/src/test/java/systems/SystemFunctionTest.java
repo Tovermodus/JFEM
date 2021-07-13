@@ -170,5 +170,6 @@ public class SystemFunctionTest
 		d.set(0, 6, 0);
 		d.set(1, 6, 1);
 		assertEquals(f.gradient(new CoordinateVector(2)), d);
+		SystemParameters.deleteInstance();
 	}
 }

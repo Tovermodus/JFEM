@@ -46,13 +46,7 @@ public class MixedNodeFunctional implements NodeFunctional<MixedValue, MixedGrad
 		return new FunctionSignature(MixedValue.class, MixedGradient.class, MixedHessian.class);
 	}
 	
-	@Override
-	public double evaluate(Function<MixedValue, MixedGradient, MixedHessian> func)
-	{
-		return evaluate(MixedFunction.fromRawFunction(func));
-	}
-	
-	public double evaluate(MixedFunction func)
+	public double evaluateMixedF(MixedFunction func)
 	{
 		if(func.isPressure() && isPressureFunctional())
 			return pressureFunctional.evaluate(func.getPressureFunction());
@@ -61,4 +55,12 @@ public class MixedNodeFunctional implements NodeFunctional<MixedValue, MixedGrad
 		else
 			return 0;
 	}
+	@Override
+	public double evaluate(Function<MixedValue, MixedGradient, MixedHessian> func)
+	{
+		if(func instanceof MixedFunction)
+			return evaluateMixedF((MixedFunction) func);
+		throw new IllegalArgumentException("Needs to be performed on MixedFunction");
+	}
+	
 }

@@ -73,7 +73,7 @@ public class StokesTime
 		int n = grid.getShapeFunctions().size();
 		double reynolds = 0.01;
 		double dt = 0.1;
-		int timesteps = 450;
+		int timesteps = 50;
 		
 		ScalarFunction indicatorFunction = new ScalarFunction()
 		{

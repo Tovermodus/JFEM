@@ -46,7 +46,7 @@ public class NedelecSpaceTest
 								(shapeFunction.getVelocityShapeFunction()), 1e-12);
 				}
 			}
-			assertEquals(1.0,shapeFunction.getNodeFunctional().evaluate(shapeFunction),1e-12);
+			assertEquals(1.0, shapeFunction.getNodeFunctional().evaluate(shapeFunction),1e-12);
 		}
 		
 	}

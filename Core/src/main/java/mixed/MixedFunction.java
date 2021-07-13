@@ -27,40 +27,6 @@ public class MixedFunction implements Function < MixedValue,
 		velocityFunction = null;
 	}
 	
-	static MixedFunction fromRawFunction(Function<MixedValue, MixedGradient, MixedHessian> function)
-	{
-		return new MixedFunction(){
-			@Override
-			public MixedValue value(CoordinateVector pos)
-			{
-				return function.value(pos);
-			}
-			
-			@Override
-			public MixedGradient gradient(CoordinateVector pos)
-			{
-				return function.gradient(pos);
-			}
-			
-			@Override
-			public MixedValue defaultValue()
-			{
-				return function.defaultValue();
-			}
-			
-			@Override
-			public MixedGradient defaultGradient()
-			{
-				return function.defaultGradient();
-			}
-			
-			@Override
-			public int getDomainDimension()
-			{
-				return function.getDomainDimension();
-			}
-		};
-	}
 	public ScalarFunction getPressureFunction()
 	{
 		if(!isPressure())
@@ -97,18 +63,18 @@ public class MixedFunction implements Function < MixedValue,
 	public int getDomainDimension()
 	{
 		if(isPressure())
-			return Objects.requireNonNull(pressureFunction).getDomainDimension();
+			return Objects.requireNonNull(getPressureFunction()).getDomainDimension();
 		else
-			return Objects.requireNonNull(velocityFunction).getDomainDimension();
+			return Objects.requireNonNull(getVelocityFunction()).getDomainDimension();
 	}
 	
 	@Override
 	public MixedValue defaultValue()
 	{
 		if(velocityFunction != null)
-			return new MixedValue(velocityFunction.getRangeDimension()+1);
+			return new MixedValue(getVelocityFunction().getRangeDimension()+1);
 		if(pressureFunction != null)
-			return new MixedValue(pressureFunction.getDomainDimension()+1);
+			return new MixedValue(getPressureFunction().getDomainDimension()+1);
 		return new MixedValue(0);
 	}
 	
@@ -116,9 +82,9 @@ public class MixedFunction implements Function < MixedValue,
 	public MixedGradient defaultGradient()
 	{
 		if(velocityFunction != null)
-			return new MixedGradient(velocityFunction.getRangeDimension()+1);
+			return new MixedGradient(getVelocityFunction().getRangeDimension()+1);
 		if(pressureFunction != null)
-			return new MixedGradient(pressureFunction.getDomainDimension()+1);
+			return new MixedGradient(getPressureFunction().getDomainDimension()+1);
 		return new MixedGradient(0);
 	}
 	
@@ -126,9 +92,9 @@ public class MixedFunction implements Function < MixedValue,
 	public MixedHessian defaultHessian()
 	{
 		if(velocityFunction != null)
-			return new MixedHessian(velocityFunction.getRangeDimension()+1);
+			return new MixedHessian(getVelocityFunction().getRangeDimension()+1);
 		if(pressureFunction != null)
-			return new MixedHessian(pressureFunction.getDomainDimension()+1);
+			return new MixedHessian(getPressureFunction().getDomainDimension()+1);
 		return new MixedHessian(0);
 	}
 	
@@ -136,9 +102,9 @@ public class MixedFunction implements Function < MixedValue,
 	public MixedValue value(CoordinateVector pos)
 	{
 		if(isPressure())
-			return new PressureValue(Objects.requireNonNull(pressureFunction).value(pos));
+			return new PressureValue(Objects.requireNonNull(getPressureFunction()).value(pos));
 		if(isVelocity())
-			return new VelocityValue(Objects.requireNonNull(velocityFunction).value(pos));
+			return new VelocityValue(Objects.requireNonNull(getVelocityFunction()).value(pos));
 		if(overridesValue)
 			throw new IllegalStateException("needs to override value");
 		throw new IllegalStateException("neither pressure nor velocity function");
@@ -148,9 +114,9 @@ public class MixedFunction implements Function < MixedValue,
 	public MixedGradient gradient(CoordinateVector pos)
 	{
 		if(isPressure())
-			return new PressureGradient(Objects.requireNonNull(pressureFunction).gradient(pos));
+			return new PressureGradient(Objects.requireNonNull(getPressureFunction()).gradient(pos));
 		if(isVelocity())
-			return new VelocityGradient(Objects.requireNonNull(velocityFunction).gradient(pos));
+			return new VelocityGradient(Objects.requireNonNull(getVelocityFunction()).gradient(pos));
 		if(overridesValue)
 			throw new IllegalStateException("needs to override gradient");
 		throw new IllegalStateException("neither pressure nor velocity function");

@@ -12,7 +12,7 @@ public class VectorNodeFunctional implements NodeFunctional<CoordinateVector, Co
 		this.component = component;
 		this.componentNodeFunctional = componentNodeFunctional;
 	}
-	public double evaluate(VectorFunction func)
+	public double evaluateVectorF(VectorFunction func)
 	{
 		return componentNodeFunctional.evaluate(func.getComponentFunction(component));
 	}
@@ -31,7 +31,9 @@ public class VectorNodeFunctional implements NodeFunctional<CoordinateVector, Co
 	@Override
 	public double evaluate(Function<CoordinateVector, CoordinateMatrix, CoordinateTensor> func)
 	{
-		return evaluate(VectorFunction.fromRawFunction(func));
+		if(func instanceof VectorFunction)
+			evaluateVectorF((VectorFunction) func);
+		return evaluateVectorF(VectorFunction.fromRawFunction(func));
 	}
 	
 	public int getComponent()
