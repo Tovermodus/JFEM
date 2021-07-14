@@ -1,8 +1,6 @@
 package tensorproduct;
 
-import basic.Assembleable;
-import basic.MatrixFESpace;
-import basic.VectorFunction;
+import basic.*;
 import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
 import com.google.common.collect.TreeMultimap;
@@ -243,6 +241,30 @@ public class ContinuousTPFESpace implements MatrixFESpace<TPCell,
 			plotCoordinates1D.add(coordinatesForDirection);
 		}
 		return Lists.cartesianProduct(plotCoordinates1D).stream().map(Doubles::toArray).map(CoordinateVector::fromValues).collect(Collectors.toList());
+	}
+	public void setBoundaryValues(ScalarFunction boundaryValues)
+	{
+		for (TPFace face : getFaces())
+		{
+			if (face.isBoundaryFace())
+			{
+				for (ContinuousTPShapeFunction shapeFunction : getShapeFunctionsWithSupportOnFace(face))
+				{
+					double nodeValue = shapeFunction.getNodeFunctional().evaluate(boundaryValues);
+					if (nodeValue != 0 || face.isOnFace(((LagrangeNodeFunctional)shapeFunction.getNodeFunctional()).getPoint()))
+					{
+						int shapeFunctionIndex = shapeFunction.getGlobalIndex();
+						for (TPCell cell : shapeFunction.getCells())
+							for (ContinuousTPShapeFunction sameSupportFunction :
+								getShapeFunctionsWithSupportOnCell(cell))
+								systemMatrix.set(0, shapeFunctionIndex,
+									sameSupportFunction.getGlobalIndex());
+						getSystemMatrix().set(1, shapeFunctionIndex, shapeFunctionIndex);
+						getRhs().set(nodeValue, shapeFunctionIndex);
+					}
+				}
+			}
+		}
 	}
 	
 }

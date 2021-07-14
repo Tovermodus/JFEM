@@ -18,6 +18,11 @@ public class TPFaceIntegralViaReferenceFace<ST extends ScalarShapeFunctionWithRe
 		super(ScalarFunction.constantFunction(weight),name, weightIsTensorProduct);
 		savedValues = new ConcurrentHashMap<>();
 	}
+	public TPFaceIntegralViaReferenceFace(double weight, String name)
+	{
+		super(ScalarFunction.constantFunction(weight),name, true);
+		savedValues = new ConcurrentHashMap<>();
+	}
 	public TPFaceIntegralViaReferenceFace(String name)
 	{
 		super(name);
@@ -43,7 +48,6 @@ public class TPFaceIntegralViaReferenceFace<ST extends ScalarShapeFunctionWithRe
 		}
 		else
 		{
-			System.out.println(savedValues.size());
 			savedValues.put(key, super.evaluateFaceIntegral(face, shapeFunction1, shapeFunction2));
 			return savedValues.get(key);
 		}
