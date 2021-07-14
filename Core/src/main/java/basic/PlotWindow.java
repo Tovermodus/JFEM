@@ -5,16 +5,13 @@ import java.awt.*;
 import java.awt.event.*;
 import java.awt.image.BufferedImage;
 import java.util.ArrayList;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.Executors;
-import java.util.concurrent.ScheduledFuture;
-import java.util.concurrent.TimeUnit;
+import java.util.concurrent.*;
 
 public class PlotWindow extends JFrame implements KeyListener, WindowListener, ComponentListener, MouseWheelListener
 {
 	final JSlider slider;
 	final Canvas canvas;
-	final ArrayList<Plot> plots;
+	final CopyOnWriteArrayList<Plot> plots;
 	final DrawThread d;
 	int currentPlot = 0;
 	public PlotWindow() {
@@ -28,7 +25,7 @@ public class PlotWindow extends JFrame implements KeyListener, WindowListener, C
 		add(slider, BorderLayout.NORTH);
 		add(canvas, BorderLayout.CENTER);
 		setVisible(true);
-		plots = new ArrayList<>();
+		plots = new CopyOnWriteArrayList<>();
 		addComponentListener(this);
 		addKeyListener(this);
 		addMouseWheelListener(this);
