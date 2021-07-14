@@ -72,7 +72,10 @@ public class LagrangeBasisFunction1D extends Function1D
 		}
 		return 0;
 	}
-	
+	public Cell1D getCell()
+	{
+		return cell;
+	}
 	public double derivativeOnReferenceCell(double pos)
 	{
 		switch (this.polynomialDegree)

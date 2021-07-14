@@ -5,9 +5,11 @@ import linalg.*;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.*;
+import java.util.stream.IntStream;
 
-public class ContinuousTPShapeFunction implements FastEvaluatedScalarShapeFunction<TPCell, TPFace,TPEdge>,
-        Comparable<ContinuousTPShapeFunction>{
+public class ContinuousTPShapeFunction implements ScalarShapeFunctionWithReferenceShapeFunction<TPCell,TPFace,TPEdge>,FastEvaluatedScalarShapeFunction<TPCell, TPFace,TPEdge>,
+        Comparable<ContinuousTPShapeFunction>
+{
     
     private final Map<TPCell, List<LagrangeBasisFunction1D>> cells;
     private final Set<TPFace> faces;
@@ -15,39 +17,53 @@ public class ContinuousTPShapeFunction implements FastEvaluatedScalarShapeFuncti
     private final int polynomialDegree;
     private int globalIndex;
     
-    public ContinuousTPShapeFunction(TPCell supportCell, int polynomialDegree,int localIndex)
+    public ContinuousTPShapeFunction(TPCell supportCell, int polynomialDegree, int localIndex)
     {
         cells = new TreeMap<>();
         faces = new TreeSet<>();
         this.polynomialDegree = polynomialDegree;
         List<LagrangeBasisFunction1D> supportCellFunctions = generateBasisFunctionOnCell(supportCell,
-                 localIndex);
+                localIndex);
         CoordinateVector functionalPoint =
                 CoordinateVector.fromValues(supportCellFunctions.stream().mapToDouble(LagrangeBasisFunction1D::getDegreeOfFreedom).toArray());
         nodeFunctional = new LagrangeNodeFunctional(functionalPoint);
         cells.put(supportCell, supportCellFunctions);
-        checkIfPointOnFace(functionalPoint,supportCell);
+        checkIfPointOnFace(functionalPoint, supportCell);
     }
+    
+    public ContinuousTPShapeFunction(TPCell supportCell, int polynomialDegree, CoordinateVector functionalPoint)
+    {
+        cells = new TreeMap<>();
+        faces = new TreeSet<>();
+        this.polynomialDegree = polynomialDegree;
+        List<LagrangeBasisFunction1D> supportCellFunctions = generateBasisFunctionOnCell(supportCell,
+                functionalPoint);
+        nodeFunctional = new LagrangeNodeFunctional(functionalPoint);
+        cells.put(supportCell, supportCellFunctions);
+        checkIfPointOnFace(functionalPoint, supportCell);
+    }
+    
     private void checkIfPointOnFace(CoordinateVector functionalPoint, TPCell cell)
     {
     
-        for(TPFace face: cell.faces)
+        for (TPFace face : cell.faces)
         {
-            if(faces.add(face))
+            if (faces.add(face))
             {
                 if (face.isOnFace(functionalPoint))
                 {
                     for (TPCell cellOfFace : face.getCells())
                     {
                         cells.put(cellOfFace, generateBasisFunctionOnCell(cellOfFace, functionalPoint));
-                        checkIfPointOnFace(functionalPoint,cellOfFace);
+                        checkIfPointOnFace(functionalPoint, cellOfFace);
                     }
                 }
             }
         }
     }
+    
     private List<LagrangeBasisFunction1D> generateBasisFunctionOnCell(TPCell cell,
-                                                                       int localIndex)
+                                                                      int localIndex)
     {
         int[] decomposedLocalIndex = decomposeIndex(cell.getDimension(), polynomialDegree, localIndex);
         List<LagrangeBasisFunction1D> function1Ds = new ArrayList<>();
@@ -58,10 +74,11 @@ public class ContinuousTPShapeFunction implements FastEvaluatedScalarShapeFuncti
         }
         return function1Ds;
     }
+    
     private List<LagrangeBasisFunction1D> generateBasisFunctionOnCell(TPCell cell,
-                                             CoordinateVector functionalPoint)
+                                                                      CoordinateVector functionalPoint)
     {
-        if(!cell.isInCell(functionalPoint))
+        if (!cell.isInCell(functionalPoint))
             throw new IllegalArgumentException("functional point is not in cell");
         List<LagrangeBasisFunction1D> function1Ds = new ArrayList<>();
         for (int i = 0; i < functionalPoint.getLength(); i++)
@@ -71,28 +88,33 @@ public class ContinuousTPShapeFunction implements FastEvaluatedScalarShapeFuncti
         }
         return function1Ds;
     }
+    
     private static int[] decomposeIndex(int dimension, int polynomialDegree, int localIndex)
     {
         int[] ret = new int[dimension];
         for (int i = 0; i < dimension; i++)
         {
-            ret[i] = localIndex % (polynomialDegree+1);
-            localIndex = localIndex/(polynomialDegree+1);
+            ret[i] = localIndex % (polynomialDegree + 1);
+            localIndex = localIndex / (polynomialDegree + 1);
         }
         return ret;
     }
+    
     @Override
-    public Set<TPCell> getCells() {
+    public Set<TPCell> getCells()
+    {
         return cells.keySet();
     }
-
+    
     @Override
-    public Set<TPFace> getFaces() {
+    public Set<TPFace> getFaces()
+    {
         return faces;
     }
-
+    
     @Override
-    public NodeFunctional<Double, CoordinateVector, CoordinateMatrix> getNodeFunctional() {
+    public NodeFunctional<Double, CoordinateVector, CoordinateMatrix> getNodeFunctional()
+    {
         return nodeFunctional;
     }
     
@@ -112,10 +134,10 @@ public class ContinuousTPShapeFunction implements FastEvaluatedScalarShapeFuncti
     public double fastValueInCell(CoordinateVector pos, TPCell cell)
     {
         double ret = 1;
-        if(cell == null)
+        if (cell == null)
             return ret;
         List<? extends Function1D> function1Ds;
-        if(cells.containsKey(cell))
+        if (cells.containsKey(cell))
         {
             function1Ds = cells.get(cell);
             for (int i = 0; i < pos.getLength(); i++)
@@ -131,10 +153,10 @@ public class ContinuousTPShapeFunction implements FastEvaluatedScalarShapeFuncti
     public double[] fastGradientInCell(CoordinateVector pos, TPCell cell)
     {
         double[] ret = new double[pos.getLength()];
-        if(cell == null)
+        if (cell == null)
             return ret;
         List<? extends Function1D> function1Ds;
-        if(cells.containsKey(cell))
+        if (cells.containsKey(cell))
         {
             function1Ds = cells.get(cell);
             for (int i = 0; i < pos.getLength(); i++)
@@ -154,16 +176,16 @@ public class ContinuousTPShapeFunction implements FastEvaluatedScalarShapeFuncti
     }
     
     
-
     @Override
-    public String toString() {
-        return "Cell: ".concat(", Node point: ").concat(nodeFunctional.getPoint().toString()).concat(", global Index: ").concat(getGlobalIndex()+"");
+    public String toString()
+    {
+        return "Cell: ".concat(", Node point: ").concat(nodeFunctional.getPoint().toString()).concat(", global Index: ").concat(getGlobalIndex() + "");
     }
     
     @Override
     public boolean equals(Object obj)
     {
-        if(obj instanceof ContinuousTPShapeFunction)
+        if (obj instanceof ContinuousTPShapeFunction)
             return CoordinateComparator.comp(nodeFunctional.getPoint(),
                     ((ContinuousTPShapeFunction) obj).nodeFunctional.getPoint()) == 0;
         return false;
@@ -171,11 +193,41 @@ public class ContinuousTPShapeFunction implements FastEvaluatedScalarShapeFuncti
     
     public int compareTo(ContinuousTPShapeFunction o)
     {
-            if(polynomialDegree > o.polynomialDegree)
-                return 1;
-            if(polynomialDegree < o.polynomialDegree)
-                return -1;
-            return CoordinateComparator.comp(nodeFunctional.getPoint().getEntries(),
-                    o.nodeFunctional.getPoint().getEntries());
+        if (polynomialDegree > o.polynomialDegree)
+            return 1;
+        if (polynomialDegree < o.polynomialDegree)
+            return -1;
+        return CoordinateComparator.comp(nodeFunctional.getPoint().getEntries(),
+                o.nodeFunctional.getPoint().getEntries());
+    }
+    
+    @Override
+    public ScalarShapeFunctionWithReferenceShapeFunction<TPCell, TPFace, TPEdge> getReferenceShapeFunctionRelativeTo(TPCell cell)
+    {
+        List<LagrangeBasisFunction1D> functions = cells.get(cell);
+        CoordinateVector functionalPoint =
+                CoordinateVector.fromValues(
+                        IntStream.range(0, getDomainDimension())
+                                .mapToDouble(i -> functions.get(i).getCell().positionOnReferenceCell(nodeFunctional.getPoint().at(i)))
+                                .toArray());
+        return new ContinuousTPShapeFunction(cell.getReferenceCell(), polynomialDegree, functionalPoint);
+    }
+    
+    @Override
+    public ScalarShapeFunctionWithReferenceShapeFunction<TPCell, TPFace, TPEdge> getReferenceShapeFunctionRelativeTo(TPFace face)
+    {
+        boolean down = face.getNormalUpstreamCell() == null || face.isNormalDownstream(nodeFunctional.getPoint());
+        TPCell supportCell = down?face.getNormalDownstreamCell():face.getNormalUpstreamCell();
+        TPCell referenceCell = down?face.getReferenceFace().getNormalDownstreamCell():
+                face.getReferenceFace().getNormalUpstreamCell();
+        List<LagrangeBasisFunction1D> functions = cells.get(supportCell);
+        CoordinateVector functionalPoint =
+                CoordinateVector.fromValues(
+                        IntStream.range(0, getDomainDimension())
+                                .mapToDouble(i -> functions.get(i).getCell().positionOnReferenceCell(nodeFunctional.getPoint().at(i)))
+                                .toArray());
+        if(!down)
+            functionalPoint.add(-1,face.flatDimension);
+        return new ContinuousTPShapeFunction(referenceCell, polynomialDegree, functionalPoint);
     }
 }
