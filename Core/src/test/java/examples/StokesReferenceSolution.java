@@ -3,6 +3,7 @@ package examples;
 import basic.ScalarFunction;
 import basic.VectorFunction;
 import linalg.CoordinateVector;
+import mixed.MixedFunction;
 
 import static java.lang.Math.*;
 
@@ -79,6 +80,35 @@ public class StokesReferenceSolution
 						);
 			}
 			
+		};
+	}
+	public static MixedFunction mixedReferenceSolution()
+	{
+		return new MixedFunction()
+		{
+			@Override
+			public ScalarFunction getPressureFunction()
+			{
+				return pressureReferenceSolution();
+			}
+			
+			@Override
+			public VectorFunction getVelocityFunction()
+			{
+				return velocityReferenceSolution();
+			}
+			
+			@Override
+			public boolean isPressure()
+			{
+				return true;
+			}
+			
+			@Override
+			public boolean isVelocity()
+			{
+				return true;
+			}
 		};
 	}
 	public static ScalarFunction pressureBoundaryValues()

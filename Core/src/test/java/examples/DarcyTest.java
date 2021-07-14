@@ -28,7 +28,7 @@ public class DarcyTest
 		CoordinateVector end = CoordinateVector.fromValues(1, 1);
 		int polynomialDegree = 2;
 		MixedRTSpace grid = new MixedRTSpace(start, end,
-			Ints.asList(5,5), polynomialDegree);
+			Ints.asList(5,7), polynomialDegree);
 		TPVectorCellIntegral<RTShapeFunction> valueValue =
 			new TPVectorCellIntegral<>(TPVectorCellIntegral.VALUE_VALUE);
 		MixedCellIntegral<TPCell, TPFace,TPEdge,ContinuousTPShapeFunction, RTShapeFunction>
@@ -67,21 +67,10 @@ public class DarcyTest
 		System.out.println("Face Integrals");
 		grid.evaluateFaceIntegrals(faceIntegrals, boundaryFaceIntegrals);
 		System.out.println("solve system: " + grid.getSystemMatrix().getRows() + "×" + grid.getSystemMatrix().getCols());
-		//grid.A.makeParallelReady(12);
-		if (grid.getRhs().getLength() < 100)
-		{
-			System.out.println(grid.getSystemMatrix());
-			System.out.println(grid.getRhs());
-		}
 		IterativeSolver<SparseMatrix> i = new IterativeSolver<>();
 		i.showProgress = false;
 		Vector solution1 = i.solveGMRES(grid.getSystemMatrix(), grid.getRhs(), 1e-10);
-		//Vector solution1 = new DenseMatrix(grid.getSystemMatrix()).solve(grid.getRhs());
 		System.out.println("solved");
-		System.out.println(solution1);
-		System.out.println(grid.getSystemMatrix().mvMul(solution1));
-		//grid.A.print_formatted();
-		//grid.rhs.print_formatted();
 		MixedFESpaceFunction<TPCell,TPFace,TPEdge,ContinuousTPShapeFunction,RTShapeFunction> solut =
 			new MixedFESpaceFunction<>(
 				grid.getShapeFunctions(), solution1);

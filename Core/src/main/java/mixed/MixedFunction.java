@@ -20,7 +20,7 @@ public class MixedFunction implements Function < MixedValue,
 	private final VectorFunction velocityFunction;
 	private boolean overridesValue;
 	
-	MixedFunction()
+	public MixedFunction()
 	{
 		overridesValue = true;
 		pressureFunction = null;

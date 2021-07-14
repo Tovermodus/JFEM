@@ -71,7 +71,7 @@ public class ConvergenceOrderEstimator
 		return average/(functions.size()-2);
 		
 	}
-	private static double normL20Difference(ScalarFunction f1, ScalarFunction f2, List<CoordinateVector> points)
+	public static double normL20Difference(ScalarFunction f1, ScalarFunction f2, List<CoordinateVector> points)
 	{
 		double squaredDifferences = 0;
 		double f2Correction = 0;
