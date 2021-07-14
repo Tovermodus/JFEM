@@ -40,9 +40,11 @@ public class MixedPlot3D extends ScalarPlot3D
 		{
 			int x = (int)((c.x() - min.x())/(max.x()-min.x())*(width-150)+75 );
 			int y =	(int)(height - ((c.y() - min.y())/(max.y()-min.y())*(height-150)+75));
-			int green = (int)(velocities.get(c).z()/velocityScaling*255);
+			int green = (int)((velocities.get(c).z() - min.z())/velocityScaling*255);
 			if(green>255)
 				green = 255;
+			if(green<0)
+				green = 0;
 			g.setColor(new Color(0,green,0));
 			g.fillOval(x-2,y-2,4,4);
 			int vx = (int)(velocities.get(c).x() /velocityScaling*pixelWidth);

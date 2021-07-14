@@ -9,6 +9,7 @@ public interface Plot
 	{
 		g.setColor(Color.BLACK);
 		drawValues(g,width,height-200,slider);
+		g.setColor(Color.BLACK);
 		g.drawString(title(), 20,height - 20);
 	}
 	void drawValues(Graphics g, int width, int height, double slider);

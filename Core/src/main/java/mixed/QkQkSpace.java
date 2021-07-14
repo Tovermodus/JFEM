@@ -288,10 +288,8 @@ public class QkQkSpace implements MixedFESpace<TPCell, TPFace,TPEdge, Continuous
 	public void setVelocityBoundaryValues(VectorFunction boundaryValues)
 	{
 		MixedFunction boundaryMixed = new MixedFunction(boundaryValues);
-		int progress = 0;
 		for (TPFace F : getBoundaryFaces())
 		{
-			System.out.println((int) (100. * progress++ / getBoundaryFaces().size()));
 			for (MixedShapeFunction<TPCell, TPFace, TPEdge,ContinuousTPShapeFunction,
 				ContinuousTPVectorFunction> shapeFunction :
 				getShapeFunctionsWithSupportOnFace(F))
@@ -316,10 +314,8 @@ public class QkQkSpace implements MixedFESpace<TPCell, TPFace,TPEdge, Continuous
 	public void setPressureBoundaryValues(ScalarFunction boundaryValues)
 	{
 		MixedFunction boundaryMixed = new MixedFunction(boundaryValues);
-		int progress = 0;
 		for (TPFace F : getBoundaryFaces())
 		{
-			System.out.println((int) (100. * progress++ / getBoundaryFaces().size()));
 			for (MixedShapeFunction<TPCell, TPFace, TPEdge,ContinuousTPShapeFunction,
 				ContinuousTPVectorFunction> shapeFunction :
 				getShapeFunctionsWithSupportOnFace(F))

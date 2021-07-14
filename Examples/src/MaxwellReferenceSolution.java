@@ -1,6 +1,7 @@
 import basic.ScalarFunction;
 import basic.VectorFunction;
 import linalg.CoordinateVector;
+import mixed.MixedFunction;
 
 public class MaxwellReferenceSolution
 {
@@ -76,6 +77,35 @@ public class MaxwellReferenceSolution
 					Math.pow(Math.sin(Math.PI * pos.z()), 0.2e1) * Math.cos(Math.PI * pos.y()) * Math.sin(Math.PI * pos.y()) * Math.cos(Math.PI * pos.x()) * Math.sin(Math.PI * pos.x()));
 			}
 			
+		};
+	}
+	public static MixedFunction mixedReferenceSolution()
+	{
+		return new MixedFunction()
+		{
+			@Override
+			public ScalarFunction getPressureFunction()
+			{
+				return pressureReferenceSolution();
+			}
+			
+			@Override
+			public VectorFunction getVelocityFunction()
+			{
+				return velocityReferenceSolution();
+			}
+			
+			@Override
+			public boolean isPressure()
+			{
+				return true;
+			}
+			
+			@Override
+			public boolean isVelocity()
+			{
+				return true;
+			}
 		};
 	}
 	public static ScalarFunction pressureBoundaryValues()

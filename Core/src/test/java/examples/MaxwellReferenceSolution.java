@@ -3,9 +3,39 @@ package examples;
 import basic.ScalarFunction;
 import basic.VectorFunction;
 import linalg.CoordinateVector;
+import mixed.MixedFunction;
 
 public class MaxwellReferenceSolution
 {
+	public static MixedFunction mixedReferenceSolution()
+	{
+		return new MixedFunction()
+		{
+			@Override
+			public ScalarFunction getPressureFunction()
+			{
+				return pressureReferenceSolution();
+			}
+			
+			@Override
+			public VectorFunction getVelocityFunction()
+			{
+				return velocityReferenceSolution();
+			}
+			
+			@Override
+			public boolean isPressure()
+			{
+				return true;
+			}
+			
+			@Override
+			public boolean isVelocity()
+			{
+				return true;
+			}
+		};
+	}
 	public static VectorFunction rightHandSide()
 	{
 		return new VectorFunction()

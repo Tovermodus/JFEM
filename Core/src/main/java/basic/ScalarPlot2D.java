@@ -87,9 +87,11 @@ public class ScalarPlot2D implements Plot
 	{
 		
 		double maxValueDifference = maxValue - minValue;
-		int red = (int)((val - minValue)/maxValueDifference*255);
+		if(maxValueDifference < 1e-15)
+			maxValueDifference = 1;
+		int red =  (int)((val - minValue)/maxValueDifference*255);
 		int green = 0;
-		int blue = (int)((maxValue - val)/maxValueDifference*255);
+		int blue =255 - red;
 		Color c = new Color(red,green,blue);
 		int x = (int)((coord.x() - mins.x())/(maxs.x()-mins.x())*(width -150)+75 - pixelWidth/2);
 		int y =
