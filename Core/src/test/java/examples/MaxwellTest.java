@@ -1,6 +1,7 @@
 package examples;
 
 import basic.*;
+import com.google.common.base.Stopwatch;
 import com.google.common.primitives.Ints;
 import linalg.CoordinateVector;
 import linalg.IterativeSolver;
@@ -29,7 +30,7 @@ public class MaxwellTest
 		QkQkSpace grid = new QkQkSpace(start, end,
 			Ints.asList(4, 4, 4), polynomialDegree);
 		TPVectorCellIntegral<ContinuousTPVectorFunction> valueValue =
-			new TPVectorCellIntegral<>(TPVectorCellIntegral.ROT_ROT);
+			new TPVectorCellIntegralViaReferenceCell<>(TPVectorCellIntegral.ROT_ROT);
 		MixedCellIntegral<TPCell, TPFace, TPEdge, ContinuousTPShapeFunction, ContinuousTPVectorFunction>
 			divValue =
 			new MixedTPCellIntegral<>(ScalarFunction.constantFunction(-1),
@@ -65,8 +66,10 @@ public class MaxwellTest
 		grid.setVelocityBoundaryValues(MaxwellReferenceSolution.vectorBoundaryValues());
 		System.out.println("pressure Boundary");
 		grid.setPressureBoundaryValues(MaxwellReferenceSolution.pressureBoundaryValues());
+		Stopwatch s = Stopwatch.createStarted();
 		System.out.println("Cell Integrals");
 		grid.evaluateCellIntegrals(cellIntegrals, rightHandSideIntegrals);
+		System.out.println(s.elapsed());
 		System.out.println("Face Integrals");
 		grid.evaluateFaceIntegrals(faceIntegrals, boundaryFaceIntegrals);
 		System.out.println("solve system: " + grid.getSystemMatrix().getRows() + "×" + grid.getSystemMatrix().getCols());

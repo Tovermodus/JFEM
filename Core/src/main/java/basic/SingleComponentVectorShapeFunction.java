@@ -34,6 +34,11 @@ public class SingleComponentVectorShapeFunction<CT extends Cell<CT,FT,ET>, FT ex
 			throw new IllegalStateException();
 		}
 	}
+	public SingleComponentVectorShapeFunction(CST componentFunction, int component)
+	{
+		this.component = component;
+		this.componentFunction = componentFunction;
+	}
 	
 	public CST getComponentFunction()
 	{

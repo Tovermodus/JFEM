@@ -43,7 +43,9 @@ public class TPCellIntegralViaReferenceCell<ST extends ScalarShapeFunctionWithRe
 				referenceShapeFunction2,
 				cell.getReferenceCell());
 		if (savedValues.containsKey(key))
+		{
 			return savedValues.get(key);
+		}
 		else
 		{
 			savedValues.put(key, super.evaluateCellIntegral(cell, shapeFunction1, shapeFunction2));

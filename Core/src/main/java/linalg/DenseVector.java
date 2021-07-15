@@ -242,7 +242,7 @@ public class DenseVector implements MutableVector, MutableTensor
 	{
 		int ret = -1024*entries.length;
 		for(int i = 0; i < entries.length; i++)
-			ret += entries[i]*Math.pow(2, i%30);
+			ret += entries[i]*Math.pow(2, i%15)*100000;
 		return ret;
 	}
 	@Override
