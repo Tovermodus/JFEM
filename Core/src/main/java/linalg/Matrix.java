@@ -21,6 +21,17 @@ public interface Matrix extends Tensor, VectorMultiplyable
 	
 	
 	@Override
+	default SparseMatrix slice(IntCoordinates start, IntCoordinates end)
+	{
+		SparseMatrix ret = new SparseMatrix(end.get(0) - start.get(0), end.get(1) - start.get(1));
+		for (IntCoordinates c: new IntCoordinates.Range(start, end))
+		{
+			ret.set(at(c), c.sub(start));
+		}
+		return ret;
+	}
+	
+	@Override
 	Matrix mul(double scalar);
 	
 	default int getRows()

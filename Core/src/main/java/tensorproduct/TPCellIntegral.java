@@ -19,6 +19,7 @@ public class TPCellIntegral<ST extends ScalarShapeFunction<TPCell,TPFace,TPEdge>
 	public static final String VALUE_VALUE = "ValueValue";
 	public static final String GRAD_VALUE = "GradValue";
 	public static final String VALUE_GRAD = "ValueGrad";
+	public static final String H1 = "H1";
 	final boolean weightIsTensorProduct;
 	public TPCellIntegral(double weight, String name, boolean weightIsTensorProduct)
 	{
@@ -29,6 +30,8 @@ public class TPCellIntegral<ST extends ScalarShapeFunction<TPCell,TPFace,TPEdge>
 		super(weight,name);
 		this.weightIsTensorProduct = weightIsTensorProduct;
 		if(name.equals(GRAD_GRAD) && !(weight.defaultValue() instanceof Double))
+			throw new IllegalArgumentException();
+		if(name.equals(H1) && !(weight.defaultValue() instanceof Double))
 			throw new IllegalArgumentException();
 		if(name.equals(VALUE_VALUE) && !(weight.defaultValue() instanceof Double))
 			throw new IllegalArgumentException();
@@ -43,6 +46,8 @@ public class TPCellIntegral<ST extends ScalarShapeFunction<TPCell,TPFace,TPEdge>
 		super(name);
 		this.weightIsTensorProduct = true;
 		if(name.equals(GRAD_GRAD) && !(weight.defaultValue() instanceof Double))
+			throw new IllegalArgumentException();
+		if(name.equals(H1) && !(weight.defaultValue() instanceof Double))
 			throw new IllegalArgumentException();
 		if(name.equals(VALUE_VALUE) && !(weight.defaultValue() instanceof Double))
 			throw new IllegalArgumentException();
@@ -89,9 +94,15 @@ public class TPCellIntegral<ST extends ScalarShapeFunction<TPCell,TPFace,TPEdge>
 		{
 				return integrateNonTensorProduct(x->shapeFunction1.gradient(x).inner(shapeFunction2.gradient(x))*(Double)weight.value(x),cell.cell1Ds);
 		}
+		if(name.equals(H1))
+		{
+			return integrateNonTensorProduct(x->(shapeFunction1.value(x)*shapeFunction2.value(x)
+								+ shapeFunction1.gradient(x).inner(shapeFunction2.gradient(x)))
+							*(Double)weight.value(x),cell.cell1Ds);
+		}
 		if(name.equals(VALUE_VALUE))
 		{
-				return integrateNonTensorProduct(x->shapeFunction1.value(x)*shapeFunction2.value(x)*(Double)weight.value(x),cell.cell1Ds);
+			return integrateNonTensorProduct(x->shapeFunction1.value(x)*shapeFunction2.value(x)*(Double)weight.value(x),cell.cell1Ds);
 		}
 		if(name.equals(GRAD_VALUE))
 		{

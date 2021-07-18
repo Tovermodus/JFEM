@@ -36,6 +36,12 @@ public class MixedHessian implements Tensor
 	}
 	
 	@Override
+	public Tensor slice(IntCoordinates start, IntCoordinates end)
+	{
+		throw new UnsupportedOperationException("not implemented yet");
+	}
+	
+	@Override
 	public int getSparseEntryCount()
 	{
 		throw new UnsupportedOperationException("not implemented yet");

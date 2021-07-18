@@ -35,6 +35,27 @@ public interface Vector extends Tensor
 	}
 	
 	@Override
+	default DenseVector slice(IntCoordinates start, IntCoordinates end)
+	{
+		DenseVector ret = new DenseVector(end.get(0) - start.get(0));
+		int i = 0;
+		for (IntCoordinates c: new IntCoordinates.Range(start, end))
+		{
+			ret.set(at(c), i++);
+		}
+		return ret;
+	}
+	
+	default SparseMatrix asMatrix()
+	{
+		SparseMatrix ret = new SparseMatrix(getLength(), 1);
+		for (int i = 0; i < getLength(); i++)
+		{
+			ret.add(at(i), i,0);
+		}
+		return ret;
+	}
+	@Override
 	Vector mul(double scalar);
 	
 	Matrix outer(Vector other);

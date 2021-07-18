@@ -6,6 +6,7 @@ import org.ujmp.core.Matrix;
 import tensorproduct.TPEdge;
 
 import java.util.List;
+import java.util.Map;
 
 public class DenseVector implements MutableVector, MutableTensor
 {
@@ -203,6 +204,20 @@ public class DenseVector implements MutableVector, MutableTensor
 		return ret;
 	}
 	
+	public void addSmallVectorAt(DenseVector small, int...coordinates)
+	{
+		if (PerformanceArguments.getInstance().executeChecks)
+		{
+			if (coordinates.length != 1)
+				throw new IllegalArgumentException("Wrong number of coordinates");
+			if (coordinates[0]+small.getLength() > getLength())
+				throw new IllegalArgumentException("small Vector too large position");
+		}
+		for(int i = 0; i < small.getLength(); i++)
+		{
+			add(small.at(i), i + coordinates[0]);
+		}
+	}
 	no.uib.cipr.matrix.DenseVector toMTJvector()
 	{
 		no.uib.cipr.matrix.DenseVector m = new no.uib.cipr.matrix.DenseVector(getShape().get(0));

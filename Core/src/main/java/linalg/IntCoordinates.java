@@ -25,6 +25,20 @@ public class IntCoordinates implements Comparable<IntCoordinates>, Cloneable
 	public int getDimension() {
 		return coordinates.length;
 	}
+	public IntCoordinates add(IntCoordinates o)
+	{
+		IntCoordinates ret = new IntCoordinates(this);
+		for(int i = 0; i < getDimension(); i++)
+			ret.coordinates[i] += o.coordinates[i];
+		return ret;
+	}
+	public IntCoordinates sub(IntCoordinates o)
+	{
+		IntCoordinates ret = new IntCoordinates(this);
+		for(int i = 0; i < getDimension(); i++)
+			ret.coordinates[i] -= o.coordinates[i];
+		return ret;
+	}
 	public IntCoordinates zerosLike() {
 		int [] zeros = new int[coordinates.length];
 		for(int i = 0; i < getDimension(); i++)

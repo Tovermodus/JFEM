@@ -37,7 +37,7 @@ public interface Tensor
 		return ImmutableMap.copyOf(ret);
 	}
 	List<? extends Tensor> unfoldDimension(int dimension);
-	
+	Tensor slice(IntCoordinates start, IntCoordinates end);
 	int getSparseEntryCount();
 	boolean isSparse();
 	
