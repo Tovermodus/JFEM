@@ -60,7 +60,7 @@ public class IterativeSolver<Op extends VectorMultiplyable>
 		DenseVector v = new DenseVector(n);
 		Vector x = null;
 		gm = new GMRES();
-			x =  gm.solve(preconditioner, operator, rhs, tol);
+			x =  gm.solve(preconditioner, operator, rhs, tol, i);
 		i.running = false;
 		ex.shutdown();
 		return x;
@@ -75,7 +75,7 @@ public class IterativeSolver<Op extends VectorMultiplyable>
 		DenseVector v = new DenseVector(n);
 		Vector x = null;
 		gm = new GMRES();
-		x =  gm.solve(operator, rightHandSide, tol);
+		x =  gm.solve(operator, rightHandSide, tol, i);
 		i.running = false;
 		ex.shutdown();
 		return x;
@@ -179,6 +179,10 @@ public class IterativeSolver<Op extends VectorMultiplyable>
 	{
 		private JFrame f;
 		private volatile boolean running = true;
+		public boolean isRunning()
+		{
+			return running;
+		}
 		@Override
 		public void run()
 		{

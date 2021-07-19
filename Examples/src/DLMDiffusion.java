@@ -103,7 +103,7 @@ public class DLMDiffusion
 		b.addSmallVectorAt(b1, 0);
 		b.addSmallVectorAt(b2, n);
 		IterativeSolver<SparseMatrix> i = new IterativeSolver<SparseMatrix>();
-		Vector solut = i.solveCG(A,b,1e-9);//A.solve(b);
+		Vector solut = i.solveGMRES(A,b,1e-9);//A.solve(b);
 		Vector largeSolut = solut.slice(new IntCoordinates(0), new IntCoordinates(n));
 		ScalarFESpaceFunction<ContinuousTPShapeFunction> solutFun =
 			new ScalarFESpaceFunction<>(

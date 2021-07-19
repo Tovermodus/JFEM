@@ -71,7 +71,7 @@ public class GMResTest
 	}
 	@Test
 	public void testPLarge() {
-		int n = 10000;
+		int n = 106000;
 		SparseMatrix large = new SparseMatrix(n,n);
 		DenseVector b = new DenseVector(n);
 		for(int i = 0; i < n*10; i++)
@@ -82,6 +82,7 @@ public class GMResTest
 		}
 		IterativeSolver<SparseMatrix> i = new IterativeSolver<>();
 		Vector sol = i.solvePGMRES(large, SparseMatrix.identity(n),b, 1e-10);
+		System.out.println(large.mvMul(sol).sub(b).absMaxElement());
 		assertTrue(b.almostEqual(large.mvMul(sol), 1e-10));
 	}
 	@Test

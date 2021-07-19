@@ -7,19 +7,18 @@ import java.util.stream.IntStream;
 
 class GMRES
 {
-
 	public linalg.Vector solve(VectorMultiplyable A,
 	                           Vector b,
-	                           double tol)
+	                           double tol, IterativeSolver<?>.Interruptor interruptor)
 	{
 		
 		MutableVector x = new linalg.DenseVector(b.getLength());
 		x.set(1,0);
-		return solve(A,b,x,tol);
+		return solve(A,b,x,tol, interruptor);
 	}
 	public linalg.Vector solve(VectorMultiplyable A,
 	                           Vector b, Vector x,
-	                           double tol)
+	                           double tol, IterativeSolver<?>.Interruptor interruptor)
 	{
 		ArrayList<Vector> v = new ArrayList<>();
 		int n = b.getLength();
@@ -33,7 +32,7 @@ class GMRES
 		gamma.set(r.euclidianNorm(), 0);
 		v.add(r.mul(1./gamma.at(0)));
 		int j;
-		for(j = 0; j < n && r.euclidianNorm() > tol; j++)
+		for(j = 0; j < n && r.euclidianNorm() > tol && interruptor.isRunning(); j++)
 		{
 			Vector q = A.mvMul(v.get(j));
 			DenseVector newHValues =
@@ -63,7 +62,7 @@ class GMRES
 				break;
 			v.add(w.mul(1./h.at(j+1,j)));
 		}
-		if(j == n)
+		if(j == n || !interruptor.isRunning())
 			j--;
 		DenseVector alpha = new DenseVector(n);
 		for (int i = j; i >=0 ; i--)
@@ -76,22 +75,22 @@ class GMRES
 			IntStream.range(0,j+1).parallel().mapToObj(i->v.get(i).mul(alpha.at(i))).reduce(new DenseVector(n),
 				Vector::add);
 		if(j > 40)
-			return new GMRES().solve(A,b,x.add(alphaV), tol);
+			return new GMRES().solve(A,b,x.add(alphaV), tol, interruptor);
 		return x.add(alphaV);
 		
 	}
 	public<T extends VectorMultiplyable> linalg.Vector solve(T preconditioner,VectorMultiplyable A,
 	                           Vector b,
-	                           double tol)
+	                           double tol, IterativeSolver<?>.Interruptor interruptor)
 	{
 		
 		MutableVector x = new linalg.DenseVector(b.getLength());
 		x.set(1,0);
-		return solve(preconditioner,A,b,x,tol);
+		return solve(preconditioner,A,b,x,tol, interruptor);
 	}
 	public<T extends VectorMultiplyable> linalg.Vector solve(T preconditioner, VectorMultiplyable A,
 	                           Vector b, Vector x,
-	                           double tol)
+	                           double tol, IterativeSolver<?>.Interruptor interruptor)
 	{
 		ArrayList<Vector> v = new ArrayList<>();
 		int n = b.getLength();
@@ -105,7 +104,7 @@ class GMRES
 		gamma.set(r.euclidianNorm(), 0);
 		v.add(r.mul(1./gamma.at(0)));
 		int j;
-		for(j = 0; j < n && r.euclidianNorm() > tol; j++)
+		for(j = 0; j < n && r.euclidianNorm() > tol && interruptor.isRunning(); j++)
 		{
 			Vector q = preconditioner.mvMul(A.mvMul(v.get(j)));
 			DenseVector newHValues =
@@ -135,7 +134,7 @@ class GMRES
 				break;
 			v.add(w.mul(1./h.at(j+1,j)));
 		}
-		if(j == n)
+		if(j == n || !interruptor.isRunning())
 			j--;
 		DenseVector alpha = new DenseVector(n);
 		for (int i = j; i >=0 ; i--)
@@ -148,7 +147,7 @@ class GMRES
 			IntStream.range(0,j+1).parallel().mapToObj(i->v.get(i).mul(alpha.at(i))).reduce(new DenseVector(n),
 				Vector::add);
 		if(j > 40)
-			return new GMRES().solve(A,b,x.add(alphaV), tol);
+			return new GMRES().solve(A,b,x.add(alphaV), tol, interruptor);
 		return x.add(alphaV);
 		
 	}
