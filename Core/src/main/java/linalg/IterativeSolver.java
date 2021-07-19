@@ -59,14 +59,8 @@ public class IterativeSolver<Op extends VectorMultiplyable>
 		int n = rhs.getLength();
 		DenseVector v = new DenseVector(n);
 		Vector x = null;
-		gm = new GMRES(v.toMTJvector());
-		try
-		{
+		gm = new GMRES();
 			x =  gm.solve(preconditioner, operator, rhs, tol);
-		} catch (IterativeSolverNotConvergedException e)
-		{
-			e.printStackTrace();
-		}
 		i.running = false;
 		ex.shutdown();
 		return x;
@@ -80,14 +74,8 @@ public class IterativeSolver<Op extends VectorMultiplyable>
 		int n = rightHandSide.getLength();
 		DenseVector v = new DenseVector(n);
 		Vector x = null;
-		gm = new GMRES(v.toMTJvector());
-		try
-		{
-			x =  gm.solve(operator, rightHandSide, tol);
-		} catch (IterativeSolverNotConvergedException e)
-		{
-			e.printStackTrace();
-		}
+		gm = new GMRES();
+		x =  gm.solve(operator, rightHandSide, tol);
 		i.running = false;
 		ex.shutdown();
 		return x;
@@ -207,8 +195,6 @@ public class IterativeSolver<Op extends VectorMultiplyable>
 				{
 					System.out.println("Interrupt!!!");
 					running = false;
-					if(gm != null)
-						gm.interrupted = true;
 					f.setVisible(false);
 					f.dispose();
 				}

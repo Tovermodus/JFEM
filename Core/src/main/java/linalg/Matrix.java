@@ -80,7 +80,18 @@ public interface Matrix extends Tensor, VectorMultiplyable
 				throw new IllegalArgumentException("Incompatible sizes");
 		return mmMul(matrix.transpose());
 	}
-	
+	default SparseMatrix diag()
+	{
+		if (PerformanceArguments.getInstance().executeChecks)
+			if (getRows() != getCols())
+				throw new IllegalArgumentException("Only for aquare matrices");
+		SparseMatrix ret =  new SparseMatrix(getRows(), getCols());
+		for (int i = 0; i < getRows(); i++)
+		{
+			ret.add(at(i,i),i,i);
+		}
+		return ret;
+	}
 	@Override
 	default String printFormatted(double... tol)
 	{

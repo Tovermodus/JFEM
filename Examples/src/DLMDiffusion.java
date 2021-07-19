@@ -29,14 +29,14 @@ public class DLMDiffusion
 		largeGrid.assembleCells();
 		largeGrid.assembleFunctions(polynomialDegree);
 		ContinuousTPFESpace immersedGrid = new ContinuousTPFESpace(startImmersed, endImmersed,
-			Ints.asList(5,5), polynomialDegree);
+			Ints.asList(11,11), polynomialDegree);
 		immersedGrid.assembleCells();
 		immersedGrid.assembleFunctions(polynomialDegree);
 		
 		ScalarFunction rho = ScalarFunction.constantFunction(1);
-		ScalarFunction rho2minrho = ScalarFunction.constantFunction(1);
+		ScalarFunction rho2minrho = ScalarFunction.constantFunction(10);
 		ScalarFunction f = ScalarFunction.constantFunction(2);
-		ScalarFunction f2minf = ScalarFunction.constantFunction(-3);
+		ScalarFunction f2minf = ScalarFunction.constantFunction(-2);
 		
 		TPCellIntegral<ContinuousTPShapeFunction> rhogradgrad = new TPCellIntegral<>(rho,
 			TPCellIntegral.GRAD_GRAD, true);
@@ -102,13 +102,13 @@ public class DLMDiffusion
 		DenseVector b = new DenseVector(n+2*m);
 		b.addSmallVectorAt(b1, 0);
 		b.addSmallVectorAt(b2, n);
-		
-		Vector solut = A.solve(b);
+		IterativeSolver<SparseMatrix> i = new IterativeSolver<SparseMatrix>();
+		Vector solut = i.solveCG(A,b,1e-9);//A.solve(b);
 		Vector largeSolut = solut.slice(new IntCoordinates(0), new IntCoordinates(n));
 		ScalarFESpaceFunction<ContinuousTPShapeFunction> solutFun =
 			new ScalarFESpaceFunction<>(
 				largeGrid.getShapeFunctions(), largeSolut);
 		PlotWindow p = new PlotWindow();
-		p.addPlot(new ScalarPlot2D(solutFun, largeGrid.generatePlotPoints(20), 20));
+		p.addPlot(new ScalarPlot2D(solutFun, largeGrid.generatePlotPoints(100), 100));
 	}
 }

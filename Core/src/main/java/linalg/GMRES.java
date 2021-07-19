@@ -1,229 +1,155 @@
-package linalg;/*
- * Copyright (C) 2003-2006 Bjørn-Ove Heimsund
- *
- * This file is part of MTJ.
- *
- * This library is free software; you can redistribute it and/or modify it
- * under the terms of the GNU Lesser General Public License as published by the
- * Free Software Foundation; either version 2.1 of the License, or (at your
- * option) any later version.
- *
- * This library is distributed in the hope that it will be useful, but WITHOUT
- * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
- * FITNESS FOR A PARTICULAR PURPOSE. See the GNU Lesser General Public License
- * for more details.
- *
- * You should have received a copy of the GNU Lesser General Public License
- * along with this library; if not, write to the Free Software Foundation,
- * Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
- */
-/*
- * Derived from public domain software at http://www.netlib.org/templates
- */
+package linalg;
 
+import java.lang.reflect.Array;
+import java.util.ArrayList;
+import java.util.stream.Collectors;
+import java.util.stream.IntStream;
 
-import no.uib.cipr.matrix.DenseMatrix;
-import no.uib.cipr.matrix.DenseVector;
-import no.uib.cipr.matrix.GivensRotation;
-import no.uib.cipr.matrix.Matrix;
-import no.uib.cipr.matrix.UpperTriangDenseMatrix;
-import no.uib.cipr.matrix.Vector;
-import no.uib.cipr.matrix.sparse.AbstractIterativeSolver;
-import no.uib.cipr.matrix.sparse.IterativeSolverNotConvergedException;
-
-/**
- * GMRES solver. GMRES solves the unsymmetric linear system <code>Ax = b</code>
- * using the Generalized Minimum Residual method. The GMRES iteration is
- * restarted after a given number of iterations. By default it is restarted
- * after 30 iterations.
- *
- * @author Templates
- */
-class GMRES extends AbstractIterativeSolver
+class GMRES
 {
 
-	/**
-	 * After this many iterations, the GMRES will be restarted.
-	 */
-	private int restart;
-
-	/**
-	 * Vectors for use in the iterative solution process
-	 */
-	private Vector w, u, r;
-
-	/**
-	 * Vectors spanning the subspace
-	 */
-	private Vector[] v;
-
-	/**
-	 * Restart vector
-	 */
-	private DenseVector s;
-
-	/**
-	 * Hessenberg matrix
-	 */
-	private DenseMatrix H;
-
-	/**
-	 * Givens rotations for the QR factorization
-	 */
-	private GivensRotation[] rotation;
-	boolean interrupted = false;
-
-	/**
-	 * Constructor for GMRES. Uses the given vector as template for creating
-	 * scratch vectors. Typically, the solution or the right hand side vector
-	 * can be passed, and the template is not modified. The iteration is
-	 * restarted every 30 iterations
-	 *
-	 * @param template
-	 *            Vector to use as template for the work vectors needed in the
-	 *            solution process
-	 */
-	public GMRES(Vector template) {
-		this(template, 30);
-	}
-
-	/**
-	 * Constructor for GMRES. Uses the given vector as template for creating
-	 * scratch vectors. Typically, the solution or the right hand side vector
-	 * can be passed, and the template is not modified
-	 *
-	 * @param template
-	 *            Vector to use as template for the work vectors needed in the
-	 *            solution process
-	 * @param restart
-	 *            GMRES iteration is restarted after this number of iterations
-	 */
-	public GMRES(Vector template, int restart) {
-		w = template.copy();
-		u = template.copy();
-		r = template.copy();
-		setRestart(restart);
-	}
-
-	/**
-	 * Sets the restart parameter
-	 *
-	 * @param restart
-	 *            GMRES iteration is restarted after this number of iterations
-	 */
-	public void setRestart(int restart) {
-		this.restart = restart;
-		if (restart <= 0)
-			throw new IllegalArgumentException(
-				"restart must be a positive integer");
-
-		s = new DenseVector(restart + 1);
-		H = new DenseMatrix(restart + 1, restart);
-		rotation = new GivensRotation[restart + 1];
-
-		v = new Vector[restart + 1];
-		for (int i = 0; i < v.length; ++i)
-			v[i] = r.copy().zero();
-	}
-
-	public<T extends VectorMultiplyable> linalg.Vector solve(T preconditioner, VectorMultiplyable A,
-	                                                         linalg.Vector b,
-	                                                         double tol)
-		throws IterativeSolverNotConvergedException
-	{
-		linalg.Vector x = new linalg.DenseVector(b.getShape().get(0));
-		linalg.Vector r_ = preconditioner.mvMul(b.sub(A.mvMul(x)));
-		linalg.Vector w;
-		double normr = r_.euclidianNorm();
-		linalg.Vector v_[] = new linalg.DenseVector[v.length];
-		// Outer iteration
-		for (iter.setFirst(); normr > tol && !interrupted; iter.next()) {
-
-			v_[0] = r_.mul(1./normr);
-			s.zero().set(0, normr);
-			int i = 0;
-			// Inner iteration
-			for (; i < restart && normr>tol && !interrupted; i++, iter
-				.next()) {
-				w = preconditioner.mvMul(A.mvMul(v_[i]));
-				for (int k = 0; k <= i; k++) {
-					H.set(k, i, w.inner(v_[k]));
-					w = v_[k].mul(-H.get(k, i)).add(w);
-				}
-				H.set(i + 1, i, w.euclidianNorm());
-				v_[i+1] = w.mul(1. / H.get(i + 1, i));
-				// QR factorization of H using Givens rotations
-				for (int k = 0; k < i; ++k)
-					rotation[k].apply(H, i, k, k + 1);
-
-				rotation[i] = new GivensRotation(H.get(i, i), H.get(i + 1, i));
-				rotation[i].apply(H, i, i, i + 1);
-				rotation[i].apply(s, i, i + 1);
-			}
-
-			// Update solution in current subspace
-			new UpperTriangDenseMatrix(H, i, false).solve(s, s);
-			for (int j = 0; j < i && !interrupted; j++)
-				x = x.add(v_[j].mul(s.get(j)));
-
-			r_ = b.sub(A.mvMul(x));
-			normr = r_.euclidianNorm();
-		}
-
-		return x;
-	}
-
 	public linalg.Vector solve(VectorMultiplyable A,
-	                                                          linalg.Vector b,
-	                                                          double tol)
-		throws IterativeSolverNotConvergedException
+	                           Vector b,
+	                           double tol)
 	{
-		MutableVector x = new linalg.DenseVector(b.getShape().get(0));
-		x.set(Math.random(),0);
-		linalg.Vector r_ = b.sub(A.mvMul(x));
-		linalg.Vector w;
-		double normr = r_.euclidianNorm();
-		linalg.Vector v_[] = new linalg.Vector[v.length];
-		// Outer iteration
-		for (iter.setFirst(); normr > tol && !interrupted; iter.next()) {
-
-			v_[0] = r_.mul(1./normr);
-			s.zero().set(0, normr);
-			int i = 0;
-			// Inner iteration
-			for (; i < restart && normr>tol && !interrupted; i++, iter
-				.next()) {
-				w = A.mvMul(v_[i]);
-				for (int k = 0; k <= i; k++) {
-					H.set(k, i, w.inner(v_[k]));
-					w = v_[k].mul(-H.get(k, i)).add(w);
-				}
-				H.set(i + 1, i, w.euclidianNorm());
-				v_[i+1] = w.mul(1. / H.get(i + 1, i));
-				// QR factorization of H using Givens rotations
-				for (int k = 0; k < i; ++k)
-					rotation[k].apply(H, i, k, k + 1);
-
-				rotation[i] = new GivensRotation(H.get(i, i), H.get(i + 1, i));
-				rotation[i].apply(H, i, i, i + 1);
-				rotation[i].apply(s, i, i + 1);
-			}
-
-			// Update solution in current subspace
-			new UpperTriangDenseMatrix(H, i, false).solve(s, s);
-			for (int j = 0; j < i && !interrupted; j++)
-				x.addInPlace(v_[j].mul(s.get(j)));
-
-			r_ = b.sub(A.mvMul(x));
-			normr = r_.euclidianNorm();
-			System.out.println(normr+" "+ interrupted);
-		}
-
-		return x;
+		
+		MutableVector x = new linalg.DenseVector(b.getLength());
+		x.set(1,0);
+		return solve(A,b,x,tol);
 	}
-	@Override
-	public Vector solve(Matrix matrix, Vector vector, Vector vector1) throws IterativeSolverNotConvergedException
+	public linalg.Vector solve(VectorMultiplyable A,
+	                           Vector b, Vector x,
+	                           double tol)
 	{
-		return null;
+		ArrayList<Vector> v = new ArrayList<>();
+		int n = b.getLength();
+		MutableVector c = new linalg.DenseVector(n);
+		MutableVector s = new linalg.DenseVector(n);
+		MutableVector gamma = new linalg.DenseVector(n+1);
+		Vector r = b.sub(A.mvMul(x));
+		SparseMatrix h = new SparseMatrix(n, n);
+		if (r.euclidianNorm() <= tol)
+			return x;
+		gamma.set(r.euclidianNorm(), 0);
+		v.add(r.mul(1./gamma.at(0)));
+		int j;
+		for(j = 0; j < n && r.euclidianNorm() > tol; j++)
+		{
+			Vector q = A.mvMul(v.get(j));
+			DenseVector newHValues =
+				DenseVector.vectorFromValues(v.stream().parallel().mapToDouble(vec->vec.inner(q)).toArray());
+			h.addSmallMatrixAt(newHValues.asMatrix(), 0, j);
+			Vector newHV =
+				(IntStream.range(0, j+1)).parallel().mapToObj(i->v.get(i).mul(newHValues.at(i))).reduce(new DenseVector(n), Vector::add);
+			Vector w = q.sub(newHV);
+			h.add(w.euclidianNorm(), j+1,j);
+			for(int i = 0; i < j; i++)
+			{
+				double c_i = c.at(i);
+				double s_i = s.at(i);
+				double h_ij = h.at(i,j);
+				double h_ipj = h.at(i+1,j);
+				h.set(h_ij*c_i + h_ipj*s_i, i, j);
+				h.set(-h_ij*s_i + h_ipj*c_i, i+1, j);
+			}
+			double beta = Math.sqrt(Math.pow(h.at(j, j),2) + Math.pow(h.at(j+1,j),2));
+			s.set(h.at(j+1,j)/beta, j);
+			c.set(h.at(j,j)/beta, j);
+			h.set(beta, j, j);
+			gamma.set(-s.at(j)*gamma.at(j),j+1);
+			gamma.set(c.at(j)*gamma.at(j),j);
+			System.out.println(Math.abs(gamma.at(j+1)));
+			if(Math.abs(gamma.at(j+1)) < tol || j > 40)
+				break;
+			v.add(w.mul(1./h.at(j+1,j)));
+		}
+		if(j == n)
+			j--;
+		DenseVector alpha = new DenseVector(n);
+		for (int i = j; i >=0 ; i--)
+		{
+			int finalI = i;
+			double hAlpha = IntStream.range(i+1,j+1).mapToDouble(k->h.at(finalI,k)*alpha.at(k)).sum();
+			alpha.set(1./h.at(i,i)*(gamma.at(i) - hAlpha), i);
+		}
+		Vector alphaV =
+			IntStream.range(0,j+1).parallel().mapToObj(i->v.get(i).mul(alpha.at(i))).reduce(new DenseVector(n),
+				Vector::add);
+		if(j > 40)
+			return new GMRES().solve(A,b,x.add(alphaV), tol);
+		return x.add(alphaV);
+		
+	}
+	public<T extends VectorMultiplyable> linalg.Vector solve(T preconditioner,VectorMultiplyable A,
+	                           Vector b,
+	                           double tol)
+	{
+		
+		MutableVector x = new linalg.DenseVector(b.getLength());
+		x.set(1,0);
+		return solve(preconditioner,A,b,x,tol);
+	}
+	public<T extends VectorMultiplyable> linalg.Vector solve(T preconditioner, VectorMultiplyable A,
+	                           Vector b, Vector x,
+	                           double tol)
+	{
+		ArrayList<Vector> v = new ArrayList<>();
+		int n = b.getLength();
+		MutableVector c = new linalg.DenseVector(n);
+		MutableVector s = new linalg.DenseVector(n);
+		MutableVector gamma = new linalg.DenseVector(n+1);
+		Vector r = preconditioner.mvMul(b.sub(A.mvMul(x)));
+		SparseMatrix h = new SparseMatrix(n, n);
+		if (r.euclidianNorm() <= tol)
+			return x;
+		gamma.set(r.euclidianNorm(), 0);
+		v.add(r.mul(1./gamma.at(0)));
+		int j;
+		for(j = 0; j < n && r.euclidianNorm() > tol; j++)
+		{
+			Vector q = preconditioner.mvMul(A.mvMul(v.get(j)));
+			DenseVector newHValues =
+				DenseVector.vectorFromValues(v.stream().parallel().mapToDouble(vec->vec.inner(q)).toArray());
+			h.addSmallMatrixAt(newHValues.asMatrix(), 0, j);
+			Vector newHV =
+				(IntStream.range(0, j+1)).parallel().mapToObj(i->v.get(i).mul(newHValues.at(i))).reduce(new DenseVector(n), Vector::add);
+			Vector w = q.sub(newHV);
+			h.add(w.euclidianNorm(), j+1,j);
+			for(int i = 0; i < j; i++)
+			{
+				double c_i = c.at(i);
+				double s_i = s.at(i);
+				double h_ij = h.at(i,j);
+				double h_ipj = h.at(i+1,j);
+				h.set(h_ij*c_i + h_ipj*s_i, i, j);
+				h.set(-h_ij*s_i + h_ipj*c_i, i+1, j);
+			}
+			double beta = Math.sqrt(Math.pow(h.at(j, j),2) + Math.pow(h.at(j+1,j),2));
+			s.set(h.at(j+1,j)/beta, j);
+			c.set(h.at(j,j)/beta, j);
+			h.set(beta, j, j);
+			gamma.set(-s.at(j)*gamma.at(j),j+1);
+			gamma.set(c.at(j)*gamma.at(j),j);
+			System.out.println(Math.abs(gamma.at(j+1)));
+			if(Math.abs(gamma.at(j+1)) < tol || j > 40)
+				break;
+			v.add(w.mul(1./h.at(j+1,j)));
+		}
+		if(j == n)
+			j--;
+		DenseVector alpha = new DenseVector(n);
+		for (int i = j; i >=0 ; i--)
+		{
+			int finalI = i;
+			double hAlpha = IntStream.range(i+1,j+1).mapToDouble(k->h.at(finalI,k)*alpha.at(k)).sum();
+			alpha.set(1./h.at(i,i)*(gamma.at(i) - hAlpha), i);
+		}
+		Vector alphaV =
+			IntStream.range(0,j+1).parallel().mapToObj(i->v.get(i).mul(alpha.at(i))).reduce(new DenseVector(n),
+				Vector::add);
+		if(j > 40)
+			return new GMRES().solve(A,b,x.add(alphaV), tol);
+		return x.add(alphaV);
+		
 	}
 }
