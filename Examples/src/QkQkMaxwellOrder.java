@@ -72,7 +72,7 @@ public class QkQkMaxwellOrder
 			System.out.println("Face Integrals");
 			grid.evaluateFaceIntegrals(faceIntegrals, boundaryFaceIntegrals);
 			System.out.println("solve system: " + grid.getSystemMatrix().getRows() + "×" + grid.getSystemMatrix().getCols());
-			IterativeSolver<SparseMatrix> it = new IterativeSolver<>();
+			IterativeSolver it = new IterativeSolver();
 			Vector solution1 = it.solveGMRES(grid.getSystemMatrix(), grid.getRhs(), 1e-7);
 			MixedFESpaceFunction<TPCell,TPFace,TPEdge,ContinuousTPShapeFunction,
 				ContinuousTPVectorFunction> solut =

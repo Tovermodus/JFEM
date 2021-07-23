@@ -78,7 +78,7 @@ public class HeatEquation
 		boolean implicit = true;
 		for (int i = 0; i < timesteps; i++)
 		{
-			IterativeSolver<Matrix> its = new IterativeSolver<>();
+			IterativeSolver its = new IterativeSolver();
 			its.showProgress = false;
 			if(implicit)
 			{

@@ -51,7 +51,7 @@ public class LaplaceContinuousOrder
 			grid.evaluateCellIntegrals(cellIntegrals, rightHandSideIntegrals);
 			grid.evaluateFaceIntegrals(faceIntegrals, boundaryFaceIntegrals);
 			grid.setBoundaryValues(LaplaceReferenceSolution.vectorBoundaryValues());
-			IterativeSolver<SparseMatrix> it = new IterativeSolver<>();
+			IterativeSolver it = new IterativeSolver();
 			Vector solution1 = it.solveGMRES(grid.getSystemMatrix(), grid.getRhs(), 1e-11);
 			VectorFESpaceFunction<ContinuousTPVectorFunction> solut =
 				new VectorFESpaceFunction<>(

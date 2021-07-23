@@ -59,7 +59,7 @@ public class LaplaceTest
 		grid.evaluateCellIntegrals(cellIntegrals, rightHandSideIntegrals);
 		grid.evaluateFaceIntegrals(faceIntegrals, boundaryFaceIntegrals);
 		
-		IterativeSolver<SparseMatrix> it = new IterativeSolver<>();
+		IterativeSolver it = new IterativeSolver();
 		it.showProgress = false;
 		Vector solution1 = it.solveGMRES(grid.getSystemMatrix(), grid.getRhs(), 1e-8);
 		ScalarFESpaceFunction<TPShapeFunction> solut =
@@ -106,7 +106,7 @@ public class LaplaceTest
 		grid.evaluateFaceIntegrals(faceIntegrals, boundaryFaceIntegrals);
 		grid.setBoundaryValues(LaplaceReferenceSolution.scalarBoundaryValues());
 		
-		IterativeSolver<SparseMatrix> it = new IterativeSolver<>();
+		IterativeSolver it = new IterativeSolver();
 		it.showProgress = false;
 		Vector solution1 = it.solveGMRES(grid.getSystemMatrix(), grid.getRhs(), 1e-8);
 		ScalarFESpaceFunction<ContinuousTPShapeFunction> solut =

@@ -68,7 +68,7 @@ public class TaylorHoodStokesOrder
 			grid.evaluateCellIntegrals(cellIntegrals, rightHandSideIntegrals);
 			grid.evaluateFaceIntegrals(faceIntegrals, boundaryFaceIntegrals);
 			grid.setVelocityBoundaryValues(StokesReferenceSolution.vectorBoundaryValues());
-			IterativeSolver<SparseMatrix> it = new IterativeSolver<>();
+			IterativeSolver it = new IterativeSolver();
 			Vector solution1 = it.solveCG(grid.getSystemMatrix(), grid.getRhs(), 1e-8);
 			MixedFESpaceFunction<TPCell,TPFace,TPEdge,ContinuousTPShapeFunction,
 				ContinuousTPVectorFunction> solut =

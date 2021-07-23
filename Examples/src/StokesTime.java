@@ -123,7 +123,7 @@ public class StokesTime
 			.velocityValuesInPointsAtTime(points,0));
 		for (int i = 0; i < timesteps; i++)
 		{
-			IterativeSolver<Matrix> its = new IterativeSolver<>();
+			IterativeSolver its = new IterativeSolver();
 			its.showProgress = false;
 			DenseVector rhs = src.add(M.mvMul(iterate));
 			iterate = new DenseVector(its.solveBiCGStab(MAD, rhs,iterate, 1e-6));

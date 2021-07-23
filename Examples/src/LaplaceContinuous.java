@@ -64,7 +64,7 @@ public class LaplaceContinuous
 			System.out.println(grid.getSystemMatrix());
 			System.out.println(grid.getRhs());
 		}
-		IterativeSolver<SparseMatrix> it = new IterativeSolver<>();
+		IterativeSolver it = new IterativeSolver();
 		System.out.println("start stopwatch");
 		Stopwatch s = Stopwatch.createStarted();
 		Vector solution1 = it.solveCG(grid.getSystemMatrix(),grid.getRhs(),1e-3);

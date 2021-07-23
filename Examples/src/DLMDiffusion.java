@@ -34,14 +34,14 @@ public class DLMDiffusion
 		immersedGrid.assembleFunctions(polynomialDegree);
 		
 		ScalarFunction rho = ScalarFunction.constantFunction(1);
-		ScalarFunction rho2minrho = ScalarFunction.constantFunction(10);
+		ScalarFunction rho2minrho = ScalarFunction.constantFunction(1000);
 		ScalarFunction f = ScalarFunction.constantFunction(2);
 		ScalarFunction f2minf = ScalarFunction.constantFunction(-2);
 		
 		TPCellIntegral<ContinuousTPShapeFunction> rhogradgrad = new TPCellIntegral<>(rho,
 			TPCellIntegral.GRAD_GRAD, true);
 		TPFaceIntegral<ContinuousTPShapeFunction> dirichlet =
-			new TPFaceIntegral<>(ScalarFunction.constantFunction(10000),
+			new TPFaceIntegral<>(ScalarFunction.constantFunction(1000),
 				TPFaceIntegral.VALUE_JUMP_VALUE_JUMP, true);
 		TPCellIntegral<ContinuousTPShapeFunction> rho2gradgrad = new TPCellIntegral<>(rho2minrho,
 			TPCellIntegral.GRAD_GRAD, true);
@@ -102,7 +102,7 @@ public class DLMDiffusion
 		DenseVector b = new DenseVector(n+2*m);
 		b.addSmallVectorAt(b1, 0);
 		b.addSmallVectorAt(b2, n);
-		IterativeSolver<SparseMatrix> i = new IterativeSolver<SparseMatrix>();
+		IterativeSolver i = new IterativeSolver();
 		Vector solut = i.solveGMRES(A,b,1e-9);//A.solve(b);
 		Vector largeSolut = solut.slice(new IntCoordinates(0), new IntCoordinates(n));
 		ScalarFESpaceFunction<ContinuousTPShapeFunction> solutFun =

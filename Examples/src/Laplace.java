@@ -74,7 +74,7 @@ public class Laplace
                         System.out.println(grid.getSystemMatrix());
                         System.out.println(grid.getRhs());
                 }
-                IterativeSolver<SparseMatrix> i = new IterativeSolver<>();
+                IterativeSolver i = new IterativeSolver();
                 System.out.println("start stopwatch");
                 Stopwatch s = Stopwatch.createStarted();
                 Vector solution1 = i.solveCG(grid.getSystemMatrix(),grid.getRhs(),1e-3);

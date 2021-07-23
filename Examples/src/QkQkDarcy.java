@@ -65,7 +65,7 @@ public class QkQkDarcy
 			System.out.println(grid.getSystemMatrix());
 			System.out.println(grid.getRhs());
 		}
-		IterativeSolver<SparseMatrix> i = new IterativeSolver<>();
+		IterativeSolver i = new IterativeSolver();
 		Vector solution1 = i.solveGMRES(grid.getSystemMatrix(), grid.getRhs(), 1e-3);
 		//Vector solution1 = new DenseMatrix(grid.getSystemMatrix()).solve(grid.getRhs());
 		System.out.println("solved");

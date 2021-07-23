@@ -62,7 +62,7 @@ public class RTDarcyOrder
 			grid.initializeRhs();
 			grid.evaluateCellIntegrals(cellIntegrals, rightHandSideIntegrals);
 			grid.evaluateFaceIntegrals(faceIntegrals, boundaryFaceIntegrals);
-			IterativeSolver<SparseMatrix> it = new IterativeSolver<>();
+			IterativeSolver it = new IterativeSolver();
 			Vector solution1 = it.solveGMRES(grid.getSystemMatrix(), grid.getRhs(), 1e-9);
 			MixedFESpaceFunction<TPCell,TPFace,TPEdge,ContinuousTPShapeFunction,RTShapeFunction> solut =
 				new MixedFESpaceFunction<>(

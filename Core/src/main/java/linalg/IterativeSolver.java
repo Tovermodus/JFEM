@@ -1,27 +1,21 @@
 package linalg;
 
-import com.google.common.base.Stopwatch;
-import no.uib.cipr.matrix.sparse.IterativeSolverNotConvergedException;
-
 import javax.swing.*;
 import java.awt.*;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
-public class IterativeSolver<Op extends VectorMultiplyable>
+public class IterativeSolver
 {
 	private GMRES gm;
 	ExecutorService ex;
 	public boolean showProgress = true;
-	public Vector solveCG(Op operator, Vector rhs, double tol)
+	public Vector solveCG(VectorMultiplyable operator, Vector rhs, double tol)
 	{
 		ex = Executors.newSingleThreadExecutor();
 		Interruptor i = new Interruptor();
 		if(showProgress)
 			ex.execute(i);
-		Stopwatch s = Stopwatch.createStarted();
 		int n = rhs.getLength();
 		Vector z;
 		Vector newResiduum;
@@ -49,31 +43,27 @@ public class IterativeSolver<Op extends VectorMultiplyable>
 		
 		return iterate;
 	}
-	public <T extends VectorMultiplyable> Vector solvePGMRES(Op operator, T preconditioner, Vector rhs,
+	public <T extends VectorMultiplyable> Vector solvePGMRES(VectorMultiplyable operator, T preconditioner, Vector rhs,
 	                                                              double tol)
 	{
 		ex = Executors.newSingleThreadExecutor();
 		Interruptor i = new Interruptor();
 		if(showProgress)
 		ex.execute(i);
-		int n = rhs.getLength();
-		DenseVector v = new DenseVector(n);
-		Vector x = null;
+		Vector x;
 		gm = new GMRES();
 			x =  gm.solve(preconditioner, operator, rhs, tol, i);
 		i.running = false;
 		ex.shutdown();
 		return x;
 	}
-	public Vector solveGMRES(Op operator, Vector rightHandSide, double tol)
+	public Vector solveGMRES(VectorMultiplyable operator, Vector rightHandSide, double tol)
 	{
 		ex = Executors.newSingleThreadExecutor();
 		Interruptor i = new Interruptor();
 		if(showProgress)
 		ex.execute(i);
-		int n = rightHandSide.getLength();
-		DenseVector v = new DenseVector(n);
-		Vector x = null;
+		Vector x;
 		gm = new GMRES();
 		x =  gm.solve(operator, rightHandSide, tol, i);
 		i.running = false;
@@ -81,11 +71,11 @@ public class IterativeSolver<Op extends VectorMultiplyable>
 		return x;
 	}
 	
-	public Vector solveBiCGStab(Op operator, Vector rhs, double tol)
+	public Vector solveBiCGStab(VectorMultiplyable operator, Vector rhs, double tol)
 	{
 		return solveBiCGStab(operator, rhs, new DenseVector(rhs.getLength()), tol);
 	}
-	public Vector solveBiCGStab(Op operator, Vector rhs, Vector startIterate, double tol)
+	public Vector solveBiCGStab(VectorMultiplyable operator, Vector rhs, Vector startIterate, double tol)
 	{
 		ex = Executors.newSingleThreadExecutor();
 		Interruptor i = new Interruptor();
@@ -126,7 +116,7 @@ public class IterativeSolver<Op extends VectorMultiplyable>
 
 
 	}
-	public <T extends VectorMultiplyable> Vector solvePBiCGStab(Op operator, T preconditioner, Vector rhs,
+	public <T extends VectorMultiplyable> Vector solvePBiCGStab(VectorMultiplyable operator, T preconditioner, Vector rhs,
 	                                                                 double tol)
 	{
 		ex = Executors.newSingleThreadExecutor();
@@ -175,7 +165,7 @@ public class IterativeSolver<Op extends VectorMultiplyable>
 
 
 	}
-	class Interruptor implements Runnable
+	static class Interruptor implements Runnable
 	{
 		private JFrame f;
 		private volatile boolean running = true;
@@ -192,16 +182,12 @@ public class IterativeSolver<Op extends VectorMultiplyable>
 			f.add(b);
 			f.setBounds(0,0,300,300);
 			f.setVisible(true);
-			b.addActionListener(new ActionListener()
+			b.addActionListener(e ->
 			{
-				@Override
-				public void actionPerformed(ActionEvent e)
-				{
-					System.out.println("Interrupt!!!");
-					running = false;
-					f.setVisible(false);
-					f.dispose();
-				}
+				System.out.println("Interrupt!!!");
+				running = false;
+				f.setVisible(false);
+				f.dispose();
 			});
 			while(running)
 			{

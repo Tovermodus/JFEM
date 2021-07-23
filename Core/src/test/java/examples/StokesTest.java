@@ -69,7 +69,7 @@ public class StokesTest
 		grid.evaluateFaceIntegrals(faceIntegrals, boundaryFaceIntegrals);
 		grid.setVelocityBoundaryValues(StokesReferenceSolution.vectorBoundaryValues());
 		System.out.println("solve system: " + grid.getSystemMatrix().getRows() + "×" + grid.getSystemMatrix().getCols());
-		IterativeSolver<SparseMatrix> i = new IterativeSolver<>();
+		IterativeSolver i = new IterativeSolver();
 		i.showProgress = false;
 		Vector solution1 = i.solveCG(grid.getSystemMatrix(), grid.getRhs(), 1e-8);
 		System.out.println("solved");

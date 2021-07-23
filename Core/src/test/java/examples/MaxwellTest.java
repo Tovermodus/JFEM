@@ -73,7 +73,7 @@ public class MaxwellTest
 		System.out.println("Face Integrals");
 		grid.evaluateFaceIntegrals(faceIntegrals, boundaryFaceIntegrals);
 		System.out.println("solve system: " + grid.getSystemMatrix().getRows() + "×" + grid.getSystemMatrix().getCols());
-		IterativeSolver<SparseMatrix> i = new IterativeSolver<>();
+		IterativeSolver i = new IterativeSolver();
 		i.showProgress = false;
 		Vector solution1 = i.solveGMRES(grid.getSystemMatrix(), grid.getRhs(), 1e-6);
 		System.out.println("solved");

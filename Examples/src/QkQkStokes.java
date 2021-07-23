@@ -78,7 +78,7 @@ public class QkQkStokes
 		}
 		System.out.println("solve system: " + grid.getSystemMatrix().getRows() + "×" + grid.getSystemMatrix().getCols());
 		//DenseMatrix A = new DenseMatrix(grid.getSystemMatrix());
-		IterativeSolver<SparseMatrix> i = new IterativeSolver<>();
+		IterativeSolver i = new IterativeSolver();
 		Vector solution1 = i.solveGMRES(grid.getSystemMatrix(), grid.getRhs(), 1e-7);
 		//Vector solution1 = grid.getSystemMatrix().solve(grid.getRhs());
 		//Vector solution1 = new DenseMatrix(grid.getSystemMatrix()).solve(grid.getRhs());

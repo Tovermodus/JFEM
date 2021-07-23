@@ -1,15 +1,13 @@
 package linalg;
 
-import java.lang.reflect.Array;
 import java.util.ArrayList;
-import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
 class GMRES
 {
 	public linalg.Vector solve(VectorMultiplyable A,
 	                           Vector b,
-	                           double tol, IterativeSolver<?>.Interruptor interruptor)
+	                           double tol, IterativeSolver.Interruptor interruptor)
 	{
 		
 		MutableVector x = new linalg.DenseVector(b.getLength());
@@ -18,7 +16,7 @@ class GMRES
 	}
 	public linalg.Vector solve(VectorMultiplyable A,
 	                           Vector b, Vector x,
-	                           double tol, IterativeSolver<?>.Interruptor interruptor)
+	                           double tol, IterativeSolver.Interruptor interruptor)
 	{
 		ArrayList<Vector> v = new ArrayList<>();
 		int n = b.getLength();
@@ -81,7 +79,7 @@ class GMRES
 	}
 	public<T extends VectorMultiplyable> linalg.Vector solve(T preconditioner,VectorMultiplyable A,
 	                           Vector b,
-	                           double tol, IterativeSolver<?>.Interruptor interruptor)
+	                           double tol, IterativeSolver.Interruptor interruptor)
 	{
 		
 		MutableVector x = new linalg.DenseVector(b.getLength());
@@ -90,7 +88,7 @@ class GMRES
 	}
 	public<T extends VectorMultiplyable> linalg.Vector solve(T preconditioner, VectorMultiplyable A,
 	                           Vector b, Vector x,
-	                           double tol, IterativeSolver<?>.Interruptor interruptor)
+	                           double tol, IterativeSolver.Interruptor interruptor)
 	{
 		ArrayList<Vector> v = new ArrayList<>();
 		int n = b.getLength();
@@ -147,7 +145,7 @@ class GMRES
 			IntStream.range(0,j+1).parallel().mapToObj(i->v.get(i).mul(alpha.at(i))).reduce(new DenseVector(n),
 				Vector::add);
 		if(j > 40)
-			return new GMRES().solve(A,b,x.add(alphaV), tol, interruptor);
+			return new GMRES().solve(A, preconditioner, b,x.add(alphaV), tol, interruptor);
 		return x.add(alphaV);
 		
 	}

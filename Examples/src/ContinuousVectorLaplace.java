@@ -111,7 +111,7 @@ public class ContinuousVectorLaplace
 			System.out.println(grid.getSystemMatrix());
 			System.out.println(grid.getRhs());
 		}
-		IterativeSolver<SparseMatrix> i = new IterativeSolver<>();
+		IterativeSolver i = new IterativeSolver();
 		System.out.println("start stopwatch");
 		Vector solution1 = i.solveGMRES(grid.getSystemMatrix(), grid.getRhs(), 1e-3);
 		//Vector solution = ((DenseMatrix)grid.getSystemMatrix()).solve(grid.getRhs());
