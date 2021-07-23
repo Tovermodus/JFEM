@@ -48,7 +48,7 @@ public class MatrixPlot implements Plot
 		int blue = 255 - red;
 		Color c = new Color(red,green,blue);
 		int x = (int)((1.0*coords.get(1)/m.getCols())*(width -150)+75 - pixelWidth/2);
-		int y = (int)((1.0*coords.get(0)/m.getRows())*(height -150) - pixelWidth/2);
+		int y = (int)((1.0*coords.get(0)/m.getRows())*(height -150) - pixelWidth/2) + 75;
 		g.setColor(c);
 		g.fillRect(x,y,pixelWidth,pixelHeight);
 	}
@@ -56,6 +56,6 @@ public class MatrixPlot implements Plot
 	@Override
 	public String title()
 	{
-		return "Matrix ";
+		return "Matrix. Scale logarithmic: blue = 1e-4, red = "+ maxValue;
 	}
 }

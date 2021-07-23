@@ -36,7 +36,43 @@ public class IterativeSolver
 			defect = newResiduum.add(defect.mul(beta));
 			residuum = newResiduum;
 			if(showProgress)
-			System.out.println(residuum.euclidianNorm());
+				System.out.println(residuum.euclidianNorm());
+		}
+		i.running = false;
+		ex.shutdown();
+		
+		return iterate;
+	}
+	public Vector solvePCG(VectorMultiplyable operator, VectorMultiplyable preconditioner,  Vector rhs, double tol)
+	{
+		ex = Executors.newSingleThreadExecutor();
+		Interruptor i = new Interruptor();
+		if(showProgress)
+			ex.execute(i);
+		int n = rhs.getLength();
+		Vector Ap;
+		Vector z, newZ;
+		Vector newResiduum;
+		DenseVector iterate = new DenseVector(n);
+		iterate.set(1,0);
+		Vector residuum = rhs.sub(operator.mvMul(iterate));
+		z = preconditioner.mvMul(residuum);
+		Vector p = new DenseVector(z);
+		double alpha;
+		double beta;
+		for(int iter = 0; iter < n && residuum.euclidianNorm() > tol && i.running; iter++)
+		{
+			Ap = operator.mvMul(p);
+			alpha = residuum.inner(z)/p.inner(Ap);
+			iterate.addInPlace(p.mul(alpha));
+			newResiduum = residuum.sub(Ap.mul(alpha));
+			newZ = preconditioner.mvMul(newResiduum);
+			beta = newResiduum.inner(newZ)/residuum.inner(z);
+			p = newZ.add(p.mul(beta));
+			residuum = newResiduum;
+			z = newZ;
+			if(showProgress)
+				System.out.println(residuum.euclidianNorm());
 		}
 		i.running = false;
 		ex.shutdown();

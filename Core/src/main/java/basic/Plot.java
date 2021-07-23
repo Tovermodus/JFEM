@@ -8,7 +8,7 @@ public interface Plot
 	default void draw(Graphics g, int width, int height, double slider)
 	{
 		g.setColor(Color.BLACK);
-		drawValues(g,width,height-200,slider);
+		drawValues(g,width,height-50,slider);
 		g.setColor(Color.BLACK);
 		g.drawString(title(), 20,height - 20);
 	}

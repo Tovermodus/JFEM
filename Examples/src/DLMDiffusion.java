@@ -25,11 +25,11 @@ public class DLMDiffusion
 		
 		ContinuousTPFESpace largeGrid = new ContinuousTPFESpace(start, end,
 			Ints.asList(
-				11,11), polynomialDegree);
+				10,10), polynomialDegree);
 		largeGrid.assembleCells();
 		largeGrid.assembleFunctions(polynomialDegree);
 		ContinuousTPFESpace immersedGrid = new ContinuousTPFESpace(startImmersed, endImmersed,
-			Ints.asList(11,11), polynomialDegree);
+			Ints.asList(8,5), polynomialDegree);
 		immersedGrid.assembleCells();
 		immersedGrid.assembleFunctions(polynomialDegree);
 		
@@ -84,6 +84,9 @@ public class DLMDiffusion
 		SparseMatrix A =
 			new SparseMatrix(n+2*m, n+2*m);
 		
+		SparseMatrix T =
+			new SparseMatrix(n+2*m, n+2*m);
+		
 		A.addSmallMatrixAt(A11,0,0);
 		A.addSmallMatrixAt(A22, n,n);
 		A.addSmallMatrixAt(A23, n,n+m);
@@ -92,6 +95,10 @@ public class DLMDiffusion
 		A.addSmallMatrixAt(A13.transpose(), n+m,0);
 		//PlotWindow p = new PlotWindow();
 		//p.addPlot(new MatrixPlot(A));
+		
+		T.addSmallMatrixAt(A11.inverse(), 0, 0);
+		T.addSmallMatrixAt(A22.inverse(), n, n);
+		T.addSmallMatrixAt(SparseMatrix.identity(m), n+m, n+m);
 		
 		DenseVector b1 = new DenseVector(n);
 		DenseVector b2 = new DenseVector(m);
@@ -103,12 +110,14 @@ public class DLMDiffusion
 		b.addSmallVectorAt(b1, 0);
 		b.addSmallVectorAt(b2, n);
 		IterativeSolver i = new IterativeSolver();
-		Vector solut = i.solveGMRES(A,b,1e-9);//A.solve(b);
+		Vector solut = i.solvePCG(A,T,b,1e-9);//A.solve(b);
 		Vector largeSolut = solut.slice(new IntCoordinates(0), new IntCoordinates(n));
 		ScalarFESpaceFunction<ContinuousTPShapeFunction> solutFun =
 			new ScalarFESpaceFunction<>(
 				largeGrid.getShapeFunctions(), largeSolut);
 		PlotWindow p = new PlotWindow();
+		p.addPlot(new MatrixPlot(A));
+		p.addPlot(new MatrixPlot(T));
 		p.addPlot(new ScalarPlot2D(solutFun, largeGrid.generatePlotPoints(100), 100));
 	}
 }

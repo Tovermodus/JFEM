@@ -86,6 +86,24 @@ public class SparseMatrix implements MutableMatrix, DirectlySolvable, Decomposab
 		return ret;
 	}
 	
+	public void addSmallMatrixAt(Matrix small, int...coordinates)
+	{
+		if (PerformanceArguments.getInstance().executeChecks)
+		{
+			if (coordinates.length != 2)
+				throw new IllegalArgumentException("Wrong number of coordinates");
+			if (coordinates[0]+small.getRows() > getRows())
+				throw new IllegalArgumentException("small Matrix too large in y for position");
+			if (coordinates[1]+small.getCols() > getCols())
+				throw new IllegalArgumentException("small Matrix too large in x for position");
+		}
+		for(IntCoordinates c:small.getShape().range())
+		{
+			add(small.at(c), c.get(0) + coordinates[0],
+				c.get(1) + coordinates[1]);
+		}
+		
+	}
 	public void addSmallMatrixAt(SparseMatrix small, int...coordinates)
 	{
 		if (PerformanceArguments.getInstance().executeChecks)

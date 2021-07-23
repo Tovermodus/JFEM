@@ -83,6 +83,8 @@ public class PlotWindow extends JFrame implements KeyListener, WindowListener, C
 		if(newValue > 99)
 			newValue = 0;
 		currentPlot = currentPlot % plots.size();
+		while(currentPlot < 0)
+			currentPlot+=plots.size();
 		System.out.println(currentPlot);
 		d.setPlot(plots.get(currentPlot));
 		slider.setValue(newValue);
@@ -197,7 +199,7 @@ class DrawThread implements Runnable {
 		content.getGraphics().setColor(Color.white);
 		content.getGraphics().fillRect(0,0,width+100,height+100);
 		if(currentPlot != null)
-			currentPlot.drawValues(content.getGraphics(), width, height, 0.01*slider.getValue());
+			currentPlot.draw(content.getGraphics(), width, height, 0.01*slider.getValue());
 		canvas.getGraphics().drawImage(content,0,0,null);
 	}
 	public synchronized void setPlot(Plot p)
