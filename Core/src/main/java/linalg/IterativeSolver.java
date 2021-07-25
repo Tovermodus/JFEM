@@ -20,7 +20,7 @@ public class IterativeSolver
 		Vector z;
 		Vector newResiduum;
 		DenseVector iterate = new DenseVector(n);
-		iterate.set(Math.random(),0);
+		iterate.set(1,0);
 		Vector m = operator.mvMul(iterate);
 		Vector residuum = rhs.sub(m);
 		Vector defect = new DenseVector(residuum);

@@ -19,6 +19,6 @@ public class ScalarPlot2DTime extends ScalarPlot3D
 	@Override
 	public String title()
 	{
-		return "2D Plot with time " + title;
+		return "2D Plot with time " + title + " blue is min with " + minValue+" red is max with " + maxValue;
 	}
 }

@@ -77,7 +77,7 @@ class GMRES
 		return x.add(alphaV);
 		
 	}
-	public<T extends VectorMultiplyable> linalg.Vector solve(T preconditioner,VectorMultiplyable A,
+	public<T extends VectorMultiplyable> linalg.Vector solve(T preconditioner, VectorMultiplyable A,
 	                           Vector b,
 	                           double tol, IterativeSolver.Interruptor interruptor)
 	{

@@ -103,6 +103,6 @@ public class ScalarPlot2D implements Plot
 	@Override
 	public String title()
 	{
-		return "2D Plot " + title;
+		return "2D Plot " + title + " blue is min with " + minValue+" red is max with " + maxValue;
 	}
 }

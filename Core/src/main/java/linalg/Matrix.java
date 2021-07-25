@@ -12,6 +12,12 @@ public interface Matrix extends Tensor, VectorMultiplyable
 	Matrix add(Tensor other);
 	
 	@Override
+	default int getVectorSize()
+	{
+		return getRows();
+	}
+	
+	@Override
 	default Matrix sub(Tensor other)
 	{
 		if (!getShape().equals(other.getShape()))

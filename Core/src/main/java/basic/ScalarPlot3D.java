@@ -75,6 +75,6 @@ public class ScalarPlot3D implements Plot
 	@Override
 	public String title()
 	{
-		return "3D Plot " + title;
+		return "3D Plot " + title + " blue is min with " + minValue+" red is max with " + maxValue;
 	}
 }

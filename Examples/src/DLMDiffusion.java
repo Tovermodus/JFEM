@@ -29,14 +29,14 @@ public class DLMDiffusion
 		largeGrid.assembleCells();
 		largeGrid.assembleFunctions(polynomialDegree);
 		ContinuousTPFESpace immersedGrid = new ContinuousTPFESpace(startImmersed, endImmersed,
-			Ints.asList(8,5), polynomialDegree);
+			Ints.asList(8,8), polynomialDegree);
 		immersedGrid.assembleCells();
 		immersedGrid.assembleFunctions(polynomialDegree);
 		
 		ScalarFunction rho = ScalarFunction.constantFunction(1);
-		ScalarFunction rho2minrho = ScalarFunction.constantFunction(1000);
+		ScalarFunction rho2minrho = ScalarFunction.constantFunction(1);
 		ScalarFunction f = ScalarFunction.constantFunction(2);
-		ScalarFunction f2minf = ScalarFunction.constantFunction(-2);
+		ScalarFunction f2minf = ScalarFunction.constantFunction(2);
 		
 		TPCellIntegral<ContinuousTPShapeFunction> rhogradgrad = new TPCellIntegral<>(rho,
 			TPCellIntegral.GRAD_GRAD, true);
@@ -93,11 +93,9 @@ public class DLMDiffusion
 		A.addSmallMatrixAt(A23.transpose(), n+m,n);
 		A.addSmallMatrixAt(A13, 0,n+m);
 		A.addSmallMatrixAt(A13.transpose(), n+m,0);
-		//PlotWindow p = new PlotWindow();
-		//p.addPlot(new MatrixPlot(A));
 		
 		T.addSmallMatrixAt(A11.inverse(), 0, 0);
-		T.addSmallMatrixAt(A22.inverse(), n, n);
+		T.addSmallMatrixAt(SparseMatrix.identity(m), n, n);
 		T.addSmallMatrixAt(SparseMatrix.identity(m), n+m, n+m);
 		
 		DenseVector b1 = new DenseVector(n);
@@ -110,7 +108,7 @@ public class DLMDiffusion
 		b.addSmallVectorAt(b1, 0);
 		b.addSmallVectorAt(b2, n);
 		IterativeSolver i = new IterativeSolver();
-		Vector solut = i.solvePCG(A,T,b,1e-9);//A.solve(b);
+		Vector solut = i.solvePGMRES(A,T,b,1e-9);//A.solve(b);
 		Vector largeSolut = solut.slice(new IntCoordinates(0), new IntCoordinates(n));
 		ScalarFESpaceFunction<ContinuousTPShapeFunction> solutFun =
 			new ScalarFESpaceFunction<>(
@@ -118,6 +116,6 @@ public class DLMDiffusion
 		PlotWindow p = new PlotWindow();
 		p.addPlot(new MatrixPlot(A));
 		p.addPlot(new MatrixPlot(T));
-		p.addPlot(new ScalarPlot2D(solutFun, largeGrid.generatePlotPoints(100), 100));
+		p.addPlot(new ScalarPlot2D(solutFun, largeGrid.generatePlotPoints(70), 70));
 	}
 }
