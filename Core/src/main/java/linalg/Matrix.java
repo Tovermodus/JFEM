@@ -9,6 +9,12 @@ import java.util.TreeMap;
 public interface Matrix extends Tensor, VectorMultiplyable
 {
 	@Override
+	default int getTVectorSize()
+	{
+		return getCols();
+	}
+	
+	@Override
 	Matrix add(Tensor other);
 	
 	@Override

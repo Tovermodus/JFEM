@@ -25,11 +25,11 @@ public class DLMDiffusion
 		
 		ContinuousTPFESpace largeGrid = new ContinuousTPFESpace(start, end,
 			Ints.asList(
-				10,10), polynomialDegree);
+				6,6), polynomialDegree);
 		largeGrid.assembleCells();
 		largeGrid.assembleFunctions(polynomialDegree);
 		ContinuousTPFESpace immersedGrid = new ContinuousTPFESpace(startImmersed, endImmersed,
-			Ints.asList(8,8), polynomialDegree);
+			Ints.asList(4,4), polynomialDegree);
 		immersedGrid.assembleCells();
 		immersedGrid.assembleFunctions(polynomialDegree);
 		
@@ -98,6 +98,76 @@ public class DLMDiffusion
 		T.addSmallMatrixAt(SparseMatrix.identity(m), n, n);
 		T.addSmallMatrixAt(SparseMatrix.identity(m), n+m, n+m);
 		
+		VectorMultiplyable TA = new VectorMultiplyable()
+		{
+			@Override
+			public int getVectorSize()
+			{
+				return A.getVectorSize();
+			}
+			
+			@Override
+			public int getTVectorSize()
+			{
+				return A.getTVectorSize();
+			}
+			
+			@Override
+			public Vector mvMul(Vector vector)
+			{
+				return T.mvMul(A.mvMul(vector));
+			}
+			
+			@Override
+			public Vector tvMul(Vector vector)
+			{
+				return A.transpose().mvMul(T.transpose().mvMul(vector));
+			}
+		};
+		VectorMultiplyable TAinv = new VectorMultiplyable()
+		{
+			@Override
+			public int getVectorSize()
+			{
+				return A.getVectorSize();
+			}
+			
+			@Override
+			public int getTVectorSize()
+			{
+				return A.getTVectorSize();
+			}
+			
+			@Override
+			public Vector mvMul(Vector vector)
+			{
+				IterativeSolver i = new IterativeSolver();
+				i.showProgress = false;
+				return i.solveCG(TA, vector, 1e-14);
+			}
+			
+			@Override
+			public Vector tvMul(Vector vector)
+			{
+				IterativeSolver i = new IterativeSolver();
+				i.showProgress = false;
+				return i.solveCG(TA.transpose(), vector, 1e-14);
+			}
+		};
+		System.out.println("Diff Matrix, transpose " + A.sub(A.transpose()).absMaxElement());
+		System.out.println("Max Eigenvalue " + A.powerIterationSymmetric());
+		System.out.println("Min Eigenvalue " + A.inverse().powerIterationSymmetric());
+		System.out.println("Prec Max Eigenvalue " + T.mmMul(A).powerIterationSymmetric());
+		for(int i = 0; i < n+2*m; i++)
+		{
+			System.out.println(T.mmMul(A).at(i,i));
+		}
+		System.out.println("Prec Min Eigenvalue " + T.mmMul(A).inverse().powerIterationSymmetric());
+		System.out.println("Prec Max Eigenvalue " + TA.powerIterationSymmetric());
+		System.out.println("Prec Min Eigenvalue " + TAinv.powerIterationSymmetric());
+		System.out.println("CONDITION NUMBERSTUFF");
+		
+		
 		DenseVector b1 = new DenseVector(n);
 		DenseVector b2 = new DenseVector(m);
 		
@@ -108,7 +178,7 @@ public class DLMDiffusion
 		b.addSmallVectorAt(b1, 0);
 		b.addSmallVectorAt(b2, n);
 		IterativeSolver i = new IterativeSolver();
-		Vector solut = i.solvePGMRES(A,T,b,1e-9);//A.solve(b);
+		Vector solut = b;//i.solvePGMRES(A,T,b,1e-9);//A.solve(b);
 		Vector largeSolut = solut.slice(new IntCoordinates(0), new IntCoordinates(n));
 		ScalarFESpaceFunction<ContinuousTPShapeFunction> solutFun =
 			new ScalarFESpaceFunction<>(
@@ -116,6 +186,7 @@ public class DLMDiffusion
 		PlotWindow p = new PlotWindow();
 		p.addPlot(new MatrixPlot(A));
 		p.addPlot(new MatrixPlot(T));
+		p.addPlot(new MatrixPlot(T.mmMul(A)));
 		p.addPlot(new ScalarPlot2D(solutFun, largeGrid.generatePlotPoints(70), 70));
 	}
 }

@@ -71,6 +71,13 @@ public class DenseVector implements MutableVector, MutableTensor
 		
 	}
 	
+	public static DenseVector getUnitVector(int d, int index)
+	{
+		DenseVector ret = new DenseVector(d);
+		ret.set(1,index);
+		return ret;
+	}
+	
 	@Override
 	public int getSparseEntryCount()
 	{

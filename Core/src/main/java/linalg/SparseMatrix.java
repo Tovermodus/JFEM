@@ -52,11 +52,6 @@ public class SparseMatrix implements MutableMatrix, DirectlySolvable, Decomposab
 		return ret;
 	}
 	
-	@Override
-	public DenseMatrix inverse()
-	{
-		return new DenseMatrix(this).inverse();
-	}
 	
 	@Override
 	public Vector solve(Vector rhs)
@@ -168,8 +163,14 @@ public class SparseMatrix implements MutableMatrix, DirectlySolvable, Decomposab
 	public synchronized void add(double value, int... coordinates)
 	{
 		if (PerformanceArguments.getInstance().executeChecks)
+		{
 			if (coordinates.length != 2)
 				throw new IllegalArgumentException("Wrong number of coordinates");
+			if(coordinates[0] < 0 || coordinates[0] >= getRows())
+				throw new IllegalArgumentException("y coordinate out of bounds");
+			if(coordinates[1] < 0 || coordinates[1] >= getCols())
+				throw new IllegalArgumentException("x coordinate out of bounds");
+		}
 		if (sparseEntries >= sparseValues.length - 2)
 			resizeSparse();
 		sparseValues[sparseEntries] = value;
@@ -350,20 +351,20 @@ public class SparseMatrix implements MutableMatrix, DirectlySolvable, Decomposab
 	}
 	
 	@Override
-	public Matrix mmMul(Matrix matrix)
+	public DirectlySolvable mmMul(Matrix matrix)
 	{
 		if (PerformanceArguments.getInstance().executeChecks)
 			if (getCols() != (matrix.getRows()))
 				throw new IllegalArgumentException("Incompatible sizes");
-		if (!(matrix instanceof SparseMatrix))
-			return matrix.tmMul(transpose()).transpose();
+		if(! (matrix instanceof  SparseMatrix))
+			return (new DenseMatrix(this)).mmMul(matrix);
 		SparseMatrix ret = new SparseMatrix(getRows(), matrix.getCols());
 		for (int i = 0; i < sparseEntries; i++)
 			for (int j = 0; j < ((SparseMatrix) matrix).sparseEntries; j++)
 			{
-				if (sparseXs[i] == ((SparseMatrix) matrix).sparseYs[i])
-					ret.add(sparseValues[i] * ((SparseMatrix) matrix).sparseValues[i], sparseYs[i],
-						((SparseMatrix) matrix).sparseXs[i]);
+				if (sparseXs[i] == ((SparseMatrix) matrix).sparseYs[j])
+					ret.add(sparseValues[i] * ((SparseMatrix) matrix).sparseValues[j], sparseYs[i],
+						((SparseMatrix) matrix).sparseXs[j]);
 			}
 		return ret;
 	}

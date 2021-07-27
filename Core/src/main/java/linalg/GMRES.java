@@ -5,6 +5,7 @@ import java.util.stream.IntStream;
 
 class GMRES
 {
+	int restarts = 0;
 	public linalg.Vector solve(VectorMultiplyable A,
 	                           Vector b,
 	                           double tol, IterativeSolver.Interruptor interruptor)
@@ -55,7 +56,7 @@ class GMRES
 			h.set(beta, j, j);
 			gamma.set(-s.at(j)*gamma.at(j),j+1);
 			gamma.set(c.at(j)*gamma.at(j),j);
-			System.out.println(Math.abs(gamma.at(j+1)));
+			//System.out.println(Math.abs(gamma.at(j+1)));
 			if(Math.abs(gamma.at(j+1)) < tol || j > 40)
 				break;
 			v.add(w.mul(1./h.at(j+1,j)));
@@ -72,8 +73,11 @@ class GMRES
 		Vector alphaV =
 			IntStream.range(0,j+1).parallel().mapToObj(i->v.get(i).mul(alpha.at(i))).reduce(new DenseVector(n),
 				Vector::add);
-		if(j > 40)
-			return new GMRES().solve(A,b,x.add(alphaV), tol, interruptor);
+		if(j > 40 && restarts < 200)
+		{
+			restarts++;
+			return new GMRES().solve(A, b, x.add(alphaV), tol, interruptor);
+		}
 		return x.add(alphaV);
 		
 	}
@@ -127,7 +131,7 @@ class GMRES
 			h.set(beta, j, j);
 			gamma.set(-s.at(j)*gamma.at(j),j+1);
 			gamma.set(c.at(j)*gamma.at(j),j);
-			System.out.println(Math.abs(gamma.at(j+1)));
+			//System.out.println(Math.abs(gamma.at(j+1)));
 			if(Math.abs(gamma.at(j+1)) < tol || j > 40)
 				break;
 			v.add(w.mul(1./h.at(j+1,j)));
@@ -144,8 +148,11 @@ class GMRES
 		Vector alphaV =
 			IntStream.range(0,j+1).parallel().mapToObj(i->v.get(i).mul(alpha.at(i))).reduce(new DenseVector(n),
 				Vector::add);
-		if(j > 40)
-			return new GMRES().solve(A, preconditioner, b,x.add(alphaV), tol, interruptor);
+		if(j > 40 && restarts < 200)
+		{
+			restarts++;
+			return solve(A, preconditioner, b, x.add(alphaV), tol, interruptor);
+		}
 		return x.add(alphaV);
 		
 	}

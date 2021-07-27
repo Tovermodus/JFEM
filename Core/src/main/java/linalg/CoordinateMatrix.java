@@ -43,7 +43,7 @@ public class CoordinateMatrix extends DenseMatrix
 	@Override
 	public CoordinateVector mvMul(Vector vector)
 	{
-		return (CoordinateVector) super.mvMul(vector);
+		return new CoordinateVector(super.mvMul(vector));
 	}
 	
 	@Override

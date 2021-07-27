@@ -5,7 +5,10 @@ import linalg.Vector;
 
 public interface DirectlySolvable extends Matrix
 {
-	Matrix inverse();
+	default DenseMatrix inverse()
+	{
+		return (new DenseMatrix(this)).inverse();
+	}
 	Vector solve(Vector rhs);
 	Vector solveSymm(Vector rhs);
 }
