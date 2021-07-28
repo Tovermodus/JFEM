@@ -223,9 +223,9 @@ public class ContinuousTPShapeFunction implements ScalarShapeFunctionWithReferen
     @Override
     public ContinuousTPShapeFunction createReferenceShapeFunctionRelativeTo(TPFace face)
     {
-        boolean down = face.getNormalUpstreamCell() == null || face.isNormalDownstream(nodeFunctional.getPoint());
-        TPCell supportCell = down?face.getNormalDownstreamCell():face.getNormalUpstreamCell();
-        TPCell referenceCell = down?face.getReferenceFace().getNormalDownstreamCell():
+        boolean functionalPointIsDownStreamOfFace = face.getNormalUpstreamCell() == null || face.isNormalDownstream(nodeFunctional.getPoint());
+        TPCell supportCell = functionalPointIsDownStreamOfFace?face.getNormalDownstreamCell():face.getNormalUpstreamCell();
+        TPCell referenceCell = functionalPointIsDownStreamOfFace?face.getReferenceFace().getNormalDownstreamCell():
                 face.getReferenceFace().getNormalUpstreamCell();
         List<LagrangeBasisFunction1D> functions = cells.get(supportCell);
         CoordinateVector functionalPoint =
@@ -233,7 +233,7 @@ public class ContinuousTPShapeFunction implements ScalarShapeFunctionWithReferen
                         IntStream.range(0, getDomainDimension())
                                 .mapToDouble(i -> functions.get(i).getCell().positionOnReferenceCell(nodeFunctional.getPoint().at(i)))
                                 .toArray());
-        if(!down)
+        if(!functionalPointIsDownStreamOfFace)
             functionalPoint.add(-1,face.flatDimension);
         return new ContinuousTPShapeFunction(referenceCell, polynomialDegree, functionalPoint);
     }

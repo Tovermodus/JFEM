@@ -211,6 +211,8 @@ public class TPFace implements FaceWithReferenceFace<TPCell, TPFace, TPEdge>,Com
 			if(d<cell1Ds.size())
 				ret = ret.concat("x");
 		}
+		if(isBoundaryFace)
+			ret = ret.concat(" On Boundary");
 		return ret;
 	}
 	@Override
@@ -293,9 +295,11 @@ public class TPFace implements FaceWithReferenceFace<TPCell, TPFace, TPEdge>,Com
 			}
 		}
 		TPCell downstreamCell = new TPCell(cells1);
-		refFace.addCell(downstreamCell);
+		if(getNormalDownstreamCell() != null)
+			refFace.addCell(downstreamCell);
 		TPCell upstreamCell = new TPCell(cells2);
-		refFace.addCell(upstreamCell);
+		if(getNormalUpstreamCell() != null)
+			refFace.addCell(upstreamCell);
 		return refFace;
 	}
 //	@Override
