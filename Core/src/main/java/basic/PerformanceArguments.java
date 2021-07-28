@@ -1,5 +1,10 @@
 package basic;
 
+import org.apache.log4j.Level;
+import org.apache.log4j.Logger;
+import org.apache.spark.SparkConf;
+import org.apache.spark.api.java.JavaSparkContext;
+
 import java.util.Objects;
 
 public class PerformanceArguments
@@ -9,6 +14,8 @@ public class PerformanceArguments
 	public final int threadNumber;
 	public final boolean executeChecks;
 	public final int cacheSize;
+	public final JavaSparkContext sparkContext;
+	public final SparkConf conf;
 	
 	private PerformanceArguments(Boolean parallelizeThreads, Integer threadNumber, Boolean executeChecks,
 	                             Integer cacheSize) {
@@ -16,6 +23,10 @@ public class PerformanceArguments
 		this.threadNumber = Objects.requireNonNullElse(threadNumber, 12);
 		this.executeChecks = Objects.requireNonNullElse(executeChecks, true);
 		this.cacheSize = Objects.requireNonNullElse(cacheSize, 50000);
+		
+		this.conf = new SparkConf().setAppName("JFEM").setMaster("local[*]");
+		Logger.getLogger("org.apache.spark").setLevel(Level.WARN);
+		sparkContext = new JavaSparkContext(conf);
 	}
 	public static void createInstance(Boolean parallelizeThreads, Integer threadNumber, Boolean executeChecks,
 	                                  Integer cacheSize) {

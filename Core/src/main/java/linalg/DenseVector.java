@@ -225,15 +225,6 @@ public class DenseVector implements MutableVector, MutableTensor
 			add(small.at(i), i + coordinates[0]);
 		}
 	}
-	no.uib.cipr.matrix.DenseVector toMTJvector()
-	{
-		no.uib.cipr.matrix.DenseVector m = new no.uib.cipr.matrix.DenseVector(getShape().get(0));
-		for (int i = 0; i < getLength(); i++)
-		{
-			m.set(i, at(i));
-		}
-		return m;
-	}
 	
 	org.ujmp.core.Matrix toUJMPVector()
 	{
