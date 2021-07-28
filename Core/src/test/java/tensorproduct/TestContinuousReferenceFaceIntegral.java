@@ -60,7 +60,6 @@ public class TestContinuousReferenceFaceIntegral
 		grid.initializeSystemMatrix();
 		grid.initializeRhs();
 		grid.evaluateFaceIntegrals(faceIntegrals, rightHandSideIntegrals);
-		
 		assertTrue(referenceMatrix.almostEqual(grid.getSystemMatrix(), 1e-12));
 		
 	}

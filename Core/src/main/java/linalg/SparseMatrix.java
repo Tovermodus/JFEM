@@ -396,7 +396,6 @@ public class SparseMatrix implements MutableMatrix, DirectlySolvable, Decomposab
 	@Override
 	public boolean almostEqual(Tensor other, double tol)
 	{
-		
 		if (PerformanceArguments.getInstance().executeChecks)
 		{
 			if (!getShape().equals(other.getShape()))
@@ -406,17 +405,26 @@ public class SparseMatrix implements MutableMatrix, DirectlySolvable, Decomposab
 			return other.almostEqual(this, tol);
 		ImmutableMap<IntCoordinates, Double> myValues = getCoordinateEntryList();
 		ImmutableMap<IntCoordinates, Double> otherValues = other.getCoordinateEntryList();
-		
 		double absmax = absMaxElement() + other.absMaxElement();
 		for (Map.Entry<IntCoordinates, Double> entry : myValues.entrySet())
 		{
 			if (otherValues.containsKey(entry.getKey()))
 			{
 				if (Math.abs(entry.getValue() - otherValues.get(entry.getKey())) > tol * (1 + absmax))
+				{
+					System.out.println(entry.getValue() + " != " + otherValues.get(entry.getKey()) + " with tol " + tol * (1 + absmax) +
+						" " +
+						" difference: " + Math.abs(entry.getValue() - otherValues.get(entry.getKey())) + " at " + entry.getKey() + " out of " + getShape());
 					return false;
+				}
 			} else
+			{
+				System.out.println("Value at" + entry.getKey() + " was not found in second matrix");
 				return false;
+			}
 		}
+		if(otherValues.size() != myValues.size())
+			System.out.println("matrices have different numbers of values");
 		return otherValues.size() == myValues.size();
 	}
 	

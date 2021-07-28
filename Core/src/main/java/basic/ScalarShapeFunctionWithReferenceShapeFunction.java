@@ -9,13 +9,13 @@ public interface ScalarShapeFunctionWithReferenceShapeFunction<CT extends CellWi
 		ScalarShapeFunction<CT,FT,ET>
 {
 	@Override
-	ScalarShapeFunctionWithReferenceShapeFunction<CT, FT, ET> getReferenceShapeFunctionRelativeTo(CT cell);
+	ScalarShapeFunctionWithReferenceShapeFunction<CT, FT, ET> createReferenceShapeFunctionRelativeTo(CT cell);
 	
 	@Override
-	ScalarShapeFunctionWithReferenceShapeFunction<CT, FT, ET> getReferenceShapeFunctionRelativeTo(FT face);
+	ScalarShapeFunctionWithReferenceShapeFunction<CT, FT, ET> createReferenceShapeFunctionRelativeTo(FT face);
 	
 	@Override
-	default ScalarShapeFunctionWithReferenceShapeFunction<CT, FT, ET> getReferenceShapeFunctionRelativeTo(ET edge)
+	default ScalarShapeFunctionWithReferenceShapeFunction<CT, FT, ET> createReferenceShapeFunctionRelativeTo(ET edge)
 	{
 		throw new UnsupportedOperationException("not implemented yet");
 	}

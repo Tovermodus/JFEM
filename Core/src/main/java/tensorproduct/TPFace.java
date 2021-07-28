@@ -228,6 +228,10 @@ public class TPFace implements FaceWithReferenceFace<TPCell, TPFace, TPEdge>,Com
 			return -1;
 		if(o.otherCoordinate > otherCoordinate)
 			return 1;
+		if(o.isBoundaryFace && !isBoundaryFace)
+			return 1;
+		if(!o.isBoundaryFace && isBoundaryFace)
+			return -1;
 		return CoordinateComparator.comp(center().getEntries(), o.center().getEntries());
 	}
 	@Override
@@ -242,6 +246,9 @@ public class TPFace implements FaceWithReferenceFace<TPCell, TPFace, TPEdge>,Com
 		}
 		ret -= 141*otherCoordinate;
 		ret*=(flatDimension+19);
+		ret*=2;
+		if(isBoundaryFace)
+			ret+=1;
 		return ret;
 	}
 	

@@ -183,74 +183,48 @@ public class TPCell implements CellWithReferenceCell<TPCell, TPFace, TPEdge>
 	
 	
 	@Override
-	public CoordinateMatrix getReferenceTransformationJacobian()
+	public CoordinateMatrix transformationGradientFromReferenceCell(CoordinateVector pos)
 	{
 		CoordinateMatrix ret = new CoordinateMatrix(getDimension(), getDimension());
 		for(int i = 0; i < getDimension(); i++)
 		{
-			/*double val = 1;
-			for (int j = 0; j < getDimension(); j++)
-			{
-				if (j != i)
-					val*=cell1Ds.get(j).getEnd() - cell1Ds.get(j).getStart();
-			}
-			ret.set(val, i, i);*/
 			ret.set(cell1Ds.get(i).getEnd() - cell1Ds.get(i).getStart(), i, i);
 		}
 		return ret;
 	}
 	
-	//	@Override
-//	public  List<TPCell> refine(List<TPFace> refinedFaces)
-//	{
-//		List<Cell<TPFace,TPShapeFunction>> refinedCells = new ArrayList<>();
-//		TPCell cell1 = new TPCell(cellx.getStart(),celly.getStart(),cellx.center(),celly.center(),
-//			polynomialDegree);
-//		TPFace face1 = new TPFace(new Cell1D(cellx.getStart(),cellx.center()),celly.center(),1);
-//		TPFace face2 = new TPFace(new Cell1D(celly.getStart(),celly.center()),cellx.center(),0);
-//		TPCell cell2 = new TPCell(cellx.center(),celly.getStart(),cellx.getEnd(),celly.center(),
-//			polynomialDegree);
-//		TPCell cell3 = new TPCell(cellx.getStart(),celly.center(),cellx.center(),celly.getEnd(),
-//			polynomialDegree);
-//		TPCell cell4 = new TPCell(cellx.center(),celly.center(),cellx.getEnd(),celly.getEnd(),
-//			polynomialDegree);
-//		TPFace face3 = new TPFace(new Cell1D(cellx.center(),cellx.getEnd()),celly.center(),1);
-//		TPFace face4 = new TPFace(new Cell1D(celly.center(),celly.getEnd()),cellx.center(),0);
-//		cell1.faces.add(face1);
-//		cell1.faces.add(face2);
-//		cell2.faces.add(face2);
-//		cell2.faces.add(face3);
-//		cell3.faces.add(face1);
-//		cell3.faces.add(face4);
-//		cell4.faces.add(face3);
-//		cell4.faces.add(face4);
-//		System.out.println("MAKE NICER TPCELL");
-//		face1.getCells().add(cell1);
-//		face1.getCells().add(cell3);
-//		face2.getCells().add(cell1);
-//		face2.getCells().add(cell2);
-//		face3.getCells().add(cell2);
-//		face3.getCells().add(cell4);
-//		face4.getCells().add(cell3);
-//		face4.getCells().add(cell4);
-//		face1.setBoundaryFace(false);
-//		face2.setBoundaryFace(false);
-//		face3.setBoundaryFace(false);
-//		face4.setBoundaryFace(false);
-//		refinedCells.add(cell1);
-//		refinedCells.add(cell2);
-//		refinedCells.add(cell3);
-//		refinedCells.add(cell4);
-//		refinedFaces.add(face1);
-//		refinedFaces.add(face2);
-//		refinedFaces.add(face3);
-//		refinedFaces.add(face4);
-//		setRefined(true);
-//		return refinedCells;
-//	}
-//
-
-
+	@Override
+	public CoordinateMatrix transformationGradientToReferenceCell(CoordinateVector pos)
+	{
+		CoordinateMatrix ret = new CoordinateMatrix(getDimension(), getDimension());
+		for(int i = 0; i < getDimension(); i++)
+		{
+			ret.set(1./(cell1Ds.get(i).getEnd() - cell1Ds.get(i).getStart()), i, i);
+		}
+		return ret;
+	}
+	
+	@Override
+	public CoordinateVector transformToReferenceCell(CoordinateVector pos)
+	{
+		CoordinateVector ret = new CoordinateVector(getDimension());
+		for(int i = 0; i < getDimension(); i++)
+		{
+			ret.set((pos.at(i) - cell1Ds.get(i).getStart())/(cell1Ds.get(i).getEnd() - cell1Ds.get(i).getStart()), i);
+		}
+		return ret;
+	}
+	
+	@Override
+	public CoordinateVector transformFromReferenceCell(CoordinateVector pos)
+	{
+		CoordinateVector ret = new CoordinateVector(getDimension());
+		for(int i = 0; i < getDimension(); i++)
+		{
+			ret.set(pos.at(i) *(cell1Ds.get(i).getEnd() - cell1Ds.get(i).getStart()) + cell1Ds.get(i).getStart(), i);
+		}
+		return ret;
+	}
 }
 
 

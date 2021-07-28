@@ -1,16 +1,9 @@
 package tensorproduct;
 
 import basic.*;
-import linalg.CoordinateMatrix;
-import linalg.CoordinateVector;
-import linalg.Matrix;
-import linalg.Vector;
 
-import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.function.ToDoubleFunction;
 
 public class TPCellIntegralViaReferenceCell<ST extends ScalarShapeFunctionWithReferenceShapeFunction<TPCell,TPFace,TPEdge>> extends TPCellIntegral<ST>
 {
@@ -34,9 +27,9 @@ public class TPCellIntegralViaReferenceCell<ST extends ScalarShapeFunctionWithRe
 	                                   ST shapeFunction2)
 	{
 		ScalarShapeFunctionWithReferenceShapeFunction<TPCell,TPFace,TPEdge> referenceShapeFunction1
-			= shapeFunction1.getReferenceShapeFunctionRelativeTo(cell);
+			= shapeFunction1.createReferenceShapeFunctionRelativeTo(cell);
 		ScalarShapeFunctionWithReferenceShapeFunction<TPCell,TPFace,TPEdge> referenceShapeFunction2
-			= shapeFunction2.getReferenceShapeFunctionRelativeTo(cell);
+			= shapeFunction2.createReferenceShapeFunctionRelativeTo(cell);
 		ReferenceCellIdentificationTriplet<TPCell, TPFace, TPEdge,
 			ScalarShapeFunctionWithReferenceShapeFunction<TPCell,TPFace,TPEdge>> key =
 			new ReferenceCellIdentificationTriplet<>(referenceShapeFunction1,

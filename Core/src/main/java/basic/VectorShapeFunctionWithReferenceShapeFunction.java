@@ -10,13 +10,13 @@ public interface VectorShapeFunctionWithReferenceShapeFunction<CT extends CellWi
 		VectorShapeFunction<CT,FT,ET>
 {
 	@Override
-	VectorShapeFunctionWithReferenceShapeFunction<CT, FT, ET> getReferenceShapeFunctionRelativeTo(CT cell);
+	VectorShapeFunctionWithReferenceShapeFunction<CT, FT, ET> createReferenceShapeFunctionRelativeTo(CT cell);
 	
 	@Override
-	VectorShapeFunctionWithReferenceShapeFunction<CT, FT, ET> getReferenceShapeFunctionRelativeTo(FT face);
+	VectorShapeFunctionWithReferenceShapeFunction<CT, FT, ET> createReferenceShapeFunctionRelativeTo(FT face);
 	
 	@Override
-	default VectorShapeFunctionWithReferenceShapeFunction<CT, FT, ET> getReferenceShapeFunctionRelativeTo(ET edge)
+	default VectorShapeFunctionWithReferenceShapeFunction<CT, FT, ET> createReferenceShapeFunctionRelativeTo(ET edge)
 	{
 		throw new UnsupportedOperationException("not implemented yet");
 	}

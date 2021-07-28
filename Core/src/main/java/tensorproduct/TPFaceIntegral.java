@@ -63,6 +63,7 @@ public class TPFaceIntegral<ST extends ScalarShapeFunction<TPCell,TPFace,TPEdge>
 				else
 					point[j] = x.at(subd++);
 			}
+			System.out.println(eval.applyAsDouble(CoordinateVector.fromValues(point)));
 			return eval.applyAsDouble(CoordinateVector.fromValues(point));
 		}, cells);
 //		System.out.println(v);

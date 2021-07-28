@@ -2,7 +2,6 @@ package tensorproduct;
 
 import basic.LagrangeNodeFunctional;
 import basic.SingleComponentVectorShapeFunction;
-import basic.VectorNodeFunctional;
 import basic.VectorShapeFunctionWithReferenceShapeFunction;
 import linalg.CoordinateVector;
 
@@ -24,16 +23,16 @@ public class ContinuousTPVectorFunction extends SingleComponentVectorShapeFuncti
 	}
 	
 	@Override
-	public ContinuousTPVectorFunction getReferenceShapeFunctionRelativeTo(TPCell cell)
+	public ContinuousTPVectorFunction createReferenceShapeFunctionRelativeTo(TPCell cell)
 	{
-		return new ContinuousTPVectorFunction(getComponentFunction().getReferenceShapeFunctionRelativeTo(cell)
+		return new ContinuousTPVectorFunction(getComponentFunction().createReferenceShapeFunctionRelativeTo(cell)
 			, getComponent());
 	}
 	
 	@Override
-	public ContinuousTPVectorFunction getReferenceShapeFunctionRelativeTo(TPFace face)
+	public ContinuousTPVectorFunction createReferenceShapeFunctionRelativeTo(TPFace face)
 	{
-		return new ContinuousTPVectorFunction(getComponentFunction().getReferenceShapeFunctionRelativeTo(face)
+		return new ContinuousTPVectorFunction(getComponentFunction().createReferenceShapeFunctionRelativeTo(face)
 			, getComponent());
 	}
 	@Override

@@ -3,7 +3,6 @@ package tensorproduct;
 import basic.*;
 
 import java.util.Map;
-import java.util.TreeMap;
 import java.util.concurrent.ConcurrentHashMap;
 
 public class TPVectorCellIntegralViaReferenceCell<ST extends VectorShapeFunctionWithReferenceShapeFunction<TPCell,TPFace,TPEdge>> extends TPVectorCellIntegral<ST>
@@ -28,9 +27,9 @@ public class TPVectorCellIntegralViaReferenceCell<ST extends VectorShapeFunction
 	                                   ST shapeFunction2)
 	{
 		VectorShapeFunctionWithReferenceShapeFunction<TPCell,TPFace,TPEdge> referenceShapeFunction1
-			= shapeFunction1.getReferenceShapeFunctionRelativeTo(cell);
+			= shapeFunction1.createReferenceShapeFunctionRelativeTo(cell);
 		VectorShapeFunctionWithReferenceShapeFunction<TPCell,TPFace,TPEdge> referenceShapeFunction2
-			= shapeFunction2.getReferenceShapeFunctionRelativeTo(cell);
+			= shapeFunction2.createReferenceShapeFunctionRelativeTo(cell);
 		ReferenceCellIdentificationTriplet<TPCell, TPFace, TPEdge,
 			VectorShapeFunctionWithReferenceShapeFunction<TPCell,TPFace,TPEdge>> key =
 			new ReferenceCellIdentificationTriplet<>(referenceShapeFunction1,

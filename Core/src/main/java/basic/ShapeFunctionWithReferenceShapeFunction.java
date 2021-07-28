@@ -7,10 +7,9 @@ public interface ShapeFunctionWithReferenceShapeFunction<CT extends CellWithRefe
 	ET extends EdgeWithReferenceEdge<CT,FT,ET>, valueT,	gradientT,
 	hessianT> extends ShapeFunction<CT,FT,ET,valueT,gradientT,hessianT>
 {
-	
-	ShapeFunctionWithReferenceShapeFunction<CT,FT,ET,valueT,gradientT,hessianT> getReferenceShapeFunctionRelativeTo(CT cell);
-	ShapeFunctionWithReferenceShapeFunction<CT,FT,ET,valueT,gradientT,hessianT> getReferenceShapeFunctionRelativeTo(FT face);
-	default ShapeFunctionWithReferenceShapeFunction<CT,FT,ET,valueT,gradientT,hessianT> getReferenceShapeFunctionRelativeTo(ET edge)
+	ShapeFunctionWithReferenceShapeFunction<CT,FT,ET,valueT,gradientT,hessianT> createReferenceShapeFunctionRelativeTo(CT cell);
+	ShapeFunctionWithReferenceShapeFunction<CT,FT,ET,valueT,gradientT,hessianT> createReferenceShapeFunctionRelativeTo(FT face);
+	default ShapeFunctionWithReferenceShapeFunction<CT,FT,ET,valueT,gradientT,hessianT> createReferenceShapeFunctionRelativeTo(ET edge)
 	{
 		throw new UnsupportedOperationException("not implemented yet");
 	}

@@ -179,7 +179,9 @@ public class ContinuousTPShapeFunction implements ScalarShapeFunctionWithReferen
     @Override
     public String toString()
     {
-        return "Cell: ".concat(", Node point: ").concat(nodeFunctional.getPoint().toString()).concat(", global Index: ").concat(getGlobalIndex() + "");
+        return "Cells: ".concat(getCells().toString()).concat(", Node point: ").concat(nodeFunctional.getPoint().toString()).concat(", " +
+                "global " +
+            "Index: ").concat(getGlobalIndex() + "");
     }
     @Override
     public int hashCode()
@@ -207,7 +209,7 @@ public class ContinuousTPShapeFunction implements ScalarShapeFunctionWithReferen
     }
     
     @Override
-    public ContinuousTPShapeFunction getReferenceShapeFunctionRelativeTo(TPCell cell)
+    public ContinuousTPShapeFunction createReferenceShapeFunctionRelativeTo(TPCell cell)
     {
         List<LagrangeBasisFunction1D> functions = cells.get(cell);
         CoordinateVector functionalPoint =
@@ -219,7 +221,7 @@ public class ContinuousTPShapeFunction implements ScalarShapeFunctionWithReferen
     }
     
     @Override
-    public ContinuousTPShapeFunction getReferenceShapeFunctionRelativeTo(TPFace face)
+    public ContinuousTPShapeFunction createReferenceShapeFunctionRelativeTo(TPFace face)
     {
         boolean down = face.getNormalUpstreamCell() == null || face.isNormalDownstream(nodeFunctional.getPoint());
         TPCell supportCell = down?face.getNormalDownstreamCell():face.getNormalUpstreamCell();
