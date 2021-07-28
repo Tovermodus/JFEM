@@ -311,7 +311,7 @@ public class TaylorHoodSpace implements MixedFESpace<TPCell, TPFace, TPEdge,Cont
 				if (F.isBoundaryFace())
 				{
 					if(TPFaceIntegral.integrateNonTensorProduct(indicatorFunction::value,
-						F.getCell1Ds(),F.getFlatDimension(),F.getOtherCoordinate()) > 0)
+						F.getCell1Ds(),F.getFlatDimension(),F.getOtherCoordinate(),QuadratureRule1D.Gauss5) > 0)
 					{
 						for (MixedShapeFunction<TPCell, TPFace, TPEdge, ContinuousTPShapeFunction,
 							ContinuousTPVectorFunction> shapeFunction :
@@ -346,7 +346,7 @@ public class TaylorHoodSpace implements MixedFESpace<TPCell, TPFace, TPEdge,Cont
 				if (F.isBoundaryFace())
 				{
 					if(TPFaceIntegral.integrateNonTensorProduct(indicatorFunction::value,
-						F.getCell1Ds(),F.getFlatDimension(),F.getOtherCoordinate()) > 0)
+						F.getCell1Ds(),F.getFlatDimension(),F.getOtherCoordinate(), QuadratureRule1D.Gauss5) > 0)
 					{
 						for (MixedShapeFunction<TPCell, TPFace, TPEdge, ContinuousTPShapeFunction,
 							ContinuousTPVectorFunction> shapeFunction :

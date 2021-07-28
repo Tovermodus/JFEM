@@ -1,11 +1,7 @@
 package tensorproduct;
 
 import basic.*;
-import com.google.common.collect.BoundType;
 import linalg.CoordinateVector;
-
-import java.util.List;
-import java.util.function.ToDoubleFunction;
 
 public class TPVectorFaceIntegral<ST extends VectorShapeFunction<TPCell,TPFace,TPEdge>> extends FaceIntegral<TPFace,ST>
 {
@@ -13,9 +9,15 @@ public class TPVectorFaceIntegral<ST extends VectorShapeFunction<TPCell,TPFace,T
 	public static String GRAD_AVERAGE_VALUE_NORMALAVERAGE = "GradAverageValueNormalaverage";
 	public static String VALUE_NORMALAVERAGE_VALUE_NORMALAVERAGE = "ValueNormalaverageValueNormalaverage";
 	public static String BOUNDARY_VALUE = "BoundaryValue";
-	public TPVectorFaceIntegral(Function<?,?,?> weight, String name)
+	
+	public TPVectorFaceIntegral(Function<?, ?, ?> weight, String name)
 	{
-		super(weight,name);
+		this(weight, name, QuadratureRule1D.Gauss5);
+	}
+	
+	public TPVectorFaceIntegral(Function<?, ?, ?> weight, String name, QuadratureRule1D quadratureRule1D)
+	{
+		super(weight,name, quadratureRule1D);
 		if(name.equals(VALUE_NORMALAVERAGE_GRAD_AVERAGE) && !(weight.value(new CoordinateVector(weight.getDomainDimension())) instanceof Double))
 			throw new IllegalArgumentException();
 		if(name.equals(GRAD_AVERAGE_VALUE_NORMALAVERAGE) && !(weight.value(new CoordinateVector(weight.getDomainDimension())) instanceof Double))
@@ -23,9 +25,13 @@ public class TPVectorFaceIntegral<ST extends VectorShapeFunction<TPCell,TPFace,T
 		if(name.equals(VALUE_NORMALAVERAGE_VALUE_NORMALAVERAGE) && !(weight.value(new CoordinateVector(weight.getDomainDimension())) instanceof Double))
 			throw new IllegalArgumentException();
 	}
+	public TPVectorFaceIntegral(String name, QuadratureRule1D quadratureRule1D)
+	{
+		super(name, quadratureRule1D);
+	}
 	public TPVectorFaceIntegral(String name)
 	{
-		super(name);
+		this(name, QuadratureRule1D.Gauss5);
 	}
 	@Override
 	public double evaluateFaceIntegral(TPFace face, ST shapeFunction1,
@@ -37,7 +43,8 @@ public class TPVectorFaceIntegral<ST extends VectorShapeFunction<TPCell,TPFace,T
 				,x).frobeniusInner(shapeFunction2.averageInDerivative(face,x))*(double)weight.value(x),
 				face.cell1Ds,
 				face.flatDimension,
-				face.otherCoordinate);
+				face.otherCoordinate,
+				quadratureRule1D);
 		}
 		if (name.equals(GRAD_AVERAGE_VALUE_NORMALAVERAGE))
 		{
@@ -45,7 +52,8 @@ public class TPVectorFaceIntegral<ST extends VectorShapeFunction<TPCell,TPFace,T
 				,x).frobeniusInner(shapeFunction1.averageInDerivative(face,x))*(double)weight.value(x),
 				face.cell1Ds,
 				face.flatDimension,
-				face.otherCoordinate);
+				face.otherCoordinate,
+				quadratureRule1D);
 		}
 		if (name.equals(VALUE_NORMALAVERAGE_VALUE_NORMALAVERAGE))
 		{
@@ -53,7 +61,8 @@ public class TPVectorFaceIntegral<ST extends VectorShapeFunction<TPCell,TPFace,T
 				,x).frobeniusInner(shapeFunction2.normalAverageInValue(face,x))*(double)weight.value(x),
 				face.cell1Ds,
 				face.flatDimension,
-				face.otherCoordinate);
+				face.otherCoordinate,
+				quadratureRule1D);
 		}
 		if (name.equals(BOUNDARY_VALUE))
 		{
@@ -62,7 +71,8 @@ public class TPVectorFaceIntegral<ST extends VectorShapeFunction<TPCell,TPFace,T
 					, x).frobeniusInner(shapeFunction2.normalAverageInValue(face, x)) * (double) weight.value(x),
 					face.cell1Ds,
 					face.flatDimension,
-					face.otherCoordinate);
+					face.otherCoordinate,
+					quadratureRule1D);
 			else
 				return 0;
 		}

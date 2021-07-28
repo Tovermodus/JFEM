@@ -1,19 +1,16 @@
 package tensorproduct;
 
-import basic.CellIntegral;
-import basic.Function;
-import basic.ScalarShapeFunction;
 import linalg.CoordinateVector;
-import linalg.Vector;
 
 import java.util.List;
 import java.util.function.ToDoubleFunction;
 
 public class TPEdgeIntegral
 {
-	public static double integrateNonTensorProduct(ToDoubleFunction<CoordinateVector> eval, TPEdge e)
+	public static double integrateNonTensorProduct(ToDoubleFunction<CoordinateVector> eval, TPEdge e,
+	                                               QuadratureRule1D quadratureRule)
 	{
-		double v = TPCellIntegral.integrateNonTensorProduct(x ->
+		return TPCellIntegral.integrateNonTensorProduct(x ->
 		{
 			double[] point = new double[3];
 			int subd = 0;
@@ -25,7 +22,6 @@ public class TPEdgeIntegral
 					point[j] = e.otherCoordinates[subd++];
 			}
 			return eval.applyAsDouble(CoordinateVector.fromValues(point));
-		}, List.of(e.cell));
-		return v;
+		}, List.of(e.cell), quadratureRule);
 	}
 }

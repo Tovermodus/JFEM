@@ -31,10 +31,10 @@ public class LaplaceTest
 			new TPFaceIntegralViaReferenceFace<>(penalty,TPFaceIntegral.VALUE_JUMP_VALUE_JUMP);
 		TPRightHandSideIntegral<TPShapeFunction> rightHandSideIntegral =
 			new TPRightHandSideIntegral<>(LaplaceReferenceSolution.scalarRightHandSide(),
-				TPRightHandSideIntegral.VALUE, false);
+				TPRightHandSideIntegral.VALUE);
 		TPBoundaryFaceIntegral<TPShapeFunction> boundaryValues =
 			new TPBoundaryFaceIntegral<>(LaplaceReferenceSolution.scalarBoundaryValues(penalty),
-				TPBoundaryFaceIntegral.VALUE, false);
+				TPBoundaryFaceIntegral.VALUE);
 		
 		ArrayList<CellIntegral<TPCell,TPShapeFunction>> cellIntegrals =
 			new ArrayList<>();
@@ -82,7 +82,7 @@ public class LaplaceTest
 			new TPCellIntegral<>(TPCellIntegral.GRAD_GRAD);
 		TPRightHandSideIntegral<ContinuousTPShapeFunction> rightHandSideIntegral =
 			new TPRightHandSideIntegral<>(LaplaceReferenceSolution.scalarRightHandSide(),
-				TPRightHandSideIntegral.VALUE, false);
+				TPRightHandSideIntegral.VALUE);
 		
 		ArrayList<CellIntegral<TPCell,ContinuousTPShapeFunction>> cellIntegrals =
 			new ArrayList<>();

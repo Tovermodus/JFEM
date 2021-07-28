@@ -1,7 +1,6 @@
 package systems;
 
 import basic.Cell;
-import basic.CellIntegral;
 import basic.RightHandSideIntegral;
 import basic.ShapeFunction;
 
@@ -13,7 +12,6 @@ public class SystemHomogeneousRhsIntegral<CT extends Cell<CT,?,?>, ST extends Sh
 	
 	public SystemHomogeneousRhsIntegral(RightHandSideIntegral<CT, ST> cellIntegral, int component)
 	{
-		super();
 		this.cellIntegral = cellIntegral;
 		this.component = component;
 	}

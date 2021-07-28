@@ -3,13 +3,10 @@ import com.google.common.base.Stopwatch;
 import com.google.common.primitives.Ints;
 import linalg.CoordinateVector;
 import linalg.IterativeSolver;
-import linalg.SparseMatrix;
 import linalg.Vector;
 import tensorproduct.*;
 
 import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
 
 public class Laplace3D
 {
@@ -28,19 +25,17 @@ public class Laplace3D
                 TPFESpace grid = new TPFESpace(start,end,
                         Ints.asList(6,6,6),polynomialDegree);
                 TPCellIntegral<TPShapeFunction> gg = new TPCellIntegralViaReferenceCell<>(1,
-                        TPCellIntegral.GRAD_GRAD,
-                        false);
+                        TPCellIntegral.GRAD_GRAD);
                 double penalty = 200000;
                 TPFaceIntegral<TPShapeFunction> jj = new TPFaceIntegralViaReferenceFace<>(penalty,
-                        TPFaceIntegral.VALUE_JUMP_VALUE_JUMP, false);
+                        TPFaceIntegral.VALUE_JUMP_VALUE_JUMP);
                 ArrayList<CellIntegral<TPCell,TPShapeFunction>> cellIntegrals =
                         new ArrayList<>();
                 cellIntegrals.add(gg);
                 ArrayList<FaceIntegral<TPFace,TPShapeFunction>> faceIntegrals = new ArrayList<>();
                 faceIntegrals.add(jj);
                 TPRightHandSideIntegral<TPShapeFunction> rightHandSideIntegral =
-                        new TPRightHandSideIntegral<>(ScalarFunction.constantFunction(1),TPRightHandSideIntegral.VALUE,
-                                true);
+                        new TPRightHandSideIntegral<>(ScalarFunction.constantFunction(1),TPRightHandSideIntegral.VALUE);
                 ArrayList<RightHandSideIntegral<TPCell,TPShapeFunction>> rightHandSideIntegrals = new ArrayList<>();
                 rightHandSideIntegrals.add(rightHandSideIntegral);
                 TPBoundaryFaceIntegral<TPShapeFunction> bound = new TPBoundaryFaceIntegral<>(new ScalarFunction()
@@ -56,7 +51,7 @@ public class Laplace3D
                         {
                                 return (double) 0;
                         }
-                },TPBoundaryFaceIntegral.VALUE,false);
+                },TPBoundaryFaceIntegral.VALUE);
                 
                 ArrayList<BoundaryRightHandSideIntegral<TPFace,TPShapeFunction>> boundaryFaceIntegrals = new ArrayList<>();
                 boundaryFaceIntegrals.add(bound);

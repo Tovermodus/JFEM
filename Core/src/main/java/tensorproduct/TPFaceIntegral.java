@@ -16,13 +16,24 @@ public class TPFaceIntegral<ST extends ScalarShapeFunction<TPCell,TPFace,TPEdge>
 	public static String VALUE_GRAD_NORMAL = "ValueGradNormal";
 	public static String VALUE_VALUE = "ValueValue";
 	public static String BOUNDARY_VALUE = "BoundaryValue";
+	
+	public TPFaceIntegral(double weight, String name, QuadratureRule1D quadratureRule1D)
+	{
+		this(ScalarFunction.constantFunction(weight), name,quadratureRule1D);
+	}
 	public TPFaceIntegral(double weight, String name)
 	{
 		this(ScalarFunction.constantFunction(weight), name);
 	}
-	public TPFaceIntegral(Function<?,?,?> weight, String name)
+	
+	public TPFaceIntegral(Function<?, ?, ?> weight, String name)
 	{
-		super(weight,name);
+		this(weight, name, QuadratureRule1D.Gauss5);
+	}
+	
+	public TPFaceIntegral(Function<?, ?, ?> weight, String name, QuadratureRule1D quadratureRule1D)
+	{
+		super(weight,name, quadratureRule1D);
 		if(name.equals(VALUE_VALUE) && !(weight.value(new CoordinateVector(weight.getDomainDimension())) instanceof Double))
 			throw new IllegalArgumentException();
 		if(name.equals(BOUNDARY_VALUE) && !(weight.value(new CoordinateVector(weight.getDomainDimension())) instanceof Double))
@@ -38,9 +49,15 @@ public class TPFaceIntegral<ST extends ScalarShapeFunction<TPCell,TPFace,TPEdge>
 		if(name.equals(VALUE_VALUE) && !(weight.value(new CoordinateVector(weight.getDomainDimension())) instanceof Double))
 			throw new IllegalArgumentException();
 	}
+	
 	public TPFaceIntegral(String name)
 	{
-		super(name);
+		this(name, QuadratureRule1D.Gauss5);
+	}
+	
+	public TPFaceIntegral(String name, QuadratureRule1D quadratureRule1D)
+	{
+		super(name, quadratureRule1D);
 		if(name.equals(VALUE_VALUE) && !(weight.value(new CoordinateVector(weight.getDomainDimension())) instanceof Double))
 			throw new IllegalArgumentException();
 		if(name.equals(BOUNDARY_VALUE) && !(weight.value(new CoordinateVector(weight.getDomainDimension())) instanceof Double))
@@ -75,7 +92,7 @@ public class TPFaceIntegral<ST extends ScalarShapeFunction<TPCell,TPFace,TPEdge>
 				face.cell1Ds,
 				face.flatDimension,
 				face.otherCoordinate,
-				QuadratureRule1D.fromPolynomialDegree(shapeFunction1.maxPolynomialDegree()));
+				quadratureRule1D);
 		}
 		if (name.equals(INTERIOR_VALUE_JUMP_VALUE_JUMP))
 		{
@@ -85,7 +102,7 @@ public class TPFaceIntegral<ST extends ScalarShapeFunction<TPCell,TPFace,TPEdge>
 				face.cell1Ds,
 				face.flatDimension,
 				face.otherCoordinate,
-				QuadratureRule1D.fromPolynomialDegree(shapeFunction1.maxPolynomialDegree()));
+				quadratureRule1D);
 		}
 		if (name.equals(GRAD_NORMALAVERAGE_VALUE_JUMP))
 		{
@@ -93,7 +110,7 @@ public class TPFaceIntegral<ST extends ScalarShapeFunction<TPCell,TPFace,TPEdge>
 				face.cell1Ds,
 				face.flatDimension,
 				face.otherCoordinate,
-				QuadratureRule1D.fromPolynomialDegree(shapeFunction1.maxPolynomialDegree()));
+				quadratureRule1D);
 		}
 		if (name.equals(VALUE_JUMP_GRAD_NORMALAVERAGE))
 		{
@@ -101,7 +118,7 @@ public class TPFaceIntegral<ST extends ScalarShapeFunction<TPCell,TPFace,TPEdge>
 				face.cell1Ds,
 				face.flatDimension,
 				face.otherCoordinate,
-				QuadratureRule1D.fromPolynomialDegree(shapeFunction1.maxPolynomialDegree()));
+				quadratureRule1D);
 		}
 		if (name.equals(GRAD_VALUE_NORMAL))
 		{
@@ -109,7 +126,7 @@ public class TPFaceIntegral<ST extends ScalarShapeFunction<TPCell,TPFace,TPEdge>
 				face.cell1Ds,
 				face.flatDimension,
 				face.otherCoordinate,
-				QuadratureRule1D.fromPolynomialDegree(shapeFunction1.maxPolynomialDegree()));
+				quadratureRule1D);
 		}
 		if (name.equals(VALUE_GRAD_NORMAL))
 		{
@@ -117,7 +134,7 @@ public class TPFaceIntegral<ST extends ScalarShapeFunction<TPCell,TPFace,TPEdge>
 				face.cell1Ds,
 				face.flatDimension,
 				face.otherCoordinate,
-				QuadratureRule1D.fromPolynomialDegree(shapeFunction1.maxPolynomialDegree()));
+				quadratureRule1D);
 		}
 		if (name.equals(VALUE_VALUE))
 		{
@@ -126,7 +143,7 @@ public class TPFaceIntegral<ST extends ScalarShapeFunction<TPCell,TPFace,TPEdge>
 				face.cell1Ds,
 				face.flatDimension,
 				face.otherCoordinate,
-				QuadratureRule1D.fromPolynomialDegree(shapeFunction1.maxPolynomialDegree()));
+				quadratureRule1D);
 		}
 		if (name.equals(BOUNDARY_VALUE))
 		{
@@ -137,7 +154,7 @@ public class TPFaceIntegral<ST extends ScalarShapeFunction<TPCell,TPFace,TPEdge>
 					face.cell1Ds,
 					face.flatDimension,
 					face.otherCoordinate,
-					QuadratureRule1D.fromPolynomialDegree(shapeFunction1.maxPolynomialDegree()));
+					quadratureRule1D);
 			return 0;
 		}
 		throw new UnsupportedOperationException("unkown face integral name");

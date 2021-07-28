@@ -83,6 +83,6 @@ public class MaxwellTest
 		assertTrue(ConvergenceOrderEstimator.normL2Difference(solut.getPressureFunction(),
 			MaxwellReferenceSolution.pressureReferenceSolution(), grid.generatePlotPoints(20)) < 2e-1);
 		assertTrue(ConvergenceOrderEstimator.normL2VecDifference(solut.getVelocityFunction(),
-			MaxwellReferenceSolution.velocityReferenceSolution(), grid.generatePlotPoints(20)) < 5e-2);
+			MaxwellReferenceSolution.velocityReferenceSolution(), grid.generatePlotPoints(20)) < 1e-1);
 	}
 }

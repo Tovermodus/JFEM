@@ -7,15 +7,13 @@ public class TPBoundaryFaceIntegral<ST extends ScalarShapeFunction<TPCell,TPFace
 {
 	public static final String VALUE="Value";
 	public static final String VALUE_NORMAL = "ValueNormal";
-	private final boolean weightIsTensorProduct;
-	public TPBoundaryFaceIntegral(Function<?,?,?> rightHandSide, String name, boolean weightIsTensorProduct)
+	public TPBoundaryFaceIntegral(Function<?,?,?> rightHandSide, String name)
 	{
 		super(rightHandSide, name);
 		if(name.equals(VALUE) && !(rightHandSide.value(new CoordinateVector(rightHandSide.getDomainDimension())) instanceof Double))
 			throw new IllegalArgumentException();
 		if(name.equals(VALUE_NORMAL) && !(rightHandSide.value(new CoordinateVector(rightHandSide.getDomainDimension())) instanceof CoordinateVector))
 			throw new IllegalArgumentException();
-		this.weightIsTensorProduct = weightIsTensorProduct;
 	}
 	
 	@Override
@@ -26,11 +24,21 @@ public class TPBoundaryFaceIntegral<ST extends ScalarShapeFunction<TPCell,TPFace
 			return 0;
 		if(name.equals(VALUE))
 		{
-			return TPFaceIntegral.integrateNonTensorProduct(x->shapeFunction1.value(x)*(Double)(rightHandSide.value(x)),face.cell1Ds, face.flatDimension, face.otherCoordinate);
+			return TPFaceIntegral.integrateNonTensorProduct(x->shapeFunction1.value(x)
+					*(Double)(rightHandSide.value(x)),
+				face.cell1Ds,
+				face.flatDimension,
+				face.otherCoordinate,
+				quadratureRule1D);
 		}
 		if(name.equals(VALUE_NORMAL))
 		{
-			return TPFaceIntegral.integrateNonTensorProduct(x->shapeFunction1.value(x)*(Double)(rightHandSide.value(x)),face.cell1Ds, face.flatDimension, face.otherCoordinate);
+			return TPFaceIntegral.integrateNonTensorProduct(x->shapeFunction1.value(x)
+				*(Double)(rightHandSide.value(x)),
+				face.cell1Ds,
+				face.flatDimension,
+				face.otherCoordinate,
+				quadratureRule1D);
 		}
 		throw new UnsupportedOperationException("unknown rhs integral");
 	}

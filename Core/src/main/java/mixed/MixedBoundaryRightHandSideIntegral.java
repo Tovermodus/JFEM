@@ -1,7 +1,6 @@
 package mixed;
 
 import basic.*;
-import org.checkerframework.checker.units.qual.C;
 
 public class MixedBoundaryRightHandSideIntegral<CT extends Cell<CT,FT,ET>,FT extends Face<CT,FT,ET>,
 	ET extends Edge<CT,FT,ET>,
@@ -13,7 +12,6 @@ public class MixedBoundaryRightHandSideIntegral<CT extends Cell<CT,FT,ET>,FT ext
 	private MixedBoundaryRightHandSideIntegral(BoundaryRightHandSideIntegral<FT, PF> pressureIntegral,
 	                                           BoundaryRightHandSideIntegral<FT, VF> velocityIntegral)
 	{
-		super();
 		this.pressureIntegral = pressureIntegral;
 		this.velocityIntegral = velocityIntegral;
 	}

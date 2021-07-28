@@ -151,6 +151,7 @@ public abstract class MixedShapeFunction<CT extends Cell<CT, FT,ET>,
 		}
 		return ret;
 	}
+	
 	@SuppressWarnings("unchecked")
 	public int compareTo(MixedShapeFunction<CT,FT,ET,PF,VF> o)
 	{

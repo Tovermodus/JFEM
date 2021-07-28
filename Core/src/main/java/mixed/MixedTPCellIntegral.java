@@ -12,6 +12,7 @@ public class MixedTPCellIntegral<PF extends ScalarShapeFunction<TPCell, TPFace, 
 	
 	public static final String DIV_VALUE = "DivValue";
 	public static final String VALUE_GRAD = "ValueGrad";
+	
 	private MixedTPCellIntegral(CellIntegral<TPCell, PF> pressureIntegral,
 	                            CellIntegral<TPCell, VF> velocityIntegral)
 	{
@@ -30,23 +31,28 @@ public class MixedTPCellIntegral<PF extends ScalarShapeFunction<TPCell, TPFace, 
 	
 	@Override
 	protected double evaluatePressureVelocityIntegral(TPCell cell,
-	                                                  MixedShapeFunction<TPCell, TPFace, TPEdge,PF, VF> shapeFunction1
-		, MixedShapeFunction<TPCell, TPFace,TPEdge, PF, VF> shapeFunction2)
+	                                                  MixedShapeFunction<TPCell, TPFace, TPEdge, PF, VF> shapeFunction1
+		, MixedShapeFunction<TPCell, TPFace, TPEdge, PF, VF> shapeFunction2)
 	{
-		if(!isPressureVelocityIntegral())
+		if (!isPressureVelocityIntegral())
 			throw new IllegalStateException("not a pressure velocity integral");
-		if(!shapeFunction1.isVelocity() || !shapeFunction2.isPressure())
+		if (!shapeFunction1.isVelocity() || !shapeFunction2.isPressure())
 			throw new IllegalArgumentException("shapefunctions are not the right type");
 		
-		if(name.equals(DIV_VALUE))
+		if (name.equals(DIV_VALUE))
 		{
-			return TPCellIntegral.integrateNonTensorProduct(x->shapeFunction1.getVelocityShapeFunction().divergence(x)*shapeFunction2.getPressureFunction().value(x)*(Double)weight.value(x),
-				cell.getCell1Ds());
+			return TPCellIntegral.integrateNonTensorProduct(x -> shapeFunction1.getVelocityShapeFunction().divergence(x)
+					* shapeFunction2.getPressureFunction().value(x)
+					* (Double) weight.value(x),
+				cell.getCell1Ds(),
+				quadratureRule1D);
 		}
-		if(name.equals(VALUE_GRAD))
+		if (name.equals(VALUE_GRAD))
 		{
-			return TPCellIntegral.integrateNonTensorProduct(x->shapeFunction1.getVelocityShapeFunction().value(x).inner(shapeFunction2.getPressureFunction().gradient(x))*(Double)weight.value(x),
-				cell.getCell1Ds());
+			return TPCellIntegral.integrateNonTensorProduct(x -> shapeFunction1.getVelocityShapeFunction().value(x).inner(shapeFunction2.getPressureFunction().gradient(x))
+					* (Double) weight.value(x),
+				cell.getCell1Ds(),
+				quadratureRule1D);
 		}
 		throw new IllegalStateException("Integral type not supported");
 	}

@@ -29,18 +29,16 @@ public class LaplaceScalarRT
 			Ints.asList(7,7),polynomialDegree);
 		TPCellIntegral<RTComponentFunction> gg =
 			new TPCellIntegral<>(ScalarFunction.constantFunction(1),
-			TPCellIntegral.GRAD_GRAD,
-			false);
+			TPCellIntegral.GRAD_GRAD);
 		TPFaceIntegral<RTComponentFunction> jj = new TPFaceIntegral<>(ScalarFunction.constantFunction(10),
-			TPFaceIntegral.VALUE_JUMP_VALUE_JUMP, false);
+			TPFaceIntegral.VALUE_JUMP_VALUE_JUMP);
 		ArrayList<CellIntegral<TPCell,RTComponentFunction>> cellIntegrals =
 			new ArrayList<>();
 		cellIntegrals.add(gg);
 		ArrayList<FaceIntegral<TPFace,RTComponentFunction>> faceIntegrals = new ArrayList<>();
 		faceIntegrals.add(jj);
 		TPRightHandSideIntegral<RTComponentFunction> rightHandSideIntegral =
-			new TPRightHandSideIntegral<>(ScalarFunction.constantFunction(4),TPRightHandSideIntegral.VALUE,
-				true);
+			new TPRightHandSideIntegral<>(ScalarFunction.constantFunction(4),TPRightHandSideIntegral.VALUE);
 		ArrayList<RightHandSideIntegral<TPCell,RTComponentFunction>> rightHandSideIntegrals = new ArrayList<>();
 		rightHandSideIntegrals.add(rightHandSideIntegral);
 		ArrayList<BoundaryRightHandSideIntegral<TPFace,RTComponentFunction>> boundaryFaceIntegrals = new ArrayList<>();

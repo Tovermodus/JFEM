@@ -10,9 +10,9 @@ public class TPCellIntegralViaReferenceCell<ST extends ScalarShapeFunctionWithRe
 	Map<ReferenceCellIdentificationTriplet<TPCell, TPFace, TPEdge, ScalarShapeFunctionWithReferenceShapeFunction<TPCell,TPFace,TPEdge>>,
 		Double> savedValues;
 	
-	public TPCellIntegralViaReferenceCell(double weight, String name, boolean weightIsTensorProduct)
+	public TPCellIntegralViaReferenceCell(double weight, String name)
 	{
-		super(ScalarFunction.constantFunction(weight), name, weightIsTensorProduct);
+		super(ScalarFunction.constantFunction(weight), name);
 		savedValues = new ConcurrentHashMap<>();
 	}
 	

@@ -67,11 +67,11 @@ public class IntegralTest
 			}
 		};
 		TPCellIntegral<TPShapeFunction> gg = new TPCellIntegral<>(TPCellIntegral.GRAD_GRAD);
-		TPCellIntegral<TPShapeFunction> ggw = new TPCellIntegral<>(weight,TPCellIntegral.GRAD_GRAD,false);
-		TPCellIntegral<TPShapeFunction> vg = new TPCellIntegral<>(vweight,TPCellIntegral.VALUE_GRAD,false);
-		TPCellIntegral<TPShapeFunction> gv = new TPCellIntegral<>(vweight,TPCellIntegral.GRAD_VALUE,false);
+		TPCellIntegral<TPShapeFunction> ggw = new TPCellIntegral<>(weight,TPCellIntegral.GRAD_GRAD);
+		TPCellIntegral<TPShapeFunction> vg = new TPCellIntegral<>(vweight,TPCellIntegral.VALUE_GRAD);
+		TPCellIntegral<TPShapeFunction> gv = new TPCellIntegral<>(vweight,TPCellIntegral.GRAD_VALUE);
 		TPCellIntegral<TPShapeFunction> vv = new TPCellIntegral<>(TPCellIntegral.VALUE_VALUE);
-		TPCellIntegral<TPShapeFunction> vvw = new TPCellIntegral<>(weight,TPCellIntegral.VALUE_VALUE,false);
+		TPCellIntegral<TPShapeFunction> vvw = new TPCellIntegral<>(weight,TPCellIntegral.VALUE_VALUE);
 		int k = 0;
 		for (int i = 0; i < shapeFunctions.size(); i++)
 		{
@@ -147,11 +147,11 @@ public class IntegralTest
 			}
 		};
 		TPCellIntegral<TPShapeFunction> gg = new TPCellIntegral<>(TPCellIntegral.GRAD_GRAD);
-		TPCellIntegral<TPShapeFunction> ggw = new TPCellIntegral<>(weight,TPCellIntegral.GRAD_GRAD,false);
-		TPCellIntegral<TPShapeFunction> vg = new TPCellIntegral<>(vweight,TPCellIntegral.VALUE_GRAD,false);
-		TPCellIntegral<TPShapeFunction> gv = new TPCellIntegral<>(vweight,TPCellIntegral.GRAD_VALUE,false);
+		TPCellIntegral<TPShapeFunction> ggw = new TPCellIntegral<>(weight,TPCellIntegral.GRAD_GRAD);
+		TPCellIntegral<TPShapeFunction> vg = new TPCellIntegral<>(vweight,TPCellIntegral.VALUE_GRAD);
+		TPCellIntegral<TPShapeFunction> gv = new TPCellIntegral<>(vweight,TPCellIntegral.GRAD_VALUE);
 		TPCellIntegral<TPShapeFunction> vv = new TPCellIntegral<>(TPCellIntegral.VALUE_VALUE);
-		TPCellIntegral<TPShapeFunction> vvw = new TPCellIntegral<>(weight,TPCellIntegral.VALUE_VALUE,false);
+		TPCellIntegral<TPShapeFunction> vvw = new TPCellIntegral<>(weight,TPCellIntegral.VALUE_VALUE);
 		int k = 0;
 		for (int i = 0; i < shapeFunctions.size(); i++)
 		{
@@ -227,11 +227,11 @@ public class IntegralTest
 			}
 		};
 		TPCellIntegral<TPShapeFunction> gg = new TPCellIntegral<>(TPCellIntegral.GRAD_GRAD);
-		TPCellIntegral<TPShapeFunction> ggw = new TPCellIntegral<>(weight,TPCellIntegral.GRAD_GRAD,false);
-		TPCellIntegral<TPShapeFunction> vg = new TPCellIntegral<>(vweight,TPCellIntegral.VALUE_GRAD,false);
-		TPCellIntegral<TPShapeFunction> gv = new TPCellIntegral<>(vweight,TPCellIntegral.GRAD_VALUE,false);
+		TPCellIntegral<TPShapeFunction> ggw = new TPCellIntegral<>(weight,TPCellIntegral.GRAD_GRAD);
+		TPCellIntegral<TPShapeFunction> vg = new TPCellIntegral<>(vweight,TPCellIntegral.VALUE_GRAD);
+		TPCellIntegral<TPShapeFunction> gv = new TPCellIntegral<>(vweight,TPCellIntegral.GRAD_VALUE);
 		TPCellIntegral<TPShapeFunction> vv = new TPCellIntegral<>(TPCellIntegral.VALUE_VALUE);
-		TPCellIntegral<TPShapeFunction> vvw = new TPCellIntegral<>(weight,TPCellIntegral.VALUE_VALUE,false);
+		TPCellIntegral<TPShapeFunction> vvw = new TPCellIntegral<>(weight,TPCellIntegral.VALUE_VALUE);
 		int k = 0;
 		for (int i = 0; i < shapeFunctions.size(); i++)
 		{

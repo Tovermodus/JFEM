@@ -12,7 +12,6 @@ public class MixedRightHandSideIntegral<CT extends Cell<CT,FT,ET>,FT extends Fac
 	private MixedRightHandSideIntegral(RightHandSideIntegral<CT, PF> pressureIntegral,
 	                                   RightHandSideIntegral<CT, VF> velocityIntegral)
 	{
-		super();
 		this.pressureIntegral = pressureIntegral;
 		this.velocityIntegral = velocityIntegral;
 	}

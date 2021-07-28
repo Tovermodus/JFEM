@@ -10,14 +10,9 @@ public class TPFaceIntegralViaReferenceFace<ST extends ScalarShapeFunctionWithRe
 {
 	Map<ReferenceFaceIdentificationTriplet<TPCell, TPFace, TPEdge, ScalarShapeFunctionWithReferenceShapeFunction<TPCell,TPFace,
 		TPEdge>>, Double> savedValues;
-	public TPFaceIntegralViaReferenceFace(double weight, String name, boolean weightIsTensorProduct)
-	{
-		super(ScalarFunction.constantFunction(weight),name, weightIsTensorProduct);
-		savedValues = new ConcurrentHashMap<>();
-	}
 	public TPFaceIntegralViaReferenceFace(double weight, String name)
 	{
-		super(ScalarFunction.constantFunction(weight),name, true);
+		super(ScalarFunction.constantFunction(weight),name);
 		savedValues = new ConcurrentHashMap<>();
 	}
 	public TPFaceIntegralViaReferenceFace(String name)

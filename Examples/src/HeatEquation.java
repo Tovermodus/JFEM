@@ -23,15 +23,13 @@ public class HeatEquation
 		grid.assembleFunctions(polynomialDegree);
 		TPCellIntegral<TPShapeFunction> gg =
 			new TPCellIntegralViaReferenceCell<TPShapeFunction>(1,
-				TPCellIntegral.GRAD_GRAD,
-				false);
+				TPCellIntegral.GRAD_GRAD);
 		TPCellIntegral<TPShapeFunction> vv =
 			new TPCellIntegralViaReferenceCell<TPShapeFunction>(1,
-				TPCellIntegral.VALUE_VALUE,
-				false);
+				TPCellIntegral.VALUE_VALUE);
 		double penalty = 200000;
 		TPFaceIntegral<TPShapeFunction> jj = new TPFaceIntegral<>(ScalarFunction.constantFunction(penalty),
-			TPFaceIntegral.VALUE_JUMP_VALUE_JUMP, false);
+			TPFaceIntegral.VALUE_JUMP_VALUE_JUMP);
 		ScalarFunction sourceFun = new ScalarFunction()
 		{
 			final CoordinateVector c =  CoordinateVector.fromValues(0.5,0.5);
@@ -49,7 +47,7 @@ public class HeatEquation
 			}
 		};
 		TPRightHandSideIntegral<TPShapeFunction> src =new TPRightHandSideIntegral<>(sourceFun
-			, TPRightHandSideIntegral.VALUE, false);
+			, TPRightHandSideIntegral.VALUE);
 		double dt = 0.1;
 		int n = grid.getShapeFunctions().size();
 		Vector iterate = new DenseVector(n);

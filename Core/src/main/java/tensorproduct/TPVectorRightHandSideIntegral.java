@@ -21,7 +21,9 @@ public class TPVectorRightHandSideIntegral<ST extends VectorShapeFunction<TPCell
 	{
 		if(name.equals(VALUE))
 		{
-			return TPCellIntegral.integrateNonTensorProduct(x->shapeFunction1.value(x).inner((CoordinateVector)(rightHandSide.value(x))),cell.cell1Ds);
+			return TPCellIntegral.integrateNonTensorProduct(x->shapeFunction1.value(x).inner((CoordinateVector)(rightHandSide.value(x))),
+				cell.cell1Ds,
+				quadratureRule1D);
 		}
 		throw new UnsupportedOperationException("unknown rhs integral");
 	}

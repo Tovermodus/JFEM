@@ -13,6 +13,7 @@ public class MixedFaceIntegral<CT extends Cell<CT,FT,ET>, FT extends Face<CT,FT,
 	                          FaceIntegral<FT, VF> velocityIntegral,
 	                          FaceIntegral<FT, MixedShapeFunction<CT, FT, ET,PF, VF>> pressureVelocityIntegral)
 	{
+		super(null);
 		this.pressureIntegral = pressureIntegral;
 		this.velocityIntegral = velocityIntegral;
 		this.pressureVelocityIntegral = pressureVelocityIntegral;

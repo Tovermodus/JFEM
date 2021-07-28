@@ -3,9 +3,6 @@ package tensorproduct;
 import basic.CellIntegral;
 import basic.Function;
 import basic.VectorShapeFunction;
-import com.google.common.base.Stopwatch;
-import linalg.CoordinateMatrix;
-import linalg.CoordinateVector;
 
 public class TPVectorCellIntegral<ST extends VectorShapeFunction<TPCell,TPFace,TPEdge>> extends CellIntegral<TPCell,
 	ST>
@@ -15,7 +12,15 @@ public class TPVectorCellIntegral<ST extends VectorShapeFunction<TPCell,TPFace,T
 	public static final String ROT_ROT = "RotRot";
 	public TPVectorCellIntegral(Function<?,?,?> weight, String name)
 	{
-		super(weight, name);
+		this(weight, name, QuadratureRule1D.Gauss5);
+	}
+	public TPVectorCellIntegral(String name)
+	{
+		this(name, QuadratureRule1D.Gauss5);
+	}
+	public TPVectorCellIntegral(Function<?,?,?> weight, String name, QuadratureRule1D quadratureRule1D)
+	{
+		super(weight, name, quadratureRule1D);
 		if(name.equals(GRAD_GRAD) && !(weight.defaultValue() instanceof Double))
 			throw new IllegalArgumentException();
 		if(name.equals(VALUE_VALUE) && !(weight.defaultValue() instanceof Double))
@@ -23,24 +28,33 @@ public class TPVectorCellIntegral<ST extends VectorShapeFunction<TPCell,TPFace,T
 		if(name.equals(ROT_ROT) && !(weight.defaultValue() instanceof Double))
 			throw new IllegalArgumentException();
 	}
-	public TPVectorCellIntegral(String name)
+	public TPVectorCellIntegral(String name, QuadratureRule1D quadratureRule1D)
 	{
-		super(name);
+		super(name, quadratureRule1D);
 	}
 	@Override
 	public double evaluateCellIntegral(TPCell cell, ST shapeFunction1, ST shapeFunction2)
 	{
 		if(name.equals(GRAD_GRAD))
 		{
-			return TPCellIntegral.integrateNonTensorProduct(x->shapeFunction1.gradient(x).frobeniusInner(shapeFunction2.gradient(x))*(Double)weight.value(x),cell.cell1Ds);
+			return TPCellIntegral.integrateNonTensorProduct(x->shapeFunction1.gradient(x).frobeniusInner(shapeFunction2.gradient(x))
+				*(Double)weight.value(x),
+				cell.cell1Ds,
+				quadratureRule1D);
 		}
 		if(name.equals(VALUE_VALUE))
 		{
-			return TPCellIntegral.integrateNonTensorProduct(x->shapeFunction1.value(x).inner(shapeFunction2.value(x))*(Double)weight.value(x),cell.cell1Ds);
+			return TPCellIntegral.integrateNonTensorProduct(x->shapeFunction1.value(x).inner(shapeFunction2.value(x))
+				*(Double)weight.value(x),
+				cell.cell1Ds,
+				quadratureRule1D);
 		}
 		if(name.equals(ROT_ROT))
 		{
-			return TPCellIntegral.integrateNonTensorProduct(x->shapeFunction1.curl(x).inner(shapeFunction2.curl(x))*(Double)weight.value(x),cell.cell1Ds);
+			return TPCellIntegral.integrateNonTensorProduct(x->shapeFunction1.curl(x).inner(shapeFunction2.curl(x))
+				*(Double)weight.value(x),
+				cell.cell1Ds,
+				quadratureRule1D);
 		}
 		throw new UnsupportedOperationException("unknown integral name");
 	}

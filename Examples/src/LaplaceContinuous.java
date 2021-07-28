@@ -17,11 +17,6 @@ public class LaplaceContinuous
 			new PerformanceArguments.PerformanceArgumentBuilder();
 		builder.build();
 	
-//[+6.667e+02  +1.667e+02  +1.667e+02  -3.333e-03
-//		+1.667e+02  +6.667e+02  -3.333e-03  +1.667e+02
-//		+1.667e+02  -3.333e-03  +6.667e+02  +1.667e+02
-//		-3.333e-03  +1.667e+02  +1.667e+02  +6.667e+02
-// ]
 		long startTime = System.nanoTime();
 		
 		System.out.println("output start");
@@ -32,20 +27,18 @@ public class LaplaceContinuous
 			Ints.asList(3,3),polynomialDegree);
 		TPCellIntegral<ContinuousTPShapeFunction> gg =
 			new TPCellIntegral<>(ScalarFunction.constantFunction(1),
-			TPCellIntegral.GRAD_GRAD,
-			false);
+			TPCellIntegral.GRAD_GRAD);
 		double penalty = 1;
 		TPFaceIntegral<ContinuousTPShapeFunction> jj =
 			new TPFaceIntegral<>(ScalarFunction.constantFunction(penalty),
-			TPFaceIntegral.BOUNDARY_VALUE, false);
+			TPFaceIntegral.BOUNDARY_VALUE);
 		ArrayList<CellIntegral<TPCell,ContinuousTPShapeFunction>> cellIntegrals =
 			new ArrayList<>();
 		cellIntegrals.add(gg);
 		ArrayList<FaceIntegral<TPFace,ContinuousTPShapeFunction>> faceIntegrals = new ArrayList<>();
 		faceIntegrals.add(jj);
 		TPRightHandSideIntegral<ContinuousTPShapeFunction> rightHandSideIntegral =
-			new TPRightHandSideIntegral<>(ScalarFunction.constantFunction(4),TPRightHandSideIntegral.VALUE,
-				true);
+			new TPRightHandSideIntegral<>(ScalarFunction.constantFunction(4),TPRightHandSideIntegral.VALUE);
 		ArrayList<RightHandSideIntegral<TPCell,ContinuousTPShapeFunction>> rightHandSideIntegrals = new ArrayList<>();
 		rightHandSideIntegrals.add(rightHandSideIntegral);
 		ArrayList<BoundaryRightHandSideIntegral<TPFace,ContinuousTPShapeFunction>> boundaryFaceIntegrals = new ArrayList<>();

@@ -1,15 +1,15 @@
 package mixed;
 
-import basic.*;
+import basic.Function;
+import basic.FunctionSignature;
+import basic.NodeFunctional;
 import linalg.CoordinateMatrix;
 import linalg.CoordinateTensor;
 import linalg.CoordinateVector;
-import linalg.Tensor;
 import org.jetbrains.annotations.NotNull;
 import tensorproduct.*;
 
 import java.util.Collection;
-import java.util.Collections;
 import java.util.List;
 
 public class NedelecNodeFuncional implements NodeFunctional<CoordinateVector, CoordinateMatrix,
@@ -150,7 +150,8 @@ public class NedelecNodeFuncional implements NodeFunctional<CoordinateVector, Co
 	{
 		if (e != null)
 		{
-			return TPEdgeIntegral.integrateNonTensorProduct(x -> func.value(x).inner(e.getTangent().value(x)) * testFunctions.get(0).value(x.at(e.getTangentialDimension())), e);
+			return TPEdgeIntegral.integrateNonTensorProduct(x -> func.value(x).inner(e.getTangent().value(x)) * testFunctions.get(0).value(x.at(e.getTangentialDimension())), e,
+				QuadratureRule1D.Gauss5);
 		} else if (f != null)
 		{
 			return TPFaceIntegral.integrateNonTensorProduct(x ->
@@ -181,7 +182,7 @@ public class NedelecNodeFuncional implements NodeFunctional<CoordinateVector, Co
 					else
 						return -val.at(0) * testFunctionComponentValue;
 				}
-			}, f.getCell1Ds(), f.getFlatDimension(), f.getOtherCoordinate());
+			}, f.getCell1Ds(), f.getFlatDimension(), f.getOtherCoordinate(), QuadratureRule1D.Gauss5);
 		} else
 		{
 			return TPCellIntegral.integrateNonTensorProduct(x ->
@@ -189,7 +190,7 @@ public class NedelecNodeFuncional implements NodeFunctional<CoordinateVector, Co
 				double testFunctionComponentValue =
 					testFunctions.get(0).value(x.at(0)) * testFunctions.get(1).value(x.at(1)) * testFunctions.get(2).value(x.at(2));
 				return func.value(x).at(testComponent) * testFunctionComponentValue;
-			}, c.getCell1Ds());
+			}, c.getCell1Ds(), QuadratureRule1D.Gauss5);
 		}
 	}
 	

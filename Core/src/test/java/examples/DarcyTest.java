@@ -45,7 +45,7 @@ public class DarcyTest
 		MixedRightHandSideIntegral<TPCell, TPFace, TPEdge,ContinuousTPShapeFunction, RTShapeFunction> rightHandSideIntegral =
 			MixedRightHandSideIntegral.fromPressureIntegral(
 				new TPRightHandSideIntegral<ContinuousTPShapeFunction>(
-					LaplaceReferenceSolution.scalarRightHandSide(),TPRightHandSideIntegral.VALUE, false));
+					LaplaceReferenceSolution.scalarRightHandSide(),TPRightHandSideIntegral.VALUE ));
 		List<RightHandSideIntegral<TPCell,  MixedShapeFunction<TPCell, TPFace,TPEdge,
 			ContinuousTPShapeFunction,
 			RTShapeFunction>>> rightHandSideIntegrals = new ArrayList<>();

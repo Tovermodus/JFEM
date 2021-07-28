@@ -39,20 +39,20 @@ public class DLMDiffusion
 		ScalarFunction f2minf = ScalarFunction.constantFunction(2);
 		
 		TPCellIntegral<ContinuousTPShapeFunction> rhogradgrad = new TPCellIntegral<>(rho,
-			TPCellIntegral.GRAD_GRAD, true);
+			TPCellIntegral.GRAD_GRAD);
 		TPFaceIntegral<ContinuousTPShapeFunction> dirichlet =
 			new TPFaceIntegral<>(ScalarFunction.constantFunction(1000),
-				TPFaceIntegral.VALUE_JUMP_VALUE_JUMP, true);
+				TPFaceIntegral.VALUE_JUMP_VALUE_JUMP);
 		TPCellIntegral<ContinuousTPShapeFunction> rho2gradgrad = new TPCellIntegral<>(rho2minrho,
-			TPCellIntegral.GRAD_GRAD, true);
+			TPCellIntegral.GRAD_GRAD);
 		
 		
 		TPCellIntegral<ContinuousTPShapeFunction> lagv2 = new TPCellIntegral<>(TPCellIntegral.H1);
 		
 		TPRightHandSideIntegral<ContinuousTPShapeFunction> fv = new TPRightHandSideIntegral<>(f,
-			TPRightHandSideIntegral.VALUE,true);
+			TPRightHandSideIntegral.VALUE);
 		TPRightHandSideIntegral<ContinuousTPShapeFunction> f2minfv = new TPRightHandSideIntegral<>(f2minf,
-			TPRightHandSideIntegral.VALUE,true);
+			TPRightHandSideIntegral.VALUE);
 		
 		int n = largeGrid.getShapeFunctions().size();
 		int m = immersedGrid.getShapeFunctions().size();
@@ -74,7 +74,7 @@ public class DLMDiffusion
 		for (Map.Entry<Integer, ContinuousTPShapeFunction> sf: largeGrid.getShapeFunctions().entrySet())
 		{
 			TPRightHandSideIntegral<ContinuousTPShapeFunction> shapeFunctionOnImmersedGrid =
-				new TPRightHandSideIntegral<>(sf.getValue(), TPRightHandSideIntegral.H1, false);
+				new TPRightHandSideIntegral<>(sf.getValue(), TPRightHandSideIntegral.H1);
 			DenseVector integrals = new DenseVector(m);
 			immersedGrid.writeCellIntegralsToRhs(List.of(shapeFunctionOnImmersedGrid), integrals);
 			A13.addSmallMatrixAt(integrals.asMatrix().transpose(), sf.getKey(),0);

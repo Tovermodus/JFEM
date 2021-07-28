@@ -1,7 +1,6 @@
 package basic;
 
-import linalg.Tensor;
-import linalg.Vector;
+import tensorproduct.QuadratureRule1D;
 
 public abstract class CellIntegral<CT extends Cell<CT,?,?>, ST extends ShapeFunction<CT,
 	?,?,?,?,?>>
@@ -9,19 +8,23 @@ public abstract class CellIntegral<CT extends Cell<CT,?,?>, ST extends ShapeFunc
 	protected Function<?,?,?> weight;
 	protected String name;
 	
-	protected CellIntegral()
+	public final QuadratureRule1D quadratureRule1D;
+	protected CellIntegral(QuadratureRule1D quadratureRule1D)
 	{
+		this.quadratureRule1D = quadratureRule1D;
 		weight = null;
 		name = "NotReferencedByName";
 	}
-	public CellIntegral(Function<?,?,?> weight, String name)
+	public CellIntegral(Function<?, ?, ?> weight, String name, QuadratureRule1D quadratureRule1D)
 	{
 		this.weight = weight;
 		this.name = name;
+		this.quadratureRule1D = quadratureRule1D;
 	}
 	
-	public CellIntegral(String name)
+	public CellIntegral(String name, QuadratureRule1D quadratureRule1D)
 	{
+		this.quadratureRule1D = quadratureRule1D;
 		this.weight = ScalarFunction.constantFunction(1);
 		this.name = name;
 	}

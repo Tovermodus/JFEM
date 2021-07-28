@@ -24,19 +24,17 @@ public class Laplace
                 TPFESpace grid = new TPFESpace(start,end,
                         Ints.asList(10,5),polynomialDegree);
                 TPCellIntegral<TPShapeFunction> gg = new TPCellIntegral<>(ScalarFunction.constantFunction(1),
-                        TPCellIntegral.GRAD_GRAD,
-                        false);
+                        TPCellIntegral.GRAD_GRAD);
                 double penalty = 200000;
                 TPFaceIntegral<TPShapeFunction> jj = new TPFaceIntegralViaReferenceFace<>(penalty,
-                        TPFaceIntegral.VALUE_JUMP_VALUE_JUMP, true);
+                        TPFaceIntegral.VALUE_JUMP_VALUE_JUMP);
                 ArrayList<CellIntegral<TPCell,TPShapeFunction>> cellIntegrals =
                         new ArrayList<>();
                 cellIntegrals.add(gg);
                 ArrayList<FaceIntegral<TPFace,TPShapeFunction>> faceIntegrals = new ArrayList<>();
                 faceIntegrals.add(jj);
                 TPRightHandSideIntegral<TPShapeFunction> rightHandSideIntegral =
-                        new TPRightHandSideIntegral<>(ScalarFunction.constantFunction(0),TPRightHandSideIntegral.VALUE,
-                                true);
+                        new TPRightHandSideIntegral<>(ScalarFunction.constantFunction(0),TPRightHandSideIntegral.VALUE);
                 ArrayList<RightHandSideIntegral<TPCell,TPShapeFunction>> rightHandSideIntegrals = new ArrayList<>();
                 rightHandSideIntegrals.add(rightHandSideIntegral);
                 TPBoundaryFaceIntegral<TPShapeFunction> bound = new TPBoundaryFaceIntegral<>(new ScalarFunction()
@@ -54,7 +52,7 @@ public class Laplace
                                         return +penalty*2*(1+pos.y())/((3+pos.x())*(3+pos.x())+(1+pos.y())*(1+pos.y()));
                                 return (double) 0;
                         }
-                },TPBoundaryFaceIntegral.VALUE,false);
+                },TPBoundaryFaceIntegral.VALUE);
                 
                 ArrayList<BoundaryRightHandSideIntegral<TPFace,TPShapeFunction>> boundaryFaceIntegrals = new ArrayList<>();
                 boundaryFaceIntegrals.add(bound);

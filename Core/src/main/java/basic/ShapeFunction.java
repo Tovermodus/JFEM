@@ -49,5 +49,4 @@ public interface ShapeFunction<CT extends Cell<CT,FT, ET>, FT extends Face<CT,FT
 	
 	<ST extends ShapeFunction<CT,FT,ET,valueT,gradientT,hessianT>> Map<Integer, Double> prolongate(Set<ST> refinedFunctions);
 	
-	int maxPolynomialDegree();
 }

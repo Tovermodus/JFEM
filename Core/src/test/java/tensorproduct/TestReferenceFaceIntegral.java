@@ -29,8 +29,7 @@ public class TestReferenceFaceIntegral
 		TPFESpace grid = new TPFESpace(start, end,
 			Ints.asList(7, 11), polynomialDegree);
 		TPFaceIntegral<TPShapeFunction> jj = new TPFaceIntegral<>(ScalarFunction.constantFunction(1),
-			TPFaceIntegral.VALUE_JUMP_VALUE_JUMP,
-			false);
+			TPFaceIntegral.VALUE_JUMP_VALUE_JUMP);
 		ArrayList<FaceIntegral<TPFace, TPShapeFunction>> faceIntegrals =
 			new ArrayList<>();
 		faceIntegrals.add(jj);
@@ -47,8 +46,7 @@ public class TestReferenceFaceIntegral
 		grid = new TPFESpace(start, end,
 			Ints.asList(7, 11), polynomialDegree);
 		jj = new TPFaceIntegralViaReferenceFace<>(1,
-			TPFaceIntegral.VALUE_JUMP_VALUE_JUMP,
-			false);
+			TPFaceIntegral.VALUE_JUMP_VALUE_JUMP);
 		faceIntegrals =
 			new ArrayList<>();
 		faceIntegrals.add(jj);
@@ -77,8 +75,7 @@ public class TestReferenceFaceIntegral
 		TPFESpace grid = new TPFESpace(start, end,
 			Ints.asList(3, 5), polynomialDegree);
 		TPFaceIntegral<TPShapeFunction> jj = new TPFaceIntegral<>(ScalarFunction.constantFunction(1),
-			TPFaceIntegral.VALUE_JUMP_GRAD_NORMALAVERAGE,
-			false);
+			TPFaceIntegral.VALUE_JUMP_GRAD_NORMALAVERAGE);
 		ArrayList<FaceIntegral<TPFace, TPShapeFunction>> faceIntegrals =
 			new ArrayList<>();
 		faceIntegrals.add(jj);
@@ -95,8 +92,7 @@ public class TestReferenceFaceIntegral
 		grid = new TPFESpace(start, end,
 			Ints.asList(3, 5), polynomialDegree);
 		jj = new TPFaceIntegralViaReferenceFace<>(1,
-			TPFaceIntegral.VALUE_JUMP_GRAD_NORMALAVERAGE,
-			false);
+			TPFaceIntegral.VALUE_JUMP_GRAD_NORMALAVERAGE);
 		faceIntegrals =
 			new ArrayList<>();
 		faceIntegrals.add(jj);
@@ -125,8 +121,7 @@ public class TestReferenceFaceIntegral
 		TPFESpace grid = new TPFESpace(start, end,
 			Ints.asList(3, 5,2), polynomialDegree);
 		TPFaceIntegral<TPShapeFunction> jj = new TPFaceIntegral<>(ScalarFunction.constantFunction(1),
-			TPFaceIntegral.VALUE_JUMP_VALUE_JUMP,
-			false);
+			TPFaceIntegral.VALUE_JUMP_VALUE_JUMP);
 		ArrayList<FaceIntegral<TPFace, TPShapeFunction>> faceIntegrals =
 			new ArrayList<>();
 		faceIntegrals.add(jj);
@@ -143,8 +138,7 @@ public class TestReferenceFaceIntegral
 		grid = new TPFESpace(start, end,
 			Ints.asList(3, 5,2), polynomialDegree);
 		jj = new TPFaceIntegralViaReferenceFace<>(1,
-			TPFaceIntegral.VALUE_JUMP_VALUE_JUMP,
-			false);
+			TPFaceIntegral.VALUE_JUMP_VALUE_JUMP);
 		faceIntegrals =
 			new ArrayList<>();
 		faceIntegrals.add(jj);
@@ -165,8 +159,8 @@ public class TestReferenceFaceIntegral
 			new PerformanceArguments.PerformanceArgumentBuilder();
 		builder.parallelizeThreads = false;
 		ArrayList<Cell1D> cell1DList = new ArrayList<>();
-		cell1DList.add(new Cell1D(3, 6)); //2/3, 5/6, 10/9, 17/12, 26/15, 37/18
-		TPFace f = new TPFace(cell1DList,1,134,false);
+		cell1DList.add(new Cell1D(3, 6));
+		TPFace f = new TPFace(cell1DList,1,134, false);
 		cell1DList.add(new Cell1D(130,134));
 		f.addCell(new TPCell(cell1DList));
 		cell1DList.set(1,new Cell1D(134,137));
@@ -180,10 +174,9 @@ public class TestReferenceFaceIntegral
 					TPShapeFunction f1 = new TPShapeFunction(f.getNormalDownstreamCell(), k, i);
 					TPShapeFunction f2 = new TPShapeFunction(f.getNormalUpstreamCell(), k, j);
 					TPFaceIntegral<TPShapeFunction> gg = new TPFaceIntegral<>(ScalarFunction.constantFunction(1),
-						TPFaceIntegral.VALUE_JUMP_VALUE_JUMP,
-						false);
+						TPFaceIntegral.VALUE_JUMP_VALUE_JUMP);
 					TPFaceIntegral<TPShapeFunction> gg2 = new TPFaceIntegralViaReferenceFace<>(1,
-						TPFaceIntegral.VALUE_JUMP_VALUE_JUMP, false);
+						TPFaceIntegral.VALUE_JUMP_VALUE_JUMP);
 					assertTrue(Math.abs(gg.evaluateFaceIntegral(f, f1, f2) - gg2.evaluateFaceIntegral(f,
 						f1, f2)) < 1e-12, "Difference of "+Math.abs(gg.evaluateFaceIntegral(f
 						, f1,
@@ -197,10 +190,9 @@ public class TestReferenceFaceIntegral
 					TPShapeFunction f1 = new TPShapeFunction(f.getNormalUpstreamCell(), k, i);
 					TPShapeFunction f2 = new TPShapeFunction(f.getNormalUpstreamCell(), k, j);
 					TPFaceIntegral<TPShapeFunction> gg = new TPFaceIntegral<>(ScalarFunction.constantFunction(1),
-						TPFaceIntegral.VALUE_JUMP_VALUE_JUMP,
-						false);
+						TPFaceIntegral.VALUE_JUMP_VALUE_JUMP);
 					TPFaceIntegral<TPShapeFunction> gg2 = new TPFaceIntegralViaReferenceFace<>(1,
-						TPFaceIntegral.VALUE_JUMP_VALUE_JUMP, false);
+						TPFaceIntegral.VALUE_JUMP_VALUE_JUMP);
 					assertTrue(Math.abs(gg.evaluateFaceIntegral(f, f1, f2) - gg2.evaluateFaceIntegral(f,
 						f1, f2)) < 1e-12, "Difference of "+Math.abs(gg.evaluateFaceIntegral(f
 						, f1,
@@ -214,10 +206,9 @@ public class TestReferenceFaceIntegral
 					TPShapeFunction f1 = new TPShapeFunction(f.getNormalDownstreamCell(), k, i);
 					TPShapeFunction f2 = new TPShapeFunction(f.getNormalUpstreamCell(), k, j);
 					TPFaceIntegral<TPShapeFunction> gg = new TPFaceIntegral<>(ScalarFunction.constantFunction(1),
-						TPFaceIntegral.VALUE_JUMP_VALUE_JUMP,
-						false);
+						TPFaceIntegral.VALUE_JUMP_VALUE_JUMP);
 					TPFaceIntegral<TPShapeFunction> gg2 = new TPFaceIntegralViaReferenceFace<>(1,
-						TPFaceIntegral.VALUE_JUMP_VALUE_JUMP, false);
+						TPFaceIntegral.VALUE_JUMP_VALUE_JUMP);
 					assertTrue(Math.abs(gg.evaluateFaceIntegral(f, f1, f2) - gg2.evaluateFaceIntegral(f,
 						f1, f2)) < 1e-12, "Difference of "+Math.abs(gg.evaluateFaceIntegral(f
 						, f1,

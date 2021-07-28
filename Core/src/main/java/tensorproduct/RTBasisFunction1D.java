@@ -8,7 +8,7 @@ public class RTBasisFunction1D extends Function1D
 	private final int polynomialDegree;
 	private int localFunctionNumber;
 	private double degreeOfFreedom;
-	QuadratureRule1D quad;
+	private final QuadratureRule1D quad;
 	
 	public RTBasisFunction1D(int polynomialDegree, int localFunctionNumber, Cell1D cell, boolean higherDegree)
 	{

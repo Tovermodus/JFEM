@@ -1,6 +1,7 @@
 package systems;
 
 import basic.*;
+import tensorproduct.QuadratureRule1D;
 
 public class SystemHomogeneousFaceIntegral<FT extends Face<?,FT,?>, ST extends ShapeFunction<?,FT,?,?,?,?>>
 	extends FaceIntegral<FT, SystemShapeFunction<?,FT,?,ST>>
@@ -8,9 +9,15 @@ public class SystemHomogeneousFaceIntegral<FT extends Face<?,FT,?>, ST extends S
 	private final FaceIntegral<FT, ST> faceIntegral;
 	private final int component;
 	
+	public SystemHomogeneousFaceIntegral(FaceIntegral<FT, ST> faceIntegral, int component, QuadratureRule1D quadratureRule1D)
+	{
+		super("homogeneous", quadratureRule1D);
+		this.faceIntegral = faceIntegral;
+		this.component = component;
+	}
 	public SystemHomogeneousFaceIntegral(FaceIntegral<FT, ST> faceIntegral, int component)
 	{
-		super("homogeneous");
+		super("homogeneous", QuadratureRule1D.Gauss5);
 		this.faceIntegral = faceIntegral;
 		this.component = component;
 	}

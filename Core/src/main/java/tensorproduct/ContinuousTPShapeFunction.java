@@ -130,6 +130,7 @@ public class ContinuousTPShapeFunction implements ScalarShapeFunctionWithReferen
     }
     
     
+    
     @Override
     public double fastValueInCell(CoordinateVector pos, TPCell cell)
     {

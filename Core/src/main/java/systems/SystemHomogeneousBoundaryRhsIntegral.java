@@ -2,7 +2,6 @@ package systems;
 
 import basic.BoundaryRightHandSideIntegral;
 import basic.Face;
-import basic.FaceIntegral;
 import basic.ShapeFunction;
 
 public class SystemHomogeneousBoundaryRhsIntegral<FT extends Face<?,FT,?>, ST extends ShapeFunction<?,FT,?,?,?,?>>
@@ -13,7 +12,6 @@ public class SystemHomogeneousBoundaryRhsIntegral<FT extends Face<?,FT,?>, ST ex
 	
 	public SystemHomogeneousBoundaryRhsIntegral(BoundaryRightHandSideIntegral<FT, ST> faceIntegral, int component)
 	{
-		super();
 		this.faceIntegral = faceIntegral;
 		this.component = component;
 	}

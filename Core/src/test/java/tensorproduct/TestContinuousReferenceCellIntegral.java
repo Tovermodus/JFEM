@@ -21,7 +21,6 @@ public class TestContinuousReferenceCellIntegral
 		PerformanceArguments.PerformanceArgumentBuilder builder =
 			new PerformanceArguments.PerformanceArgumentBuilder();
 		builder.parallelizeThreads = false;
-		long startTime = System.nanoTime();
 		Matrix referenceMatrix;
 		CoordinateVector start = CoordinateVector.fromValues(-1, -10);
 		CoordinateVector end = CoordinateVector.fromValues(1, 1);
@@ -30,14 +29,12 @@ public class TestContinuousReferenceCellIntegral
 		ContinuousTPFESpace grid = new ContinuousTPFESpace(start, end,
 			Ints.asList(3, 5), polynomialDegree);
 		TPCellIntegral<ContinuousTPShapeFunction> gg = new TPCellIntegral<>(ScalarFunction.constantFunction(1),
-			TPCellIntegral.GRAD_GRAD,
-			false);
+			TPCellIntegral.GRAD_GRAD);
 		ArrayList<CellIntegral<TPCell, ContinuousTPShapeFunction>> cellIntegrals =
 			new ArrayList<>();
 		cellIntegrals.add(gg);
 		TPRightHandSideIntegral<ContinuousTPShapeFunction> rightHandSideIntegral =
-			new TPRightHandSideIntegral<>(ScalarFunction.constantFunction(1), TPRightHandSideIntegral.VALUE,
-				true);
+			new TPRightHandSideIntegral<>(ScalarFunction.constantFunction(1), TPRightHandSideIntegral.VALUE);
 		ArrayList<RightHandSideIntegral<TPCell, ContinuousTPShapeFunction>> rightHandSideIntegrals = new ArrayList<>();
 		rightHandSideIntegrals.add(rightHandSideIntegral);
 		grid.assembleCells();
@@ -51,14 +48,12 @@ public class TestContinuousReferenceCellIntegral
 		grid = new ContinuousTPFESpace(start, end,
 			Ints.asList(3, 5), polynomialDegree);
 		gg = new TPCellIntegralViaReferenceCell<>(1,
-			TPCellIntegral.GRAD_GRAD,
-			false);
+			TPCellIntegral.GRAD_GRAD);
 		cellIntegrals =
 			new ArrayList<>();
 		cellIntegrals.add(gg);
 		rightHandSideIntegral =
-			new TPRightHandSideIntegral<>(ScalarFunction.constantFunction(1), TPRightHandSideIntegral.VALUE,
-				true);
+			new TPRightHandSideIntegral<>(ScalarFunction.constantFunction(1), TPRightHandSideIntegral.VALUE);
 		rightHandSideIntegrals = new ArrayList<>();
 		rightHandSideIntegrals.add(rightHandSideIntegral);
 		grid.assembleCells();
@@ -73,7 +68,6 @@ public class TestContinuousReferenceCellIntegral
 	@Test
 	public void test3DGradGradMatrix()
 	{
-		long startTime = System.nanoTime();
 		Matrix referenceMatrix;
 		CoordinateVector start = CoordinateVector.fromValues(-1, -1, -1);
 		CoordinateVector end = CoordinateVector.fromValues(7, 4, 119);
@@ -82,14 +76,12 @@ public class TestContinuousReferenceCellIntegral
 		ContinuousTPFESpace grid = new ContinuousTPFESpace(start, end,
 			Ints.asList(4, 7, 2), polynomialDegree);
 		TPCellIntegral<ContinuousTPShapeFunction> gg = new TPCellIntegral<>(ScalarFunction.constantFunction(1),
-			TPCellIntegral.GRAD_GRAD,
-			false);
+			TPCellIntegral.GRAD_GRAD);
 		ArrayList<CellIntegral<TPCell, ContinuousTPShapeFunction>> cellIntegrals =
 			new ArrayList<>();
 		cellIntegrals.add(gg);
 		TPRightHandSideIntegral<ContinuousTPShapeFunction> rightHandSideIntegral =
-			new TPRightHandSideIntegral<>(ScalarFunction.constantFunction(1), TPRightHandSideIntegral.VALUE,
-				true);
+			new TPRightHandSideIntegral<>(ScalarFunction.constantFunction(1), TPRightHandSideIntegral.VALUE);
 		ArrayList<RightHandSideIntegral<TPCell, ContinuousTPShapeFunction>> rightHandSideIntegrals = new ArrayList<>();
 		rightHandSideIntegrals.add(rightHandSideIntegral);
 		grid.assembleCells();
@@ -102,14 +94,12 @@ public class TestContinuousReferenceCellIntegral
 		grid = new ContinuousTPFESpace(start, end,
 			Ints.asList(4, 7, 2), polynomialDegree);
 		gg = new TPCellIntegralViaReferenceCell<>(1,
-			TPCellIntegral.GRAD_GRAD,
-			false);
+			TPCellIntegral.GRAD_GRAD);
 		cellIntegrals =
 			new ArrayList<>();
 		cellIntegrals.add(gg);
 		rightHandSideIntegral =
-			new TPRightHandSideIntegral<>(ScalarFunction.constantFunction(1), TPRightHandSideIntegral.VALUE,
-				true);
+			new TPRightHandSideIntegral<>(ScalarFunction.constantFunction(1), TPRightHandSideIntegral.VALUE);
 		rightHandSideIntegrals = new ArrayList<>();
 		rightHandSideIntegrals.add(rightHandSideIntegral);
 		grid.assembleCells();
@@ -138,10 +128,9 @@ public class TestContinuousReferenceCellIntegral
 					ContinuousTPShapeFunction f1 = new ContinuousTPShapeFunction(c, k, i);
 					ContinuousTPShapeFunction f2 = new ContinuousTPShapeFunction(c, k, j);
 					TPCellIntegral<ContinuousTPShapeFunction> gg = new TPCellIntegral<>(ScalarFunction.constantFunction(1),
-						TPCellIntegral.GRAD_GRAD,
-						false);
+						TPCellIntegral.GRAD_GRAD);
 					TPCellIntegral<ContinuousTPShapeFunction> gg2 = new TPCellIntegralViaReferenceCell<>(1,
-						TPCellIntegral.GRAD_GRAD, false);
+						TPCellIntegral.GRAD_GRAD);
 					assertTrue(Math.abs(gg.evaluateCellIntegral(c, f1, f2) - gg2.evaluateCellIntegral(c,
 						f1, f2)) < 1e-12, "Difference of " + Math.abs(gg.evaluateCellIntegral(c, f1,
 						f2) - gg2.evaluateCellIntegral(c,
@@ -170,10 +159,9 @@ public class TestContinuousReferenceCellIntegral
 					System.out.println(f1);
 					System.out.println(f2);
 					TPCellIntegral<ContinuousTPShapeFunction> gg = new TPCellIntegral<>(ScalarFunction.constantFunction(1),
-						TPCellIntegral.GRAD_GRAD,
-						false);
+						TPCellIntegral.GRAD_GRAD);
 					TPCellIntegral<ContinuousTPShapeFunction> gg2 = new TPCellIntegralViaReferenceCell<>(1,
-						TPCellIntegral.GRAD_GRAD, false);
+						TPCellIntegral.GRAD_GRAD);
 					System.out.println("normal int " + gg.evaluateCellIntegral(c, f1, f2));
 					System.out.println("reference int " + gg2.evaluateCellIntegral(c, f1, f2));
 					assertTrue(Math.abs(gg.evaluateCellIntegral(c, f1, f2) - gg2.evaluateCellIntegral(c,
@@ -204,10 +192,9 @@ public class TestContinuousReferenceCellIntegral
 					System.out.println(f1);
 					System.out.println(f2);
 					TPCellIntegral<ContinuousTPShapeFunction> gg = new TPCellIntegral<>(ScalarFunction.constantFunction(1),
-						TPCellIntegral.VALUE_VALUE,
-						false);
+						TPCellIntegral.VALUE_VALUE);
 					TPCellIntegral<ContinuousTPShapeFunction> gg2 = new TPCellIntegralViaReferenceCell<>(1,
-						TPCellIntegral.VALUE_VALUE, false);
+						TPCellIntegral.VALUE_VALUE);
 					assertTrue(Math.abs(gg.evaluateCellIntegral(c, f1, f2) - gg2.evaluateCellIntegral(c,
 						f1, f2)) < 1e-12, "Difference of " + Math.abs(gg.evaluateCellIntegral(c, f1,
 						f2) - gg2.evaluateCellIntegral(c,
