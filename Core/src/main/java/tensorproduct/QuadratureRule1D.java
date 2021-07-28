@@ -90,5 +90,19 @@ public enum QuadratureRule1D
 			this.referenceWeights[i] = referenceWeights[i] / 2;
 		}
 	}
+	public static QuadratureRule1D fromPolynomialDegree(int polynomialDegree)
+	{
+		switch (polynomialDegree)
+		{
+			case 1:
+				return Gauss2;
+			case 2:
+				return Gauss3;
+			case 3:
+				return Gauss4;
+			default:
+				return Gauss5;
+		}
+	}
 	
 }

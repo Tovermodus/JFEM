@@ -16,15 +16,13 @@ public class TPFaceIntegral<ST extends ScalarShapeFunction<TPCell,TPFace,TPEdge>
 	public static String VALUE_GRAD_NORMAL = "ValueGradNormal";
 	public static String VALUE_VALUE = "ValueValue";
 	public static String BOUNDARY_VALUE = "BoundaryValue";
-	private final boolean weightIsTensorProduct;
-	public TPFaceIntegral(double weight, String name, boolean weightIsTensorProduct)
+	public TPFaceIntegral(double weight, String name)
 	{
-		this(ScalarFunction.constantFunction(weight), name, weightIsTensorProduct);
+		this(ScalarFunction.constantFunction(weight), name);
 	}
-	public TPFaceIntegral(Function<?,?,?> weight, String name, boolean weightIsTensorProduct)
+	public TPFaceIntegral(Function<?,?,?> weight, String name)
 	{
 		super(weight,name);
-		this.weightIsTensorProduct = weightIsTensorProduct;
 		if(name.equals(VALUE_VALUE) && !(weight.value(new CoordinateVector(weight.getDomainDimension())) instanceof Double))
 			throw new IllegalArgumentException();
 		if(name.equals(BOUNDARY_VALUE) && !(weight.value(new CoordinateVector(weight.getDomainDimension())) instanceof Double))
@@ -43,16 +41,16 @@ public class TPFaceIntegral<ST extends ScalarShapeFunction<TPCell,TPFace,TPEdge>
 	public TPFaceIntegral(String name)
 	{
 		super(name);
-		this.weightIsTensorProduct = true;
 		if(name.equals(VALUE_VALUE) && !(weight.value(new CoordinateVector(weight.getDomainDimension())) instanceof Double))
 			throw new IllegalArgumentException();
 		if(name.equals(BOUNDARY_VALUE) && !(weight.value(new CoordinateVector(weight.getDomainDimension())) instanceof Double))
 			throw new IllegalArgumentException();
 	}
 	public static double integrateNonTensorProduct(ToDoubleFunction<CoordinateVector> eval, List<Cell1D> cells,
-	                                        int flatDimension, double otherCoordinate)
+	                                        int flatDimension, double otherCoordinate,
+	                                               QuadratureRule1D quadratureRule)
 	{
-		double v = TPCellIntegral.integrateNonTensorProduct(x ->
+		return TPCellIntegral.integrateNonTensorProduct(x ->
 		{
 			double[] point = new double[cells.size() + 1];
 			int subd = 0;
@@ -64,9 +62,7 @@ public class TPFaceIntegral<ST extends ScalarShapeFunction<TPCell,TPFace,TPEdge>
 					point[j] = x.at(subd++);
 			}
 			return eval.applyAsDouble(CoordinateVector.fromValues(point));
-		}, cells);
-//		System.out.println(v);
-		return v;
+		}, cells, quadratureRule);
 	}
 	
 	@Override
@@ -78,7 +74,8 @@ public class TPFaceIntegral<ST extends ScalarShapeFunction<TPCell,TPFace,TPEdge>
 			return integrateNonTensorProduct(x -> shapeFunction1.jumpInValue(face, x) * shapeFunction2.jumpInValue(face, x) * (Double) weight.value(x),
 				face.cell1Ds,
 				face.flatDimension,
-				face.otherCoordinate);
+				face.otherCoordinate,
+				QuadratureRule1D.fromPolynomialDegree(shapeFunction1.maxPolynomialDegree()));
 		}
 		if (name.equals(INTERIOR_VALUE_JUMP_VALUE_JUMP))
 		{
@@ -87,35 +84,40 @@ public class TPFaceIntegral<ST extends ScalarShapeFunction<TPCell,TPFace,TPEdge>
 			return integrateNonTensorProduct(x -> shapeFunction1.jumpInValue(face, x) * shapeFunction2.jumpInValue(face, x) * (Double) weight.value(x),
 				face.cell1Ds,
 				face.flatDimension,
-				face.otherCoordinate);
+				face.otherCoordinate,
+				QuadratureRule1D.fromPolynomialDegree(shapeFunction1.maxPolynomialDegree()));
 		}
 		if (name.equals(GRAD_NORMALAVERAGE_VALUE_JUMP))
 		{
 			return integrateNonTensorProduct(x -> shapeFunction1.normalAverageInDerivative(face, x) * shapeFunction2.jumpInValue(face, x) * (Double) weight.value(x),
 				face.cell1Ds,
 				face.flatDimension,
-				face.otherCoordinate);
+				face.otherCoordinate,
+				QuadratureRule1D.fromPolynomialDegree(shapeFunction1.maxPolynomialDegree()));
 		}
 		if (name.equals(VALUE_JUMP_GRAD_NORMALAVERAGE))
 		{
 			return integrateNonTensorProduct(x -> shapeFunction1.jumpInValue(face, x) * shapeFunction2.normalAverageInDerivative(face, x) * (Double) weight.value(x),
 				face.cell1Ds,
 				face.flatDimension,
-				face.otherCoordinate);
+				face.otherCoordinate,
+				QuadratureRule1D.fromPolynomialDegree(shapeFunction1.maxPolynomialDegree()));
 		}
 		if (name.equals(GRAD_VALUE_NORMAL))
 		{
 			return integrateNonTensorProduct(x -> shapeFunction1.gradient(x).inner(face.getNormal().value(x)) * shapeFunction2.value(x) * (Double) weight.value(x),
 				face.cell1Ds,
 				face.flatDimension,
-				face.otherCoordinate);
+				face.otherCoordinate,
+				QuadratureRule1D.fromPolynomialDegree(shapeFunction1.maxPolynomialDegree()));
 		}
 		if (name.equals(VALUE_GRAD_NORMAL))
 		{
 			return integrateNonTensorProduct(x -> shapeFunction2.gradient(x).inner(face.getNormal().value(x)) * shapeFunction1.value(x) * (Double) weight.value(x),
 				face.cell1Ds,
 				face.flatDimension,
-				face.otherCoordinate);
+				face.otherCoordinate,
+				QuadratureRule1D.fromPolynomialDegree(shapeFunction1.maxPolynomialDegree()));
 		}
 		if (name.equals(VALUE_VALUE))
 		{
@@ -123,7 +125,8 @@ public class TPFaceIntegral<ST extends ScalarShapeFunction<TPCell,TPFace,TPEdge>
 					shapeFunction1.value(x) * shapeFunction2.value(x) * (Double) weight.value(x),
 				face.cell1Ds,
 				face.flatDimension,
-				face.otherCoordinate);
+				face.otherCoordinate,
+				QuadratureRule1D.fromPolynomialDegree(shapeFunction1.maxPolynomialDegree()));
 		}
 		if (name.equals(BOUNDARY_VALUE))
 		{
@@ -133,7 +136,8 @@ public class TPFaceIntegral<ST extends ScalarShapeFunction<TPCell,TPFace,TPEdge>
 							x)* (Double) weight.value(x),
 					face.cell1Ds,
 					face.flatDimension,
-					face.otherCoordinate);
+					face.otherCoordinate,
+					QuadratureRule1D.fromPolynomialDegree(shapeFunction1.maxPolynomialDegree()));
 			return 0;
 		}
 		throw new UnsupportedOperationException("unkown face integral name");

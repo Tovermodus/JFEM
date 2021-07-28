@@ -15,6 +15,15 @@ public class IntCoordinates implements Comparable<IntCoordinates>, Cloneable
 	public IntCoordinates(IntCoordinates source) {
 		this.coordinates = source.coordinates.clone();
 	}
+	public static IntCoordinates repeat(int number, int times)
+	{
+		int[] coords = new int[times];
+		for (int i = 0; i < times; i++)
+		{
+			coords[i] = number;
+		}
+		return new IntCoordinates(coords);
+	}
 	public int [] asArray() {
 		return coordinates;
 	}

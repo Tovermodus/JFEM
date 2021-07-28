@@ -33,6 +33,17 @@ public class Cell1D implements Comparable<Cell1D>
         {
                 this(start,end, QuadratureRule1D.Gauss5);
         }
+        
+        public double[][] distributeQuadrature(QuadratureRule1D quadratureRule)
+        {
+                double[][] pointsWeights = new double[2][quadratureRule.length()];
+                for(int i = 0; i < quadratureRule.length(); i++)
+                {
+                        pointsWeights[0][i] = positionOnGrid(quadratureRule.getReferencePoints().get(i));
+                        pointsWeights[1][i] = quadratureRule.getReferenceWeights().get(i)*length();
+                }
+                return pointsWeights;
+        }
         public double getStart()
         {
                 return start;
