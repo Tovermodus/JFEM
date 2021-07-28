@@ -25,7 +25,7 @@ class GMRES
 		MutableVector s = new linalg.DenseVector(n);
 		MutableVector gamma = new linalg.DenseVector(n+1);
 		Vector r = b.sub(A.mvMul(x));
-		SparseMatrix h = new SparseMatrix(n, n);
+		SparseMatrix h = new SparseMatrix(n+1, n+1);
 		if (r.euclidianNorm() <= tol)
 			return x;
 		gamma.set(r.euclidianNorm(), 0);
@@ -56,7 +56,7 @@ class GMRES
 			h.set(beta, j, j);
 			gamma.set(-s.at(j)*gamma.at(j),j+1);
 			gamma.set(c.at(j)*gamma.at(j),j);
-			//System.out.println(Math.abs(gamma.at(j+1)));
+			System.out.println(Math.abs(gamma.at(j+1)));
 			if(Math.abs(gamma.at(j+1)) < tol || j > 40)
 				break;
 			v.add(w.mul(1./h.at(j+1,j)));
@@ -100,7 +100,7 @@ class GMRES
 		MutableVector s = new linalg.DenseVector(n);
 		MutableVector gamma = new linalg.DenseVector(n+1);
 		Vector r = preconditioner.mvMul(b.sub(A.mvMul(x)));
-		SparseMatrix h = new SparseMatrix(n, n);
+		SparseMatrix h = new SparseMatrix(n+1, n+1);
 		if (r.euclidianNorm() <= tol)
 			return x;
 		gamma.set(r.euclidianNorm(), 0);
@@ -131,7 +131,7 @@ class GMRES
 			h.set(beta, j, j);
 			gamma.set(-s.at(j)*gamma.at(j),j+1);
 			gamma.set(c.at(j)*gamma.at(j),j);
-			//System.out.println(Math.abs(gamma.at(j+1)));
+			System.out.println(Math.abs(gamma.at(j+1)));
 			if(Math.abs(gamma.at(j+1)) < tol || j > 40)
 				break;
 			v.add(w.mul(1./h.at(j+1,j)));
@@ -151,7 +151,7 @@ class GMRES
 		if(j > 40 && restarts < 200)
 		{
 			restarts++;
-			return solve(A, preconditioner, b, x.add(alphaV), tol, interruptor);
+			return solve(preconditioner, A, b, x.add(alphaV), tol, interruptor);
 		}
 		return x.add(alphaV);
 		

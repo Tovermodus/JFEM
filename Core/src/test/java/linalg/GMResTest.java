@@ -21,6 +21,8 @@ public class GMResTest
 		DenseVector b = DenseVector.vectorFromValues(3,4,5);
 		IterativeSolver i = new IterativeSolver();
 		Vector sol = i.solveGMRES(symm, b, 1e-12);
+		assertEquals(b, symm.mvMul(sol));
+		assertEquals(symm.solve(b), sol);
 	}
 	@Test
 	public void testNonSymm() {
@@ -71,7 +73,7 @@ public class GMResTest
 	}
 	@Test
 	public void testPLarge() {
-		int n = 106000;
+		int n = 10000;
 		SparseMatrix large = new SparseMatrix(n,n);
 		DenseVector b = new DenseVector(n);
 		for(int i = 0; i < n*10; i++)
@@ -81,37 +83,17 @@ public class GMResTest
 			large.add(Math.random(), (int)(Math.random()*n), (int)(Math.random()*n));
 		}
 		IterativeSolver i = new IterativeSolver();
-		Vector sol = i.solvePGMRES(large, SparseMatrix.identity(n),b, 1e-10);
-		System.out.println(large.mvMul(sol).sub(b).absMaxElement());
+		Vector sol = i.solvePGMRES(large, SparseMatrix.identity(n), b, 1e-10);
 		assertTrue(b.almostEqual(large.mvMul(sol), 1e-10));
+		
 	}
 	@Test
 	public void testGoodPNonSymm() {
 		DenseMatrix nonsymm = DenseMatrix.squareMatrixFromValues(3,1,7,2,4,3,2,3,7);
 		DenseVector b = DenseVector.vectorFromValues(3,4,5);
 		IterativeSolver i = new IterativeSolver();
-		Vector sol = i.solvePGMRES(nonsymm,nonsymm.diag().inverse(), b, 1e-12);
+		Vector sol = i.solvePGMRES(nonsymm,nonsymm.inverse(), b, 1e-12);
 		assertEquals(b, nonsymm.mvMul(sol));
 		assertEquals(nonsymm.solve(b), sol);
-	}
-	@Test
-	public void testGoodPLarge() {
-		int n = 10000;
-		SparseMatrix large = new SparseMatrix(n,n);
-		DenseVector b = new DenseVector(n);
-		SparseMatrix d = new SparseMatrix(n,n);
-		for(int i = 0; i < n*10; i++)
-		{
-			b.add(1,i%n);
-			large.add(0.2,i%n,i%n);
-			large.add(Math.random(), (int)(Math.random()*n), (int)(Math.random()*n));
-		}
-		for (int i = 0; i < n; i++)
-		{
-			d.add(1./large.at(i,i),i,i);
-		}
-		IterativeSolver i = new IterativeSolver();
-		Vector sol = i.solvePGMRES(large, d,b, 1e-10);
-		assertTrue(b.almostEqual(large.mvMul(sol), 1e-10));
 	}
 }
