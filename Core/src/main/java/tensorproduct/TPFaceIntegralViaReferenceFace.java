@@ -41,7 +41,8 @@ public class TPFaceIntegralViaReferenceFace<ST extends ScalarShapeFunctionWithRe
 				face.getReferenceFace());
 		if (savedValues.containsKey(key))
 		{
-			if(savedValues.get(key) != super.evaluateFaceIntegral(face, shapeFunction1, shapeFunction2))
+			if(Math.abs(savedValues.get(key) -  super.evaluateFaceIntegral(face, shapeFunction1,
+			shapeFunction2)) > 1e-5)
 			{
 				System.out.println();
 				System.out.println();
@@ -53,7 +54,8 @@ public class TPFaceIntegralViaReferenceFace<ST extends ScalarShapeFunctionWithRe
 				System.out.println(shapeFunction2);
 				System.out.println(face);
 				System.out.println(face.getReferenceFace());
-				System.out.println(savedValues.get(key) + " " + super.evaluateFaceIntegral(face, shapeFunction1, shapeFunction2));
+				System.out.println(savedValues.get(key) + " " + super.evaluateFaceIntegral(face,
+					shapeFunction1, shapeFunction2) + " integrals");
 			}
 			return savedValues.get(key);
 		}

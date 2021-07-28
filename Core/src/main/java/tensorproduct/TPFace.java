@@ -234,6 +234,14 @@ public class TPFace implements FaceWithReferenceFace<TPCell, TPFace, TPEdge>,Com
 			return 1;
 		if(!o.isBoundaryFace && isBoundaryFace)
 			return -1;
+		if(o.getNormalDownstreamCell() != null && getNormalDownstreamCell() == null)
+			return 1;
+		if(o.getNormalDownstreamCell() != null && getNormalDownstreamCell() == null)
+			return -1;
+		if(o.getNormalUpstreamCell() != null && getNormalUpstreamCell() == null)
+			return 1;
+		if(o.getNormalUpstreamCell() != null && getNormalUpstreamCell() == null)
+			return -1;
 		return CoordinateComparator.comp(center().getEntries(), o.center().getEntries());
 	}
 	@Override
@@ -251,6 +259,10 @@ public class TPFace implements FaceWithReferenceFace<TPCell, TPFace, TPEdge>,Com
 		ret*=2;
 		if(isBoundaryFace)
 			ret+=1;
+		if(getNormalDownstreamCell() != null)
+			ret+= 1789821;
+		if(getNormalUpstreamCell() != null)
+			ret+= 31789821;
 		return ret;
 	}
 	
