@@ -1,8 +1,6 @@
 package tensorproduct;
 
-import basic.Face;
-import basic.FaceWithReferenceFace;
-import basic.VectorFunction;
+import basic.*;
 import com.google.common.collect.Multimap;
 import linalg.CoordinateComparator;
 import linalg.CoordinateVector;
@@ -167,7 +165,7 @@ public class TPFace implements FaceWithReferenceFace<TPCell, TPFace, TPEdge>,Com
 		{
 			if(d == flatDimension)
 			{
-				if (pos.at(flatDimension) != otherCoordinate)
+				if (!DoubleCompare.almostEqual(pos.at(flatDimension), otherCoordinate))
 					return false;
 			}
 			else
@@ -226,9 +224,9 @@ public class TPFace implements FaceWithReferenceFace<TPCell, TPFace, TPEdge>,Com
 			return -1;
 		if(o.flatDimension > flatDimension)
 			return 1;
-		if(o.otherCoordinate < otherCoordinate)
+		if(o.otherCoordinate < otherCoordinate-PerformanceArguments.getInstance().doubleTolerance)
 			return -1;
-		if(o.otherCoordinate > otherCoordinate)
+		if(o.otherCoordinate > otherCoordinate+PerformanceArguments.getInstance().doubleTolerance)
 			return 1;
 		if(o.isBoundaryFace && !isBoundaryFace)
 			return 1;
@@ -314,40 +312,4 @@ public class TPFace implements FaceWithReferenceFace<TPCell, TPFace, TPEdge>,Com
 			refFace.addCell(upstreamCell);
 		return refFace;
 	}
-//	@Override
-//	public List<Face<TPCell, TPShapeFunction>> refine(Multimap<TPCell, TPCell> cellMap)
-//	{
-//		assert(cells.size()<2);
-//		List<Face<TPCell, TPShapeFunction>> refinedFaces = new ArrayList<>();
-//		TPFace face1 = new TPFace(new Cell1D(cell1d.getStart(),cell1d.center()),otherCoordinate,
-//		normaldirection);
-//		TPFace face2 = new TPFace(new Cell1D(cell1d.center(), cell1d.getEnd()),otherCoordinate,normaldirection);
-//		for(TPCell cell:cells)
-//		{
-//			for (TPCell  refinedCell : cellMap.get(cell))
-//			{
-//				if(refinedCell.isInCell(face1.center()))
-//				{
-//					refinedCell.getFaces().add(face1);
-//					face1.cells.add(refinedCell);
-//				}
-//				if(refinedCell.isInCell(face2.center()))
-//				{
-//					refinedCell.getFaces().add(face2);
-//					face2.cells.add(refinedCell);
-//				}
-//			}
-//		}
-//		face1.setBoundaryFace(isBoundaryFace());
-//		face2.setBoundaryFace(isBoundaryFace());
-//		refinedFaces.add(face1);
-//		refinedFaces.add(face2);
-//		return refinedFaces;
-//
-//	}
-//
-//
-
-
-
 }

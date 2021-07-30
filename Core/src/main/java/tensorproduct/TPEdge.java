@@ -1,6 +1,8 @@
 package tensorproduct;
 
+import basic.DoubleCompare;
 import basic.EdgeWithReferenceEdge;
+import basic.PerformanceArguments;
 import basic.VectorFunction;
 import linalg.CoordinateComparator;
 import linalg.CoordinateVector;
@@ -156,7 +158,7 @@ public class TPEdge implements EdgeWithReferenceEdge<TPCell, TPFace, TPEdge>
 			}
 			else
 			{
-				if (otherCoordinates[subd++] != pos.at(d))
+				if (!DoubleCompare.almostEqual(otherCoordinates[subd++],  pos.at(d)))
 					return false;
 			}
 		}
@@ -171,13 +173,13 @@ public class TPEdge implements EdgeWithReferenceEdge<TPCell, TPFace, TPEdge>
 			return -1;
 		if(o.tangentialDimension > tangentialDimension)
 			return 1;
-		if(o.otherCoordinates[0] < otherCoordinates[0])
+		if(o.otherCoordinates[0] < otherCoordinates[0]-PerformanceArguments.getInstance().doubleTolerance)
 			return -1;
-		if(o.otherCoordinates[0] > otherCoordinates[0])
+		if(o.otherCoordinates[0] > otherCoordinates[0]+PerformanceArguments.getInstance().doubleTolerance)
 			return 1;
-		if(o.otherCoordinates[1] < otherCoordinates[1])
+		if(o.otherCoordinates[1] < otherCoordinates[1]-PerformanceArguments.getInstance().doubleTolerance)
 			return -1;
-		if(o.otherCoordinates[1] > otherCoordinates[1])
+		if(o.otherCoordinates[1] > otherCoordinates[1]+PerformanceArguments.getInstance().doubleTolerance)
 			return 1;
 		return CoordinateComparator.comp(center().getEntries(), o.center().getEntries());
 	}
