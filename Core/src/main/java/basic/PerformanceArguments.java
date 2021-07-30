@@ -9,21 +9,23 @@ public class PerformanceArguments
 	public final int threadNumber;
 	public final boolean executeChecks;
 	public final int cacheSize;
+	public final double doubleTolerance;
 	
 	private PerformanceArguments(Boolean parallelizeThreads, Integer threadNumber, Boolean executeChecks,
-	                             Integer cacheSize) {
+	                             Integer cacheSize, Double doubleTolerance) {
 		this.parallelizeThreads = Objects.requireNonNullElse(parallelizeThreads, true);
 		this.threadNumber = Objects.requireNonNullElse(threadNumber, 12);
 		this.executeChecks = Objects.requireNonNullElse(executeChecks, true);
 		this.cacheSize = Objects.requireNonNullElse(cacheSize, 50000);
+		this.doubleTolerance = Objects.requireNonNullElse(doubleTolerance, 1e-14);
 	}
 	public static void createInstance(Boolean parallelizeThreads, Integer threadNumber, Boolean executeChecks,
-	                                  Integer cacheSize) {
-		INSTANCE = new PerformanceArguments(parallelizeThreads, threadNumber, executeChecks, cacheSize);
+	                                  Integer cacheSize, Double doubleTolerance) {
+		INSTANCE = new PerformanceArguments(parallelizeThreads, threadNumber, executeChecks, cacheSize, doubleTolerance);
 	}
 	public static PerformanceArguments getInstance() {
 		if(INSTANCE == null)
-			createInstance(null, null, null, null);
+			createInstance(null, null, null, null, null);
 		return INSTANCE;
 	}
 	
@@ -32,9 +34,11 @@ public class PerformanceArguments
 		public Integer threadNumber = null;
 		public Boolean executeChecks = null;
 		public Integer cacheSize = null;
+		public Double doubleTolerance = null;
 		public void build()
 		{
-			PerformanceArguments.createInstance(parallelizeThreads, threadNumber, executeChecks, cacheSize);
+			PerformanceArguments.createInstance(parallelizeThreads, threadNumber, executeChecks,
+				cacheSize, doubleTolerance);
 		}
 	}
 }

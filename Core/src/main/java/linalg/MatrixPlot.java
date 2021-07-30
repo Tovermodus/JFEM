@@ -16,6 +16,7 @@ public class MatrixPlot implements Plot
 	public int pixelWidth;
 	public int pixelHeight;
 	public double maxValue;
+	final double IDENTIFIED_AS_ZERO = 1e-4;
 	public MatrixPlot(Matrix m)
 	{
 		this.m = m;
@@ -35,11 +36,11 @@ public class MatrixPlot implements Plot
 	{
 		
 		double logval = 0;
-		double minlog = Math.log(1e-4);
-		if(Math.abs(val) > 1e-4)
+		double minlog = Math.log(IDENTIFIED_AS_ZERO);
+		if(Math.abs(val) > IDENTIFIED_AS_ZERO)
 			logval = Math.log(Math.abs(val)) - minlog;
 		double maxlog = 1;
-		if(maxValue > 1e-4)
+		if(maxValue > IDENTIFIED_AS_ZERO)
 			maxlog = Math.log(maxValue) - minlog;
 		//System.out.println(Math.log(Math.abs(val))+" "+logval+ " " + minlog + " " + maxlog + " " + Math.log
 		// (maxValue));
@@ -56,6 +57,6 @@ public class MatrixPlot implements Plot
 	@Override
 	public String title()
 	{
-		return "Matrix. Scale logarithmic: blue = 1e-4, red = "+ maxValue;
+		return "Matrix. Scale logarithmic: blue = "+IDENTIFIED_AS_ZERO+", red = "+ maxValue;
 	}
 }

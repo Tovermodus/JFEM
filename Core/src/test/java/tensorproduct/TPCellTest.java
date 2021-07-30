@@ -78,7 +78,9 @@ public class TPCellTest
 	@Test
 	public void testCompare()
 	{
-	
+		TPCell cell1 = createCell2D();
+		TPCell cell2 = createCell2D();
+		assertEquals(0, cell1.compareTo(cell2));
 	}
 	@Test
 	public void testEquals()

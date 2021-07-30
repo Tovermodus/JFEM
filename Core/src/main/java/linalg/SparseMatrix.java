@@ -1,9 +1,8 @@
 package linalg;
 
+import basic.DoubleCompare;
 import basic.PerformanceArguments;
 import com.google.common.collect.ImmutableMap;
-import com.google.common.primitives.Ints;
-import kotlin.Pair;
 
 import java.util.*;
 
@@ -394,7 +393,7 @@ public class SparseMatrix implements MutableMatrix, DirectlySolvable, Decomposab
 	}
 	
 	@Override
-	public boolean almostEqual(Tensor other, double tol)
+	public boolean almostEqual(Tensor other)
 	{
 		if (PerformanceArguments.getInstance().executeChecks)
 		{
@@ -402,7 +401,7 @@ public class SparseMatrix implements MutableMatrix, DirectlySolvable, Decomposab
 				throw new IllegalArgumentException("Tensors are of different size");
 		}
 		if (!(other instanceof SparseMatrix))
-			return other.almostEqual(this, tol);
+			return other.almostEqual(this);
 		ImmutableMap<IntCoordinates, Double> myValues = getCoordinateEntryList();
 		ImmutableMap<IntCoordinates, Double> otherValues = other.getCoordinateEntryList();
 		double absmax = absMaxElement() + other.absMaxElement();
@@ -410,11 +409,10 @@ public class SparseMatrix implements MutableMatrix, DirectlySolvable, Decomposab
 		{
 			if (otherValues.containsKey(entry.getKey()))
 			{
-				if (Math.abs(entry.getValue() - otherValues.get(entry.getKey())) > tol * (1 + absmax))
+				if (!DoubleCompare.almostEqualAfterOps(entry.getValue(), otherValues.get(entry.getKey()),
+					absmax*10, sparseEntries))
 				{
-					System.out.println(entry.getValue() + " != " + otherValues.get(entry.getKey()) + " with tol " + tol * (1 + absmax) +
-						" " +
-						" difference: " + Math.abs(entry.getValue() - otherValues.get(entry.getKey())) + " at " + entry.getKey() + " out of " + getShape());
+					System.out.println(entry.getValue() + " != " + otherValues.get(entry.getKey()) +" difference: " + Math.abs(entry.getValue() - otherValues.get(entry.getKey())) + " at " + entry.getKey() + " out of " + getShape());
 					return false;
 				}
 			} else

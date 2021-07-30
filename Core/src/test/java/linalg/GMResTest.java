@@ -1,6 +1,5 @@
 package linalg;
 
-import com.google.common.collect.ImmutableMap;
 import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -46,7 +45,7 @@ public class GMResTest
 		}
 		IterativeSolver i = new IterativeSolver();
 		Vector sol = i.solveGMRES(large, b, 1e-10);
-		assertTrue(b.almostEqual(large.mvMul(sol), 1e-10));
+		assertTrue(b.almostEqual(large.mvMul(sol)));
 	}
 	@Test
 	public void testPIdentity() {
@@ -84,7 +83,7 @@ public class GMResTest
 		}
 		IterativeSolver i = new IterativeSolver();
 		Vector sol = i.solvePGMRES(large, SparseMatrix.identity(n), b, 1e-10);
-		assertTrue(b.almostEqual(large.mvMul(sol), 1e-10));
+		assertTrue(b.almostEqual(large.mvMul(sol)));
 		
 	}
 	@Test

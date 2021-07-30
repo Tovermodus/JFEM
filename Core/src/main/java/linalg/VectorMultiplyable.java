@@ -1,5 +1,6 @@
 package linalg;
 
+import basic.DoubleCompare;
 import basic.PerformanceArguments;
 
 import java.util.stream.IntStream;
@@ -58,7 +59,7 @@ public interface VectorMultiplyable
 		d = new DenseVector(getVectorSize());
 		int component = 0;
 		d.set(1,component++);
-		while (this.mvMul(d).absMaxElement() < 1e-14)
+		while (this.mvMul(d).absMaxElement() < PerformanceArguments.getInstance().doubleTolerance*getVectorSize())
 		{
 			d = new DenseVector(getVectorSize());
 			d.set(1,component++);
@@ -67,7 +68,7 @@ public interface VectorMultiplyable
 		Vector Ab;
 		double old_lamb = 7.0;
 		double new_lamb = 6.0;
-		while (Math.abs(old_lamb / new_lamb - 1) > 1e-12)
+		while (!DoubleCompare.almostEqualAfterOps(old_lamb/new_lamb, 1, this.getVectorSize()))
 		{
 			old_lamb = new_lamb;
 			Ab = this.mvMul(b);

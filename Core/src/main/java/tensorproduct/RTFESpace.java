@@ -7,7 +7,6 @@ import com.google.common.collect.TreeMultimap;
 import com.google.common.primitives.Doubles;
 import com.google.common.primitives.Ints;
 import linalg.*;
-import linalg.Vector;
 
 import java.util.*;
 import java.util.stream.Collectors;
@@ -55,7 +54,7 @@ public class RTFESpace implements MatrixFESpace<TPCell, TPFace, TPEdge,RTShapeFu
 			{
 				coordinatesForDirection.add(startCoordinates.at(i) + le * j);
 				cellsForDirection.add(new Cell1D(startCoordinates.at(i) + le * j,
-					startCoordinates.at(i) + le * (j + 1), quad));
+					startCoordinates.at(i) + le * (j + 1)));
 			}
 			coordinatesForDirection.add(endCoordinates.at(i));
 			cells1D.add(cellsForDirection);

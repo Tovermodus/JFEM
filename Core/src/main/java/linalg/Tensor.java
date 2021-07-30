@@ -1,11 +1,10 @@
 package linalg;
 
+import basic.DoubleCompare;
 import basic.PerformanceArguments;
-import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
-import com.google.common.primitives.Ints;
+
 import java.util.*;
-import java.util.stream.IntStream;
 
 public interface Tensor
 {
@@ -61,9 +60,9 @@ public interface Tensor
 	
 	default boolean almostEqual(Tensor other)
 	{
-		return almostEqual(other, 1e-15);
+		return almostEqual(other, 0);
 	}
-	default boolean almostEqual(Tensor other, double tol)
+	default boolean almostEqual(Tensor other, double extraTol)
 	{
 		if(PerformanceArguments.getInstance().executeChecks)
 		{
@@ -73,9 +72,10 @@ public interface Tensor
 		double absmax = absMaxElement() + other.absMaxElement();
 		for(IntCoordinates c: getShape().range())
 		{
-			if(Math.abs(at(c) - other.at(c)) > Math.abs(tol*(1+absmax)))
+			if(!DoubleCompare.almostEqualAfterOps(at(c),
+				other.at(c), absmax + extraTol, size()))
 			{
-				System.out.println(at(c)+" != " +other.at(c)+" with tol " +  tol*(1+absmax)+ " " +
+				System.out.println(at(c)+" != " +other.at(c)+
 					" difference: " + Math.abs(at(c) - other.at(c)) + " ");
 				return false;
 			}

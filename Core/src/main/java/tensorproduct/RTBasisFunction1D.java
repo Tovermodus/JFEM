@@ -1,5 +1,6 @@
 package tensorproduct;
 
+import basic.DoubleCompare;
 import basic.PerformanceArguments;
 
 public class RTBasisFunction1D extends Function1D
@@ -23,13 +24,14 @@ public class RTBasisFunction1D extends Function1D
 	{
 		this.cell = cell;
 		if (PerformanceArguments.getInstance().executeChecks)
-		if (!cell.isInCell(degreeOfFreedom))
-			throw new IllegalArgumentException("degree of freedom is not in given cell");
+			if (!cell.isInCell(degreeOfFreedom))
+				throw new IllegalArgumentException("degree of freedom is not in given cell");
 		this.quad = obtainquadPoints(polynomialDegree, higherDegree);
 		boolean pointFound = false;
 		for (int i = 0; i < quad.length(); i++)
 		{
-			if(Math.abs(degreeOfFreedom - cell.positionOnGrid(quad.getReferencePoints().get(i)))< 1e-12)
+			if (DoubleCompare.almostEqual(degreeOfFreedom ,
+				cell.positionOnGrid(quad.getReferencePoints().get(i))))
 			{
 				this.localFunctionNumber = i;
 				this.degreeOfFreedom = quad.getReferencePoints().get(i);
@@ -41,10 +43,11 @@ public class RTBasisFunction1D extends Function1D
 			throw new IllegalArgumentException("Identification not possible ");
 		this.polynomialDegree = polynomialDegree;
 	}
+	
 	private QuadratureRule1D obtainquadPoints(int polynomialDegree, boolean higherDegree)
 	{
 		
-		if(higherDegree)
+		if (higherDegree)
 			switch (polynomialDegree)
 			{
 				case 0:
@@ -76,16 +79,17 @@ public class RTBasisFunction1D extends Function1D
 				throw new IllegalArgumentException("bad polynomial degree");
 		}
 	}
+	
 	public double valueOnReferenceCell(double pos)
 	{
-		if(pos<0 || pos > 1)
+		if (pos < 0 || pos > 1)
 			return 0;
 		double ret = 1;
 		for (int i = 0; i < quad.length(); i++)
 		{
 			if (i != localFunctionNumber)
 			{
-				ret *= (pos - quad.getReferencePoints().get(i)) / (quad.getReferencePoints().get(localFunctionNumber) -  quad.getReferencePoints().get(i));
+				ret *= (pos - quad.getReferencePoints().get(i)) / (quad.getReferencePoints().get(localFunctionNumber) - quad.getReferencePoints().get(i));
 			}
 		}
 		return ret;
@@ -94,7 +98,7 @@ public class RTBasisFunction1D extends Function1D
 	
 	public double derivativeOnReferenceCell(double pos)
 	{
-		if(pos<0 || pos > 1)
+		if (pos < 0 || pos > 1)
 			return 0;
 		double derret = 0;
 		for (int j = 0; j < quad.length(); j++)

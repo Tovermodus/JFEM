@@ -57,7 +57,7 @@ public class TestReferenceFaceIntegral
 		grid.initializeRhs();
 		grid.evaluateFaceIntegrals(faceIntegrals, rightHandSideIntegrals);
 		
-		assertTrue(referenceMatrix.almostEqual(grid.getSystemMatrix(), 1e-12));
+		assertTrue(referenceMatrix.almostEqual(grid.getSystemMatrix()));
 		
 	}
 	@Test
@@ -102,7 +102,7 @@ public class TestReferenceFaceIntegral
 		grid.initializeSystemMatrix();
 		grid.initializeRhs();
 		grid.evaluateFaceIntegrals(faceIntegrals, rightHandSideIntegrals);
-		assertTrue(referenceMatrix.almostEqual(grid.getSystemMatrix(), 1e-12));
+		assertTrue(referenceMatrix.almostEqual(grid.getSystemMatrix()));
 		
 	}
 	
@@ -148,7 +148,7 @@ public class TestReferenceFaceIntegral
 		grid.initializeSystemMatrix();
 		grid.initializeRhs();
 		grid.evaluateFaceIntegrals(faceIntegrals, rightHandSideIntegrals);
-		assertTrue(referenceMatrix.almostEqual(grid.getSystemMatrix(), 1e-12));
+		assertTrue(referenceMatrix.almostEqual(grid.getSystemMatrix()));
 		
 	}
 	

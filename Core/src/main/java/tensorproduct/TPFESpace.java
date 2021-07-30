@@ -5,10 +5,7 @@ import com.google.common.collect.*;
 import com.google.common.primitives.Doubles;
 import com.google.common.primitives.Ints;
 import linalg.*;
-import linalg.Vector;
-import org.checkerframework.checker.nullness.qual.Nullable;
 
-import java.awt.image.AreaAveragingScaleFilter;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -42,11 +39,6 @@ public class TPFESpace implements MatrixFESpace<TPCell,
 		coordinates1D = new ArrayList<>();
 		supportOnCell = TreeMultimap.create();
 		supportOnFace = TreeMultimap.create();
-		QuadratureRule1D quad;
-		if(polynomialDegree < 3)
-			quad = QuadratureRule1D.Gauss5;
-		else
-			quad = QuadratureRule1D.Gauss5;
 		for (int i = 0; i < startCoordinates.getLength(); i++)
 		{
 			List<Cell1D> cellsForDirection = new ArrayList<>();
@@ -56,7 +48,7 @@ public class TPFESpace implements MatrixFESpace<TPCell,
 			{
 				coordinatesForDirection.add(startCoordinates.at(i) + le*j);
 				cellsForDirection.add(new Cell1D(startCoordinates.at(i) + le*j,
-					startCoordinates.at(i) + le*(j+1),quad));
+					startCoordinates.at(i) + le*(j+1)));
 			}
 			coordinatesForDirection.add(endCoordinates.at(i));
 			cells1D.add(cellsForDirection);

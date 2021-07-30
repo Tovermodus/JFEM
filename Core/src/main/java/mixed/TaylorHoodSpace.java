@@ -10,7 +10,6 @@ import com.google.common.primitives.Doubles;
 import com.google.common.primitives.Ints;
 import linalg.CoordinateVector;
 import linalg.DenseVector;
-import linalg.Matrix;
 import linalg.SparseMatrix;
 import tensorproduct.*;
 
@@ -61,7 +60,7 @@ public class TaylorHoodSpace implements MixedFESpace<TPCell, TPFace, TPEdge,Cont
 			{
 				coordinatesForDirection.add(startCoordinates.at(i) + le * j);
 				cellsForDirection.add(new Cell1D(startCoordinates.at(i) + le * j,
-					startCoordinates.at(i) + le * (j + 1), quad));
+					startCoordinates.at(i) + le * (j + 1)));
 			}
 			coordinatesForDirection.add(endCoordinates.at(i));
 			cells1D.add(cellsForDirection);

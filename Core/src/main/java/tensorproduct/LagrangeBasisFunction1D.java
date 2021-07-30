@@ -1,5 +1,7 @@
 package tensorproduct;
 
+import basic.DoubleCompare;
+
 public class LagrangeBasisFunction1D extends Function1D
 {
 	private final Cell1D cell;
@@ -20,10 +22,10 @@ public class LagrangeBasisFunction1D extends Function1D
 		this.cell = cell;
 		if (!cell.isInCell(degreeOfFreedom))
 			throw new IllegalArgumentException("degree of freedom is not in given cell");
-		if (Math.abs(cell.positionOnReferenceCell(degreeOfFreedom) * polynomialDegree - (int) (cell.positionOnReferenceCell(degreeOfFreedom) * polynomialDegree + 1e-10)) > 1e-13)
-			throw new IllegalArgumentException("Identification not possible " + cell.positionOnReferenceCell(degreeOfFreedom) * polynomialDegree + " " + (int) (cell.positionOnReferenceCell(degreeOfFreedom) * polynomialDegree + 1e-10));
+		if (!DoubleCompare.isInteger(cell.positionOnReferenceCell(degreeOfFreedom) * polynomialDegree))
+			throw new IllegalArgumentException("Identification not possible. This should be int" + cell.positionOnReferenceCell(degreeOfFreedom) * polynomialDegree);
 		this.localFunctionNumber =
-			(int) (cell.positionOnReferenceCell(degreeOfFreedom) * polynomialDegree + 1e-12);
+			(int) Math.round(cell.positionOnReferenceCell(degreeOfFreedom) * polynomialDegree);
 		this.polynomialDegree = polynomialDegree;
 		this.degreeOfFreedom = degreeOfFreedom; //equidistant
 	}

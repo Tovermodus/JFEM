@@ -59,7 +59,7 @@ public class TestReferenceCellIntegral
 		grid.initializeSystemMatrix();
 		grid.initializeRhs();
 		grid.evaluateCellIntegrals(cellIntegrals, rightHandSideIntegrals);
-		assertTrue(referenceMatrix.almostEqual(grid.getSystemMatrix(), 1e-12));
+		assertTrue(referenceMatrix.almostEqual(grid.getSystemMatrix()));
 		
 	}
 	
@@ -106,7 +106,7 @@ public class TestReferenceCellIntegral
 		grid.initializeSystemMatrix();
 		grid.initializeRhs();
 		grid.evaluateCellIntegrals(cellIntegrals, rightHandSideIntegrals);
-		assertTrue(referenceMatrix.almostEqual(grid.getSystemMatrix(),1e-12));
+		assertTrue(referenceMatrix.almostEqual(grid.getSystemMatrix()));
 		
 	}
 	

@@ -1,10 +1,6 @@
 package linalg;
 
-import com.google.common.primitives.Doubles;
-import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
-
-import java.util.Random;
 
 import static org.junit.jupiter.api.Assertions.*;
 public class DenseMatrixTest1
@@ -97,14 +93,14 @@ public class DenseMatrixTest1
 			assertEquals(mul1.mul(2).at(i), mul2.at(i));
 			assertEquals(mul1.at(i)*2, mul2.at(i));
 		}
-		assertTrue(mul1.almostEqual(mul2.mul(0.5),1e-14));
+		assertTrue(mul1.almostEqual(mul2.mul(0.5)));
 		for(int i = 0; i < 50; i++)
 		{
 			largeVector.add(Math.random(),i);
 		}
 		assertEquals(largeDense.transpose().transpose(), largeDense);
-		assertTrue(largeDense.tvMul(largeVector).almostEqual(largeDense2.transpose().mvMul(largeVector),
-			1e-12));
+		assertTrue(largeDense.tvMul(largeVector).almostEqual(largeDense2.transpose().mvMul(largeVector)
+		));
 	}
 	@Test
 	public void testSolve()
@@ -122,24 +118,24 @@ public class DenseMatrixTest1
 			largeDense.add(5.2,i%50,i%50);
 		}
 		DenseMatrix denseInverse = largeDense.inverse();
-		assertTrue(denseInverse.mvMul(largeVector).almostEqual(largeDense.solve(largeVector),1e-10));
-		assertTrue(denseInverse.mmMul(largeDense).almostEqual(largeDense.mmMul(denseInverse),1e-10));
-		assertTrue(denseInverse.mmMul(largeDense).almostEqual(DenseMatrix.identity(50),1e-10));
-		assertTrue(denseInverse.inverse().almostEqual(largeDense,1e-10));
-		assertTrue(new IterativeSolver().solveBiCGStab(largeDense,largeVector,1e-10).almostEqual(denseInverse.mvMul(largeVector),
-			1e-8));
+		assertTrue(denseInverse.mvMul(largeVector).almostEqual(largeDense.solve(largeVector)));
+		assertTrue(denseInverse.mmMul(largeDense).almostEqual(largeDense.mmMul(denseInverse)));
+		assertTrue(denseInverse.mmMul(largeDense).almostEqual(DenseMatrix.identity(50)));
+		assertTrue(denseInverse.inverse().almostEqual(largeDense));
+		assertTrue(new IterativeSolver().solveBiCGStab(largeDense,largeVector,1e-10).almostEqual(denseInverse.mvMul(largeVector)
+		));
 		assertTrue(largeDense.mvMul(new IterativeSolver().solveBiCGStab(largeDense,largeVector,
-			1e-12)).almostEqual(largeVector,1e-8));
-		assertTrue(new IterativeSolver().solveGMRES(largeDense,largeVector,1e-10).almostEqual(denseInverse.mvMul(largeVector),
-			1e-8));
-		assertTrue(new IterativeSolver().solveBiCGStab(largeDense,largeVector,1e-10).almostEqual(denseInverse.mvMul(largeVector),
-			1e-8));
-		assertTrue(new IterativeSolver().solveGMRES(largeDense,largeVector,1e-10).almostEqual(denseInverse.mvMul(largeVector),
-			1e-8));
+			1e-12)).almostEqual(largeVector));
+		assertTrue(new IterativeSolver().solveGMRES(largeDense,largeVector,1e-10).almostEqual(denseInverse.mvMul(largeVector)
+		));
+		assertTrue(new IterativeSolver().solveBiCGStab(largeDense,largeVector,1e-10).almostEqual(denseInverse.mvMul(largeVector)
+		));
+		assertTrue(new IterativeSolver().solveGMRES(largeDense,largeVector,1e-10).almostEqual(denseInverse.mvMul(largeVector)
+		));
 		DenseMatrix symmDense = denseInverse.add(denseInverse.transpose());
-		assertTrue(symmDense.solveSymm(largeVector).almostEqual(new IterativeSolver().solveCG(symmDense,largeVector,1e-10),1e-8));
-		assertTrue(symmDense.solve(largeVector).almostEqual(new IterativeSolver().solveCG(symmDense,largeVector,1e-10),1e-8));
-		assertTrue(symmDense.solve(largeVector).almostEqual(symmDense.solveSymm(largeVector),1e-10));
+		assertTrue(symmDense.solveSymm(largeVector).almostEqual(new IterativeSolver().solveCG(symmDense,largeVector,1e-10)));
+		assertTrue(symmDense.solve(largeVector).almostEqual(new IterativeSolver().solveCG(symmDense,largeVector,1e-10)));
+		assertTrue(symmDense.solve(largeVector).almostEqual(symmDense.solveSymm(largeVector)));
 		
 	}
 	@Test
@@ -189,28 +185,28 @@ public class DenseMatrixTest1
 		assertTrue(largeVector.sub(largeVector2).euclidianNorm() <1e-14);
 		assertTrue(largeDense.mvMul(largeVector).almostEqual(largeDense.mvMul(largeVector)));
 		assertTrue(largeDense.mvMul(largeVector).almostEqual(largeDense.mvMul(largeVector)));
-		assertTrue(denseInverse.mvMul(largeVector).almostEqual(largeDense.solve(largeVector),1e-10));
-		assertTrue(denseInverse.mmMul(largeDense).almostEqual(largeDense.mmMul(denseInverse),1e-10));
-		assertTrue(denseInverse.mmMul(largeDense).almostEqual(DenseMatrix.identity(50),1e-10));
-		assertTrue(denseInverse.inverse().almostEqual(largeDense,1e-10));
+		assertTrue(denseInverse.mvMul(largeVector).almostEqual(largeDense.solve(largeVector)));
+		assertTrue(denseInverse.mmMul(largeDense).almostEqual(largeDense.mmMul(denseInverse)));
+		assertTrue(denseInverse.mmMul(largeDense).almostEqual(DenseMatrix.identity(50)));
+		assertTrue(denseInverse.inverse().almostEqual(largeDense));
 		denseInverse = largeDense.inverse();
 		DenseVector sparsecopy = new DenseVector(largeVector);
 		assertTrue(largeDense.mvMul(new IterativeSolver().solveBiCGStab(largeDense,sparsecopy,
-			1e-12)).almostEqual(sparsecopy,1e-8));
+			1e-12)).almostEqual(sparsecopy));
 		assertTrue(largeDense.mvMul(new IterativeSolver().solveBiCGStab(largeDense,largeVector,
-			1e-12)).almostEqual(sparsecopy,1e-8));
-		assertTrue(new IterativeSolver().solveBiCGStab(largeDense,largeVector,1e-12).almostEqual(denseInverse.mvMul(largeVector),
-			1e-8));
-		assertTrue(new IterativeSolver().solveGMRES(largeDense,largeVector,1e-10).almostEqual(denseInverse.mvMul(largeVector),
-			1e-8));
-		assertTrue(new IterativeSolver().solveBiCGStab(largeDense,largeVector,1e-10).almostEqual(denseInverse.mvMul(largeVector),
-			1e-8));
-		assertTrue(new IterativeSolver().solveGMRES(largeDense,largeVector,1e-10).almostEqual(denseInverse.mvMul(largeVector),
-			1e-8));
+			1e-12)).almostEqual(sparsecopy));
+		assertTrue(new IterativeSolver().solveBiCGStab(largeDense,largeVector,1e-12).almostEqual(denseInverse.mvMul(largeVector)
+		));
+		assertTrue(new IterativeSolver().solveGMRES(largeDense,largeVector,1e-10).almostEqual(denseInverse.mvMul(largeVector)
+		));
+		assertTrue(new IterativeSolver().solveBiCGStab(largeDense,largeVector,1e-10).almostEqual(denseInverse.mvMul(largeVector)
+		));
+		assertTrue(new IterativeSolver().solveGMRES(largeDense,largeVector,1e-10).almostEqual(denseInverse.mvMul(largeVector)
+		));
 		DenseMatrix symmDense = denseInverse.add(denseInverse.transpose());
-		assertTrue(symmDense.solveSymm(largeVector).almostEqual(new IterativeSolver().solveCG(symmDense,largeVector,1e-10),1e-8));
-		assertTrue(symmDense.solve(largeVector).almostEqual(new IterativeSolver().solveCG(symmDense,largeVector,1e-10),1e-8));
-		assertTrue(symmDense.solve(largeVector).almostEqual(symmDense.solveSymm(largeVector),1e-10));
+		assertTrue(symmDense.solveSymm(largeVector).almostEqual(new IterativeSolver().solveCG(symmDense,largeVector,1e-10)));
+		assertTrue(symmDense.solve(largeVector).almostEqual(new IterativeSolver().solveCG(symmDense,largeVector,1e-10)));
+		assertTrue(symmDense.solve(largeVector).almostEqual(symmDense.solveSymm(largeVector)));
 		
 	}
 	
