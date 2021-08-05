@@ -35,7 +35,6 @@ public class TestReferenceCellIntegral
 		ArrayList<RightHandSideIntegral<TPCell, TPShapeFunction>> rightHandSideIntegrals = new ArrayList<>();
 		rightHandSideIntegrals.add(rightHandSideIntegral);
 		grid.assembleCells();
-		System.out.println(grid.getCells());
 		grid.assembleFunctions(polynomialDegree);
 		grid.initializeSystemMatrix();
 		grid.initializeRhs();
@@ -141,17 +140,12 @@ public class TestReferenceCellIntegral
 			for (int i = 0; i < (k + 1) * (k + 1); i++)
 				for (int j = 0; j < (k + 1) * (k + 1); j++)
 				{
-					System.out.println("--------------" + i + " " + j + " k " + k);
 					TPShapeFunction f1 = new TPShapeFunction(c, k, i);
 					TPShapeFunction f2 = new TPShapeFunction(c, k, j);
-					System.out.println(f1);
-					System.out.println(f2);
 					TPCellIntegral<TPShapeFunction> gg = new TPCellIntegral<>(ScalarFunction.constantFunction(1),
 						TPCellIntegral.GRAD_GRAD);
 					TPCellIntegral<TPShapeFunction> gg2 = new TPCellIntegralViaReferenceCell<>(1,
 						TPCellIntegral.GRAD_GRAD);
-					System.out.println("normal int " + gg.evaluateCellIntegral(c, f1, f2));
-					System.out.println("reference int " + gg2.evaluateCellIntegral(c, f1, f2));
 					assertTrue(Math.abs(gg.evaluateCellIntegral(c, f1, f2) - gg2.evaluateCellIntegral(c,
 						f1, f2)) < 1e-12, "Difference of "+Math.abs(gg.evaluateCellIntegral(c, f1,
 						f2) - gg2.evaluateCellIntegral(c,
@@ -168,17 +162,12 @@ public class TestReferenceCellIntegral
 			for (int i = 0; i < (k + 1) * (k + 1); i++)
 				for (int j = 0; j < (k + 1) * (k + 1); j++)
 				{
-					System.out.println("--------------" + i + " " + j + " k " + k);
 					TPShapeFunction f1 = new TPShapeFunction(c, k, i);
 					TPShapeFunction f2 = new TPShapeFunction(c, k, j);
-					System.out.println(f1);
-					System.out.println(f2);
 					TPCellIntegral<TPShapeFunction> gg = new TPCellIntegral<>(ScalarFunction.constantFunction(1),
 						TPCellIntegral.VALUE_VALUE);
 					TPCellIntegral<TPShapeFunction> gg2 = new TPCellIntegralViaReferenceCell<>(1,
 						TPCellIntegral.VALUE_VALUE);
-					System.out.println("normal int " + gg.evaluateCellIntegral(c, f1, f2));
-					System.out.println("reference int " + gg2.evaluateCellIntegral(c, f1, f2));
 					assertTrue(Math.abs(gg.evaluateCellIntegral(c, f1, f2) - gg2.evaluateCellIntegral(c,
 						f1, f2)) < 1e-12, "Difference of "+Math.abs(gg.evaluateCellIntegral(c, f1,
 						f2) - gg2.evaluateCellIntegral(c,

@@ -35,7 +35,6 @@ public class MixedPlot3D extends ScalarPlot3D
 	{
 		super.drawValues(g, width, height, slider);
 		double velocityScaling = Math.max(Math.sqrt((maxValue - minValue)*maxV), maxV);
-		System.out.println(velocityScaling+" " + maxV + " " + (maxValue - minValue));
 		for(CoordinateVector c:getClosestPoints(slider))
 		{
 			int x = (int)((c.x() - min.x())/(max.x()-min.x())*(width-150)+75 );

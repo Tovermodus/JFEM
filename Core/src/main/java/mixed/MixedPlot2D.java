@@ -21,7 +21,6 @@ public class MixedPlot2D extends ScalarPlot2D
 		else
 			velocities =
 				ScalarFunction.constantFunction(0).makeIsotropicVectorFunction().valuesInPoints(points);
-		System.out.println(function.hasPressureFunction() + " " + function.hasVelocityFunction());
 		OptionalDouble maxVelocity =
 			velocities.values().stream().parallel().mapToDouble(CoordinateVector::euclidianNorm).max();
 		maxV = maxVelocity.orElse(1);

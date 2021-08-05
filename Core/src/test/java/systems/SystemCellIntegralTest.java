@@ -32,7 +32,6 @@ public class SystemCellIntegralTest
 			= new SystemShapeFunction<>(new TPShapeFunction(c,1,0),2);
 		SystemMixedCellIntegral<TPCell> integral =
 			new SystemMixedTPCellIntegral(SystemMixedTPCellIntegral.VALUE_VALUE,0,2);
-		System.out.println(integral.evaluateCellIntegral(c,f1,f2));
 		SystemParameters.deleteInstance();
 	}
 }

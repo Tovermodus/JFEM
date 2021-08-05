@@ -39,7 +39,6 @@ public class TestContinuousReferenceCellIntegral
 		ArrayList<RightHandSideIntegral<TPCell, ContinuousTPShapeFunction>> rightHandSideIntegrals = new ArrayList<>();
 		rightHandSideIntegrals.add(rightHandSideIntegral);
 		grid.assembleCells();
-		System.out.println(grid.getCells());
 		grid.assembleFunctions(polynomialDegree);
 		grid.initializeSystemMatrix();
 		grid.initializeRhs();
@@ -149,17 +148,12 @@ public class TestContinuousReferenceCellIntegral
 			for (int i = 0; i < (k + 1) * (k + 1); i++)
 				for (int j = 0; j < (k + 1) * (k + 1); j++)
 				{
-					System.out.println("--------------" + i + " " + j + " k " + k);
 					ContinuousTPShapeFunction f1 = new ContinuousTPShapeFunction(c, k, i);
 					ContinuousTPShapeFunction f2 = new ContinuousTPShapeFunction(c, k, j);
-					System.out.println(f1);
-					System.out.println(f2);
 					TPCellIntegral<ContinuousTPShapeFunction> gg = new TPCellIntegral<>(ScalarFunction.constantFunction(1),
 						TPCellIntegral.GRAD_GRAD);
 					TPCellIntegral<ContinuousTPShapeFunction> gg2 = new TPCellIntegralViaReferenceCell<>(1,
 						TPCellIntegral.GRAD_GRAD);
-					System.out.println("normal int " + gg.evaluateCellIntegral(c, f1, f2));
-					System.out.println("reference int " + gg2.evaluateCellIntegral(c, f1, f2));
 					assertTrue(Math.abs(gg.evaluateCellIntegral(c, f1, f2) - gg2.evaluateCellIntegral(c,
 						f1, f2)) < 1e-12, "Difference of " + Math.abs(gg.evaluateCellIntegral(c, f1,
 						f2) - gg2.evaluateCellIntegral(c,
@@ -177,11 +171,8 @@ public class TestContinuousReferenceCellIntegral
 			for (int i = 0; i < (k + 1) * (k + 1); i++)
 				for (int j = 0; j < (k + 1) * (k + 1); j++)
 				{
-					System.out.println("--------------" + i + " " + j + " k " + k);
 					ContinuousTPShapeFunction f1 = new ContinuousTPShapeFunction(c, k, i);
 					ContinuousTPShapeFunction f2 = new ContinuousTPShapeFunction(c, k, j);
-					System.out.println(f1);
-					System.out.println(f2);
 					TPCellIntegral<ContinuousTPShapeFunction> gg = new TPCellIntegral<>(ScalarFunction.constantFunction(1),
 						TPCellIntegral.VALUE_VALUE);
 					TPCellIntegral<ContinuousTPShapeFunction> gg2 = new TPCellIntegralViaReferenceCell<>(1,

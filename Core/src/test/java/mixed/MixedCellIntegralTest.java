@@ -83,9 +83,7 @@ public class MixedCellIntegralTest
 		double [] valuesDV = new double[]{-0.666, 0.666, -0.333, 0.333, -0.333, -0.1666, 0.333, 0.1666};
 		for(int i = 0; i < 8; i++)
 		{
-			System.out.println(i);
 			f1 = new ContinuousTPVectorFunction(c, 1, i);
-			System.out.println(f1.getNodeFunctionalPoint());
 			ContinuousTPShapeFunction f2 = new ContinuousTPShapeFunction(c,1,0);
 			QkQkFunction mf1 = new QkQkFunction(f1);
 			QkQkFunction mf2 = new QkQkFunction(f2);

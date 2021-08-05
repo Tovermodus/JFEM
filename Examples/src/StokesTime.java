@@ -111,7 +111,7 @@ public class StokesTime
 		DenseVector iterate = new DenseVector(n);
 		VectorFunction bdrFunction = createBoundaryFunction(0);
 		grid.setVelocityBoundaryValues(indicatorFunction, MAD);
-		//grid.setVelocityBoundaryValues(bdrFunction, indicatorFunction, iterate);
+		grid.setVelocityBoundaryValues(bdrFunction, indicatorFunction, iterate);
 		
 		List<CoordinateVector> points = grid.generatePlotPoints(30);
 		Map<CoordinateVector, Double>pvals = (new MixedFESpaceFunction<>(
@@ -127,7 +127,7 @@ public class StokesTime
 			DenseVector rhs = src.add(M.mvMul(iterate));
 			iterate = new DenseVector(its.solveBiCGStab(MAD, rhs,iterate, 1e-6));
 			//System.out.println(rhs);
-			//grid.setVelocityBoundaryValues(bdrFunction, indicatorFunction, iterate);
+			grid.setVelocityBoundaryValues(bdrFunction, indicatorFunction, iterate);
 			System.out.println("x"+iterate);
 			System.out.println(i);
 			pvals.putAll(new MixedFESpaceFunction<>(

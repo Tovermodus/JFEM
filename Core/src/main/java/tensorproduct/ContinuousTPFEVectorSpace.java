@@ -1,18 +1,14 @@
 package tensorproduct;
 
-import basic.*;
-import com.google.common.collect.Iterables;
-import com.google.common.collect.Lists;
-import com.google.common.collect.TreeMultimap;
-import com.google.common.primitives.Doubles;
-import com.google.common.primitives.Ints;
-import linalg.*;
-import tensorproduct.geometry.Cell1D;
+import linalg.CoordinateMatrix;
+import linalg.CoordinateTensor;
+import linalg.CoordinateVector;
 import tensorproduct.geometry.TPCell;
 import tensorproduct.geometry.TPFace;
 
-import java.util.*;
-import java.util.stream.Collectors;
+import java.util.Arrays;
+import java.util.List;
+import java.util.TreeSet;
 
 public class ContinuousTPFEVectorSpace extends CartesianGridSpace<ContinuousTPVectorFunction, CoordinateVector, CoordinateMatrix, CoordinateTensor>
 {
@@ -47,7 +43,7 @@ public class ContinuousTPFEVectorSpace extends CartesianGridSpace<ContinuousTPVe
 			throw new IllegalStateException("Identification did not work");
 	}
 	
-	
+	/*
 	public void setBoundaryValues(VectorFunction boundaryValues)
 	{
 		int progress = 0;
@@ -74,6 +70,6 @@ public class ContinuousTPFEVectorSpace extends CartesianGridSpace<ContinuousTPVe
 				}
 			}
 		}
-	}
+	}*/
 }
 

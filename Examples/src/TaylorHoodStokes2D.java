@@ -13,10 +13,6 @@ public class TaylorHoodStokes2D
 {
 	public static void main(String[] args)
 	{
-		PerformanceArguments.PerformanceArgumentBuilder builder =
-			new PerformanceArguments.PerformanceArgumentBuilder();
-		builder.parallelizeThreads = false;
-		builder.build();
 		CoordinateVector start = CoordinateVector.fromValues(0, 0);
 		CoordinateVector end = CoordinateVector.fromValues(1, 1);
 		int polynomialDegree = 1;

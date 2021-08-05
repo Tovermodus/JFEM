@@ -1,22 +1,17 @@
 package tensorproduct;
 
-import basic.PlotWindow;
 import basic.ScalarFunction;
-import basic.ScalarPlot2D;
 import basic.VectorFunction;
-import linalg.*;
-import mixed.MixedFunction;
-import mixed.MixedPlot2D;
-import mixed.MixedValue;
+import linalg.CoordinateVector;
+import linalg.IntCoordinates;
 import org.junit.jupiter.api.Test;
 import tensorproduct.geometry.CartesianGrid;
-import tensorproduct.geometry.Cell1D;
 import tensorproduct.geometry.TPCell;
 
 import java.util.ArrayList;
 import java.util.List;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 public class IntegralTest
 {

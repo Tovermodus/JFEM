@@ -34,7 +34,6 @@ public class TestReferenceFaceIntegral
 		ArrayList<BoundaryRightHandSideIntegral<TPFace, TPShapeFunction>> rightHandSideIntegrals =
 			new ArrayList<>();
 		grid.assembleCells();
-		System.out.println(grid.getCells());
 		grid.assembleFunctions(polynomialDegree);
 		grid.initializeSystemMatrix();
 		grid.initializeRhs();
@@ -76,7 +75,6 @@ public class TestReferenceFaceIntegral
 		ArrayList<BoundaryRightHandSideIntegral<TPFace, TPShapeFunction>> rightHandSideIntegrals =
 			new ArrayList<>();
 		grid.assembleCells();
-		System.out.println(grid.getCells());
 		grid.assembleFunctions(polynomialDegree);
 		grid.initializeSystemMatrix();
 		grid.initializeRhs();

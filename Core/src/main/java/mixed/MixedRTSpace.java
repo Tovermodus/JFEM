@@ -66,6 +66,17 @@ public class MixedRTSpace extends CartesianGridSpace<RTMixedFunction, MixedValue
 	public void setVelocityBoundaryValues(VectorFunction boundaryValues)
 	{
 		MixedFunction boundaryMixed = new MixedFunction(boundaryValues);
+		setBoundaryValues(boundaryMixed);
+	}
+	
+	public void setPressureBoundaryValues(ScalarFunction boundaryValues)
+	{
+		MixedFunction boundaryMixed = new MixedFunction(boundaryValues);
+		setBoundaryValues(boundaryMixed);
+	}
+	/*public void setVelocityBoundaryValues(VectorFunction boundaryValues)
+	{
+		MixedFunction boundaryMixed = new MixedFunction(boundaryValues);
 		int progress = 0;
 		for (TPFace face : getFaces())
 		{
@@ -130,5 +141,5 @@ public class MixedRTSpace extends CartesianGridSpace<RTMixedFunction, MixedValue
 			}
 		}
 		
-	}
+	}*/
 }
