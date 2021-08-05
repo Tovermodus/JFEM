@@ -53,6 +53,13 @@ public class ScalarPlot2D implements Plot
 				pixelWidth,
 				pixelHeight);
 		}
+		g.setColor(Color.black);
+		g.drawString(""+min.x(),50,height - 35);
+		g.drawLine(75,height - 40, width - 100, height - 40);
+		g.drawString(""+max.x(),width - 75,height - 35);
+		g.drawString(""+min.y(),15,height - 55);
+		g.drawLine(25,85, 25, height - 75);
+		g.drawString(""+max.y(),15,65);
 	}
 	public static CoordinateVector getMinCoordinates(Collection<CoordinateVector> coordinates)
 	{
@@ -97,7 +104,7 @@ public class ScalarPlot2D implements Plot
 		int y =
 			(int)(height - ((coord.y() - mins.y())/(maxs.y()-mins.y())*(height -150)+75 + pixelHeight/2));
 		g.setColor(c);
-		g.fillRect(x,y,pixelWidth,pixelHeight);
+		g.fillRect(x,y,pixelWidth+2,pixelHeight+2);
 	}
 	
 	@Override

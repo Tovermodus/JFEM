@@ -1,15 +1,17 @@
 package tensorproduct;
 
 import basic.*;
+import tensorproduct.geometry.TPCell;
+import tensorproduct.geometry.TPFace;
 
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
-public class TPFaceIntegralViaReferenceFace<ST extends ScalarShapeFunctionWithReferenceShapeFunction<TPCell,TPFace,
-	TPEdge>> extends TPFaceIntegral<ST>
+public class TPFaceIntegralViaReferenceFace<ST extends ScalarShapeFunctionWithReferenceShapeFunction<TPCell, TPFace
+	>> extends TPFaceIntegral<ST>
 {
-	Map<ReferenceFaceIdentificationTriplet<TPCell, TPFace, TPEdge, ScalarShapeFunctionWithReferenceShapeFunction<TPCell,TPFace,
-		TPEdge>>, Double> savedValues;
+	Map<ReferenceFaceIdentificationTriplet<TPCell, TPFace, ScalarShapeFunctionWithReferenceShapeFunction<TPCell,TPFace
+		>>, Double> savedValues;
 	public TPFaceIntegralViaReferenceFace(double weight, String name)
 	{
 		super(ScalarFunction.constantFunction(weight),name);
@@ -25,12 +27,12 @@ public class TPFaceIntegralViaReferenceFace<ST extends ScalarShapeFunctionWithRe
 	public double evaluateFaceIntegral(TPFace face, ST shapeFunction1,
 	                                   ST shapeFunction2)
 	{
-		ScalarShapeFunctionWithReferenceShapeFunction<TPCell,TPFace,
-			TPEdge> referenceShapeFunction1 = shapeFunction1.createReferenceShapeFunctionRelativeTo(face);
-		ScalarShapeFunctionWithReferenceShapeFunction<TPCell,TPFace,
-			TPEdge> referenceShapeFunction2 = shapeFunction2.createReferenceShapeFunctionRelativeTo(face);
-		ReferenceFaceIdentificationTriplet<TPCell, TPFace, TPEdge, ScalarShapeFunctionWithReferenceShapeFunction<TPCell,TPFace,
-			TPEdge>> key =
+		ScalarShapeFunctionWithReferenceShapeFunction<TPCell,TPFace
+			> referenceShapeFunction1 = shapeFunction1.createReferenceShapeFunctionRelativeTo(face);
+		ScalarShapeFunctionWithReferenceShapeFunction<TPCell,TPFace
+			> referenceShapeFunction2 = shapeFunction2.createReferenceShapeFunctionRelativeTo(face);
+		ReferenceFaceIdentificationTriplet<TPCell, TPFace, ScalarShapeFunctionWithReferenceShapeFunction<TPCell,TPFace
+			>> key =
 			new ReferenceFaceIdentificationTriplet<>(referenceShapeFunction1,
 				referenceShapeFunction2,
 				face.getReferenceFace());

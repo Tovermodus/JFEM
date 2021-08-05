@@ -18,7 +18,7 @@ public class HeatEquation
 		CoordinateVector end = CoordinateVector.fromValues(1,1);
 		int polynomialDegree = 2;
 		TPFESpace grid = new TPFESpace(start,end,
-			Ints.asList(12,12),polynomialDegree);
+			Ints.asList(12,12));
 		grid.assembleCells();
 		grid.assembleFunctions(polynomialDegree);
 		TPCellIntegral<TPShapeFunction> gg =

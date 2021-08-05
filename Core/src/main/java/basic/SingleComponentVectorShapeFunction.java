@@ -1,18 +1,14 @@
 package basic;
 
 import linalg.CoordinateMatrix;
-import linalg.CoordinateTensor;
 import linalg.CoordinateVector;
-import org.jetbrains.annotations.NotNull;
 
 import java.lang.reflect.InvocationTargetException;
-import java.util.Map;
 import java.util.Set;
 
-public class SingleComponentVectorShapeFunction<CT extends Cell<CT,FT,ET>, FT extends Face<CT,FT,ET>,
-	ET extends Edge<CT,FT,ET>,
-	CST extends FastEvaluatedScalarShapeFunction<CT,FT,ET>> implements VectorShapeFunction<CT,FT,ET>,
-	Comparable<SingleComponentVectorShapeFunction<CT,FT,ET, CST>>
+public class SingleComponentVectorShapeFunction<CT extends Cell<CT,FT>, FT extends Face<CT,FT>,
+	CST extends FastEvaluatedScalarShapeFunction<CT,FT>> implements VectorShapeFunction<CT,FT>,
+	Comparable<SingleComponentVectorShapeFunction<CT,FT, CST>>
 {
 	private final CST componentFunction;
 	private final int component;
@@ -150,7 +146,7 @@ public class SingleComponentVectorShapeFunction<CT extends Cell<CT,FT,ET>, FT ex
 	}
 	
 	@SuppressWarnings("unchecked")
-	public int compareTo(SingleComponentVectorShapeFunction<CT, FT, ET, CST> o)
+	public int compareTo(SingleComponentVectorShapeFunction<CT, FT, CST> o)
 	{
 		if (o.getComponent() < getComponent())
 			return 1;

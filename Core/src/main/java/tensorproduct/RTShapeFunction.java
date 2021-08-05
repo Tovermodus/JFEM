@@ -1,18 +1,17 @@
 package tensorproduct;
 
 import basic.LagrangeNodeFunctional;
-import basic.ShapeFunction;
 import basic.VectorNodeFunctional;
 import basic.VectorShapeFunction;
 import linalg.CoordinateMatrix;
-import linalg.CoordinateTensor;
 import linalg.CoordinateVector;
 import org.jetbrains.annotations.NotNull;
+import tensorproduct.geometry.TPCell;
+import tensorproduct.geometry.TPFace;
 
-import java.util.Map;
 import java.util.Set;
 
-public class RTShapeFunction implements VectorShapeFunction<TPCell, TPFace,TPEdge>, Comparable<RTShapeFunction>
+public class RTShapeFunction implements VectorShapeFunction<TPCell, TPFace>, Comparable<RTShapeFunction>
 {
 	private final RTComponentFunction componentFunction;
 	private final int component;

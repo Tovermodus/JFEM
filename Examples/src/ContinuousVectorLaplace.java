@@ -2,9 +2,10 @@ import basic.*;
 import com.google.common.primitives.Ints;
 import linalg.CoordinateVector;
 import linalg.IterativeSolver;
-import linalg.SparseMatrix;
 import linalg.Vector;
 import tensorproduct.*;
+import tensorproduct.geometry.TPCell;
+import tensorproduct.geometry.TPFace;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -21,7 +22,7 @@ public class ContinuousVectorLaplace
 		CoordinateVector end = CoordinateVector.fromValues(1, 1);
 		int polynomialDegree = 2;
 		ContinuousTPFEVectorSpace grid = new ContinuousTPFEVectorSpace(start, end,
-			Ints.asList(20, 20), polynomialDegree);
+			Ints.asList(20, 20));
 		TPVectorCellIntegral<ContinuousTPVectorFunction> gg =
 			new TPVectorCellIntegral<>(TPVectorCellIntegral.GRAD_GRAD);
 		ArrayList<CellIntegral<TPCell, ContinuousTPVectorFunction>> cellIntegrals =

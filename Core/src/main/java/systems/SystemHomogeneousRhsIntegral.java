@@ -4,8 +4,8 @@ import basic.Cell;
 import basic.RightHandSideIntegral;
 import basic.ShapeFunction;
 
-public class SystemHomogeneousRhsIntegral<CT extends Cell<CT,?,?>, ST extends ShapeFunction<CT,?,?,?,?,?>>
-	extends RightHandSideIntegral<CT, SystemShapeFunction<CT,?,?,ST>>
+public class SystemHomogeneousRhsIntegral<CT extends Cell<CT,?>, ST extends ShapeFunction<CT,?, ?,?,?>>
+	extends RightHandSideIntegral<CT, SystemShapeFunction<CT,?, ST>>
 {
 	private final RightHandSideIntegral<CT, ST> cellIntegral;
 	private final int component;
@@ -18,7 +18,7 @@ public class SystemHomogeneousRhsIntegral<CT extends Cell<CT,?,?>, ST extends Sh
 	
 	
 	@Override
-	public double evaluateRightHandSideIntegral(CT cell, SystemShapeFunction<CT, ?, ?, ST> shapeFunction)
+	public double evaluateRightHandSideIntegral(CT cell, SystemShapeFunction<CT, ?, ST> shapeFunction)
 	{
 		if(shapeFunction.mainComponent == component)
 		{

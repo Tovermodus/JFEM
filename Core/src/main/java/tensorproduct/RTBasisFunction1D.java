@@ -2,6 +2,7 @@ package tensorproduct;
 
 import basic.DoubleCompare;
 import basic.PerformanceArguments;
+import tensorproduct.geometry.Cell1D;
 
 public class RTBasisFunction1D extends Function1D
 {
@@ -134,7 +135,7 @@ public class RTBasisFunction1D extends Function1D
 	public double derivative(double pos)
 	{
 		if (cell.isInCell(pos))
-			return derivativeOnReferenceCell(cell.positionOnReferenceCell(pos)) * cell.jacobiDeterminant(pos);
+			return derivativeOnReferenceCell(cell.positionOnReferenceCell(pos)) / cell.length();
 		return 0;
 	}
 	

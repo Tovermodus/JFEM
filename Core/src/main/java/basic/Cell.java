@@ -1,23 +1,17 @@
 package basic;
 
+import com.google.common.collect.ImmutableSet;
 import linalg.CoordinateVector;
-import tensorproduct.TPEdge;
 
 import java.util.List;
-import java.util.Set;
 
-public interface Cell<CT extends Cell<CT,FT, ET>, FT extends Face<CT,FT, ET>, ET extends Edge<CT,FT,ET>> extends Comparable<CT>
+public interface Cell<CT extends Cell<CT,FT>, FT extends Face<CT,FT>> extends Comparable<CT>
 {
 	int  getDimension();
 	
 	
-	Set<FT> getFaces();
+	ImmutableSet<FT> getFaces();
 	
-	boolean isRefined();
-	
-	void setRefined(boolean refined);
-	
-	void addFace(FT face);
 	
 	boolean isInCell(CoordinateVector pos);
 	CoordinateVector center();
@@ -28,5 +22,4 @@ public interface Cell<CT extends Cell<CT,FT, ET>, FT extends Face<CT,FT, ET>, ET
 		throw new UnsupportedOperationException();
 	}
 	
-	void addEdge(TPEdge tpEdge);
 }

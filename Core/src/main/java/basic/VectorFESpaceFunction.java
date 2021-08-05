@@ -6,9 +6,9 @@ import linalg.Vector;
 import java.util.HashMap;
 import java.util.Map;
 
-public class VectorFESpaceFunction<ST extends VectorShapeFunction<?,?,?>> implements VectorFunction
+public class VectorFESpaceFunction<ST extends VectorShapeFunction<?,?>> implements VectorFunction
 {
-	private HashMap<ST, Double> coefficients;
+	private final HashMap<ST, Double> coefficients;
 	public VectorFESpaceFunction(ST[] functions, double[] coefficients)
 	{
 		assert(functions.length == coefficients.length);

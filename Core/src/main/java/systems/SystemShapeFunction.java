@@ -3,16 +3,15 @@ package systems;
 import basic.*;
 import linalg.CoordinateMatrix;
 import linalg.CoordinateVector;
-import org.jetbrains.annotations.NotNull;
 
 import java.util.Map;
 import java.util.Set;
 
-public class SystemShapeFunction<CT extends Cell<CT,FT,ET>, FT extends Face<CT,FT,ET>, ET extends Edge<CT,FT,ET>,
-	CST extends ShapeFunction<CT,FT,ET, ?, ?, ?>>
+public class SystemShapeFunction<CT extends Cell<CT,FT>, FT extends Face<CT,FT>,
+	CST extends ShapeFunction<CT,FT, ?, ?, ?>>
 	extends SystemFunction
-	implements ShapeFunction<CT, FT, ET, SystemValue, SystemGradient,
-	SystemHessian>, Comparable<SystemShapeFunction<CT,FT,ET, CST>>
+	implements ShapeFunction<CT, FT, SystemValue, SystemGradient,
+	SystemHessian>, Comparable<SystemShapeFunction<CT,FT, CST>>
 {
 	private final CST function;
 	public SystemShapeFunction(CST function, int component)
@@ -107,7 +106,7 @@ public class SystemShapeFunction<CT extends Cell<CT,FT,ET>, FT extends Face<CT,F
 	}
 	
 	@Override
-	public <ST extends ShapeFunction<CT, FT, ET, SystemValue, SystemGradient, SystemHessian>> Map<Integer, Double> prolongate(Set<ST> refinedFunctions)
+	public <ST extends ShapeFunction<CT, FT, SystemValue, SystemGradient, SystemHessian>> Map<Integer, Double> prolongate(Set<ST> refinedFunctions)
 	{
 		throw new UnsupportedOperationException("not implemented yet");
 	}
@@ -125,7 +124,7 @@ public class SystemShapeFunction<CT extends Cell<CT,FT,ET>, FT extends Face<CT,F
 		return "component: " + mainComponent + " " + function.getClass() + " function: " + function;
 	}
 	@SuppressWarnings("unchecked")
-	public int compareTo(SystemShapeFunction<CT,FT,ET,CST> o)
+	public int compareTo(SystemShapeFunction<CT,FT, CST> o)
 	{
 		if(o.mainComponent == mainComponent)
 			return ((Comparable<CST>)function).compareTo(o.function);

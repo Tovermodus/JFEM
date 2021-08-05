@@ -1,30 +1,25 @@
-package tensorproduct;
+package tensorproduct.geometry;
 
 import basic.*;
+import com.google.common.collect.ImmutableList;
+import com.google.common.collect.ImmutableSet;
 import linalg.CoordinateComparator;
 import linalg.CoordinateMatrix;
 import linalg.CoordinateVector;
 import org.jetbrains.annotations.NotNull;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Set;
-import java.util.TreeSet;
+import java.util.*;
 
-public class TPCell implements CellWithReferenceCell<TPCell, TPFace, TPEdge>
+public class TPCell implements CellWithReferenceCell<TPCell, TPFace>
 {
-	List<Cell1D> cell1Ds;
+	final ImmutableList<Cell1D> cell1Ds;
 	Set<TPFace> faces;
-	Set<TPEdge> edges;
 	boolean refined;
 	
-	public TPCell(List<Cell1D> cell1Ds)
+	TPCell(List<Cell1D> cell1Ds)
 	{
-		this.cell1Ds = new ArrayList<>();
-		for (Cell1D c : cell1Ds)
-			this.cell1Ds.add(new Cell1D(c));
-		this.faces = new TreeSet<>();
-		this.edges = new TreeSet<>();
+		this.cell1Ds = ImmutableList.copyOf(cell1Ds);
+		this.faces = new HashSet<>(2*getDimension());
 		this.refined = false;
 	}
 	
@@ -34,34 +29,19 @@ public class TPCell implements CellWithReferenceCell<TPCell, TPFace, TPEdge>
 		return cell1Ds.size();
 	}
 	
-	public List<Cell1D> getCell1Ds()
+	public Cell1D getComponentCell(int dim)
+	{
+		return cell1Ds.get(dim);
+	}
+	public ImmutableList<Cell1D> getComponentCells()
 	{
 		return cell1Ds;
 	}
 	
 	@Override
-	public Set<TPFace> getFaces()
+	public ImmutableSet<TPFace> getFaces()
 	{
-		return faces;
-	}
-	
-	@Override
-	public boolean isRefined()
-	{
-		return refined;
-	}
-	
-	@Override
-	public void setRefined(boolean refined)
-	{
-		refined = refined;
-	}
-	
-	@Override
-	public void addFace(TPFace face)
-	{
-		if (faces.add(face))
-			face.addCell(this);
+		return ImmutableSet.copyOf(faces);
 	}
 	
 	@Override
@@ -150,9 +130,9 @@ public class TPCell implements CellWithReferenceCell<TPCell, TPFace, TPEdge>
 		int ret = 0;
 		for (int i = 0; i < cell1Ds.size(); i++)
 		{
-			ret += Math.pow(7, 3 * i) * cell1Ds.get(i).center();
-			ret += Math.pow(7, 3 * i + 1) * cell1Ds.get(i).getStart();
-			ret += Math.pow(7, 3 * i + 2) * cell1Ds.get(i).getEnd();
+			ret += Math.pow(7, 3 * i) * DoubleCompare.doubleHash(cell1Ds.get(i).center());
+			ret += Math.pow(7, 3 * i + 1) * DoubleCompare.doubleHash(cell1Ds.get(i).getStart());
+			ret += Math.pow(7, 3 * i + 2) * DoubleCompare.doubleHash(cell1Ds.get(i).getEnd());
 		}
 		return ret;
 	}
@@ -164,14 +144,6 @@ public class TPCell implements CellWithReferenceCell<TPCell, TPFace, TPEdge>
 			return 0 == compareTo((TPCell) obj);
 		else
 			return false;
-	}
-	
-	@Override
-	public void addEdge(TPEdge tpEdge)
-	{
-		
-		if (edges.add(tpEdge))
-			tpEdge.addCell(this);
 	}
 	
 	@Override

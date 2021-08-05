@@ -3,6 +3,8 @@ import com.google.common.base.Stopwatch;
 import com.google.common.primitives.Ints;
 import linalg.*;
 import tensorproduct.*;
+import tensorproduct.geometry.TPCell;
+import tensorproduct.geometry.TPFace;
 
 import java.util.ArrayList;
 import java.util.Map;
@@ -24,7 +26,7 @@ public class LaplaceContinuous
 		CoordinateVector end = CoordinateVector.fromValues(1,1);
 		int polynomialDegree = 3;
 		ContinuousTPFESpace grid = new ContinuousTPFESpace(start,end,
-			Ints.asList(3,3),polynomialDegree);
+			Ints.asList(3,3));
 		TPCellIntegral<ContinuousTPShapeFunction> gg =
 			new TPCellIntegral<>(ScalarFunction.constantFunction(1),
 			TPCellIntegral.GRAD_GRAD);

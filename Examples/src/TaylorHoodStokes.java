@@ -2,15 +2,14 @@ import basic.*;
 import com.google.common.primitives.Ints;
 import linalg.CoordinateVector;
 import linalg.IterativeSolver;
-import linalg.SparseMatrix;
 import linalg.Vector;
 import mixed.*;
 import tensorproduct.*;
+import tensorproduct.geometry.TPCell;
+import tensorproduct.geometry.TPFace;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
-import java.util.OptionalDouble;
 
 public class TaylorHoodStokes
 {
@@ -24,39 +23,33 @@ public class TaylorHoodStokes
 		CoordinateVector end = CoordinateVector.fromValues(1, 1,1);
 		int polynomialDegree = 1;
 		TaylorHoodSpace grid = new TaylorHoodSpace(start, end,
-			Ints.asList(3,3,3), polynomialDegree);
+			Ints.asList(3,3,3));
 		TPVectorCellIntegral<ContinuousTPVectorFunction> valueValue =
 			new TPVectorCellIntegral<>(ScalarFunction.constantFunction(StokesReferenceSolution.reynolds),
 				TPVectorCellIntegral.GRAD_GRAD);
-		MixedCellIntegral<TPCell,TPFace,TPEdge,ContinuousTPShapeFunction, ContinuousTPVectorFunction>
+		MixedCellIntegral<TPCell, ContinuousTPShapeFunction, ContinuousTPVectorFunction,QkQkFunction>
 			divValue =
 			new MixedTPCellIntegral<>(ScalarFunction.constantFunction(-1),
 				MixedTPCellIntegral.DIV_VALUE);
-		MixedCellIntegral<TPCell, TPFace,TPEdge, ContinuousTPShapeFunction, ContinuousTPVectorFunction> vv =
+		MixedCellIntegral<TPCell, ContinuousTPShapeFunction, ContinuousTPVectorFunction,QkQkFunction> vv =
 			MixedCellIntegral.fromVelocityIntegral(valueValue);
-		List<CellIntegral<TPCell,  MixedShapeFunction<TPCell, TPFace,TPEdge,ContinuousTPShapeFunction,
-			ContinuousTPVectorFunction>>> cellIntegrals =
+		List<CellIntegral<TPCell, QkQkFunction>> cellIntegrals =
 			new ArrayList<>();
 		cellIntegrals.add(vv);
 		cellIntegrals.add(divValue);
-		List<FaceIntegral< TPFace, MixedShapeFunction<TPCell, TPFace,TPEdge,ContinuousTPShapeFunction,
-					ContinuousTPVectorFunction>>> faceIntegrals = new ArrayList<>();
+		List<FaceIntegral< TPFace, QkQkFunction>> faceIntegrals = new ArrayList<>();
 		//faceIntegrals.add(jj);
 		//faceIntegrals.add(gj);
 		//faceIntegrals.add(jg);
-		MixedRightHandSideIntegral<TPCell, TPFace,TPEdge, ContinuousTPShapeFunction,
-			ContinuousTPVectorFunction> rightHandSideIntegral =
+		MixedRightHandSideIntegral<TPCell, ContinuousTPShapeFunction,
+			ContinuousTPVectorFunction,QkQkFunction> rightHandSideIntegral =
 			MixedRightHandSideIntegral.fromVelocityIntegral(
 				new TPVectorRightHandSideIntegral<ContinuousTPVectorFunction>(ScalarFunction.constantFunction(1).makeIsotropicVectorFunction(),
 					TPVectorRightHandSideIntegral.VALUE));
-		List<RightHandSideIntegral<TPCell,  MixedShapeFunction<TPCell, TPFace,TPEdge,
-			ContinuousTPShapeFunction,
-			ContinuousTPVectorFunction>>> rightHandSideIntegrals = new ArrayList<>();
+		List<RightHandSideIntegral<TPCell,  QkQkFunction>> rightHandSideIntegrals = new ArrayList<>();
 		rightHandSideIntegrals.add(rightHandSideIntegral);
 		
-		List<BoundaryRightHandSideIntegral< TPFace, MixedShapeFunction<TPCell, TPFace,
-			TPEdge,ContinuousTPShapeFunction,
-			ContinuousTPVectorFunction>>> boundaryFaceIntegrals =
+		List<BoundaryRightHandSideIntegral< TPFace, QkQkFunction>> boundaryFaceIntegrals =
 			new ArrayList<>();
 		grid.assembleCells();
 		grid.assembleFunctions(polynomialDegree);
@@ -95,7 +88,7 @@ public class TaylorHoodStokes
 		System.out.println("rhs2"+grid.getSystemMatrix().mvMul(solution1));
 		//grid.A.print_formatted();
 		//grid.rhs.print_formatted();
-		MixedFESpaceFunction<TPCell,TPFace,TPEdge,ContinuousTPShapeFunction,ContinuousTPVectorFunction> solut =
+		MixedFESpaceFunction<QkQkFunction> solut =
 			new MixedFESpaceFunction<>(
 				grid.getShapeFunctions(), solution1);
 		PlotWindow p = new PlotWindow();

@@ -1,25 +1,21 @@
 package basic
 
-data class ReferenceCellIdentificationTriplet<CT: CellWithReferenceCell<CT, FT, ET>,
-        FT : FaceWithReferenceFace<CT, FT, ET>?,
-        ET : EdgeWithReferenceEdge<CT, FT, ET>?,
-        ST: ShapeFunctionWithReferenceShapeFunction<CT,FT,ET, *,*,*>>(
+data class ReferenceCellIdentificationTriplet<CT: CellWithReferenceCell<CT, FT>,
+        FT : FaceWithReferenceFace<CT, FT>?,
+        ST: ShapeFunctionWithReferenceShapeFunction<CT,FT, *,*,*>>(
     val firstFunction: ST,
     val secondFunction: ST,
     val cell: CT)
 
-data class ReferenceFaceIdentificationTriplet<CT: CellWithReferenceCell<CT, FT, ET>,
-        FT : FaceWithReferenceFace<CT, FT, ET>?,
-        ET : EdgeWithReferenceEdge<CT, FT, ET>?,
-        ST: ShapeFunctionWithReferenceShapeFunction<CT,FT,ET,*, *, *>>(
+data class ReferenceFaceIdentificationTriplet<CT: CellWithReferenceCell<CT, FT>,
+        FT : FaceWithReferenceFace<CT, FT>?,
+        ST: ShapeFunctionWithReferenceShapeFunction<CT,FT,*, *, *>>(
     val firstFunction: ST,
     val secondFunction: ST,
     val face: FT)
 
-data class ReferenceEdgeIdentificationTriplet<CT: CellWithReferenceCell<CT, FT, ET>,
-        FT : FaceWithReferenceFace<CT, FT, ET>?,
-        ET : EdgeWithReferenceEdge<CT, FT, ET>?,
-        ST: ShapeFunctionWithReferenceShapeFunction<CT,FT,ET, *, *, *>>(
+data class ReferenceEdgeIdentificationTriplet<CT: CellWithReferenceCell<CT, FT>,
+        FT : FaceWithReferenceFace<CT, FT>?,
+        ST: ShapeFunctionWithReferenceShapeFunction<CT,FT, *, *, *>>(
     val firstFunction: ST,
-    val secondFunction: ST,
-    val edge: ET)
+    val secondFunction: ST)

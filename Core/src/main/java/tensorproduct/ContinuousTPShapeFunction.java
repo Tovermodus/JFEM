@@ -2,12 +2,13 @@ package tensorproduct;
 
 import basic.*;
 import linalg.*;
-import org.jetbrains.annotations.NotNull;
+import tensorproduct.geometry.TPCell;
+import tensorproduct.geometry.TPFace;
 
 import java.util.*;
 import java.util.stream.IntStream;
 
-public class ContinuousTPShapeFunction implements ScalarShapeFunctionWithReferenceShapeFunction<TPCell,TPFace,TPEdge>,FastEvaluatedScalarShapeFunction<TPCell, TPFace,TPEdge>,
+public class ContinuousTPShapeFunction implements ScalarShapeFunctionWithReferenceShapeFunction<TPCell, TPFace>,FastEvaluatedScalarShapeFunction<TPCell, TPFace>,
         Comparable<ContinuousTPShapeFunction>
 {
     
@@ -46,7 +47,7 @@ public class ContinuousTPShapeFunction implements ScalarShapeFunctionWithReferen
     private void checkIfPointOnFace(CoordinateVector functionalPoint, TPCell cell)
     {
     
-        for (TPFace face : cell.faces)
+        for (TPFace face : cell.getFaces())
         {
             if (faces.add(face))
             {
@@ -70,7 +71,7 @@ public class ContinuousTPShapeFunction implements ScalarShapeFunctionWithReferen
         for (int i = 0; i < decomposedLocalIndex.length; i++)
         {
             function1Ds.add(new LagrangeBasisFunction1D(polynomialDegree, decomposedLocalIndex[i],
-                    cell.cell1Ds.get(i)));
+                    cell.getComponentCell(i)));
         }
         return function1Ds;
     }
@@ -84,7 +85,7 @@ public class ContinuousTPShapeFunction implements ScalarShapeFunctionWithReferen
         for (int i = 0; i < functionalPoint.getLength(); i++)
         {
             function1Ds.add(new LagrangeBasisFunction1D(polynomialDegree, functionalPoint.at(i),
-                    cell.cell1Ds.get(i)));
+                    cell.getComponentCell(i)));
         }
         return function1Ds;
     }

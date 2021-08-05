@@ -1,37 +1,32 @@
-package tensorproduct;
+package tensorproduct.geometry;
 
 import basic.*;
+import com.google.common.collect.ImmutableList;
+import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Multimap;
 import linalg.CoordinateComparator;
 import linalg.CoordinateVector;
 import org.jetbrains.annotations.NotNull;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Set;
-import java.util.TreeSet;
+import java.util.*;
 
-public class TPFace implements FaceWithReferenceFace<TPCell, TPFace, TPEdge>,Comparable<TPFace>
+public class TPFace implements FaceWithReferenceFace<TPCell, TPFace>,Comparable<TPFace>
 {
-	double otherCoordinate;
-	List<Cell1D> cell1Ds;
-	int flatDimension;
+	public final double otherCoordinate;
+	final ImmutableList<Cell1D> cell1Ds;
+	public final int flatDimension;
 	
-	private final Set<TPCell> cells;
-	private final Set<TPEdge> edges;
-	private boolean isBoundaryFace;
+	Set<TPCell> cells;
+	private final boolean isBoundaryFace;
 	private final VectorFunction normal;
 	
-	public TPFace(List<Cell1D> cell1Ds, int flatDimension, double otherCoordinate, boolean isBoundaryFace)
+	TPFace(List<Cell1D> cell1Ds, int flatDimension, double otherCoordinate, boolean isBoundaryFace)
 	{
 		this.otherCoordinate = otherCoordinate;
 		this.flatDimension = flatDimension;
 		this.isBoundaryFace = isBoundaryFace;
-		this.cell1Ds = new ArrayList<>();
-		for(Cell1D c: cell1Ds)
-			this.cell1Ds.add(new Cell1D(c));
-		this.edges = new TreeSet<>();
-		this.cells = new TreeSet<>();
+		this.cell1Ds = ImmutableList.copyOf(cell1Ds);
+		this.cells = new HashSet<>();
 		this.normal = new VectorFunction()
 		{
 			@Override
@@ -55,7 +50,10 @@ public class TPFace implements FaceWithReferenceFace<TPCell, TPFace, TPEdge>,Com
 			}
 		};
 	}
-	
+	public ImmutableList<Cell1D> getComponentCells()
+	{
+		return cell1Ds;
+	}
 	@Override
 	public int getDimension()
 	{
@@ -63,34 +61,15 @@ public class TPFace implements FaceWithReferenceFace<TPCell, TPFace, TPEdge>,Com
 	}
 	
 	@Override
-	public Set<TPCell> getCells()
+	public ImmutableSet<TPCell> getCells()
 	{
-		return cells;
-	}
-	
-	@Override
-	public void setBoundaryFace(boolean boundaryFace)
-	{
-		isBoundaryFace = boundaryFace;
+		return ImmutableSet.copyOf(cells);
 	}
 	
 	@Override
 	public boolean isBoundaryFace()
 	{
 		return isBoundaryFace;
-	}
-	
-	@Override
-	public void addCell(TPCell cell)
-	{
-		if(cells.add(cell))
-			cell.addFace(this);
-	}
-	
-	
-	public List<Cell1D> getCell1Ds()
-	{
-		return cell1Ds;
 	}
 	
 	@Override
@@ -184,16 +163,6 @@ public class TPFace implements FaceWithReferenceFace<TPCell, TPFace, TPEdge>,Com
 		throw new UnsupportedOperationException();
 	}
 
-	public int getFlatDimension()
-	{
-		return flatDimension;
-	}
-
-	public double getOtherCoordinate()
-	{
-		return otherCoordinate;
-	}
-	
 	@Override
 	public String toString()
 	{
@@ -248,11 +217,11 @@ public class TPFace implements FaceWithReferenceFace<TPCell, TPFace, TPEdge>,Com
 		int ret = 0;
 		for(int i = 0; i < cell1Ds.size(); i++)
 		{
-			ret += Math.pow(7, 3*i) * cell1Ds.get(i).center();
-			ret += Math.pow(7, 3*i+1) * cell1Ds.get(i).getStart();
-			ret += Math.pow(7, 3*i+2) * cell1Ds.get(i).getEnd();
+			ret += Math.pow(7, 3*i) * DoubleCompare.doubleHash(cell1Ds.get(i).center());
+			ret += Math.pow(7, 3*i+1) * DoubleCompare.doubleHash(cell1Ds.get(i).getStart());
+			ret += Math.pow(7, 3*i+2) * DoubleCompare.doubleHash(cell1Ds.get(i).getEnd());
 		}
-		ret -= 141*otherCoordinate;
+		ret -= 141*DoubleCompare.doubleHash(otherCoordinate);
 		ret*=(flatDimension+19);
 		ret*=2;
 		if(isBoundaryFace)
@@ -271,12 +240,6 @@ public class TPFace implements FaceWithReferenceFace<TPCell, TPFace, TPEdge>,Com
 			return 0 == compareTo((TPFace) obj);
 		else
 			return false;
-	}
-	@Override
-	public void addEdge(TPEdge tpEdge)
-	{
-		if(edges.add(tpEdge))
-			tpEdge.addFace(this);
 	}
 	
 	@Override
@@ -306,10 +269,10 @@ public class TPFace implements FaceWithReferenceFace<TPCell, TPFace, TPEdge>,Com
 		}
 		TPCell downstreamCell = new TPCell(cells1);
 		if(getNormalDownstreamCell() != null)
-			refFace.addCell(downstreamCell);
+			refFace.cells.add(downstreamCell);
 		TPCell upstreamCell = new TPCell(cells2);
 		if(getNormalUpstreamCell() != null)
-			refFace.addCell(upstreamCell);
+			refFace.cells.add(upstreamCell);
 		return refFace;
 	}
 }

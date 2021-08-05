@@ -4,8 +4,10 @@ import basic.Function;
 import basic.RightHandSideIntegral;
 import basic.VectorShapeFunction;
 import linalg.CoordinateVector;
+import tensorproduct.geometry.TPCell;
+import tensorproduct.geometry.TPFace;
 
-public class TPVectorRightHandSideIntegral<ST extends VectorShapeFunction<TPCell,TPFace,TPEdge>> extends RightHandSideIntegral<TPCell,
+public class TPVectorRightHandSideIntegral<ST extends VectorShapeFunction<TPCell, TPFace>> extends RightHandSideIntegral<TPCell,
 	ST>
 {
 	public static final String VALUE="Value";
@@ -22,7 +24,7 @@ public class TPVectorRightHandSideIntegral<ST extends VectorShapeFunction<TPCell
 		if(name.equals(VALUE))
 		{
 			return TPCellIntegral.integrateNonTensorProduct(x->shapeFunction1.value(x).inner((CoordinateVector)(rightHandSide.value(x))),
-				cell.cell1Ds,
+				cell,
 				quadratureRule1D);
 		}
 		throw new UnsupportedOperationException("unknown rhs integral");

@@ -3,10 +3,11 @@ package examples;
 import basic.*;
 import linalg.CoordinateVector;
 import linalg.IterativeSolver;
-import linalg.SparseMatrix;
 import linalg.Vector;
 import org.junit.jupiter.api.Test;
 import tensorproduct.*;
+import tensorproduct.geometry.TPCell;
+import tensorproduct.geometry.TPFace;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -40,7 +41,7 @@ public class VectorLaplaceTest
 		
 		ArrayList<CellIntegral<TPCell,TPVectorFunction>> cellIntegrals =
 			new ArrayList<>();
-		ArrayList<FaceIntegral< TPFace,TPVectorFunction>> faceIntegrals =
+		ArrayList<FaceIntegral<TPFace,TPVectorFunction>> faceIntegrals =
 			new ArrayList<>();
 		ArrayList<RightHandSideIntegral<TPCell, TPVectorFunction>> rightHandSideIntegrals
 			= new ArrayList<>();
@@ -53,7 +54,7 @@ public class VectorLaplaceTest
 		faceIntegrals.add(jj);
 		
 		int polynomialDegree = 2;
-		TPVectorFESpace grid = new TPVectorFESpace(start, end, cells, polynomialDegree);
+		TPVectorFESpace grid = new TPVectorFESpace(start, end, cells);
 		grid.assembleCells();
 		grid.assembleFunctions(polynomialDegree);
 		grid.initializeSystemMatrix();
@@ -101,7 +102,7 @@ public class VectorLaplaceTest
 		cellIntegrals.add(gg);
 		
 		int polynomialDegree = 2;
-		ContinuousTPFEVectorSpace grid = new ContinuousTPFEVectorSpace(start, end, cells, polynomialDegree);
+		ContinuousTPFEVectorSpace grid = new ContinuousTPFEVectorSpace(start, end, cells);
 		grid.assembleCells();
 		grid.assembleFunctions(polynomialDegree);
 		grid.initializeSystemMatrix();

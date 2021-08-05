@@ -3,8 +3,10 @@ package tensorproduct;
 import basic.CellIntegral;
 import basic.Function;
 import basic.VectorShapeFunction;
+import tensorproduct.geometry.TPCell;
+import tensorproduct.geometry.TPFace;
 
-public class TPVectorCellIntegral<ST extends VectorShapeFunction<TPCell,TPFace,TPEdge>> extends CellIntegral<TPCell,
+public class TPVectorCellIntegral<ST extends VectorShapeFunction<TPCell, TPFace>> extends CellIntegral<TPCell,
 	ST>
 {
 	public static final String GRAD_GRAD = "GradGrad";
@@ -39,21 +41,21 @@ public class TPVectorCellIntegral<ST extends VectorShapeFunction<TPCell,TPFace,T
 		{
 			return TPCellIntegral.integrateNonTensorProduct(x->shapeFunction1.gradient(x).frobeniusInner(shapeFunction2.gradient(x))
 				*(Double)weight.value(x),
-				cell.cell1Ds,
+				cell,
 				quadratureRule1D);
 		}
 		if(name.equals(VALUE_VALUE))
 		{
 			return TPCellIntegral.integrateNonTensorProduct(x->shapeFunction1.value(x).inner(shapeFunction2.value(x))
 				*(Double)weight.value(x),
-				cell.cell1Ds,
+				cell,
 				quadratureRule1D);
 		}
 		if(name.equals(ROT_ROT))
 		{
 			return TPCellIntegral.integrateNonTensorProduct(x->shapeFunction1.curl(x).inner(shapeFunction2.curl(x))
 				*(Double)weight.value(x),
-				cell.cell1Ds,
+				cell,
 				quadratureRule1D);
 		}
 		throw new UnsupportedOperationException("unknown integral name");

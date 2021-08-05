@@ -73,7 +73,7 @@ public interface Tensor
 		for(IntCoordinates c: getShape().range())
 		{
 			if(!DoubleCompare.almostEqualAfterOps(at(c),
-				other.at(c), absmax + extraTol, size()))
+				other.at(c), absmax, size(), extraTol))
 			{
 				System.out.println(at(c)+" != " +other.at(c)+
 					" difference: " + Math.abs(at(c) - other.at(c)) + " ");

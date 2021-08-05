@@ -49,7 +49,7 @@ public class MixedPlot3D extends ScalarPlot3D
 			g.fillOval(x-2,y-2,4,4);
 			int vx = (int)(velocities.get(c).x() /velocityScaling*pixelWidth);
 			int vy = (int)(velocities.get(c).y() /velocityScaling*pixelHeight);
-			g.drawLine(x,y,x+vx,y+vy);
+			g.drawLine(x,y,x+vx,y-vy);
 		}
 		
 	}

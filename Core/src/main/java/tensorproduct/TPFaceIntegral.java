@@ -2,11 +2,14 @@ package tensorproduct;
 
 import basic.*;
 import linalg.CoordinateVector;
+import tensorproduct.geometry.Cell1D;
+import tensorproduct.geometry.TPCell;
+import tensorproduct.geometry.TPFace;
 
 import java.util.List;
 import java.util.function.ToDoubleFunction;
 
-public class TPFaceIntegral<ST extends ScalarShapeFunction<TPCell,TPFace,TPEdge>> extends FaceIntegral<TPFace,ST>
+public class TPFaceIntegral<ST extends ScalarShapeFunction<TPCell, TPFace>> extends FaceIntegral<TPFace,ST>
 {
 	public static String VALUE_JUMP_VALUE_JUMP = "ValueJumpValueJump";
 	public static String INTERIOR_VALUE_JUMP_VALUE_JUMP = "InteriorValueJumpValueJump";
@@ -63,8 +66,13 @@ public class TPFaceIntegral<ST extends ScalarShapeFunction<TPCell,TPFace,TPEdge>
 		if(name.equals(BOUNDARY_VALUE) && !(weight.value(new CoordinateVector(weight.getDomainDimension())) instanceof Double))
 			throw new IllegalArgumentException();
 	}
+	public static double integrateNonTensorProduct(ToDoubleFunction<CoordinateVector> eval, TPFace f, QuadratureRule1D quadratureRule)
+	{
+		return integrateNonTensorProduct(eval, f.getComponentCells(), f.flatDimension, f.otherCoordinate,
+			quadratureRule);
+	}
 	public static double integrateNonTensorProduct(ToDoubleFunction<CoordinateVector> eval, List<Cell1D> cells,
-	                                        int flatDimension, double otherCoordinate,
+	                                               int flatDimension, double otherCoordinate,
 	                                               QuadratureRule1D quadratureRule)
 	{
 		return TPCellIntegral.integrateNonTensorProduct(x ->
@@ -89,9 +97,7 @@ public class TPFaceIntegral<ST extends ScalarShapeFunction<TPCell,TPFace,TPEdge>
 		if (name.equals(VALUE_JUMP_VALUE_JUMP))
 		{
 			return integrateNonTensorProduct(x -> shapeFunction1.jumpInValue(face, x) * shapeFunction2.jumpInValue(face, x) * (Double) weight.value(x),
-				face.cell1Ds,
-				face.flatDimension,
-				face.otherCoordinate,
+				face,
 				quadratureRule1D);
 		}
 		if (name.equals(INTERIOR_VALUE_JUMP_VALUE_JUMP))
@@ -99,50 +105,38 @@ public class TPFaceIntegral<ST extends ScalarShapeFunction<TPCell,TPFace,TPEdge>
 			if(face.isBoundaryFace())
 				return 0;
 			return integrateNonTensorProduct(x -> shapeFunction1.jumpInValue(face, x) * shapeFunction2.jumpInValue(face, x) * (Double) weight.value(x),
-				face.cell1Ds,
-				face.flatDimension,
-				face.otherCoordinate,
+				face,
 				quadratureRule1D);
 		}
 		if (name.equals(GRAD_NORMALAVERAGE_VALUE_JUMP))
 		{
 			return integrateNonTensorProduct(x -> shapeFunction1.normalAverageInDerivative(face, x) * shapeFunction2.jumpInValue(face, x) * (Double) weight.value(x),
-				face.cell1Ds,
-				face.flatDimension,
-				face.otherCoordinate,
+				face,
 				quadratureRule1D);
 		}
 		if (name.equals(VALUE_JUMP_GRAD_NORMALAVERAGE))
 		{
 			return integrateNonTensorProduct(x -> shapeFunction1.jumpInValue(face, x) * shapeFunction2.normalAverageInDerivative(face, x) * (Double) weight.value(x),
-				face.cell1Ds,
-				face.flatDimension,
-				face.otherCoordinate,
+				face,
 				quadratureRule1D);
 		}
 		if (name.equals(GRAD_VALUE_NORMAL))
 		{
 			return integrateNonTensorProduct(x -> shapeFunction1.gradient(x).inner(face.getNormal().value(x)) * shapeFunction2.value(x) * (Double) weight.value(x),
-				face.cell1Ds,
-				face.flatDimension,
-				face.otherCoordinate,
+				face,
 				quadratureRule1D);
 		}
 		if (name.equals(VALUE_GRAD_NORMAL))
 		{
 			return integrateNonTensorProduct(x -> shapeFunction2.gradient(x).inner(face.getNormal().value(x)) * shapeFunction1.value(x) * (Double) weight.value(x),
-				face.cell1Ds,
-				face.flatDimension,
-				face.otherCoordinate,
+				face,
 				quadratureRule1D);
 		}
 		if (name.equals(VALUE_VALUE))
 		{
 			return integrateNonTensorProduct(x ->
 					shapeFunction1.value(x) * shapeFunction2.value(x) * (Double) weight.value(x),
-				face.cell1Ds,
-				face.flatDimension,
-				face.otherCoordinate,
+				face,
 				quadratureRule1D);
 		}
 		if (name.equals(BOUNDARY_VALUE))
@@ -151,9 +145,7 @@ public class TPFaceIntegral<ST extends ScalarShapeFunction<TPCell,TPFace,TPEdge>
 				return integrateNonTensorProduct(x ->
 						shapeFunction1.jumpInValue(face, x)* shapeFunction2.jumpInValue(face,
 							x)* (Double) weight.value(x),
-					face.cell1Ds,
-					face.flatDimension,
-					face.otherCoordinate,
+					face,
 					quadratureRule1D);
 			return 0;
 		}

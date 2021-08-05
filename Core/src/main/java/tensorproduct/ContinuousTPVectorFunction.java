@@ -4,14 +4,15 @@ import basic.LagrangeNodeFunctional;
 import basic.SingleComponentVectorShapeFunction;
 import basic.VectorShapeFunctionWithReferenceShapeFunction;
 import linalg.CoordinateVector;
+import tensorproduct.geometry.TPCell;
+import tensorproduct.geometry.TPFace;
 
 public class ContinuousTPVectorFunction extends SingleComponentVectorShapeFunction<TPCell,
-	TPFace, TPEdge, ContinuousTPShapeFunction> implements VectorShapeFunctionWithReferenceShapeFunction<TPCell, TPFace, TPEdge>
+	TPFace, ContinuousTPShapeFunction> implements VectorShapeFunctionWithReferenceShapeFunction<TPCell, TPFace>
 {
-	public ContinuousTPVectorFunction(TPCell supportCell, int polynomialDegree, int localIndex,
-	                                  Class<ContinuousTPShapeFunction> componentFunctionClass)
+	public ContinuousTPVectorFunction(TPCell supportCell, int polynomialDegree, int localIndex)
 	{
-		super(supportCell, polynomialDegree, localIndex, componentFunctionClass);
+		super(supportCell, polynomialDegree, localIndex, ContinuousTPShapeFunction.class);
 	}
 	public ContinuousTPVectorFunction(ContinuousTPShapeFunction function, int component)
 	{

@@ -1,13 +1,15 @@
 package tensorproduct;
 
 import basic.*;
+import tensorproduct.geometry.TPCell;
+import tensorproduct.geometry.TPFace;
 
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
-public class TPVectorCellIntegralViaReferenceCell<ST extends VectorShapeFunctionWithReferenceShapeFunction<TPCell,TPFace,TPEdge>> extends TPVectorCellIntegral<ST>
+public class TPVectorCellIntegralViaReferenceCell<ST extends VectorShapeFunctionWithReferenceShapeFunction<TPCell, TPFace>> extends TPVectorCellIntegral<ST>
 {
-	Map<ReferenceCellIdentificationTriplet<TPCell, TPFace, TPEdge, VectorShapeFunctionWithReferenceShapeFunction<TPCell,TPFace,TPEdge>>,
+	Map<ReferenceCellIdentificationTriplet<TPCell, TPFace, VectorShapeFunctionWithReferenceShapeFunction<TPCell,TPFace>>,
 		Double> savedValues;
 	int i = 0;
 	public TPVectorCellIntegralViaReferenceCell(double weight, String name)
@@ -26,12 +28,12 @@ public class TPVectorCellIntegralViaReferenceCell<ST extends VectorShapeFunction
 	public double evaluateCellIntegral(TPCell cell, ST shapeFunction1,
 	                                   ST shapeFunction2)
 	{
-		VectorShapeFunctionWithReferenceShapeFunction<TPCell,TPFace,TPEdge> referenceShapeFunction1
+		VectorShapeFunctionWithReferenceShapeFunction<TPCell,TPFace> referenceShapeFunction1
 			= shapeFunction1.createReferenceShapeFunctionRelativeTo(cell);
-		VectorShapeFunctionWithReferenceShapeFunction<TPCell,TPFace,TPEdge> referenceShapeFunction2
+		VectorShapeFunctionWithReferenceShapeFunction<TPCell,TPFace> referenceShapeFunction2
 			= shapeFunction2.createReferenceShapeFunctionRelativeTo(cell);
-		ReferenceCellIdentificationTriplet<TPCell, TPFace, TPEdge,
-			VectorShapeFunctionWithReferenceShapeFunction<TPCell,TPFace,TPEdge>> key =
+		ReferenceCellIdentificationTriplet<TPCell, TPFace,
+			VectorShapeFunctionWithReferenceShapeFunction<TPCell,TPFace>> key =
 			new ReferenceCellIdentificationTriplet<>(referenceShapeFunction1,
 				referenceShapeFunction2,
 				cell.getReferenceCell());

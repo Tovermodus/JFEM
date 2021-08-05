@@ -5,6 +5,8 @@ import linalg.CoordinateVector;
 import linalg.IterativeSolver;
 import linalg.Vector;
 import tensorproduct.*;
+import tensorproduct.geometry.TPCell;
+import tensorproduct.geometry.TPFace;
 
 import java.util.ArrayList;
 
@@ -23,7 +25,7 @@ public class Laplace3D
                 CoordinateVector end = CoordinateVector.fromValues(1,1,1);
                 int polynomialDegree = 2;
                 TPFESpace grid = new TPFESpace(start,end,
-                        Ints.asList(6,6,6),polynomialDegree);
+                        Ints.asList(6,6,6));
                 TPCellIntegral<TPShapeFunction> gg = new TPCellIntegralViaReferenceCell<>(1,
                         TPCellIntegral.GRAD_GRAD);
                 double penalty = 200000;

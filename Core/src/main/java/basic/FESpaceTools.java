@@ -8,8 +8,8 @@ import java.util.List;
 import java.util.function.BiFunction;
 import java.util.stream.Stream;
 
-public interface FESpaceTools<CT extends Cell<CT,FT,ET>, FT extends  Face<CT,FT,ET>, ET extends Edge<CT,FT,ET>,
-	ST extends ShapeFunction<CT,FT,ET,?,?,?>>
+public interface FESpaceTools<CT extends Cell<CT,FT>, FT extends  Face<CT,FT>,
+	ST extends ShapeFunction<CT,FT, ?,?,?>>
 {
 	default int increaseCellCounter()
 	{
@@ -20,7 +20,7 @@ public interface FESpaceTools<CT extends Cell<CT,FT,ET>, FT extends  Face<CT,FT,
 		return 0;
 	}
 	default void loopMatrixViaCell(Function3<CT,ST,ST, Double> integralEvaluation,
-	                                       MatrixFESpace<CT,FT,ET,ST,?,?,?> space, MutableMatrix s){
+	                               MatrixFESpace<CT,FT, ST> space, MutableMatrix s){
 		List<List<CT>> smallerList = Lists.partition(space.getCells(),
 			space.getCells().size()/PerformanceArguments.getInstance().threadNumber+1);
 		Stream<List<CT>> stream = smallerList.stream();
@@ -51,7 +51,7 @@ public interface FESpaceTools<CT extends Cell<CT,FT,ET>, FT extends  Face<CT,FT,
 		});
 	}
 	default void loopRhsViaCell(BiFunction<CT,ST,Double> integralEvaluation,
-	                                   MatrixFESpace<CT,FT,ET, ST,?,?,?> space, MutableVector d){
+	                            MatrixFESpace<CT,FT, ST> space, MutableVector d){
 		List<List<CT>> smallerList = Lists.partition(space.getCells(),space.getCells().size()/PerformanceArguments.getInstance().threadNumber+1);
 		Stream<List<CT>> stream = smallerList.stream();
 		if(PerformanceArguments.getInstance().parallelizeThreads)
@@ -72,7 +72,7 @@ public interface FESpaceTools<CT extends Cell<CT,FT,ET>, FT extends  Face<CT,FT,
 		});
 	}
 	default void loopMatrixViaFace(Function3<FT,ST,ST,Double> integralEvaluation,
-	                               MatrixFESpace<CT,FT,ET,ST,?,?,?> space, MutableMatrix s){
+	                               MatrixFESpace<CT,FT, ST> space, MutableMatrix s){
 		List<List<FT>> smallerList = Lists.partition(space.getFaces(),space.getFaces().size()/PerformanceArguments.getInstance().threadNumber+1);
 		Stream<List<FT>> stream = smallerList.stream();
 		if(PerformanceArguments.getInstance().parallelizeThreads)
@@ -101,7 +101,7 @@ public interface FESpaceTools<CT extends Cell<CT,FT,ET>, FT extends  Face<CT,FT,
 		});
 	}
 	default void loopRhsViaFace(BiFunction<FT,ST,Double> integralEvaluation,
-	                                   MatrixFESpace<CT,FT,ET,ST,?,?,?> space, MutableVector d){
+	                            MatrixFESpace<CT,FT, ST> space, MutableVector d){
 		List<List<FT>> smallerList = Lists.partition(space.getFaces(),space.getFaces().size()/PerformanceArguments.getInstance().threadNumber+1);
 		Stream<List<FT>> stream = smallerList.stream();
 		if(PerformanceArguments.getInstance().parallelizeThreads)

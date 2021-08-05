@@ -3,9 +3,10 @@ import com.google.common.base.Stopwatch;
 import com.google.common.primitives.Ints;
 import linalg.CoordinateVector;
 import linalg.IterativeSolver;
-import linalg.SparseMatrix;
 import linalg.Vector;
 import tensorproduct.*;
+import tensorproduct.geometry.TPCell;
+import tensorproduct.geometry.TPFace;
 
 import java.util.ArrayList;
 
@@ -24,7 +25,7 @@ public class LaplaceSystem
                 CoordinateVector end = CoordinateVector.fromValues(1,1);
                 int polynomialDegree = 2;
                 TPFESpace grid = new TPFESpace(start,end,
-                        Ints.asList(10,5),polynomialDegree);
+                        Ints.asList(10,5));
                 TPCellIntegral<TPShapeFunction> gg = new TPCellIntegral<>(ScalarFunction.constantFunction(1),
                         TPCellIntegral.GRAD_GRAD);
                 double penalty = 200000;

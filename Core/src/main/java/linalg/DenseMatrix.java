@@ -1,5 +1,6 @@
 package linalg;
 
+import basic.DoubleCompare;
 import basic.PerformanceArguments;
 import com.google.common.primitives.Ints;
 
@@ -359,7 +360,7 @@ public class DenseMatrix implements MutableMatrix, Decomposable, DirectlySolvabl
 	@Override
 	public int hashCode()
 	{
-		return Arrays.stream(entries).mapToInt(e -> Arrays.stream(e).mapToInt(f->(int)(1e8*f)).sum()).sum();
+		return Arrays.stream(entries).mapToInt(e -> Arrays.stream(e).mapToInt(DoubleCompare::doubleHash).sum()).sum();
 	}
 	
 	@Override

@@ -5,10 +5,8 @@ import linalg.CoordinateVector;
 
 import java.util.*;
 
-public interface FESpace<CT extends Cell<CT,FT,ET>, FT extends  Face<CT,FT,ET>,
-	ET extends Edge<CT,FT,ET>,ST extends ShapeFunction<CT,FT,
-	ET,valueT,gradientT,hessianT>,valueT,gradientT,hessianT, FST extends FESpace<CT,FT,ET,ST,valueT,gradientT,
-	hessianT,FST>>
+public interface FESpace<CT extends Cell<CT,FT>, FT extends  Face<CT,FT>,
+	ST extends ShapeFunction<CT,FT,?,?,?>, FST extends FESpace<CT,FT, ST,FST>>
 {
 	int getDimension();
 	List<CT> getCells();

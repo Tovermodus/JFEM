@@ -1,8 +1,10 @@
 package tensorproduct;
 import basic.*;
 import linalg.CoordinateVector;
+import tensorproduct.geometry.TPCell;
+import tensorproduct.geometry.TPFace;
 
-public class TPBoundaryFaceIntegral<ST extends ScalarShapeFunction<TPCell,TPFace,TPEdge>> extends BoundaryRightHandSideIntegral<TPFace,
+public class TPBoundaryFaceIntegral<ST extends ScalarShapeFunction<TPCell, TPFace>> extends BoundaryRightHandSideIntegral<TPFace,
 	ST>
 {
 	public static final String VALUE="Value";
@@ -26,18 +28,14 @@ public class TPBoundaryFaceIntegral<ST extends ScalarShapeFunction<TPCell,TPFace
 		{
 			return TPFaceIntegral.integrateNonTensorProduct(x->shapeFunction1.value(x)
 					*(Double)(rightHandSide.value(x)),
-				face.cell1Ds,
-				face.flatDimension,
-				face.otherCoordinate,
+				face,
 				quadratureRule1D);
 		}
 		if(name.equals(VALUE_NORMAL))
 		{
 			return TPFaceIntegral.integrateNonTensorProduct(x->shapeFunction1.value(x)
 				*(Double)(rightHandSide.value(x)),
-				face.cell1Ds,
-				face.flatDimension,
-				face.otherCoordinate,
+				face,
 				quadratureRule1D);
 		}
 		throw new UnsupportedOperationException("unknown rhs integral");

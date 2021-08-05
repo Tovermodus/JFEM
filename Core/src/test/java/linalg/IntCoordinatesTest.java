@@ -127,9 +127,9 @@ public class IntCoordinatesTest
 	public void testRange()
 	{
 		Set<IntCoordinates> tree = new TreeSet<>();
-		IntCoordinates lowerBounds = new IntCoordinates(0, 0, 1);
+		IntCoordinates lowerBounds = new IntCoordinates(0, -1, 1);
 		IntCoordinates upperBounds = new IntCoordinates(2, 3, 5);
-		IntCoordinates coordinates = new IntCoordinates(0, 0, 0);
+		IntCoordinates coordinates = new IntCoordinates(0, -1, 0);
 		for (IntCoordinates c : new IntCoordinates.Range(lowerBounds, upperBounds))
 		{
 			tree.add(new IntCoordinates(c));
@@ -138,7 +138,7 @@ public class IntCoordinatesTest
 			coordinates = new IntCoordinates(c);
 		}
 		assertEquals(coordinates, new IntCoordinates(1, 2, 4));
-		assertEquals(2 * 3 * 4, tree.size());
+		assertEquals(2 * 4 * 4, tree.size());
 		tree = new TreeSet<>();
 		upperBounds = new IntCoordinates(2, 3, 4,5);
 		coordinates = new IntCoordinates(0, 0, 0,0);

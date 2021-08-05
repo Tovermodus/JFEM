@@ -1,8 +1,13 @@
 package tensorproduct;
 
-import basic.VectorFunction;
+import basic.DoubleCompare;
 import linalg.CoordinateVector;
+import linalg.IntCoordinates;
 import org.junit.jupiter.api.Test;
+import tensorproduct.geometry.CartesianGrid;
+import tensorproduct.geometry.Cell1D;
+import tensorproduct.geometry.TPCell;
+import tensorproduct.geometry.TPFace;
 
 import java.util.List;
 
@@ -12,19 +17,15 @@ public class TPCellTest
 {
 	private TPCell createCell2D()
 	{
-		List<Cell1D> cell1DS = List.of(new Cell1D(0,6), new Cell1D(1,1.0005));
-		TPCell cell = new TPCell(cell1DS);
-		cell.addFace(new TPFace(List.of(cell1DS.get(0)),1,1,true));
-		cell.addFace(new TPFace(List.of(cell1DS.get(0)),1,1.0005,true));
-		cell.addFace(new TPFace(List.of(cell1DS.get(1)),0,0,true));
-		cell.addFace(new TPFace(List.of(cell1DS.get(1)),0,6,true));
-		//cell.addFace(new TPFace(List.of(cell1DS.get(0)),1,1,true));
-		return cell;
+		CartesianGrid g = new CartesianGrid(CoordinateVector.fromValues(0,1), CoordinateVector.fromValues(6,
+			1.0005), new IntCoordinates(1,1));
+		return g.cells.get(0);
 	}
 	private TPCell createCell3D()
 	{
-		List<Cell1D> cell1DS = List.of(new Cell1D(0,6), new Cell1D(1,3), new Cell1D(1676.2, 1889.4));
-		return new TPCell(cell1DS);
+		CartesianGrid g = new CartesianGrid(CoordinateVector.fromValues(0,1,1676.2),
+			CoordinateVector.fromValues(6,3,1889.4), new IntCoordinates(1,1,1));
+		return g.cells.get(0);
 	}
 	@Test
 	public void testGetters()
@@ -32,12 +33,10 @@ public class TPCellTest
 		TPCell cell2d = createCell2D();
 		assertEquals(4, cell2d.getFaces().size());
 		assertEquals(2,cell2d.getDimension());
-		assertEquals(2,cell2d.getCell1Ds().size());
 		assertEquals(CoordinateVector.fromValues(3,1.00025), cell2d.center());
 		TPCell cell3d = createCell3D();
-		assertEquals(0, cell3d.getFaces().size());
-		assertEquals(3,cell3d.getDimension());
-		assertEquals(3,cell3d.getCell1Ds().size());
+		assertEquals(6, cell3d.getFaces().size());
+		assertEquals(3, cell3d.getDimension());
 		assertTrue(CoordinateVector.fromValues(3,2, 1782.8).almostEqual(cell3d.center()));
 	}
 	@Test
@@ -61,13 +60,13 @@ public class TPCellTest
 	@Test
 	public void testNormal()
 	{
+		CartesianGrid unrelated = new CartesianGrid(CoordinateVector.fromValues(5,6),
+			CoordinateVector.fromValues(7,8), new IntCoordinates(1,1));
 		TPCell cell2d = createCell2D();
 		assertThrows(IllegalArgumentException.class,
-			()->cell2d.getOuterNormal(new TPFace(List.of(cell2d.cell1Ds.get(0)),1,1,
-				true)));
+			()->cell2d.getOuterNormal(unrelated.faces.get(0)));
 		assertThrows(IllegalArgumentException.class,
-			()->cell2d.getOuterNormal(new TPFace(List.of(cell2d.cell1Ds.get(0)),0,1,
-				true)));
+			()->cell2d.getOuterNormal(unrelated.faces.get(1)));
 		for(TPFace f:cell2d.getFaces())
 		{
 			CoordinateVector expectedNormal = new CoordinateVector(2);
@@ -81,6 +80,27 @@ public class TPCellTest
 		TPCell cell1 = createCell2D();
 		TPCell cell2 = createCell2D();
 		assertEquals(0, cell1.compareTo(cell2));
+	}
+	@Test
+	public void testGrid()
+	{
+		CartesianGrid g = new CartesianGrid(CoordinateVector.fromValues(0,-1,1),
+			CoordinateVector.fromValues(5,6,10), new IntCoordinates(5,7,10));
+		for(TPCell cell: g.cells)
+		{
+			for (int i = 0; i < 3; i++)
+			{
+				assertTrue(DoubleCompare.isInteger(cell.getComponentCell(i).getStart()));
+				assertTrue(DoubleCompare.isInteger(cell.getComponentCell(i).getEnd()));
+			}
+			assertEquals(6, cell.getFaces().size());
+			for(TPFace f: cell.getFaces())
+			{
+				assertTrue((f.getCells().size() == 1 && f.isBoundaryFace()) || f.getCells().size() == 2);
+			}
+		}
+		assertEquals(5*7*10, g.cells.size());
+		assertEquals(6*7*10 + 5*8*10 + 5*7*11, g.faces.size());
 	}
 	@Test
 	public void testEquals()

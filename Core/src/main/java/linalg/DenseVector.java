@@ -1,12 +1,10 @@
 package linalg;
 
+import basic.DoubleCompare;
 import basic.PerformanceArguments;
-import com.google.common.primitives.Ints;
 import org.ujmp.core.Matrix;
-import tensorproduct.TPEdge;
 
-import java.util.List;
-import java.util.Map;
+import java.util.Arrays;
 
 public class DenseVector implements MutableVector, MutableTensor
 {
@@ -262,10 +260,7 @@ public class DenseVector implements MutableVector, MutableTensor
 	@Override
 	public int hashCode()
 	{
-		int ret = -1024*entries.length;
-		for(int i = 0; i < entries.length; i++)
-			ret += entries[i]*Math.pow(2, i%15)*100000;
-		return ret;
+		return Arrays.stream(entries).mapToInt(DoubleCompare::doubleHash).sum();
 	}
 	@Override
 	public String toString()

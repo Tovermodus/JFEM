@@ -14,6 +14,11 @@ public class MixedValue implements MutableVector
 		pressure = mv.getPressure();
 		velocity = new CoordinateVector(mv.getVelocity());
 	}
+	public MixedValue(double pressure, CoordinateVector velocity)
+	{
+		this.pressure = pressure;
+		this.velocity = velocity;
+	}
 	
 	protected MixedValue(int d)
 	{

@@ -3,8 +3,11 @@ package tensorproduct;
 import basic.*;
 import com.google.common.primitives.Ints;
 import linalg.CoordinateVector;
+import linalg.IntCoordinates;
 import linalg.Matrix;
 import org.junit.jupiter.api.Test;
+import tensorproduct.geometry.CartesianGrid;
+import tensorproduct.geometry.TPFace;
 
 import java.util.ArrayList;
 
@@ -16,18 +19,13 @@ public class TestReferenceFaceIntegral
 	@Test
 	public void test2DJumpJumpMatrix()
 	{
-		PerformanceArguments.PerformanceArgumentBuilder builder =
-			new PerformanceArguments.PerformanceArgumentBuilder();
-		builder.parallelizeThreads = false;
-		builder.build();
-		long startTime = System.nanoTime();
 		Matrix referenceMatrix;
 		CoordinateVector start = CoordinateVector.fromValues(-1, -10);
 		CoordinateVector end = CoordinateVector.fromValues(4, 1);
 		int polynomialDegree = 1;
 		
 		TPFESpace grid = new TPFESpace(start, end,
-			Ints.asList(7, 11), polynomialDegree);
+			Ints.asList(7, 11));
 		TPFaceIntegral<TPShapeFunction> jj = new TPFaceIntegral<>(ScalarFunction.constantFunction(1),
 			TPFaceIntegral.VALUE_JUMP_VALUE_JUMP);
 		ArrayList<FaceIntegral<TPFace, TPShapeFunction>> faceIntegrals =
@@ -44,7 +42,7 @@ public class TestReferenceFaceIntegral
 		referenceMatrix = grid.getSystemMatrix();
 		
 		grid = new TPFESpace(start, end,
-			Ints.asList(7, 11), polynomialDegree);
+			Ints.asList(7, 11));
 		jj = new TPFaceIntegralViaReferenceFace<>(1,
 			TPFaceIntegral.VALUE_JUMP_VALUE_JUMP);
 		faceIntegrals =
@@ -63,17 +61,13 @@ public class TestReferenceFaceIntegral
 	@Test
 	public void test2DvaluenormalaverageMatrix()
 	{
-		PerformanceArguments.PerformanceArgumentBuilder builder =
-			new PerformanceArguments.PerformanceArgumentBuilder();
-		builder.parallelizeThreads = false;
-		long startTime = System.nanoTime();
 		Matrix referenceMatrix;
 		CoordinateVector start = CoordinateVector.fromValues(-1, -10);
 		CoordinateVector end = CoordinateVector.fromValues(1, 1);
 		int polynomialDegree = 3;
 		
 		TPFESpace grid = new TPFESpace(start, end,
-			Ints.asList(3, 5), polynomialDegree);
+			Ints.asList(3, 5));
 		TPFaceIntegral<TPShapeFunction> jj = new TPFaceIntegral<>(ScalarFunction.constantFunction(1),
 			TPFaceIntegral.VALUE_JUMP_GRAD_NORMALAVERAGE);
 		ArrayList<FaceIntegral<TPFace, TPShapeFunction>> faceIntegrals =
@@ -90,7 +84,7 @@ public class TestReferenceFaceIntegral
 		referenceMatrix = grid.getSystemMatrix();
 		
 		grid = new TPFESpace(start, end,
-			Ints.asList(3, 5), polynomialDegree);
+			Ints.asList(3, 5));
 		jj = new TPFaceIntegralViaReferenceFace<>(1,
 			TPFaceIntegral.VALUE_JUMP_GRAD_NORMALAVERAGE);
 		faceIntegrals =
@@ -109,17 +103,13 @@ public class TestReferenceFaceIntegral
 	@Test
 	public void test3DJumpJumpMatrix()
 	{
-		PerformanceArguments.PerformanceArgumentBuilder builder =
-			new PerformanceArguments.PerformanceArgumentBuilder();
-		builder.parallelizeThreads = false;
-		long startTime = System.nanoTime();
 		Matrix referenceMatrix;
 		CoordinateVector start = CoordinateVector.fromValues(-1, -10,6);
 		CoordinateVector end = CoordinateVector.fromValues(1, 1,17);
 		int polynomialDegree = 1;
 		
 		TPFESpace grid = new TPFESpace(start, end,
-			Ints.asList(3, 5,2), polynomialDegree);
+			Ints.asList(3, 5,2));
 		TPFaceIntegral<TPShapeFunction> jj = new TPFaceIntegral<>(ScalarFunction.constantFunction(1),
 			TPFaceIntegral.VALUE_JUMP_VALUE_JUMP);
 		ArrayList<FaceIntegral<TPFace, TPShapeFunction>> faceIntegrals =
@@ -136,7 +126,7 @@ public class TestReferenceFaceIntegral
 		referenceMatrix = grid.getSystemMatrix();
 		
 		grid = new TPFESpace(start, end,
-			Ints.asList(3, 5,2), polynomialDegree);
+			Ints.asList(3, 5,2));
 		jj = new TPFaceIntegralViaReferenceFace<>(1,
 			TPFaceIntegral.VALUE_JUMP_VALUE_JUMP);
 		faceIntegrals =
@@ -155,18 +145,11 @@ public class TestReferenceFaceIntegral
 	@Test
 	public void test2DJumpJump()
 	{
-		PerformanceArguments.PerformanceArgumentBuilder builder =
-			new PerformanceArguments.PerformanceArgumentBuilder();
-		builder.parallelizeThreads = false;
-		ArrayList<Cell1D> cell1DList = new ArrayList<>();
-		cell1DList.add(new Cell1D(3, 6));
-		TPFace f = new TPFace(cell1DList,1,134, false);
-		cell1DList.add(new Cell1D(130,134));
-		f.addCell(new TPCell(cell1DList));
-		cell1DList.set(1,new Cell1D(134,137));
-		f.addCell(new TPCell(cell1DList));
+		CartesianGrid g = new CartesianGrid(CoordinateVector.fromValues(3, 130),
+			CoordinateVector.fromValues(6,138),new IntCoordinates(1,2));
+		TPFace f = g.faces.get(5);
 		assertEquals(f.getNormalUpstreamCell().center(), CoordinateVector.fromValues(4.5, 132.0));
-		assertEquals(f.getNormalDownstreamCell().center(), CoordinateVector.fromValues(4.5, 135.5));
+		assertEquals(f.getNormalDownstreamCell().center(), CoordinateVector.fromValues(4.5, 136));
 		for(int k = 0; k < 5; k++)
 			for (int i = 0; i < (k + 1) * (k + 1); i++)
 				for (int j = 0; j < (k + 1) * (k + 1); j++)

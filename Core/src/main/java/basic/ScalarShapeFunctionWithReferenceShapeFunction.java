@@ -3,20 +3,15 @@ package basic;
 import linalg.CoordinateMatrix;
 import linalg.CoordinateVector;
 
-public interface ScalarShapeFunctionWithReferenceShapeFunction<CT extends CellWithReferenceCell<CT,FT,ET>,
-	FT extends FaceWithReferenceFace<CT,FT,ET>, ET extends EdgeWithReferenceEdge<CT,FT,ET>>
-	extends ShapeFunctionWithReferenceShapeFunction<CT,FT,ET,Double, CoordinateVector, CoordinateMatrix>,
-		ScalarShapeFunction<CT,FT,ET>
+public interface ScalarShapeFunctionWithReferenceShapeFunction<CT extends CellWithReferenceCell<CT,FT>,
+	FT extends FaceWithReferenceFace<CT,FT>>
+	extends ShapeFunctionWithReferenceShapeFunction<CT,FT, Double, CoordinateVector, CoordinateMatrix>,
+		ScalarShapeFunction<CT,FT>
 {
 	@Override
-	ScalarShapeFunctionWithReferenceShapeFunction<CT, FT, ET> createReferenceShapeFunctionRelativeTo(CT cell);
+	ScalarShapeFunctionWithReferenceShapeFunction<CT, FT> createReferenceShapeFunctionRelativeTo(CT cell);
 	
 	@Override
-	ScalarShapeFunctionWithReferenceShapeFunction<CT, FT, ET> createReferenceShapeFunctionRelativeTo(FT face);
+	ScalarShapeFunctionWithReferenceShapeFunction<CT, FT> createReferenceShapeFunctionRelativeTo(FT face);
 	
-	@Override
-	default ScalarShapeFunctionWithReferenceShapeFunction<CT, FT, ET> createReferenceShapeFunctionRelativeTo(ET edge)
-	{
-		throw new UnsupportedOperationException("not implemented yet");
-	}
 }

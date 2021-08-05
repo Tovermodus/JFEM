@@ -99,13 +99,13 @@ public class StokesReferenceSolution
 			}
 			
 			@Override
-			public boolean isPressure()
+			public boolean hasPressureFunction()
 			{
 				return true;
 			}
 			
 			@Override
-			public boolean isVelocity()
+			public boolean hasVelocityFunction()
 			{
 				return true;
 			}

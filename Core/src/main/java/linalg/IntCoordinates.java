@@ -4,6 +4,7 @@ import com.google.common.collect.Streams;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.Iterator;
+import java.util.List;
 import java.util.stream.Stream;
 
 public class IntCoordinates implements Comparable<IntCoordinates>, Cloneable
@@ -11,6 +12,9 @@ public class IntCoordinates implements Comparable<IntCoordinates>, Cloneable
 	final private int [] coordinates;
 	public IntCoordinates(int ... coordinates) {
 		this.coordinates = coordinates;
+	}
+	public IntCoordinates(List<Integer> coordinates) {
+		this.coordinates = coordinates.stream().mapToInt(Integer::intValue).toArray();
 	}
 	public IntCoordinates(IntCoordinates source) {
 		this.coordinates = source.coordinates.clone();
@@ -25,7 +29,7 @@ public class IntCoordinates implements Comparable<IntCoordinates>, Cloneable
 		return new IntCoordinates(coords);
 	}
 	public int [] asArray() {
-		return coordinates;
+		return coordinates.clone();
 	}
 	public int get(int d)
 	{
@@ -39,6 +43,12 @@ public class IntCoordinates implements Comparable<IntCoordinates>, Cloneable
 		IntCoordinates ret = new IntCoordinates(this);
 		for(int i = 0; i < getDimension(); i++)
 			ret.coordinates[i] += o.coordinates[i];
+		return ret;
+	}
+	public IntCoordinates get_modified(int d, int value)
+	{
+		IntCoordinates ret = new IntCoordinates(this);
+		ret.coordinates[d] = value;
 		return ret;
 	}
 	public IntCoordinates sub(IntCoordinates o)
@@ -75,6 +85,7 @@ public class IntCoordinates implements Comparable<IntCoordinates>, Cloneable
 		int ret = 0;
 		for(int c:coordinates)
 		{
+			ret = ret % 1657877;
 			ret *= 104729;
 			ret += c;
 			

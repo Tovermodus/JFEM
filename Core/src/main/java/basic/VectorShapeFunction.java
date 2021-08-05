@@ -1,21 +1,18 @@
 package basic;
 
 import linalg.*;
-import org.jetbrains.annotations.NotNull;
 
-import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
 
-public interface VectorShapeFunction<CT extends Cell<CT,FT, ET>,FT extends Face<CT,FT, ET>, ET extends Edge<CT,
-	FT,ET>>
-	extends VectorFunction, ShapeFunction<CT,FT,ET
-	,	CoordinateVector,
+public interface VectorShapeFunction<CT extends Cell<CT,FT>,FT extends Face<CT,FT>>
+	extends VectorFunction, ShapeFunction<CT,FT,
+	CoordinateVector,
 	CoordinateMatrix, CoordinateTensor>
 {
 	
 	@Override
-	default <ST extends ShapeFunction<CT, FT, ET, CoordinateVector, CoordinateMatrix, CoordinateTensor>> Map<Integer,
+	default <ST extends ShapeFunction<CT, FT, CoordinateVector, CoordinateMatrix, CoordinateTensor>> Map<Integer,
 	Double> prolongate(Set<ST> refinedFunctions)
 	{
 		throw new UnsupportedOperationException("Not Yet Implemented");

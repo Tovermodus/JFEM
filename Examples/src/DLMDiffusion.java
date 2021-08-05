@@ -25,11 +25,11 @@ public class DLMDiffusion
 		
 		ContinuousTPFESpace largeGrid = new ContinuousTPFESpace(start, end,
 			Ints.asList(
-				6,6), polynomialDegree);
+				6,6));
 		largeGrid.assembleCells();
 		largeGrid.assembleFunctions(polynomialDegree);
 		ContinuousTPFESpace immersedGrid = new ContinuousTPFESpace(startImmersed, endImmersed,
-			Ints.asList(4,4), polynomialDegree);
+			Ints.asList(4,4));
 		immersedGrid.assembleCells();
 		immersedGrid.assembleFunctions(polynomialDegree);
 		

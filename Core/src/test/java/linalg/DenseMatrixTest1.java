@@ -122,7 +122,7 @@ public class DenseMatrixTest1
 		assertTrue(denseInverse.mmMul(largeDense).almostEqual(largeDense.mmMul(denseInverse)));
 		assertTrue(denseInverse.mmMul(largeDense).almostEqual(DenseMatrix.identity(50)));
 		assertTrue(denseInverse.inverse().almostEqual(largeDense));
-		assertTrue(new IterativeSolver().solveBiCGStab(largeDense,largeVector,1e-10).almostEqual(denseInverse.mvMul(largeVector),1e-10
+		assertTrue(new IterativeSolver().solveBiCGStab(largeDense,largeVector,1e-10).almostEqual(denseInverse.mvMul(largeVector),1e-8
 		));
 		assertTrue(largeDense.mvMul(new IterativeSolver().solveBiCGStab(largeDense,largeVector,
 			1e-12)).almostEqual(largeVector));

@@ -2,9 +2,6 @@ package mixed;
 
 import basic.*;
 import linalg.*;
-import systems.SystemGradient;
-import systems.SystemHessian;
-import systems.SystemValue;
 
 public class MixedNodeFunctional implements NodeFunctional<MixedValue, MixedGradient,
 	MixedHessian>
@@ -48,9 +45,9 @@ public class MixedNodeFunctional implements NodeFunctional<MixedValue, MixedGrad
 	
 	public double evaluateMixedF(MixedFunction func)
 	{
-		if(func.isPressure() && isPressureFunctional())
+		if(func.hasPressureFunction() && isPressureFunctional())
 			return pressureFunctional.evaluate(func.getPressureFunction());
-		else if(func.isVelocity() && isVelocityFunctional())
+		else if(func.hasVelocityFunction() && isVelocityFunctional())
 			return velocityFunctional.evaluate(func.getVelocityFunction());
 		else
 			return 0;

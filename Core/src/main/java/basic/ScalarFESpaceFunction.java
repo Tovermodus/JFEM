@@ -5,13 +5,13 @@ import linalg.Vector;
 
 import java.util.*;
 
-public class ScalarFESpaceFunction<ST extends ScalarShapeFunction<?,?,?>> implements ScalarFunction
+public class ScalarFESpaceFunction<ST extends ScalarShapeFunction<?,?>> implements ScalarFunction
 {
 	private final Map<ST, Double> coefficients;
 	public ScalarFESpaceFunction(ST[] functions, double[] coefficients)
 	{
 		assert(functions.length == coefficients.length);
-		this.coefficients = new TreeMap<>();
+		this.coefficients = new HashMap<>();
 		for(int i = 0; i < functions.length; i++)
 		{
 			this.coefficients.put(functions[i], coefficients[i]);

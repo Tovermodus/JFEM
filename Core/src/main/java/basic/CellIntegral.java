@@ -2,8 +2,8 @@ package basic;
 
 import tensorproduct.QuadratureRule1D;
 
-public abstract class CellIntegral<CT extends Cell<CT,?,?>, ST extends ShapeFunction<CT,
-	?,?,?,?,?>>
+public abstract class CellIntegral<CT extends Cell<CT,?>, ST extends ShapeFunction<CT,
+	?, ?,?,?>>
 {
 	protected Function<?,?,?> weight;
 	protected String name;

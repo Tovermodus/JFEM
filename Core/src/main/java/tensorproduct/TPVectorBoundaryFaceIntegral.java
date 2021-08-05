@@ -5,8 +5,10 @@ import basic.Function;
 import basic.VectorShapeFunction;
 import com.google.common.collect.Iterables;
 import linalg.CoordinateVector;
+import tensorproduct.geometry.TPCell;
+import tensorproduct.geometry.TPFace;
 
-public class TPVectorBoundaryFaceIntegral<ST extends VectorShapeFunction<TPCell,TPFace,TPEdge>> extends BoundaryRightHandSideIntegral<TPFace,
+public class TPVectorBoundaryFaceIntegral<ST extends VectorShapeFunction<TPCell, TPFace>> extends BoundaryRightHandSideIntegral<TPFace,
 	ST>
 {
 	public static final String VALUE="Value";
@@ -31,9 +33,7 @@ public class TPVectorBoundaryFaceIntegral<ST extends VectorShapeFunction<TPCell,
 		if(name.equals(VALUE))
 		{
 			return TPFaceIntegral.integrateNonTensorProduct(x->shapeFunction1.value(x).inner((CoordinateVector)(rightHandSide.value(x))),
-				face.cell1Ds,
-				face.flatDimension,
-				face.otherCoordinate, quadratureRule1D);
+				face, quadratureRule1D);
 		}
 		if(name.equals(NORMAL_VALUE))
 		{
@@ -41,7 +41,7 @@ public class TPVectorBoundaryFaceIntegral<ST extends VectorShapeFunction<TPCell,
 			if(cell == null)
 				throw new IllegalStateException("face has no cells");
 			return TPFaceIntegral.integrateNonTensorProduct(x->shapeFunction1.value(x).inner(cell.getOuterNormal(face).value(x))*(Double)rightHandSide.value(x),
-				face.cell1Ds, face.flatDimension, face.otherCoordinate, quadratureRule1D);
+				face, quadratureRule1D);
 		}
 		throw new UnsupportedOperationException("unknown rhs integral");
 	}

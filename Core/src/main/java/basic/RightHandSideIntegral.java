@@ -2,9 +2,9 @@ package basic;
 
 import tensorproduct.QuadratureRule1D;
 
-public abstract class RightHandSideIntegral<CT extends Cell<CT,?,?>,
+public abstract class RightHandSideIntegral<CT extends Cell<CT,?>,
 	ST extends ShapeFunction<CT,
-	?,?,?,?,?>>
+	?, ?,?,?>>
 {
 	protected Function<?, ?, ?> rightHandSide;
 	protected String name;

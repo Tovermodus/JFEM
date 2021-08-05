@@ -3,17 +3,15 @@ package basic;
 import linalg.CoordinateMatrix;
 import linalg.CoordinateVector;
 
-import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
 
-public interface ScalarShapeFunction<CT extends Cell<CT,FT,ET>, FT extends Face<CT,FT,ET>, ET extends Edge<CT,FT
-	,ET>> extends ScalarFunction, ShapeFunction<CT
-	,FT,ET,
+public interface ScalarShapeFunction<CT extends Cell<CT,FT>, FT extends Face<CT,FT>> extends ScalarFunction, ShapeFunction<CT
+	,FT,
 	Double, CoordinateVector, CoordinateMatrix>
 {
 	@Override
-	default <ST extends ShapeFunction<CT, FT, ET, Double, CoordinateVector, CoordinateMatrix>> Map<Integer, Double>
+	default <ST extends ShapeFunction<CT, FT, Double, CoordinateVector, CoordinateMatrix>> Map<Integer, Double>
 	prolongate(Set<ST> refinedFunctions)
 	{
 		throw new UnsupportedOperationException("Not Yet Implemented");

@@ -2,8 +2,8 @@ package basic;
 
 import tensorproduct.QuadratureRule1D;
 
-public abstract class BoundaryRightHandSideIntegral<FT extends Face<?,FT,?>, ST extends ShapeFunction<?,
-	FT,?,?,?,?>>
+public abstract class BoundaryRightHandSideIntegral<FT extends Face<?,FT>, ST extends ShapeFunction<?,
+	FT, ?,?,?>>
 {
 	protected Function<?, ?, ?> rightHandSide;
 	protected String name;

@@ -2,8 +2,10 @@ package mixed;
 
 import org.jetbrains.annotations.NotNull;
 import tensorproduct.*;
+import tensorproduct.geometry.TPCell;
+import tensorproduct.geometry.TPFace;
 
-public class RTMixedFunction extends MixedShapeFunction<TPCell, TPFace,TPEdge, ContinuousTPShapeFunction,
+public class RTMixedFunction extends MixedShapeFunction<TPCell, TPFace, ContinuousTPShapeFunction,
 	RTShapeFunction>
 {
 	public RTMixedFunction(@NotNull ContinuousTPShapeFunction pressureFunction)

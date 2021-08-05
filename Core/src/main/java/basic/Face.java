@@ -1,25 +1,19 @@
 package basic;
 
+import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Multimap;
 import linalg.CoordinateVector;
-import linalg.Vector;
-import tensorproduct.TPEdge;
 
 import java.util.List;
-import java.util.Set;
 
-public interface Face<CT extends Cell<CT,FT, ET>,FT extends Face<CT,FT, ET>, ET extends Edge<CT,FT,ET>> extends Comparable<FT>
+public interface Face<CT extends Cell<CT,FT>,FT extends Face<CT,FT>> extends Comparable<FT>
 {
 	
 	int  getDimension();
 	
-	Set<CT> getCells();
+	ImmutableSet<CT> getCells();
 	
-	
-	void setBoundaryFace(boolean boundaryFace);
 	boolean isBoundaryFace();
-	
-	void addCell(CT cell);
 	
 	VectorFunction getNormal();
 	
@@ -35,5 +29,4 @@ public interface Face<CT extends Cell<CT,FT, ET>,FT extends Face<CT,FT, ET>, ET 
 		throw new UnsupportedOperationException();
 	}
 	
-	void addEdge(TPEdge tpEdge);
 }

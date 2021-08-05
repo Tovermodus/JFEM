@@ -1,16 +1,14 @@
 import basic.*;
-import com.google.common.base.Stopwatch;
 import com.google.common.primitives.Ints;
 import linalg.CoordinateVector;
 import linalg.IterativeSolver;
-import linalg.SparseMatrix;
 import linalg.Vector;
 import tensorproduct.*;
+import tensorproduct.geometry.TPCell;
+import tensorproduct.geometry.TPFace;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
-import java.util.TreeSet;
 
 public class LaplaceContinuousOrder
 {
@@ -27,7 +25,7 @@ public class LaplaceContinuousOrder
 		ArrayList<CellIntegral<TPCell,ContinuousTPVectorFunction>> cellIntegrals =
 			new ArrayList<>();
 		cellIntegrals.add(gg);
-		ArrayList<FaceIntegral< TPFace,ContinuousTPVectorFunction>> faceIntegrals =
+		ArrayList<FaceIntegral<TPFace,ContinuousTPVectorFunction>> faceIntegrals =
 			new ArrayList<>();
 		TPVectorRightHandSideIntegral<ContinuousTPVectorFunction> rightHandSideIntegral =
 			new TPVectorRightHandSideIntegral<>(LaplaceReferenceSolution.vectorRightHandSide(),
@@ -43,7 +41,7 @@ public class LaplaceContinuousOrder
 		for(int i = 0; i < 5; i++)
 		{
 			grid = new ContinuousTPFEVectorSpace(start, end,
-				Ints.asList(2*(int)Math.pow(2,i),2*(int)Math.pow(2,i)), polynomialDegree);
+				Ints.asList(2*(int)Math.pow(2,i),2*(int)Math.pow(2,i)));
 			grid.assembleCells();
 			grid.assembleFunctions(polynomialDegree);
 			grid.initializeSystemMatrix();

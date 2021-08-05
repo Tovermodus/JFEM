@@ -5,9 +5,10 @@ import tensorproduct.QuadratureRule1D;
 
 import java.util.Objects;
 
-public class MixedCellIntegral<CT extends Cell<CT,FT,ET>, FT extends Face<CT,FT,ET>, ET extends Edge<CT,FT,ET>,
-	PF extends ScalarShapeFunction<CT,FT,ET>, VF extends VectorShapeFunction<CT,FT,ET>> extends CellIntegral<CT
-	,MixedShapeFunction<CT,FT,ET,PF,VF>>
+public class MixedCellIntegral<CT extends Cell<CT,?>,
+	PF extends ScalarShapeFunction<CT,?>, VF extends VectorShapeFunction<CT,?>, MF extends MixedShapeFunction<CT,
+	?, PF,VF>> extends CellIntegral<CT
+	,MF>
 {
 	private final CellIntegral<CT, PF> pressureIntegral;
 	private final CellIntegral<CT, VF> velocityIntegral;
@@ -43,18 +44,21 @@ public class MixedCellIntegral<CT extends Cell<CT,FT,ET>, FT extends Face<CT,FT,
 		this(name,QuadratureRule1D.Gauss5);
 	}
 	
-	public static <CT extends Cell<CT,FT,ET>, FT extends Face<CT,FT,ET>, ET extends Edge<CT,FT,ET>,
-		PF extends ScalarShapeFunction<CT,
-		FT,ET>,
-		VF extends VectorShapeFunction<CT,FT,ET>> MixedCellIntegral<CT,FT,ET, PF, VF> fromPressureIntegral(CellIntegral<CT
+	public static <CT extends Cell<CT, ?>,
+		PF extends ScalarShapeFunction<CT,?>,
+		VF extends VectorShapeFunction<CT, ?>, MF extends MixedShapeFunction<CT,
+		?, PF,VF>> MixedCellIntegral<CT, PF, VF,MF> fromPressureIntegral(CellIntegral<CT
 		, PF> pressureIntegral)
 	{
 		return new MixedCellIntegral<>(pressureIntegral, null);
 	}
 	
-	public static <CT extends Cell<CT,FT,ET>, FT extends Face<CT,FT,ET>, ET extends Edge<CT,FT,ET>,
-		PF extends ScalarShapeFunction<CT,FT,ET>, VF extends VectorShapeFunction<CT,FT,ET>> MixedCellIntegral<CT,FT,ET, PF,
-		VF> fromVelocityIntegral(CellIntegral<CT
+	public static <CT extends Cell<CT,FT>, FT extends Face<CT,FT>,
+		PF extends ScalarShapeFunction<CT,FT>, VF extends VectorShapeFunction<CT,FT>,
+		MF extends MixedShapeFunction<CT,
+	?, PF,VF>> MixedCellIntegral<CT,
+		PF,
+		VF,MF> fromVelocityIntegral(CellIntegral<CT
 		, VF> velocityIntegral)
 	{
 		return new MixedCellIntegral<>(null, velocityIntegral);
@@ -76,34 +80,34 @@ public class MixedCellIntegral<CT extends Cell<CT,FT,ET>, FT extends Face<CT,FT,
 	}
 	
 	protected double evaluatePressureVelocityIntegral(CT cell,
-	                                                  MixedShapeFunction<CT,FT,ET, PF, VF> pressureShapeFunction,
-	                                                  MixedShapeFunction<CT,FT,ET, PF, VF> velocityShapeFunction)
+	                                                  MF pressureShapeFunction,
+	                                                  MF velocityShapeFunction)
 	{
 		throw new UnsupportedOperationException("needs to be overwritten");
 	}
 	
 	@Override
 	public double evaluateCellIntegral(CT cell,
-	                                   MixedShapeFunction<CT,FT,ET, PF, VF> shapeFunction1,
-	                                   MixedShapeFunction<CT,FT,ET, PF, VF> shapeFunction2)
+	                                   MF shapeFunction1,
+	                                   MF shapeFunction2)
 	{
 		if (isPressureIntegral())
 		{
-			if (shapeFunction1.isVelocity() || shapeFunction2.isVelocity())
+			if (shapeFunction1.hasVelocityFunction() || shapeFunction2.hasVelocityFunction())
 				return 0;
 			return Objects.requireNonNull(pressureIntegral).evaluateCellIntegral(cell, shapeFunction1.getPressureShapeFunction(),
 				shapeFunction2.getPressureShapeFunction());
 		} else if (isVelocityIntegral())
 		{
-			if (shapeFunction1.isPressure() || shapeFunction2.isPressure())
+			if (shapeFunction1.hasPressureFunction() || shapeFunction2.hasPressureFunction())
 				return 0;
 			return Objects.requireNonNull(velocityIntegral).evaluateCellIntegral(cell, shapeFunction1.getVelocityShapeFunction(),
 				shapeFunction2.getVelocityShapeFunction());
 		} else
 		{
-			if (shapeFunction1.isPressure() && shapeFunction2.isVelocity())
+			if (shapeFunction1.hasPressureFunction() && shapeFunction2.hasVelocityFunction())
 				return evaluatePressureVelocityIntegral(cell, shapeFunction2, shapeFunction1);
-			else if (shapeFunction2.isPressure() && shapeFunction1.isVelocity())
+			else if (shapeFunction2.hasPressureFunction() && shapeFunction1.hasVelocityFunction())
 				return evaluatePressureVelocityIntegral(cell, shapeFunction1, shapeFunction2);
 			else
 				return 0;

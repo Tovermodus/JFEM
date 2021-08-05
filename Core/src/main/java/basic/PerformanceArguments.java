@@ -21,6 +21,8 @@ public class PerformanceArguments
 	}
 	public static void createInstance(Boolean parallelizeThreads, Integer threadNumber, Boolean executeChecks,
 	                                  Integer cacheSize, Double doubleTolerance) {
+		if(INSTANCE != null)
+			throw new IllegalStateException();
 		INSTANCE = new PerformanceArguments(parallelizeThreads, threadNumber, executeChecks, cacheSize, doubleTolerance);
 	}
 	public static PerformanceArguments getInstance() {

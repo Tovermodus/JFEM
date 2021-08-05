@@ -2,10 +2,11 @@ import basic.*;
 import com.google.common.primitives.Ints;
 import linalg.CoordinateVector;
 import linalg.IterativeSolver;
-import linalg.SparseMatrix;
 import linalg.Vector;
 import mixed.*;
 import tensorproduct.*;
+import tensorproduct.geometry.TPCell;
+import tensorproduct.geometry.TPFace;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -22,39 +23,33 @@ public class RTDarcy
 		CoordinateVector end = CoordinateVector.fromValues(1, 1,1);
 		int polynomialDegree = 2;
 		MixedRTSpace grid = new MixedRTSpace(start, end,
-			Ints.asList(3,3,3), polynomialDegree);
+			Ints.asList(3,3,3));
 		TPVectorCellIntegral<RTShapeFunction> valueValue =
 			new TPVectorCellIntegral<>(TPVectorCellIntegral.VALUE_VALUE);
-		MixedCellIntegral<TPCell,TPFace,TPEdge,ContinuousTPShapeFunction, RTShapeFunction>
+		MixedCellIntegral<TPCell, ContinuousTPShapeFunction, RTShapeFunction,RTMixedFunction>
 			divValue = new MixedTPCellIntegral<>(MixedTPCellIntegral.DIV_VALUE);
-		MixedCellIntegral<TPCell, TPFace,TPEdge, ContinuousTPShapeFunction, RTShapeFunction> vv =
+		MixedCellIntegral<TPCell, ContinuousTPShapeFunction, RTShapeFunction,RTMixedFunction> vv =
 			MixedCellIntegral.fromVelocityIntegral(valueValue);
-		List<CellIntegral<TPCell,  MixedShapeFunction<TPCell, TPFace,TPEdge,ContinuousTPShapeFunction,
-			RTShapeFunction>>> cellIntegrals =
+		List<CellIntegral<TPCell,  RTMixedFunction>> cellIntegrals =
 			new ArrayList<>();
 		cellIntegrals.add(vv);
 		cellIntegrals.add(divValue);
-		List<FaceIntegral< TPFace, MixedShapeFunction<TPCell, TPFace,TPEdge,ContinuousTPShapeFunction,
-			RTShapeFunction>>> faceIntegrals = new ArrayList<>();
+		List<FaceIntegral< TPFace, RTMixedFunction>> faceIntegrals = new ArrayList<>();
 		
-		MixedRightHandSideIntegral<TPCell, TPFace,TPEdge, ContinuousTPShapeFunction, RTShapeFunction> rightHandSideIntegral =
+		MixedRightHandSideIntegral<TPCell, ContinuousTPShapeFunction, RTShapeFunction,RTMixedFunction> rightHandSideIntegral =
 			MixedRightHandSideIntegral.fromPressureIntegral(
 				new TPRightHandSideIntegral<ContinuousTPShapeFunction>(ScalarFunction.constantFunction(-1),
-					TPRightHandSideIntegral.VALUE, false));
+					TPRightHandSideIntegral.VALUE));
 		
 		
-		List<RightHandSideIntegral<TPCell,  MixedShapeFunction<TPCell, TPFace,TPEdge,
-			ContinuousTPShapeFunction,
-			RTShapeFunction>>> rightHandSideIntegrals = new ArrayList<>();
+		List<RightHandSideIntegral<TPCell,  RTMixedFunction>> rightHandSideIntegrals = new ArrayList<>();
 		rightHandSideIntegrals.add(rightHandSideIntegral);
 		
 		
-		List<BoundaryRightHandSideIntegral< TPFace, MixedShapeFunction<TPCell, TPFace,
-			TPEdge,ContinuousTPShapeFunction,
-			RTShapeFunction>>> boundaryFaceIntegrals =
+		List<BoundaryRightHandSideIntegral< TPFace, RTMixedFunction>> boundaryFaceIntegrals =
 			new ArrayList<>();
 		
-		MixedBoundaryRightHandSideIntegral<TPCell, TPFace, TPEdge,ContinuousTPShapeFunction, RTShapeFunction> dirichlet =
+		MixedBoundaryRightHandSideIntegral< TPFace, ContinuousTPShapeFunction, RTShapeFunction,RTMixedFunction> dirichlet =
 			MixedBoundaryRightHandSideIntegral.fromVelocityIntegral(
 				new TPVectorBoundaryFaceIntegral<RTShapeFunction>(ScalarFunction.constantFunction(0),
 					TPVectorBoundaryFaceIntegral.NORMAL_VALUE));
@@ -82,7 +77,7 @@ public class RTDarcy
 		System.out.println(grid.getSystemMatrix().mvMul(solution1));
 		//grid.A.print_formatted();
 		//grid.rhs.print_formatted();
-		MixedFESpaceFunction<TPCell,TPFace,TPEdge,ContinuousTPShapeFunction,RTShapeFunction> solut =
+		MixedFESpaceFunction<RTMixedFunction> solut =
 			new MixedFESpaceFunction<>(
 				grid.getShapeFunctions(), solution1);
 		ArrayList<Map<CoordinateVector, Double>> valList = new ArrayList<>();

@@ -3,10 +3,9 @@ package examples;
 import basic.*;
 import linalg.*;
 import org.junit.jupiter.api.Test;
-import systems.SystemMixedCellIntegral;
-import systems.SystemParameters;
-import systems.SystemShapeFunction;
 import tensorproduct.*;
+import tensorproduct.geometry.TPCell;
+import tensorproduct.geometry.TPFace;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -38,7 +37,7 @@ public class LaplaceTest
 		
 		ArrayList<CellIntegral<TPCell,TPShapeFunction>> cellIntegrals =
 			new ArrayList<>();
-		ArrayList<FaceIntegral< TPFace,TPShapeFunction>> faceIntegrals =
+		ArrayList<FaceIntegral<TPFace,TPShapeFunction>> faceIntegrals =
 			new ArrayList<>();
 		ArrayList<RightHandSideIntegral<TPCell, TPShapeFunction>> rightHandSideIntegrals
 			= new ArrayList<>();
@@ -51,7 +50,7 @@ public class LaplaceTest
 		faceIntegrals.add(jj);
 		
 		int polynomialDegree = 2;
-		TPFESpace grid = new TPFESpace(start, end, cells, polynomialDegree);
+		TPFESpace grid = new TPFESpace(start, end, cells);
 		grid.assembleCells();
 		grid.assembleFunctions(polynomialDegree);
 		grid.initializeSystemMatrix();
@@ -97,7 +96,7 @@ public class LaplaceTest
 		cellIntegrals.add(gg);
 		
 		int polynomialDegree = 2;
-		ContinuousTPFESpace grid = new ContinuousTPFESpace(start, end, cells, polynomialDegree);
+		ContinuousTPFESpace grid = new ContinuousTPFESpace(start, end, cells);
 		grid.assembleCells();
 		grid.assembleFunctions(polynomialDegree);
 		grid.initializeSystemMatrix();

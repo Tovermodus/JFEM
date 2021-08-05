@@ -2,8 +2,9 @@ package tensorproduct;
 
 import com.google.common.primitives.Ints;
 import linalg.CoordinateVector;
-import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
+import tensorproduct.geometry.TPCell;
+import tensorproduct.geometry.TPFace;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -17,7 +18,7 @@ public class TPFESpaceTest
 		CoordinateVector end = CoordinateVector.fromValues(1, 1);
 		int polynomialDegree = 1;
 		TPFESpace grid = new TPFESpace(start, end,
-			Ints.asList(3, 3), polynomialDegree);
+			Ints.asList(3, 3));
 		grid.assembleCells();;
 		grid.assembleFunctions(polynomialDegree);
 		assertEquals(9, grid.getCells().size());
@@ -84,7 +85,7 @@ public class TPFESpaceTest
 		CoordinateVector end = CoordinateVector.fromValues(1, 1);
 		int polynomialDegree = 3;
 		TPFESpace grid = new TPFESpace(start, end,
-			Ints.asList(3, 3), polynomialDegree);
+			Ints.asList(3, 3));
 		grid.assembleCells();;
 		grid.assembleFunctions(polynomialDegree);
 		assertEquals(9, grid.getCells().size());

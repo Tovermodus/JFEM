@@ -3,9 +3,10 @@ import com.google.common.base.Stopwatch;
 import com.google.common.primitives.Ints;
 import linalg.CoordinateVector;
 import linalg.IterativeSolver;
-import linalg.SparseMatrix;
 import linalg.Vector;
 import tensorproduct.*;
+import tensorproduct.geometry.TPCell;
+import tensorproduct.geometry.TPFace;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -26,7 +27,7 @@ public class LaplaceScalarRT
 		CoordinateVector end = CoordinateVector.fromValues(1,1);
 		int polynomialDegree = 4;
 		ScalarRTFESpace grid = new ScalarRTFESpace(start,end,
-			Ints.asList(7,7),polynomialDegree);
+			Ints.asList(7,7));
 		TPCellIntegral<RTComponentFunction> gg =
 			new TPCellIntegral<>(ScalarFunction.constantFunction(1),
 			TPCellIntegral.GRAD_GRAD);

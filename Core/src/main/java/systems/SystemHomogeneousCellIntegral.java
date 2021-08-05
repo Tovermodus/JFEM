@@ -5,8 +5,8 @@ import basic.CellIntegral;
 import basic.ShapeFunction;
 import tensorproduct.QuadratureRule1D;
 
-public class SystemHomogeneousCellIntegral<CT extends Cell<CT,?,?>, ST extends ShapeFunction<CT,?,?,?,?,?>>
-	extends CellIntegral<CT, SystemShapeFunction<CT,?,?,ST>>
+public class SystemHomogeneousCellIntegral<CT extends Cell<CT,?>, ST extends ShapeFunction<CT,?, ?,?,?>>
+	extends CellIntegral<CT, SystemShapeFunction<CT,?, ST>>
 {
 	private final CellIntegral<CT, ST> cellIntegral;
 	private final int component;
@@ -26,8 +26,8 @@ public class SystemHomogeneousCellIntegral<CT extends Cell<CT,?,?>, ST extends S
 	
 	
 	@Override
-	public double evaluateCellIntegral(CT cell, SystemShapeFunction<CT, ?, ?, ST> shapeFunction1,
-	                                   SystemShapeFunction<CT, ?, ?, ST> shapeFunction2)
+	public double evaluateCellIntegral(CT cell, SystemShapeFunction<CT, ?, ST> shapeFunction1,
+	                                   SystemShapeFunction<CT, ?, ST> shapeFunction2)
 	{
 		if(shapeFunction1.mainComponent == component && shapeFunction2.mainComponent == component)
 		{

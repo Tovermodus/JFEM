@@ -3,8 +3,8 @@ package systems;
 import basic.*;
 import tensorproduct.QuadratureRule1D;
 
-public class SystemHomogeneousFaceIntegral<FT extends Face<?,FT,?>, ST extends ShapeFunction<?,FT,?,?,?,?>>
-	extends FaceIntegral<FT, SystemShapeFunction<?,FT,?,ST>>
+public class SystemHomogeneousFaceIntegral<FT extends Face<?,FT>, ST extends ShapeFunction<?,FT, ?,?,?>>
+	extends FaceIntegral<FT, SystemShapeFunction<?,FT, ST>>
 {
 	private final FaceIntegral<FT, ST> faceIntegral;
 	private final int component;
@@ -24,8 +24,8 @@ public class SystemHomogeneousFaceIntegral<FT extends Face<?,FT,?>, ST extends S
 	
 	
 	@Override
-	public double evaluateFaceIntegral(FT face, SystemShapeFunction<?, FT, ?, ST> shapeFunction1,
-	                                   SystemShapeFunction<?, FT, ?, ST> shapeFunction2)
+	public double evaluateFaceIntegral(FT face, SystemShapeFunction<?, FT, ST> shapeFunction1,
+	                                   SystemShapeFunction<?, FT, ST> shapeFunction2)
 	{
 		if(shapeFunction1.mainComponent == component && shapeFunction2.mainComponent == component)
 		{

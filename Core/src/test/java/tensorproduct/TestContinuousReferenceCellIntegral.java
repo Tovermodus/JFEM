@@ -6,8 +6,12 @@ import basic.RightHandSideIntegral;
 import basic.ScalarFunction;
 import com.google.common.primitives.Ints;
 import linalg.CoordinateVector;
+import linalg.IntCoordinates;
 import linalg.Matrix;
 import org.junit.jupiter.api.Test;
+import tensorproduct.geometry.CartesianGrid;
+import tensorproduct.geometry.Cell1D;
+import tensorproduct.geometry.TPCell;
 
 import java.util.ArrayList;
 
@@ -18,16 +22,13 @@ public class TestContinuousReferenceCellIntegral
 	@Test
 	public void test2DGradGradMatrix()
 	{
-		PerformanceArguments.PerformanceArgumentBuilder builder =
-			new PerformanceArguments.PerformanceArgumentBuilder();
-		builder.parallelizeThreads = false;
 		Matrix referenceMatrix;
 		CoordinateVector start = CoordinateVector.fromValues(-1, -10);
 		CoordinateVector end = CoordinateVector.fromValues(1, 1);
 		int polynomialDegree = 3;
 		
 		ContinuousTPFESpace grid = new ContinuousTPFESpace(start, end,
-			Ints.asList(3, 5), polynomialDegree);
+			Ints.asList(3, 5));
 		TPCellIntegral<ContinuousTPShapeFunction> gg = new TPCellIntegral<>(ScalarFunction.constantFunction(1),
 			TPCellIntegral.GRAD_GRAD);
 		ArrayList<CellIntegral<TPCell, ContinuousTPShapeFunction>> cellIntegrals =
@@ -46,7 +47,7 @@ public class TestContinuousReferenceCellIntegral
 		referenceMatrix = grid.getSystemMatrix();
 		
 		grid = new ContinuousTPFESpace(start, end,
-			Ints.asList(3, 5), polynomialDegree);
+			Ints.asList(3, 5));
 		gg = new TPCellIntegralViaReferenceCell<>(1,
 			TPCellIntegral.GRAD_GRAD);
 		cellIntegrals =
@@ -74,7 +75,7 @@ public class TestContinuousReferenceCellIntegral
 		int polynomialDegree = 2;
 		
 		ContinuousTPFESpace grid = new ContinuousTPFESpace(start, end,
-			Ints.asList(4, 7, 2), polynomialDegree);
+			Ints.asList(4, 7, 2));
 		TPCellIntegral<ContinuousTPShapeFunction> gg = new TPCellIntegral<>(ScalarFunction.constantFunction(1),
 			TPCellIntegral.GRAD_GRAD);
 		ArrayList<CellIntegral<TPCell, ContinuousTPShapeFunction>> cellIntegrals =
@@ -92,7 +93,7 @@ public class TestContinuousReferenceCellIntegral
 		referenceMatrix = grid.getSystemMatrix();
 		
 		grid = new ContinuousTPFESpace(start, end,
-			Ints.asList(4, 7, 2), polynomialDegree);
+			Ints.asList(4, 7, 2));
 		gg = new TPCellIntegralViaReferenceCell<>(1,
 			TPCellIntegral.GRAD_GRAD);
 		cellIntegrals =
@@ -114,13 +115,9 @@ public class TestContinuousReferenceCellIntegral
 	@Test
 	public void test2DGradGrad()
 	{
-		PerformanceArguments.PerformanceArgumentBuilder builder =
-			new PerformanceArguments.PerformanceArgumentBuilder();
-		builder.parallelizeThreads = false;
-		ArrayList<Cell1D> cell1DList = new ArrayList<>();
-		cell1DList.add(new Cell1D(3, 5)); //2/3, 5/6, 10/9, 17/12, 26/15, 37/18
-		cell1DList.add(new Cell1D(0, 4));// 2/3, 13/18 5/6 29/30 10/9 53/42
-		TPCell c = new TPCell(cell1DList);
+		CartesianGrid g = new CartesianGrid(CoordinateVector.fromValues(3,0),
+			CoordinateVector.fromValues(5,4),new IntCoordinates(1,1));
+		TPCell c = g.cells.get(0);
 		for (int k = 1; k < 5; k++)
 			for (int i = 0; i < (k + 1) * (k + 1); i++)
 				for (int j = 0; j < (k + 1) * (k + 1); j++)
@@ -145,10 +142,9 @@ public class TestContinuousReferenceCellIntegral
 			new PerformanceArguments.PerformanceArgumentBuilder();
 		builder.parallelizeThreads = false;
 		ArrayList<Cell1D> cell1DList = new ArrayList<>();
-		cell1DList.add(new Cell1D(0, 2));
-		cell1DList.add(new Cell1D(0, 1));
-		cell1DList.add(new Cell1D(0, 1));
-		TPCell c = new TPCell(cell1DList);
+		CartesianGrid g = new CartesianGrid(CoordinateVector.fromValues(0,0,0),
+			CoordinateVector.fromValues(2,1,1),new IntCoordinates(1,1,1));
+		TPCell c = g.cells.get(0);
 		for (int k = 1; k < 5; k++)
 			for (int i = 0; i < (k + 1) * (k + 1); i++)
 				for (int j = 0; j < (k + 1) * (k + 1); j++)
@@ -174,14 +170,9 @@ public class TestContinuousReferenceCellIntegral
 	@Test
 	public void test3DValueValue()
 	{
-		PerformanceArguments.PerformanceArgumentBuilder builder =
-			new PerformanceArguments.PerformanceArgumentBuilder();
-		builder.parallelizeThreads = false;
-		ArrayList<Cell1D> cell1DList = new ArrayList<>();
-		cell1DList.add(new Cell1D(0, 2));
-		cell1DList.add(new Cell1D(0, 1));
-		cell1DList.add(new Cell1D(0, 1));
-		TPCell c = new TPCell(cell1DList);
+		CartesianGrid g = new CartesianGrid(CoordinateVector.fromValues(0,0,0),
+			CoordinateVector.fromValues(2,1,1),new IntCoordinates(1,1,1));
+		TPCell c = g.cells.get(0);
 		for (int k = 1; k < 5; k++)
 			for (int i = 0; i < (k + 1) * (k + 1); i++)
 				for (int j = 0; j < (k + 1) * (k + 1); j++)

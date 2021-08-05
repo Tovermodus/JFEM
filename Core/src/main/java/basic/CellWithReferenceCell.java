@@ -3,8 +3,8 @@ package basic;
 import linalg.CoordinateMatrix;
 import linalg.CoordinateVector;
 
-public interface CellWithReferenceCell<CT extends CellWithReferenceCell<CT, FT, ET>, FT extends FaceWithReferenceFace<CT, FT, ET>,
-	ET extends EdgeWithReferenceEdge<CT, FT, ET>> extends Cell<CT,FT,ET>
+public interface CellWithReferenceCell<CT extends CellWithReferenceCell<CT, FT>, FT extends FaceWithReferenceFace<CT, FT>
+	> extends Cell<CT,FT>
 {
 	CT getReferenceCell();
 	

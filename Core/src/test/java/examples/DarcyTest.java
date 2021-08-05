@@ -4,15 +4,15 @@ import basic.*;
 import com.google.common.primitives.Ints;
 import linalg.CoordinateVector;
 import linalg.IterativeSolver;
-import linalg.SparseMatrix;
 import linalg.Vector;
 import mixed.*;
 import org.junit.jupiter.api.Test;
 import tensorproduct.*;
+import tensorproduct.geometry.TPCell;
+import tensorproduct.geometry.TPFace;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
@@ -21,41 +21,32 @@ public class DarcyTest
 	@Test
 	public void testConvergence()
 	{
-		PerformanceArguments.PerformanceArgumentBuilder builder =
-			new PerformanceArguments.PerformanceArgumentBuilder();
-		builder.build();
 		CoordinateVector start = CoordinateVector.fromValues(-1, -1);
 		CoordinateVector end = CoordinateVector.fromValues(1, 1);
 		int polynomialDegree = 2;
 		MixedRTSpace grid = new MixedRTSpace(start, end,
-			Ints.asList(5,7), polynomialDegree);
+			Ints.asList(5,7));
 		TPVectorCellIntegral<RTShapeFunction> valueValue =
 			new TPVectorCellIntegral<>(TPVectorCellIntegral.VALUE_VALUE);
-		MixedCellIntegral<TPCell, TPFace,TPEdge,ContinuousTPShapeFunction, RTShapeFunction>
+		MixedCellIntegral<TPCell,  ContinuousTPShapeFunction, RTShapeFunction, RTMixedFunction>
 			divValue = new MixedTPCellIntegral<>(MixedTPCellIntegral.DIV_VALUE);
-		MixedCellIntegral<TPCell, TPFace,TPEdge, ContinuousTPShapeFunction, RTShapeFunction> vv =
+		MixedCellIntegral<TPCell,  ContinuousTPShapeFunction, RTShapeFunction, RTMixedFunction> vv =
 			MixedCellIntegral.fromVelocityIntegral(valueValue);
-		List<CellIntegral<TPCell,  MixedShapeFunction<TPCell, TPFace,TPEdge,ContinuousTPShapeFunction,
-			RTShapeFunction>>> cellIntegrals =
+		List<CellIntegral<TPCell,  RTMixedFunction>> cellIntegrals =
 			new ArrayList<>();
 		cellIntegrals.add(vv);
 		cellIntegrals.add(divValue);
-		List<FaceIntegral< TPFace, MixedShapeFunction<TPCell, TPFace,TPEdge,ContinuousTPShapeFunction,
-			RTShapeFunction>>> faceIntegrals = new ArrayList<>();
-		MixedRightHandSideIntegral<TPCell, TPFace, TPEdge,ContinuousTPShapeFunction, RTShapeFunction> rightHandSideIntegral =
+		List<FaceIntegral< TPFace, RTMixedFunction>> faceIntegrals = new ArrayList<>();
+		RightHandSideIntegral<TPCell, RTMixedFunction> rightHandSideIntegral =
 			MixedRightHandSideIntegral.fromPressureIntegral(
-				new TPRightHandSideIntegral<ContinuousTPShapeFunction>(
+				new TPRightHandSideIntegral<>(
 					LaplaceReferenceSolution.scalarRightHandSide(),TPRightHandSideIntegral.VALUE ));
-		List<RightHandSideIntegral<TPCell,  MixedShapeFunction<TPCell, TPFace,TPEdge,
-			ContinuousTPShapeFunction,
-			RTShapeFunction>>> rightHandSideIntegrals = new ArrayList<>();
+		List<RightHandSideIntegral<TPCell, RTMixedFunction>> rightHandSideIntegrals = new ArrayList<>();
 		rightHandSideIntegrals.add(rightHandSideIntegral);
-		List<BoundaryRightHandSideIntegral< TPFace, MixedShapeFunction<TPCell, TPFace,
-			TPEdge,ContinuousTPShapeFunction,
-			RTShapeFunction>>> boundaryFaceIntegrals = new ArrayList<>();
-		MixedBoundaryRightHandSideIntegral<TPCell, TPFace, TPEdge,ContinuousTPShapeFunction, RTShapeFunction> dirichlet =
+		List<BoundaryRightHandSideIntegral< TPFace, RTMixedFunction>> boundaryFaceIntegrals = new ArrayList<>();
+		MixedBoundaryRightHandSideIntegral<TPFace, ContinuousTPShapeFunction, RTShapeFunction, RTMixedFunction> dirichlet =
 			MixedBoundaryRightHandSideIntegral.fromVelocityIntegral(
-				new TPVectorBoundaryFaceIntegral<RTShapeFunction>(LaplaceReferenceSolution.scalarBoundaryValues(),
+				new TPVectorBoundaryFaceIntegral<>(LaplaceReferenceSolution.scalarBoundaryValues(),
 					TPVectorBoundaryFaceIntegral.NORMAL_VALUE));
 		boundaryFaceIntegrals.add(dirichlet);
 		grid.assembleCells();
@@ -71,9 +62,21 @@ public class DarcyTest
 		i.showProgress = false;
 		Vector solution1 = i.solveGMRES(grid.getSystemMatrix(), grid.getRhs(), 1e-10);
 		System.out.println("solved");
-		MixedFESpaceFunction<TPCell,TPFace,TPEdge,ContinuousTPShapeFunction,RTShapeFunction> solut =
+		MixedFESpaceFunction<RTMixedFunction> solut =
 			new MixedFESpaceFunction<>(
 				grid.getShapeFunctions(), solution1);
+//		PlotWindow p = new PlotWindow();
+//		p.addPlot(new MixedPlot2D(solut, grid.generatePlotPoints(20),20));
+//		p.addPlot(new ScalarPlot2D(LaplaceReferenceSolution.scalarReferenceSolution(), grid.generatePlotPoints(20),20));
+		System.out.println(ConvergenceOrderEstimator.normL2Difference(solut.getPressureFunction(),
+			LaplaceReferenceSolution.scalarReferenceSolution(),grid.generatePlotPoints(20)));
+		try
+		{
+			Thread.sleep(00000);
+		} catch (InterruptedException e)
+		{
+			e.printStackTrace();
+		}
 		assertTrue(ConvergenceOrderEstimator.normL2Difference(solut.getPressureFunction(),
 			LaplaceReferenceSolution.scalarReferenceSolution(),grid.generatePlotPoints(20))<1e-2);
 	}

@@ -2,12 +2,12 @@ package tensorproduct;
 
 import basic.*;
 import linalg.*;
-import linalg.Vector;
-import org.jetbrains.annotations.NotNull;
+import tensorproduct.geometry.TPCell;
+import tensorproduct.geometry.TPFace;
 
 import java.util.*;
 
-public class RTComponentFunction implements FastEvaluatedScalarShapeFunction<TPCell, TPFace,TPEdge>,
+public class RTComponentFunction implements FastEvaluatedScalarShapeFunction<TPCell, TPFace>,
 	Comparable<RTComponentFunction>{
 	
 	private Map<TPCell, List<RTBasisFunction1D>> cells;
@@ -38,7 +38,7 @@ public class RTComponentFunction implements FastEvaluatedScalarShapeFunction<TPC
 	private void checkIfPointOnFace(CoordinateVector functionalPoint, TPCell cell)
 	{
 		
-		for(TPFace face: cell.faces)
+		for(TPFace face: cell.getFaces())
 		{
 			if(faces.add(face))
 			{
@@ -61,7 +61,7 @@ public class RTComponentFunction implements FastEvaluatedScalarShapeFunction<TPC
 		for (int i = 0; i < getDomainDimension(); i++)
 		{
 			function1Ds.add(new RTBasisFunction1D(polynomialDegree, decomposedLocalIndex[i],
-				cell.cell1Ds.get(i), i == highDegreeDimension));
+				cell.getComponentCell(i), i == highDegreeDimension));
 		}
 		return function1Ds;
 	}
@@ -72,10 +72,10 @@ public class RTComponentFunction implements FastEvaluatedScalarShapeFunction<TPC
 		if(!cell.isInCell(functionalPoint))
 			throw new IllegalArgumentException("functional point is not in cell");
 		List<RTBasisFunction1D> function1Ds = new ArrayList<>();
-		for (int i = 0; i < functionalPoint.getLength(); i++)
+		for (int i = 0; i < dimension; i++)
 		{
 			function1Ds.add(new RTBasisFunction1D(polynomialDegree, functionalPoint.at(i),
-				cell.cell1Ds.get(i), i == highDegreeDimension));
+				cell.getComponentCell(i), i == highDegreeDimension));
 		}
 		return function1Ds;
 	}

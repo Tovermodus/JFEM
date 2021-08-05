@@ -1,15 +1,13 @@
 package basic;
 
 import com.google.common.collect.Iterables;
-import com.google.common.collect.Sets;
 import linalg.CoordinateVector;
-import org.jetbrains.annotations.NotNull;
 
 import java.util.Map;
 import java.util.Set;
 
-public interface ShapeFunction<CT extends Cell<CT,FT, ET>, FT extends Face<CT,FT, ET>,
-	ET extends Edge<CT,FT,ET>, valueT,	gradientT,
+public interface ShapeFunction<CT extends Cell<CT,FT>, FT extends Face<CT,FT>,
+	valueT,	gradientT,
 	hessianT> extends Function<valueT,gradientT,hessianT>
 {
 	@Override
@@ -47,6 +45,6 @@ public interface ShapeFunction<CT extends Cell<CT,FT, ET>, FT extends Face<CT,FT
 	
 	valueT normalAverageInDerivative(FT face, CoordinateVector pos);
 	
-	<ST extends ShapeFunction<CT,FT,ET,valueT,gradientT,hessianT>> Map<Integer, Double> prolongate(Set<ST> refinedFunctions);
+	<ST extends ShapeFunction<CT,FT, valueT,gradientT,hessianT>> Map<Integer, Double> prolongate(Set<ST> refinedFunctions);
 	
 }

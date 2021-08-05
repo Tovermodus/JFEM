@@ -4,12 +4,13 @@ import basic.*;
 import linalg.CoordinateComparator;
 import linalg.CoordinateMatrix;
 import linalg.CoordinateVector;
-import org.jetbrains.annotations.NotNull;
+import tensorproduct.geometry.TPCell;
+import tensorproduct.geometry.TPFace;
 
 import java.util.*;
 
-public class TPShapeFunction implements ScalarShapeFunctionWithReferenceShapeFunction<TPCell,TPFace,TPEdge>,
-	FastEvaluatedScalarShapeFunction<TPCell, TPFace, TPEdge>, Comparable<TPShapeFunction>
+public class TPShapeFunction implements ScalarShapeFunctionWithReferenceShapeFunction<TPCell, TPFace>,
+	FastEvaluatedScalarShapeFunction<TPCell, TPFace>, Comparable<TPShapeFunction>
 {
 	private final int polynomialDegree;
 	List<LagrangeBasisFunction1D> function1Ds;
@@ -31,7 +32,7 @@ public class TPShapeFunction implements ScalarShapeFunctionWithReferenceShapeFun
 		for (int i = 0; i < localIndices.length; i++)
 		{
 			function1Ds.add(new LagrangeBasisFunction1D(polynomialDegree, localIndices[i],
-				this.supportCell.cell1Ds.get(i)));
+				this.supportCell.getComponentCell(i)));
 		}
 		CoordinateVector functional_point =
 			CoordinateVector.fromValues(function1Ds.stream().mapToDouble(LagrangeBasisFunction1D::getDegreeOfFreedom).toArray());
@@ -47,7 +48,10 @@ public class TPShapeFunction implements ScalarShapeFunctionWithReferenceShapeFun
 			CoordinateVector.fromValues(function1Ds.stream().mapToDouble(LagrangeBasisFunction1D::getDegreeOfFreedom).toArray());
 		nodeFunctional = new LagrangeNodeFunctional(functional_point);
 	}
-	
+	public static int functionsPerCell(int polynomialDegree, int dimension)
+	{
+		return (int)Math.pow(polynomialDegree+1, dimension);
+	}
 	private static int[] decomposeIndex(int dimension, int polynomialDegree, int localIndex)
 	{
 		int[] ret = new int[dimension];

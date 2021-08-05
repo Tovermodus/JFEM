@@ -1,13 +1,8 @@
 package linalg;
 
 import basic.PerformanceArguments;
-import com.google.common.collect.ImmutableMap;
-import com.google.common.collect.Streams;
-import com.google.common.primitives.Ints;
-import tensorproduct.TPEdge;
 
 import java.util.*;
-import java.util.stream.IntStream;
 
 public interface Vector extends Tensor
 {

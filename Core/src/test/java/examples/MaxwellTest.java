@@ -5,11 +5,12 @@ import com.google.common.base.Stopwatch;
 import com.google.common.primitives.Ints;
 import linalg.CoordinateVector;
 import linalg.IterativeSolver;
-import linalg.SparseMatrix;
 import linalg.Vector;
 import mixed.*;
 import org.junit.jupiter.api.Test;
 import tensorproduct.*;
+import tensorproduct.geometry.TPCell;
+import tensorproduct.geometry.TPFace;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -21,42 +22,33 @@ public class MaxwellTest
 	@Test
 	public void testQkQkConvergence()
 	{
-		PerformanceArguments.PerformanceArgumentBuilder builder =
-			new PerformanceArguments.PerformanceArgumentBuilder();
-		builder.build();
 		CoordinateVector start = CoordinateVector.fromValues(0, 0, 0);
 		CoordinateVector end = CoordinateVector.fromValues(1, 1, 1);
 		int polynomialDegree = 3;
 		QkQkSpace grid = new QkQkSpace(start, end,
-			Ints.asList(4, 4, 4), polynomialDegree);
+			Ints.asList(4, 4, 4));
 		TPVectorCellIntegral<ContinuousTPVectorFunction> valueValue =
 			new TPVectorCellIntegralViaReferenceCell<>(TPVectorCellIntegral.ROT_ROT);
-		MixedCellIntegral<TPCell, TPFace, TPEdge, ContinuousTPShapeFunction, ContinuousTPVectorFunction>
+		MixedCellIntegral<TPCell, ContinuousTPShapeFunction, ContinuousTPVectorFunction,QkQkFunction>
 			divValue =
 			new MixedTPCellIntegral<>(ScalarFunction.constantFunction(-1),
 				MixedTPCellIntegral.DIV_VALUE);
-		MixedCellIntegral<TPCell, TPFace, TPEdge, ContinuousTPShapeFunction, ContinuousTPVectorFunction> vv =
+		MixedCellIntegral<TPCell, ContinuousTPShapeFunction, ContinuousTPVectorFunction,QkQkFunction> vv =
 			MixedCellIntegral.fromVelocityIntegral(valueValue);
-		List<CellIntegral<TPCell, MixedShapeFunction<TPCell, TPFace, TPEdge, ContinuousTPShapeFunction,
-			ContinuousTPVectorFunction>>> cellIntegrals =
+		List<CellIntegral<TPCell, QkQkFunction>> cellIntegrals =
 			new ArrayList<>();
 		cellIntegrals.add(vv);
 		cellIntegrals.add(divValue);
-		List<FaceIntegral<TPFace, MixedShapeFunction<TPCell, TPFace, TPEdge, ContinuousTPShapeFunction,
-			ContinuousTPVectorFunction>>> faceIntegrals = new ArrayList<>();
-		MixedRightHandSideIntegral<TPCell, TPFace, TPEdge, ContinuousTPShapeFunction,
-			ContinuousTPVectorFunction> rightHandSideIntegral =
+		List<FaceIntegral<TPFace, QkQkFunction>> faceIntegrals = new ArrayList<>();
+		MixedRightHandSideIntegral<TPCell, ContinuousTPShapeFunction,
+			ContinuousTPVectorFunction,QkQkFunction> rightHandSideIntegral =
 			MixedRightHandSideIntegral.fromVelocityIntegral(
 				new TPVectorRightHandSideIntegral<ContinuousTPVectorFunction>(MaxwellReferenceSolution.rightHandSide(),
 					TPVectorRightHandSideIntegral.VALUE));
-		List<RightHandSideIntegral<TPCell, MixedShapeFunction<TPCell, TPFace, TPEdge,
-			ContinuousTPShapeFunction,
-			ContinuousTPVectorFunction>>> rightHandSideIntegrals = new ArrayList<>();
+		List<RightHandSideIntegral<TPCell, QkQkFunction>> rightHandSideIntegrals = new ArrayList<>();
 		rightHandSideIntegrals.add(rightHandSideIntegral);
 		
-		List<BoundaryRightHandSideIntegral<TPFace, MixedShapeFunction<TPCell, TPFace,
-			TPEdge, ContinuousTPShapeFunction,
-			ContinuousTPVectorFunction>>> boundaryFaceIntegrals =
+		List<BoundaryRightHandSideIntegral<TPFace, QkQkFunction>> boundaryFaceIntegrals =
 			new ArrayList<>();
 		grid.assembleCells();
 		grid.assembleFunctions(polynomialDegree);
@@ -74,10 +66,10 @@ public class MaxwellTest
 		grid.evaluateFaceIntegrals(faceIntegrals, boundaryFaceIntegrals);
 		System.out.println("solve system: " + grid.getSystemMatrix().getRows() + "×" + grid.getSystemMatrix().getCols());
 		IterativeSolver i = new IterativeSolver();
-		i.showProgress = false;
+		i.showProgress = true;
 		Vector solution1 = i.solveGMRES(grid.getSystemMatrix(), grid.getRhs(), 1e-6);
 		System.out.println("solved");
-		MixedFESpaceFunction<TPCell,TPFace,TPEdge,ContinuousTPShapeFunction,ContinuousTPVectorFunction> solut =
+		MixedFESpaceFunction<QkQkFunction> solut =
 			new MixedFESpaceFunction<>(
 				grid.getShapeFunctions(), solution1);
 		assertTrue(ConvergenceOrderEstimator.normL2Difference(solut.getPressureFunction(),

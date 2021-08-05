@@ -3,11 +3,10 @@ import com.google.common.primitives.Ints;
 import linalg.*;
 import mixed.*;
 import tensorproduct.*;
+import tensorproduct.geometry.TPCell;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
-import java.util.OptionalDouble;
 
 public class StokesTime
 {
@@ -49,24 +48,24 @@ public class StokesTime
 		CoordinateVector end = CoordinateVector.fromValues(1, 1);
 		int polynomialDegree = 1;
 		TaylorHoodSpace grid = new TaylorHoodSpace(start, end,
-			Ints.asList(6,6), polynomialDegree);
+			Ints.asList(6,6));
 		
-		MixedCellIntegral<TPCell,TPFace,TPEdge,ContinuousTPShapeFunction, ContinuousTPVectorFunction>
+		MixedCellIntegral<TPCell, ContinuousTPShapeFunction, ContinuousTPVectorFunction,QkQkFunction>
 			divValue =
 			new MixedTPCellIntegral<>(ScalarFunction.constantFunction(1),
 				MixedTPCellIntegral.DIV_VALUE);
-		MixedCellIntegral<TPCell, TPFace,TPEdge, ContinuousTPShapeFunction, ContinuousTPVectorFunction> gradGrad =
-			MixedCellIntegral.fromVelocityIntegral(new TPVectorCellIntegral<ContinuousTPVectorFunction>(
+		MixedCellIntegral<TPCell, ContinuousTPShapeFunction, ContinuousTPVectorFunction,QkQkFunction> gradGrad =
+			MixedCellIntegral.fromVelocityIntegral(new TPVectorCellIntegral<>(
 				ScalarFunction.constantFunction(1),
 				TPVectorCellIntegral.GRAD_GRAD));
-		MixedCellIntegral<TPCell, TPFace,TPEdge, ContinuousTPShapeFunction, ContinuousTPVectorFunction> valueValue =
-			MixedCellIntegral.fromVelocityIntegral(new TPVectorCellIntegral<ContinuousTPVectorFunction>(
+		MixedCellIntegral<TPCell, ContinuousTPShapeFunction, ContinuousTPVectorFunction,QkQkFunction> valueValue =
+			MixedCellIntegral.fromVelocityIntegral(new TPVectorCellIntegral<>(
 				ScalarFunction.constantFunction(1),
 				TPVectorCellIntegral.VALUE_VALUE));
-		MixedRightHandSideIntegral<TPCell, TPFace,TPEdge, ContinuousTPShapeFunction,
-			ContinuousTPVectorFunction> source =
+		MixedRightHandSideIntegral<TPCell, ContinuousTPShapeFunction,
+			ContinuousTPVectorFunction,QkQkFunction> source =
 			MixedRightHandSideIntegral.fromVelocityIntegral(
-				new TPVectorRightHandSideIntegral<ContinuousTPVectorFunction>(ScalarFunction.constantFunction(0).makeIsotropicVectorFunction(),
+				new TPVectorRightHandSideIntegral<>(ScalarFunction.constantFunction(0).makeIsotropicVectorFunction(),
 					TPVectorRightHandSideIntegral.VALUE));
 		grid.assembleCells();
 		grid.assembleFunctions(polynomialDegree);
@@ -111,7 +110,7 @@ public class StokesTime
 		SparseMatrix MAD = M.add(A).add(D);
 		DenseVector iterate = new DenseVector(n);
 		VectorFunction bdrFunction = createBoundaryFunction(0);
-		grid.setVelocityBoundaryValues(bdrFunction, indicatorFunction, MAD);
+		grid.setVelocityBoundaryValues(indicatorFunction, MAD);
 		grid.setVelocityBoundaryValues(bdrFunction, indicatorFunction, iterate);
 		
 		List<CoordinateVector> points = grid.generatePlotPoints(30);

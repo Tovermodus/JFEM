@@ -3,9 +3,8 @@ package basic;
 import linalg.CoordinateMatrix;
 import linalg.CoordinateVector;
 
-public interface FastEvaluatedScalarShapeFunction<CT extends Cell<CT,FT,ET>, FT extends Face<CT,FT,ET>, ET extends Edge<CT,FT
-	,ET>> extends FastEvaluatedScalarFunction, ScalarShapeFunction<CT,FT,
-	ET>
+public interface FastEvaluatedScalarShapeFunction<CT extends Cell<CT,FT>, FT extends Face<CT,FT>> extends FastEvaluatedScalarFunction, ScalarShapeFunction<CT,FT
+	>
 {
 	double fastValueInCell(CoordinateVector pos, CT cell);
 	double[] fastGradientInCell(CoordinateVector pos, CT cell);

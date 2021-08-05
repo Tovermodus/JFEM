@@ -2,9 +2,10 @@ import basic.*;
 import com.google.common.primitives.Ints;
 import linalg.CoordinateVector;
 import linalg.IterativeSolver;
-import linalg.SparseMatrix;
 import linalg.Vector;
 import tensorproduct.*;
+import tensorproduct.geometry.TPCell;
+import tensorproduct.geometry.TPFace;
 
 import java.util.ArrayList;
 import java.util.Map;
@@ -20,7 +21,7 @@ public class DGRTLaplace
 		CoordinateVector end = CoordinateVector.fromValues(1, 1);
 		int polynomialDegree = 2;
 		RTFESpace grid = new RTFESpace(start, end,
-			Ints.asList(15, 15), polynomialDegree);
+			Ints.asList(15, 15));
 		TPVectorCellIntegral<RTShapeFunction> gg =
 			new TPVectorCellIntegral<>(TPVectorCellIntegral.GRAD_GRAD);
 		TPVectorFaceIntegral<RTShapeFunction> gj =

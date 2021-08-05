@@ -2,9 +2,9 @@ package mixed;
 
 import basic.*;
 
-public class MixedBoundaryRightHandSideIntegral<CT extends Cell<CT,FT,ET>,FT extends Face<CT,FT,ET>,
-	ET extends Edge<CT,FT,ET>,
-	PF extends ScalarShapeFunction<CT,FT,ET>, VF extends VectorShapeFunction<CT,FT,ET>> extends BoundaryRightHandSideIntegral<FT,MixedShapeFunction<CT,FT,ET,PF,VF>>
+public class MixedBoundaryRightHandSideIntegral<FT extends Face<?,FT>,
+	PF extends ScalarShapeFunction<?,FT>, VF extends VectorShapeFunction<?,
+	FT>, MF extends MixedShapeFunction<?,FT,PF,VF>> extends BoundaryRightHandSideIntegral<FT, MF>
 {
 	private final BoundaryRightHandSideIntegral<FT, PF> pressureIntegral;
 	private final BoundaryRightHandSideIntegral<FT, VF> velocityIntegral;
@@ -16,19 +16,19 @@ public class MixedBoundaryRightHandSideIntegral<CT extends Cell<CT,FT,ET>,FT ext
 		this.velocityIntegral = velocityIntegral;
 	}
 	
-	public static <CT extends Cell<CT, FT, ET>, FT extends Face<CT, FT, ET>, ET extends Edge<CT, FT, ET>,
-		PF extends ScalarShapeFunction<CT, FT, ET>, VF extends VectorShapeFunction<CT, FT, ET>
-		> MixedBoundaryRightHandSideIntegral<CT, FT, ET, PF,
-		VF> fromPressureIntegral(BoundaryRightHandSideIntegral<FT
+	public static <FT extends Face<?, FT>,
+		PF extends ScalarShapeFunction<?, FT>, VF extends VectorShapeFunction<?, FT>, MF extends MixedShapeFunction<?,FT,PF,VF>
+		> MixedBoundaryRightHandSideIntegral<FT, PF,
+		VF,MF> fromPressureIntegral(BoundaryRightHandSideIntegral<FT
 		, PF> pressureIntegral)
 	{
 		return new MixedBoundaryRightHandSideIntegral<>(pressureIntegral, null);
 	}
 	
-	public static <CT extends Cell<CT, FT, ET>, FT extends Face<CT, FT, ET>, ET extends Edge<CT, FT, ET>,
-		PF extends ScalarShapeFunction<CT, FT, ET>, VF extends VectorShapeFunction<CT, FT, ET>
-		> MixedBoundaryRightHandSideIntegral<CT, FT, ET, PF,
-		VF> fromVelocityIntegral(BoundaryRightHandSideIntegral<FT
+	public static <FT extends Face<?, FT>,
+		PF extends ScalarShapeFunction<?, FT>, VF extends VectorShapeFunction<?, FT>, MF extends MixedShapeFunction<?,FT,PF,VF>
+		> MixedBoundaryRightHandSideIntegral<FT, PF,
+		VF, MF> fromVelocityIntegral(BoundaryRightHandSideIntegral<FT
 		, VF> velocityIntegral)
 	{
 		return new MixedBoundaryRightHandSideIntegral<>(null, velocityIntegral);
@@ -45,17 +45,17 @@ public class MixedBoundaryRightHandSideIntegral<CT extends Cell<CT,FT,ET>,FT ext
 	}
 	
 	public double evaluateBoundaryRightHandSideIntegral(FT face,
-	                                                    MixedShapeFunction<CT, FT, ET, PF, VF> shapeFunction1)
+	                                                    MF shapeFunction1)
 	{
 		if (isPressureIntegral())
 		{
-			if (!shapeFunction1.isPressure())
+			if (!shapeFunction1.hasPressureFunction())
 				return 0;
 			return pressureIntegral.evaluateBoundaryRightHandSideIntegral(face,
 				shapeFunction1.getPressureShapeFunction());
 		} else
 		{
-			if (!shapeFunction1.isVelocity())
+			if (!shapeFunction1.hasVelocityFunction())
 				return 0;
 			return velocityIntegral.evaluateBoundaryRightHandSideIntegral(face,
 				shapeFunction1.getVelocityShapeFunction());

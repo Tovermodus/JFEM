@@ -1,6 +1,7 @@
 package tensorproduct;
 
 import basic.DoubleCompare;
+import tensorproduct.geometry.Cell1D;
 
 public class LagrangeBasisFunction1D extends Function1D
 {
@@ -138,7 +139,7 @@ public class LagrangeBasisFunction1D extends Function1D
 	public double derivative(double pos)
 	{
 		if (cell.isInCell(pos))
-			return derivativeOnReferenceCell(cell.positionOnReferenceCell(pos)) * cell.jacobiDeterminant(pos);
+			return derivativeOnReferenceCell(cell.positionOnReferenceCell(pos)) /cell.length();
 		return 0;
 	}
 	

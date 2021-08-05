@@ -3,7 +3,6 @@ package mixed;
 import basic.Function;
 import basic.ScalarFunction;
 import basic.VectorFunction;
-import linalg.CoordinateMatrix;
 import linalg.CoordinateVector;
 import org.jetbrains.annotations.NotNull;
 
@@ -26,17 +25,23 @@ public class MixedFunction implements Function < MixedValue,
 		pressureFunction = null;
 		velocityFunction = null;
 	}
+	public MixedFunction(ScalarFunction pressureFunction, VectorFunction velocityFunction)
+	{
+		overridesValue = false;
+		this.pressureFunction = pressureFunction;
+		this.velocityFunction = velocityFunction;
+	}
 	
 	public ScalarFunction getPressureFunction()
 	{
-		if(!isPressure())
+		if(!hasPressureFunction())
 			throw new IllegalStateException("Is not pressure Function");
 		return pressureFunction;
 	}
 	
 	public VectorFunction getVelocityFunction()
 	{
-		if(!isVelocity())
+		if(!hasVelocityFunction())
 			throw new IllegalStateException("Is not velocity Function");
 		return velocityFunction;
 	}
@@ -51,18 +56,18 @@ public class MixedFunction implements Function < MixedValue,
 		this.pressureFunction = null;
 		this.velocityFunction = velocityFunction;
 	}
-	public boolean isPressure()
+	public boolean hasPressureFunction()
 	{
-		return pressureFunction!=null && !overridesValue;
+		return pressureFunction!=null;
 	}
-	public boolean isVelocity()
+	public boolean hasVelocityFunction()
 	{
-		return velocityFunction!=null &&!overridesValue;
+		return velocityFunction!=null;
 	}
 	@Override
 	public int getDomainDimension()
 	{
-		if(isPressure())
+		if(hasPressureFunction())
 			return Objects.requireNonNull(getPressureFunction()).getDomainDimension();
 		else
 			return Objects.requireNonNull(getVelocityFunction()).getDomainDimension();
@@ -101,9 +106,9 @@ public class MixedFunction implements Function < MixedValue,
 	@Override
 	public MixedValue value(CoordinateVector pos)
 	{
-		if(isPressure())
+		if(hasPressureFunction())
 			return new PressureValue(Objects.requireNonNull(getPressureFunction()).value(pos));
-		if(isVelocity())
+		if(hasVelocityFunction())
 			return new VelocityValue(Objects.requireNonNull(getVelocityFunction()).value(pos));
 		if(overridesValue)
 			throw new IllegalStateException("needs to override value");
@@ -113,9 +118,9 @@ public class MixedFunction implements Function < MixedValue,
 	@Override
 	public MixedGradient gradient(CoordinateVector pos)
 	{
-		if(isPressure())
+		if(hasPressureFunction())
 			return new PressureGradient(Objects.requireNonNull(getPressureFunction()).gradient(pos));
-		if(isVelocity())
+		if(hasVelocityFunction())
 			return new VelocityGradient(Objects.requireNonNull(getVelocityFunction()).gradient(pos));
 		if(overridesValue)
 			throw new IllegalStateException("needs to override gradient");

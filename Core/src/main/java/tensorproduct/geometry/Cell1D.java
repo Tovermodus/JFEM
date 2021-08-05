@@ -1,20 +1,20 @@
-package tensorproduct;
+package tensorproduct.geometry;
 
+import basic.DoubleCompare;
+import basic.PerformanceArguments;
 import org.jetbrains.annotations.NotNull;
-
-import java.util.ArrayList;
+import tensorproduct.QuadratureRule1D;
 
 public class Cell1D implements Comparable<Cell1D>
 {
         private final double start;
         private final double end;
-        public ArrayList<LagrangeBasisFunction1D> shapefunctions;
-        public Cell1D(double start, double end)
+        Cell1D(double start, double end)
         {
                 this.start = start;
                 this.end = end;
         }
-        public Cell1D(Cell1D cell)
+        Cell1D(Cell1D cell)
         {
                 this(cell.start, cell.end);
         }
@@ -51,7 +51,7 @@ public class Cell1D implements Comparable<Cell1D>
 
         public boolean isInCell(double pos)                //in [0,1]
         {
-                return (pos >= start && pos <= end);
+                return (pos >= start- PerformanceArguments.getInstance().doubleTolerance && pos <= end+PerformanceArguments.getInstance().doubleTolerance);
         }
 
         public double positionOnReferenceCell(double pos)
@@ -62,19 +62,6 @@ public class Cell1D implements Comparable<Cell1D>
         public double positionOnGrid(double pospp)
         {
                 return pospp * length() + start;
-        }
-
-        public double jacobiDeterminant(double pos)
-        {
-                return 1.0 / length();
-        }
-
-        public void distributeFunctions(int polynomialDegree)
-        {
-                for(int  i = 0; i < polynomialDegree + 1; i++)
-                {
-                        shapefunctions.add(new LagrangeBasisFunction1D(polynomialDegree, i, this));
-                }
         }
         
         @Override
@@ -91,10 +78,28 @@ public class Cell1D implements Comparable<Cell1D>
         @Override
         public int compareTo(@NotNull Cell1D o)
         {
-                if(getStart() < o.getStart())
+                if(getStart() < o.getStart()-PerformanceArguments.getInstance().doubleTolerance)
                         return -1;
-                if(getStart() > o.getStart())
+                if(getStart() > o.getStart()+PerformanceArguments.getInstance().doubleTolerance)
+                        return 1;
+                if(getEnd() < o.getEnd()-PerformanceArguments.getInstance().doubleTolerance)
+                        return -1;
+                if(getEnd() > o.getEnd()+PerformanceArguments.getInstance().doubleTolerance)
                         return 1;
                 return 0;
+        }
+        
+        @Override
+        public int hashCode()
+        {
+                return 17+ DoubleCompare.doubleHash(start) + 39*DoubleCompare.doubleHash(end);
+        }
+        
+        @Override
+        public boolean equals(Object obj)
+        {
+                if(!(obj instanceof Cell1D))
+                        return false;
+                return compareTo((Cell1D) obj) == 0;
         }
 }

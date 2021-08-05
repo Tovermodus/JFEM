@@ -7,11 +7,14 @@ import basic.ScalarShapeFunction;
 import linalg.CoordinateVector;
 import linalg.IntCoordinates;
 import linalg.Vector;
+import tensorproduct.geometry.Cell1D;
+import tensorproduct.geometry.TPCell;
+import tensorproduct.geometry.TPFace;
 
 import java.util.List;
 import java.util.function.ToDoubleFunction;
 
-public class TPCellIntegral<ST extends ScalarShapeFunction<TPCell,TPFace,TPEdge>> extends CellIntegral<TPCell,ST>
+public class TPCellIntegral<ST extends ScalarShapeFunction<TPCell, TPFace>> extends CellIntegral<TPCell,ST>
 {
 	public static final String GRAD_GRAD = "GradGrad";
 	public static final String VALUE_VALUE = "ValueValue";
@@ -99,7 +102,7 @@ public class TPCellIntegral<ST extends ScalarShapeFunction<TPCell,TPFace,TPEdge>
 	public static double integrateNonTensorProduct(ToDoubleFunction<CoordinateVector> eval, TPCell cell,
 	                                               QuadratureRule1D quadratureRule)
 	{
-		List<Cell1D> cells = cell.cell1Ds;
+		List<Cell1D> cells = cell.getComponentCells();
 		return integrateNonTensorProduct(eval, cells, quadratureRule);
 	}
 	
@@ -111,7 +114,7 @@ public class TPCellIntegral<ST extends ScalarShapeFunction<TPCell,TPFace,TPEdge>
 		{
 			return integrateNonTensorProduct(x -> shapeFunction1.gradient(x).inner(shapeFunction2.gradient(x))
 				* (Double) weight.value(x),
-				cell.cell1Ds,
+				cell,
 				quadratureRule1D);
 		}
 		if (name.equals(H1))
@@ -119,7 +122,7 @@ public class TPCellIntegral<ST extends ScalarShapeFunction<TPCell,TPFace,TPEdge>
 			return integrateNonTensorProduct(x -> (shapeFunction1.value(x) * shapeFunction2.value(x)
 				+ shapeFunction1.gradient(x).inner(shapeFunction2.gradient(x)))
 				* (Double) weight.value(x),
-				cell.cell1Ds,
+				cell,
 				quadratureRule1D);
 		}
 		if (name.equals(VALUE_VALUE))
@@ -127,21 +130,21 @@ public class TPCellIntegral<ST extends ScalarShapeFunction<TPCell,TPFace,TPEdge>
 			return integrateNonTensorProduct(x -> shapeFunction1.value(x)
 				* shapeFunction2.value(x)
 				* (Double) weight.value(x),
-				cell.cell1Ds,
+				cell,
 				quadratureRule1D);
 		}
 		if (name.equals(GRAD_VALUE))
 		{
 			return integrateNonTensorProduct(x -> shapeFunction1.gradient(x).inner((Vector) weight.value(x))
 				* shapeFunction2.value(x),
-				cell.cell1Ds,
+				cell,
 				quadratureRule1D);
 		}
 		if (name.equals(VALUE_GRAD))
 		{
 			return integrateNonTensorProduct(x -> shapeFunction2.gradient(x).inner((Vector) weight.value(x))
 				* shapeFunction1.value(x),
-				cell.cell1Ds,
+				cell,
 				quadratureRule1D);
 		}
 		throw new UnsupportedOperationException("unknown integral name");
