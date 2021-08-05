@@ -64,7 +64,7 @@ public class StokesTest
 		SparseMatrix mat2 = grid2.getSystemMatrix();
 		DenseVector rhs2 = grid2.getRhs();
 		assertTrue(mat2.sub(mat).absMaxElement() < 1e-10);
-		assertTrue(mat2.sub(mat2.transpose()).absMaxElement() < 1e-10);
+		//assertTrue(mat2.sub(mat2.transpose()).absMaxElement() < 1e-10);
 		assertTrue(rhs2.sub(rhs).absMaxElement() < 1e-10);
 	}
 	@Test
@@ -112,7 +112,7 @@ public class StokesTest
 		System.out.println("solve system: " + grid.getSystemMatrix().getRows() + "×" + grid.getSystemMatrix().getCols());
 		IterativeSolver i = new IterativeSolver();
 		i.showProgress = false;
-		Vector solution1 = i.solveCG(grid.getSystemMatrix(), grid.getRhs(), 1e-10);
+		Vector solution1 = i.solveGMRES(grid.getSystemMatrix(), grid.getRhs(), 1e-10);
 		System.out.println("solved");
 		System.out.println(grid.getSystemMatrix().sub(grid.getSystemMatrix().transpose()).absMaxElement());
 		MixedFESpaceFunction<QkQkFunction> solut =
@@ -169,8 +169,8 @@ public class StokesTest
 		System.out.println("solve system: " + grid.getSystemMatrix().getRows() + "×" + grid.getSystemMatrix().getCols());
 		grid.setVelocityBoundaryValues(StokesReferenceSolution.vectorBoundaryValues());
 		IterativeSolver i = new IterativeSolver();
-		i.showProgress = false;
-		Vector solution1 = i.solveCG(grid.getSystemMatrix(), grid.getRhs(), 1e-10);
+		i.showProgress = true;
+		Vector solution1 = i.solveGMRES(grid.getSystemMatrix(), grid.getRhs(), 1e-10);
 		System.out.println("solved");
 		System.out.println(grid.getSystemMatrix().sub(grid.getSystemMatrix().transpose()).absMaxElement());
 		

@@ -21,7 +21,7 @@ public interface AcceptsMatrixBoundaryValues<CT extends Cell<CT, FT>,
 	{
 		getFixedNodeIndices().add(index);
 		getSystemMatrix().deleteRow(index);
-		getSystemMatrix().deleteColumn(index);
+		//getSystemMatrix().deleteColumn(index);
 		getSystemMatrix().set(1, index, index);
 		getRhs().set(value, index);
 	}

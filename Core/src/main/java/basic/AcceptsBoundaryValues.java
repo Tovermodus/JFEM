@@ -1,12 +1,5 @@
 package basic;
 
-import mixed.MixedShapeFunction;
-import mixed.QkQkFunction;
-import tensorproduct.ContinuousTPShapeFunction;
-import tensorproduct.ContinuousTPVectorFunction;
-import tensorproduct.geometry.TPCell;
-import tensorproduct.geometry.TPFace;
-
 import java.util.Set;
 import java.util.function.BiConsumer;
 import java.util.function.BiPredicate;
@@ -73,8 +66,8 @@ public interface AcceptsBoundaryValues<CT extends Cell<CT,FT>,
 	{
 		for (ST function1 : getShapeFunctionsWithSupportOnCell(K))
 		{
-			if (getFixedNodeIndices().contains(function1.getGlobalIndex()))
-				continue;
+			//if (getFixedNodeIndices().contains(function1.getGlobalIndex()))
+			//	continue;
 			for (ST function2 : getShapeFunctionsWithSupportOnCell(K))
 			{
 				if (getFixedNodeIndices().contains(function2.getGlobalIndex()))
@@ -89,8 +82,8 @@ public interface AcceptsBoundaryValues<CT extends Cell<CT,FT>,
 	{
 		for (ST function1 : getShapeFunctionsWithSupportOnFace(F))
 		{
-			if (getFixedNodeIndices().contains(function1.getGlobalIndex()))
-				continue;
+			//if (getFixedNodeIndices().contains(function1.getGlobalIndex()))
+			//	continue;
 			for (ST function2 : getShapeFunctionsWithSupportOnFace(F))
 			{
 				if (getFixedNodeIndices().contains(function2.getGlobalIndex()))

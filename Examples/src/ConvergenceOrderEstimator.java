@@ -21,7 +21,7 @@ public class ConvergenceOrderEstimator
 		return average/(functions.size()-2);
 		
 	}
-	private static double normL2VecDifference(VectorFunction f1, VectorFunction f2, List<CoordinateVector> points)
+	public static double normL2VecDifference(VectorFunction f1, VectorFunction f2, List<CoordinateVector> points)
 	{
 		double squaredDifferences = 0;
 		for(CoordinateVector p: points)
