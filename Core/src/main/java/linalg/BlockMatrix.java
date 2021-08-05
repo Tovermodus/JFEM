@@ -254,4 +254,16 @@ public class BlockMatrix implements MutableMatrix
 					ret.add(at(i, k) * matrix.at(k, j), i, j);
 		return ret;
 	}
+	
+	@Override
+	public void deleteRow(int row)
+	{
+		throw new UnsupportedOperationException("not implemented yet");
+	}
+	
+	@Override
+	public void deleteColumn(int column)
+	{
+		throw new UnsupportedOperationException("not implemented yet");
+	}
 }

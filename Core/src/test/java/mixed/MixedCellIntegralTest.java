@@ -92,15 +92,5 @@ public class MixedCellIntegralTest
 			assertTrue(Math.abs(vg.evaluateCellIntegral(c,mf1,mf2) - valuesVG[i]) < 1e-2);
 			assertTrue(Math.abs(dv.evaluateCellIntegral(c,mf1,mf2) - valuesDV[i]) < 1e-2);
 		}
-		PlotWindow p = new PlotWindow();
-		p.addPlot(new ScalarPlot2D(f1.getComponentFunction(0), g.generatePlotPoints(20),20));
-		p.addPlot(new ScalarPlot2D(f1.getComponentFunction(1), g.generatePlotPoints(20),20));
-		try
-		{
-			Thread.sleep(100000);
-		} catch (InterruptedException e)
-		{
-			e.printStackTrace();
-		}
 	}
 }

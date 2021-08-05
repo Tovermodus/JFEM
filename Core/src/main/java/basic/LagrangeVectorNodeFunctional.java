@@ -28,6 +28,12 @@ public class LagrangeVectorNodeFunctional implements NodeFunctional<CoordinateVe
 		return func.value(point).at(component);
 	}
 	
+	@Override
+	public boolean usesFace(Face<?, ?> f)
+	{
+		return f.isOnFace(point);
+	}
+	
 	public CoordinateVector getPoint()
 	{
 		return point;

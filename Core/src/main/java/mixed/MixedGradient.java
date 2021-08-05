@@ -2,7 +2,6 @@ package mixed;
 
 import basic.PerformanceArguments;
 import linalg.*;
-import org.checkerframework.checker.units.qual.C;
 
 import java.util.List;
 
@@ -179,5 +178,21 @@ public class MixedGradient implements MutableMatrix
 	public Matrix mmMul(Matrix matrix)
 	{
 		throw new UnsupportedOperationException("not implemented yet");
+	}
+	
+	@Override
+	public void deleteRow(int row)
+	{
+		if(row == 0)
+			pressureGradient.mulInPlace(0);
+		else
+			velocityGradient.deleteRow(row-1);
+	}
+	
+	@Override
+	public void deleteColumn(int column)
+	{
+		pressureGradient.set(0,column);
+		velocityGradient.deleteColumn(column);
 	}
 }

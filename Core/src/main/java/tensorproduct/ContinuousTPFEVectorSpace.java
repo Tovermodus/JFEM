@@ -14,7 +14,7 @@ import tensorproduct.geometry.TPFace;
 import java.util.*;
 import java.util.stream.Collectors;
 
-public class ContinuousTPFEVectorSpace extends CartesianGridSpace<ContinuousTPVectorFunction>
+public class ContinuousTPFEVectorSpace extends CartesianGridSpace<ContinuousTPVectorFunction, CoordinateVector, CoordinateMatrix, CoordinateTensor>
 {
 	
 	public ContinuousTPFEVectorSpace(CoordinateVector startCoordinates, CoordinateVector endCoordinates,

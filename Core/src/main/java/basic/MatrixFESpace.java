@@ -1,16 +1,14 @@
 package basic;
 
 
-import java.util.Set;
-
+import io.vavr.Function3;
 import linalg.*;
 
 import java.util.List;
-import java.util.TreeSet;
+import java.util.function.BiFunction;
 
 public interface MatrixFESpace<CT extends Cell<CT,FT>, FT extends  Face<CT,FT>,
-	ST extends ShapeFunction<CT,FT, ?,?,?>> extends FESpace<CT,FT,
-	ST,MatrixFESpace<CT,FT, ST>>, FESpaceTools<CT,FT, ST>
+	ST extends ShapeFunction<CT,FT, ?,?,?>> extends FESpace<CT,FT, ST>
 {
 	void initializeSystemMatrix();
 	
@@ -19,10 +17,7 @@ public interface MatrixFESpace<CT extends Cell<CT,FT>, FT extends  Face<CT,FT>,
 	MutableVector getRhs();
 	
 	MutableMatrix getSystemMatrix();
-	default Set<Integer> getFixedNodeIndices()
-	{
-		return new TreeSet<>();
-	}
+	
 	default void evaluateCellIntegrals(List<CellIntegral<CT,ST>> cellIntegrals,
 	                                   List<RightHandSideIntegral<CT,ST>> rightHandSideIntegrals)
 	{
@@ -41,7 +36,7 @@ public interface MatrixFESpace<CT extends Cell<CT,FT>, FT extends  Face<CT,FT>,
 				integral += cellIntegral.evaluateCellIntegral(K, u, v);
 			}
 			return integral;
-		}, this, s);
+		},  s);
 	}
 	default void writeCellIntegralsToRhs(List<RightHandSideIntegral<CT,ST>> rightHandSideIntegrals,
 	                                   MutableVector d)
@@ -55,7 +50,7 @@ public interface MatrixFESpace<CT extends Cell<CT,FT>, FT extends  Face<CT,FT>,
 				integral += rightHandSideIntegral.evaluateRightHandSideIntegral(K, v);
 			}
 			return integral;
-		}, this, d);
+		},  d);
 	}
 	
 	default void evaluateFaceIntegrals(List<FaceIntegral<FT,ST>> faceIntegrals,
@@ -76,7 +71,7 @@ public interface MatrixFESpace<CT extends Cell<CT,FT>, FT extends  Face<CT,FT>,
 				integral += faceIntegral.evaluateFaceIntegral(F, u, v);
 			}
 			return integral;
-		}, this, s);
+		}, s);
 	}
 	default void writeFaceIntegralsToRhs(List<BoundaryRightHandSideIntegral<FT,ST>> boundaryRightHandSideIntegrals
 		, MutableVector d)
@@ -90,6 +85,48 @@ public interface MatrixFESpace<CT extends Cell<CT,FT>, FT extends  Face<CT,FT>,
 				integral += boundaryRightHandSideIntegral.evaluateBoundaryRightHandSideIntegral(F, v);
 			}
 			return integral;
-		}, this, d);
+		},  d);
 	}
+	
+	default <T> void addToMatrix(Function3<T, ST, ST, Double> integralEvaluation, MutableMatrix s, T K, ST v,
+	                             ST u)
+	{
+		double integral = integralEvaluation.apply(K, u, v);
+		if (integral != 0)
+			s.add(integral, v.getGlobalIndex(),
+				u.getGlobalIndex());
+	}
+	default <T> void addToVector(BiFunction<T, ST, Double> integralEvaluation, MutableVector d, T K, ST v)
+	{
+		double integral = integralEvaluation.apply(K, v);
+		if (integral != 0)
+			d.add(integral, v.getGlobalIndex());
+	}
+	
+	default void loopMatrixViaCell(Function3<CT, ST, ST, Double> integralEvaluation, MutableMatrix s)
+	{
+		forEachCell(K ->
+			forEachFunctionCombinationOnCell(K, (u,v)-> addToMatrix(integralEvaluation, s, K, v, u)));
+	}
+	
+	default void loopRhsViaCell(BiFunction<CT, ST, Double> integralEvaluation,MutableVector d)
+	{
+		forEachCell(K ->
+			forEachFunctionOnCell(K, (u)-> addToVector(integralEvaluation, d, K, u)));
+	}
+	
+	
+	default void loopMatrixViaFace(Function3<FT, ST, ST, Double> integralEvaluation, MutableMatrix s)
+	{
+		forEachFace(F ->
+			forEachFunctionCombinationOnFace(F, (u,v)-> addToMatrix(integralEvaluation, s, F, v, u)));
+	}
+	
+	default void loopRhsViaFace(BiFunction<FT, ST, Double> integralEvaluation, MutableVector d)
+	{
+		forEachFace(F ->
+			forEachFunctionOnFace(F, (u)-> addToVector(integralEvaluation, d, F, u)));
+	}
+	
+	
 }

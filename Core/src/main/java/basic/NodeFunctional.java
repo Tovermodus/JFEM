@@ -10,4 +10,6 @@ public interface NodeFunctional<valueT, gradientT, hessianT>
 			 && functionSignature.getGradientT().isAssignableFrom(functionSignature.getGradientT())
 			 && functionSignature.getHessianT().isAssignableFrom(functionSignature.getHessianT());
 	}
+	
+	boolean usesFace(Face<?,?> f);
 }

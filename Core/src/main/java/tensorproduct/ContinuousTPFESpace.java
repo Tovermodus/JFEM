@@ -2,6 +2,7 @@ package tensorproduct;
 
 import basic.LagrangeNodeFunctional;
 import basic.ScalarFunction;
+import linalg.CoordinateMatrix;
 import linalg.CoordinateVector;
 import tensorproduct.geometry.TPCell;
 import tensorproduct.geometry.TPFace;
@@ -10,7 +11,7 @@ import java.util.Arrays;
 import java.util.HashSet;
 import java.util.List;
 
-public class ContinuousTPFESpace extends CartesianGridSpace<ContinuousTPShapeFunction>
+public class ContinuousTPFESpace extends CartesianGridSpace<ContinuousTPShapeFunction, Double, CoordinateVector, CoordinateMatrix>
 {
 	
 	public ContinuousTPFESpace(CoordinateVector startCoordinates, CoordinateVector endCoordinates,

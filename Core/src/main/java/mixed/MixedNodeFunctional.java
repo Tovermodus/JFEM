@@ -60,4 +60,14 @@ public class MixedNodeFunctional implements NodeFunctional<MixedValue, MixedGrad
 		throw new IllegalArgumentException("Needs to be performed on MixedFunction");
 	}
 	
+	@Override
+	public boolean usesFace(Face<?, ?> f)
+	{
+		if(isPressureFunctional())
+			return pressureFunctional.usesFace(f);
+		if(isVelocityFunctional())
+			return velocityFunctional.usesFace(f);
+		return true;
+	}
+	
 }

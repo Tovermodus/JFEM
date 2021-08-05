@@ -137,10 +137,16 @@ public class SparseMatrix implements MutableMatrix, DirectlySolvable, Decomposab
 		sparseXs = sparseX;
 	}
 	
-	public void deleteLine(int lineCoordinate)
+	public void deleteRow(int lineCoordinate)
 	{
 		for (int i = 0; i < sparseEntries; i++)
 			if (sparseYs[i] == lineCoordinate)
+				sparseValues[i] = 0;
+	}
+	public void deleteColumn(int lineCoordinate)
+	{
+		for (int i = 0; i < sparseEntries; i++)
+			if (sparseXs[i] == lineCoordinate)
 				sparseValues[i] = 0;
 	}
 	

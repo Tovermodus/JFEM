@@ -1,9 +1,10 @@
 package tensorproduct;
 
+import basic.AcceptsMatrixBoundaryValues;
 import basic.Assembleable;
-import basic.MatrixFESpace;
 import basic.ShapeFunction;
 import com.google.common.collect.HashMultimap;
+import com.google.common.collect.Sets;
 import linalg.*;
 import tensorproduct.geometry.CartesianGrid;
 import tensorproduct.geometry.TPCell;
@@ -11,8 +12,9 @@ import tensorproduct.geometry.TPFace;
 
 import java.util.*;
 
-public abstract class CartesianGridSpace<ST extends ShapeFunction<TPCell, TPFace, ?, ?, ?>> implements MatrixFESpace<TPCell,
-	TPFace, ST>, Assembleable
+public abstract class CartesianGridSpace<ST extends ShapeFunction<TPCell, TPFace, valueT, gradientT, hessianT>,
+	valueT, gradientT, hessianT>
+	implements AcceptsMatrixBoundaryValues<TPCell, TPFace, ST, valueT, gradientT, hessianT>, Assembleable
 {
 	protected final CartesianGrid grid;
 	protected final HashMultimap<TPCell,ST> supportOnCell;
@@ -22,15 +24,23 @@ public abstract class CartesianGridSpace<ST extends ShapeFunction<TPCell, TPFace
 	protected DenseVector rhs;
 	private volatile int cellCounter = 0;
 	private volatile int faceCounter = 0;
+	Set<Integer> fixedNodes;
+	
+	@Override
+	public Set<Integer> getFixedNodeIndices()
+	{
+		return fixedNodes;
+	}
 	
 	public CartesianGridSpace(CoordinateVector startCoordinates, CoordinateVector endCoordinates,
-	                 List<Integer> cellsPerDimension)
+	                          List<Integer> cellsPerDimension)
 	{
 		if(startCoordinates.getLength() != endCoordinates.getLength()|| startCoordinates.getLength() != cellsPerDimension.size())
 			throw new IllegalArgumentException();
 		supportOnCell = HashMultimap.create();
 		supportOnFace = HashMultimap.create();
 		grid = new CartesianGrid(startCoordinates, endCoordinates, new IntCoordinates(cellsPerDimension));
+		fixedNodes = Sets.newConcurrentHashSet();
 	}
 	@Override
 	public void assembleCells()
@@ -111,17 +121,5 @@ public abstract class CartesianGridSpace<ST extends ShapeFunction<TPCell, TPFace
 		return grid.generatePlotPoints(resolution);
 	}
 	
-	
-	@Override
-	public synchronized int increaseCellCounter()
-	{
-		return cellCounter++;
-	}
-	
-	@Override
-	public synchronized int increaseFaceCounter()
-	{
-		return faceCounter++;
-	}
 	
 }

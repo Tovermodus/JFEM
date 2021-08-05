@@ -1,14 +1,17 @@
 package tensorproduct;
 
 import basic.VectorFunction;
+import linalg.CoordinateMatrix;
+import linalg.CoordinateTensor;
 import linalg.CoordinateVector;
+import mixed.MixedFunction;
 import tensorproduct.geometry.TPCell;
 import tensorproduct.geometry.TPFace;
 
 import java.util.List;
 import java.util.TreeSet;
 
-public class RTFESpace extends CartesianGridSpace<RTShapeFunction>
+public class RTFESpace extends CartesianGridSpace<RTShapeFunction, CoordinateVector, CoordinateMatrix, CoordinateTensor>
 {
 	public RTFESpace(CoordinateVector startCoordinates, CoordinateVector endCoordinates,
 	                                 List<Integer> cellsPerDimension)
@@ -39,9 +42,10 @@ public class RTFESpace extends CartesianGridSpace<RTShapeFunction>
 	}
 	
 	
-	public void setBoundaryValues(VectorFunction boundaryValues)
+	/*public void setBoundaryValues(VectorFunction boundaryValues)
 	{
-		int progress = 0;
+		
+		/*int progress = 0;
 		for (TPFace face : getFaces())
 		{
 			System.out.println((100*progress/getFaces().size())+"%");
@@ -65,6 +69,6 @@ public class RTFESpace extends CartesianGridSpace<RTShapeFunction>
 				}
 			}
 		}
-	}
+	}*/
 }
 

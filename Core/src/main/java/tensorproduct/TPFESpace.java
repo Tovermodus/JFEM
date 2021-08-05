@@ -11,7 +11,7 @@ import java.util.List;
 /*
 Workflow of this finite element is: first generate 1D cells, then
  */
-public class TPFESpace extends CartesianGridSpace<TPShapeFunction>
+public class TPFESpace extends CartesianGridSpace<TPShapeFunction, Double, CoordinateVector, CoordinateMatrix>
 {
 	public TPFESpace(CoordinateVector startCoordinates, CoordinateVector endCoordinates,
 	                 List<Integer> cellsPerDimension)

@@ -28,4 +28,10 @@ public class LagrangeNodeFunctional implements NodeFunctional<Double, Coordinate
 	{
 		 return func.value(point);
 	}
+	
+	@Override
+	public boolean usesFace(Face<?, ?> f)
+	{
+		return f.isOnFace(point);
+	}
 }

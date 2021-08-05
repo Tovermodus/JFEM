@@ -10,7 +10,7 @@ import tensorproduct.geometry.TPFace;
 
 import java.util.*;
 
-public class MixedRTSpace extends CartesianGridSpace<RTMixedFunction>
+public class MixedRTSpace extends CartesianGridSpace<RTMixedFunction, MixedValue, MixedGradient, MixedHessian>
 {
 	public MixedRTSpace(CoordinateVector startCoordinates, CoordinateVector endCoordinates,
 	                    List<Integer> cellsPerDimension)

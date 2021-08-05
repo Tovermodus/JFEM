@@ -8,22 +8,14 @@ import tensorproduct.geometry.TPFace;
 
 import java.util.*;
 
-public class QkQkSpace extends CartesianGridSpace<QkQkFunction>
+public class QkQkSpace extends CartesianGridSpace<QkQkFunction, MixedValue, MixedGradient, MixedHessian>
 {
 	
-	Set<Integer> boundaryNodes;
 	
 	public QkQkSpace(CoordinateVector startCoordinates, CoordinateVector endCoordinates,
 	                 List<Integer> cellsPerDimension)
 	{
 		super(startCoordinates, endCoordinates, cellsPerDimension);
-		boundaryNodes = new HashSet<>();
-	}
-	
-	@Override
-	public Set<Integer> getFixedNodeIndices()
-	{
-		return boundaryNodes;
 	}
 	
 	@Override
@@ -56,7 +48,6 @@ public class QkQkSpace extends CartesianGridSpace<QkQkFunction>
 	}
 	private void assembleVelocityFunctions(int polynomialDegree)
 	{
-		
 		for (TPCell cell : getCells())
 		{
 			for (int i = 0; i < Math.pow(polynomialDegree + 1, getDimension()) * getDimension(); i++)
@@ -77,52 +68,12 @@ public class QkQkSpace extends CartesianGridSpace<QkQkFunction>
 	public void setVelocityBoundaryValues(VectorFunction boundaryValues)
 	{
 		MixedFunction boundaryMixed = new MixedFunction(boundaryValues);
-		for (TPFace F : getBoundaryFaces())
-		{
-			for (MixedShapeFunction<TPCell, TPFace, ContinuousTPShapeFunction,
-				ContinuousTPVectorFunction> shapeFunction :
-				getShapeFunctionsWithSupportOnFace(F))
-			{
-				if (shapeFunction.hasVelocityFunction())
-				{
-					double nodeValue = shapeFunction.getNodeFunctional().evaluate(boundaryMixed);
-					if (nodeValue != 0 || F.isOnFace(shapeFunction.getVelocityShapeFunction().getNodeFunctionalPoint()))
-					{
-						int shapeFunctionIndex = shapeFunction.getGlobalIndex();
-						boundaryNodes.add(shapeFunctionIndex);
-						getSystemMatrix().deleteLine(shapeFunctionIndex);
-						getSystemMatrix().set(1, shapeFunctionIndex, shapeFunctionIndex);
-						getRhs().set(nodeValue, shapeFunctionIndex);
-					}
-				}
-			}
-			
-		}
+		setBoundaryValues(boundaryMixed);
 	}
 	
 	public void setPressureBoundaryValues(ScalarFunction boundaryValues)
 	{
 		MixedFunction boundaryMixed = new MixedFunction(boundaryValues);
-		for (TPFace F : getBoundaryFaces())
-		{
-			for (MixedShapeFunction<TPCell, TPFace, ContinuousTPShapeFunction,
-				ContinuousTPVectorFunction> shapeFunction :
-				getShapeFunctionsWithSupportOnFace(F))
-			{
-				if (shapeFunction.hasPressureFunction())
-				{
-					double nodeValue = shapeFunction.getNodeFunctional().evaluate(boundaryMixed);
-					if (nodeValue != 0 || F.isOnFace(((LagrangeNodeFunctional) shapeFunction.getPressureShapeFunction().getNodeFunctional()).getPoint()))
-					{
-						int shapeFunctionIndex = shapeFunction.getGlobalIndex();
-						boundaryNodes.add(shapeFunctionIndex);
-						getSystemMatrix().deleteLine(shapeFunctionIndex);
-						getSystemMatrix().set(1, shapeFunctionIndex, shapeFunctionIndex);
-						getRhs().set(nodeValue, shapeFunctionIndex);
-					}
-				}
-			}
-			
-		}
+		setBoundaryValues(boundaryMixed);
 	}
 }

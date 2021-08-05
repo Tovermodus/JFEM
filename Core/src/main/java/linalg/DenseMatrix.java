@@ -368,4 +368,25 @@ public class DenseMatrix implements MutableMatrix, Decomposable, DirectlySolvabl
 	{
 		return printFormatted();
 	}
+	
+	@Override
+	public void deleteRow(int row)
+	{
+		if (PerformanceArguments.getInstance().executeChecks)
+			if (0 <= row && row <= getRows())
+				throw new UnsupportedOperationException("row out of bounds");
+		for(int i = 0; i < getCols(); i++)
+			entries[row][i] = 0;
+	}
+	
+	@Override
+	public void deleteColumn(int column)
+	{
+		
+		if (PerformanceArguments.getInstance().executeChecks)
+			if (0 <= column && column <= getCols())
+				throw new UnsupportedOperationException("column out of bounds");
+		for(int i = 0; i < getRows(); i++)
+			entries[i][column] = 0;
+	}
 }

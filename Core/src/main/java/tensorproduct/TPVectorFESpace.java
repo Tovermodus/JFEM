@@ -1,5 +1,7 @@
 package tensorproduct;
 
+import linalg.CoordinateMatrix;
+import linalg.CoordinateTensor;
 import linalg.CoordinateVector;
 import tensorproduct.geometry.TPCell;
 import tensorproduct.geometry.TPFace;
@@ -7,7 +9,7 @@ import tensorproduct.geometry.TPFace;
 import java.util.HashSet;
 import java.util.List;
 
-public class TPVectorFESpace extends CartesianGridSpace<TPVectorFunction>
+public class TPVectorFESpace extends CartesianGridSpace<TPVectorFunction, CoordinateVector, CoordinateMatrix, CoordinateTensor>
 {
 	public TPVectorFESpace(CoordinateVector startCoordinates, CoordinateVector endCoordinates,
 	                       List<Integer> cellsPerDimension)

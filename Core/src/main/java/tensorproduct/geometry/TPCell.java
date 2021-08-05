@@ -121,6 +121,17 @@ public class TPCell implements CellWithReferenceCell<TPCell, TPFace>
 			return -1;
 		if (o.getDimension() > getDimension())
 			return 1;
+		for (int i = 0; i < cell1Ds.size(); i++)
+		{
+			if(!DoubleCompare.almostEqual(getComponentCell(i).getStart(),
+				o.getComponentCell(i).getStart()))
+				return Double.compare(getComponentCell(i).getStart(),
+					o.getComponentCell(i).getStart());
+			if(!DoubleCompare.almostEqual(getComponentCell(i).getEnd(),
+				o.getComponentCell(i).getEnd()))
+				return Double.compare(getComponentCell(i).getEnd(),
+					o.getComponentCell(i).getEnd());
+		}
 		return CoordinateComparator.comp(center().getEntries(), o.center().getEntries());
 	}
 	
@@ -130,9 +141,9 @@ public class TPCell implements CellWithReferenceCell<TPCell, TPFace>
 		int ret = 0;
 		for (int i = 0; i < cell1Ds.size(); i++)
 		{
-			ret += Math.pow(7, 3 * i) * DoubleCompare.doubleHash(cell1Ds.get(i).center());
-			ret += Math.pow(7, 3 * i + 1) * DoubleCompare.doubleHash(cell1Ds.get(i).getStart());
-			ret += Math.pow(7, 3 * i + 2) * DoubleCompare.doubleHash(cell1Ds.get(i).getEnd());
+			ret += 175628373 *3*i* DoubleCompare.doubleHash(cell1Ds.get(i).center());
+			ret += 175628373*(3*i+1)* DoubleCompare.doubleHash(cell1Ds.get(i).getStart());
+			ret += 175628373 *(3*i+2)* DoubleCompare.doubleHash(cell1Ds.get(i).getEnd());
 		}
 		return ret;
 	}

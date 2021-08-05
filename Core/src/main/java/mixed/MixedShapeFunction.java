@@ -13,7 +13,7 @@ public abstract class MixedShapeFunction<CT extends Cell<CT, FT>,
 	>, VF extends VectorShapeFunction<CT, FT>>
 	extends MixedFunction
 	implements ShapeFunction<CT, FT, MixedValue, MixedGradient,
-	MixedHessian>, Comparable<MixedShapeFunction<CT,FT, PF,VF>>
+	MixedHessian>
 {
 	
 	public MixedShapeFunction(@NotNull PF pressureFunction)
@@ -151,17 +151,7 @@ public abstract class MixedShapeFunction<CT extends Cell<CT, FT>,
 		}
 		return ret;
 	}
+	public abstract boolean equals(Object other);
+	public abstract int hashCode();
 	
-	@SuppressWarnings("unchecked")
-	public int compareTo(MixedShapeFunction<CT,FT, PF,VF> o)
-	{
-		if (o.hasPressureFunction() && hasPressureFunction())
-			return ((Comparable<PF>)getPressureShapeFunction()).compareTo(o.getPressureShapeFunction());
-		else if (o.hasVelocityFunction() && hasVelocityFunction())
-			return ((Comparable<VF>)getVelocityShapeFunction()).compareTo(o.getVelocityShapeFunction());
-		else if (o.hasVelocityFunction() && hasPressureFunction())
-			return -1;
-		else
-			return 1;
-	}
 }

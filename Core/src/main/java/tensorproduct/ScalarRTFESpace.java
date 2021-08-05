@@ -15,7 +15,7 @@ import tensorproduct.geometry.TPFace;
 import java.util.*;
 import java.util.stream.Collectors;
 
-public class ScalarRTFESpace extends CartesianGridSpace<RTComponentFunction>
+public class ScalarRTFESpace extends CartesianGridSpace<RTComponentFunction, Double, CoordinateVector, CoordinateMatrix>
 {
 	public ScalarRTFESpace(CoordinateVector startCoordinates, CoordinateVector endCoordinates,
 	                       List<Integer> cellsPerDimension)

@@ -36,6 +36,12 @@ public class VectorNodeFunctional implements NodeFunctional<CoordinateVector, Co
 		return evaluateVectorF(VectorFunction.fromRawFunction(func));
 	}
 	
+	@Override
+	public boolean usesFace(Face<?, ?> f)
+	{
+		return componentNodeFunctional.usesFace(f);
+	}
+	
 	public int getComponent()
 	{
 		return component;

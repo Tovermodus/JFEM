@@ -1,9 +1,6 @@
 package systems;
 
-import basic.Function;
-import basic.FunctionSignature;
-import basic.NodeFunctional;
-import basic.PerformanceArguments;
+import basic.*;
 import it.unimi.dsi.fastutil.ints.IntComparator;
 import org.jetbrains.annotations.NotNull;
 import org.w3c.dom.Node;
@@ -34,6 +31,13 @@ public class SystemNodeFunctional implements NodeFunctional<SystemValue,
 	public double evaluate(Function<SystemValue, SystemGradient, SystemHessian> func)
 	{
 		throw new UnsupportedOperationException("Needs SystemFunction");
+	}
+	
+	@SuppressWarnings("unchecked")
+	@Override
+	public boolean usesFace(Face<?, ?> f)
+	{
+		return functional.usesFace(f);
 	}
 	
 	@SuppressWarnings("unchecked")

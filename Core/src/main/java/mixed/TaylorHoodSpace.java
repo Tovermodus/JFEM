@@ -1,6 +1,7 @@
 package mixed;
 
 import basic.LagrangeNodeFunctional;
+import basic.PerformanceArguments;
 import basic.ScalarFunction;
 import basic.VectorFunction;
 import com.google.common.collect.Lists;
@@ -13,8 +14,9 @@ import tensorproduct.geometry.TPFace;
 
 import java.util.List;
 import java.util.TreeSet;
+import java.util.stream.Stream;
 
-public class TaylorHoodSpace extends CartesianGridSpace<QkQkFunction>
+public class TaylorHoodSpace extends CartesianGridSpace<QkQkFunction, MixedValue, MixedGradient, MixedHessian>
 {
 	
 	public TaylorHoodSpace(CoordinateVector startCoordinates, CoordinateVector endCoordinates,
@@ -22,6 +24,7 @@ public class TaylorHoodSpace extends CartesianGridSpace<QkQkFunction>
 	{
 		super(startCoordinates, endCoordinates, cellsPerDimension);
 	}
+	
 	@Override
 	public void assembleFunctions(int polynomialDegree)
 	{
@@ -74,116 +77,109 @@ public class TaylorHoodSpace extends CartesianGridSpace<QkQkFunction>
 	
 	public void setVelocityBoundaryValues(VectorFunction boundaryValues)
 	{
-		setVelocityBoundaryValues(getSystemMatrix());
-		setVelocityBoundaryValues(boundaryValues, getRhs());
+		MixedFunction boundaryMixed = new MixedFunction(boundaryValues);
+		setBoundaryValues(boundaryMixed);
 	}
-	public void setVelocityBoundaryValues(SparseMatrix s)
+	public void setPressureBoundaryValues(ScalarFunction boundaryValues)
 	{
-		setVelocityBoundaryValues(ScalarFunction.constantFunction(1),s);
+		MixedFunction boundaryMixed = new MixedFunction(boundaryValues);
+		setBoundaryValues(boundaryMixed);
 	}
+	
+	public void setVelocityBoundaryValues(ScalarFunction indicatorFunction, SparseMatrix mad)
+	{
+		throw new UnsupportedOperationException("slkdjfhl");
+	}
+	
+	/*public void setVelocityBoundaryValues(SparseMatrix s)
+	{
+		setVelocityBoundaryValues(ScalarFunction.constantFunction(1), s);
+	}
+	
 	public void setVelocityBoundaryValues(VectorFunction boundaryValues, DenseVector d)
 	{
-		setVelocityBoundaryValues(boundaryValues, ScalarFunction.constantFunction(1),d);
+		setVelocityBoundaryValues(boundaryValues, ScalarFunction.constantFunction(1), d);
 	}
+	
 	public void setVelocityBoundaryValues(ScalarFunction indicatorFunction, SparseMatrix s)
 	{
-		List<List<TPFace>> smallerList = Lists.partition(getFaces(), getFaces().size() / 12 + 1);
-		smallerList.stream().parallel().forEach(smallList ->
+		forEachBoundaryFace(F ->
 		{
-			for (TPFace F : smallList)
+			if (TPFaceIntegral.integrateNonTensorProduct(indicatorFunction::value, F,
+				QuadratureRule1D.Gauss5) > 0)
 			{
-				if (F.isBoundaryFace())
+				for (QkQkFunction shapeFunction : getShapeFunctionsWithSupportOnFace(F))
 				{
-					if(TPFaceIntegral.integrateNonTensorProduct(indicatorFunction::value,
-						F,QuadratureRule1D.Gauss5) > 0)
+					if (shapeFunction.hasVelocityFunction())
 					{
-						for (MixedShapeFunction<TPCell, TPFace, ContinuousTPShapeFunction,
-							ContinuousTPVectorFunction> shapeFunction :
-							getShapeFunctionsWithSupportOnFace(F))
+						if (F.isOnFace(shapeFunction.getVelocityShapeFunction().getNodeFunctionalPoint()))
 						{
-							if (shapeFunction.hasVelocityFunction())
-							{
-								if (F.isOnFace(shapeFunction.getVelocityShapeFunction().getNodeFunctionalPoint()))
-								{
-									int shapeFunctionIndex = shapeFunction.getGlobalIndex();
-									s.deleteLine(shapeFunctionIndex);
-									s.set(1, shapeFunctionIndex, shapeFunctionIndex);
-								}
-							}
+							int shapeFunctionIndex = shapeFunction.getGlobalIndex();
+							s.deleteColumn(shapeFunctionIndex);
+							s.deleteRow(shapeFunctionIndex);
+							s.set(1, shapeFunctionIndex, shapeFunctionIndex);
 						}
 					}
 				}
 			}
+			
 		});
 	}
+	
 	public void setVelocityBoundaryValues(VectorFunction boundaryValues,
 	                                      ScalarFunction indicatorFunction, DenseVector d)
 	{
 		MixedFunction boundaryMixed = new MixedFunction(boundaryValues);
-		List<List<TPFace>> smallerList = Lists.partition(getFaces(), getFaces().size() / 12 + 1);
-		smallerList.stream().parallel().forEach(smallList ->
+		forEachBoundaryFace(F ->
 		{
-			for (TPFace F : smallList)
+			if (TPFaceIntegral.integrateNonTensorProduct(indicatorFunction::value,
+				F, QuadratureRule1D.Gauss5) > 0)
 			{
-				if (F.isBoundaryFace())
+				for (QkQkFunction shapeFunction : getShapeFunctionsWithSupportOnFace(F))
 				{
-					if(TPFaceIntegral.integrateNonTensorProduct(indicatorFunction::value,
-						F, QuadratureRule1D.Gauss5) > 0)
+					if (shapeFunction.hasVelocityFunction())
 					{
-						for (MixedShapeFunction<TPCell, TPFace, ContinuousTPShapeFunction,
-							ContinuousTPVectorFunction> shapeFunction :
-							getShapeFunctionsWithSupportOnFace(F))
+						double nodeValue = shapeFunction.getNodeFunctional().evaluate(boundaryMixed);
+						if (F.isOnFace(shapeFunction.getVelocityShapeFunction().getNodeFunctionalPoint()))
 						{
-							if (shapeFunction.hasVelocityFunction())
-							{
-								double nodeValue = shapeFunction.getNodeFunctional().evaluate(boundaryMixed);
-								if (F.isOnFace(shapeFunction.getVelocityShapeFunction().getNodeFunctionalPoint()))
-								{
-									int shapeFunctionIndex = shapeFunction.getGlobalIndex();
-									d.set(nodeValue, shapeFunctionIndex);
-								}
-							}
+							int shapeFunctionIndex = shapeFunction.getGlobalIndex();
+							d.set(nodeValue, shapeFunctionIndex);
 						}
 					}
 				}
 			}
+			
 		});
 	}
 	
 	public void setPressureBoundaryValues(ScalarFunction boundaryValues)
 	{
 		MixedFunction boundaryMixed = new MixedFunction(boundaryValues);
-		int progress = 0;
-		for (TPFace face : getFaces())
+		forEachBoundaryFace(face ->
 		{
-			System.out.println( (100 * progress / getFaces().size()) + "%");
-			progress++;
-			if (face.isBoundaryFace())
+			for (QkQkFunction shapeFunction : getShapeFunctionsWithSupportOnFace(face))
 			{
-				for (MixedShapeFunction<TPCell, TPFace, ContinuousTPShapeFunction,
-					ContinuousTPVectorFunction> shapeFunction :
-					getShapeFunctionsWithSupportOnFace(face))
+				if (shapeFunction.hasPressureFunction())
 				{
-					if (shapeFunction.hasPressureFunction())
+					double nodeValue = shapeFunction.getNodeFunctional().evaluate(boundaryMixed);
+					if (nodeValue != 0 || face.isOnFace(((LagrangeNodeFunctional) shapeFunction.getPressureShapeFunction().getNodeFunctional()).getPoint()))
 					{
-						double nodeValue = shapeFunction.getNodeFunctional().evaluate(boundaryMixed);
-						if (nodeValue != 0 || face.isOnFace(((LagrangeNodeFunctional) shapeFunction.getPressureShapeFunction().getNodeFunctional()).getPoint()))
-						{
-							int shapeFunctionIndex = shapeFunction.getGlobalIndex();
-							for (TPCell cell : shapeFunction.getCells())
-								for (MixedShapeFunction<TPCell, TPFace,
-									ContinuousTPShapeFunction,
-									ContinuousTPVectorFunction> sameSupportFunction :
-									getShapeFunctionsWithSupportOnCell(cell))
-									systemMatrix.set(0, shapeFunctionIndex,
-										sameSupportFunction.getGlobalIndex());
-							getSystemMatrix().set(1, shapeFunctionIndex, shapeFunctionIndex);
-							getRhs().set(nodeValue, shapeFunctionIndex);
-						}
+						int shapeFunctionIndex = shapeFunction.getGlobalIndex();
+						for (TPCell cell : shapeFunction.getCells())
+							for (MixedShapeFunction<TPCell, TPFace,
+								ContinuousTPShapeFunction,
+								ContinuousTPVectorFunction> sameSupportFunction :
+								getShapeFunctionsWithSupportOnCell(cell))
+								systemMatrix.set(0, shapeFunctionIndex,
+									sameSupportFunction.getGlobalIndex());
+						getSystemMatrix().set(1, shapeFunctionIndex, shapeFunctionIndex);
+						getRhs().set(nodeValue, shapeFunctionIndex);
 					}
 				}
 			}
-		}
+			
+			
+		});
 	}
-	
+	*/
 }
