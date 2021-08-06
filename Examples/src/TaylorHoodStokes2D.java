@@ -33,7 +33,7 @@ public class TaylorHoodStokes2D
 		
 		PlotWindow p = new PlotWindow();
 		TaylorHoodSpace grid = new TaylorHoodSpace(start, end,
-			Ints.asList(3,3));
+			Ints.asList(5,5));
 		grid.assembleCells();
 		grid.assembleFunctions(polynomialDegree);
 		grid.initializeSystemMatrix();
@@ -54,7 +54,7 @@ public class TaylorHoodStokes2D
 				grid.getShapeFunctions(), solution1);
 		p.addPlot(new MixedPlot2D(solut, grid.generatePlotPoints(20),20));
 		TaylorHoodSpace grid2 = new TaylorHoodSpace(start, end,
-			Ints.asList(3,3));
+			Ints.asList(5,5));
 		grid2.assembleCells();
 		grid2.assembleFunctions(polynomialDegree);
 		grid2.initializeSystemMatrix();
@@ -82,5 +82,6 @@ public class TaylorHoodStokes2D
 			new MixedFESpaceFunction<>(
 				grid2.getShapeFunctions(), solution1);
 		p.addPlot(new MixedPlot2D(solut, grid2.generatePlotPoints(20),20));
+		p.addPlot(new ScalarPlot2D(solut.getVelocityFunction().getDivergenceFunction(), grid2.generatePlotPoints(20),20));
 	}
 }

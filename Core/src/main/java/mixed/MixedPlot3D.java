@@ -34,20 +34,14 @@ public class MixedPlot3D extends ScalarPlot3D
 	public void drawValues(Graphics g, int width, int height, double slider)
 	{
 		super.drawValues(g, width, height, slider);
-		double velocityScaling = Math.max(Math.sqrt((maxValue - minValue)*maxV), maxV);
 		for(CoordinateVector c:getClosestPoints(slider))
 		{
 			int x = (int)((c.x() - min.x())/(max.x()-min.x())*(width-150)+75 );
 			int y =	(int)(height - ((c.y() - min.y())/(max.y()-min.y())*(height-150)+75));
-			int green = (int)((velocities.get(c).z() - min.z())/velocityScaling*255);
-			if(green>255)
-				green = 255;
-			if(green<0)
-				green = 0;
-			g.setColor(new Color(0,green,0));
+			g.setColor(Color.BLACK);
 			g.fillOval(x-2,y-2,4,4);
-			int vx = (int)(velocities.get(c).x() /velocityScaling*pixelWidth);
-			int vy = (int)(velocities.get(c).y() /velocityScaling*pixelHeight);
+			int vx = (int)(velocities.get(c).x()/(maxV)*pixelWidth);
+			int vy = (int)(velocities.get(c).y()/(maxV)*pixelHeight);
 			g.drawLine(x,y,x+vx,y-vy);
 		}
 		
@@ -56,7 +50,9 @@ public class MixedPlot3D extends ScalarPlot3D
 	@Override
 	public String title()
 	{
-		return "Mixed 2D plot";
+		
+		return "Mixed 3D Plot " + title + " blue is min with " + minValue+" red is max with " + maxValue +
+			"max velocity is" + maxV;
 	}
 	
 }

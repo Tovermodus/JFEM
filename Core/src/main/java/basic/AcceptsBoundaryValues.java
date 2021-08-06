@@ -1,5 +1,8 @@
 package basic;
 
+import linalg.MutableMatrix;
+import linalg.MutableVector;
+
 import java.util.Set;
 import java.util.function.BiConsumer;
 import java.util.function.BiPredicate;

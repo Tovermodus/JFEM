@@ -111,7 +111,7 @@ public class SparseMatrixTest1
 		assertTrue(denseInverse.inverse().almostEqual(largeDense));
 	
 		assertTrue(new IterativeSolver().solveBiCGStab(largeDense,largeVector,1e-12).almostEqual(denseInverse.mvMul(largeVector)
-		));
+		, 1e-10));
 		assertTrue(largeDense.mvMul(new IterativeSolver().solveBiCGStab(largeDense,largeVector,
 			1e-12)).almostEqual(largeVector));
 		assertTrue(new IterativeSolver().solveGMRES(largeDense,largeVector,1e-12).almostEqual(denseInverse.mvMul(largeVector)

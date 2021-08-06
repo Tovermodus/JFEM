@@ -17,4 +17,10 @@ public class MixedPlot2DTime extends MixedPlot3D
 		super(pressures, velocities, pointsPerDimension);
 	}
 	
+	@Override
+	public String title()
+	{
+		return "Mixed 2D Plot in Time " + title + " blue is min with " + minValue+" red is max with " + maxValue +
+			"max velocity is" + maxV;
+	}
 }
