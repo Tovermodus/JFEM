@@ -5,6 +5,7 @@ import basic.PerformanceArguments;
 import com.google.common.collect.ImmutableMap;
 
 import java.util.*;
+import java.util.stream.IntStream;
 
 public class SparseMatrix implements MutableMatrix, DirectlySolvable, Decomposable
 {
@@ -364,13 +365,18 @@ public class SparseMatrix implements MutableMatrix, DirectlySolvable, Decomposab
 		if(! (matrix instanceof  SparseMatrix))
 			return (new DenseMatrix(this)).mmMul(matrix);
 		SparseMatrix ret = new SparseMatrix(getRows(), matrix.getCols());
-		for (int i = 0; i < sparseEntries; i++)
+		IntStream stream = IntStream.range(0,sparseEntries);
+		if(PerformanceArguments.getInstance().parallelizeThreads)
+			stream = stream.parallel();
+		stream.forEach(i ->
+		{
 			for (int j = 0; j < ((SparseMatrix) matrix).sparseEntries; j++)
 			{
 				if (sparseXs[i] == ((SparseMatrix) matrix).sparseYs[j])
 					ret.add(sparseValues[i] * ((SparseMatrix) matrix).sparseValues[j], sparseYs[i],
 						((SparseMatrix) matrix).sparseXs[j]);
 			}
+		});
 		return ret;
 	}
 	

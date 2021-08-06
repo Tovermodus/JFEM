@@ -21,22 +21,22 @@ public class DLMDiffusion
 		CoordinateVector startImmersed = CoordinateVector.fromValues(0.25, 0.25);
 		CoordinateVector endImmersed = CoordinateVector.fromValues(0.75, 0.75);
 		
-		int polynomialDegree = 1;
+		int polynomialDegree = 2;
 		
 		ContinuousTPFESpace largeGrid = new ContinuousTPFESpace(start, end,
 			Ints.asList(
-				6,6));
+				15,15));
 		largeGrid.assembleCells();
 		largeGrid.assembleFunctions(polynomialDegree);
 		ContinuousTPFESpace immersedGrid = new ContinuousTPFESpace(startImmersed, endImmersed,
-			Ints.asList(4,4));
+			Ints.asList(8,8));
 		immersedGrid.assembleCells();
 		immersedGrid.assembleFunctions(polynomialDegree);
 		
 		ScalarFunction rho = ScalarFunction.constantFunction(1);
-		ScalarFunction rho2minrho = ScalarFunction.constantFunction(1);
+		ScalarFunction rho2minrho = ScalarFunction.constantFunction(100);
 		ScalarFunction f = ScalarFunction.constantFunction(2);
-		ScalarFunction f2minf = ScalarFunction.constantFunction(2);
+		ScalarFunction f2minf = ScalarFunction.constantFunction(-4);
 		
 		TPCellIntegral<ContinuousTPShapeFunction> rhogradgrad = new TPCellIntegral<>(rho,
 			TPCellIntegral.GRAD_GRAD);
@@ -94,78 +94,11 @@ public class DLMDiffusion
 		A.addSmallMatrixAt(A13, 0,n+m);
 		A.addSmallMatrixAt(A13.transpose(), n+m,0);
 		
-		T.addSmallMatrixAt(A11.inverse(), 0, 0);
-		T.addSmallMatrixAt(SparseMatrix.identity(m), n, n);
+		DenseMatrix A11inv = A11.inverse();
+		T.addSmallMatrixAt(A11inv, 0, 0);
+		T.addSmallMatrixAt((A22.add(SparseMatrix.identity(m).mul(0.01))).inverse(), n, n);
 		T.addSmallMatrixAt(SparseMatrix.identity(m), n+m, n+m);
 		
-		VectorMultiplyable TA = new VectorMultiplyable()
-		{
-			@Override
-			public int getVectorSize()
-			{
-				return A.getVectorSize();
-			}
-			
-			@Override
-			public int getTVectorSize()
-			{
-				return A.getTVectorSize();
-			}
-			
-			@Override
-			public Vector mvMul(Vector vector)
-			{
-				return T.mvMul(A.mvMul(vector));
-			}
-			
-			@Override
-			public Vector tvMul(Vector vector)
-			{
-				return A.transpose().mvMul(T.transpose().mvMul(vector));
-			}
-		};
-		VectorMultiplyable TAinv = new VectorMultiplyable()
-		{
-			@Override
-			public int getVectorSize()
-			{
-				return A.getVectorSize();
-			}
-			
-			@Override
-			public int getTVectorSize()
-			{
-				return A.getTVectorSize();
-			}
-			
-			@Override
-			public Vector mvMul(Vector vector)
-			{
-				IterativeSolver i = new IterativeSolver();
-				i.showProgress = false;
-				return i.solveCG(TA, vector, 1e-14);
-			}
-			
-			@Override
-			public Vector tvMul(Vector vector)
-			{
-				IterativeSolver i = new IterativeSolver();
-				i.showProgress = false;
-				return i.solveCG(TA.transpose(), vector, 1e-14);
-			}
-		};
-		System.out.println("Diff Matrix, transpose " + A.sub(A.transpose()).absMaxElement());
-		System.out.println("Max Eigenvalue " + A.powerIterationSymmetric());
-		System.out.println("Min Eigenvalue " + A.inverse().powerIterationSymmetric());
-		System.out.println("Prec Max Eigenvalue " + T.mmMul(A).powerIterationSymmetric());
-		for(int i = 0; i < n+2*m; i++)
-		{
-			System.out.println(T.mmMul(A).at(i,i));
-		}
-		System.out.println("Prec Min Eigenvalue " + T.mmMul(A).inverse().powerIterationSymmetric());
-		System.out.println("Prec Max Eigenvalue " + TA.powerIterationSymmetric());
-		System.out.println("Prec Min Eigenvalue " + TAinv.powerIterationSymmetric());
-		System.out.println("CONDITION NUMBERSTUFF");
 		
 		
 		DenseVector b1 = new DenseVector(n);
@@ -178,15 +111,12 @@ public class DLMDiffusion
 		b.addSmallVectorAt(b1, 0);
 		b.addSmallVectorAt(b2, n);
 		IterativeSolver i = new IterativeSolver();
-		Vector solut = b;//i.solvePGMRES(A,T,b,1e-9);//A.solve(b);
+		Vector solut = i.solvePGMRES(A, T,b,1e-9);//A.solve(b);
 		Vector largeSolut = solut.slice(new IntCoordinates(0), new IntCoordinates(n));
 		ScalarFESpaceFunction<ContinuousTPShapeFunction> solutFun =
 			new ScalarFESpaceFunction<>(
 				largeGrid.getShapeFunctions(), largeSolut);
 		PlotWindow p = new PlotWindow();
-		p.addPlot(new MatrixPlot(A));
-		p.addPlot(new MatrixPlot(T));
-		p.addPlot(new MatrixPlot(T.mmMul(A)));
 		p.addPlot(new ScalarPlot2D(solutFun, largeGrid.generatePlotPoints(70), 70));
 	}
 }

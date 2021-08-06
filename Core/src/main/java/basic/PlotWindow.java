@@ -82,11 +82,13 @@ public class PlotWindow extends JFrame implements KeyListener, WindowListener, C
 			newValue = 99;
 		if(newValue > 99)
 			newValue = 0;
-		currentPlot = currentPlot % plots.size();
+		if(plots.size() != 0)
+			currentPlot = currentPlot % plots.size();
 		while(currentPlot < 0)
 			currentPlot+=plots.size();
 		//System.out.println(currentPlot);
-		d.setPlot(plots.get(currentPlot));
+		if(plots.size() != 0)
+			d.setPlot(plots.get(currentPlot));
 		slider.setValue(newValue);
 	}
 	

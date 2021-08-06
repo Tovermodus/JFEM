@@ -21,6 +21,8 @@ public class MatrixPlot implements Plot
 	{
 		this.m = m;
 		this.maxValue = m.absMaxElement();
+		if(maxValue > 1e30)
+			maxValue = 1e30;
 	}
 	@Override
 	public void drawValues(Graphics g, int width, int height, double slider)
@@ -34,7 +36,8 @@ public class MatrixPlot implements Plot
 	}
 	public void drawSinglePoint(Graphics g, int width, int height, double val, IntCoordinates coords)
 	{
-		
+		if(Math.abs(val) > 1e30)
+			val = 1e30;
 		double logval = 0;
 		double minlog = Math.log(IDENTIFIED_AS_ZERO);
 		if(Math.abs(val) > IDENTIFIED_AS_ZERO)

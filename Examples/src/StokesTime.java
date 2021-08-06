@@ -50,17 +50,18 @@ public class StokesTime
 		builder.build();
 		CoordinateVector start = CoordinateVector.fromValues(0, 0);
 		CoordinateVector end = CoordinateVector.fromValues(1, 1);
-		int polynomialDegree = 2;
+		int polynomialDegree = 1;
 		TaylorHoodSpace grid = new TaylorHoodSpace(start, end,
-			Ints.asList(15,15));
+			Ints.asList(6,6));
 		double reynolds = 0.1;
-		double dt = 1;
-		int timesteps = 30;
-		int nPoints = 50;
+		double dt =
+			0.1;
+		int timesteps = 50;
+		int nPoints = 80;
 		
 		MixedCellIntegral<TPCell, ContinuousTPShapeFunction, ContinuousTPVectorFunction,QkQkFunction>
 			divValue =
-			new MixedTPCellIntegral<>(ScalarFunction.constantFunction(-1),
+			new MixedTPCellIntegral<>(ScalarFunction.constantFunction(1),
 				MixedTPCellIntegral.DIV_VALUE);
 		MixedCellIntegral<TPCell, ContinuousTPShapeFunction, ContinuousTPVectorFunction,QkQkFunction> gradGrad =
 			MixedCellIntegral.fromVelocityIntegral(new TPVectorCellIntegral<>(
@@ -132,10 +133,10 @@ public class StokesTime
 				//	return 1.0;
 				//if(Math.abs(pos.x()-1) <= 1e-10)
 				//	return 1.0;
-//				if(Math.abs(pos.y()) <= 1e-10)
-//					return 1.0;
-//				if(Math.abs(1-pos.y()) <= 1e-10)
-//					return 1.0;
+				if(Math.abs(pos.y()) <= 1e-10)
+					return 1.0;
+				if(Math.abs(1-pos.y()) <= 1e-10)
+					return 1.0;
 				return 0.0;
 			}
 		};
@@ -183,12 +184,13 @@ public class StokesTime
 			IterativeSolver its = new IterativeSolver();
 			its.showProgress = false;
 			DenseVector rhs = src.add(M.mvMul(iterate));
-			iterate = new DenseVector(its.solveBiCGStab(MAD, rhs,iterate, 1e-6));
+			bdrFunction = createBoundaryFunction(i*dt);
 			grid.writeBoundaryValuesTo(new MixedFunction(bdrFunction),
 				(f) -> {
 					return TPFaceIntegral.integrateNonTensorProduct(indicatorFunction::value, f,
-					QuadratureRule1D.Gauss5) > 0;
+						QuadratureRule1D.Gauss5) > 0;
 				}, MAD, iterate);
+			iterate = new DenseVector(its.solveBiCGStab(MAD, rhs,iterate, 1e-6));
 			System.out.println("x"+iterate);
 			System.out.println(i);
 			pvals.putAll(generateCurrentFunction(iterate, grid)
@@ -198,7 +200,6 @@ public class StokesTime
 			divvals.putAll(generateCurrentFunction(iterate, grid)
 				.getVelocityFunction()
 				.getDivergenceFunction().valuesInPointsAtTime(points,dt*i));
-			bdrFunction = createBoundaryFunction(i*dt);
 		}
 		p.addPlot(new MixedPlot2DTime(pvals, vvals, nPoints));
 		p.addPlot(new ScalarPlot2DTime(divvals, nPoints, ""));

@@ -17,7 +17,7 @@ public class PerformanceArguments
 		this.threadNumber = Objects.requireNonNullElse(threadNumber, 12);
 		this.executeChecks = Objects.requireNonNullElse(executeChecks, true);
 		this.cacheSize = Objects.requireNonNullElse(cacheSize, 50000);
-		this.doubleTolerance = Objects.requireNonNullElse(doubleTolerance, 1e-14);
+		this.doubleTolerance = Objects.requireNonNullElse(doubleTolerance, 1e-10);
 	}
 	public static void createInstance(Boolean parallelizeThreads, Integer threadNumber, Boolean executeChecks,
 	                                  Integer cacheSize, Double doubleTolerance) {

@@ -57,7 +57,7 @@ class GMRES
 			gamma.set(-s.at(j)*gamma.at(j),j+1);
 			gamma.set(c.at(j)*gamma.at(j),j);
 			System.out.println(Math.abs(gamma.at(j+1)));
-			if(Math.abs(gamma.at(j+1)) < tol || j > 40)
+			if(Math.abs(gamma.at(j+1)) < tol || j > 100)
 				break;
 			v.add(w.mul(1./h.at(j+1,j)));
 		}
@@ -73,7 +73,7 @@ class GMRES
 		Vector alphaV =
 			IntStream.range(0,j+1).parallel().mapToObj(i->v.get(i).mul(alpha.at(i))).reduce(new DenseVector(n),
 				Vector::add);
-		if(j > 40 && restarts < 200)
+		if(j > 100 && restarts < 100)
 		{
 			restarts++;
 			return new GMRES().solve(A, b, x.add(alphaV), tol, interruptor);
@@ -132,7 +132,7 @@ class GMRES
 			gamma.set(-s.at(j)*gamma.at(j),j+1);
 			gamma.set(c.at(j)*gamma.at(j),j);
 			System.out.println(Math.abs(gamma.at(j+1)));
-			if(Math.abs(gamma.at(j+1)) < tol || j > 40)
+			if(Math.abs(gamma.at(j+1)) < tol || j > 100)
 				break;
 			v.add(w.mul(1./h.at(j+1,j)));
 		}
@@ -148,7 +148,7 @@ class GMRES
 		Vector alphaV =
 			IntStream.range(0,j+1).parallel().mapToObj(i->v.get(i).mul(alpha.at(i))).reduce(new DenseVector(n),
 				Vector::add);
-		if(j > 40 && restarts < 200)
+		if(j > 100 && restarts < 100)
 		{
 			restarts++;
 			return solve(preconditioner, A, b, x.add(alphaV), tol, interruptor);

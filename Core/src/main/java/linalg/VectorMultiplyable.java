@@ -53,7 +53,6 @@ public interface VectorMultiplyable
 				.mapToObj(i -> DenseVector.getUnitVector(getVectorSize(), i))
 				.anyMatch(v -> !mvMul(v).almostEqual(tvMul(v))))
 				throw new IllegalStateException("Not Symmetric");
-				
 		}
 		DenseVector d;
 		d = new DenseVector(getVectorSize());

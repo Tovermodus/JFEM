@@ -2,12 +2,15 @@ package linalg;
 
 import basic.DoubleCompare;
 import basic.PerformanceArguments;
+import basic.PlotWindow;
 import com.google.common.primitives.Ints;
+import org.ujmp.core.doublematrix.calculation.general.decomposition.Chol;
 
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.IntStream;
 
 public class DenseMatrix implements MutableMatrix, Decomposable, DirectlySolvable
 {
@@ -22,9 +25,14 @@ public class DenseMatrix implements MutableMatrix, Decomposable, DirectlySolvabl
 	public DenseMatrix(Matrix matrix)
 	{
 		entries = new double[matrix.getRows()][matrix.getCols()];
-		for (int i = 0; i < getRows(); i++)
+		IntStream stream = IntStream.range(0,getRows());
+		if(PerformanceArguments.getInstance().parallelizeThreads)
+			stream = stream.parallel();
+		stream.forEach(i ->
+		{
 			for (int j = 0; j < getCols(); j++)
 				entries[i][j] = matrix.at(i, j);
+		});
 	}
 	
 	public DenseMatrix(double [][] matrix)
@@ -321,6 +329,12 @@ public class DenseMatrix implements MutableMatrix, Decomposable, DirectlySolvabl
 		}
 		return ujmpmat;
 	}
+	public SparseMatrix getCholeskyL()
+	{
+		org.ujmp.core.Matrix c = org.ujmp.core.Matrix.chol.calc(toUJMPMatrix());
+		return fromUJMPMatrixSparse(c);
+	}
+	
 	
 	private static DenseMatrix fromUJMPMatrix(org.ujmp.core.Matrix matrix)
 	{
@@ -329,6 +343,16 @@ public class DenseMatrix implements MutableMatrix, Decomposable, DirectlySolvabl
 		for (int i = 0; i < ret.getRows(); i++)
 			for (int j = 0; j < ret.getCols(); j++)
 				ret.set(matrix.getAsDouble(i, j), i, j);
+		return ret;
+	}
+	private static SparseMatrix fromUJMPMatrixSparse(org.ujmp.core.Matrix matrix)
+	{
+		SparseMatrix ret = new SparseMatrix((int) matrix.getRowCount(), (int) matrix.getColumnCount());
+		
+		for (int i = 0; i < ret.getRows(); i++)
+			for (int j = 0; j < ret.getCols(); j++)
+				if(Math.abs(matrix.getAsDouble(i,j)) > PerformanceArguments.getInstance().doubleTolerance)
+					ret.add(matrix.getAsDouble(i, j), i, j);
 		return ret;
 	}
 	
