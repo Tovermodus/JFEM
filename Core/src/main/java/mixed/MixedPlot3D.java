@@ -1,5 +1,6 @@
 package mixed;
 
+import basic.ScalarFunction;
 import basic.ScalarPlot2D;
 import basic.ScalarPlot3D;
 import linalg.CoordinateVector;
@@ -15,8 +16,13 @@ public class MixedPlot3D extends ScalarPlot3D
 	double maxV;
 	public MixedPlot3D(MixedFunction function, List<CoordinateVector> points, int pointsPerDimension)
 	{
-		super(function.getPressureFunction(), points, pointsPerDimension);
-		velocities = function.getVelocityFunction().valuesInPoints(points);
+		super(function.hasPressureFunction()?function.getPressureFunction(): ScalarFunction.constantFunction(0), points,
+			pointsPerDimension);
+		if(function.hasVelocityFunction())
+			velocities = function.getVelocityFunction().valuesInPoints(points);
+		else
+			velocities =
+				ScalarFunction.constantFunction(0).makeIsotropicVectorFunction().valuesInPoints(points);
 		OptionalDouble maxVelocity =
 			velocities.values().stream().parallel().mapToDouble(CoordinateVector::euclidianNorm).max();
 		maxV = maxVelocity.orElse(1);

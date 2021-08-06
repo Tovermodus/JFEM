@@ -52,12 +52,11 @@ public class StokesTime
 		CoordinateVector end = CoordinateVector.fromValues(1, 1);
 		int polynomialDegree = 1;
 		TaylorHoodSpace grid = new TaylorHoodSpace(start, end,
-			Ints.asList(6,6));
-		double reynolds = 0.1;
-		double dt =
-			0.1;
-		int timesteps = 50;
-		int nPoints = 80;
+			Ints.asList(11,11));
+		double reynolds = 100;
+		double dt = 0.3;
+		int timesteps = 10;
+		int nPoints = 43;
 		
 		MixedCellIntegral<TPCell, ContinuousTPShapeFunction, ContinuousTPVectorFunction,QkQkFunction>
 			divValue =
@@ -85,7 +84,7 @@ public class StokesTime
 					@Override
 					public Double value(CoordinateVector pos)
 					{
-						return Math.exp(-pos.sub(CoordinateVector.fromValues(0.5,0.5)).euclidianNorm());
+						return Math.exp(-10*pos.sub(CoordinateVector.fromValues(0.5,0.5)).euclidianNorm());
 					}
 				}).makeIsotropicVectorFunction(),
 					TPVectorRightHandSideIntegral.VALUE));
@@ -109,7 +108,7 @@ public class StokesTime
 					@Override
 					public CoordinateVector value(CoordinateVector pos)
 					{
-						return CoordinateVector.fromValues(1,0);
+						return CoordinateVector.fromValues(0,0);
 					}
 				},
 					TPVectorRightHandSideIntegral.VALUE));
@@ -151,7 +150,9 @@ public class StokesTime
 		
 		SparseMatrix D = new SparseMatrix(n,n);
 		grid.writeCellIntegralsToMatrix(List.of(divValue), D);
-		D.mulInPlace(dt);
+		D.mulInPlace(100);
+		
+		SparseMatrix C = new SparseMatrix(n,n);
 		
 		DenseVector src = new DenseVector(n);
 		grid.writeCellIntegralsToRhs(List.of(source), src);
@@ -183,14 +184,24 @@ public class StokesTime
 		{
 			IterativeSolver its = new IterativeSolver();
 			its.showProgress = false;
+			
+			
+//			MixedCellIntegral<TPCell, ContinuousTPShapeFunction, ContinuousTPVectorFunction,QkQkFunction> convection =
+//				MixedCellIntegral.fromVelocityIntegral(new TPVectorCellIntegral<>(
+//					generateCurrentFunction(iterate, grid).getVelocityFunction(),
+//					TPVectorCellIntegral.GRAD_VALUE));
+//			grid.writeCellIntegralsToMatrix(List.of(convection), C);
+//			C.mulInPlace(dt);
+			SparseMatrix MADC = MAD;//.add(C);
+			
 			DenseVector rhs = src.add(M.mvMul(iterate));
 			bdrFunction = createBoundaryFunction(i*dt);
 			grid.writeBoundaryValuesTo(new MixedFunction(bdrFunction),
 				(f) -> {
 					return TPFaceIntegral.integrateNonTensorProduct(indicatorFunction::value, f,
 						QuadratureRule1D.Gauss5) > 0;
-				}, MAD, iterate);
-			iterate = new DenseVector(its.solveBiCGStab(MAD, rhs,iterate, 1e-6));
+				}, MADC, iterate);
+			iterate = new DenseVector(its.solveBiCGStab(MADC, rhs,iterate, 1e-6));
 			System.out.println("x"+iterate);
 			System.out.println(i);
 			pvals.putAll(generateCurrentFunction(iterate, grid)

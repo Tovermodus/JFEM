@@ -1,10 +1,7 @@
 package mixed;
 
-import basic.ScalarPlot2D;
 import linalg.CoordinateVector;
 
-import java.awt.*;
-import java.util.List;
 import java.util.Map;
 import java.util.OptionalDouble;
 
@@ -15,6 +12,9 @@ public class MixedPlot2DTime extends MixedPlot3D
 	                       int pointsPerDimension)
 	{
 		super(pressures, velocities, pointsPerDimension);
+		OptionalDouble maxVelocity =
+			velocities.values().stream().parallel().mapToDouble(c->Math.sqrt(c.x()*c.x() + c.y()*c.y())).max();
+		maxV = maxVelocity.orElse(1);
 	}
 	
 	@Override
