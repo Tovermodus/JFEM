@@ -38,6 +38,15 @@ public class CoordinateVector extends DenseVector implements Comparable<Coordina
 		}
 		return ret;
 	}
+	public static CoordinateVector repeat(double val, int number)
+	{
+		CoordinateVector ret = new CoordinateVector(number);
+		for (int i = 0; i < number; i++)
+		{
+			ret.set(val,i);
+		}
+		return ret;
+	}
 	
 	public CoordinateVector addTime(double time)
 	{

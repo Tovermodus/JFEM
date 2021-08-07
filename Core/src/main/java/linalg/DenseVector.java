@@ -130,7 +130,11 @@ public class DenseVector implements MutableVector, MutableTensor
 	@Override
 	public void subInPlace(Tensor other)
 	{
-		entries = sub(other).entries;
+		if (PerformanceArguments.getInstance().executeChecks)
+			if (!other.getShape().equals(getShape()))
+				throw new IllegalArgumentException("Other has wrong shape");
+		for(int i = 0; i < getLength(); i++)
+			entries[i] -= other.at(i);
 	}
 	
 	@Override

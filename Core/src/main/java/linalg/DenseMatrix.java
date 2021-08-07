@@ -225,7 +225,7 @@ public class DenseMatrix implements MutableMatrix, Decomposable, DirectlySolvabl
 	@Override
 	public long size()
 	{
-		return entries.length * entries[0].length;
+		return (long) entries.length * entries[0].length;
 	}
 	
 	

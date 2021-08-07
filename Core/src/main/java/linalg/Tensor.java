@@ -58,6 +58,10 @@ public interface Tensor
 	
 	String printFormatted(double... tol);
 	
+	default boolean almostZero()
+	{
+		return DoubleCompare.almostEqualAfterOps(absMaxElement(), 0, 0, size());
+	}
 	default boolean almostEqual(Tensor other)
 	{
 		return almostEqual(other, 0);

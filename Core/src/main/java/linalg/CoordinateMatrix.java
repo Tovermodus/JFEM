@@ -98,6 +98,12 @@ public class CoordinateMatrix extends DenseMatrix
 		return ret;
 	}
 	
+	@Override
+	public CoordinateVector solve(Vector rhs)
+	{
+		return new CoordinateVector(super.solve(rhs));
+	}
+	
 	public double determinant()
 	{
 		if (this.getCols() == 1)
