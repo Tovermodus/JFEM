@@ -23,6 +23,14 @@ public class TPCell implements CellWithReferenceCell<TPCell, TPFace>
 		this.refined = false;
 	}
 	
+	public static TPCell unitHyperCube(int dimension)
+	{
+		List<Cell1D> cells = new ArrayList<>(dimension);
+		for (int i = 0; i < dimension; i++)
+			cells.add(new Cell1D(0, 1));
+		return new TPCell(cells);
+	}
+	
 	@Override
 	public int getDimension()
 	{
@@ -160,10 +168,7 @@ public class TPCell implements CellWithReferenceCell<TPCell, TPFace>
 	@Override
 	public TPCell getReferenceCell()
 	{
-		List<Cell1D> cells = new ArrayList<>(getDimension());
-		for (int i = 0; i < getDimension(); i++)
-			cells.add(new Cell1D(0, 1));
-		return new TPCell(cells);
+		return TPCell.unitHyperCube(getDimension());
 	}
 	
 	
