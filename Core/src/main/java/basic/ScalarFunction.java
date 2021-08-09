@@ -2,7 +2,6 @@ package basic;
 
 import linalg.CoordinateMatrix;
 import linalg.CoordinateVector;
-import linalg.Matrix;
 
 import java.util.List;
 import java.util.Map;
@@ -77,7 +76,7 @@ public interface ScalarFunction extends Function<Double, CoordinateVector, Coord
 	default Map<CoordinateVector, Double> valuesInPointsAtTime(List<CoordinateVector> points, double t)
 	{
 		ConcurrentHashMap<CoordinateVector, Double> ret = new ConcurrentHashMap<>();
-		points.stream().parallel().forEach(point->ret.put(point.addTime(t), value(point)));
+		points.stream().parallel().forEach(point->ret.put(point.addCoordinate(t), value(point)));
 		return ret;
 	}
 	default VectorFunction getGradientFunction()

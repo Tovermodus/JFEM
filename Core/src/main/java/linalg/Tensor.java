@@ -86,4 +86,26 @@ public interface Tensor
 		}
 		return true;
 	}
+	default boolean almostEqualMute(Tensor other)
+	{
+		return almostEqualMute(other, 0);
+	}
+	default boolean almostEqualMute(Tensor other, double extraTol)
+	{
+		if(PerformanceArguments.getInstance().executeChecks)
+		{
+			if (!getShape().equals(other.getShape()))
+				throw new IllegalArgumentException("Tensors are of different size");
+		}
+		double absmax = absMaxElement() + other.absMaxElement();
+		for(IntCoordinates c: getShape().range())
+		{
+			if(!DoubleCompare.almostEqualAfterOps(at(c),
+				other.at(c), absmax, size(), extraTol))
+			{
+				return false;
+			}
+		}
+		return true;
+	}
 }

@@ -20,6 +20,14 @@ public interface Vector extends Tensor
 	@Override
 	Vector add(Tensor other);
 	
+	default double sumElements()
+	{
+		return getShape().range().stream().mapToDouble(this::at).sum();
+	}
+	default double manhattanNorm()
+	{
+		return getShape().range().stream().mapToDouble(this::at).map(Math::abs).sum();
+	}
 	@Override
 	default Vector sub(Tensor other)
 	{

@@ -5,35 +5,57 @@ import basic.FaceWithReferenceFace;
 import basic.VectorFunction;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Multimap;
+import linalg.CoordinateMatrix;
 import linalg.CoordinateVector;
 import org.jetbrains.annotations.NotNull;
+import tensorproduct.geometry.TPCell;
+import tensorproduct.geometry.TPFace;
 
 import java.util.List;
+import java.util.Set;
 
 public class DistortedFace implements FaceWithReferenceFace<DistortedCell, DistortedFace>
 {
+	Set<DistortedCell> cells;
+	private final boolean isBoundaryFace;
+	private final VectorFunction normal;
+	final DistortedFace referenceFace;
+	final int dimension;
+	
+	public DistortedFace()
+	{
+		isBoundaryFace = false;
+		normal = null;
+		referenceFace = null;
+		dimension = 0;
+	}
+	
 	@Override
 	public int getDimension()
 	{
-		throw new UnsupportedOperationException("not implemented yet");
+		return dimension;
 	}
 	
 	@Override
 	public ImmutableSet<DistortedCell> getCells()
 	{
-		throw new UnsupportedOperationException("not implemented yet");
+		return ImmutableSet.copyOf(cells);
 	}
+	public CoordinateMatrix getRotationOfDownStreamCell()
+	{
+		throw new UnsupportedOperationException("not implemented yet");
 	
+	}
 	@Override
 	public boolean isBoundaryFace()
 	{
-		throw new UnsupportedOperationException("not implemented yet");
+		return isBoundaryFace;
 	}
 	
 	@Override
 	public VectorFunction getNormal()
 	{
-		throw new UnsupportedOperationException("not implemented yet");
+		return normal;
 	}
 	
 	@Override
@@ -51,13 +73,14 @@ public class DistortedFace implements FaceWithReferenceFace<DistortedCell, Disto
 	@Override
 	public CoordinateVector center()
 	{
-		throw new UnsupportedOperationException("not implemented yet");
+		return getNormalUpstreamCell().transformFromReferenceCell(referenceFace.center());
 	}
 	
 	@Override
 	public boolean isOnFace(CoordinateVector pos)
 	{
-		throw new UnsupportedOperationException("not implemented yet");
+		
+		return referenceFace.isOnFace(getNormalUpstreamCell().transformToReferenceCell(pos));
 	}
 	
 	@Override
@@ -75,6 +98,6 @@ public class DistortedFace implements FaceWithReferenceFace<DistortedCell, Disto
 	@Override
 	public DistortedFace getReferenceFace()
 	{
-		throw new UnsupportedOperationException("not implemented yet");
+		return referenceFace;
 	}
 }

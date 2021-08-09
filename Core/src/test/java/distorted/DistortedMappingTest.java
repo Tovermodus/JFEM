@@ -103,7 +103,7 @@ public class DistortedMappingTest
 	public void testMappingRotated2D()
 	{
 		DistortedCell cell = getRotated2D();
-		CoordinateMatrix rotation = CoordinateMatrix.fromValues(2,2,0,-1,1,0);
+		CoordinateMatrix rotation = CoordinateMatrix.fromValues(2,2,1,1,-1,1);
 		CoordinateMatrix rotationInv = rotation.inverse();
 		for(int i = 0; i <=10; i++)
 		{
@@ -122,7 +122,7 @@ public class DistortedMappingTest
 	public void testMappingRotated3D()
 	{
 		DistortedCell cell = getRotated3D();
-		CoordinateMatrix rotation = CoordinateMatrix.fromValues(3,3,0,-1,0,1,0,0,0,0,1);
+		CoordinateMatrix rotation = CoordinateMatrix.fromValues(3,3,1,1,0,-1,1,0,0,0,1);
 		CoordinateMatrix rotationInv = rotation.inverse();
 		for(int i = 0; i <= 10; i++)
 		{
@@ -215,23 +215,23 @@ public class DistortedMappingTest
 	private DistortedCell getRotated2D()
 	{
 		CoordinateVector [] vertices = new CoordinateVector[4];
-		vertices[0] = CoordinateVector.fromValues(1,0);
-		vertices[1] = CoordinateVector.fromValues(1,1);
-		vertices[2] = CoordinateVector.fromValues(0,1);
-		vertices[3] = CoordinateVector.fromValues(0,0);
+		vertices[0] = CoordinateVector.fromValues(0,0);
+		vertices[1] = CoordinateVector.fromValues(1,-1);
+		vertices[2] = CoordinateVector.fromValues(2,0);
+		vertices[3] = CoordinateVector.fromValues(1,1);
 		return new DistortedCell(vertices);
 	}
 	private DistortedCell getRotated3D()
 	{
 		CoordinateVector [] vertices = new CoordinateVector[8];
-		vertices[0] = CoordinateVector.fromValues(1,0,0);
-		vertices[1] = CoordinateVector.fromValues(1,1,0);
-		vertices[2] = CoordinateVector.fromValues(0,1,0);
-		vertices[3] = CoordinateVector.fromValues(0,0,0);
-		vertices[4] = CoordinateVector.fromValues(1,0,1);
-		vertices[5] = CoordinateVector.fromValues(1,1,1);
-		vertices[6] = CoordinateVector.fromValues(0,1,1);
-		vertices[7] = CoordinateVector.fromValues(0,0,1);
+		vertices[0] = CoordinateVector.fromValues(0,0,0);
+		vertices[1] = CoordinateVector.fromValues(1,-1,0);
+		vertices[2] = CoordinateVector.fromValues(2,0,0);
+		vertices[3] = CoordinateVector.fromValues(1,1,0);
+		vertices[4] = CoordinateVector.fromValues(0,0,1);
+		vertices[5] = CoordinateVector.fromValues(1,-1,1);
+		vertices[6] = CoordinateVector.fromValues(2,0,1);
+		vertices[7] = CoordinateVector.fromValues(1,1,1);
 		return new DistortedCell(vertices);
 	}
 	private DistortedCell getDistortedCell2D()
@@ -247,13 +247,13 @@ public class DistortedMappingTest
 	{
 		CoordinateVector [] vertices = new CoordinateVector[8];
 		vertices[0] = CoordinateVector.fromValues(0,0,0);
-		vertices[1] = CoordinateVector.fromValues(2,0,-1);
-		vertices[2] = CoordinateVector.fromValues(0.8,23.1,0.2);
+		vertices[1] = CoordinateVector.fromValues(2,0,-0.1);
+		vertices[2] = CoordinateVector.fromValues(0.8,2.1,0.2);
 		vertices[3] = CoordinateVector.fromValues(0,1,0);
 		vertices[4] = CoordinateVector.fromValues(0,0,4);
-		vertices[5] = CoordinateVector.fromValues(2,0,3);
-		vertices[6] = CoordinateVector.fromValues(0.8,23.1,4);
-		vertices[7] = CoordinateVector.fromValues(0,1,5);
+		vertices[5] = CoordinateVector.fromValues(2,0,3.8);
+		vertices[6] = CoordinateVector.fromValues(0.8,2.1,4);
+		vertices[7] = CoordinateVector.fromValues(0,1,4.2);
 		return new DistortedCell(vertices);
 	}
 }

@@ -5,11 +5,9 @@ import linalg.CoordinateVector;
 import linalg.IntCoordinates;
 import org.junit.jupiter.api.Test;
 import tensorproduct.geometry.CartesianGrid;
-import tensorproduct.geometry.Cell1D;
 import tensorproduct.geometry.TPCell;
 import tensorproduct.geometry.TPFace;
 
-import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.*;
 

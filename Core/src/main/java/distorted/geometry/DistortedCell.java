@@ -3,27 +3,24 @@ import basic.CellWithReferenceCell;
 import basic.PerformanceArguments;
 import basic.VectorFunction;
 import com.google.common.collect.ImmutableSet;
-import linalg.CoordinateMatrix;
-import linalg.CoordinateVector;
-import linalg.Newton;
+import linalg.*;
+import linalg.Vector;
 import org.jetbrains.annotations.NotNull;
 import tensorproduct.geometry.TPCell;
-import tensorproduct.geometry.TPFace;
 
-import java.util.Arrays;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 
 public class DistortedCell implements CellWithReferenceCell<DistortedCell, DistortedFace>
 {
-	
+	final double MAXIMUM_WARP = 0.1; //25°
 	final TPCell referenceCell;
-	private final CoordinateVector[] transformationCoefficients; //in order xyz, xy, xz, yz, x, y, z, 1
+	private final CoordinateVector[] transformationCoefficients;
+	private final CoordinateVector[] vertices; //in order xyz, xy, xz, yz, x, y, z, 1
 	private final int dimension;
 	Set<DistortedFace> faces;
 	public DistortedCell(CoordinateVector[] vertices)
 	{
+		this.vertices = vertices;
 		dimension = vertices[0].getLength();
 		referenceCell = TPCell.unitHyperCube(dimension);
 		faces = new HashSet<>(2*dimension);
@@ -33,13 +30,13 @@ public class DistortedCell implements CellWithReferenceCell<DistortedCell, Disto
 				throw new IllegalArgumentException("Wrong number of vertices");
 		}
 		transformationCoefficients = new CoordinateVector[(int)Math.pow(2,dimension)];
-		if(dimension == 1)
+		if(getDimension() == 1)
 		{
 			transformationCoefficients[0] = vertices[1]
 				.sub(vertices[0]);
 			transformationCoefficients[1] = vertices[0];
 		}
-		if(dimension == 2)
+		if(getDimension() == 2)
 		{
 			transformationCoefficients[0] = vertices[0]
 				.add(vertices[2])
@@ -51,7 +48,7 @@ public class DistortedCell implements CellWithReferenceCell<DistortedCell, Disto
 				.sub(vertices[0]);
 			transformationCoefficients[3] = vertices[0];
 		}
-		if(dimension == 3)
+		if(getDimension() == 3)
 		{
 			transformationCoefficients[0] = vertices[1]
 				.add(vertices[3])
@@ -81,6 +78,10 @@ public class DistortedCell implements CellWithReferenceCell<DistortedCell, Disto
 				.sub(vertices[0]);
 			transformationCoefficients[7] = vertices[0];
 		}
+		if(!verticesHaveCorrectPosition())
+			throw new IllegalArgumentException("vertices are in wrong order or hexahedron is warped too " +
+				"much");
+		
 	}
 	@Override
 	public int getDimension()
@@ -88,6 +89,123 @@ public class DistortedCell implements CellWithReferenceCell<DistortedCell, Disto
 		return dimension;
 	}
 	
+	public int getPositionOfVertex(CoordinateVector vertex)
+	{
+		for(int i = 0; i < vertices.length; i++)
+			if(vertices[i].almostEqualMute(vertex))
+				return i;
+		throw new IllegalArgumentException("vertex is not vertex of cell");
+	}
+	public IntCoordinates mapPositionToReferencePosition(int position)
+	{
+		if(getDimension() == 1)
+		{
+			return new IntCoordinates(position);
+		}
+		if(getDimension() == 2)
+		{
+			if(position == 0)
+				return new IntCoordinates(0,0);
+			if(position == 1)
+				return new IntCoordinates(1,0);
+			if(position == 2)
+				return new IntCoordinates(1,1);
+			if(position == 3)
+				return new IntCoordinates(0,1);
+		}
+		if(getDimension() == 3)
+		{
+			if(position == 0)
+				return new IntCoordinates(0,0,0);
+			if(position == 1)
+				return new IntCoordinates(1,0,0);
+			if(position == 2)
+				return new IntCoordinates(1,1,0);
+			if(position == 3)
+				return new IntCoordinates(0,1,0);
+			if(position == 4)
+				return new IntCoordinates(0,0,1);
+			if(position == 5)
+				return new IntCoordinates(1,0,1);
+			if(position == 6)
+				return new IntCoordinates(1,1,1);
+			if(position == 7)
+				return new IntCoordinates(0,1,1);
+		}
+		throw new IllegalArgumentException("position or dimension is wrong");
+	}
+	private boolean verticesHaveCorrectPosition()
+	{
+		
+		OptionalDouble minSum = Arrays.stream(vertices).mapToDouble(Vector::sumElements).min();
+		double min = 0;
+		if(minSum.isPresent())
+			min = minSum.getAsDouble();
+		else 
+			throw new IllegalStateException("No vertices");
+		if(vertices[0].sumElements() != min)
+			return false;
+		if(getDimension() == 2)
+			if(!checkQuadrilateral(vertices[0], vertices[3], vertices[2], vertices[1]))
+				return false;
+		if(getDimension() == 3)
+		{
+			if (!checkQuadrilateral(vertices[0], vertices[3], vertices[2], vertices[1]))
+				return false;
+			if (!checkQuadrilateral(vertices[0], vertices[1], vertices[5], vertices[4]))
+				return false;
+			if (!checkQuadrilateral(vertices[0], vertices[4], vertices[7], vertices[3]))
+				return false;
+			if (!checkQuadrilateral(vertices[6], vertices[7], vertices[4], vertices[5]))
+				return false;
+			if (!checkQuadrilateral(vertices[6], vertices[2], vertices[3], vertices[7]))
+				return false;
+			if (!checkQuadrilateral(vertices[6], vertices[5], vertices[1], vertices[2]))
+				return false ;
+		}
+		return true;
+	}
+	private boolean checkQuadrilateral(CoordinateVector c1, CoordinateVector c2, CoordinateVector c3,
+	                                   CoordinateVector c4)
+	{
+		CoordinateVector center = center();
+		if(getDimension() == 2)
+		{
+			c1 = c1.addCoordinate(0);
+			c2 = c2.addCoordinate(0);
+			c3 = c3.addCoordinate(0);
+			c4 = c4.addCoordinate(0);
+			center = center.addCoordinate(1);
+		}
+		CoordinateVector v1 = c2.sub(c1);
+		CoordinateVector v2 = c3.sub(c2);
+		CoordinateVector v3 = c4.sub(c3);
+		CoordinateVector v4 = c1.sub(c4);
+		CoordinateVector c12 = v1.cross(v2);
+		CoordinateVector c23 = v2.cross(v3);
+		CoordinateVector c34 = v3.cross(v4);
+		CoordinateVector c41 = v4.cross(v1);
+		c12.mulInPlace(1./c12.euclidianNorm());
+		c23.mulInPlace(1./c23.euclidianNorm());
+		c34.mulInPlace(1./c34.euclidianNorm());
+		c41.mulInPlace(1./c41.euclidianNorm());
+		CoordinateVector mean = c1.add(c2).add(c3).add(c4).mul(1./4);
+		if(c12.inner(mean.sub(center)) <= 0)
+			return false;
+		if(c12.inner(c23)<1-MAXIMUM_WARP)
+			return false;
+		if(c12.inner(c34)<1-MAXIMUM_WARP)
+			return false;
+		if(c12.inner(c41)<1-MAXIMUM_WARP)
+			return false;
+		if(c23.inner(c34)<1-MAXIMUM_WARP)
+			return false;
+		if(c23.inner(c41)<1-MAXIMUM_WARP)
+			return false;
+		if(c34.inner(c41)<1-MAXIMUM_WARP)
+			return false;
+		return true;
+	}
 	@Override
 	public ImmutableSet<DistortedFace> getFaces()
 	{
@@ -150,9 +268,9 @@ public class DistortedCell implements CellWithReferenceCell<DistortedCell, Disto
 			return -1;
 		if (o.getDimension() > getDimension())
 			return 1;
-		for(int i = 0; i < transformationCoefficients.length; i++)
-			if(transformationCoefficients[i].compareTo(o.transformationCoefficients[i]) != 0)
-				return transformationCoefficients[i].compareTo(o.transformationCoefficients[i]);
+		for(int i = 0; i < vertices.length; i++)
+			if(vertices[i].compareTo(o.vertices[i]) != 0)
+				return vertices[i].compareTo(o.vertices[i]);
 		return 0;
 	}
 	
