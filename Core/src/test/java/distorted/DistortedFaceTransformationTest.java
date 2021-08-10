@@ -10,7 +10,7 @@ import org.junit.jupiter.api.Test;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 
-public class DistortedFaceTest
+public class DistortedFaceTransformationTest
 {
 	@Test
 	public void testRotation2D()

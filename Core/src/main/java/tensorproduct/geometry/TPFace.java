@@ -50,6 +50,13 @@ public class TPFace implements FaceWithReferenceFace<TPCell, TPFace>,Comparable<
 			}
 		};
 	}
+	public static TPFace unitHyperCubeFace(int dimension, boolean isBoundaryFace)
+	{
+		List<Cell1D> cells = new ArrayList<>(dimension-1);
+		for (int i = 0; i < dimension-1; i++)
+			cells.add(new Cell1D(0, 1));
+		return new TPFace(cells,0,0,isBoundaryFace);
+	}
 	public ImmutableList<Cell1D> getComponentCells()
 	{
 		return cell1Ds;

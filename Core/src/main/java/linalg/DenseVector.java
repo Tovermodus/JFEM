@@ -5,6 +5,7 @@ import basic.PerformanceArguments;
 import org.ujmp.core.Matrix;
 
 import java.util.Arrays;
+import java.util.function.DoubleUnaryOperator;
 
 public class DenseVector implements MutableVector, MutableTensor
 {
@@ -196,6 +197,13 @@ public class DenseVector implements MutableVector, MutableTensor
 		{
 			ret.entries[i] = entries[i]*scalar;
 		}
+		return ret;
+	}
+	public DenseVector componentWise(DoubleUnaryOperator action)
+	{
+		DenseVector ret = new DenseVector(this);
+		for(int i = 0; i < getLength(); i++)
+			 ret.entries[i] = action.applyAsDouble(ret.entries[i]);
 		return ret;
 	}
 	

@@ -106,8 +106,6 @@ public class CoordinateVector extends DenseVector implements Comparable<Coordina
 	{
 		if (PerformanceArguments.getInstance().executeChecks)
 		{
-			if (!(other instanceof CoordinateVector))
-				throw new IllegalArgumentException("can't add coordinates and other vectors");
 			if (!getShape().equals(other.getShape()))
 				throw new IllegalArgumentException("Vectors are of different size");
 		}

@@ -12,10 +12,10 @@ import java.util.*;
 
 public class DistortedCell implements CellWithReferenceCell<DistortedCell, DistortedFace>
 {
-	final double MAXIMUM_WARP = 0.1; //25°
+	final double MAXIMUM_WARP = 1e-10; //25°
 	final TPCell referenceCell;
-	private final CoordinateVector[] transformationCoefficients;
-	private final CoordinateVector[] vertices; //in order xyz, xy, xz, yz, x, y, z, 1
+	private final CoordinateVector[] transformationCoefficients;//in order xyz, xy, xz, yz, x, y, z, 1
+	final CoordinateVector[] vertices;
 	private final int dimension;
 	Set<DistortedFace> faces;
 	public DistortedCell(CoordinateVector[] vertices)
