@@ -176,12 +176,12 @@ public class DistortedFaceTransformationTest
 		CoordinateVector[] vertices = new CoordinateVector[8];
 		vertices[0] = CoordinateVector.fromValues(0, 0, 0);
 		vertices[1] = CoordinateVector.fromValues(1, 0, 0);
-		vertices[2] = CoordinateVector.fromValues(1, 1, 0);
+		vertices[2] = CoordinateVector.fromValues(2, 2, 0);
 		vertices[3] = CoordinateVector.fromValues(0, 1, 0);
-		vertices[4] = CoordinateVector.fromValues(0, 0, 1);
-		vertices[5] = CoordinateVector.fromValues(1, 0, 1);
-		vertices[6] = CoordinateVector.fromValues(1, 1, 1);
-		vertices[7] = CoordinateVector.fromValues(0, 1, 1);
+		vertices[4] = CoordinateVector.fromValues(0, 0, 2);
+		vertices[5] = CoordinateVector.fromValues(1, 0, 2);
+		vertices[6] = CoordinateVector.fromValues(2, 2, 2);
+		vertices[7] = CoordinateVector.fromValues(0, 1, 2);
 		CoordinateVector[] referenceVertices = new CoordinateVector[8];
 		referenceVertices[0] = CoordinateVector.fromValues(0, 0, 0);
 		referenceVertices[1] = CoordinateVector.fromValues(1, 0, 0);

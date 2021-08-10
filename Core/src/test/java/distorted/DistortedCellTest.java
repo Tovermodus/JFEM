@@ -1,15 +1,10 @@
 package distorted;
 
 import distorted.geometry.DistortedCell;
-import linalg.CoordinateMatrix;
 import linalg.CoordinateVector;
-import linalg.IntCoordinates;
 import org.junit.jupiter.api.Test;
-import tensorproduct.geometry.CartesianGrid;
-import tensorproduct.geometry.TPCell;
-import tensorproduct.geometry.TPFace;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
 public class DistortedCellTest

@@ -31,7 +31,7 @@ public class PowerIterationTest
 		}
 		s.add(5,0,1);
 		s.add(5,n-1,n-2);
-		double eigenVal = 4 + 2 * 5 * Math.cos(1 * Math.PI / (n + 1));
+		double eigenVal = 4 + 2 * 5 * Math.cos(1 * Math.PI / (n -1));
 		assertTrue(Math.abs(s.powerIterationSymmetric() - eigenVal) < 1e-5);
 	}
 	

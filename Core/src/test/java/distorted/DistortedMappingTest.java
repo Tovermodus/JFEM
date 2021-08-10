@@ -246,14 +246,14 @@ public class DistortedMappingTest
 	private DistortedCell getDistortedCell3D()
 	{
 		CoordinateVector [] vertices = new CoordinateVector[8];
-		vertices[0] = CoordinateVector.fromValues(0,0,0);
-		vertices[1] = CoordinateVector.fromValues(2,0,-0.1);
-		vertices[2] = CoordinateVector.fromValues(0.8,2.1,0.2);
-		vertices[3] = CoordinateVector.fromValues(0,1,0);
-		vertices[4] = CoordinateVector.fromValues(0,0,4);
-		vertices[5] = CoordinateVector.fromValues(2,0,3.8);
-		vertices[6] = CoordinateVector.fromValues(0.8,2.1,4);
-		vertices[7] = CoordinateVector.fromValues(0,1,4.2);
+		vertices[0] = CoordinateVector.fromValues(5,5,5);
+		vertices[1] = CoordinateVector.fromValues(10,0,5);
+		vertices[2] = CoordinateVector.fromValues(15,5,5);
+		vertices[3] = CoordinateVector.fromValues(10,10,5);
+		vertices[4] = CoordinateVector.fromValues(4,6,11);
+		vertices[5] = CoordinateVector.fromValues(9,1,11);
+		vertices[6] = CoordinateVector.fromValues(14,6,11);
+		vertices[7] = CoordinateVector.fromValues(9,11,11);
 		return new DistortedCell(vertices);
 	}
 }

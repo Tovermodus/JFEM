@@ -53,7 +53,7 @@ public class TPCellTest
 		assertFalse(cell2d.isInCell(CoordinateVector.fromValues(-1,1.0003)));
 		assertFalse(cell2d.isInCell(CoordinateVector.fromValues(6.00001,1.0003)));
 		assertFalse(cell2d.isInCell(CoordinateVector.fromValues(1,0)));
-		assertFalse(cell2d.isInCell(CoordinateVector.fromValues(1,1.0005000001)));
+		assertFalse(cell2d.isInCell(CoordinateVector.fromValues(1,1.0005001)));
 	}
 	@Test
 	public void testNormal()
