@@ -1,14 +1,16 @@
 package distorted.geometry;
 import basic.CellWithReferenceCell;
+import basic.DoubleCompare;
 import basic.PerformanceArguments;
 import basic.VectorFunction;
 import com.google.common.collect.ImmutableSet;
 import linalg.*;
-import linalg.Vector;
+import org.checkerframework.checker.units.qual.C;
 import org.jetbrains.annotations.NotNull;
 import tensorproduct.geometry.TPCell;
 
 import java.util.*;
+import java.util.Vector;
 
 public class DistortedCell implements CellWithReferenceCell<DistortedCell, DistortedFace>
 {
@@ -137,31 +139,57 @@ public class DistortedCell implements CellWithReferenceCell<DistortedCell, Disto
 	private boolean verticesHaveCorrectPosition()
 	{
 		
-		OptionalDouble minSum = Arrays.stream(vertices).mapToDouble(Vector::sumElements).min();
+		CoordinateVector rating;
+		if(dimension == 2)
+			rating = CoordinateVector.fromValues(1,1);
+		else
+			rating = CoordinateVector.fromValues(1,1,2);
+		OptionalDouble minSum = Arrays.stream(vertices).mapToDouble(rating::inner).min();
 		double min = 0;
 		if(minSum.isPresent())
 			min = minSum.getAsDouble();
 		else 
 			throw new IllegalStateException("No vertices");
-		if(vertices[0].sumElements() != min)
+		if(!DoubleCompare.almostEqual(vertices[0].inner(rating) , min))
+		{
+			System.out.println("min wrong" + min + " " + vertices[0].inner(rating));
 			return false;
+		}
 		if(getDimension() == 2)
 			if(!checkQuadrilateral(vertices[0], vertices[3], vertices[2], vertices[1]))
 				return false;
 		if(getDimension() == 3)
 		{
 			if (!checkQuadrilateral(vertices[0], vertices[3], vertices[2], vertices[1]))
+			{
+				System.out.println("bottom wrong");
 				return false;
+			}
 			if (!checkQuadrilateral(vertices[0], vertices[1], vertices[5], vertices[4]))
+			{
+				System.out.println("front wrong");
 				return false;
+			}
 			if (!checkQuadrilateral(vertices[0], vertices[4], vertices[7], vertices[3]))
+			{
+				System.out.println("left wrong");
 				return false;
+			}
 			if (!checkQuadrilateral(vertices[6], vertices[7], vertices[4], vertices[5]))
+			{
+				System.out.println("top wrong");
 				return false;
+			}
 			if (!checkQuadrilateral(vertices[6], vertices[2], vertices[3], vertices[7]))
+			{
+				System.out.println("back wrong");
 				return false;
+			}
 			if (!checkQuadrilateral(vertices[6], vertices[5], vertices[1], vertices[2]))
-				return false ;
+			{
+				System.out.println("right wrong");
+				return false;
+			}
 		}
 		return true;
 	}
@@ -355,7 +383,7 @@ public class DistortedCell implements CellWithReferenceCell<DistortedCell, Disto
 	@Override
 	public CoordinateVector transformToReferenceCell(CoordinateVector pos)
 	{
-		if(PerformanceArguments.getInstance().executeChecks)
+		if (PerformanceArguments.getInstance().executeChecks)
 		{
 			if (pos.getLength() != getDimension())
 				throw new IllegalArgumentException("coordinate has wrong dimension");

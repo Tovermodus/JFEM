@@ -9,14 +9,23 @@ public class Newton
 	                                                      VectorFunction function)
 	{
 		CoordinateVector iterate = new CoordinateVector(initial);
-		for(int i = 0; i < 100; i++)
+		
+		for(int i = 0; i < 10; i++)
 		{
 			CoordinateVector fx = function.value(iterate).sub(rhs);
 			if(fx.almostZero())
 			{
 				return iterate;
 			}
-			iterate.subInPlace(function.gradient(iterate).solve(fx));
+			try
+			{
+				iterate.subInPlace(function.gradient(iterate).solve(fx));
+			}
+			catch (RuntimeException e)
+			{
+				//System.out.println("Newton moved into nondifferentiable region, stopping");
+				return iterate;
+			}
 		}
 		System.err.println("Newton did not converge. Final error in maximumnorm was"+ rhs.sub(function.value(iterate)).absMaxElement());
 		return iterate;

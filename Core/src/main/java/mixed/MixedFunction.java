@@ -1,6 +1,7 @@
 package mixed;
 
 import basic.Function;
+import basic.PerformanceArguments;
 import basic.ScalarFunction;
 import basic.VectorFunction;
 import linalg.CoordinateVector;
@@ -10,6 +11,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.stream.Stream;
 
 public class MixedFunction implements Function < MixedValue,
 	MixedGradient,
@@ -129,19 +131,28 @@ public class MixedFunction implements Function < MixedValue,
 	public Map<CoordinateVector, Double> pressureValuesInPoints(List<CoordinateVector> points)
 	{
 		ConcurrentHashMap<CoordinateVector, Double> ret = new ConcurrentHashMap<>();
-		points.stream().parallel().forEach(point->ret.put(point, value(point).getPressure()));
+		Stream<CoordinateVector> stream = points.stream();
+		if(PerformanceArguments.getInstance().parallelizeThreads)
+			stream = stream.parallel();
+		stream.forEach(point->ret.put(point, value(point).getPressure()));
 		return ret;
 	}
 	public Map<CoordinateVector, Double> pressureValuesInPointsAtTime(List<CoordinateVector> points, double t)
 	{
 		ConcurrentHashMap<CoordinateVector, Double> ret = new ConcurrentHashMap<>();
-		points.stream().parallel().forEach(point->ret.put(point.addCoordinate(t), value(point).getPressure()));
+		Stream<CoordinateVector> stream = points.stream();
+		if(PerformanceArguments.getInstance().parallelizeThreads)
+			stream = stream.parallel();
+		stream.forEach(point->ret.put(point.addCoordinate(t), value(point).getPressure()));
 		return ret;
 	}
 	public Map<CoordinateVector, Double> velocityComponentsInPoints(List<CoordinateVector> points, int component)
 	{
 		ConcurrentHashMap<CoordinateVector, Double> ret = new ConcurrentHashMap<>();
-		points.stream().parallel().forEach(point->ret.put(point, value(point).getVelocity().at(component)));
+		Stream<CoordinateVector> stream = points.stream();
+		if(PerformanceArguments.getInstance().parallelizeThreads)
+			stream = stream.parallel();
+		stream.forEach(point->ret.put(point, value(point).getVelocity().at(component)));
 		return ret;
 	}
 	
@@ -149,7 +160,10 @@ public class MixedFunction implements Function < MixedValue,
 	                                                                      double t)
 	{
 		ConcurrentHashMap<CoordinateVector, Double> ret = new ConcurrentHashMap<>();
-		points.stream().parallel().forEach(point->ret.put(point.addCoordinate(t),
+		Stream<CoordinateVector> stream = points.stream();
+		if(PerformanceArguments.getInstance().parallelizeThreads)
+			stream = stream.parallel();
+		stream.forEach(point->ret.put(point.addCoordinate(t),
 			value(point).getVelocity().at(component)));
 		return ret;
 	}
@@ -157,7 +171,10 @@ public class MixedFunction implements Function < MixedValue,
 	                                                                      double t)
 	{
 		ConcurrentHashMap<CoordinateVector, CoordinateVector> ret = new ConcurrentHashMap<>();
-		points.stream().parallel().forEach(point->ret.put(point.addCoordinate(t),
+		Stream<CoordinateVector> stream = points.stream();
+		if(PerformanceArguments.getInstance().parallelizeThreads)
+			stream = stream.parallel();
+		stream.forEach(point->ret.put(point.addCoordinate(t),
 			value(point).getVelocity().addCoordinate(t)));
 		return ret;
 	}

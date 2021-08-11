@@ -6,6 +6,7 @@ import linalg.*;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.stream.Stream;
 
 public interface VectorFunction extends Function<CoordinateVector, CoordinateMatrix, CoordinateTensor>
 {
@@ -76,14 +77,20 @@ public interface VectorFunction extends Function<CoordinateVector, CoordinateMat
 	default Map<CoordinateVector, CoordinateVector> valuesInPoints(List<CoordinateVector> points)
 	{
 		ConcurrentHashMap<CoordinateVector, CoordinateVector> ret = new ConcurrentHashMap<>();
-		points.stream().parallel().forEach(point->ret.put(point, value(point)));
+		Stream<CoordinateVector> stream = points.stream();
+		if(PerformanceArguments.getInstance().parallelizeThreads)
+			stream = stream.parallel();
+		stream.forEach(point->ret.put(point, value(point)));
 		return ret;
 	}
 	default Map<CoordinateVector, Double> componentValuesInPoints(List<CoordinateVector> points,
 	                                                                       int component)
 	{
 		ConcurrentHashMap<CoordinateVector, Double> ret = new ConcurrentHashMap<>();
-		points.stream().parallel().forEach(point->ret.put(point, value(point).at(component)));
+		Stream<CoordinateVector> stream = points.stream();
+		if(PerformanceArguments.getInstance().parallelizeThreads)
+			stream = stream.parallel();
+		stream.forEach(point->ret.put(point, value(point).at(component)));
 		return ret;
 	}
 	default double divergence(CoordinateVector pos)

@@ -6,6 +6,7 @@ import linalg.CoordinateVector;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.stream.Stream;
 
 public interface ScalarFunction extends Function<Double, CoordinateVector, CoordinateMatrix>
 {
@@ -70,13 +71,19 @@ public interface ScalarFunction extends Function<Double, CoordinateVector, Coord
 	default Map<CoordinateVector, Double> valuesInPoints(List<CoordinateVector> points)
 	{
 		ConcurrentHashMap<CoordinateVector, Double> ret = new ConcurrentHashMap<>();
-		points.stream().parallel().forEach(point->ret.put(point, value(point)));
+		Stream<CoordinateVector> stream = points.stream();
+		if(PerformanceArguments.getInstance().parallelizeThreads)
+			stream = stream.parallel();
+		stream.forEach(point->ret.put(point, value(point)));
 		return ret;
 	}
 	default Map<CoordinateVector, Double> valuesInPointsAtTime(List<CoordinateVector> points, double t)
 	{
 		ConcurrentHashMap<CoordinateVector, Double> ret = new ConcurrentHashMap<>();
-		points.stream().parallel().forEach(point->ret.put(point.addCoordinate(t), value(point)));
+		Stream<CoordinateVector> stream = points.stream();
+		if(PerformanceArguments.getInstance().parallelizeThreads)
+			stream = stream.parallel();
+		stream.forEach(point->ret.put(point.addCoordinate(t), value(point)));
 		return ret;
 	}
 	default VectorFunction getGradientFunction()
