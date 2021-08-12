@@ -1,6 +1,9 @@
 package tensorproduct.geometry;
 
-import basic.*;
+import basic.DoubleCompare;
+import basic.FaceWithReferenceFace;
+import basic.PerformanceArguments;
+import basic.VectorFunction;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Multimap;
@@ -8,17 +11,19 @@ import linalg.CoordinateComparator;
 import linalg.CoordinateVector;
 import org.jetbrains.annotations.NotNull;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
 
-public class TPFace implements FaceWithReferenceFace<TPCell, TPFace>,Comparable<TPFace>
+public class TPFace implements FaceWithReferenceFace<TPCell, TPFace>, Comparable<TPFace>
 {
 	public final double otherCoordinate;
-	final ImmutableList<Cell1D> cell1Ds;
 	public final int flatDimension;
-	
-	Set<TPCell> cells;
+	final ImmutableList<Cell1D> cell1Ds;
 	private final boolean isBoundaryFace;
 	private final VectorFunction normal;
+	Set<TPCell> cells;
 	
 	TPFace(List<Cell1D> cell1Ds, int flatDimension, double otherCoordinate, boolean isBoundaryFace)
 	{
@@ -45,26 +50,33 @@ public class TPFace implements FaceWithReferenceFace<TPCell, TPFace>,Comparable<
 			public CoordinateVector value(CoordinateVector pos)
 			{
 				CoordinateVector ret = new CoordinateVector(pos.getLength());
-				ret.set(1,flatDimension);
+				ret.set(1, flatDimension);
 				return ret;
 			}
 		};
 	}
+	
 	public static TPFace unitHyperCubeFace(int dimension, boolean isBoundaryFace)
 	{
-		List<Cell1D> cells = new ArrayList<>(dimension-1);
-		for (int i = 0; i < dimension-1; i++)
+		if (dimension == 2)
+		{
+			return new TPFace(List.of(new Cell1D(0, 1)), 1, 0, isBoundaryFace);
+		}
+		List<Cell1D> cells = new ArrayList<>(dimension - 1);
+		for (int i = 0; i < dimension - 1; i++)
 			cells.add(new Cell1D(0, 1));
-		return new TPFace(cells,0,0,isBoundaryFace);
+		return new TPFace(cells, 0, 0, isBoundaryFace);
 	}
+	
 	public ImmutableList<Cell1D> getComponentCells()
 	{
 		return cell1Ds;
 	}
+	
 	@Override
 	public int getDimension()
 	{
-		return cell1Ds.size()+1;
+		return cell1Ds.size() + 1;
 	}
 	
 	@Override
@@ -84,20 +96,23 @@ public class TPFace implements FaceWithReferenceFace<TPCell, TPFace>,Comparable<
 	{
 		return normal;
 	}
+	
 	public boolean isNormalDownstream(CoordinateVector pos)
 	{
-		return getNormal().value(center()).inner(pos.sub(center()))>0;
+		return getNormal().value(center()).inner(pos.sub(center())) > 0;
 	}
+	
 	public TPCell getUpStreamCell(CoordinateVector direction)
 	{
-		if(normal.value(center()).inner(direction)>0)
+		if (normal.value(center()).inner(direction) > 0)
 			return getNormalUpstreamCell();
 		else
 			return getNormalDownstreamCell();
 	}
+	
 	public TPCell getDownStreamCell(CoordinateVector direction)
 	{
-		if(normal.value(center()).inner(direction)<0)
+		if (normal.value(center()).inner(direction) < 0)
 			return getNormalUpstreamCell();
 		else
 			return getNormalDownstreamCell();
@@ -106,7 +121,7 @@ public class TPFace implements FaceWithReferenceFace<TPCell, TPFace>,Comparable<
 	@Override
 	public TPCell getNormalDownstreamCell()
 	{
-		for(TPCell cell:cells)
+		for (TPCell cell : cells)
 		{
 			if (cell.center().at(flatDimension) > otherCoordinate)
 			{
@@ -115,10 +130,11 @@ public class TPFace implements FaceWithReferenceFace<TPCell, TPFace>,Comparable<
 		}
 		return null;
 	}
+	
 	@Override
 	public TPCell getNormalUpstreamCell()
 	{
-		for(TPCell cell:cells)
+		for (TPCell cell : cells)
 		{
 			if (cell.center().at(flatDimension) < otherCoordinate)
 			{
@@ -133,12 +149,12 @@ public class TPFace implements FaceWithReferenceFace<TPCell, TPFace>,Comparable<
 	{
 		CoordinateVector ret = new CoordinateVector(getDimension());
 		int subd = 0;
-		for(int d = 0; d < getDimension(); d++)
+		for (int d = 0; d < getDimension(); d++)
 		{
-			if(d == flatDimension)
+			if (d == flatDimension)
 				ret.set(otherCoordinate, d);
 			else
-				ret.set(cell1Ds.get(subd++).center(),d);
+				ret.set(cell1Ds.get(subd++).center(), d);
 		}
 		return ret;
 	}
@@ -147,21 +163,19 @@ public class TPFace implements FaceWithReferenceFace<TPCell, TPFace>,Comparable<
 	public boolean isOnFace(CoordinateVector pos)
 	{
 		int subd = 0;
-		for(int d = 0; d < getDimension(); d++)
+		for (int d = 0; d < getDimension(); d++)
 		{
-			if(d == flatDimension)
+			if (d == flatDimension)
 			{
 				if (!DoubleCompare.almostEqual(pos.at(flatDimension), otherCoordinate))
 					return false;
-			}
-			else
+			} else
 			{
 				if (!cell1Ds.get(subd++).isInCell(pos.at(d)))
 					return false;
 			}
 		}
 		return true;
-		
 	}
 	
 	@Override
@@ -169,74 +183,77 @@ public class TPFace implements FaceWithReferenceFace<TPCell, TPFace>,Comparable<
 	{
 		throw new UnsupportedOperationException();
 	}
-
+	
 	@Override
 	public String toString()
 	{
 		String ret = "";
 		int subd = 0;
-		for(int d = 0; d < getDimension(); d++)
+		for (int d = 0; d < getDimension(); d++)
 		{
-			if(d == flatDimension)
-				ret = ret.concat(otherCoordinate+"");
+			if (d == flatDimension)
+				ret = ret.concat(otherCoordinate + "");
 			else
-				ret = ret.concat("["+cell1Ds.get(subd).getStart()+", "+cell1Ds.get(subd++).getEnd()+
-					"]");
-			if(d<cell1Ds.size())
+				ret = ret.concat(
+					"[" + cell1Ds.get(subd).getStart() + ", " + cell1Ds.get(subd++).getEnd() +
+						"]");
+			if (d < cell1Ds.size())
 				ret = ret.concat("x");
 		}
-		if(isBoundaryFace)
+		if (isBoundaryFace)
 			ret = ret.concat(" On Boundary");
 		return ret;
 	}
+	
 	@Override
 	public int compareTo(@NotNull TPFace o)
 	{
-		if(o.getDimension() < getDimension())
+		if (o.getDimension() < getDimension())
 			return -1;
-		if(o.getDimension() > getDimension())
+		if (o.getDimension() > getDimension())
 			return 1;
-		if(o.flatDimension < flatDimension)
+		if (o.flatDimension < flatDimension)
 			return -1;
-		if(o.flatDimension > flatDimension)
+		if (o.flatDimension > flatDimension)
 			return 1;
-		if(o.otherCoordinate < otherCoordinate-PerformanceArguments.getInstance().doubleTolerance)
+		if (o.otherCoordinate < otherCoordinate - PerformanceArguments.getInstance().doubleTolerance)
 			return -1;
-		if(o.otherCoordinate > otherCoordinate+PerformanceArguments.getInstance().doubleTolerance)
+		if (o.otherCoordinate > otherCoordinate + PerformanceArguments.getInstance().doubleTolerance)
 			return 1;
-		if(o.isBoundaryFace && !isBoundaryFace)
+		if (o.isBoundaryFace && !isBoundaryFace)
 			return 1;
-		if(!o.isBoundaryFace && isBoundaryFace)
+		if (!o.isBoundaryFace && isBoundaryFace)
 			return -1;
-		if(o.getNormalDownstreamCell() != null && getNormalDownstreamCell() == null)
+		if (o.getNormalDownstreamCell() != null && getNormalDownstreamCell() == null)
 			return 1;
-		if(o.getNormalDownstreamCell() != null && getNormalDownstreamCell() == null)
+		if (o.getNormalDownstreamCell() != null && getNormalDownstreamCell() == null)
 			return -1;
-		if(o.getNormalUpstreamCell() != null && getNormalUpstreamCell() == null)
+		if (o.getNormalUpstreamCell() != null && getNormalUpstreamCell() == null)
 			return 1;
-		if(o.getNormalUpstreamCell() != null && getNormalUpstreamCell() == null)
+		if (o.getNormalUpstreamCell() != null && getNormalUpstreamCell() == null)
 			return -1;
 		return CoordinateComparator.comp(center().getEntries(), o.center().getEntries());
 	}
+	
 	@Override
 	public int hashCode()
 	{
 		int ret = 0;
-		for(int i = 0; i < cell1Ds.size(); i++)
+		for (int i = 0; i < cell1Ds.size(); i++)
 		{
-			ret += Math.pow(7, 3*i) * DoubleCompare.doubleHash(cell1Ds.get(i).center());
-			ret += Math.pow(7, 3*i+1) * DoubleCompare.doubleHash(cell1Ds.get(i).getStart());
-			ret += Math.pow(7, 3*i+2) * DoubleCompare.doubleHash(cell1Ds.get(i).getEnd());
+			ret += Math.pow(7, 3 * i) * DoubleCompare.doubleHash(cell1Ds.get(i).center());
+			ret += Math.pow(7, 3 * i + 1) * DoubleCompare.doubleHash(cell1Ds.get(i).getStart());
+			ret += Math.pow(7, 3 * i + 2) * DoubleCompare.doubleHash(cell1Ds.get(i).getEnd());
 		}
-		ret -= 141*DoubleCompare.doubleHash(otherCoordinate);
-		ret*=(flatDimension+19);
-		ret*=2;
-		if(isBoundaryFace)
-			ret+=1;
-		if(getNormalDownstreamCell() != null)
-			ret+= 1789821;
-		if(getNormalUpstreamCell() != null)
-			ret+= 31789821;
+		ret -= 141 * DoubleCompare.doubleHash(otherCoordinate);
+		ret *= (flatDimension + 19);
+		ret *= 2;
+		if (isBoundaryFace)
+			ret += 1;
+		if (getNormalDownstreamCell() != null)
+			ret += 1789821;
+		if (getNormalUpstreamCell() != null)
+			ret += 31789821;
 		return ret;
 	}
 	
@@ -252,33 +269,32 @@ public class TPFace implements FaceWithReferenceFace<TPCell, TPFace>,Comparable<
 	@Override
 	public TPFace getReferenceFace()
 	{
-		List<Cell1D> cells1 = new ArrayList<>(getDimension()-1);
-		for(int i = 0; i < getDimension()-1; i++)
+		List<Cell1D> cells1 = new ArrayList<>(getDimension() - 1);
+		for (int i = 0; i < getDimension() - 1; i++)
 		{
 			cells1.add(new Cell1D(0, 1));
 		}
 		TPFace refFace =
 			new TPFace(cells1, flatDimension, 0, isBoundaryFace);
-		cells1 = new ArrayList<>(getDimension()-1);
-		List<Cell1D> cells2 = new ArrayList<>(getDimension()-1);
+		cells1 = new ArrayList<>(getDimension() - 1);
+		List<Cell1D> cells2 = new ArrayList<>(getDimension() - 1);
 		for (int i = 0; i < getDimension(); i++)
 		{
-			if(i != flatDimension)
+			if (i != flatDimension)
 			{
 				cells1.add(new Cell1D(0, 1));
 				cells2.add(new Cell1D(0, 1));
-			}
-			else
+			} else
 			{
 				cells1.add(new Cell1D(0, 1));
 				cells2.add(new Cell1D(-1, 0));
 			}
 		}
 		TPCell downstreamCell = new TPCell(cells1);
-		if(getNormalDownstreamCell() != null)
+		if (getNormalDownstreamCell() != null)
 			refFace.cells.add(downstreamCell);
 		TPCell upstreamCell = new TPCell(cells2);
-		if(getNormalUpstreamCell() != null)
+		if (getNormalUpstreamCell() != null)
 			refFace.cells.add(upstreamCell);
 		return refFace;
 	}

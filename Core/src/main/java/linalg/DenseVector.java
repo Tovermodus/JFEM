@@ -4,7 +4,6 @@ import basic.DoubleCompare;
 import basic.PerformanceArguments;
 import org.ujmp.core.Matrix;
 
-import java.util.Arrays;
 import java.util.function.DoubleUnaryOperator;
 
 public class DenseVector implements MutableVector, MutableTensor
@@ -18,14 +17,15 @@ public class DenseVector implements MutableVector, MutableTensor
 		entries = new double[size];
 	}
 	
-	public DenseVector(DenseVector vect, boolean wrap)
+	public DenseVector(final DenseVector vect, final boolean wrap)
 	{
-		if(wrap)
+		if (wrap)
 			entries = vect.entries;
 		else
 			entries = vect.entries.clone();
 	}
-	public DenseVector(Vector vect)
+	
+	public DenseVector(final Vector vect)
 	{
 		entries = new double[vect.getLength()];
 		for (int i = 0; i < vect.getLength(); i++)
@@ -34,21 +34,36 @@ public class DenseVector implements MutableVector, MutableTensor
 		}
 	}
 	
-	public DenseVector(double[] vect)
+	public DenseVector(final double[] vect)
 	{
 		entries = vect.clone();
 	}
 	
-	public static DenseVector vectorFromValues(double... values)
+	public static DenseVector vectorFromValues(final double... values)
 	{
-		DenseVector ret = new DenseVector(values.length);
+		final DenseVector ret = new DenseVector(values.length);
 		for (int i = 0; i < values.length; i++)
 			ret.set(values[i], i);
 		return ret;
 	}
 	
+	public static DenseVector getUnitVector(final int d, final int index)
+	{
+		final DenseVector ret = new DenseVector(d);
+		ret.set(1, index);
+		return ret;
+	}
+	
+	static DenseVector fromUJMPVector(final Matrix matrix)
+	{
+		final DenseVector ret = new DenseVector((int) (matrix.getRowCount() * matrix.getColumnCount()));
+		for (int i = 0; i < ret.getLength(); i++)
+			ret.set(matrix.getAsDouble(i, 0), i);
+		return ret;
+	}
+	
 	@Override
-	public double inner(Vector other)
+	public double inner(final Vector other)
 	{
 		if (PerformanceArguments.getInstance().executeChecks)
 			if (getLength() != other.getLength())
@@ -66,15 +81,6 @@ public class DenseVector implements MutableVector, MutableTensor
 				ret += this.entries[i] * other.at(i);
 			return ret;
 		}
-		
-		
-	}
-	
-	public static DenseVector getUnitVector(int d, int index)
-	{
-		DenseVector ret = new DenseVector(d);
-		ret.set(1,index);
-		return ret;
 	}
 	
 	@Override
@@ -96,7 +102,7 @@ public class DenseVector implements MutableVector, MutableTensor
 	}
 	
 	@Override
-	public double at(int... coordinates)
+	public double at(final int... coordinates)
 	{
 		if (PerformanceArguments.getInstance().executeChecks)
 			if (coordinates.length != 1)
@@ -105,7 +111,7 @@ public class DenseVector implements MutableVector, MutableTensor
 	}
 	
 	@Override
-	public void set(double value, int... coordinates)
+	public void set(final double value, final int... coordinates)
 	{
 		if (PerformanceArguments.getInstance().executeChecks)
 			if (coordinates.length != 1)
@@ -114,7 +120,7 @@ public class DenseVector implements MutableVector, MutableTensor
 	}
 	
 	@Override
-	public void add(double value, int... coordinates)
+	public void add(final double value, final int... coordinates)
 	{
 		if (PerformanceArguments.getInstance().executeChecks)
 			if (coordinates.length != 1)
@@ -123,34 +129,34 @@ public class DenseVector implements MutableVector, MutableTensor
 	}
 	
 	@Override
-	public void addInPlace(Tensor other)
+	public void addInPlace(final Tensor other)
 	{
 		entries = add(other).entries;
 	}
 	
 	@Override
-	public void subInPlace(Tensor other)
+	public void subInPlace(final Tensor other)
 	{
 		if (PerformanceArguments.getInstance().executeChecks)
 			if (!other.getShape().equals(getShape()))
 				throw new IllegalArgumentException("Other has wrong shape");
-		for(int i = 0; i < getLength(); i++)
+		for (int i = 0; i < getLength(); i++)
 			entries[i] -= other.at(i);
 	}
 	
 	@Override
-	public void mulInPlace(double scalar)
+	public void mulInPlace(final double scalar)
 	{
 		entries = mul(scalar).entries;
 	}
 	
 	@Override
-	public DenseVector add(Tensor other)
+	public DenseVector add(final Tensor other)
 	{
 		if (PerformanceArguments.getInstance().executeChecks)
 			if (!getShape().equals(other.getShape()))
 				throw new IllegalArgumentException("Vectors are of different size");
-		DenseVector ret = new DenseVector(this);
+		final DenseVector ret = new DenseVector(this);
 		if (!other.isSparse())
 		{
 			if (other instanceof DenseVector)
@@ -163,18 +169,18 @@ public class DenseVector implements MutableVector, MutableTensor
 					ret.add(other.at(i), i);
 				}
 		} else
-			for (IntCoordinates key : other.getCoordinateEntryList().keySet())
+			for (final IntCoordinates key : other.getCoordinateEntryList().keySet())
 				ret.add(other.getCoordinateEntryList().get(key), key);
 		return ret;
 	}
 	
 	@Override
-	public DenseVector sub(Tensor other)
+	public DenseVector sub(final Tensor other)
 	{
 		if (PerformanceArguments.getInstance().executeChecks)
 			if (!getShape().equals(other.getShape()))
 				throw new IllegalArgumentException("Vectors are of different size");
-		DenseVector ret = new DenseVector(getLength());
+		final DenseVector ret = new DenseVector(getLength());
 		if (other instanceof DenseVector)
 		{
 			for (int i = 0; i < getLength(); i++)
@@ -190,27 +196,28 @@ public class DenseVector implements MutableVector, MutableTensor
 	}
 	
 	@Override
-	public DenseVector mul(double scalar)
+	public DenseVector mul(final double scalar)
 	{
-		DenseVector ret = new DenseVector(entries.length);
+		final DenseVector ret = new DenseVector(entries.length);
 		for (int i = 0; i < getLength(); i++)
 		{
-			ret.entries[i] = entries[i]*scalar;
+			ret.entries[i] = entries[i] * scalar;
 		}
 		return ret;
 	}
-	public DenseVector componentWise(DoubleUnaryOperator action)
+	
+	public DenseVector componentWise(final DoubleUnaryOperator action)
 	{
-		DenseVector ret = new DenseVector(this);
-		for(int i = 0; i < getLength(); i++)
-			 ret.entries[i] = action.applyAsDouble(ret.entries[i]);
+		final DenseVector ret = new DenseVector(this);
+		for (int i = 0; i < getLength(); i++)
+			ret.entries[i] = action.applyAsDouble(ret.entries[i]);
 		return ret;
 	}
 	
 	@Override
-	public DenseMatrix outer(Vector other)
+	public DenseMatrix outer(final Vector other)
 	{
-		DenseMatrix ret = new DenseMatrix(getLength(), other.getLength());
+		final DenseMatrix ret = new DenseMatrix(getLength(), other.getLength());
 		for (int i = 0; i < getLength(); i++)
 		{
 			for (int j = 0; j < other.getLength(); j++)
@@ -221,23 +228,24 @@ public class DenseVector implements MutableVector, MutableTensor
 		return ret;
 	}
 	
-	public void addSmallVectorAt(DenseVector small, int...coordinates)
+	public void addSmallVectorAt(final DenseVector small, final int... coordinates)
 	{
 		if (PerformanceArguments.getInstance().executeChecks)
 		{
 			if (coordinates.length != 1)
 				throw new IllegalArgumentException("Wrong number of coordinates");
-			if (coordinates[0]+small.getLength() > getLength())
+			if (coordinates[0] + small.getLength() > getLength())
 				throw new IllegalArgumentException("small Vector too large position");
 		}
-		for(int i = 0; i < small.getLength(); i++)
+		for (int i = 0; i < small.getLength(); i++)
 		{
 			add(small.at(i), i + coordinates[0]);
 		}
 	}
+	
 	no.uib.cipr.matrix.DenseVector toMTJvector()
 	{
-		no.uib.cipr.matrix.DenseVector m = new no.uib.cipr.matrix.DenseVector(getShape().get(0));
+		final no.uib.cipr.matrix.DenseVector m = new no.uib.cipr.matrix.DenseVector(getShape().get(0));
 		for (int i = 0; i < getLength(); i++)
 		{
 			m.set(i, at(i));
@@ -247,22 +255,14 @@ public class DenseVector implements MutableVector, MutableTensor
 	
 	org.ujmp.core.Matrix toUJMPVector()
 	{
-		org.ujmp.core.Matrix mat = org.ujmp.core.DenseMatrix.Factory.zeros(getLength(), 1);
+		final org.ujmp.core.Matrix mat = org.ujmp.core.DenseMatrix.Factory.zeros(getLength(), 1);
 		for (int i = 0; i < getLength(); i++)
 			mat.setAsDouble(at(i), i, 0);
 		return mat;
 	}
 	
-	static DenseVector fromUJMPVector(Matrix matrix)
-	{
-		DenseVector ret = new DenseVector((int) (matrix.getRowCount() * matrix.getColumnCount()));
-		for (int i = 0; i < ret.getLength(); i++)
-			ret.set(matrix.getAsDouble(i, 0), i);
-		return ret;
-	}
-	
 	@Override
-	public boolean equals(Object obj)
+	public boolean equals(final Object obj)
 	{
 		if (!(obj instanceof Vector))
 			return false;
@@ -272,8 +272,15 @@ public class DenseVector implements MutableVector, MutableTensor
 	@Override
 	public int hashCode()
 	{
-		return Arrays.stream(entries).mapToInt(DoubleCompare::doubleHash).sum();
+		int ret = 0;
+		for (int i = 0; i < getLength(); i++)
+		{
+			final int elementHash = DoubleCompare.doubleHash(at(i));
+			ret = ret * 37 + (i + 2) * ((int) Math.signum(elementHash) + i + 3) * elementHash;
+		}
+		return ret;
 	}
+	
 	@Override
 	public String toString()
 	{

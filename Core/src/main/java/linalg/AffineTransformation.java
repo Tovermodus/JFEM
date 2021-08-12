@@ -10,9 +10,17 @@ public class AffineTransformation
 		this.matrix = matrix;
 		this.vector = vector;
 	}
+	
 	public CoordinateVector apply(CoordinateVector x)
 	{
-		return matrix.mvMul(x).add(vector);
+		return matrix
+			.mvMul(x)
+			.add(vector);
+	}
+	
+	public CoordinateVector applyInverse(CoordinateVector x)
+	{
+		return matrix.solve(x.sub(vector));
 	}
 	
 	@Override

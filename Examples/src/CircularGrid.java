@@ -1,24 +1,28 @@
-import basic.*;
+import basic.PerformanceArguments;
+import basic.PlotWindow;
+import basic.ScalarPlot3D;
 import distorted.geometry.CircleGrid;
-import distorted.geometry.DistortedCell;
 import distorted.geometry.DistortedFace;
 import linalg.CoordinateVector;
-import tensorproduct.geometry.CartesianGrid;
 
 public class CircularGrid
 {
-	public static void main(String[] args)
+	public static void main(final String[] args)
 	{
-		PerformanceArguments.PerformanceArgumentBuilder builder =
+		final PerformanceArguments.PerformanceArgumentBuilder builder =
 			new PerformanceArguments.PerformanceArgumentBuilder();
-		builder.parallelizeThreads = true;
+		builder.parallelizeThreads = false;
 		builder.build();
-		CircleGrid circle = new CircleGrid(3,new CoordinateVector(3), 1, 2);
-		PlotWindow p = new PlotWindow();
-		for(DistortedCell c:circle.cells)
-			p.addPlot(new ScalarPlot3D(c.indicatorFunction(), circle.generatePlotPoints(30), 30, "cell"));
-		for(DistortedFace c:circle.faces)
-			p.addPlot(new ScalarPlot3D(c.indicatorFunction(), circle.generatePlotPoints(100), 101, "face"));
-		
+		final CircleGrid circle = new CircleGrid(3, new CoordinateVector(3), 2 * Math.pow(2, 1. / 3), 2);
+		final PlotWindow p = new PlotWindow();
+		System.out.println(circle.faces.size());
+		//for(DistortedCell c:circle.cells)
+		//	p.addPlot(new ScalarPlot3D(c.indicatorFunction(), circle.generatePlotPoints(30), 30, "cell"));
+		int i = 0;
+		for (final DistortedFace c : circle.faces)
+		{
+			p.addPlot(new ScalarPlot3D(c.indicatorFunction(), circle.generatePlotPoints(30), 30,
+			                           "face " + i++));
+		}
 	}
 }
