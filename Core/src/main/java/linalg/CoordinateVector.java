@@ -5,7 +5,7 @@ import org.jetbrains.annotations.NotNull;
 
 public class CoordinateVector extends DenseVector implements Comparable<CoordinateVector>
 {
-	public CoordinateVector(Vector v)
+	public CoordinateVector(final Vector v)
 	{
 		super(v);
 		if (PerformanceArguments.getInstance().executeChecks)
@@ -13,7 +13,7 @@ public class CoordinateVector extends DenseVector implements Comparable<Coordina
 				throw new IllegalArgumentException("only 1D, 2D, 3D and 4D supported");
 	}
 	
-	public CoordinateVector(int d)
+	public CoordinateVector(final int d)
 	{
 		super(d);
 		if (PerformanceArguments.getInstance().executeChecks)
@@ -21,21 +21,21 @@ public class CoordinateVector extends DenseVector implements Comparable<Coordina
 				throw new IllegalArgumentException("only 1D, 2D, 3D and 4D supported");
 	}
 	
-	public CoordinateVector(double[] vector)
+	public CoordinateVector(final double[] vector)
 	{
 		super(vector);
 	}
 	
-	public static CoordinateVector getUnitVector(int d, int index)
+	public static CoordinateVector getUnitVector(final int d, final int index)
 	{
-		CoordinateVector ret = new CoordinateVector(d);
+		final CoordinateVector ret = new CoordinateVector(d);
 		ret.set(1, index);
 		return ret;
 	}
 	
-	public static CoordinateVector fromValues(double... values)
+	public static CoordinateVector fromValues(final double... values)
 	{
-		CoordinateVector ret = new CoordinateVector(values.length);
+		final CoordinateVector ret = new CoordinateVector(values.length);
 		for (int i = 0; i < values.length; i++)
 		{
 			ret.set(values[i], i);
@@ -43,9 +43,14 @@ public class CoordinateVector extends DenseVector implements Comparable<Coordina
 		return ret;
 	}
 	
-	public static CoordinateVector repeat(double val, int number)
+	public CoordinateVector normalize()
 	{
-		CoordinateVector ret = new CoordinateVector(number);
+		return this.mul(1. / euclidianNorm());
+	}
+	
+	public static CoordinateVector repeat(final double val, final int number)
+	{
+		final CoordinateVector ret = new CoordinateVector(number);
 		for (int i = 0; i < number; i++)
 		{
 			ret.set(val, i);
@@ -53,9 +58,9 @@ public class CoordinateVector extends DenseVector implements Comparable<Coordina
 		return ret;
 	}
 	
-	public CoordinateVector addCoordinate(double time)
+	public CoordinateVector addCoordinate(final double time)
 	{
-		CoordinateVector ret = new CoordinateVector(getLength() + 1);
+		final CoordinateVector ret = new CoordinateVector(getLength() + 1);
 		for (int i = 0; i < getLength(); i++)
 		{
 			ret.set(at(i), i);
@@ -64,14 +69,14 @@ public class CoordinateVector extends DenseVector implements Comparable<Coordina
 		return ret;
 	}
 	
-	public CoordinateMatrix outer(CoordinateVector other)
+	public CoordinateMatrix outer(final CoordinateVector other)
 	{
 		return new CoordinateMatrix(super.outer(other));
 	}
 	
 	public CoordinateMatrix asCoordinateMatrix()
 	{
-		CoordinateMatrix ret = new CoordinateMatrix(entries.length, 1);
+		final CoordinateMatrix ret = new CoordinateMatrix(entries.length, 1);
 		for (int i = 0; i < getLength(); i++)
 		{
 			ret.set(entries[i], i, 0);
@@ -80,19 +85,18 @@ public class CoordinateVector extends DenseVector implements Comparable<Coordina
 	}
 	
 	@Override
-	public CoordinateVector add(Tensor other)
+	public CoordinateVector add(final Tensor other)
 	{
 		if (PerformanceArguments.getInstance().executeChecks)
 		{
 			if (!getShape().equals(other.getShape()))
 				throw new IllegalArgumentException("Vectors are of different size");
 		}
-		CoordinateVector ret = new CoordinateVector(this);
+		final CoordinateVector ret = new CoordinateVector(this);
 		if (!(other instanceof CoordinateVector))
 		{
 			for (int i = 0; i < getLength(); i++)
 				ret.entries[i] = entries[i] + other.at(i);
-			
 		} else
 		{
 			for (int i = 0; i < getLength(); i++)
@@ -102,23 +106,23 @@ public class CoordinateVector extends DenseVector implements Comparable<Coordina
 	}
 	
 	@Override
-	public CoordinateVector sub(Tensor other)
+	public CoordinateVector sub(final Tensor other)
 	{
 		if (PerformanceArguments.getInstance().executeChecks)
 		{
 			if (!getShape().equals(other.getShape()))
 				throw new IllegalArgumentException("Vectors are of different size");
 		}
-		CoordinateVector ret = new CoordinateVector(this);
+		final CoordinateVector ret = new CoordinateVector(this);
 		for (int i = 0; i < getLength(); i++)
 			ret.entries[i] = entries[i] - ((DenseVector) other).entries[i];
 		return ret;
 	}
 	
 	@Override
-	public CoordinateVector mul(double scalar)
+	public CoordinateVector mul(final double scalar)
 	{
-		CoordinateVector ret = new CoordinateVector(entries.length);
+		final CoordinateVector ret = new CoordinateVector(entries.length);
 		for (int i = 0; i < getLength(); i++)
 		{
 			ret.set(at(i) * scalar, i);
@@ -147,28 +151,28 @@ public class CoordinateVector extends DenseVector implements Comparable<Coordina
 	}
 	
 	@Override
-	public int compareTo(@NotNull CoordinateVector o)
+	public int compareTo(@NotNull final CoordinateVector o)
 	{
 		return CoordinateComparator.comp(this, o);
 	}
 	
 	@Override
-	public boolean equals(Object obj)
+	public boolean equals(final Object obj)
 	{
 		if (obj instanceof CoordinateVector)
 			return compareTo((CoordinateVector) obj) == 0;
 		return false;
 	}
 	
-	public CoordinateVector cross(CoordinateVector other)
+	public CoordinateVector cross(final CoordinateVector other)
 	{
 		if (PerformanceArguments.getInstance().executeChecks)
 		{
 			if (getLength() != 3 || other.getLength() != 3)
 				throw new IllegalArgumentException("can't compute cross product");
 		}
-		return CoordinateVector.fromValues(entries[1]*other.entries[2] - entries[2]*other.entries[1],
-			entries[2]*other.entries[0] - entries[0]*other.entries[2],
-			entries[0]*other.entries[1] - entries[1]*other.entries[0]);
+		return CoordinateVector.fromValues(entries[1] * other.entries[2] - entries[2] * other.entries[1],
+		                                   entries[2] * other.entries[0] - entries[0] * other.entries[2],
+		                                   entries[0] * other.entries[1] - entries[1] * other.entries[0]);
 	}
 }

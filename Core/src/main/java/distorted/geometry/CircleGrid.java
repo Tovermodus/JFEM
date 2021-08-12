@@ -21,12 +21,26 @@ public class CircleGrid
 		this.dimension = dimension;
 		this.centerPoint = centerPoint;
 		this.radius = radius;
-		final HashSet<DistortedCell> genCells = generateCells();
-		final HashSet<DistortedFace> genFaces = generateFaces(genCells);
+		HashSet<DistortedCell> genCells = generateCells();
+		generateFaces(genCells);
 		for (int i = 0; i < refinements; i++)
-			refine(genCells, genFaces);
+		{
+			genCells = refineCells(genCells);
+			generateFaces(genCells);
+		}
 		cells = ImmutableSet.copyOf(genCells);
-		faces = ImmutableSet.copyOf(genFaces);
+		faces = ImmutableSet.copyOf(generateFaces(genCells));
+	}
+	
+	private static HashSet<DistortedCell> getCellsBelongingToFace(final DistortedFace f, final Collection<DistortedCell> from)
+	{
+		final HashSet<DistortedCell> cellsBelonging = new HashSet<>();
+		for (final DistortedCell cell : from)
+		{
+			if (f.isOnCell(cell))
+				cellsBelonging.add(cell);
+		}
+		return cellsBelonging;
 	}
 	
 	public HashSet<DistortedCell> generateCells()
@@ -76,13 +90,20 @@ public class CircleGrid
 			final double sideLength = radius * 0.5 / Math.sqrt(3);
 			final CoordinateVector center_llf = CoordinateVector.fromValues(-sideLength, -sideLength,
 			                                                                -sideLength);
-			final CoordinateVector center_lrf = CoordinateVector.fromValues(sideLength, -sideLength, -sideLength);
-			final CoordinateVector center_lrb = CoordinateVector.fromValues(sideLength, sideLength, -sideLength);
-			final CoordinateVector center_llb = CoordinateVector.fromValues(-sideLength, sideLength, -sideLength);
-			final CoordinateVector center_ulf = CoordinateVector.fromValues(-sideLength, -sideLength, sideLength);
-			final CoordinateVector center_urf = CoordinateVector.fromValues(sideLength, -sideLength, sideLength);
-			final CoordinateVector center_urb = CoordinateVector.fromValues(sideLength, sideLength, sideLength);
-			final CoordinateVector center_ulb = CoordinateVector.fromValues(-sideLength, sideLength, sideLength);
+			final CoordinateVector center_lrf = CoordinateVector.fromValues(sideLength, -sideLength,
+			                                                                -sideLength);
+			final CoordinateVector center_lrb = CoordinateVector.fromValues(sideLength, sideLength,
+			                                                                -sideLength);
+			final CoordinateVector center_llb = CoordinateVector.fromValues(-sideLength, sideLength,
+			                                                                -sideLength);
+			final CoordinateVector center_ulf = CoordinateVector.fromValues(-sideLength, -sideLength,
+			                                                                sideLength);
+			final CoordinateVector center_urf = CoordinateVector.fromValues(sideLength, -sideLength,
+			                                                                sideLength);
+			final CoordinateVector center_urb = CoordinateVector.fromValues(sideLength, sideLength,
+			                                                                sideLength);
+			final CoordinateVector center_ulb = CoordinateVector.fromValues(-sideLength, sideLength,
+			                                                                sideLength);
 			final CoordinateVector outer_llf = center_llf.mul(2);
 			final CoordinateVector outer_lrf = center_lrf.mul(2);
 			final CoordinateVector outer_urf = center_urf.mul(2);
@@ -148,7 +169,8 @@ public class CircleGrid
 			{
 				final boolean isOnBoundary = Arrays.stream(vertices).mapToDouble(
 					CoordinateVector::euclidianNorm)
-				                                   .allMatch(norm -> DoubleCompare.almostEqual(norm, radius));
+				                                   .allMatch(norm -> DoubleCompare.almostEqual(norm,
+				                                                                               radius));
 				final DistortedFace face = new DistortedFace(vertices, isOnBoundary);
 				for (final DistortedCell c : getCellsBelongingToFace(face, genCells))
 				{
@@ -161,23 +183,69 @@ public class CircleGrid
 		return faces;
 	}
 	
-	private HashSet<DistortedCell> getCellsBelongingToFace(final DistortedFace f, final Collection<DistortedCell> from)
+	CoordinateVector mean(final CoordinateVector... points)
 	{
-		final HashSet<DistortedCell> cellsBelonging = new HashSet<>();
-		for (final DistortedCell cell : from)
-		{
-			if (f.isOnCell(cell))
-				cellsBelonging.add(cell);
-		}
-		return cellsBelonging;
+		return Arrays.stream(points).reduce(new CoordinateVector(dimension), CoordinateVector::add).mul(
+			1. / points.length);
 	}
 	
-	public void refine(final HashSet<DistortedCell> genCells, final HashSet<DistortedFace> genFaces)
+	CoordinateVector mean(final List<CoordinateVector> points)
 	{
-//		wennamrand erstrandkoordinate bestimmen
-//		für mitte alles halbieren
-//
-//		für faces: naiv wie oben aber nur faces von den cells die vorher über die face verbunden waren
+		return points.stream().reduce(new CoordinateVector(dimension), CoordinateVector::add).mul(
+			1. / points.size());
+	}
+	
+	List<DistortedCell> partitionCell(final DistortedCell cell)
+	{
+		final List<DistortedCell> ret = new ArrayList<>();
+		final CoordinateVector[] vertices = cell.vertices;
+		if (dimension == 2)
+		{
+			final DistortedFace bottom = cell.getFaceFromVertexNumbers(0, 1);
+			CoordinateVector bottomCenter = bottom.center();
+			final DistortedFace right = cell.getFaceFromVertexNumbers(1, 2);
+			CoordinateVector rightCenter = right.center();
+			final DistortedFace top = cell.getFaceFromVertexNumbers(2, 3);
+			CoordinateVector topCenter = top.center();
+			final DistortedFace left = cell.getFaceFromVertexNumbers(3, 0);
+			CoordinateVector leftCenter = left.center();
+			if (bottom.isBoundaryFace())
+				bottomCenter = bottomCenter.normalize().mul(radius);
+			if (right.isBoundaryFace())
+				rightCenter = rightCenter.normalize().mul(radius);
+			if (top.isBoundaryFace())
+				topCenter = topCenter.normalize().mul(radius);
+			if (left.isBoundaryFace())
+				leftCenter = leftCenter.normalize().mul(radius);
+			final CoordinateVector center = mean(bottomCenter, rightCenter, topCenter, leftCenter);
+			System.out.println(cell);
+			System.out.println(bottom);
+			System.out.println(right);
+			System.out.println(top);
+			System.out.println(left);
+			System.out.println(
+				"centers: " + bottomCenter + " " + rightCenter + " " + topCenter + " " + leftCenter);
+			System.out.println(cell.vertices[0] + " " + bottomCenter + " " + center + " " + leftCenter);
+			ret.add(new DistortedCell(cell.vertices[0], bottomCenter, center, leftCenter));
+			ret.add(new DistortedCell(bottomCenter, cell.vertices[1], rightCenter, center));
+			ret.add(new DistortedCell(leftCenter, center, topCenter, vertices[3]));
+			ret.add(new DistortedCell(center, rightCenter, vertices[2], topCenter));
+			return ret;
+		}
+		if (dimension == 3)
+		{
+			return ret;
+		}
+		throw new IllegalStateException("Dimension Wrong");
+	}
+	
+	public HashSet<DistortedCell> refineCells(final HashSet<DistortedCell> genCells)
+	{
+		final HashMap<DistortedCell, List<DistortedCell>> refinedCells = new HashMap<>();
+		final HashSet<DistortedCell> newCells = new HashSet<>();
+		for (final DistortedCell cell : genCells)
+			newCells.addAll(partitionCell(cell));
+		return newCells;
 	}
 	
 	public List<CoordinateVector> generatePlotPoints(final int resolution)

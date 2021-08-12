@@ -24,7 +24,7 @@ public class DistortedFace implements FaceWithReferenceFace<DistortedCell, Disto
 	private final VectorFunction normal;
 	private final CoordinateVector normalVector;
 	
-	public DistortedFace(CoordinateVector[] vertices, boolean isBoundaryFace)
+	public DistortedFace(final CoordinateVector[] vertices, final boolean isBoundaryFace)
 	{
 		this.vertices = vertices;
 		dimension = vertices[0].getLength();
@@ -37,7 +37,7 @@ public class DistortedFace implements FaceWithReferenceFace<DistortedCell, Disto
 		cellsWithTransformation = new HashMap<>();
 		if (dimension == 2)
 		{
-			CoordinateVector tangent = vertices[1].sub(vertices[0]);
+			final CoordinateVector tangent = vertices[1].sub(vertices[0]);
 			normalVector = CoordinateVector.fromValues(tangent.at(1), -tangent.at(0));
 		} else
 		{
@@ -61,7 +61,7 @@ public class DistortedFace implements FaceWithReferenceFace<DistortedCell, Disto
 			}
 			
 			@Override
-			public CoordinateVector value(CoordinateVector pos)
+			public CoordinateVector value(final CoordinateVector pos)
 			{
 				
 				return normalVector;
@@ -92,7 +92,7 @@ public class DistortedFace implements FaceWithReferenceFace<DistortedCell, Disto
 		return ImmutableSet.copyOf(cellsWithTransformation.keySet());
 	}
 	
-	public boolean isOnCell(DistortedCell cell)
+	public boolean isOnCell(final DistortedCell cell)
 	{
 		//System.out.println(Arrays.toString(Arrays.stream(vertices).mapToInt(cell::getPositionOfVertex)
 		// .toArray()));
@@ -102,29 +102,29 @@ public class DistortedFace implements FaceWithReferenceFace<DistortedCell, Disto
 			.noneMatch(i -> i == -1);
 	}
 	
-	public AffineTransformation getTransformationFromReferenceFaceToFaceOfReferenceCell(DistortedCell cell)
+	public AffineTransformation getTransformationFromReferenceFaceToFaceOfReferenceCell(final DistortedCell cell)
 	{
 		if (!isOnCell(cell))
 			throw new IllegalArgumentException("Face does not belong to cell");
-		IntCoordinates vertexNumbers =
+		final IntCoordinates vertexNumbers =
 			new IntCoordinates(Arrays
 				                   .stream(vertices)
 				                   .mapToInt(cell::getPositionOfVertex)
 				                   .toArray());
-		DistortedCell referenceCell = cell.getReferenceCell();
-		CoordinateVector vector = referenceCell.vertices[vertexNumbers.get(0)];
-		CoordinateMatrix matrix = new CoordinateMatrix(dimension, dimension);
+		final DistortedCell referenceCell = cell.getReferenceCell();
+		final CoordinateVector vector = referenceCell.vertices[vertexNumbers.get(0)];
+		final CoordinateMatrix matrix = new CoordinateMatrix(dimension, dimension);
 		if (dimension == 2)
 		{
-			CoordinateVector mapsFromX = referenceCell.vertices[vertexNumbers.get(1)].sub(vector);
+			final CoordinateVector mapsFromX = referenceCell.vertices[vertexNumbers.get(1)].sub(vector);
 			matrix.addColumn(mapsFromX, 0);
 			matrix.addColumn(CoordinateVector
 				                 .repeat(1, 2)
 				                 .sub(mapsFromX.componentWise(Math::abs)), 1);
 		} else if (dimension == 3)
 		{
-			CoordinateVector mapsFromY = referenceCell.vertices[vertexNumbers.get(1)].sub(vector);
-			CoordinateVector mapsFromX = referenceCell.vertices[vertexNumbers.get(3)].sub(vector);
+			final CoordinateVector mapsFromY = referenceCell.vertices[vertexNumbers.get(1)].sub(vector);
+			final CoordinateVector mapsFromX = referenceCell.vertices[vertexNumbers.get(3)].sub(vector);
 			matrix.addColumn(mapsFromX, 0);
 			matrix.addColumn(mapsFromY, 1);
 			matrix.addColumn(CoordinateVector
@@ -136,7 +136,7 @@ public class DistortedFace implements FaceWithReferenceFace<DistortedCell, Disto
 		return new AffineTransformation(matrix, vector);
 	}
 	
-	void addCell(DistortedCell c)
+	void addCell(final DistortedCell c)
 	{
 		if (isOnCell(c))
 			cellsWithTransformation.put(c, getTransformationFromReferenceFaceToFaceOfReferenceCell(c));
@@ -158,7 +158,7 @@ public class DistortedFace implements FaceWithReferenceFace<DistortedCell, Disto
 	@Override
 	public DistortedCell getNormalDownstreamCell()
 	{
-		for (DistortedCell c : getCells())
+		for (final DistortedCell c : getCells())
 		{
 			if (center()
 				.sub(c.center())
@@ -171,7 +171,7 @@ public class DistortedFace implements FaceWithReferenceFace<DistortedCell, Disto
 	@Override
 	public DistortedCell getNormalUpstreamCell()
 	{
-		for (DistortedCell c : getCells())
+		for (final DistortedCell c : getCells())
 		{
 			if (center()
 				.sub(c.center())
@@ -192,14 +192,14 @@ public class DistortedFace implements FaceWithReferenceFace<DistortedCell, Disto
 	}
 	
 	@Override
-	public boolean equals(Object o)
+	public boolean equals(final Object o)
 	{
 		if (this == o) return true;
 		if (o == null || getClass() != o.getClass()) return false;
-		DistortedFace that = (DistortedFace) o;
+		final DistortedFace that = (DistortedFace) o;
 		if (isBoundaryFace != that.isBoundaryFace)
 			return false;
-		for (CoordinateVector vertex : vertices)
+		for (final CoordinateVector vertex : vertices)
 		{
 			boolean otherHasVertex = false;
 			for (int j = 0; j < vertices.length; j++)
@@ -228,9 +228,9 @@ public class DistortedFace implements FaceWithReferenceFace<DistortedCell, Disto
 	}
 	
 	@Override
-	public boolean isOnFace(CoordinateVector pos)
+	public boolean isOnFace(final CoordinateVector pos)
 	{
-		DistortedCell upStream = getNormalUpstreamCell();
+		final DistortedCell upStream = getNormalUpstreamCell();
 		if (upStream != null)
 		{
 			return referenceFace.isOnFace(cellsWithTransformation
@@ -248,13 +248,13 @@ public class DistortedFace implements FaceWithReferenceFace<DistortedCell, Disto
 	}
 	
 	@Override
-	public List<DistortedFace> refine(Multimap<DistortedCell, DistortedCell> cellMap)
+	public List<DistortedFace> refine(final Multimap<DistortedCell, DistortedCell> cellMap)
 	{
 		throw new UnsupportedOperationException("not implemented yet");
 	}
 	
 	@Override
-	public int compareTo(@NotNull DistortedFace o)
+	public int compareTo(@NotNull final DistortedFace o)
 	{
 		
 		if (o.getDimension() < getDimension())
@@ -274,14 +274,14 @@ public class DistortedFace implements FaceWithReferenceFace<DistortedCell, Disto
 	{
 		if (getDimension() == 2)
 		{
-			CoordinateVector[] vertices = new CoordinateVector[2];
+			final CoordinateVector[] vertices = new CoordinateVector[2];
 			vertices[0] = CoordinateVector.fromValues(0, 0);
 			vertices[1] = CoordinateVector.fromValues(1, 0);
 			return new DistortedFace(vertices, isBoundaryFace);
 		}
 		if (getDimension() == 3)
 		{
-			CoordinateVector[] vertices = new CoordinateVector[4];
+			final CoordinateVector[] vertices = new CoordinateVector[4];
 			vertices[0] = CoordinateVector.fromValues(0, 0, 0);
 			vertices[1] = CoordinateVector.fromValues(1, 0, 0);
 			vertices[2] = CoordinateVector.fromValues(1, 1, 0);

@@ -23,7 +23,7 @@ public class DistortedCell implements CellWithReferenceCell<DistortedCell, Disto
 	private final int dimension;
 	Set<DistortedFace> faces;
 	
-	public DistortedCell(CoordinateVector[] vertices)
+	public DistortedCell(final CoordinateVector... vertices)
 	{
 		this.vertices = vertices;
 		dimension = vertices[0].getLength();
@@ -94,7 +94,7 @@ public class DistortedCell implements CellWithReferenceCell<DistortedCell, Disto
 		return dimension;
 	}
 	
-	public int getPositionOfVertex(CoordinateVector vertex)
+	public int getPositionOfVertex(final CoordinateVector vertex)
 	{
 		for (int i = 0; i < vertices.length; i++)
 			if (vertices[i].almostEqualMute(vertex))
@@ -102,7 +102,19 @@ public class DistortedCell implements CellWithReferenceCell<DistortedCell, Disto
 		return -1;
 	}
 	
-	public IntCoordinates mapPositionToReferencePosition(int position)
+	public DistortedFace getFaceFromVertexNumbers(final int... numbers)
+	{
+		for (final DistortedFace face : faces)
+		{
+			System.out.println(face);
+			System.out.println(vertices[numbers[0]] + " " + vertices[numbers[1]]);
+			if (Arrays.stream(numbers).mapToObj(i -> vertices[i]).allMatch(face::isOnFace))
+				return face;
+		}
+		throw new IllegalArgumentException("Cell has no Face with the numbers" + Arrays.toString(numbers));
+	}
+	
+	public IntCoordinates mapPositionToReferencePosition(final int position)
 	{
 		if (getDimension() == 1)
 		{
@@ -144,12 +156,12 @@ public class DistortedCell implements CellWithReferenceCell<DistortedCell, Disto
 	private boolean verticesHaveCorrectPosition()
 	{
 		
-		CoordinateVector rating;
+		final CoordinateVector rating;
 		if (dimension == 2)
 			rating = CoordinateVector.fromValues(1, 1);
 		else
 			rating = CoordinateVector.fromValues(1, 1, 2);
-		OptionalDouble minSum = Arrays.stream(vertices).mapToDouble(rating::inner).min();
+		final OptionalDouble minSum = Arrays.stream(vertices).mapToDouble(rating::inner).min();
 		double min = 0;
 		if (minSum.isPresent())
 			min = minSum.getAsDouble();
@@ -162,7 +174,10 @@ public class DistortedCell implements CellWithReferenceCell<DistortedCell, Disto
 		}
 		if (getDimension() == 2)
 			if (!checkQuadrilateral(vertices[0], vertices[3], vertices[2], vertices[1]))
+			{
+				System.out.println("order wrong");
 				return false;
+			}
 		if (getDimension() == 3)
 		{
 			if (!checkQuadrilateral(vertices[0], vertices[3], vertices[2], vertices[1]))
@@ -211,19 +226,19 @@ public class DistortedCell implements CellWithReferenceCell<DistortedCell, Disto
 			c4 = c4.addCoordinate(0);
 			center = center.addCoordinate(1);
 		}
-		CoordinateVector v1 = c2.sub(c1);
-		CoordinateVector v2 = c3.sub(c2);
-		CoordinateVector v3 = c4.sub(c3);
-		CoordinateVector v4 = c1.sub(c4);
-		CoordinateVector c12 = v1.cross(v2);
-		CoordinateVector c23 = v2.cross(v3);
-		CoordinateVector c34 = v3.cross(v4);
-		CoordinateVector c41 = v4.cross(v1);
+		final CoordinateVector v1 = c2.sub(c1);
+		final CoordinateVector v2 = c3.sub(c2);
+		final CoordinateVector v3 = c4.sub(c3);
+		final CoordinateVector v4 = c1.sub(c4);
+		final CoordinateVector c12 = v1.cross(v2);
+		final CoordinateVector c23 = v2.cross(v3);
+		final CoordinateVector c34 = v3.cross(v4);
+		final CoordinateVector c41 = v4.cross(v1);
 		c12.mulInPlace(1. / c12.euclidianNorm());
 		c23.mulInPlace(1. / c23.euclidianNorm());
 		c34.mulInPlace(1. / c34.euclidianNorm());
 		c41.mulInPlace(1. / c41.euclidianNorm());
-		CoordinateVector mean = c1.add(c2).add(c3).add(c4).mul(1. / 4);
+		final CoordinateVector mean = c1.add(c2).add(c3).add(c4).mul(1. / 4);
 		if (c12.inner(mean.sub(center)) <= 0)
 			return false;
 		if (c12.inner(c23) < 1 - MAXIMUM_WARP)
@@ -248,7 +263,7 @@ public class DistortedCell implements CellWithReferenceCell<DistortedCell, Disto
 	}
 	
 	@Override
-	public boolean isInCell(CoordinateVector pos)
+	public boolean isInCell(final CoordinateVector pos)
 	{
 		return referenceCell.isInCell(transformToReferenceCell(pos));
 	}
@@ -261,12 +276,13 @@ public class DistortedCell implements CellWithReferenceCell<DistortedCell, Disto
 	}
 	
 	@Override
-	public VectorFunction getOuterNormal(DistortedFace face)
+	public VectorFunction getOuterNormal(final DistortedFace face)
 	{
 		if (PerformanceArguments.getInstance().executeChecks)
 			if (!faces.contains(face))
 				throw new IllegalArgumentException("face does not belong to cell");
-		boolean invertNormal = (center().sub(face.center())).inner(face.getNormal().value(face.center())) > 0;
+		final boolean invertNormal = (center().sub(face.center())).inner(
+			face.getNormal().value(face.center())) > 0;
 		if (invertNormal)
 			return new VectorFunction()
 			{
@@ -283,7 +299,7 @@ public class DistortedCell implements CellWithReferenceCell<DistortedCell, Disto
 				}
 				
 				@Override
-				public CoordinateVector value(CoordinateVector pos)
+				public CoordinateVector value(final CoordinateVector pos)
 				{
 					return face.getNormal().value(pos).mul(-1);
 				}
@@ -292,13 +308,13 @@ public class DistortedCell implements CellWithReferenceCell<DistortedCell, Disto
 	}
 	
 	@Override
-	public List<DistortedCell> refine(List<DistortedFace> refinedFaces)
+	public List<DistortedCell> refine(final List<DistortedFace> refinedFaces)
 	{
 		throw new UnsupportedOperationException("not implemented yet");
 	}
 	
 	@Override
-	public int compareTo(@NotNull DistortedCell o)
+	public int compareTo(@NotNull final DistortedCell o)
 	{
 		if (o.getDimension() < getDimension())
 			return -1;
@@ -317,14 +333,14 @@ public class DistortedCell implements CellWithReferenceCell<DistortedCell, Disto
 	{
 		if (getDimension() == 1)
 		{
-			CoordinateVector[] vertices = new CoordinateVector[2];
+			final CoordinateVector[] vertices = new CoordinateVector[2];
 			vertices[0] = CoordinateVector.fromValues(0);
 			vertices[1] = CoordinateVector.fromValues(1);
 			return new DistortedCell(vertices);
 		}
 		if (getDimension() == 2)
 		{
-			CoordinateVector[] vertices = new CoordinateVector[4];
+			final CoordinateVector[] vertices = new CoordinateVector[4];
 			vertices[0] = CoordinateVector.fromValues(0, 0);
 			vertices[1] = CoordinateVector.fromValues(1, 0);
 			vertices[2] = CoordinateVector.fromValues(1, 1);
@@ -333,7 +349,7 @@ public class DistortedCell implements CellWithReferenceCell<DistortedCell, Disto
 		}
 		if (getDimension() == 3)
 		{
-			CoordinateVector[] vertices = new CoordinateVector[8];
+			final CoordinateVector[] vertices = new CoordinateVector[8];
 			vertices[0] = CoordinateVector.fromValues(0, 0, 0);
 			vertices[1] = CoordinateVector.fromValues(1, 0, 0);
 			vertices[2] = CoordinateVector.fromValues(1, 1, 0);
@@ -348,7 +364,7 @@ public class DistortedCell implements CellWithReferenceCell<DistortedCell, Disto
 	}
 	
 	@Override
-	public CoordinateMatrix transformationGradientFromReferenceCell(CoordinateVector pos)
+	public CoordinateMatrix transformationGradientFromReferenceCell(final CoordinateVector pos)
 	{
 		if (getDimension() == 1)
 		{
@@ -357,7 +373,7 @@ public class DistortedCell implements CellWithReferenceCell<DistortedCell, Disto
 		}
 		if (getDimension() == 2)
 		{
-			CoordinateMatrix ret = new CoordinateMatrix(2, 2);
+			final CoordinateMatrix ret = new CoordinateMatrix(2, 2);
 			ret.addColumn(transformationCoefficients[0].mul(pos.y())
 			                                           .add(transformationCoefficients[1]), 0);
 			ret.addColumn(transformationCoefficients[0].mul(pos.x())
@@ -366,7 +382,7 @@ public class DistortedCell implements CellWithReferenceCell<DistortedCell, Disto
 		}
 		if (getDimension() == 3)
 		{
-			CoordinateMatrix ret = new CoordinateMatrix(3, 3);
+			final CoordinateMatrix ret = new CoordinateMatrix(3, 3);
 			ret.addColumn(transformationCoefficients[0].mul(pos.y() * pos.z())
 			                                           .add(transformationCoefficients[1].mul(pos.y()))
 			                                           .add(transformationCoefficients[2].mul(pos.z()))
@@ -385,13 +401,13 @@ public class DistortedCell implements CellWithReferenceCell<DistortedCell, Disto
 	}
 	
 	@Override
-	public CoordinateMatrix transformationGradientToReferenceCell(CoordinateVector pos)
+	public CoordinateMatrix transformationGradientToReferenceCell(final CoordinateVector pos)
 	{
 		return transformationGradientFromReferenceCell(transformToReferenceCell(pos)).inverse();
 	}
 	
 	@Override
-	public CoordinateVector transformToReferenceCell(CoordinateVector pos)
+	public CoordinateVector transformToReferenceCell(final CoordinateVector pos)
 	{
 		if (PerformanceArguments.getInstance().executeChecks)
 		{
@@ -403,7 +419,7 @@ public class DistortedCell implements CellWithReferenceCell<DistortedCell, Disto
 	}
 	
 	@Override
-	public CoordinateVector transformFromReferenceCell(CoordinateVector pos)
+	public CoordinateVector transformFromReferenceCell(final CoordinateVector pos)
 	{
 		if (PerformanceArguments.getInstance().executeChecks)
 		{
@@ -452,13 +468,13 @@ public class DistortedCell implements CellWithReferenceCell<DistortedCell, Disto
 			}
 			
 			@Override
-			public CoordinateVector value(CoordinateVector pos)
+			public CoordinateVector value(final CoordinateVector pos)
 			{
 				return transformFromReferenceCell(pos);
 			}
 			
 			@Override
-			public CoordinateMatrix gradient(CoordinateVector pos)
+			public CoordinateMatrix gradient(final CoordinateVector pos)
 			{
 				return transformationGradientFromReferenceCell(pos);
 			}
@@ -466,11 +482,11 @@ public class DistortedCell implements CellWithReferenceCell<DistortedCell, Disto
 	}
 	
 	@Override
-	public boolean equals(Object o)
+	public boolean equals(final Object o)
 	{
 		if (this == o) return true;
 		if (o == null || getClass() != o.getClass()) return false;
-		DistortedCell that = (DistortedCell) o;
+		final DistortedCell that = (DistortedCell) o;
 		for (int i = 0; i < vertices.length; i++)
 		{
 			boolean otherHasVertex = false;
@@ -493,7 +509,7 @@ public class DistortedCell implements CellWithReferenceCell<DistortedCell, Disto
 	{
 		if (getDimension() == 2)
 		{
-			List<CoordinateVector[]> sides = new ArrayList<>(4);
+			final List<CoordinateVector[]> sides = new ArrayList<>(4);
 			sides.add(new CoordinateVector[]{vertices[0], vertices[1]});
 			sides.add(new CoordinateVector[]{vertices[1], vertices[2]});
 			sides.add(new CoordinateVector[]{vertices[2], vertices[3]});
@@ -502,7 +518,7 @@ public class DistortedCell implements CellWithReferenceCell<DistortedCell, Disto
 		}
 		if (getDimension() == 3)
 		{
-			List<CoordinateVector[]> sides = new ArrayList<>(6);
+			final List<CoordinateVector[]> sides = new ArrayList<>(6);
 			sides.add(new CoordinateVector[]{vertices[0], vertices[3], vertices[2], vertices[1]});
 			sides.add(new CoordinateVector[]{vertices[0], vertices[1], vertices[5], vertices[4]});
 			sides.add(new CoordinateVector[]{vertices[0], vertices[4], vertices[7], vertices[3]});
