@@ -290,4 +290,9 @@ public class DistortedFace implements FaceWithReferenceFace<DistortedCell, Disto
 		}
 		throw new IllegalStateException("Dimension must be less than 3");
 	}
+	
+	public boolean isVertex(final CoordinateVector point)
+	{
+		return Arrays.stream(vertices).anyMatch(point::almostEqualMute);
+	}
 }

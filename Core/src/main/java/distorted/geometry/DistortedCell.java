@@ -19,6 +19,7 @@ public class DistortedCell implements CellWithReferenceCell<DistortedCell, Disto
 	final double MAXIMUM_WARP = 1e-10; //25°
 	final TPCell referenceCell;
 	final CoordinateVector[] vertices;
+	final double diam;
 	private final CoordinateVector[] transformationCoefficients;//in order xyz, xy, xz, yz, x, y, z, 1
 	private final int dimension;
 	Set<DistortedFace> faces;
@@ -35,12 +36,13 @@ public class DistortedCell implements CellWithReferenceCell<DistortedCell, Disto
 				throw new IllegalArgumentException("Wrong number of vertices");
 		}
 		transformationCoefficients = new CoordinateVector[(int) Math.pow(2, dimension)];
-		if (getDimension() == 1)
-		{
-			transformationCoefficients[0] = vertices[1]
-				.sub(vertices[0]);
-			transformationCoefficients[1] = vertices[0];
-		}
+		diam = Arrays.stream(vertices)
+		             .mapToDouble(v1 -> Arrays.stream(vertices)
+		                                      .mapToDouble(v2 -> v1.sub(v2).euclidianNorm())
+		                                      .max()
+		                                      .getAsDouble())
+		             .max()
+		             .getAsDouble();
 		if (getDimension() == 2)
 		{
 			transformationCoefficients[0] = vertices[0]
@@ -106,9 +108,7 @@ public class DistortedCell implements CellWithReferenceCell<DistortedCell, Disto
 	{
 		for (final DistortedFace face : faces)
 		{
-			System.out.println(face);
-			System.out.println(vertices[numbers[0]] + " " + vertices[numbers[1]]);
-			if (Arrays.stream(numbers).mapToObj(i -> vertices[i]).allMatch(face::isOnFace))
+			if (Arrays.stream(numbers).mapToObj(i -> vertices[i]).allMatch(face::isVertex))
 				return face;
 		}
 		throw new IllegalArgumentException("Cell has no Face with the numbers" + Arrays.toString(numbers));
@@ -265,7 +265,13 @@ public class DistortedCell implements CellWithReferenceCell<DistortedCell, Disto
 	@Override
 	public boolean isInCell(final CoordinateVector pos)
 	{
-		return referenceCell.isInCell(transformToReferenceCell(pos));
+		if (Arrays.stream(vertices)
+		          .map(pos::sub)
+		          .mapToDouble(CoordinateVector::euclidianNorm)
+		          .anyMatch(dist -> dist > diam))
+			return false;
+		else
+			return referenceCell.isInCell(transformToReferenceCell(pos));
 	}
 	
 	@Override

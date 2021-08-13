@@ -9,7 +9,7 @@ public class Newton
 	{
 		final CoordinateVector iterate = new CoordinateVector(initial);
 		
-		for (int i = 0; i < 300; i++)
+		for (int i = 0; i < 30; i++)
 		{
 			final CoordinateVector fx = function.value(iterate).sub(rhs);
 			if (fx.almostZero())
