@@ -13,19 +13,19 @@ public class Newton
 		{
 			final CoordinateVector fx =
 				function.value(iterate).sub(rhs);
-//			System.out.println(iterate + "\tit");
-//			System.out.println(function.gradient(iterate));
-//			System.out.println(fx.absMaxElement() + "\tfx");
+			System.out.println(iterate + "\tit");
+			System.out.println(function.gradient(iterate));
+			System.out.println(fx.absMaxElement() + "\tfx");
 			if (fx.almostZero())
 			{
 				return iterate;
 			}
 			try
 			{
-				step = function.gradient(iterate).add(DenseMatrix.identity(2).mul(0.6)).solve(fx);
+				step = function.gradient(iterate).solve(fx);
 			} catch (final RuntimeException e)
 			{
-				//System.out.println("Newton moved into nondifferentiable region, stopping");
+				System.out.println("Newton moved into nondifferentiable region, stopping");
 				return iterate;
 			}
 			int backtrs = 0;

@@ -22,7 +22,7 @@ public class DistortedMappingTest
 				{
 					final CoordinateVector c = CoordinateVector.fromValues(i * 0.1, j * 0.1,
 					                                                       k * 0.1);
-					assertTrue(c.almostEqual(cell.transformToReferenceCell(c), 1e-8));
+					assertTrue(c.almostEqual(cell.transformPreciseToReferenceCell(c), 1e-8));
 					assertTrue(c.almostEqual(cell.transformFromReferenceCell(c), 1e-8));
 					assertEquals(cell.transformationGradientFromReferenceCell(c),
 					             CoordinateMatrix.fromValues(3, 3,
@@ -35,7 +35,8 @@ public class DistortedMappingTest
 					                                         0, 1, 0,
 					                                         0, 0, 1));
 					assertTrue(c.almostEqual(
-						cell.transformToReferenceCell(cell.transformFromReferenceCell(c)),
+						cell.transformPreciseToReferenceCell(
+							cell.transformFromReferenceCell(c)),
 						1e-8));
 				}
 			}
@@ -51,14 +52,15 @@ public class DistortedMappingTest
 			for (int j = 0; j <= 10; j++)
 			{
 				final CoordinateVector c = CoordinateVector.fromValues(i * 0.1, j * 0.1);
-				assertTrue(c.almostEqual(cell.transformToReferenceCell(c), 1e-8));
+				assertTrue(c.almostEqual(cell.transformPreciseToReferenceCell(c), 1e-8));
 				assertTrue(c.almostEqual(cell.transformFromReferenceCell(c), 1e-8));
 				assertEquals(cell.transformationGradientFromReferenceCell(c),
 				             CoordinateMatrix.fromValues(2, 2, 1, 0, 0, 1));
 				assertEquals(cell.transformationGradientToReferenceCell(c),
 				             CoordinateMatrix.fromValues(2, 2, 1, 0, 0, 1));
 				assertTrue(
-					c.almostEqual(cell.transformToReferenceCell(cell.transformFromReferenceCell(c)),
+					c.almostEqual(cell.transformPreciseToReferenceCell(
+						cell.transformFromReferenceCell(c)),
 					              1e-8));
 			}
 		}
@@ -79,10 +81,11 @@ public class DistortedMappingTest
 				             scale);
 				assertEquals(cell.transformationGradientToReferenceCell(c),
 				             scaleInv);
-				assertTrue(c.almostEqual(cell.transformToReferenceCell(scale.mvMul(c)), 1e-8));
+				assertTrue(c.almostEqual(cell.transformPreciseToReferenceCell(scale.mvMul(c)), 1e-8));
 				assertTrue(c.almostEqual(cell.transformFromReferenceCell(scaleInv.mvMul(c)), 1e-8));
 				assertTrue(
-					c.almostEqual(cell.transformToReferenceCell(cell.transformFromReferenceCell(c)),
+					c.almostEqual(cell.transformPreciseToReferenceCell(
+						cell.transformFromReferenceCell(c)),
 					              1e-8));
 			}
 		}
@@ -102,13 +105,15 @@ public class DistortedMappingTest
 				{
 					final CoordinateVector c = CoordinateVector.fromValues(i * 0.1, j * 0.1,
 					                                                       k * 0.1);
-					assertTrue(c.almostEqual(cell.transformToReferenceCell(scale.mvMul(c)), 1e-8));
+					assertTrue(c.almostEqual(cell.transformPreciseToReferenceCell(scale.mvMul(c)),
+					                         1e-8));
 					assertTrue(c.almostEqual(cell.transformFromReferenceCell(scaleInv.mvMul(c)),
 					                         1e-8));
 					assertEquals(cell.transformationGradientFromReferenceCell(c), scale);
 					assertEquals(cell.transformationGradientToReferenceCell(c), scaleInv);
 					assertTrue(c.almostEqual(
-						cell.transformToReferenceCell(cell.transformFromReferenceCell(c)),
+						cell.transformPreciseToReferenceCell(
+							cell.transformFromReferenceCell(c)),
 						1e-8));
 				}
 			}
@@ -131,7 +136,8 @@ public class DistortedMappingTest
 				assertEquals(cell.transformationGradientToReferenceCell(c),
 				             rotationInv);
 				assertTrue(
-					c.almostEqual(cell.transformToReferenceCell(cell.transformFromReferenceCell(c)),
+					c.almostEqual(cell.transformPreciseToReferenceCell(
+						cell.transformFromReferenceCell(c)),
 					              1e-8));
 			}
 		}
@@ -154,7 +160,8 @@ public class DistortedMappingTest
 					assertEquals(cell.transformationGradientFromReferenceCell(c), rotation);
 					assertEquals(cell.transformationGradientToReferenceCell(c), rotationInv);
 					assertTrue(c.almostEqual(
-						cell.transformToReferenceCell(cell.transformFromReferenceCell(c)),
+						cell.transformPreciseToReferenceCell(
+							cell.transformFromReferenceCell(c)),
 						1e-8));
 				}
 			}
@@ -174,7 +181,8 @@ public class DistortedMappingTest
 					final CoordinateVector c = CoordinateVector.fromValues(i * 0.1, j * 0.1,
 					                                                       k * 0.1);
 					assertTrue(c.almostEqual(
-						cell.transformToReferenceCell(cell.transformFromReferenceCell(c)),
+						cell.transformPreciseToReferenceCell(
+							cell.transformFromReferenceCell(c)),
 						1e-8));
 				}
 			}
@@ -191,7 +199,8 @@ public class DistortedMappingTest
 			{
 				final CoordinateVector c = CoordinateVector.fromValues(i * 0.1, j * 0.1);
 				assertTrue(
-					c.almostEqual(cell.transformToReferenceCell(cell.transformFromReferenceCell(c)),
+					c.almostEqual(cell.transformPreciseToReferenceCell(
+						cell.transformFromReferenceCell(c)),
 					              1e-8));
 			}
 		}
@@ -207,7 +216,8 @@ public class DistortedMappingTest
 			{
 				final CoordinateVector c = CoordinateVector.fromValues(i * 0.1, j * 0.1);
 				assertTrue(
-					c.almostEqual(cell.transformToReferenceCell(cell.transformFromReferenceCell(c)),
+					c.almostEqual(cell.transformPreciseToReferenceCell(
+						cell.transformFromReferenceCell(c)),
 					              1e-8));
 			}
 		}

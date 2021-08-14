@@ -426,7 +426,7 @@ public class DistortedCell implements CellWithReferenceCell<DistortedCell, Disto
 		}
 //		System.out.println(transformFromReferenceCell(CoordinateVector.fromValues(1, 0)));
 //		System.out.println(pos);
-		return Newton.solve(CoordinateVector.fromValues(1, 0), pos,
+		return Newton.solve(CoordinateVector.repeat(0.5, dimension), pos,
 		                    getTransformationFromReferenceCell(), 1000);
 	}
 	
@@ -440,8 +440,8 @@ public class DistortedCell implements CellWithReferenceCell<DistortedCell, Disto
 		}
 //		System.out.println(transformFromReferenceCell(CoordinateVector.fromValues(1, 0)));
 //		System.out.println(pos);
-		return Newton.solve(CoordinateVector.fromValues(1, 0), pos,
-		                    getTransformationFromReferenceCell(), 10);
+		return Newton.solve(CoordinateVector.repeat(0.5, dimension), pos,
+		                    getTransformationFromReferenceCell(), 20);
 	}
 	
 	@Override
