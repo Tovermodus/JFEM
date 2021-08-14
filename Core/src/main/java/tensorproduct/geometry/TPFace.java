@@ -11,10 +11,7 @@ import linalg.CoordinateComparator;
 import linalg.CoordinateVector;
 import org.jetbrains.annotations.NotNull;
 
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 
 public class TPFace implements FaceWithReferenceFace<TPCell, TPFace>, Comparable<TPFace>
 {
@@ -25,7 +22,7 @@ public class TPFace implements FaceWithReferenceFace<TPCell, TPFace>, Comparable
 	private final VectorFunction normal;
 	Set<TPCell> cells;
 	
-	TPFace(List<Cell1D> cell1Ds, int flatDimension, double otherCoordinate, boolean isBoundaryFace)
+	TPFace(final List<Cell1D> cell1Ds, final int flatDimension, final double otherCoordinate, final boolean isBoundaryFace)
 	{
 		this.otherCoordinate = otherCoordinate;
 		this.flatDimension = flatDimension;
@@ -47,22 +44,45 @@ public class TPFace implements FaceWithReferenceFace<TPCell, TPFace>, Comparable
 			}
 			
 			@Override
-			public CoordinateVector value(CoordinateVector pos)
+			public CoordinateVector value(final CoordinateVector pos)
 			{
-				CoordinateVector ret = new CoordinateVector(pos.getLength());
+				final CoordinateVector ret = new CoordinateVector(pos.getLength());
 				ret.set(1, flatDimension);
 				return ret;
 			}
 		};
 	}
 	
-	public static TPFace unitHyperCubeFace(int dimension, boolean isBoundaryFace)
+	public static TPFace fromVertices(final CoordinateVector[] vertices, final boolean isBoundaryFace)
+	{
+		final int dimension = vertices[0].getLength();
+		int flatDimension = 0;
+		double otherCoordinate = 0;
+		final List<Cell1D> cell1DS = new ArrayList<>();
+		for (int i = 0; i < dimension; i++)
+		{
+			final int finalI = i;
+			final double min = Arrays.stream(vertices).mapToDouble(v -> v.at(finalI)).min().getAsDouble();
+			final double max = Arrays.stream(vertices).mapToDouble(v -> v.at(finalI)).max().getAsDouble();
+			if (DoubleCompare.almostEqual(min, max))
+			{
+				flatDimension = i;
+				otherCoordinate = min;
+			} else
+			{
+				cell1DS.add(new Cell1D(min, max));
+			}
+		}
+		return new TPFace(cell1DS, flatDimension, otherCoordinate, isBoundaryFace);
+	}
+	
+	public static TPFace unitHyperCubeFace(final int dimension, final boolean isBoundaryFace)
 	{
 		if (dimension == 2)
 		{
 			return new TPFace(List.of(new Cell1D(0, 1)), 1, 0, isBoundaryFace);
 		}
-		List<Cell1D> cells = new ArrayList<>(dimension - 1);
+		final List<Cell1D> cells = new ArrayList<>(dimension - 1);
 		for (int i = 0; i < dimension - 1; i++)
 			cells.add(new Cell1D(0, 1));
 		return new TPFace(cells, 0, 0, isBoundaryFace);
@@ -97,12 +117,12 @@ public class TPFace implements FaceWithReferenceFace<TPCell, TPFace>, Comparable
 		return normal;
 	}
 	
-	public boolean isNormalDownstream(CoordinateVector pos)
+	public boolean isNormalDownstream(final CoordinateVector pos)
 	{
 		return getNormal().value(center()).inner(pos.sub(center())) > 0;
 	}
 	
-	public TPCell getUpStreamCell(CoordinateVector direction)
+	public TPCell getUpStreamCell(final CoordinateVector direction)
 	{
 		if (normal.value(center()).inner(direction) > 0)
 			return getNormalUpstreamCell();
@@ -110,7 +130,7 @@ public class TPFace implements FaceWithReferenceFace<TPCell, TPFace>, Comparable
 			return getNormalDownstreamCell();
 	}
 	
-	public TPCell getDownStreamCell(CoordinateVector direction)
+	public TPCell getDownStreamCell(final CoordinateVector direction)
 	{
 		if (normal.value(center()).inner(direction) < 0)
 			return getNormalUpstreamCell();
@@ -121,7 +141,7 @@ public class TPFace implements FaceWithReferenceFace<TPCell, TPFace>, Comparable
 	@Override
 	public TPCell getNormalDownstreamCell()
 	{
-		for (TPCell cell : cells)
+		for (final TPCell cell : cells)
 		{
 			if (cell.center().at(flatDimension) > otherCoordinate)
 			{
@@ -134,7 +154,7 @@ public class TPFace implements FaceWithReferenceFace<TPCell, TPFace>, Comparable
 	@Override
 	public TPCell getNormalUpstreamCell()
 	{
-		for (TPCell cell : cells)
+		for (final TPCell cell : cells)
 		{
 			if (cell.center().at(flatDimension) < otherCoordinate)
 			{
@@ -147,7 +167,7 @@ public class TPFace implements FaceWithReferenceFace<TPCell, TPFace>, Comparable
 	@Override
 	public CoordinateVector center()
 	{
-		CoordinateVector ret = new CoordinateVector(getDimension());
+		final CoordinateVector ret = new CoordinateVector(getDimension());
 		int subd = 0;
 		for (int d = 0; d < getDimension(); d++)
 		{
@@ -160,14 +180,14 @@ public class TPFace implements FaceWithReferenceFace<TPCell, TPFace>, Comparable
 	}
 	
 	@Override
-	public boolean isOnFace(CoordinateVector pos)
+	public boolean isOnFace(final CoordinateVector pos)
 	{
 		int subd = 0;
 		for (int d = 0; d < getDimension(); d++)
 		{
 			if (d == flatDimension)
 			{
-				if (!DoubleCompare.almostEqual(pos.at(flatDimension), otherCoordinate))
+				if (!DoubleCompare.almostEqual(pos.at(flatDimension), otherCoordinate, 1000))
 					return false;
 			} else
 			{
@@ -179,7 +199,7 @@ public class TPFace implements FaceWithReferenceFace<TPCell, TPFace>, Comparable
 	}
 	
 	@Override
-	public List<TPFace> refine(Multimap<TPCell, TPCell> cellMap)
+	public List<TPFace> refine(final Multimap<TPCell, TPCell> cellMap)
 	{
 		throw new UnsupportedOperationException();
 	}
@@ -206,7 +226,7 @@ public class TPFace implements FaceWithReferenceFace<TPCell, TPFace>, Comparable
 	}
 	
 	@Override
-	public int compareTo(@NotNull TPFace o)
+	public int compareTo(@NotNull final TPFace o)
 	{
 		if (o.getDimension() < getDimension())
 			return -1;
@@ -258,7 +278,7 @@ public class TPFace implements FaceWithReferenceFace<TPCell, TPFace>, Comparable
 	}
 	
 	@Override
-	public boolean equals(Object obj)
+	public boolean equals(final Object obj)
 	{
 		if (obj instanceof TPFace)
 			return 0 == compareTo((TPFace) obj);
@@ -274,10 +294,10 @@ public class TPFace implements FaceWithReferenceFace<TPCell, TPFace>, Comparable
 		{
 			cells1.add(new Cell1D(0, 1));
 		}
-		TPFace refFace =
+		final TPFace refFace =
 			new TPFace(cells1, flatDimension, 0, isBoundaryFace);
 		cells1 = new ArrayList<>(getDimension() - 1);
-		List<Cell1D> cells2 = new ArrayList<>(getDimension() - 1);
+		final List<Cell1D> cells2 = new ArrayList<>(getDimension() - 1);
 		for (int i = 0; i < getDimension(); i++)
 		{
 			if (i != flatDimension)
@@ -290,10 +310,10 @@ public class TPFace implements FaceWithReferenceFace<TPCell, TPFace>, Comparable
 				cells2.add(new Cell1D(-1, 0));
 			}
 		}
-		TPCell downstreamCell = new TPCell(cells1);
+		final TPCell downstreamCell = new TPCell(cells1);
 		if (getNormalDownstreamCell() != null)
 			refFace.cells.add(downstreamCell);
-		TPCell upstreamCell = new TPCell(cells2);
+		final TPCell upstreamCell = new TPCell(cells2);
 		if (getNormalUpstreamCell() != null)
 			refFace.cells.add(upstreamCell);
 		return refFace;

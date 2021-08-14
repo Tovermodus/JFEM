@@ -283,7 +283,7 @@ public class CircleGrid
 		}
 		if (dimension == 3)
 		{
-			return ret;
+			throw new UnsupportedOperationException("Not Yet implemented");
 		}
 		throw new IllegalStateException("Dimension Wrong");
 	}

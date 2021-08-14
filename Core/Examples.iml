@@ -9,5 +9,6 @@
     <orderEntry type="sourceFolder" forTests="false" />
     <orderEntry type="module" module-name="Core" />
     <orderEntry type="library" name="Maven: com.google.guava:guava:29.0-jre" level="project" />
+    <orderEntry type="library" name="Maven: io.vavr:vavr:0.10.3" level="project" />
   </component>
 </module>
