@@ -15,48 +15,60 @@ public class DistortedFaceTest
 	@Test
 	public void testRotation2D()
 	{
-		CoordinateVector[] vertices = new CoordinateVector[4];
+		final CoordinateVector[] vertices = new CoordinateVector[4];
 		vertices[0] = CoordinateVector.fromValues(0, 0);
 		vertices[1] = CoordinateVector.fromValues(1, 0);
 		vertices[2] = CoordinateVector.fromValues(1, 1);
 		vertices[3] = CoordinateVector.fromValues(0, 1);
-		DistortedCell cell = new DistortedCell(vertices);
+		final DistortedCell cell = new DistortedCell(vertices);
 		for (int i = 0; i < vertices.length; i++)
 		{
-			DistortedFace face = new DistortedFace(new CoordinateVector[]{vertices[i],
-				vertices[(i + 1) % vertices.length]}, false);
-			AffineTransformation at = face.getTransformationFromReferenceFaceToFaceOfReferenceCell(cell);
+			final DistortedFace face = new DistortedFace(new CoordinateVector[]{vertices[i],
+			                                                                    vertices[(i + 1) %
+				                                                              vertices.length]}, false);
+			final AffineTransformation at = face.getTransformationFromReferenceFaceToFaceOfReferenceCell(cell);
 			assertEquals(at.apply(CoordinateVector.fromValues(0, 0)), vertices[i]);
 			assertEquals(at.apply(CoordinateVector.fromValues(1, 0)), vertices[(i + 1) % vertices.length]);
-			assertFalse(at.apply(CoordinateVector.fromValues(1, 0)).almostEqual(vertices[(i + 2) % vertices.length]));
-			assertFalse(at.apply(CoordinateVector.fromValues(1, 0)).almostEqual(vertices[(i + 3) % vertices.length]));
-			assertFalse(at.apply(CoordinateVector.fromValues(1, 0)).almostEqual(vertices[(i) % vertices.length]));
-			
+			assertFalse(at
+				            .apply(CoordinateVector.fromValues(1, 0))
+				            .almostEqual(vertices[(i + 2) % vertices.length]));
+			assertFalse(at
+				            .apply(CoordinateVector.fromValues(1, 0))
+				            .almostEqual(vertices[(i + 3) % vertices.length]));
+			assertFalse(at
+				            .apply(CoordinateVector.fromValues(1, 0))
+				            .almostEqual(vertices[(i) % vertices.length]));
 		}
 		for (int i = 0; i < vertices.length; i++)
 		{
-			DistortedFace face = new DistortedFace(new CoordinateVector[]{vertices[i],
-				vertices[(i + 3) % vertices.length]}, false);
-			AffineTransformation at = face.getTransformationFromReferenceFaceToFaceOfReferenceCell(cell);
+			final DistortedFace face = new DistortedFace(new CoordinateVector[]{vertices[i],
+			                                                                    vertices[(i + 3) %
+				                                                              vertices.length]}, false);
+			final AffineTransformation at = face.getTransformationFromReferenceFaceToFaceOfReferenceCell(cell);
 			assertEquals(at.apply(CoordinateVector.fromValues(0, 0)), vertices[i]);
 			assertEquals(at.apply(CoordinateVector.fromValues(1, 0)), vertices[(i + 3) % vertices.length]);
-			assertFalse(at.apply(CoordinateVector.fromValues(1, 0)).almostEqual(vertices[(i) % vertices.length]));
-			assertFalse(at.apply(CoordinateVector.fromValues(1, 0)).almostEqual(vertices[(i + 1) % vertices.length]));
-			assertFalse(at.apply(CoordinateVector.fromValues(1, 0)).almostEqual(vertices[(i + 2) % vertices.length]));
-			
+			assertFalse(at
+				            .apply(CoordinateVector.fromValues(1, 0))
+				            .almostEqual(vertices[(i) % vertices.length]));
+			assertFalse(at
+				            .apply(CoordinateVector.fromValues(1, 0))
+				            .almostEqual(vertices[(i + 1) % vertices.length]));
+			assertFalse(at
+				            .apply(CoordinateVector.fromValues(1, 0))
+				            .almostEqual(vertices[(i + 2) % vertices.length]));
 		}
 	}
 	
 	@Test
 	public void testDistortedRotation2D()
 	{
-		CoordinateVector[] vertices = new CoordinateVector[4];
+		final CoordinateVector[] vertices = new CoordinateVector[4];
 		vertices[0] = CoordinateVector.fromValues(0, 0);
 		vertices[1] = CoordinateVector.fromValues(2, 1);
 		vertices[2] = CoordinateVector.fromValues(4, 4);
 		vertices[3] = CoordinateVector.fromValues(-0.5, 2);
-		DistortedCell cell = new DistortedCell(vertices);
-		CoordinateVector[] referenceVertices = new CoordinateVector[4];
+		final DistortedCell cell = new DistortedCell(vertices);
+		final CoordinateVector[] referenceVertices = new CoordinateVector[4];
 		referenceVertices[0] = CoordinateVector.fromValues(0, 0);
 		referenceVertices[1] = CoordinateVector.fromValues(1, 0);
 		referenceVertices[2] = CoordinateVector.fromValues(1, 1);
@@ -64,34 +76,48 @@ public class DistortedFaceTest
 		
 		for (int i = 0; i < vertices.length; i++)
 		{
-			DistortedFace face = new DistortedFace(new CoordinateVector[]{vertices[i],
-				vertices[(i + 1) % vertices.length]}, false);
-			AffineTransformation at = face.getTransformationFromReferenceFaceToFaceOfReferenceCell(cell);
+			final DistortedFace face = new DistortedFace(new CoordinateVector[]{vertices[i],
+			                                                                    vertices[(i + 1) %
+				                                                              vertices.length]}, false);
+			final AffineTransformation at = face.getTransformationFromReferenceFaceToFaceOfReferenceCell(cell);
 			assertEquals(at.apply(CoordinateVector.fromValues(0, 0)), referenceVertices[i]);
-			assertEquals(at.apply(CoordinateVector.fromValues(1, 0)), referenceVertices[(i + 1) % vertices.length]);
-			assertFalse(at.apply(CoordinateVector.fromValues(1, 0)).almostEqual(referenceVertices[(i + 2) % vertices.length]));
-			assertFalse(at.apply(CoordinateVector.fromValues(1, 0)).almostEqual(referenceVertices[(i + 3) % vertices.length]));
-			assertFalse(at.apply(CoordinateVector.fromValues(1, 0)).almostEqual(referenceVertices[(i) % vertices.length]));
-			
+			assertEquals(at.apply(CoordinateVector.fromValues(1, 0)),
+			             referenceVertices[(i + 1) % vertices.length]);
+			assertFalse(at
+				            .apply(CoordinateVector.fromValues(1, 0))
+				            .almostEqual(referenceVertices[(i + 2) % vertices.length]));
+			assertFalse(at
+				            .apply(CoordinateVector.fromValues(1, 0))
+				            .almostEqual(referenceVertices[(i + 3) % vertices.length]));
+			assertFalse(at
+				            .apply(CoordinateVector.fromValues(1, 0))
+				            .almostEqual(referenceVertices[(i) % vertices.length]));
 		}
 		for (int i = 0; i < vertices.length; i++)
 		{
-			DistortedFace face = new DistortedFace(new CoordinateVector[]{vertices[i],
-				vertices[(i + 3) % vertices.length]}, false);
-			AffineTransformation at = face.getTransformationFromReferenceFaceToFaceOfReferenceCell(cell);
+			final DistortedFace face = new DistortedFace(new CoordinateVector[]{vertices[i],
+			                                                                    vertices[(i + 3) %
+				                                                              vertices.length]}, false);
+			final AffineTransformation at = face.getTransformationFromReferenceFaceToFaceOfReferenceCell(cell);
 			assertEquals(at.apply(CoordinateVector.fromValues(0, 0)), referenceVertices[i]);
-			assertEquals(at.apply(CoordinateVector.fromValues(1, 0)), referenceVertices[(i + 3) % vertices.length]);
-			assertFalse(at.apply(CoordinateVector.fromValues(1, 0)).almostEqual(referenceVertices[(i) % vertices.length]));
-			assertFalse(at.apply(CoordinateVector.fromValues(1, 0)).almostEqual(referenceVertices[(i + 1) % vertices.length]));
-			assertFalse(at.apply(CoordinateVector.fromValues(1, 0)).almostEqual(referenceVertices[(i + 2) % vertices.length]));
-			
+			assertEquals(at.apply(CoordinateVector.fromValues(1, 0)),
+			             referenceVertices[(i + 3) % vertices.length]);
+			assertFalse(at
+				            .apply(CoordinateVector.fromValues(1, 0))
+				            .almostEqual(referenceVertices[(i) % vertices.length]));
+			assertFalse(at
+				            .apply(CoordinateVector.fromValues(1, 0))
+				            .almostEqual(referenceVertices[(i + 1) % vertices.length]));
+			assertFalse(at
+				            .apply(CoordinateVector.fromValues(1, 0))
+				            .almostEqual(referenceVertices[(i + 2) % vertices.length]));
 		}
-		
 	}
+	
 	@Test
 	public void testRotation3D()
 	{
-		CoordinateVector[] vertices = new CoordinateVector[8];
+		final CoordinateVector[] vertices = new CoordinateVector[8];
 		vertices[0] = CoordinateVector.fromValues(0, 0, 0);
 		vertices[1] = CoordinateVector.fromValues(1, 0, 0);
 		vertices[2] = CoordinateVector.fromValues(1, 1, 0);
@@ -100,8 +126,8 @@ public class DistortedFaceTest
 		vertices[5] = CoordinateVector.fromValues(1, 0, 1);
 		vertices[6] = CoordinateVector.fromValues(1, 1, 1);
 		vertices[7] = CoordinateVector.fromValues(0, 1, 1);
-		DistortedCell cell = new DistortedCell(vertices);
-		IntCoordinates[] faces = new IntCoordinates[48];
+		final DistortedCell cell = new DistortedCell(vertices);
+		final IntCoordinates[] faces = new IntCoordinates[48];
 		faces[0] = new IntCoordinates(0, 3, 2, 1);
 		faces[1] = new IntCoordinates(3, 2, 1, 0);
 		faces[2] = new IntCoordinates(2, 1, 0, 3);
@@ -156,24 +182,24 @@ public class DistortedFaceTest
 		faces[46] = new IntCoordinates(1, 5, 6, 2);
 		faces[47] = new IntCoordinates(5, 6, 2, 1);
 		
-		for (IntCoordinates facec : faces)
+		for (final IntCoordinates facec : faces)
 		{
-			DistortedFace face = new DistortedFace(new CoordinateVector[]{vertices[facec.get(0)],
-				vertices[facec.get(1)],
-				vertices[facec.get(2)],
-				vertices[facec.get(3)]}, false);
-			AffineTransformation at = face.getTransformationFromReferenceFaceToFaceOfReferenceCell(cell);
+			final DistortedFace face = new DistortedFace(new CoordinateVector[]{vertices[facec.get(0)],
+			                                                                    vertices[facec.get(1)],
+			                                                                    vertices[facec.get(2)],
+			                                                                    vertices[facec.get(3)]}, false);
+			final AffineTransformation at = face.getTransformationFromReferenceFaceToFaceOfReferenceCell(cell);
 			assertEquals(at.apply(CoordinateVector.fromValues(0, 0, 0)), vertices[facec.get(0)]);
 			assertEquals(at.apply(CoordinateVector.fromValues(0, 1, 0)), vertices[facec.get(1)]);
 			assertEquals(at.apply(CoordinateVector.fromValues(1, 1, 0)), vertices[facec.get(2)]);
 			assertEquals(at.apply(CoordinateVector.fromValues(1, 0, 0)), vertices[facec.get(3)]);
-			
 		}
 	}
+	
 	@Test
 	public void testDistortedRotation3D()
 	{
-		CoordinateVector[] vertices = new CoordinateVector[8];
+		final CoordinateVector[] vertices = new CoordinateVector[8];
 		vertices[0] = CoordinateVector.fromValues(0, 0, 0);
 		vertices[1] = CoordinateVector.fromValues(1, 0, 0);
 		vertices[2] = CoordinateVector.fromValues(1, 1, 0);
@@ -182,7 +208,7 @@ public class DistortedFaceTest
 		vertices[5] = CoordinateVector.fromValues(1, 0, 1);
 		vertices[6] = CoordinateVector.fromValues(1, 1, 1);
 		vertices[7] = CoordinateVector.fromValues(0, 1, 1);
-		CoordinateVector[] referenceVertices = new CoordinateVector[8];
+		final CoordinateVector[] referenceVertices = new CoordinateVector[8];
 		referenceVertices[0] = CoordinateVector.fromValues(0, 0, 0);
 		referenceVertices[1] = CoordinateVector.fromValues(1, 0, 0);
 		referenceVertices[2] = CoordinateVector.fromValues(1, 1, 0);
@@ -191,8 +217,8 @@ public class DistortedFaceTest
 		referenceVertices[5] = CoordinateVector.fromValues(1, 0, 1);
 		referenceVertices[6] = CoordinateVector.fromValues(1, 1, 1);
 		referenceVertices[7] = CoordinateVector.fromValues(0, 1, 1);
-		DistortedCell cell = new DistortedCell(vertices);
-		IntCoordinates[] faces = new IntCoordinates[48];
+		final DistortedCell cell = new DistortedCell(vertices);
+		final IntCoordinates[] faces = new IntCoordinates[48];
 		faces[0] = new IntCoordinates(0, 3, 2, 1);
 		faces[1] = new IntCoordinates(3, 2, 1, 0);
 		faces[2] = new IntCoordinates(2, 1, 0, 3);
@@ -247,18 +273,57 @@ public class DistortedFaceTest
 		faces[46] = new IntCoordinates(1, 5, 6, 2);
 		faces[47] = new IntCoordinates(5, 6, 2, 1);
 		
-		for (IntCoordinates facec : faces)
+		for (final IntCoordinates facec : faces)
 		{
-			DistortedFace face = new DistortedFace(new CoordinateVector[]{vertices[facec.get(0)],
-				vertices[facec.get(1)],
-				vertices[facec.get(2)],
-				vertices[facec.get(3)]}, false);
-			AffineTransformation at = face.getTransformationFromReferenceFaceToFaceOfReferenceCell(cell);
+			final DistortedFace face = new DistortedFace(new CoordinateVector[]{vertices[facec.get(0)],
+			                                                                    vertices[facec.get(1)],
+			                                                                    vertices[facec.get(2)],
+			                                                                    vertices[facec.get(3)]}, false);
+			final AffineTransformation at = face.getTransformationFromReferenceFaceToFaceOfReferenceCell(cell);
 			assertEquals(at.apply(CoordinateVector.fromValues(0, 0, 0)), referenceVertices[facec.get(0)]);
 			assertEquals(at.apply(CoordinateVector.fromValues(0, 1, 0)), referenceVertices[facec.get(1)]);
 			assertEquals(at.apply(CoordinateVector.fromValues(1, 1, 0)), referenceVertices[facec.get(2)]);
 			assertEquals(at.apply(CoordinateVector.fromValues(1, 0, 0)), referenceVertices[facec.get(3)]);
-			
 		}
+	}
+	
+	@Test
+	public void testIsOnCell()
+	{
+	}
+	
+	@Test
+	public void testGetDownStreamCell()
+	{
+	}
+	
+	@Test
+	public void testGetUpStreamCell()
+	{
+	}
+	
+	@Test
+	public void testEquals()
+	{
+	}
+	
+	@Test
+	public void testHashCode()
+	{
+	}
+	
+	@Test
+	public void testCompare()
+	{
+	}
+	
+	@Test
+	public void testIsOnFace()
+	{
+	}
+	
+	@Test
+	public void testIsVertex()
+	{
 	}
 }

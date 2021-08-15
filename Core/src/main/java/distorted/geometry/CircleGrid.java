@@ -207,11 +207,20 @@ public class CircleGrid
 		return faces;
 	}
 	
-	private void createFaces(final HashSet<DistortedFace> faces, final DistortedCell cell, final Collection<DistortedCell> neighbouringCells)
+	private void createFaces(final HashSet<DistortedFace> faces, final DistortedCell cell,
+	                         final Collection<DistortedCell> neighbouringCells)
+	{
+		createFaces(faces, cell, neighbouringCells, radius, centerPoint);
+	}
+	
+	public static void createFaces(final HashSet<DistortedFace> faces, final DistortedCell cell,
+	                               final Collection<DistortedCell> neighbouringCells, final double radius,
+	                               final CoordinateVector centerPoint)
 	{
 		for (final CoordinateVector[] vertices : cell.getSides())
 		{
 			final boolean isOnBoundary = Arrays.stream(vertices)
+			                                   .map(centerPoint::sub)
 			                                   .mapToDouble(CoordinateVector::euclidianNorm)
 			                                   .allMatch(norm -> DoubleCompare.almostEqual(norm,
 			                                                                               radius));

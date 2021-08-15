@@ -26,7 +26,7 @@ public class DistortedFace implements FaceWithReferenceFace<DistortedCell, Disto
 	
 	public DistortedFace(final CoordinateVector[] vertices, final boolean isBoundaryFace)
 	{
-		this.vertices = vertices;
+		this.vertices = vertices.clone();
 		dimension = vertices[0].getLength();
 		if (PerformanceArguments.getInstance().executeChecks)
 		{

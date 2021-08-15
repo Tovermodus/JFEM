@@ -1,6 +1,5 @@
 package distorted;
 
-import basic.PlotWindow;
 import distorted.geometry.CircleGrid;
 import linalg.CoordinateVector;
 import org.junit.jupiter.api.Test;
@@ -41,7 +40,7 @@ public class DistortedShapeFunctionTest
 	{
 		for (int j = 0; j < 4; j++)
 		{
-			final CircleGrid circle = new CircleGrid( new CoordinateVector(2), 1354,
+			final CircleGrid circle = new CircleGrid(new CoordinateVector(2), 1354,
 			                                         j);
 			System.out.println(circle.faces.size());
 			System.out.println(circle.cells.size());
@@ -65,7 +64,7 @@ public class DistortedShapeFunctionTest
 	{
 		for (int j = 0; j < 4; j++)
 		{
-			final CircleGrid circle = new CircleGrid( CoordinateVector.fromValues(178, -172), 1,
+			final CircleGrid circle = new CircleGrid(CoordinateVector.fromValues(178, -172), 1,
 			                                         j);
 			System.out.println(circle.faces.size());
 			System.out.println(circle.cells.size());
@@ -89,7 +88,7 @@ public class DistortedShapeFunctionTest
 	{
 		for (int j = 0; j < 4; j++)
 		{
-			final CircleGrid circle = new CircleGrid( CoordinateVector.fromValues(-178, -172), 1312,
+			final CircleGrid circle = new CircleGrid(CoordinateVector.fromValues(-178, -172), 1312,
 			                                         j);
 			System.out.println(circle.faces.size());
 			System.out.println(circle.cells.size());
@@ -106,5 +105,50 @@ public class DistortedShapeFunctionTest
 			final TreeSet<DistortedShapeFunction> sortedFunctions = new TreeSet<>(shapeFunctionSet);
 			assertEquals(sortedFunctions.size(), shapeFunctionSet.size());
 		}
+	}
+	
+	@Test
+	public void testValueInCell()
+	{
+	}
+	
+	@Test
+	public void testGradientInCell()
+	{
+	}
+	
+	@Test
+	public void testValue()
+	{
+	}
+	
+	@Test
+	public void testGradient()
+	{
+	}
+	
+	@Test
+	public void testNodeFunctional()
+	{
+	}
+	
+	@Test
+	public void testNodeFunctionalOnReferenceCell()
+	{
+	}
+	
+	@Test
+	public void testEquals()
+	{
+	}
+	
+	@Test
+	public void testHashCode()
+	{
+	}
+	
+	@Test
+	public void testCompare()
+	{
 	}
 }

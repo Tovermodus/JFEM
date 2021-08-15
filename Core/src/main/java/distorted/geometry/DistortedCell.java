@@ -4,6 +4,7 @@ import basic.CellWithReferenceCell;
 import basic.DoubleCompare;
 import basic.PerformanceArguments;
 import basic.VectorFunction;
+import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
 import linalg.CoordinateMatrix;
 import linalg.CoordinateVector;
@@ -12,9 +13,10 @@ import org.jetbrains.annotations.NotNull;
 import tensorproduct.geometry.TPCell;
 
 import java.util.*;
+import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
-public class DistortedCell implements CellWithReferenceCell<DistortedCell, DistortedFace>
+public class DistortedCell implements CellWithReferenceCell<DistortedCell, DistortedFace>, Comparable<DistortedCell>
 {
 	final double MAXIMUM_WARP = 1e-10; //25°
 	public final TPCell referenceCell;
@@ -26,7 +28,7 @@ public class DistortedCell implements CellWithReferenceCell<DistortedCell, Disto
 	
 	public DistortedCell(final CoordinateVector... vertices)
 	{
-		this.vertices = vertices;
+		this.vertices = Arrays.stream(vertices).map(CoordinateVector::new).toArray(CoordinateVector[]::new);
 		dimension = vertices[0].getLength();
 		referenceCell = TPCell.unitHyperCube(dimension);
 		faces = new HashSet<>(2 * dimension);
@@ -88,6 +90,14 @@ public class DistortedCell implements CellWithReferenceCell<DistortedCell, Disto
 		if (!verticesHaveCorrectPosition())
 			throw new IllegalArgumentException("vertices are in wrong order or hexahedron is warped too " +
 				                                   "much");
+	}
+	
+	public ImmutableList<CoordinateVector> getVertices()
+	{
+		return ImmutableList.copyOf(Arrays
+			                            .stream(vertices)
+			                            .map(CoordinateVector::new)
+			                            .collect(Collectors.toList()));
 	}
 	
 	@Override
@@ -282,6 +292,16 @@ public class DistortedCell implements CellWithReferenceCell<DistortedCell, Disto
 		          .anyMatch(dist -> dist > diam))
 			return false;
 		return referenceCell.isInCell(transformToReferenceCell(pos));
+	}
+	
+	public boolean isInCellPrecise(final CoordinateVector pos)
+	{
+		if (Arrays.stream(vertices)
+		          .map(pos::sub)
+		          .mapToDouble(CoordinateVector::euclidianNorm)
+		          .anyMatch(dist -> dist > diam))
+			return false;
+		return referenceCell.isInCell(transformPreciseToReferenceCell(pos));
 	}
 	
 	@Override
@@ -514,7 +534,9 @@ public class DistortedCell implements CellWithReferenceCell<DistortedCell, Disto
 			boolean otherHasVertex = false;
 			for (int j = 0; j < vertices.length; j++)
 				if (vertices[i].almostEqualMute(that.vertices[j]))
+				{
 					otherHasVertex = true;
+				}
 			if (!otherHasVertex)
 				return false;
 		}
