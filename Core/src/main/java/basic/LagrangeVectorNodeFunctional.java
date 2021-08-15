@@ -8,9 +8,10 @@ public class LagrangeVectorNodeFunctional implements NodeFunctional<CoordinateVe
 	CoordinateTensor>
 {
 	
-	private CoordinateVector point;
+	private final CoordinateVector point;
 	int component;
-	public LagrangeVectorNodeFunctional(CoordinateVector point, int component)
+	
+	public LagrangeVectorNodeFunctional(final CoordinateVector point, final int component)
 	{
 		this.point = point;
 		this.component = component;
@@ -23,13 +24,13 @@ public class LagrangeVectorNodeFunctional implements NodeFunctional<CoordinateVe
 	}
 	
 	@Override
-	public double evaluate(Function<CoordinateVector, CoordinateMatrix, CoordinateTensor> func)
+	public double evaluate(final Function<CoordinateVector, CoordinateMatrix, CoordinateTensor> func)
 	{
 		return func.value(point).at(component);
 	}
 	
 	@Override
-	public boolean usesFace(Face<?, ?> f)
+	public boolean usesFace(final Face<?, ?> f)
 	{
 		return f.isOnFace(point);
 	}
@@ -38,6 +39,7 @@ public class LagrangeVectorNodeFunctional implements NodeFunctional<CoordinateVe
 	{
 		return point;
 	}
+	
 	public int getComponent()
 	{
 		return component;

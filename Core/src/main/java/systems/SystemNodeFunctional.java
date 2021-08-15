@@ -1,9 +1,6 @@
 package systems;
 
 import basic.*;
-import it.unimi.dsi.fastutil.ints.IntComparator;
-import org.jetbrains.annotations.NotNull;
-import org.w3c.dom.Node;
 
 public class SystemNodeFunctional implements NodeFunctional<SystemValue,
 	SystemGradient,
@@ -12,12 +9,12 @@ public class SystemNodeFunctional implements NodeFunctional<SystemValue,
 	private final NodeFunctional functional;
 	final int component;
 	
-	public SystemNodeFunctional(NodeFunctional<?,?,?> functional, int component)
+	public SystemNodeFunctional(final NodeFunctional<?, ?, ?> functional, final int component)
 	{
 		this.functional = functional;
 		this.component = component;
 		if (PerformanceArguments.getInstance().executeChecks)
-			if(!functional.canEvaluate(SystemParameters.getInstance().signatures[component]))
+			if (!functional.canEvaluate(SystemParameters.getInstance().signatures[component]))
 				throw new IllegalArgumentException("Functional does not fit signatures");
 	}
 	
@@ -28,25 +25,24 @@ public class SystemNodeFunctional implements NodeFunctional<SystemValue,
 	}
 	
 	@Override
-	public double evaluate(Function<SystemValue, SystemGradient, SystemHessian> func)
+	public double evaluate(final Function<SystemValue, SystemGradient, SystemHessian> func)
 	{
 		throw new UnsupportedOperationException("Needs SystemFunction");
 	}
 	
 	@SuppressWarnings("unchecked")
 	@Override
-	public boolean usesFace(Face<?, ?> f)
+	public boolean usesFace(final Face<?, ?> f)
 	{
 		return functional.usesFace(f);
 	}
 	
 	@SuppressWarnings("unchecked")
-	public double evaluate(SystemFunction func)
+	public double evaluate(final SystemFunction func)
 	{
 		if (PerformanceArguments.getInstance().executeChecks)
-			if(!functional.canEvaluate(func.getComponentFunction(component).getFunctionSignature()))
+			if (!functional.canEvaluate(func.getComponentFunction(component).getFunctionSignature()))
 				throw new IllegalArgumentException("Functional does not fit signatures");
 		return functional.evaluate(func.getComponentFunction(component));
 	}
-	
 }

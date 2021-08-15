@@ -104,7 +104,7 @@ public class DistortedShapeFunction implements ScalarShapeFunction<DistortedCell
 	public CoordinateVector gradientOnReferenceCell(final CoordinateVector pos, final DistortedCell cell)
 	{
 		if (PerformanceArguments.getInstance().executeChecks)
-			if (!cell.getReferenceCell().isInCell(pos))
+			if (!cell.referenceCell.isInCell(pos))
 				throw new IllegalArgumentException("pos is not in cell");
 		if (shapeFunctionsOnCell.containsKey(cell))
 		{

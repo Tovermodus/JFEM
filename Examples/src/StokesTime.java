@@ -1,4 +1,6 @@
-import basic.*;
+import basic.PerformanceArguments;
+import basic.ScalarFunction;
+import basic.VectorFunction;
 import com.google.common.primitives.Ints;
 import linalg.*;
 import mixed.*;
@@ -10,7 +12,7 @@ import java.util.Map;
 
 public class StokesTime
 {
-	public static VectorFunction createBoundaryFunction(double t)
+	public static VectorFunction createBoundaryFunction(final double t)
 	{
 		
 		return new VectorFunction()
@@ -28,7 +30,7 @@ public class StokesTime
 			}
 			
 			@Override
-			public CoordinateVector value(CoordinateVector pos)
+			public CoordinateVector value(final CoordinateVector pos)
 			{
 				if (Math.abs(pos.x()) <= 1e-10 || Math.abs(pos.x() - 1) <= 1e-10)
 					return CoordinateVector.fromValues(0.1, 0);
@@ -40,40 +42,42 @@ public class StokesTime
 		};
 	}
 	
-	public static MixedFunction generateCurrentFunction(Vector iterate, TaylorHoodSpace grid)
+	public static MixedFunction generateCurrentFunction(final Vector iterate, final TaylorHoodSpace grid)
 	{
 		return new MixedFESpaceFunction<>(grid.getShapeFunctions(), iterate);
 	}
 	
-	public static void main(String[] args)
+	public static void main(final String[] args)
 	{
 		
-		PerformanceArguments.PerformanceArgumentBuilder builder =
+		final PerformanceArguments.PerformanceArgumentBuilder builder =
 			new PerformanceArguments.PerformanceArgumentBuilder();
 		builder.build();
-		CoordinateVector start = CoordinateVector.fromValues(0, 0);
-		CoordinateVector end = CoordinateVector.fromValues(1, 1);
-		int polynomialDegree = 1;
-		TaylorHoodSpace grid = new TaylorHoodSpace(start, end,
-			Ints.asList(5, 5));
-		double reynolds = 1;
-		double dt = 0.003;
-		int timesteps = 25;
-		int nPoints = 43;
+		final CoordinateVector start = CoordinateVector.fromValues(0, 0);
+		final CoordinateVector end = CoordinateVector.fromValues(1, 1);
+		final int polynomialDegree = 1;
+		final TaylorHoodSpace grid = new TaylorHoodSpace(start, end,
+		                                                 Ints.asList(5, 5));
+		final double reynolds = 1;
+		final double dt = 0.003;
+		final int timesteps = 3;
+		final int nPoints = 43;
 		
-		MixedCellIntegral<TPCell, ContinuousTPShapeFunction, ContinuousTPVectorFunction, QkQkFunction>
+		final MixedCellIntegral<TPCell, ContinuousTPShapeFunction, ContinuousTPVectorFunction, QkQkFunction>
 			divValue =
 			new MixedTPCellIntegral<>(ScalarFunction.constantFunction(1),
-				MixedTPCellIntegral.DIV_VALUE);
-		MixedCellIntegral<TPCell, ContinuousTPShapeFunction, ContinuousTPVectorFunction, QkQkFunction> gradGrad =
+			                          MixedTPCellIntegral.DIV_VALUE);
+		final MixedCellIntegral<TPCell, ContinuousTPShapeFunction, ContinuousTPVectorFunction, QkQkFunction>
+			gradGrad =
 			MixedCellIntegral.fromVelocityIntegral(new TPVectorCellIntegral<>(
 				ScalarFunction.constantFunction(1),
 				TPVectorCellIntegral.GRAD_GRAD));
-		MixedCellIntegral<TPCell, ContinuousTPShapeFunction, ContinuousTPVectorFunction, QkQkFunction> valueValue =
+		final MixedCellIntegral<TPCell, ContinuousTPShapeFunction, ContinuousTPVectorFunction, QkQkFunction>
+			valueValue =
 			MixedCellIntegral.fromVelocityIntegral(new TPVectorCellIntegral<>(
 				ScalarFunction.constantFunction(1),
 				TPVectorCellIntegral.VALUE_VALUE));
-		MixedRightHandSideIntegral<TPCell, ContinuousTPShapeFunction,
+		final MixedRightHandSideIntegral<TPCell, ContinuousTPShapeFunction,
 			ContinuousTPVectorFunction, QkQkFunction> source =
 			MixedRightHandSideIntegral.fromVelocityIntegral(
 				new TPVectorRightHandSideIntegral<>(
@@ -93,14 +97,14 @@ public class StokesTime
 						}
 						
 						@Override
-						public CoordinateVector value(CoordinateVector pos)
+						public CoordinateVector value(final CoordinateVector pos)
 						{
 							return CoordinateVector.fromValues(0.1,
-								10 * Math.sin(pos.x()*20));
+							                                   10 * Math.sin(pos.x() * 20));
 						}
 					},
 					TPVectorRightHandSideIntegral.VALUE));
-		MixedRightHandSideIntegral<TPCell, ContinuousTPShapeFunction,
+		final MixedRightHandSideIntegral<TPCell, ContinuousTPShapeFunction,
 			ContinuousTPVectorFunction, QkQkFunction> initial =
 			MixedRightHandSideIntegral.fromVelocityIntegral(
 				new TPVectorRightHandSideIntegral<>(new VectorFunction()
@@ -118,18 +122,18 @@ public class StokesTime
 					}
 					
 					@Override
-					public CoordinateVector value(CoordinateVector pos)
+					public CoordinateVector value(final CoordinateVector pos)
 					{
 						return CoordinateVector.fromValues(0, 0);
 					}
 				},
-					TPVectorRightHandSideIntegral.VALUE));
+				                                    TPVectorRightHandSideIntegral.VALUE));
 		grid.assembleCells();
 		grid.assembleFunctions(polynomialDegree);
-		List<CoordinateVector> points = grid.generatePlotPoints(nPoints);
-		int n = grid.getShapeFunctions().size();
+		final List<CoordinateVector> points = grid.generatePlotPoints(nPoints);
+		final int n = grid.getShapeFunctions().size();
 		
-		ScalarFunction indicatorFunction = new ScalarFunction()
+		final ScalarFunction indicatorFunction = new ScalarFunction()
 		{
 			@Override
 			public int getDomainDimension()
@@ -138,95 +142,99 @@ public class StokesTime
 			}
 			
 			@Override
-			public Double value(CoordinateVector pos)
+			public Double value(final CoordinateVector pos)
 			{
 //				if (Math.abs(pos.x()) <= 1e-10)
 //					return 1.0;
 				//if(Math.abs(pos.x()-1) <= 1e-10)
 				//	return 1.0;
-				if(Math.abs(pos.y()) <= 1e-10)
+				if (Math.abs(pos.y()) <= 1e-10)
 					return 1.0;
-				if(Math.abs(1-pos.y()) <= 1e-10)
+				if (Math.abs(1 - pos.y()) <= 1e-10)
 					return 1.0;
 				return 0.0;
 			}
 		};
 		
-		
-		SparseMatrix M = new SparseMatrix(n, n);
+		final SparseMatrix M = new SparseMatrix(n, n);
 		grid.writeCellIntegralsToMatrix(List.of(valueValue), M);
 		
-		SparseMatrix A = new SparseMatrix(n, n);
+		final SparseMatrix A = new SparseMatrix(n, n);
 		grid.writeCellIntegralsToMatrix(List.of(gradGrad), A);
 		A.mulInPlace(reynolds * dt);
 		
-		SparseMatrix D = new SparseMatrix(n, n);
+		final SparseMatrix D = new SparseMatrix(n, n);
 		grid.writeCellIntegralsToMatrix(List.of(divValue), D);
 		D.mulInPlace(100);
 		
-		SparseMatrix C = new SparseMatrix(n, n);
+		final SparseMatrix C = new SparseMatrix(n, n);
 		
-		DenseVector src = new DenseVector(n);
+		final DenseVector src = new DenseVector(n);
 		grid.writeCellIntegralsToRhs(List.of(source), src);
 		src.mulInPlace(dt);
 		
 		DenseVector iterate = new DenseVector(n);
 		grid.writeCellIntegralsToRhs(List.of(initial), iterate);
 		
-		SparseMatrix MAD = M.add(A).add(D);
+		final SparseMatrix MAD = M.add(A).add(D);
 		
 		VectorFunction bdrFunction = createBoundaryFunction(0);
 		
 		grid.writeBoundaryValuesTo(new MixedFunction(bdrFunction),
-			(f) -> TPFaceIntegral.integrateNonTensorProduct(indicatorFunction::value, f,
-				QuadratureRule1D.Gauss5) > 0, MAD, iterate);
+		                           (f) -> TPFaceIntegral.integrateNonTensorProduct(indicatorFunction::value, f,
+		                                                                           QuadratureRule1D.Gauss5) > 0,
+		                           MAD, iterate);
 		System.out.println(iterate);
 		
-		Map<CoordinateVector, Double> pvals =
+		final Map<CoordinateVector, Double> pvals =
 			(generateCurrentFunction(iterate, grid).pressureValuesInPointsAtTime(points, 0));
-		Map<CoordinateVector, Double> divvals =
-			(generateCurrentFunction(iterate, grid).getVelocityFunction().getDivergenceFunction().valuesInPointsAtTime(points, 0));
+		final Map<CoordinateVector, Double> divvals =
+			(generateCurrentFunction(iterate, grid)
+				 .getVelocityFunction()
+				 .getDivergenceFunction()
+				 .valuesInPointsAtTime(points, 0));
 		
-		Map<CoordinateVector, CoordinateVector> vvals = (new MixedFESpaceFunction<>(
+		final Map<CoordinateVector, CoordinateVector> vvals = (new MixedFESpaceFunction<>(
 			grid.getShapeFunctions(), iterate)
-			.velocityValuesInPointsAtTime(points, 0));
-		PlotWindow p = new PlotWindow();
-		p.addPlot(new MixedPlot2D(generateCurrentFunction(iterate, grid), points, nPoints));
+			                                                       .velocityValuesInPointsAtTime(points,
+			                                                                                     0));
+		//final PlotWindow p = new PlotWindow();
+		//p.addPlot(new MixedPlot2D(generateCurrentFunction(iterate, grid), points, nPoints));
 		for (int i = 1; i < timesteps; i++)
 		{
-			IterativeSolver its = new IterativeSolver();
+			final IterativeSolver its = new IterativeSolver();
 			its.showProgress = false;
 			
-			
-			MixedCellIntegral<TPCell, ContinuousTPShapeFunction, ContinuousTPVectorFunction, QkQkFunction> convection =
+			final MixedCellIntegral<TPCell, ContinuousTPShapeFunction, ContinuousTPVectorFunction, QkQkFunction>
+				convection =
 				MixedCellIntegral.fromVelocityIntegral(new TPVectorCellIntegral<>(
 					generateCurrentFunction(iterate, grid).getVelocityFunction(),
 					TPVectorCellIntegral.GRAD_VALUE));
 			grid.writeCellIntegralsToMatrix(List.of(convection), C);
 			C.mulInPlace(dt);
-			SparseMatrix MADC = MAD.add(C);
+			final SparseMatrix MADC = MAD.add(C);
 			
-			DenseVector rhs = src.add(M.mvMul(iterate));
+			final DenseVector rhs = src.add(M.mvMul(iterate));
 			bdrFunction = createBoundaryFunction(i * dt);
 			grid.writeBoundaryValuesTo(new MixedFunction(bdrFunction),
-				(f) ->
-				{
-					return TPFaceIntegral.integrateNonTensorProduct(indicatorFunction::value, f,
-						QuadratureRule1D.Gauss5) > 0;
-				}, MADC, iterate);
+			                           (f) ->
+			                           {
+				                           return TPFaceIntegral.integrateNonTensorProduct(
+					                           indicatorFunction::value, f,
+					                           QuadratureRule1D.Gauss5) > 0;
+			                           }, MADC, iterate);
 			iterate = new DenseVector(its.solveBiCGStab(MADC, rhs, iterate, 1e-6));
 			System.out.println("x" + iterate);
 			System.out.println(i);
-			pvals.putAll(generateCurrentFunction(iterate, grid)
-				.pressureValuesInPointsAtTime(points, dt * i));
-			vvals.putAll(generateCurrentFunction(iterate, grid)
-				.velocityValuesInPointsAtTime(points, dt * i));
-			divvals.putAll(generateCurrentFunction(iterate, grid)
-				.getVelocityFunction()
-				.getDivergenceFunction().valuesInPointsAtTime(points, dt * i));
+//			pvals.putAll(generateCurrentFunction(iterate, grid)
+//				             .pressureValuesInPointsAtTime(points, dt * i));
+//			vvals.putAll(generateCurrentFunction(iterate, grid)
+//				             .velocityValuesInPointsAtTime(points, dt * i));
+//			divvals.putAll(generateCurrentFunction(iterate, grid)
+//				               .getVelocityFunction()
+//				               .getDivergenceFunction().valuesInPointsAtTime(points, dt * i));
 		}
-		p.addPlot(new MixedPlot2DTime(pvals, vvals, nPoints));
-		p.addPlot(new ScalarPlot2DTime(divvals, nPoints, ""));
-		
+//		p.addPlot(new MixedPlot2DTime(pvals, vvals, nPoints));
+//		p.addPlot(new ScalarPlot2DTime(divvals, nPoints, ""));
 	}
 }

@@ -102,6 +102,16 @@ public class DenseVector implements MutableVector, MutableTensor
 	}
 	
 	@Override
+	public double absMaxElement()
+	{
+		double max = 0;
+		for (int i = 0; i < getLength(); i++)
+			if (Math.abs(entries[i]) > max)
+				max = Math.abs(entries[i]);
+		return max;
+	}
+	
+	@Override
 	public double at(final int... coordinates)
 	{
 		if (PerformanceArguments.getInstance().executeChecks)
@@ -148,6 +158,12 @@ public class DenseVector implements MutableVector, MutableTensor
 	public void mulInPlace(final double scalar)
 	{
 		entries = mul(scalar).entries;
+	}
+	
+	@Override
+	public int getLength()
+	{
+		return entries.length;
 	}
 	
 	@Override

@@ -1,6 +1,5 @@
 package basic;
 
-import com.google.common.base.Stopwatch;
 import io.vavr.Function3;
 import linalg.MutableMatrix;
 import linalg.MutableVector;
@@ -115,12 +114,9 @@ public interface MatrixFESpace<CT extends Cell<CT, FT>, FT extends Face<CT, FT>,
 	{
 		forEachCell(K ->
 		            {
-			            System.out.println("LoopViaCell" + K);
-			            final Stopwatch st = Stopwatch.createStarted();
 			            forEachFunctionCombinationOnCell(K,
 			                                             (u, v) -> addToMatrix(integralEvaluation, s, K, v,
 			                                                                   u));
-			            System.out.println(st.elapsed() + " Time Per Cell");
 		            });
 	}
 	

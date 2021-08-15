@@ -116,6 +116,8 @@ public class CoordinateMatrix extends DenseMatrix
 	@Override
 	public CoordinateVector solve(final Vector rhs)
 	{
+		if (entries.length == 2)
+			return inverse().mvMul(rhs);
 		return new CoordinateVector(super.solve(rhs));
 	}
 	

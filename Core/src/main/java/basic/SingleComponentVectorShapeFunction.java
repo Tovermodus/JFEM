@@ -13,12 +13,14 @@ public class SingleComponentVectorShapeFunction<CT extends Cell<CT, FT>, FT exte
 	private final CST componentFunction;
 	private final int component;
 	private int globalIndex;
+	private final int dimension;
 	
-	public SingleComponentVectorShapeFunction(CT supportCell, int polynomialDegree, int localIndex,
-	                                          Class<CST> componentFunctionClass)
+	public SingleComponentVectorShapeFunction(final CT supportCell, final int polynomialDegree, final int localIndex,
+	                                          final Class<CST> componentFunctionClass)
 	{
 		component = (int) (localIndex / Math.pow((polynomialDegree + 1), supportCell.getDimension()));
-		int componentLocalIndex =
+		dimension = supportCell.getDimension();
+		final int componentLocalIndex =
 			(int) (localIndex % Math.pow((polynomialDegree + 1), supportCell.getDimension()));
 		try
 		{
@@ -28,14 +30,15 @@ public class SingleComponentVectorShapeFunction<CT extends Cell<CT, FT>, FT exte
 					                Integer.TYPE,
 					                Integer.TYPE)
 					.newInstance(supportCell, polynomialDegree, componentLocalIndex);
-		} catch (InstantiationException | IllegalAccessException | InvocationTargetException | NoSuchMethodException e)
+		} catch (final InstantiationException | IllegalAccessException | InvocationTargetException | NoSuchMethodException e)
 		{
 			throw new IllegalStateException();
 		}
 	}
 	
-	public SingleComponentVectorShapeFunction(CST componentFunction, int component)
+	public SingleComponentVectorShapeFunction(final CST componentFunction, final int component)
 	{
+		dimension = componentFunction.getDomainDimension();
 		this.component = component;
 		this.componentFunction = componentFunction;
 	}
@@ -53,7 +56,7 @@ public class SingleComponentVectorShapeFunction<CT extends Cell<CT, FT>, FT exte
 	@Override
 	public int getDomainDimension()
 	{
-		return componentFunction.getDomainDimension();
+		return dimension;
 	}
 	
 	@Override
@@ -69,7 +72,7 @@ public class SingleComponentVectorShapeFunction<CT extends Cell<CT, FT>, FT exte
 	}
 	
 	@Override
-	public CoordinateVector valueInCell(CoordinateVector pos, CT cell)
+	public CoordinateVector valueInCell(final CoordinateVector pos, final CT cell)
 	{
 		return CoordinateVector
 			.getUnitVector(getDomainDimension(), component)
@@ -78,7 +81,7 @@ public class SingleComponentVectorShapeFunction<CT extends Cell<CT, FT>, FT exte
 	}
 	
 	@Override
-	public CoordinateMatrix gradientInCell(CoordinateVector pos, CT cell)
+	public CoordinateMatrix gradientInCell(final CoordinateVector pos, final CT cell)
 	{
 		return componentFunction
 			.gradientInCell(pos, cell)
@@ -98,7 +101,7 @@ public class SingleComponentVectorShapeFunction<CT extends Cell<CT, FT>, FT exte
 	}
 	
 	@Override
-	public double divergenceInCell(CoordinateVector pos, CT cell)
+	public double divergenceInCell(final CoordinateVector pos, final CT cell)
 	{
 		return componentFunction.gradientInCell(pos, cell).at(component);
 	}
@@ -110,25 +113,25 @@ public class SingleComponentVectorShapeFunction<CT extends Cell<CT, FT>, FT exte
 	}
 	
 	@Override
-	public double divergence(CoordinateVector pos)
+	public double divergence(final CoordinateVector pos)
 	{
 		return componentFunction.gradient(pos).at(component);
 	}
 	
 	@Override
-	public CoordinateVector curl(CoordinateVector pos)
+	public CoordinateVector curl(final CoordinateVector pos)
 	{
-		CoordinateVector ret = new CoordinateVector(getDomainDimension());
-		CoordinateVector grad = componentFunction.gradient(pos);
-		int compplus1 = (component + 1) % 3;
-		int compplus2 = (component + 2) % 3;
+		final CoordinateVector ret = new CoordinateVector(getDomainDimension());
+		final CoordinateVector grad = componentFunction.gradient(pos);
+		final int compplus1 = (component + 1) % 3;
+		final int compplus2 = (component + 2) % 3;
 		ret.set(grad.at(compplus2), compplus1);
 		ret.set(-grad.at(compplus1), compplus2);
 		return ret;
 	}
 	
 	@Override
-	public CoordinateVector value(CoordinateVector pos)
+	public CoordinateVector value(final CoordinateVector pos)
 	{
 		return CoordinateVector
 			.getUnitVector(getDomainDimension(), component)
@@ -136,7 +139,7 @@ public class SingleComponentVectorShapeFunction<CT extends Cell<CT, FT>, FT exte
 	}
 	
 	@Override
-	public CoordinateMatrix gradient(CoordinateVector pos)
+	public CoordinateMatrix gradient(final CoordinateVector pos)
 	{
 		return componentFunction.gradient(pos).outer(
 			CoordinateVector.getUnitVector(getDomainDimension(), component));
@@ -148,13 +151,14 @@ public class SingleComponentVectorShapeFunction<CT extends Cell<CT, FT>, FT exte
 		return globalIndex;
 	}
 	
-	public void setGlobalIndex(int globalIndex)
+	public void setGlobalIndex(final int globalIndex)
 	{
 		this.globalIndex = globalIndex;
 	}
 	
+	@Override
 	@SuppressWarnings("unchecked")
-	public int compareTo(SingleComponentVectorShapeFunction<CT, FT, CST> o)
+	public int compareTo(final SingleComponentVectorShapeFunction<CT, FT, CST> o)
 	{
 		if (o.getComponent() < getComponent())
 			return 1;

@@ -350,6 +350,12 @@ public class DistortedCell implements CellWithReferenceCell<DistortedCell, Disto
 	}
 	
 	@Override
+	public double diam()
+	{
+		return diam;
+	}
+	
+	@Override
 	public List<DistortedCell> refine(final List<DistortedFace> refinedFaces)
 	{
 		throw new UnsupportedOperationException("not implemented yet");
@@ -563,7 +569,12 @@ public class DistortedCell implements CellWithReferenceCell<DistortedCell, Disto
 	@Override
 	public int hashCode()
 	{
-		return Arrays.stream(vertices).mapToInt(CoordinateVector::hashCode).sum();
+		int hash = 7;
+		for (final CoordinateVector vertex : vertices)
+		{
+			hash += vertex.hashCode();
+		}
+		return hash;
 	}
 	
 	public List<CoordinateVector[]> getSides()

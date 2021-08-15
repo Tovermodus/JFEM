@@ -1,19 +1,18 @@
 package basic;
 
-import com.google.common.collect.Iterables;
 import linalg.CoordinateVector;
 
 import java.util.Map;
 import java.util.Set;
 
-public interface ShapeFunction<CT extends Cell<CT,FT>, FT extends Face<CT,FT>,
-	valueT,	gradientT,
-	hessianT> extends Function<valueT,gradientT,hessianT>
+public interface ShapeFunction<CT extends Cell<CT, FT>, FT extends Face<CT, FT>,
+	valueT, gradientT,
+	hessianT> extends Function<valueT, gradientT, hessianT>
 {
 	@Override
 	default int getDomainDimension()
 	{
-		return Iterables.getLast(getCells()).getDimension();
+		return getCells().iterator().next().getDimension();
 	}
 	
 	Set<CT> getCells();
@@ -28,7 +27,7 @@ public interface ShapeFunction<CT extends Cell<CT,FT>, FT extends Face<CT,FT>,
 	
 	gradientT gradientInCell(CoordinateVector pos, CT cell);
 	
-	default hessianT hessianInCell(CoordinateVector pos, CT cell)
+	default hessianT hessianInCell(final CoordinateVector pos, final CT cell)
 	{
 		throw new UnsupportedOperationException();
 	}
@@ -45,6 +44,5 @@ public interface ShapeFunction<CT extends Cell<CT,FT>, FT extends Face<CT,FT>,
 	
 	valueT normalAverageInDerivative(FT face, CoordinateVector pos);
 	
-	<ST extends ShapeFunction<CT,FT, valueT,gradientT,hessianT>> Map<Integer, Double> prolongate(Set<ST> refinedFunctions);
-	
+	<ST extends ShapeFunction<CT, FT, valueT, gradientT, hessianT>> Map<Integer, Double> prolongate(Set<ST> refinedFunctions);
 }

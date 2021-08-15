@@ -62,7 +62,7 @@ public interface Tensor
 	default double absMaxElement()
 	{
 		final OptionalDouble max =
-			getCoordinateEntryList().values().stream().parallel().mapToDouble(Double::doubleValue).map(
+			getCoordinateEntryList().values().stream().mapToDouble(Double::doubleValue).map(
 				Math::abs).max();
 		if (max.isPresent())
 			return max.getAsDouble();

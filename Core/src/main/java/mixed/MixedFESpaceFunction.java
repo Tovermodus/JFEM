@@ -1,6 +1,7 @@
 package mixed;
 
-import basic.*;
+import basic.ScalarFunction;
+import basic.VectorFunction;
 import linalg.CoordinateMatrix;
 import linalg.CoordinateVector;
 import linalg.Vector;
@@ -10,37 +11,58 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.ConcurrentHashMap;
 
-public class MixedFESpaceFunction<MF extends MixedShapeFunction<?,?,?,?>> extends MixedFunction
+public class MixedFESpaceFunction<MF extends MixedShapeFunction<?, ?, ?, ?>> extends MixedFunction
 {
+	final double diam;
 	private final HashMap<MF, Double> coefficients;
 	Map<MF, Double> pressureCoefficients;
 	Map<MF, Double> velocityCoefficients;
-	public MixedFESpaceFunction(MF[] functions, double[] coefficients)
+	
+	public MixedFESpaceFunction(final MF[] functions, final double[] coefficients)
 	{
 		super();
-		assert(functions.length == coefficients.length);
+		diam = functions[0].getCells()
+		                   .stream()
+		                   .findAny()
+		                   .orElseThrow(() -> new IllegalArgumentException("Function Has No Cells"))
+		                   .diam();
+		assert (functions.length == coefficients.length);
 		this.coefficients = new HashMap<>();
-		for(int i = 0; i < functions.length; i++)
+		for (int i = 0; i < functions.length; i++)
 		{
 			this.coefficients.put(functions[i], coefficients[i]);
 		}
 		initializeFunctionSets();
 	}
-	public MixedFESpaceFunction(Map<Integer, MF> functions, Vector coefficients)
+	
+	public MixedFESpaceFunction(final Map<Integer, MF> functions, final Vector coefficients)
 	{
-		assert(functions.size() == coefficients.size());
+		assert (functions.size() == coefficients.size());
+		diam =
+			functions
+				.values()
+				.stream()
+				.findAny()
+				.orElseThrow(() -> new IllegalArgumentException("Has no Functions"))
+				.getCells()
+				.stream()
+				.findAny()
+				.orElseThrow(() -> new IllegalArgumentException("Function Has No Cells"))
+				.diam();
+		;
 		this.coefficients = new HashMap<>();
-		for(Map.Entry<Integer,MF> function:functions.entrySet())
+		for (final Map.Entry<Integer, MF> function : functions.entrySet())
 		{
 			this.coefficients.put(function.getValue(), coefficients.at(function.getKey()));
 		}
 		initializeFunctionSets();
 	}
+	
 	private void initializeFunctionSets()
 	{
 		pressureCoefficients = new ConcurrentHashMap<>();
 		velocityCoefficients = new ConcurrentHashMap<>();
-		for (MF shapeFunction : coefficients.keySet())
+		for (final MF shapeFunction : coefficients.keySet())
 		{
 			if (shapeFunction.hasPressureFunction())
 				pressureCoefficients.put(shapeFunction, coefficients.get(shapeFunction));
@@ -58,7 +80,7 @@ public class MixedFESpaceFunction<MF extends MixedShapeFunction<?,?,?,?>> extend
 	@Override
 	public ScalarFunction getPressureFunction()
 	{
-		MixedFESpaceFunction<MF> me = this;
+		final MixedFESpaceFunction<MF> me = this;
 		return new ScalarFunction()
 		{
 			@Override
@@ -68,13 +90,13 @@ public class MixedFESpaceFunction<MF extends MixedShapeFunction<?,?,?,?>> extend
 			}
 			
 			@Override
-			public Double value(CoordinateVector pos)
+			public Double value(final CoordinateVector pos)
 			{
 				return me.value(pos).getPressure();
 			}
 			
 			@Override
-			public CoordinateVector gradient(CoordinateVector pos)
+			public CoordinateVector gradient(final CoordinateVector pos)
 			{
 				return me.gradient(pos).getPressureGradient();
 			}
@@ -84,7 +106,7 @@ public class MixedFESpaceFunction<MF extends MixedShapeFunction<?,?,?,?>> extend
 	@Override
 	public VectorFunction getVelocityFunction()
 	{
-		MixedFESpaceFunction<MF> me = this;
+		final MixedFESpaceFunction<MF> me = this;
 		return new VectorFunction()
 		{
 			@Override
@@ -100,12 +122,13 @@ public class MixedFESpaceFunction<MF extends MixedShapeFunction<?,?,?,?>> extend
 			}
 			
 			@Override
-			public CoordinateVector value(CoordinateVector pos)
+			public CoordinateVector value(final CoordinateVector pos)
 			{
 				return me.value(pos).getVelocity();
 			}
+			
 			@Override
-			public CoordinateMatrix gradient(CoordinateVector pos)
+			public CoordinateMatrix gradient(final CoordinateVector pos)
 			{
 				return me.gradient(pos).getVelocityGradient();
 			}
@@ -125,27 +148,50 @@ public class MixedFESpaceFunction<MF extends MixedShapeFunction<?,?,?,?>> extend
 	}
 	
 	@Override
-	public MixedValue value(CoordinateVector pos)
+	public MixedValue value(final CoordinateVector pos)
 	{
-		PressureValue pf = new PressureValue(pressureCoefficients.entrySet().stream().parallel().mapToDouble(entry->entry.getKey().value(pos).getPressure()*entry.getValue()).sum());
-		VelocityValue vf =
-			velocityCoefficients.entrySet().stream().parallel().map(entry->(VelocityValue)(entry.getKey().value(pos)).mul(entry.getValue())).reduce(new VelocityValue(getDomainDimension()), (a,b)->(VelocityValue) (a.add(b)));
-		return pf.add(vf);
-	}
-	@Override
-	public MixedGradient gradient(CoordinateVector pos)
-	{
-		Optional<CoordinateVector> pressureGradient =
-			pressureCoefficients.entrySet().stream().parallel().map(entry->entry.getKey().gradient(pos).getPressureGradient().mul(entry.getValue())).reduce(CoordinateVector::add);
-		PressureGradient pf = new PressureGradient(pos.mul(0));
-		if(pressureGradient.isPresent())
-			pf = new PressureGradient(pressureGradient.get());
-		Optional<CoordinateMatrix> velocityGradient =
-			velocityCoefficients.entrySet().stream().parallel().map(entry->entry.getKey().gradient(pos).getVelocityGradient().mul(entry.getValue())).reduce(CoordinateMatrix::add);
-		VelocityGradient vf = new VelocityGradient(pos.outer(pos).mul(0));
-		if(velocityGradient.isPresent())
-			vf = new VelocityGradient(velocityGradient.get());
+		final PressureValue pf =
+			new PressureValue(pressureCoefficients
+				                  .entrySet()
+				                  .stream()
+				                  .parallel()
+				                  .filter(entry -> entry.getKey().hasPressureFunction())
+				                  .mapToDouble(entry -> entry.getKey().value(pos).getPressure() *
+					                  entry.getValue())
+				                  .sum());
+		final VelocityValue vf =
+			velocityCoefficients.entrySet()
+			                    .stream()
+			                    .parallel()
+			                    .filter(entry -> entry.getKey().hasVelocityFunction())
+			                    .map(entry -> (VelocityValue) (entry.getKey().value(pos)).mul(
+				                    entry.getValue()))
+			                    .reduce(new VelocityValue(getDomainDimension()),
+			                            (a, b) -> (VelocityValue) (a.add(b)));
 		return pf.add(vf);
 	}
 	
+	@Override
+	public MixedGradient gradient(final CoordinateVector pos)
+	{
+		final Optional<CoordinateVector> pressureGradient =
+			pressureCoefficients.entrySet().stream().parallel().map(entry -> entry
+				.getKey()
+				.gradient(pos)
+				.getPressureGradient()
+				.mul(entry.getValue())).reduce(CoordinateVector::add);
+		PressureGradient pf = new PressureGradient(pos.mul(0));
+		if (pressureGradient.isPresent())
+			pf = new PressureGradient(pressureGradient.get());
+		final Optional<CoordinateMatrix> velocityGradient =
+			velocityCoefficients.entrySet().stream().parallel().map(entry -> entry
+				.getKey()
+				.gradient(pos)
+				.getVelocityGradient()
+				.mul(entry.getValue())).reduce(CoordinateMatrix::add);
+		VelocityGradient vf = new VelocityGradient(pos.outer(pos).mul(0));
+		if (velocityGradient.isPresent())
+			vf = new VelocityGradient(velocityGradient.get());
+		return pf.add(vf);
+	}
 }

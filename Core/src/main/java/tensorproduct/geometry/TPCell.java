@@ -112,6 +112,12 @@ public class TPCell implements CellWithReferenceCell<TPCell, TPFace>
 	}
 	
 	@Override
+	public double diam()
+	{
+		return cell1Ds.stream().mapToDouble(Cell1D::length).max().orElse(1);
+	}
+	
+	@Override
 	public List<TPCell> refine(final List<TPFace> refinedFaces)
 	{
 		throw new UnsupportedOperationException();

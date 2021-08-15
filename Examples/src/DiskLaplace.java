@@ -1,7 +1,5 @@
 import basic.PerformanceArguments;
-import basic.PlotWindow;
 import basic.ScalarFESpaceFunction;
-import basic.ScalarPlot2D;
 import distorted.DistortedCellIntegral;
 import distorted.DistortedRightHandSideIntegral;
 import distorted.DistortedShapeFunction;
@@ -20,17 +18,19 @@ public class DiskLaplace
 	{
 		final PerformanceArguments.PerformanceArgumentBuilder builder =
 			new PerformanceArguments.PerformanceArgumentBuilder();
-		builder.parallelizeThreads = true;
+		builder.parallelizeThreads = false;
 		builder.build();
-		int polynomialDegree = 1;
-		final DistortedCellIntegral gradGrad = new DistortedCellIntegral(1, DistortedCellIntegral.GRAD_GRAD, QuadratureRule1D
-			.fromPolynomialDegree(polynomialDegree));
+		final int polynomialDegree = 3;
+		final DistortedCellIntegral gradGrad = new DistortedCellIntegral(1, DistortedCellIntegral.GRAD_GRAD,
+		                                                                 QuadratureRule1D
+			                                                                 .fromPolynomialDegree(
+				                                                                 polynomialDegree));
 		final DistortedRightHandSideIntegral source = new DistortedRightHandSideIntegral(
 			LaplaceReferenceSolution.scalarRightHandSide(),
 			DistortedRightHandSideIntegral.VALUE);
-		final PlotWindow p = new PlotWindow();
+		//final PlotWindow p = new PlotWindow();
 		
-		for (int i = 0; i < 4; i++)
+		for (int i = 0; i < 5; i++)
 		{
 			final DistortedSpace circle = new DistortedSpace(new CoordinateVector(2), 1, i);
 			
@@ -54,17 +54,17 @@ public class DiskLaplace
 			
 			final ScalarFESpaceFunction<DistortedShapeFunction> solutionFunction =
 				new ScalarFESpaceFunction<>(circle.getShapeFunctions(), solution);
-			p.addPlot(new ScalarPlot2D(solutionFunction,
-			                           circle.generatePlotPoints(6 * circle.getCells().size()),
-			                           30));
-			p.addPlot(new ScalarPlot2D(LaplaceReferenceSolution.scalarReferenceSolution(),
-			                           circle.generatePlotPoints(6 * circle.getCells().size()), 30));
-			System.out.println(ConvergenceOrderEstimator.normL2Difference(solutionFunction,
-			                                                              LaplaceReferenceSolution.scalarReferenceSolution(),
-			                                                              circle.generatePlotPoints(6 *
-				                                                                                        circle
-					                                                                                        .getCells()
-					                                                                                        .size())));
+//			p.addPlot(new ScalarPlot2D(solutionFunction,
+//			                           circle.generatePlotPoints(6 * circle.getCells().size()),
+//			                           30));
+//			p.addPlot(new ScalarPlot2D(LaplaceReferenceSolution.scalarReferenceSolution(),
+//			                           circle.generatePlotPoints(6 * circle.getCells().size()), 30));
+//			System.out.println(ConvergenceOrderEstimator.normL2Difference(solutionFunction,
+//			                                                              LaplaceReferenceSolution.scalarReferenceSolution(),
+//			                                                              circle.generatePlotPoints(6 *
+//				                                                                                        circle
+//					                                                                                        .getCells()
+//					                                                                                        .size())));
 		}
 	}
 }

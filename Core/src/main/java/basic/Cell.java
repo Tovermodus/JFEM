@@ -5,17 +5,19 @@ import linalg.CoordinateVector;
 
 import java.util.List;
 
-public interface Cell<CT extends Cell<CT,FT>, FT extends Face<CT,FT>> extends Comparable<CT>
+public interface Cell<CT extends Cell<CT, FT>, FT extends Face<CT, FT>> extends Comparable<CT>
 {
-	int  getDimension();
-	
+	int getDimension();
 	
 	ImmutableSet<FT> getFaces();
 	
-	
 	boolean isInCell(CoordinateVector pos);
+	
 	CoordinateVector center();
+	
 	VectorFunction getOuterNormal(FT face);
+	
+	double diam();
 	
 	default ScalarFunction indicatorFunction()
 	{
@@ -28,17 +30,17 @@ public interface Cell<CT extends Cell<CT,FT>, FT extends Face<CT,FT>> extends Co
 			}
 			
 			@Override
-			public Double value(CoordinateVector pos)
+			public Double value(final CoordinateVector pos)
 			{
-				if(isInCell(pos))
+				if (isInCell(pos))
 					return 1.0;
 				return 0.0;
 			}
 		};
 	}
-	default List<CT> refine(List<FT> refinedFaces)
+	
+	default List<CT> refine(final List<FT> refinedFaces)
 	{
 		throw new UnsupportedOperationException();
 	}
-	
 }
