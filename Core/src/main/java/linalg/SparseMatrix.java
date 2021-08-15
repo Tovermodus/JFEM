@@ -16,7 +16,7 @@ public class SparseMatrix implements MutableMatrix, DirectlySolvable, Decomposab
 	volatile int[] sparseYs;
 	volatile int sparseEntries;
 	
-	public SparseMatrix(int rows, int cols)
+	public SparseMatrix(final int rows, final int cols)
 	{
 		this.rows = rows;
 		this.cols = cols;
@@ -26,7 +26,7 @@ public class SparseMatrix implements MutableMatrix, DirectlySolvable, Decomposab
 		this.sparseEntries = 1;
 	}
 	
-	public SparseMatrix(SparseMatrix m)
+	public SparseMatrix(final SparseMatrix m)
 	{
 		this.rows = m.rows;
 		this.cols = m.cols;
@@ -42,9 +42,9 @@ public class SparseMatrix implements MutableMatrix, DirectlySolvable, Decomposab
 		}
 	}
 	
-	public static SparseMatrix identity(int i)
+	public static SparseMatrix identity(final int i)
 	{
-		SparseMatrix ret = new SparseMatrix(i, i);
+		final SparseMatrix ret = new SparseMatrix(i, i);
 		for (int j = 0; j < i; j++)
 		{
 			ret.add(1, j, j);
@@ -52,21 +52,20 @@ public class SparseMatrix implements MutableMatrix, DirectlySolvable, Decomposab
 		return ret;
 	}
 	
-	
 	@Override
-	public Vector solve(Vector rhs)
+	public Vector solve(final Vector rhs)
 	{
 		return new DenseMatrix(this).solve(rhs);
 	}
 	
 	@Override
-	public Vector solveSymm(Vector rhs)
+	public Vector solveSymm(final Vector rhs)
 	{
 		return new DenseMatrix(this).solveSymm(rhs);
 	}
 	
 	@Override
-	public double at(int... coordinates)
+	public double at(final int... coordinates)
 	{
 		if (PerformanceArguments.getInstance().executeChecks)
 			if (coordinates.length != 2)
@@ -81,33 +80,32 @@ public class SparseMatrix implements MutableMatrix, DirectlySolvable, Decomposab
 		return ret;
 	}
 	
-	public void addSmallMatrixAt(SparseMatrix small, int...coordinates)
+	public void addSmallMatrixAt(final SparseMatrix small, final int... coordinates)
 	{
 		if (PerformanceArguments.getInstance().executeChecks)
 		{
 			if (coordinates.length != 2)
 				throw new IllegalArgumentException("Wrong number of coordinates");
-			if (coordinates[0]+small.getRows() > getRows())
+			if (coordinates[0] + small.getRows() > getRows())
 				throw new IllegalArgumentException("small Matrix too large in y for position");
-			if (coordinates[1]+small.getCols() > getCols())
+			if (coordinates[1] + small.getCols() > getCols())
 				throw new IllegalArgumentException("small Matrix too large in x for position");
 		}
-		for(Map.Entry<IntCoordinates, Double> smallEntry: small.getCoordinateEntryList().entrySet())
+		for (final Map.Entry<IntCoordinates, Double> smallEntry : small.getCoordinateEntryList().entrySet())
 		{
 			add(smallEntry.getValue(), smallEntry.getKey().get(0) + coordinates[0],
-				smallEntry.getKey().get(1) + coordinates[1]);
+			    smallEntry.getKey().get(1) + coordinates[1]);
 		}
-		
 	}
 	
 	private synchronized void resizeSparse()
 	{
-		TreeMap<IntCoordinates, Double> sparseEntriesMap = new TreeMap<>(getCoordinateEntryList());
-		double[] sparseVals = new double[sparseValues.length * 2];
-		int[] sparseX = new int[sparseValues.length * 2];
-		int[] sparseY = new int[sparseValues.length * 2];
+		final TreeMap<IntCoordinates, Double> sparseEntriesMap = new TreeMap<>(getCoordinateEntryList());
+		final double[] sparseVals = new double[sparseValues.length * 2];
+		final int[] sparseX = new int[sparseValues.length * 2];
+		final int[] sparseY = new int[sparseValues.length * 2];
 		int i = 0;
-		for (Map.Entry<IntCoordinates, Double> entry : sparseEntriesMap.entrySet())
+		for (final Map.Entry<IntCoordinates, Double> entry : sparseEntriesMap.entrySet())
 		{
 			sparseVals[i] = entry.getValue();
 			sparseX[i] = entry.getKey().get(1);
@@ -120,13 +118,16 @@ public class SparseMatrix implements MutableMatrix, DirectlySolvable, Decomposab
 		sparseXs = sparseX;
 	}
 	
-	public void deleteRow(int lineCoordinate)
+	@Override
+	public void deleteRow(final int lineCoordinate)
 	{
 		for (int i = 0; i < sparseEntries; i++)
 			if (sparseYs[i] == lineCoordinate)
 				sparseValues[i] = 0;
 	}
-	public void deleteColumn(int lineCoordinate)
+	
+	@Override
+	public void deleteColumn(final int lineCoordinate)
 	{
 		for (int i = 0; i < sparseEntries; i++)
 			if (sparseXs[i] == lineCoordinate)
@@ -134,7 +135,7 @@ public class SparseMatrix implements MutableMatrix, DirectlySolvable, Decomposab
 	}
 	
 	@Override
-	public synchronized void set(double value, int... coordinates)
+	public synchronized void set(final double value, final int... coordinates)
 	{
 		if (PerformanceArguments.getInstance().executeChecks)
 			if (coordinates.length != 2)
@@ -148,15 +149,16 @@ public class SparseMatrix implements MutableMatrix, DirectlySolvable, Decomposab
 	}
 	
 	@Override
-	public synchronized void add(double value, int... coordinates)
+	public synchronized void add(final double value, final int... coordinates)
 	{
 		if (PerformanceArguments.getInstance().executeChecks)
 		{
 			if (coordinates.length != 2)
 				throw new IllegalArgumentException("Wrong number of coordinates");
-			if(coordinates[0] < 0 || coordinates[0] >= getRows())
-				throw new IllegalArgumentException("y coordinate out of bounds");
-			if(coordinates[1] < 0 || coordinates[1] >= getCols())
+			if (coordinates[0] < 0 || coordinates[0] >= getRows())
+				throw new IllegalArgumentException("y coordinate out of bounds" + coordinates[0] + " " +
+					                                   "with rows: " + getRows());
+			if (coordinates[1] < 0 || coordinates[1] >= getCols())
 				throw new IllegalArgumentException("x coordinate out of bounds");
 		}
 		if (sparseEntries >= sparseValues.length - 2)
@@ -168,7 +170,7 @@ public class SparseMatrix implements MutableMatrix, DirectlySolvable, Decomposab
 	}
 	
 	@Override
-	public void addInPlace(Tensor other)
+	public void addInPlace(final Tensor other)
 	{
 		
 		if (PerformanceArguments.getInstance().executeChecks)
@@ -176,20 +178,20 @@ public class SparseMatrix implements MutableMatrix, DirectlySolvable, Decomposab
 				throw new IllegalArgumentException("Incompatible sizes");
 		if (!(other instanceof SparseMatrix))
 		{
-			for (IntCoordinates c : other.getShape().range())
+			for (final IntCoordinates c : other.getShape().range())
 				add(other.at(c), c);
 		} else
 		{
 			for (int i = 0; i < ((SparseMatrix) other).sparseEntries; i++)
 			{
 				add(((SparseMatrix) other).sparseValues[i], ((SparseMatrix) other).sparseYs[i],
-					((SparseMatrix) other).sparseXs[i]);
+				    ((SparseMatrix) other).sparseXs[i]);
 			}
 		}
 	}
 	
 	@Override
-	public void mulInPlace(double scalar)
+	public void mulInPlace(final double scalar)
 	{
 		for (int i = 0; i < sparseEntries; i++)
 		{
@@ -198,7 +200,7 @@ public class SparseMatrix implements MutableMatrix, DirectlySolvable, Decomposab
 	}
 	
 	@Override
-	public Matrix add(Tensor other)
+	public Matrix add(final Tensor other)
 	{
 		if (PerformanceArguments.getInstance().executeChecks)
 			if (!getShape().equals(other.getShape()))
@@ -208,30 +210,30 @@ public class SparseMatrix implements MutableMatrix, DirectlySolvable, Decomposab
 		return add((SparseMatrix) other);
 	}
 	
-	public SparseMatrix add(SparseMatrix other)
+	public SparseMatrix add(final SparseMatrix other)
 	{
 		if (PerformanceArguments.getInstance().executeChecks)
 			if (!getShape().equals(other.getShape()))
 				throw new IllegalArgumentException("Incompatible sizes");
-		SparseMatrix ret = new SparseMatrix(this);
+		final SparseMatrix ret = new SparseMatrix(this);
 		for (int i = 0; i < other.sparseEntries; i++)
 		{
 			ret.add(other.sparseValues[i], other.sparseYs[i],
-				other.sparseXs[i]);
+			        other.sparseXs[i]);
 		}
 		return ret;
 	}
 	
-	public SparseMatrix sub(SparseMatrix other)
+	public SparseMatrix sub(final SparseMatrix other)
 	{
 		if (PerformanceArguments.getInstance().executeChecks)
 			if (!getShape().equals(other.getShape()))
 				throw new IllegalArgumentException("Incompatible sizes");
-		SparseMatrix ret = new SparseMatrix(this);
+		final SparseMatrix ret = new SparseMatrix(this);
 		for (int i = 0; i < other.sparseEntries; i++)
 		{
 			ret.add(-other.sparseValues[i], other.sparseYs[i],
-				other.sparseXs[i]);
+			        other.sparseXs[i]);
 		}
 		return ret;
 	}
@@ -239,10 +241,10 @@ public class SparseMatrix implements MutableMatrix, DirectlySolvable, Decomposab
 	@Override
 	public ImmutableMap<IntCoordinates, Double> getCoordinateEntryList()
 	{
-		Map<IntCoordinates, Double> list = new HashMap<>();
+		final Map<IntCoordinates, Double> list = new HashMap<>();
 		for (int i = 0; i < sparseEntries; i++)
 		{
-			IntCoordinates coordinates = new IntCoordinates(sparseYs[i], sparseXs[i]);
+			final IntCoordinates coordinates = new IntCoordinates(sparseYs[i], sparseXs[i]);
 			double value = sparseValues[i];
 			if (list.containsKey(coordinates))
 			{
@@ -254,9 +256,9 @@ public class SparseMatrix implements MutableMatrix, DirectlySolvable, Decomposab
 	}
 	
 	@Override
-	public SparseMatrix mul(double scalar)
+	public SparseMatrix mul(final double scalar)
 	{
-		SparseMatrix ret = new SparseMatrix(this);
+		final SparseMatrix ret = new SparseMatrix(this);
 		for (int i = 0; i < sparseEntries; i++)
 		{
 			ret.sparseValues[i] *= scalar;
@@ -265,12 +267,12 @@ public class SparseMatrix implements MutableMatrix, DirectlySolvable, Decomposab
 	}
 	
 	@Override
-	public List<Vector> unfoldDimension(int dimension)
+	public List<Vector> unfoldDimension(final int dimension)
 	{
 		if (PerformanceArguments.getInstance().executeChecks)
 			if (dimension > 1)
 				throw new IllegalArgumentException("Matrix is two dimensional");
-		List<Vector> ret = new ArrayList<>(getShape().get(dimension));
+		final List<Vector> ret = new ArrayList<>(getShape().get(dimension));
 		for (int i = 0; i < getShape().get(dimension); i++)
 			ret.add(new DenseVector(getShape().get(1 - dimension)));
 		if (dimension == 0)
@@ -304,7 +306,7 @@ public class SparseMatrix implements MutableMatrix, DirectlySolvable, Decomposab
 	@Override
 	public SparseMatrix transpose()
 	{
-		SparseMatrix ret = new SparseMatrix(cols, rows);
+		final SparseMatrix ret = new SparseMatrix(cols, rows);
 		ret.sparseEntries = sparseEntries;
 		ret.sparseValues = sparseValues.clone();
 		ret.sparseXs = sparseYs.clone();
@@ -313,59 +315,59 @@ public class SparseMatrix implements MutableMatrix, DirectlySolvable, Decomposab
 	}
 	
 	@Override
-	public Vector mvMul(Vector vector)
+	public Vector mvMul(final Vector vector)
 	{
 		if (PerformanceArguments.getInstance().executeChecks)
 			if (getCols() != (vector.getLength()))
 				throw new IllegalArgumentException("Incompatible sizes");
-		DenseVector ret = new DenseVector(getRows());
+		final DenseVector ret = new DenseVector(getRows());
 		for (int i = 0; i < sparseEntries; i++)
 			ret.add(sparseValues[i] * vector.at(sparseXs[i]), sparseYs[i]);
 		return ret;
-		
 	}
 	
 	@Override
-	public Vector tvMul(Vector vector)
+	public Vector tvMul(final Vector vector)
 	{
 		if (PerformanceArguments.getInstance().executeChecks)
 			if (getCols() != (vector.getLength()))
 				throw new IllegalArgumentException("Incompatible sizes");
-		DenseVector ret = new DenseVector(getCols());
+		final DenseVector ret = new DenseVector(getCols());
 		for (int i = 0; i < sparseEntries; i++)
 			ret.add(sparseValues[i] * vector.at(sparseYs[i]), sparseXs[i]);
 		return ret;
-		
 	}
 	
 	@Override
-	public DirectlySolvable mmMul(Matrix matrix)
+	public DirectlySolvable mmMul(final Matrix matrix)
 	{
 		if (PerformanceArguments.getInstance().executeChecks)
 			if (getCols() != (matrix.getRows()))
 				throw new IllegalArgumentException("Incompatible sizes");
-		if(! (matrix instanceof  SparseMatrix))
+		if (!(matrix instanceof SparseMatrix))
 			return (new DenseMatrix(this)).mmMul(matrix);
-		SparseMatrix ret = new SparseMatrix(getRows(), matrix.getCols());
-		IntStream stream = IntStream.range(0,sparseEntries);
-		if(PerformanceArguments.getInstance().parallelizeThreads)
+		final SparseMatrix ret = new SparseMatrix(getRows(), matrix.getCols());
+		IntStream stream = IntStream.range(0, sparseEntries);
+		if (PerformanceArguments.getInstance().parallelizeThreads)
 			stream = stream.parallel();
 		stream.forEach(i ->
-		{
-			for (int j = 0; j < ((SparseMatrix) matrix).sparseEntries; j++)
-			{
-				if (sparseXs[i] == ((SparseMatrix) matrix).sparseYs[j])
-					ret.add(sparseValues[i] * ((SparseMatrix) matrix).sparseValues[j], sparseYs[i],
-						((SparseMatrix) matrix).sparseXs[j]);
-			}
-		});
+		               {
+			               for (int j = 0; j < ((SparseMatrix) matrix).sparseEntries; j++)
+			               {
+				               if (sparseXs[i] == ((SparseMatrix) matrix).sparseYs[j])
+					               ret.add(sparseValues[i] *
+						                       ((SparseMatrix) matrix).sparseValues[j],
+					                       sparseYs[i],
+					                       ((SparseMatrix) matrix).sparseXs[j]);
+			               }
+		               });
 		return ret;
 	}
 	
 	@Override
 	public SparseMatrix getLowerTriangleMatrix()
 	{
-		SparseMatrix mat = new SparseMatrix(getRows(), getCols());
+		final SparseMatrix mat = new SparseMatrix(getRows(), getCols());
 		for (int i = 0; i < sparseEntries; i++)
 		{
 			if (sparseYs[i] > sparseXs[i])
@@ -377,7 +379,7 @@ public class SparseMatrix implements MutableMatrix, DirectlySolvable, Decomposab
 	@Override
 	public SparseMatrix getUpperTriangleMatrix()
 	{
-		SparseMatrix mat = new SparseMatrix(getRows(), getCols());
+		final SparseMatrix mat = new SparseMatrix(getRows(), getCols());
 		for (int i = 0; i < sparseEntries; i++)
 		{
 			if (sparseYs[i] < sparseXs[i])
@@ -387,7 +389,7 @@ public class SparseMatrix implements MutableMatrix, DirectlySolvable, Decomposab
 	}
 	
 	@Override
-	public boolean almostEqual(Tensor other)
+	public boolean almostEqual(final Tensor other)
 	{
 		if (PerformanceArguments.getInstance().executeChecks)
 		{
@@ -396,17 +398,21 @@ public class SparseMatrix implements MutableMatrix, DirectlySolvable, Decomposab
 		}
 		if (!(other instanceof SparseMatrix))
 			return other.almostEqual(this);
-		ImmutableMap<IntCoordinates, Double> myValues = getCoordinateEntryList();
-		ImmutableMap<IntCoordinates, Double> otherValues = other.getCoordinateEntryList();
-		double absmax = absMaxElement() + other.absMaxElement();
-		for (Map.Entry<IntCoordinates, Double> entry : myValues.entrySet())
+		final ImmutableMap<IntCoordinates, Double> myValues = getCoordinateEntryList();
+		final ImmutableMap<IntCoordinates, Double> otherValues = other.getCoordinateEntryList();
+		final double absmax = absMaxElement() + other.absMaxElement();
+		for (final Map.Entry<IntCoordinates, Double> entry : myValues.entrySet())
 		{
 			if (otherValues.containsKey(entry.getKey()))
 			{
-				if (!DoubleCompare.almostEqualAfterOps(entry.getValue(), otherValues.get(entry.getKey()),
-					absmax*10, sparseEntries))
+				if (!DoubleCompare.almostEqualAfterOps(entry.getValue(),
+				                                       otherValues.get(entry.getKey()),
+				                                       absmax * 10, sparseEntries))
 				{
-					System.out.println(entry.getValue() + " != " + otherValues.get(entry.getKey()) +" difference: " + Math.abs(entry.getValue() - otherValues.get(entry.getKey())) + " at " + entry.getKey() + " out of " + getShape());
+					System.out.println(entry.getValue() + " != " + otherValues.get(entry.getKey()) +
+						                   " difference: " + Math.abs(
+						entry.getValue() - otherValues.get(entry.getKey())) + " at " +
+						                   entry.getKey() + " out of " + getShape());
 					return false;
 				}
 			} else
@@ -415,13 +421,13 @@ public class SparseMatrix implements MutableMatrix, DirectlySolvable, Decomposab
 				return false;
 			}
 		}
-		if(otherValues.size() != myValues.size())
+		if (otherValues.size() != myValues.size())
 			System.out.println("matrices have different numbers of values");
 		return otherValues.size() == myValues.size();
 	}
 	
 	@Override
-	public boolean equals(Object obj)
+	public boolean equals(final Object obj)
 	{
 		if (!(obj instanceof Matrix))
 			return false;
@@ -437,7 +443,7 @@ public class SparseMatrix implements MutableMatrix, DirectlySolvable, Decomposab
 	@Override
 	public SparseMatrix getDiagonalMatrix()
 	{
-		SparseMatrix mat = new SparseMatrix(getRows(), getCols());
+		final SparseMatrix mat = new SparseMatrix(getRows(), getCols());
 		for (int i = 0; i < sparseEntries; i++)
 		{
 			if (sparseYs[i] == sparseXs[i])

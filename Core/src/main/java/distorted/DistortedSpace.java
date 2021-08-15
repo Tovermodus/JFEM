@@ -6,7 +6,6 @@ import linalg.CoordinateMatrix;
 import linalg.CoordinateVector;
 import tensorproduct.TPShapeFunction;
 
-import java.util.HashSet;
 import java.util.TreeSet;
 
 /*
@@ -31,8 +30,9 @@ public class DistortedSpace extends CircleGridSpace<DistortedShapeFunction, Doub
 				final DistortedShapeFunction function = new DistortedShapeFunction(cell,
 				                                                                   polynomialDegree,
 				                                                                   localIndex);
-				function.setGlobalIndex(shapeFunctions.size());
-				shapeFunctions.add(function);
+				if (shapeFunctions.add(function))
+					function.setGlobalIndex(shapeFunctions.size()-1);
+				
 				for (final DistortedCell c : function.getCells())
 					supportOnCell.put(c, function);
 				for (final DistortedFace f : function.getFaces())

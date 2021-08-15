@@ -4,7 +4,6 @@ import basic.CellIntegral;
 import basic.Function;
 import basic.ScalarFunction;
 import distorted.geometry.DistortedCell;
-import linalg.CoordinateMatrix;
 import linalg.CoordinateVector;
 import linalg.IntCoordinates;
 import tensorproduct.QuadratureRule1D;
@@ -16,6 +15,7 @@ public class DistortedCellIntegral extends CellIntegral<DistortedCell, Distorted
 {
 	
 	public static final String GRAD_GRAD = "GradGrad";
+	public static final String VALUE_VALUE = "ValueValue";
 	
 	public DistortedCellIntegral(final double weight, final String name, final QuadratureRule1D quadratureRule1D)
 	{
@@ -36,6 +36,8 @@ public class DistortedCellIntegral extends CellIntegral<DistortedCell, Distorted
 	{
 		super(weight, name, quadratureRule1D);
 		if (name.equals(GRAD_GRAD) && !(weight.defaultValue() instanceof Double))
+			throw new IllegalArgumentException();
+		if (name.equals(VALUE_VALUE) && !(weight.defaultValue() instanceof Double))
 			throw new IllegalArgumentException();
 	}
 	
@@ -72,7 +74,7 @@ public class DistortedCellIntegral extends CellIntegral<DistortedCell, Distorted
 			}
 			val = eval.applyAsDouble(quadraturePoint)
 				* Math.abs(cell.transformationGradientFromReferenceCell(quadraturePoint)
-				      .determinant());
+				               .determinant());
 			for (int i = 0; i < cell.getDimension(); i++)
 				val *= pointsWeights[i][1][c.get(i)];
 			ret += val;
@@ -86,18 +88,23 @@ public class DistortedCellIntegral extends CellIntegral<DistortedCell, Distorted
 		if (name.equals(GRAD_GRAD))
 		{
 			return integrateOnReferenceCell(x ->
-			                                {
-				                                final CoordinateMatrix transformationGradient =
-					                                cell.transformationGradientToReferenceCell(x);
-				                                return transformationGradient
-					                                .tvMul(shapeFunction1.gradientOnReferenceCell(x,
-					                                                                              cell))
-					                                .inner(transformationGradient.tvMul(
-						                                shapeFunction2.gradientOnReferenceCell(
-							                                x, cell))) *
+				                                shapeFunction1.gradientOnReferenceCell(x, cell)
+				                                              .inner(shapeFunction2
+					                                                     .gradientOnReferenceCell(
+						                                                     x, cell)) *
 					                                (Double) weight.value(
-						                                cell.transformFromReferenceCell(x));
-			                                },
+						                                cell.transformFromReferenceCell(x)),
+			                                cell,
+			                                quadratureRule1D);
+		}
+		if (name.equals(VALUE_VALUE))
+		{
+			return integrateOnReferenceCell(x ->
+				                                shapeFunction1.valueOnReferenceCell(x, cell)
+					                                * (shapeFunction2.valueOnReferenceCell(x, cell))
+					                                * (Double) weight.value(
+					                                cell.transformFromReferenceCell(
+						                                x)),
 			                                cell,
 			                                quadratureRule1D);
 		} else throw new IllegalArgumentException("Name unknown");

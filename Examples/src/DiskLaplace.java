@@ -9,6 +9,7 @@ import distorted.DistortedSpace;
 import linalg.CoordinateVector;
 import linalg.IterativeSolver;
 import linalg.Vector;
+import tensorproduct.QuadratureRule1D;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -21,7 +22,9 @@ public class DiskLaplace
 			new PerformanceArguments.PerformanceArgumentBuilder();
 		builder.parallelizeThreads = true;
 		builder.build();
-		final DistortedCellIntegral gradGrad = new DistortedCellIntegral(1, DistortedCellIntegral.GRAD_GRAD);
+		int polynomialDegree = 1;
+		final DistortedCellIntegral gradGrad = new DistortedCellIntegral(1, DistortedCellIntegral.GRAD_GRAD, QuadratureRule1D
+			.fromPolynomialDegree(polynomialDegree));
 		final DistortedRightHandSideIntegral source = new DistortedRightHandSideIntegral(
 			LaplaceReferenceSolution.scalarRightHandSide(),
 			DistortedRightHandSideIntegral.VALUE);
@@ -33,7 +36,7 @@ public class DiskLaplace
 			
 			System.out.println("Cells done");
 			circle.assembleCells();
-			circle.assembleFunctions(2);
+			circle.assembleFunctions(polynomialDegree);
 			circle.initializeSystemMatrix();
 			circle.initializeRhs();
 			System.out.println("System Initialized");

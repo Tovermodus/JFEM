@@ -23,11 +23,11 @@ public class CircularGrid
 			ScalarFunction.constantFunction(1),
 			DistortedRightHandSideIntegral.VALUE);
 		
-		final DistortedSpace circle = new DistortedSpace(new CoordinateVector(2), 1, 3);
+		final DistortedSpace circle = new DistortedSpace(new CoordinateVector(2), 1, 1);
 		
 		System.out.println("Cells done");
 		circle.assembleCells();
-		circle.assembleFunctions(3);
+		circle.assembleFunctions(1);
 		circle.initializeSystemMatrix();
 		circle.initializeRhs();
 		System.out.println("System Initialized");
