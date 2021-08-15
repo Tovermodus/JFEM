@@ -190,6 +190,11 @@ public class DistortedCell implements CellWithReferenceCell<DistortedCell, Disto
 			throw new IllegalStateException("No vertices");
 		if (!DoubleCompare.almostEqual(vertices[0].inner(rating), min))
 		{
+			System.out.println(Arrays.toString(vertices));
+			System.out.println(Arrays.toString(Arrays
+				                                   .stream(vertices)
+				                                   .mapToDouble(rating::inner)
+				                                   .toArray()));
 			System.out.println("min wrong" + min + " " + vertices[0].inner(rating));
 			return false;
 		}

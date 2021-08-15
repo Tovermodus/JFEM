@@ -50,7 +50,7 @@ public class DoubleCompare
 		d += PerformanceArguments.getInstance().doubleTolerance * 13719 * (Math.abs(d) + 1);
 		final double normalized =
 			Math.signum(d) * d * d /
-				((int) d * d + 1) + 1. / 7 * PerformanceArguments.getInstance().doubleTolerance;
-		return (int) (normalized * 2623.7);
+				((int) d * d + 1) + 1000. / 7 * PerformanceArguments.getInstance().doubleTolerance;
+		return (int) (normalized * 2317.7);
 	}
 }

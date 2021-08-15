@@ -7,6 +7,7 @@ import linalg.CoordinateVector;
 import tensorproduct.TPShapeFunction;
 
 import java.util.HashSet;
+import java.util.TreeSet;
 
 /*
 Workflow of this finite element is: first generate 1D cells, then
@@ -21,7 +22,7 @@ public class DistortedSpace extends CircleGridSpace<DistortedShapeFunction, Doub
 	@Override
 	public void assembleFunctions(final int polynomialDegree)
 	{
-		shapeFunctions = new HashSet<>();
+		shapeFunctions = new TreeSet<>();
 		for (final DistortedCell cell : grid.cells)
 		{
 			for (int localIndex = 0; localIndex < TPShapeFunction.functionsPerCell(polynomialDegree,

@@ -29,6 +29,7 @@ public class CircleGrid
 		Collection<DistortedFace> genFaces = generateFaces(refinedCells);
 		for (int i = 0; i < refinements; i++)
 		{
+			System.out.println("refine");
 			refinedCells = refineCells(refinedCells);
 			genFaces = refineFaces(refinedCells);
 			for (final DistortedFace f : genFaces)
@@ -268,13 +269,13 @@ public class CircleGrid
 			final DistortedFace left = cell.getFaceFromVertexNumbers(3, 0);
 			CoordinateVector leftCenter = left.center();
 			if (bottom.isBoundaryFace())
-				bottomCenter = bottomCenter.normalize().mul(radius);
+				bottomCenter = centerPoint.add(bottomCenter.sub(centerPoint).normalize()).mul(radius);
 			if (right.isBoundaryFace())
-				rightCenter = rightCenter.normalize().mul(radius);
+				rightCenter = centerPoint.add(rightCenter.sub(centerPoint).normalize()).mul(radius);
 			if (top.isBoundaryFace())
-				topCenter = topCenter.normalize().mul(radius);
+				topCenter = centerPoint.add(topCenter.sub(centerPoint).normalize()).mul(radius);
 			if (left.isBoundaryFace())
-				leftCenter = leftCenter.normalize().mul(radius);
+				leftCenter = centerPoint.add(leftCenter.sub(centerPoint).normalize()).mul(radius);
 			final CoordinateVector center = mean(bottomCenter, rightCenter, topCenter, leftCenter);
 //			System.out.println(cell);
 //			System.out.println(bottom);

@@ -47,6 +47,12 @@ public class CoordinateMatrix extends DenseMatrix
 	}
 	
 	@Override
+	public CoordinateVector tvMul(Vector vector)
+	{
+		return new CoordinateVector(super.tvMul(vector));
+	}
+	
+	@Override
 	public CoordinateMatrix add(Tensor other)
 	{
 		if(PerformanceArguments.getInstance().executeChecks)
