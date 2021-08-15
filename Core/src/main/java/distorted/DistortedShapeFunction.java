@@ -1,9 +1,9 @@
 package distorted;
 
 import basic.DoubleCompare;
-import basic.FastEvaluatedScalarShapeFunction;
 import basic.LagrangeNodeFunctional;
 import basic.PerformanceArguments;
+import basic.ScalarShapeFunction;
 import distorted.geometry.DistortedCell;
 import distorted.geometry.DistortedFace;
 import linalg.CoordinateVector;
@@ -13,7 +13,7 @@ import tensorproduct.geometry.TPFace;
 
 import java.util.*;
 
-public class DistortedShapeFunction implements FastEvaluatedScalarShapeFunction<DistortedCell, DistortedFace>,
+public class DistortedShapeFunction implements ScalarShapeFunction<DistortedCell, DistortedFace>,
 	Comparable<DistortedShapeFunction>
 
 {
@@ -77,7 +77,7 @@ public class DistortedShapeFunction implements FastEvaluatedScalarShapeFunction<
 	}
 	
 	@Override
-	public double fastValueInCell(final CoordinateVector pos, final DistortedCell cell)
+	public Double valueInCell(final CoordinateVector pos, final DistortedCell cell)
 	{
 		return valueOnReferenceCell(cell.transformToReferenceCell(pos), cell);
 	}
@@ -93,16 +93,6 @@ public class DistortedShapeFunction implements FastEvaluatedScalarShapeFunction<
 		if (shapeFunctionsOnCell.containsKey(cell))
 			return shapeFunctionsOnCell.get(cell).fastValue(pos);
 		return 0;
-	}
-	
-	public double[] fastGradientOnReferenceCell(final CoordinateVector pos, final DistortedCell cell)
-	{
-		if (PerformanceArguments.getInstance().executeChecks)
-			if (!cell.getReferenceCell().isInCell(pos))
-				throw new IllegalArgumentException("pos is not in cell");
-		if (shapeFunctionsOnCell.containsKey(cell))
-			return shapeFunctionsOnCell.get(cell).fastGradient(pos);
-		return new double[pos.getLength()];
 	}
 	
 	public LagrangeNodeFunctional nodeFunctionalOnReferenceCell(final DistortedCell cell)
@@ -121,9 +111,9 @@ public class DistortedShapeFunction implements FastEvaluatedScalarShapeFunction<
 	}
 	
 	@Override
-	public double[] fastGradientInCell(final CoordinateVector pos, final DistortedCell cell)
+	public CoordinateVector gradientInCell(final CoordinateVector pos, final DistortedCell cell)
 	{
-		return fastGradientOnReferenceCell(cell.transformToReferenceCell(pos), cell);
+		return gradientOnReferenceCell(cell.transformToReferenceCell(pos), cell);
 	}
 	
 	@Override

@@ -13,9 +13,9 @@ public class Newton
 		{
 			final CoordinateVector fx =
 				function.value(iterate).sub(rhs);
-			System.out.println(iterate + "\tit");
-			System.out.println(function.gradient(iterate));
-			System.out.println(fx.absMaxElement() + "\tfx");
+//			System.out.println(iterate + "\tit");
+//			System.out.println(function.gradient(iterate));
+//			System.out.println(fx.absMaxElement() + "\tfx");
 			if (fx.almostZero())
 			{
 				return iterate;
@@ -29,10 +29,10 @@ public class Newton
 				return iterate;
 			}
 			int backtrs = 0;
-			while (function.value(iterate.sub(step)).absMaxElement() > fx.absMaxElement() && backtrs < 0)
+			while (function.value(iterate.sub(step)).absMaxElement() > fx.absMaxElement() && backtrs < 1)
 			{
-				System.out.println(function.value(iterate.sub(step)).absMaxElement() + "\tlarge");
-				step.mulInPlace(0.5);
+				//System.out.println(function.value(iterate.sub(step)).absMaxElement() + "\tlarge");
+				step.mulInPlace(0.3);
 				backtrs++;
 			}
 			iterate.subInPlace(step);

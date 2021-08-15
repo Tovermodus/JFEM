@@ -19,9 +19,9 @@ public class CircleGrid
 	public ImmutableSet<DistortedCell> cells;
 	public ImmutableSet<DistortedFace> faces;
 	
-	public CircleGrid(final int dimension, final CoordinateVector centerPoint, final double radius, final int refinements)
+	public CircleGrid(final CoordinateVector centerPoint, final double radius, final int refinements)
 	{
-		this.dimension = dimension;
+		this.dimension = centerPoint.getLength();
 		this.centerPoint = centerPoint;
 		this.radius = radius;
 		
@@ -298,11 +298,9 @@ public class CircleGrid
 	
 	public List<CoordinateVector> generatePlotPoints(final int resolution)
 	{
-		final int totalPoints = (int) Math.pow(resolution, dimension);
-		final int pointsPerCell = totalPoints / cells.size();
-		final int pointsPerDirectionPerCell = (int) (Math.pow(pointsPerCell, 1. / dimension));
+		final int pointsPerCell = resolution / cells.size();
 		final List<CoordinateVector> ret = new ArrayList<>();
-		final IntCoordinates pointsPerDimension = IntCoordinates.repeat(pointsPerDirectionPerCell, dimension);
+		final IntCoordinates pointsPerDimension = IntCoordinates.repeat(pointsPerCell, dimension);
 		for (final DistortedCell cell : cells)
 		{
 			ret.addAll(pointsPerDimension
@@ -313,7 +311,7 @@ public class CircleGrid
 					                final CoordinateVector coords = new CoordinateVector(dimension);
 					                for (int i = 0; i < dimension; i++)
 					                {
-						                coords.set(1. / (pointsPerDirectionPerCell - 1) *
+						                coords.set(1. / (pointsPerCell - 1) *
 							                           (c.get(i)), i);
 					                }
 					                return coords;

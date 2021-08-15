@@ -14,33 +14,32 @@ import tensorproduct.geometry.TPFace;
 import java.util.List;
 import java.util.function.ToDoubleFunction;
 
-public class TPCellIntegral<ST extends ScalarShapeFunction<TPCell, TPFace>> extends CellIntegral<TPCell,ST>
+public class TPCellIntegral<ST extends ScalarShapeFunction<TPCell, TPFace>> extends CellIntegral<TPCell, ST>
 {
 	public static final String GRAD_GRAD = "GradGrad";
 	public static final String VALUE_VALUE = "ValueValue";
 	public static final String GRAD_VALUE = "GradValue";
 	public static final String VALUE_GRAD = "ValueGrad";
 	public static final String H1 = "H1";
-	public final QuadratureRule1D quadratureRule1D;
 	
-	public TPCellIntegral(double weight, String name, QuadratureRule1D quadratureRule1D)
+	public TPCellIntegral(final double weight, final String name, final QuadratureRule1D quadratureRule1D)
 	{
 		this(ScalarFunction.constantFunction(weight), name, quadratureRule1D);
 	}
-	public TPCellIntegral(double weight, String name)
+	
+	public TPCellIntegral(final double weight, final String name)
 	{
 		this(ScalarFunction.constantFunction(weight), name);
 	}
 	
-	public TPCellIntegral(Function<?, ?, ?> weight, String name)
+	public TPCellIntegral(final Function<?, ?, ?> weight, final String name)
 	{
 		this(weight, name, QuadratureRule1D.Gauss5);
 	}
 	
-	public TPCellIntegral(Function<?, ?, ?> weight, String name, QuadratureRule1D quadratureRule1D)
+	public TPCellIntegral(final Function<?, ?, ?> weight, final String name, final QuadratureRule1D quadratureRule1D)
 	{
 		super(weight, name, quadratureRule1D);
-		this.quadratureRule1D = quadratureRule1D;
 		if (name.equals(GRAD_GRAD) && !(weight.defaultValue() instanceof Double))
 			throw new IllegalArgumentException();
 		if (name.equals(H1) && !(weight.defaultValue() instanceof Double))
@@ -51,18 +50,16 @@ public class TPCellIntegral<ST extends ScalarShapeFunction<TPCell, TPFace>> exte
 			throw new IllegalArgumentException();
 		if (name.equals(VALUE_GRAD) && !(weight.defaultValue() instanceof Vector))
 			throw new IllegalArgumentException();
-		
 	}
 	
-	public TPCellIntegral(String name)
+	public TPCellIntegral(final String name)
 	{
 		this(name, QuadratureRule1D.Gauss5);
 	}
 	
-	public TPCellIntegral(String name, QuadratureRule1D quadratureRule1D)
+	public TPCellIntegral(final String name, final QuadratureRule1D quadratureRule1D)
 	{
 		super(name, quadratureRule1D);
-		this.quadratureRule1D = quadratureRule1D;
 		if (name.equals(GRAD_GRAD) && !(weight.defaultValue() instanceof Double))
 			throw new IllegalArgumentException();
 		if (name.equals(H1) && !(weight.defaultValue() instanceof Double))
@@ -75,17 +72,17 @@ public class TPCellIntegral<ST extends ScalarShapeFunction<TPCell, TPFace>> exte
 			throw new IllegalArgumentException();
 	}
 	
-	public static double integrateNonTensorProduct(ToDoubleFunction<CoordinateVector> eval, List<Cell1D> cells,
-	                                               QuadratureRule1D quadratureRule)
+	public static double integrateNonTensorProduct(final ToDoubleFunction<CoordinateVector> eval, final List<Cell1D> cells,
+	                                               final QuadratureRule1D quadratureRule)
 	{
 		double ret = 0;
 		double val;
-		CoordinateVector quadraturePoint = new CoordinateVector(cells.size());
-		double[][][] pointsWeights = new double[cells.size()][2][quadratureRule.length()];
+		final CoordinateVector quadraturePoint = new CoordinateVector(cells.size());
+		final double[][][] pointsWeights = new double[cells.size()][2][quadratureRule.length()];
 		for (int j = 0; j < cells.size(); j++)
 			pointsWeights[j] = cells.get(j).distributeQuadrature(quadratureRule);
-		IntCoordinates quadraturePointSize = IntCoordinates.repeat(quadratureRule.length(), cells.size());
-		for (IntCoordinates c : quadraturePointSize.range())
+		final IntCoordinates quadraturePointSize = IntCoordinates.repeat(quadratureRule.length(), cells.size());
+		for (final IntCoordinates c : quadraturePointSize.range())
 		{
 			for (int i = 0; i < c.getDimension(); i++)
 			{
@@ -99,53 +96,56 @@ public class TPCellIntegral<ST extends ScalarShapeFunction<TPCell, TPFace>> exte
 		return ret;
 	}
 	
-	public static double integrateNonTensorProduct(ToDoubleFunction<CoordinateVector> eval, TPCell cell,
-	                                               QuadratureRule1D quadratureRule)
+	public static double integrateNonTensorProduct(final ToDoubleFunction<CoordinateVector> eval, final TPCell cell,
+	                                               final QuadratureRule1D quadratureRule)
 	{
-		List<Cell1D> cells = cell.getComponentCells();
+		final List<Cell1D> cells = cell.getComponentCells();
 		return integrateNonTensorProduct(eval, cells, quadratureRule);
 	}
 	
 	@Override
-	public double evaluateCellIntegral(TPCell cell, ST shapeFunction1,
-	                                   ST shapeFunction2)
+	public double evaluateCellIntegral(final TPCell cell, final ST shapeFunction1,
+	                                   final ST shapeFunction2)
 	{
 		if (name.equals(GRAD_GRAD))
 		{
-			return integrateNonTensorProduct(x -> shapeFunction1.gradient(x).inner(shapeFunction2.gradient(x))
-				* (Double) weight.value(x),
-				cell,
-				quadratureRule1D);
+			return integrateNonTensorProduct(x -> shapeFunction1
+				                                 .gradient(x)
+				                                 .inner(shapeFunction2.gradient(x))
+				                                 * (Double) weight.value(x),
+			                                 cell,
+			                                 quadratureRule1D);
 		}
 		if (name.equals(H1))
 		{
 			return integrateNonTensorProduct(x -> (shapeFunction1.value(x) * shapeFunction2.value(x)
-				+ shapeFunction1.gradient(x).inner(shapeFunction2.gradient(x)))
-				* (Double) weight.value(x),
-				cell,
-				quadratureRule1D);
+				                                       + shapeFunction1.gradient(x).inner(
+				shapeFunction2.gradient(x)))
+				                                 * (Double) weight.value(x),
+			                                 cell,
+			                                 quadratureRule1D);
 		}
 		if (name.equals(VALUE_VALUE))
 		{
 			return integrateNonTensorProduct(x -> shapeFunction1.value(x)
-				* shapeFunction2.value(x)
-				* (Double) weight.value(x),
-				cell,
-				quadratureRule1D);
+				                                 * shapeFunction2.value(x)
+				                                 * (Double) weight.value(x),
+			                                 cell,
+			                                 quadratureRule1D);
 		}
 		if (name.equals(GRAD_VALUE))
 		{
 			return integrateNonTensorProduct(x -> shapeFunction1.gradient(x).inner((Vector) weight.value(x))
-				* shapeFunction2.value(x),
-				cell,
-				quadratureRule1D);
+				                                 * shapeFunction2.value(x),
+			                                 cell,
+			                                 quadratureRule1D);
 		}
 		if (name.equals(VALUE_GRAD))
 		{
 			return integrateNonTensorProduct(x -> shapeFunction2.gradient(x).inner((Vector) weight.value(x))
-				* shapeFunction1.value(x),
-				cell,
-				quadratureRule1D);
+				                                 * shapeFunction1.value(x),
+			                                 cell,
+			                                 quadratureRule1D);
 		}
 		throw new UnsupportedOperationException("unknown integral name");
 	}

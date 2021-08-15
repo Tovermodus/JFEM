@@ -17,7 +17,7 @@ public class DistortedShapeFunctionTest
 	{
 		for (int j = 0; j < 4; j++)
 		{
-			final CircleGrid circle = new CircleGrid(2, new CoordinateVector(2), 1,
+			final CircleGrid circle = new CircleGrid(new CoordinateVector(2), 1,
 			                                         j);
 			System.out.println(circle.faces.size());
 			System.out.println(circle.cells.size());
@@ -41,7 +41,7 @@ public class DistortedShapeFunctionTest
 	{
 		for (int j = 0; j < 4; j++)
 		{
-			final CircleGrid circle = new CircleGrid(2, new CoordinateVector(2), 1354,
+			final CircleGrid circle = new CircleGrid( new CoordinateVector(2), 1354,
 			                                         j);
 			System.out.println(circle.faces.size());
 			System.out.println(circle.cells.size());
@@ -65,7 +65,7 @@ public class DistortedShapeFunctionTest
 	{
 		for (int j = 0; j < 4; j++)
 		{
-			final CircleGrid circle = new CircleGrid(2, CoordinateVector.fromValues(178, -172), 1,
+			final CircleGrid circle = new CircleGrid( CoordinateVector.fromValues(178, -172), 1,
 			                                         j);
 			System.out.println(circle.faces.size());
 			System.out.println(circle.cells.size());
@@ -89,7 +89,7 @@ public class DistortedShapeFunctionTest
 	{
 		for (int j = 0; j < 4; j++)
 		{
-			final CircleGrid circle = new CircleGrid(2, CoordinateVector.fromValues(-178, -172), 1312,
+			final CircleGrid circle = new CircleGrid( CoordinateVector.fromValues(-178, -172), 1312,
 			                                         j);
 			System.out.println(circle.faces.size());
 			System.out.println(circle.cells.size());

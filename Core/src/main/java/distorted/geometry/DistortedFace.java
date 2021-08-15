@@ -236,13 +236,13 @@ public class DistortedFace implements FaceWithReferenceFace<DistortedCell, Disto
 			return referenceFace.isOnFace(cellsWithTransformation
 				                              .get(upStream)
 				                              .applyInverse(getNormalUpstreamCell()
-					                                            .transformToReferenceCell(
+					                                            .transformPreciseToReferenceCell(
 						                                            pos)));
 		} else if (getNormalDownstreamCell() != null)
 			return referenceFace.isOnFace(cellsWithTransformation
 				                              .get(getNormalDownstreamCell())
 				                              .applyInverse(getNormalDownstreamCell()
-					                                            .transformToReferenceCell(
+					                                            .transformPreciseToReferenceCell(
 						                                            pos)));
 		else throw new IllegalStateException("Face is isolated");
 	}
