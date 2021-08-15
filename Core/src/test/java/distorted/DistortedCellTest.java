@@ -241,6 +241,19 @@ public class DistortedCellTest
 	}
 	
 	@Test
+	public void testCenter()
+	{
+		final DistortedCell cell2D = createCell2D();
+		final DistortedCell cell3D = createCell3D();
+		final DistortedCell cell2Dref = createCell2D().getReferenceCell();
+		final DistortedCell cell3Dref = createCell3D().getReferenceCell();
+		assertEquals(CoordinateVector.fromValues(0.5, 0.5), cell2Dref.center());
+		assertEquals(CoordinateVector.fromValues(0.5, 0.5, 0.5), cell3Dref.center());
+		assertEquals(CoordinateVector.fromValues(2.625, 1.625), cell2D.center());
+		assertEquals(CoordinateVector.fromValues(0.75, 1.5, 3.5), cell3D.center());
+	}
+	
+	@Test
 	public void testEqualsCompareHashCode()
 	{
 		

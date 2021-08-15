@@ -227,7 +227,7 @@ public class CircleGrid
 			final DistortedFace face = new DistortedFace(vertices, isOnBoundary);
 			for (final DistortedCell c : getCellsBelongingToFace(face, neighbouringCells))
 			{
-				cell.faces.add(face);
+				c.faces.add(face);
 				face.addCell(c);
 			}
 			faces.add(face);

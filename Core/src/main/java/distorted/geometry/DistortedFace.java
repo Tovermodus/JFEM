@@ -3,6 +3,7 @@ package distorted.geometry;
 import basic.FaceWithReferenceFace;
 import basic.PerformanceArguments;
 import basic.VectorFunction;
+import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Multimap;
 import linalg.AffineTransformation;
@@ -13,6 +14,7 @@ import org.jetbrains.annotations.NotNull;
 import tensorproduct.geometry.TPFace;
 
 import java.util.*;
+import java.util.stream.Collectors;
 
 public class DistortedFace implements FaceWithReferenceFace<DistortedCell, DistortedFace>
 {
@@ -26,7 +28,7 @@ public class DistortedFace implements FaceWithReferenceFace<DistortedCell, Disto
 	
 	public DistortedFace(final CoordinateVector[] vertices, final boolean isBoundaryFace)
 	{
-		this.vertices = vertices.clone();
+		this.vertices = Arrays.stream(vertices).map(CoordinateVector::new).toArray(CoordinateVector[]::new);
 		dimension = vertices[0].getLength();
 		if (PerformanceArguments.getInstance().executeChecks)
 		{
@@ -219,8 +221,8 @@ public class DistortedFace implements FaceWithReferenceFace<DistortedCell, Disto
 	@Override
 	public int hashCode()
 	{
-		int result = Objects.hash(isBoundaryFace, dimension);
-		result = 31 * result + Arrays
+		int result = Objects.hash(dimension);
+		result = 31 * (3 + (isBoundaryFace ? 2 : 0)) * result + Arrays
 			.stream(vertices)
 			.mapToInt(CoordinateVector::hashCode)
 			.sum();
@@ -261,12 +263,22 @@ public class DistortedFace implements FaceWithReferenceFace<DistortedCell, Disto
 			return -1;
 		if (o.getDimension() > getDimension())
 			return 1;
+		if (o.isBoundaryFace != isBoundaryFace())
+			return Boolean.compare(o.isBoundaryFace, isBoundaryFace);
 		if (this.equals(o))
 			return 0;
 		for (int i = 0; i < vertices.length; i++)
 			if (vertices[i].compareTo(o.vertices[i]) != 0)
 				return vertices[i].compareTo(o.vertices[i]);
 		return 0;
+	}
+	
+	public ImmutableList<CoordinateVector> getVertices()
+	{
+		return ImmutableList.copyOf(Arrays
+			                            .stream(vertices)
+			                            .map(CoordinateVector::new)
+			                            .collect(Collectors.toList()));
 	}
 	
 	@Override

@@ -1,5 +1,6 @@
 package distorted;
 
+import distorted.geometry.CircleGrid;
 import distorted.geometry.DistortedCell;
 import distorted.geometry.DistortedFace;
 import linalg.AffineTransformation;
@@ -7,8 +8,11 @@ import linalg.CoordinateVector;
 import linalg.IntCoordinates;
 import org.junit.jupiter.api.Test;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertFalse;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Optional;
+
+import static org.junit.jupiter.api.Assertions.*;
 
 public class DistortedFaceTest
 {
@@ -25,8 +29,10 @@ public class DistortedFaceTest
 		{
 			final DistortedFace face = new DistortedFace(new CoordinateVector[]{vertices[i],
 			                                                                    vertices[(i + 1) %
-				                                                              vertices.length]}, false);
-			final AffineTransformation at = face.getTransformationFromReferenceFaceToFaceOfReferenceCell(cell);
+				                                                                    vertices.length]},
+			                                             false);
+			final AffineTransformation at = face.getTransformationFromReferenceFaceToFaceOfReferenceCell(
+				cell);
 			assertEquals(at.apply(CoordinateVector.fromValues(0, 0)), vertices[i]);
 			assertEquals(at.apply(CoordinateVector.fromValues(1, 0)), vertices[(i + 1) % vertices.length]);
 			assertFalse(at
@@ -43,8 +49,10 @@ public class DistortedFaceTest
 		{
 			final DistortedFace face = new DistortedFace(new CoordinateVector[]{vertices[i],
 			                                                                    vertices[(i + 3) %
-				                                                              vertices.length]}, false);
-			final AffineTransformation at = face.getTransformationFromReferenceFaceToFaceOfReferenceCell(cell);
+				                                                                    vertices.length]},
+			                                             false);
+			final AffineTransformation at = face.getTransformationFromReferenceFaceToFaceOfReferenceCell(
+				cell);
 			assertEquals(at.apply(CoordinateVector.fromValues(0, 0)), vertices[i]);
 			assertEquals(at.apply(CoordinateVector.fromValues(1, 0)), vertices[(i + 3) % vertices.length]);
 			assertFalse(at
@@ -78,8 +86,10 @@ public class DistortedFaceTest
 		{
 			final DistortedFace face = new DistortedFace(new CoordinateVector[]{vertices[i],
 			                                                                    vertices[(i + 1) %
-				                                                              vertices.length]}, false);
-			final AffineTransformation at = face.getTransformationFromReferenceFaceToFaceOfReferenceCell(cell);
+				                                                                    vertices.length]},
+			                                             false);
+			final AffineTransformation at = face.getTransformationFromReferenceFaceToFaceOfReferenceCell(
+				cell);
 			assertEquals(at.apply(CoordinateVector.fromValues(0, 0)), referenceVertices[i]);
 			assertEquals(at.apply(CoordinateVector.fromValues(1, 0)),
 			             referenceVertices[(i + 1) % vertices.length]);
@@ -97,8 +107,10 @@ public class DistortedFaceTest
 		{
 			final DistortedFace face = new DistortedFace(new CoordinateVector[]{vertices[i],
 			                                                                    vertices[(i + 3) %
-				                                                              vertices.length]}, false);
-			final AffineTransformation at = face.getTransformationFromReferenceFaceToFaceOfReferenceCell(cell);
+				                                                                    vertices.length]},
+			                                             false);
+			final AffineTransformation at = face.getTransformationFromReferenceFaceToFaceOfReferenceCell(
+				cell);
 			assertEquals(at.apply(CoordinateVector.fromValues(0, 0)), referenceVertices[i]);
 			assertEquals(at.apply(CoordinateVector.fromValues(1, 0)),
 			             referenceVertices[(i + 3) % vertices.length]);
@@ -187,8 +199,10 @@ public class DistortedFaceTest
 			final DistortedFace face = new DistortedFace(new CoordinateVector[]{vertices[facec.get(0)],
 			                                                                    vertices[facec.get(1)],
 			                                                                    vertices[facec.get(2)],
-			                                                                    vertices[facec.get(3)]}, false);
-			final AffineTransformation at = face.getTransformationFromReferenceFaceToFaceOfReferenceCell(cell);
+			                                                                    vertices[facec.get(3)]},
+			                                             false);
+			final AffineTransformation at = face.getTransformationFromReferenceFaceToFaceOfReferenceCell(
+				cell);
 			assertEquals(at.apply(CoordinateVector.fromValues(0, 0, 0)), vertices[facec.get(0)]);
 			assertEquals(at.apply(CoordinateVector.fromValues(0, 1, 0)), vertices[facec.get(1)]);
 			assertEquals(at.apply(CoordinateVector.fromValues(1, 1, 0)), vertices[facec.get(2)]);
@@ -278,8 +292,10 @@ public class DistortedFaceTest
 			final DistortedFace face = new DistortedFace(new CoordinateVector[]{vertices[facec.get(0)],
 			                                                                    vertices[facec.get(1)],
 			                                                                    vertices[facec.get(2)],
-			                                                                    vertices[facec.get(3)]}, false);
-			final AffineTransformation at = face.getTransformationFromReferenceFaceToFaceOfReferenceCell(cell);
+			                                                                    vertices[facec.get(3)]},
+			                                             false);
+			final AffineTransformation at = face.getTransformationFromReferenceFaceToFaceOfReferenceCell(
+				cell);
 			assertEquals(at.apply(CoordinateVector.fromValues(0, 0, 0)), referenceVertices[facec.get(0)]);
 			assertEquals(at.apply(CoordinateVector.fromValues(0, 1, 0)), referenceVertices[facec.get(1)]);
 			assertEquals(at.apply(CoordinateVector.fromValues(1, 1, 0)), referenceVertices[facec.get(2)]);
@@ -290,40 +306,181 @@ public class DistortedFaceTest
 	@Test
 	public void testIsOnCell()
 	{
+		final CoordinateVector[] vertices = new CoordinateVector[4];
+		vertices[0] = CoordinateVector.fromValues(0, 0);
+		vertices[1] = CoordinateVector.fromValues(1, -0.5);
+		vertices[2] = CoordinateVector.fromValues(14, 1);
+		vertices[3] = CoordinateVector.fromValues(-4.5, 6);
+		final DistortedCell on = new DistortedCell(vertices);
+		vertices[0] = CoordinateVector.fromValues(0.1, 0);
+		vertices[1] = CoordinateVector.fromValues(1.1, -0.5);
+		vertices[2] = CoordinateVector.fromValues(14.1, 1);
+		vertices[3] = CoordinateVector.fromValues(-4.6, 6);
+		final DistortedCell off = new DistortedCell(vertices);
+		for (int i = 0; i < 4; i++)
+		{
+			final DistortedFace f = getCentralFace2D(i);
+			assertTrue(f.isOnCell(on));
+			assertFalse(f.isOnCell(off));
+		}
+	}
+	
+	@Test
+	public void testCenter()
+	{
+		for (int i = 0; i < 4; i++)
+		{
+			for (final DistortedFace f : createFaces2D(i))
+			{
+				if (f.getNormalUpstreamCell() != null)
+					assertTrue(f.getNormalUpstreamCell().isInCellPrecise(f.center()));
+				if (f.getNormalDownstreamCell() != null)
+					assertTrue(f.getNormalDownstreamCell().isInCellPrecise(f.center()));
+				assertTrue(f.isOnFace(f.center()));
+			}
+		}
 	}
 	
 	@Test
 	public void testGetDownStreamCell()
 	{
+		for (int i = 0; i < 4; i++)
+		{
+			final DistortedFace f = getCentralFace2D(i);
+			assertNotEquals(CoordinateVector.fromValues(2.625, 1.625),
+			                f.getNormalDownstreamCell().center());
+		}
+		for (int i = 0; i < 4; i++)
+		{
+			for (final DistortedFace f : createFaces2D(i))
+			{
+				if (f.getCells().size() != 2)
+					assertNull(f.getNormalDownstreamCell());
+				else
+					assertNotNull(f.getNormalDownstreamCell());
+			}
+		}
 	}
 	
 	@Test
 	public void testGetUpStreamCell()
 	{
+		for (int i = 0; i < 4; i++)
+		{
+			final DistortedFace f = getCentralFace2D(i);
+			assertEquals(CoordinateVector.fromValues(2.625, 1.625), f.getNormalUpstreamCell().center());
+		}
+		for (int i = 0; i < 4; i++)
+		{
+			for (final DistortedFace f : createFaces2D(i))
+			{
+				assertNotNull(f.getNormalUpstreamCell());
+			}
+		}
 	}
 	
 	@Test
-	public void testEquals()
+	public void testEqualsCompareHashCode()
 	{
-	}
-	
-	@Test
-	public void testHashCode()
-	{
-	}
-	
-	@Test
-	public void testCompare()
-	{
-	}
-	
-	@Test
-	public void testIsOnFace()
-	{
+		for (int side = 0; side < 4; side++)
+		{
+			final DistortedFace reference = getCentralFace2D(side);
+			CoordinateVector[] vertices = reference.getVertices().toArray(new CoordinateVector[2]);
+			DistortedFace other = new DistortedFace(vertices, !reference.isBoundaryFace());
+			assertNotEquals(reference.hashCode(), other.hashCode());
+			assertNotEquals(reference, other);
+			assertTrue(reference.compareTo(other) != 0);
+			assertTrue(other.compareTo(reference) != 0);
+			for (int i = 0; i < reference.getVertices().size(); i++)
+			{
+				vertices = reference.getVertices().toArray(vertices).clone();
+				vertices[i].addInPlace(CoordinateVector.fromValues(0, 1e-5));
+				other = new DistortedFace(vertices, reference.isBoundaryFace());
+				assertNotEquals(reference, other);
+				assertTrue(reference.compareTo(other) != 0);
+				assertTrue(other.compareTo(reference) != 0);
+			}
+			for (int i = 0; i < reference.getVertices().size(); i++)
+			{
+				vertices = reference.getVertices().toArray(vertices);
+				vertices[i].addInPlace(CoordinateVector.fromValues(0, 1e-13));
+				other = new DistortedFace(vertices, reference.isBoundaryFace());
+				assertEquals(reference.hashCode(), other.hashCode());
+				assertEquals(reference.hashCode(), other.hashCode());
+				assertEquals(0, reference.compareTo(other));
+				assertEquals(0, other.compareTo(reference));
+			}
+		}
 	}
 	
 	@Test
 	public void testIsVertex()
 	{
+		final DistortedCell cell = getCentralFace2D(0).getNormalUpstreamCell();
+		for (int i = 0; i < 4; i++)
+		{
+			for (final DistortedFace f : cell.getFaces())
+			{
+				assertEquals(2, cell.getVertices().stream().filter(f::isVertex).count());
+			}
+		}
+	}
+	
+	private static DistortedFace getCentralFace2D(final int side)
+	{
+		final HashSet<DistortedFace> faces = createFaces2D(side);
+		final Optional<DistortedFace> centralFace =
+			faces.stream().filter(f -> f.getCells().size() == 2).findAny();
+		if (centralFace.isPresent())
+			return centralFace.get();
+		else throw new IllegalArgumentException("Wrong side");
+	}
+	
+	private static HashSet<DistortedFace> createFaces2D(final int side)
+	{
+		final CoordinateVector[] vertices = new CoordinateVector[4];
+		vertices[0] = CoordinateVector.fromValues(0, 0);
+		vertices[1] = CoordinateVector.fromValues(1, -0.5);
+		vertices[2] = CoordinateVector.fromValues(14, 1);
+		vertices[3] = CoordinateVector.fromValues(-4.5, 6);
+		final DistortedCell cell = new DistortedCell(vertices);
+		final CoordinateVector[] otherVertices = new CoordinateVector[4];
+		if (side == 0)
+		{
+			otherVertices[0] = CoordinateVector.fromValues(-1, -1);
+			otherVertices[1] = CoordinateVector.fromValues(1, -1);
+			otherVertices[2] = CoordinateVector.fromValues(1, -0.5);
+			otherVertices[3] = CoordinateVector.fromValues(0, 0);
+		}
+		if (side == 1)
+		{
+			otherVertices[0] = CoordinateVector.fromValues(1, -1);
+			otherVertices[1] = CoordinateVector.fromValues(5, -1);
+			otherVertices[2] = CoordinateVector.fromValues(14, 1);
+			otherVertices[3] = CoordinateVector.fromValues(1, -0.5);
+		}
+		if (side == 2)
+		{
+			otherVertices[0] = CoordinateVector.fromValues(-4.5, 6);
+			otherVertices[1] = CoordinateVector.fromValues(14, 1);
+			otherVertices[2] = CoordinateVector.fromValues(14, 5);
+			otherVertices[3] = CoordinateVector.fromValues(-4.5, 10);
+		}
+		if (side == 3)
+		{
+			otherVertices[0] = CoordinateVector.fromValues(-1, 0);
+			otherVertices[1] = CoordinateVector.fromValues(0, 0);
+			otherVertices[2] = CoordinateVector.fromValues(-4.5, 6);
+			otherVertices[3] = CoordinateVector.fromValues(-7, 8);
+		}
+		final DistortedCell otherCell = new DistortedCell(otherVertices);
+		final HashSet<DistortedFace> faces = new HashSet<>();
+		CircleGrid.createFaces(faces, cell, List.of(cell, otherCell),
+		                       vertices[0].sub(vertices[1]).euclidianNorm() / 2,
+		                       vertices[0].add(vertices[1]).mul(0.5));
+		CircleGrid.createFaces(faces, otherCell, List.of(cell, otherCell),
+		                       vertices[0].sub(vertices[1]).euclidianNorm() / 2,
+		                       vertices[0].add(vertices[1]).mul(0.5));
+		return faces;
 	}
 }
