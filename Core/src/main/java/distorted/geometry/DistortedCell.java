@@ -201,6 +201,7 @@ public class DistortedCell implements CellWithReferenceCell<DistortedCell, Disto
 		if (getDimension() == 2)
 			if (!checkQuadrilateral(vertices[0], vertices[3], vertices[2], vertices[1]))
 			{
+				System.out.println(Arrays.toString(vertices));
 				System.out.println("order wrong");
 				return false;
 			}

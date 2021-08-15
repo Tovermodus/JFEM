@@ -5,13 +5,78 @@ import basic.ScalarFunction;
 import distorted.geometry.DistortedCell;
 import kotlin.Pair;
 import linalg.CoordinateVector;
+import linalg.Vector;
 import org.junit.jupiter.api.Test;
+
+import java.util.List;
+import java.util.stream.Collectors;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 public class DistortedShapeFunctionTest
 {
+	private static ScalarFunction getFunctionOnGrid()
+	{
+		return new ScalarFunction()
+		{
+			@Override
+			public int getDomainDimension()
+			{
+				return 2;
+			}
+			
+			@Override
+			public Double value(final CoordinateVector pos)
+			{
+				return 1 - (pos.x() - 5) / 2 + (pos.x() - 5) * (pos.y() - 5) / 4 -
+					(pos.y() - 5) * (pos.y() - 5) / 4;
+			}
+			
+			@Override
+			public CoordinateVector gradient(final CoordinateVector pos)
+			{
+				return CoordinateVector.fromValues(-0.5 + (pos.y() - 5) / 4,
+				                                   (pos.x() - 5) / 4 - (pos.y() - 5) / 2);
+			}
+		};
+	}
+	
+	private static ScalarFunction getFunctionOnReferenceCell()
+	{
+		return new ScalarFunction()
+		{
+			@Override
+			public int getDomainDimension()
+			{
+				return 2;
+			}
+			
+			@Override
+			public Double value(final CoordinateVector pos)
+			{
+				return (1 - pos.x()) * (1. - pos.y());
+			}
+			
+			@Override
+			public CoordinateVector gradient(final CoordinateVector pos)
+			{
+				return CoordinateVector.fromValues(pos.y() - 1, pos.x() - 1);
+			}
+		};
+	}
+	
+	private static Pair<DistortedShapeFunction, DistortedCell> createShapeFunction()
+	{
+		final CoordinateVector[] vertices = new CoordinateVector[4];
+		vertices[0] = CoordinateVector.fromValues(5, 5);
+		vertices[1] = CoordinateVector.fromValues(7, 5);
+		vertices[2] = CoordinateVector.fromValues(9, 7);
+		vertices[3] = CoordinateVector.fromValues(7, 7);
+		final DistortedCell cell = new DistortedCell(vertices);
+		return new Pair<>(new DistortedShapeFunction(cell, 1, 0), cell);
+	}
+	
 	@Test
 	public void testValueInCell()
 	{
@@ -93,64 +158,93 @@ public class DistortedShapeFunctionTest
 		             new LagrangeNodeFunctional(CoordinateVector.fromValues(0, 0)));
 	}
 	
-	private static ScalarFunction getFunctionOnGrid()
+	@Test
+	public void testCompareDegree1()
 	{
-		return new ScalarFunction()
+		for (int i = 0; i < 3; i++)
 		{
-			@Override
-			public int getDomainDimension()
-			{
-				return 2;
-			}
-			
-			@Override
-			public Double value(final CoordinateVector pos)
-			{
-				return 1 - (pos.x() - 5) / 2 + (pos.x() - 5) * (pos.y() - 5) / 4 -
-					(pos.y() - 5) * (pos.y() - 5) / 4;
-			}
-			
-			@Override
-			public CoordinateVector gradient(final CoordinateVector pos)
-			{
-				return CoordinateVector.fromValues(-0.5 + (pos.y() - 5) / 4,
-				                                   (pos.x() - 5) / 4 - (pos.y() - 5) / 2);
-			}
-		};
+			final DistortedSpace d = new DistortedSpace(CoordinateVector.fromValues(17, 19), 7, i);
+			d.assembleFunctions(1);
+			final List<CoordinateVector> functionalPoints =
+				d
+					.getShapeFunctions()
+					.values()
+					.stream()
+					.map(fun -> fun.getNodeFunctional().getPoint())
+					.collect(
+						Collectors.toList());
+			final int finalI = i;
+			assertTrue(functionalPoints.stream()
+			                           .parallel()
+			                           .mapToDouble(point -> functionalPoints.stream()
+			                                                                 .filter(other -> !other.equals(
+				                                                                 point))
+			                                                                 .map(point::sub)
+			                                                                 .mapToDouble(
+				                                                                 Vector::euclidianNorm)
+			                                                                 .min()
+			                                                                 .orElse(1))
+			                           .allMatch(distance -> distance > Math.pow(0.5, finalI)));
+		}
 	}
 	
-	private static ScalarFunction getFunctionOnReferenceCell()
+	@Test
+	public void testCompareDegree2()
 	{
-		return new ScalarFunction()
+		for (int i = 0; i < 3; i++)
 		{
-			@Override
-			public int getDomainDimension()
-			{
-				return 2;
-			}
-			
-			@Override
-			public Double value(final CoordinateVector pos)
-			{
-				return (1 - pos.x()) * (1. - pos.y());
-			}
-			
-			@Override
-			public CoordinateVector gradient(final CoordinateVector pos)
-			{
-				return CoordinateVector.fromValues(pos.y() - 1, pos.x() - 1);
-			}
-		};
+			final DistortedSpace d = new DistortedSpace(CoordinateVector.fromValues(17, -19), 0.07, i);
+			d.assembleFunctions(2);
+			final List<CoordinateVector> functionalPoints =
+				d
+					.getShapeFunctions()
+					.values()
+					.stream()
+					.map(fun -> fun.getNodeFunctional().getPoint())
+					.collect(
+						Collectors.toList());
+			final int finalI = i;
+			assertTrue(functionalPoints.stream()
+			                           .parallel()
+			                           .mapToDouble(point -> functionalPoints.stream()
+			                                                                 .filter(other -> !other.equals(
+				                                                                 point))
+			                                                                 .map(point::sub)
+			                                                                 .mapToDouble(
+				                                                                 Vector::euclidianNorm)
+			                                                                 .min()
+			                                                                 .orElse(1))
+			                           .allMatch(distance -> distance > 0.01 * Math.pow(0.5, finalI)));
+		}
 	}
 	
-	private static Pair<DistortedShapeFunction, DistortedCell> createShapeFunction()
+	@Test
+	public void testCompareDegree3()
 	{
-		final CoordinateVector[] vertices = new CoordinateVector[4];
-		vertices[0] = CoordinateVector.fromValues(5, 5);
-		vertices[1] = CoordinateVector.fromValues(7, 5);
-		vertices[2] = CoordinateVector.fromValues(9, 7);
-		vertices[3] = CoordinateVector.fromValues(7, 7);
-		final DistortedCell cell = new DistortedCell(vertices);
-		return new Pair<>(new DistortedShapeFunction(cell, 1, 0), cell);
+		for (int i = 0; i < 3; i++)
+		{
+			final DistortedSpace d = new DistortedSpace(CoordinateVector.fromValues(-17, -19), 0.7, i);
+			d.assembleFunctions(3);
+			final List<CoordinateVector> functionalPoints =
+				d
+					.getShapeFunctions()
+					.values()
+					.stream()
+					.map(fun -> fun.getNodeFunctional().getPoint())
+					.collect(
+						Collectors.toList());
+			final int finalI = i;
+			assertTrue(functionalPoints.stream()
+			                           .parallel()
+			                           .mapToDouble(point -> functionalPoints.stream()
+			                                                                 .filter(other -> !other.equals(
+				                                                                 point))
+			                                                                 .map(point::sub)
+			                                                                 .mapToDouble(
+				                                                                 Vector::euclidianNorm)
+			                                                                 .min()
+			                                                                 .orElse(1))
+			                           .allMatch(distance -> distance > 0.01 * Math.pow(0.5, finalI)));
+		}
 	}
 }

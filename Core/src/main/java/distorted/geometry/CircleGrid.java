@@ -269,24 +269,16 @@ public class CircleGrid
 			final DistortedFace left = cell.getFaceFromVertexNumbers(3, 0);
 			CoordinateVector leftCenter = left.center();
 			if (bottom.isBoundaryFace())
-				bottomCenter = centerPoint.add(bottomCenter.sub(centerPoint).normalize()).mul(radius);
+				bottomCenter = centerPoint.add(bottomCenter.sub(centerPoint).normalize().mul(radius));
 			if (right.isBoundaryFace())
-				rightCenter = centerPoint.add(rightCenter.sub(centerPoint).normalize()).mul(radius);
+				rightCenter = centerPoint.add(rightCenter.sub(centerPoint).normalize().mul(radius));
 			if (top.isBoundaryFace())
-				topCenter = centerPoint.add(topCenter.sub(centerPoint).normalize()).mul(radius);
+				topCenter = centerPoint.add(topCenter.sub(centerPoint).normalize().mul(radius));
 			if (left.isBoundaryFace())
-				leftCenter = centerPoint.add(leftCenter.sub(centerPoint).normalize()).mul(radius);
+				leftCenter = centerPoint.add(leftCenter.sub(centerPoint).normalize().mul(radius));
 			final CoordinateVector center = mean(bottomCenter, rightCenter, topCenter, leftCenter);
-//			System.out.println(cell);
-//			System.out.println(bottom);
-//			System.out.println(right);
-//			System.out.println(top);
-//			System.out.println(left);
-//			System.out.println(
-//				"centers: " + bottomCenter + " " + rightCenter + " " + topCenter + " " + leftCenter);
-//			System.out.println(cell.vertices[0] + " " + bottomCenter + " " + center + " " + leftCenter);
-			ret.add(new DistortedCell(cell.vertices[0], bottomCenter, center, leftCenter));
-			ret.add(new DistortedCell(bottomCenter, cell.vertices[1], rightCenter, center));
+			ret.add(new DistortedCell(vertices[0], bottomCenter, center, leftCenter));
+			ret.add(new DistortedCell(bottomCenter, vertices[1], rightCenter, center));
 			ret.add(new DistortedCell(leftCenter, center, topCenter, vertices[3]));
 			ret.add(new DistortedCell(center, rightCenter, vertices[2], topCenter));
 			return ret;
