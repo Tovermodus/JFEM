@@ -22,7 +22,6 @@ public interface AcceptsMatrixBoundaryValues<CT extends Cell<CT, FT>,
 	
 	default void overWriteValue(final int index, final double value, final MutableMatrix mat, final MutableVector rhs)
 	{
-		System.out.println("delrow");
 		mat.deleteRow(index);
 		mat.set(1, index, index);
 		rhs.set(value, index);

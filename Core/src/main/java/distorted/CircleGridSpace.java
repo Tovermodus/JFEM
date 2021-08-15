@@ -3,7 +3,6 @@ package distorted;
 import basic.AcceptsMatrixBoundaryValues;
 import basic.Assembleable;
 import basic.ShapeFunction;
-import com.google.common.collect.HashMultimap;
 import com.google.common.collect.Sets;
 import distorted.geometry.CircleGrid;
 import distorted.geometry.DistortedCell;
@@ -12,19 +11,17 @@ import linalg.CoordinateVector;
 import linalg.DenseVector;
 import linalg.SparseMatrix;
 
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-import java.util.TreeMap;
+import java.util.*;
 
-public abstract class CircleGridSpace<ST extends ShapeFunction<DistortedCell, DistortedFace, valueT, gradientT, hessianT>,
+public abstract class CircleGridSpace<ST extends ShapeFunction<DistortedCell, DistortedFace, valueT, gradientT,
+	hessianT> & Comparable<ST>,
 	valueT, gradientT, hessianT>
 	implements AcceptsMatrixBoundaryValues<DistortedCell, DistortedFace, ST, valueT, gradientT, hessianT>, Assembleable
 {
 	protected final CircleGrid grid;
-	protected final HashMultimap<DistortedCell, ST> supportOnCell;
-	protected final HashMultimap<DistortedFace, ST> supportOnFace;
-	protected Set<ST> shapeFunctions;
+	private final HashMap<DistortedCell, TreeSet<ST>> supportOnCell;
+	private final HashMap<DistortedFace, TreeSet<ST>> supportOnFace;
+	protected TreeSet<ST> shapeFunctions;
 	protected SparseMatrix systemMatrix;
 	protected DenseVector rhs;
 	Set<Integer> fixedNodes;
@@ -37,10 +34,24 @@ public abstract class CircleGridSpace<ST extends ShapeFunction<DistortedCell, Di
 	
 	public CircleGridSpace(final CoordinateVector center, final double radius, final int refinements)
 	{
-		supportOnCell = HashMultimap.create();
-		supportOnFace = HashMultimap.create();
+		supportOnCell = new HashMap<>();
+		supportOnFace = new HashMap<>();
 		grid = new CircleGrid(center, radius, refinements);
 		fixedNodes = Sets.newConcurrentHashSet();
+	}
+	
+	protected void addFunctionToCell(final ST function, final DistortedCell cell)
+	{
+		if (!supportOnCell.containsKey(cell))
+			supportOnCell.put(cell, new TreeSet<>());
+		supportOnCell.get(cell).add(function);
+	}
+	
+	protected void addFunctionToFace(final ST function, final DistortedFace face)
+	{
+		if (!supportOnFace.containsKey(face))
+			supportOnFace.put(face, new TreeSet<>());
+		supportOnFace.get(face).add(function);
 	}
 	
 	@Override

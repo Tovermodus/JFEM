@@ -411,10 +411,18 @@ public class DistortedCell implements CellWithReferenceCell<DistortedCell, Disto
 		if (getDimension() == 2)
 		{
 			final CoordinateMatrix ret = new CoordinateMatrix(2, 2);
-			ret.addColumn(transformationCoefficients[0].mul(pos.y())
-			                                           .add(transformationCoefficients[1]), 0);
-			ret.addColumn(transformationCoefficients[0].mul(pos.x())
-			                                           .add(transformationCoefficients[2]), 1);
+			ret.set(transformationCoefficients[0].at(0) * pos.y() + transformationCoefficients[1].at(0), 0,
+			        0);
+			ret.set(transformationCoefficients[0].at(0) * pos.x() + transformationCoefficients[2].at(0), 0,
+			        1);
+			ret.set(transformationCoefficients[0].at(1) * pos.y() + transformationCoefficients[1].at(1), 1,
+			        0);
+			ret.set(transformationCoefficients[0].at(1) * pos.x() + transformationCoefficients[2].at(1), 1,
+			        1);
+//			ret.addColumn(transformationCoefficients[0].mul(pos.y())
+//			                                           .add(transformationCoefficients[1]), 0);
+//			ret.addColumn(transformationCoefficients[0].mul(pos.x())
+//			                                           .add(transformationCoefficients[2]), 1);
 			return ret;
 		}
 		if (getDimension() == 3)
@@ -440,7 +448,10 @@ public class DistortedCell implements CellWithReferenceCell<DistortedCell, Disto
 	@Override
 	public CoordinateMatrix transformationGradientToReferenceCell(final CoordinateVector pos)
 	{
-		return transformationGradientFromReferenceCell(transformToReferenceCell(pos)).inverse();
+		
+		final CoordinateMatrix transgrad =
+			transformationGradientFromReferenceCell(transformToReferenceCell(pos));
+		return transgrad.inverse();
 	}
 	
 	public CoordinateVector transformPreciseToReferenceCell(final CoordinateVector pos)

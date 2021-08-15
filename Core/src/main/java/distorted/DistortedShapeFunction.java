@@ -6,6 +6,7 @@ import basic.PerformanceArguments;
 import basic.ScalarShapeFunction;
 import distorted.geometry.DistortedCell;
 import distorted.geometry.DistortedFace;
+import linalg.CoordinateMatrix;
 import linalg.CoordinateVector;
 import org.jetbrains.annotations.NotNull;
 import tensorproduct.TPShapeFunction;
@@ -106,8 +107,11 @@ public class DistortedShapeFunction implements ScalarShapeFunction<DistortedCell
 			if (!cell.getReferenceCell().isInCell(pos))
 				throw new IllegalArgumentException("pos is not in cell");
 		if (shapeFunctionsOnCell.containsKey(cell))
-			return cell.transformationGradientToReferenceCell(pos).tvMul(
-				shapeFunctionsOnCell.get(cell).gradient(pos));
+		{
+			final CoordinateMatrix mat = cell.transformationGradientFromReferenceCell(pos).inverse();
+			final CoordinateVector grad = shapeFunctionsOnCell.get(cell).gradient(pos);
+			return mat.tvMul(grad);
+		}
 		return new CoordinateVector(pos.getLength());
 	}
 	
@@ -157,6 +161,7 @@ public class DistortedShapeFunction implements ScalarShapeFunction<DistortedCell
 		final DistortedShapeFunction that = (DistortedShapeFunction) o;
 		return Objects.equals(getNodeFunctional().getPoint(), that.getNodeFunctional().getPoint());
 	}
+	
 	@Override
 	public int compareTo(@NotNull final DistortedShapeFunction o)
 	{

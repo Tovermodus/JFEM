@@ -31,12 +31,14 @@ public class DistortedSpace extends CircleGridSpace<DistortedShapeFunction, Doub
 				                                                                   polynomialDegree,
 				                                                                   localIndex);
 				if (shapeFunctions.add(function))
-					function.setGlobalIndex(shapeFunctions.size()-1);
+					function.setGlobalIndex(shapeFunctions.size() - 1);
 				
 				for (final DistortedCell c : function.getCells())
-					supportOnCell.put(c, function);
+				{
+					addFunctionToCell(function, c);
+				}
 				for (final DistortedFace f : function.getFaces())
-					supportOnFace.put(f, function);
+					addFunctionToFace(function, f);
 			}
 		}
 	}

@@ -88,12 +88,16 @@ public class DistortedCellIntegral extends CellIntegral<DistortedCell, Distorted
 		if (name.equals(GRAD_GRAD))
 		{
 			return integrateOnReferenceCell(x ->
-				                                shapeFunction1.gradientOnReferenceCell(x, cell)
-				                                              .inner(shapeFunction2
-					                                                     .gradientOnReferenceCell(
-						                                                     x, cell)) *
-					                                (Double) weight.value(
-						                                cell.transformFromReferenceCell(x)),
+			                                {
+				                                final CoordinateVector grad1 =
+					                                shapeFunction1.gradientOnReferenceCell(x, cell);
+				                                final CoordinateVector grad2 =
+					                                shapeFunction2.gradientOnReferenceCell(x, cell);
+				                                final double gradGrad = grad1.inner(grad2);
+				                                final double weigh = (Double) weight.value(
+					                                cell.transformFromReferenceCell(x));
+				                                return weigh * gradGrad;
+			                                },
 			                                cell,
 			                                quadratureRule1D);
 		}

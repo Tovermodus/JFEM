@@ -39,6 +39,7 @@ public class CircleGrid
 			}
 		}
 		cells = ImmutableSet.copyOf(refinedCells.values());
+		System.out.println(cells.size());
 		faces = ImmutableSet.copyOf(genFaces);
 	}
 	
