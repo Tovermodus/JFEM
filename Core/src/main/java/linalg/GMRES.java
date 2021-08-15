@@ -27,7 +27,7 @@ class GMRES
 		final MutableVector s = new linalg.DenseVector(n);
 		final MutableVector gamma = new linalg.DenseVector(n + 1);
 		final Vector r = b.sub(A.mvMul(x));
-		final DenseMatrix h = new DenseMatrix(n + 1, n + 1);
+		final DenseMatrix h = new DenseMatrix(110, 110);
 		if (r.euclidianNorm() <= tol)
 			return x;
 		gamma.set(r.euclidianNorm(), 0);

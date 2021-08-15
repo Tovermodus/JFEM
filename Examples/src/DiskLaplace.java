@@ -1,4 +1,3 @@
-import basic.PerformanceArguments;
 import basic.ScalarFESpaceFunction;
 import distorted.DistortedCellIntegral;
 import distorted.DistortedRightHandSideIntegral;
@@ -16,10 +15,6 @@ public class DiskLaplace
 {
 	public static void main(final String[] args)
 	{
-		final PerformanceArguments.PerformanceArgumentBuilder builder =
-			new PerformanceArguments.PerformanceArgumentBuilder();
-		builder.parallelizeThreads = false;
-		builder.build();
 		final int polynomialDegree = 3;
 		final DistortedCellIntegral gradGrad = new DistortedCellIntegral(1, DistortedCellIntegral.GRAD_GRAD,
 		                                                                 QuadratureRule1D

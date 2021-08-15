@@ -58,7 +58,7 @@ public class ConvergenceOrderEstimator
 		{
 			squaredDifferences += Math.pow(f1.value(p) - f2.value(p), 2);
 		}
-		return Math.sqrt(squaredDifferences / points.size());
+		return Math.sqrt(squaredDifferences);
 	}
 	
 	public static double estimateL20Scalar(final List<ScalarFunction> functions, final List<CoordinateVector> points)

@@ -26,10 +26,10 @@ public class ContinuousTPShapeFunction implements ScalarShapeFunctionWithReferen
 	public ContinuousTPShapeFunction(final TPCell supportCell, final int polynomialDegree, final int localIndex)
 	{
 		cells = new TreeMap<>();
-		faces = new TreeSet<>();
+		faces = new HashSet<>();
 		this.polynomialDegree = polynomialDegree;
 		final List<LagrangeBasisFunction1D> supportCellFunctions = generateBasisFunctionOnCell(supportCell,
-                                                                                                       localIndex);
+		                                                                                       localIndex);
 		final CoordinateVector functionalPoint =
 			CoordinateVector.fromValues(supportCellFunctions
 				                            .stream()
@@ -46,7 +46,7 @@ public class ContinuousTPShapeFunction implements ScalarShapeFunctionWithReferen
 		faces = new TreeSet<>();
 		this.polynomialDegree = polynomialDegree;
 		final List<LagrangeBasisFunction1D> supportCellFunctions = generateBasisFunctionOnCell(supportCell,
-                                                                                                       functionalPoint);
+		                                                                                       functionalPoint);
 		nodeFunctional = new LagrangeNodeFunctional(functionalPoint);
 		cells.put(supportCell, supportCellFunctions);
 		checkIfPointOnFace(functionalPoint, supportCell);
@@ -84,7 +84,7 @@ public class ContinuousTPShapeFunction implements ScalarShapeFunctionWithReferen
 	}
 	
 	private List<LagrangeBasisFunction1D> generateBasisFunctionOnCell(final TPCell cell,
-                                                                          final int localIndex)
+	                                                                  final int localIndex)
 	{
 		final int[] decomposedLocalIndex = decomposeIndex(cell.getDimension(), polynomialDegree, localIndex);
 		final List<LagrangeBasisFunction1D> function1Ds = new ArrayList<>();
@@ -97,7 +97,7 @@ public class ContinuousTPShapeFunction implements ScalarShapeFunctionWithReferen
 	}
 	
 	private List<LagrangeBasisFunction1D> generateBasisFunctionOnCell(final TPCell cell,
-                                                                          final CoordinateVector functionalPoint)
+	                                                                  final CoordinateVector functionalPoint)
 	{
 		if (!cell.isInCell(functionalPoint))
 			throw new IllegalArgumentException("functional point is not in cell");
@@ -210,7 +210,7 @@ public class ContinuousTPShapeFunction implements ScalarShapeFunctionWithReferen
 	}
 	
 	@Override
-        public int compareTo(final ContinuousTPShapeFunction o)
+	public int compareTo(final ContinuousTPShapeFunction o)
 	{
 		if (polynomialDegree > o.polynomialDegree)
 			return 1;
@@ -241,7 +241,7 @@ public class ContinuousTPShapeFunction implements ScalarShapeFunctionWithReferen
 		final boolean functionalPointIsDownStreamOfFace =
 			face.getNormalUpstreamCell() == null || face.isNormalDownstream(nodeFunctional.getPoint());
 		final TPCell supportCell = functionalPointIsDownStreamOfFace ? face.getNormalDownstreamCell() :
-                                           face.getNormalUpstreamCell();
+		                           face.getNormalUpstreamCell();
 		final TPCell referenceCell =
 			functionalPointIsDownStreamOfFace ? face.getReferenceFace().getNormalDownstreamCell() :
 			face.getReferenceFace().getNormalUpstreamCell();
