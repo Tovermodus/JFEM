@@ -42,27 +42,14 @@ public class DistortedShapeFunction implements ScalarShapeFunction<DistortedCell
 		
 		for (final DistortedFace face : cell.getFaces())
 		{
-//			System.out.println();
-//			System.out.println(cell);
-//			System.out.println(face);
-//			System.out.println(shapeFunctionsOnCell.get(cell).getNodeFunctional().getPoint());
 			final TPFace referenceFace = TPFace.fromVertices(cell.getReferenceVerticesOfFace(face),
 			                                                 face.isBoundaryFace());
-//			System.out.println(referenceFace);
 			if (shapeFunctionsOnCell.get(cell).getNodeFunctional().usesFace(referenceFace))
 			{
 				if (faces.add(face))
 				{
 					for (final DistortedCell cellOfFace : face.getCells())
 					{
-//						System.out.println("#########################'");
-//						System.out.println(face);
-//						System.out.println(cellOfFace);
-//						System.out.println(getNodeFunctional().getPoint() + "functional point" +
-//							                   " in real space");
-//						System.out.println(cellOfFace.transformToReferenceCell(
-//							getNodeFunctional()
-//								.getPoint()));
 						final TPShapeFunction newFunction = new TPShapeFunction(
 							cell.referenceCell,
 							polynomialDegree,
@@ -85,9 +72,6 @@ public class DistortedShapeFunction implements ScalarShapeFunction<DistortedCell
 	
 	public double valueOnReferenceCell(final CoordinateVector pos, final DistortedCell cell)
 	{
-//		System.out.println(pos.at(1));
-//		System.out.println(cell.referenceCell.isInCell(pos));
-//		System.out.println(cell.getReferenceCell().isInCell(pos));
 		if (PerformanceArguments.getInstance().executeChecks)
 			if (!cell.referenceCell.isInCell(pos))
 				throw new IllegalArgumentException("pos is not in cell");
@@ -130,7 +114,6 @@ public class DistortedShapeFunction implements ScalarShapeFunction<DistortedCell
 	@Override
 	public Set<DistortedFace> getFaces()
 	{
-		;
 		return faces;
 	}
 	

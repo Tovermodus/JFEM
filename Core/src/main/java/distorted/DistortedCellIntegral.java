@@ -16,6 +16,7 @@ public class DistortedCellIntegral extends CellIntegral<DistortedCell, Distorted
 	
 	public static final String GRAD_GRAD = "GradGrad";
 	public static final String VALUE_VALUE = "ValueValue";
+	public static final String H1 = "H1";
 	
 	public DistortedCellIntegral(final double weight, final String name, final QuadratureRule1D quadratureRule1D)
 	{
@@ -37,6 +38,8 @@ public class DistortedCellIntegral extends CellIntegral<DistortedCell, Distorted
 		super(weight, name, quadratureRule1D);
 		if (name.equals(GRAD_GRAD) && !(weight.defaultValue() instanceof Double))
 			throw new IllegalArgumentException();
+		if (name.equals(H1) && !(weight.defaultValue() instanceof Double))
+			throw new IllegalArgumentException();
 		if (name.equals(VALUE_VALUE) && !(weight.defaultValue() instanceof Double))
 			throw new IllegalArgumentException();
 	}
@@ -49,8 +52,6 @@ public class DistortedCellIntegral extends CellIntegral<DistortedCell, Distorted
 	public DistortedCellIntegral(final String name, final QuadratureRule1D quadratureRule1D)
 	{
 		super(name, quadratureRule1D);
-		if (name.equals(GRAD_GRAD) && !(weight.defaultValue() instanceof Double))
-			throw new IllegalArgumentException();
 	}
 	
 	public static double integrateOnReferenceCell(final ToDoubleFunction<CoordinateVector> eval, final DistortedCell cell,
@@ -98,6 +99,17 @@ public class DistortedCellIntegral extends CellIntegral<DistortedCell, Distorted
 					                                cell.transformFromReferenceCell(x));
 				                                return weigh * gradGrad;
 			                                },
+			                                cell,
+			                                quadratureRule1D);
+		}
+		if (name.equals(H1))
+		{
+			return integrateOnReferenceCell(x -> (shapeFunction1.valueOnReferenceCell(x, cell) *
+				                                      shapeFunction2.valueOnReferenceCell(x, cell)
+				                                      + shapeFunction1
+				                                .gradientOnReferenceCell(x, cell)
+				                                .inner(shapeFunction2.gradientOnReferenceCell(x, cell)))
+				                                * (Double) weight.value(x),
 			                                cell,
 			                                quadratureRule1D);
 		}
