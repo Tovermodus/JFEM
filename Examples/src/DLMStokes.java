@@ -3,6 +3,8 @@ import basic.PlotWindow;
 import basic.ScalarFunction;
 import basic.VectorFunction;
 import com.google.common.primitives.Ints;
+import distorted.DistortedVectorCellIntegral;
+import distorted.DistortedVectorSpace;
 import linalg.*;
 import mixed.*;
 import tensorproduct.ContinuousTPShapeFunction;
