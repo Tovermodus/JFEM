@@ -4,6 +4,7 @@ import basic.ScalarFunction;
 import basic.VectorFunction;
 import com.google.common.primitives.Ints;
 import distorted.DistortedVectorCellIntegral;
+import distorted.DistortedVectorRightHandSideIntegral;
 import distorted.DistortedVectorSpace;
 import linalg.*;
 import mixed.*;
