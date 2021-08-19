@@ -1,11 +1,6 @@
-import basic.PerformanceArguments;
-import basic.PlotWindow;
-import basic.ScalarFunction;
-import basic.VectorFunction;
+import basic.*;
 import com.google.common.primitives.Ints;
-import distorted.DistortedVectorCellIntegral;
-import distorted.DistortedVectorRightHandSideIntegral;
-import distorted.DistortedVectorSpace;
+import distorted.*;
 import linalg.*;
 import mixed.*;
 import tensorproduct.ContinuousTPShapeFunction;
@@ -26,18 +21,18 @@ public class DLMStokes
 		builder.build();
 		
 		final CoordinateVector start = CoordinateVector.fromValues(0, 0);
-		final CoordinateVector end = CoordinateVector.fromValues(5, 1);
+		final CoordinateVector end = CoordinateVector.fromValues(1, 1);
 		final CoordinateVector immercedCenter = CoordinateVector.fromValues(0.5, 0.5);
-		final double immersedRadius = 0.1;
+		final double immersedRadius = 0.3;
 		final double reynoldsNumber = 250;
-		final int polynomialDegree = 2;
+		final int polynomialDegree = 1;
 		
 		final TaylorHoodSpace largeGrid = new TaylorHoodSpace(start, end,
 		                                                      Ints.asList(
 			                                                      15, 15));
 		largeGrid.assembleCells();
 		largeGrid.assembleFunctions(polynomialDegree);
-		final DistortedVectorSpace immersedGrid = new DistortedVectorSpace(immercedCenter, immersedRadius, 2);
+		final DistortedVectorSpace immersedGrid = new DistortedVectorSpace(immercedCenter, immersedRadius, 1);
 		immersedGrid.assembleCells();
 		immersedGrid.assembleFunctions(polynomialDegree);
 		
@@ -83,7 +78,22 @@ public class DLMStokes
 			{
 				return CoordinateVector.fromValues(1, 0);
 			}
-		}), (f) -> f.center().x() == 0, (f, sf) -> sf.hasVelocityFunction(), A11, b1);
+		}), (f) -> true, (f, sf) -> sf.hasVelocityFunction(), A11, b1);
+//		largeGrid.writeBoundaryValuesTo(new MixedFunction(new ScalarFunction()
+//		{
+//
+//			@Override
+//			public int getDomainDimension()
+//			{
+//				return 2;
+//			}
+//
+//			@Override
+//			public Double value(final CoordinateVector pos)
+//			{
+//				return 0.0;
+//			}
+//		}), (f) -> true, (f, sf) -> sf.hasPressureFunction(), A11, b1);
 		System.out.println("A11");
 		A22 = SparseMatrix.identity(m);
 		//immersedGrid.writeCellIntegralsToMatrix(List.of(rho2gradgrad), A22);
@@ -113,6 +123,12 @@ public class DLMStokes
 			{
 				return pos;
 			}
+			
+			@Override
+			public CoordinateMatrix gradient(final CoordinateVector pos)
+			{
+				return CoordinateMatrix.fromValues(2, 2, 1, 0, 0, 1);
+			}
 		};
 		for (final Map.Entry<Integer, QkQkFunction> sf : largeGrid.getShapeFunctions().entrySet())
 		{
@@ -137,15 +153,26 @@ public class DLMStokes
 					return sf.getValue().getVelocityShapeFunction().value(
 						elasticTransformation.value(pos));
 				}
+				
+				@Override
+				public CoordinateMatrix gradient(final CoordinateVector pos)
+				{
+					return sf.getValue().getVelocityShapeFunction().gradient(
+						elasticTransformation.value(pos));//.mvmul(elastictransformation
+					// .gradient oder so
+				}
 			};
-			final DistortedVectorRightHandSideIntegral shapeFunctionOnImmersedGrid =
-				new DistortedVectorRightHandSideIntegral(toBeMultiplierd,
-				                                         DistortedVectorRightHandSideIntegral.H1);
-			final DenseVector integrals = new DenseVector(m);
-			immersedGrid.writeCellIntegralsToRhs(List.of(shapeFunctionOnImmersedGrid), integrals);
-			A13.addSmallMatrixAt(integrals.asMatrix().transpose(), sf.getKey(), 0);
-			//if (count % 10 == 0)
-			System.out.println("A31: " + 100.0 * (count++) / n + "%");
+			if (sf.getValue().hasVelocityFunction())
+			{
+				final DistortedVectorRightHandSideIntegral shapeFunctionOnImmersedGrid =
+					new DistortedVectorRightHandSideIntegral(toBeMultiplierd,
+					                                         DistortedVectorRightHandSideIntegral.H1);
+				final DenseVector integrals = new DenseVector(m);
+				immersedGrid.writeCellIntegralsToRhs(List.of(shapeFunctionOnImmersedGrid), integrals);
+				A13.addSmallMatrixAt(integrals.asMatrix().transpose(), sf.getKey(), 0);
+				//if (count % 10 == 0)
+				System.out.println("A31: " + 100.0 * (count++) / n + "%");
+			}
 		}
 		
 		final SparseMatrix A =
@@ -156,7 +183,7 @@ public class DLMStokes
 		
 		A.addSmallMatrixAt(A11, 0, 0);
 		A.addSmallMatrixAt(A22, n, n);
-		A.addSmallMatrixAt(A23, n, n + m);
+		//A.addSmallMatrixAt(A23, n, n + m);
 		A.addSmallMatrixAt(A23.transpose(), n + m, n);
 		A.addSmallMatrixAt(A13, 0, n + m);
 		A.addSmallMatrixAt(A13.transpose(), n + m, 0);
@@ -174,12 +201,21 @@ public class DLMStokes
 		b.addSmallVectorAt(b2, n);
 		System.out.println("b");
 		final IterativeSolver i = new IterativeSolver();
-		final Vector solut = i.solvePGMRES(A, T, b, 1e-9);//A.solve(b);
+		final Vector solut = A.solve(b);//i.solvePGMRES(A, T, b, 1e-9);//A.solve(b);
 		final Vector largeSolut = solut.slice(new IntCoordinates(0), new IntCoordinates(n));
 		final MixedFESpaceFunction<QkQkFunction> solutFun =
 			new MixedFESpaceFunction<>(
 				largeGrid.getShapeFunctions(), largeSolut);
+		final Vector immSolut = solut.slice(new IntCoordinates(n), new IntCoordinates(n + m));
+		final VectorFESpaceFunction<DistortedVectorShapeFunction> immSolutFun =
+			new VectorFESpaceFunction<>(
+				immersedGrid.getShapeFunctions(), immSolut);
 		final PlotWindow p = new PlotWindow();
-		p.addPlot(new MixedPlot2D(solutFun, largeGrid.generatePlotPoints(70), 70));
+		final MixedPlot2D solutplot = new MixedPlot2D(solutFun, largeGrid.generatePlotPoints(70), 70);
+		p.addPlot(solutplot.addOverlay(new CircleOverlay(immersedGrid, solutplot)));
+		p.addPlot(new ScalarPlot2D(immSolutFun.getComponentFunction(0), largeGrid.generatePlotPoints(30),
+		                           30));
+		//p.addPlot(new MatrixPlot(A));
+		//p.addPlot(new MatrixPlot(A11));
 	}
 }

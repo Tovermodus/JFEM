@@ -11,7 +11,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
-public class DistortedPlot2D implements Plot
+public class DistortedPlot2D extends Plot
 {
 	final public Map<CoordinateVector, Double> values;
 	final public int pointsPerDimension;

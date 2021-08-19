@@ -25,6 +25,8 @@ public abstract class CircleGridSpace<ST extends ShapeFunction<DistortedCell, Di
 	protected SparseMatrix systemMatrix;
 	protected DenseVector rhs;
 	Set<Integer> fixedNodes;
+	public final double radius;
+	public final CoordinateVector center;
 	
 	@Override
 	public Set<Integer> getFixedNodeIndices()
@@ -36,6 +38,8 @@ public abstract class CircleGridSpace<ST extends ShapeFunction<DistortedCell, Di
 	{
 		supportOnCell = new HashMap<>();
 		supportOnFace = new HashMap<>();
+		this.radius = radius;
+		this.center = center;
 		grid = new CircleGrid(center, radius, refinements);
 		fixedNodes = Sets.newConcurrentHashSet();
 	}

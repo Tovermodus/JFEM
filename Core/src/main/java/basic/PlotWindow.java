@@ -4,115 +4,128 @@ import javax.swing.*;
 import java.awt.*;
 import java.awt.event.*;
 import java.awt.image.BufferedImage;
-import java.util.ArrayList;
-import java.util.concurrent.*;
+import java.util.concurrent.CopyOnWriteArrayList;
+import java.util.concurrent.Executors;
 
 public class PlotWindow extends JFrame implements KeyListener, WindowListener, ComponentListener, MouseWheelListener
 {
 	final JSlider slider;
+	final JCheckBox overlay;
 	final Canvas canvas;
 	final CopyOnWriteArrayList<Plot> plots;
 	final DrawThread d;
 	int currentPlot = 0;
-	public PlotWindow() {
+	
+	public PlotWindow()
+	{
 		
-		setSize(800,800);
+		setSize(800, 800);
 		setLayout(new BorderLayout());
-		slider = new JSlider(JSlider.HORIZONTAL, 0, 100,0);
+		slider = new JSlider(JSlider.HORIZONTAL, 0, 100, 0);
 		slider.setFocusable(false);
+		overlay = new JCheckBox("Show Overlay");
 		canvas = new Canvas();
 		canvas.setFocusable(false);
-		add(slider, BorderLayout.NORTH);
+		final JPanel pan = new JPanel();
 		add(canvas, BorderLayout.CENTER);
+		pan.setLayout(new BorderLayout());
+		pan.add(slider, BorderLayout.CENTER);
+		pan.add(overlay, BorderLayout.EAST);
+		add(pan, BorderLayout.NORTH);
 		setVisible(true);
+		d = new DrawThread(canvas, canvas.getWidth(), canvas.getHeight(), slider);
 		plots = new CopyOnWriteArrayList<>();
 		addComponentListener(this);
 		addKeyListener(this);
 		addMouseWheelListener(this);
 		addWindowListener(this);
-		d = new DrawThread(canvas, canvas.getWidth(), canvas.getHeight(), slider);
+		overlay.addChangeListener(e ->
+		                          {
+			                          d.isChecked = overlay.isSelected();
+		                          });
 		Executors.newSingleThreadExecutor().execute(d);
-		
 	}
-	public void addPlot(Plot plot)
+	
+	public void addPlot(final Plot plot)
 	{
-		if(plots.size() == 0)
+		if (plots.size() == 0)
 			d.setPlot(plot);
 		plots.add(plot);
 	}
 	
 	@Override
-	public void componentResized(ComponentEvent e)
+	public void componentResized(final ComponentEvent e)
 	{
 		d.setSize(canvas.getWidth(), canvas.getHeight());
 	}
+	
 	@Override
-	public void componentMoved(ComponentEvent e)
+	public void componentMoved(final ComponentEvent e)
 	{
 	}
 	
 	@Override
-	public void componentShown(ComponentEvent e)
+	public void componentShown(final ComponentEvent e)
 	{
 	}
 	
 	@Override
-	public void componentHidden(ComponentEvent e)
+	public void componentHidden(final ComponentEvent e)
 	{
 	}
 	
 	@Override
-	public void keyTyped(KeyEvent e)
+	public void keyTyped(final KeyEvent e)
 	{
 	}
 	
 	@Override
-	public void keyPressed(KeyEvent e)
+	public void keyPressed(final KeyEvent e)
 	{
 		int newValue = slider.getValue();
-		if(e.getKeyCode() == KeyEvent.VK_DOWN)
+		if (e.getKeyCode() == KeyEvent.VK_DOWN)
 			currentPlot--;
-		if(e.getKeyCode() == KeyEvent.VK_UP)
+		if (e.getKeyCode() == KeyEvent.VK_UP)
 			currentPlot++;
-		if(e.getKeyCode() == KeyEvent.VK_RIGHT)
+		if (e.getKeyCode() == KeyEvent.VK_RIGHT)
 			newValue++;
-		if(e.getKeyCode() == KeyEvent.VK_LEFT)
+		if (e.getKeyCode() == KeyEvent.VK_LEFT)
 			newValue--;
-		if(newValue < 0)
+		if (newValue < 0)
 			newValue = 99;
-		if(newValue > 99)
+		if (newValue > 99)
 			newValue = 0;
-		if(plots.size() != 0)
+		if (plots.size() != 0)
 			currentPlot = currentPlot % plots.size();
-		while(currentPlot < 0)
-			currentPlot+=plots.size();
+		while (currentPlot < 0)
+			currentPlot += plots.size();
 		//System.out.println(currentPlot);
-		if(plots.size() != 0)
+		if (plots.size() != 0)
 			d.setPlot(plots.get(currentPlot));
 		slider.setValue(newValue);
 	}
 	
 	@Override
-	public void keyReleased(KeyEvent e)
+	public void keyReleased(final KeyEvent e)
 	{
 	}
 	
 	@Override
-	public void mouseWheelMoved(MouseWheelEvent e)
+	public void mouseWheelMoved(final MouseWheelEvent e)
 	{
 		int newValue = (slider.getValue() + e.getWheelRotation());
-		if(newValue < 0)
+		if (newValue < 0)
 			newValue = 99;
-		slider.setValue(newValue%100);
+		slider.setValue(newValue % 100);
 	}
 	
 	@Override
-	public void windowOpened(WindowEvent e)
+	public void windowOpened(final WindowEvent e)
 	{
 	}
 	
 	@Override
-	public void windowClosing(WindowEvent e)
+	public void windowClosing(final WindowEvent e)
 	{
 		d.running = false;
 		synchronized (d)
@@ -122,7 +135,7 @@ public class PlotWindow extends JFrame implements KeyListener, WindowListener, C
 				System.out.println("requested stop, waiting");
 				d.wait();
 				System.out.println("drawthread stopped");
-			} catch (InterruptedException interruptedException)
+			} catch (final InterruptedException interruptedException)
 			{
 				interruptedException.printStackTrace();
 			}
@@ -131,47 +144,50 @@ public class PlotWindow extends JFrame implements KeyListener, WindowListener, C
 	}
 	
 	@Override
-	public void windowClosed(WindowEvent e)
+	public void windowClosed(final WindowEvent e)
 	{
 		System.exit(0);
 	}
 	
 	@Override
-	public void windowIconified(WindowEvent e)
+	public void windowIconified(final WindowEvent e)
 	{
 	}
 	
 	@Override
-	public void windowDeiconified(WindowEvent e)
+	public void windowDeiconified(final WindowEvent e)
 	{
 	}
 	
 	@Override
-	public void windowActivated(WindowEvent e)
+	public void windowActivated(final WindowEvent e)
 	{
 	}
 	
 	@Override
-	public void windowDeactivated(WindowEvent e)
+	public void windowDeactivated(final WindowEvent e)
 	{
 	}
 }
 
-class DrawThread implements Runnable {
+class DrawThread implements Runnable
+{
 	private volatile Plot currentPlot;
 	volatile boolean running = true;
 	volatile int width;
 	volatile int height;
 	private final JSlider slider;
+	volatile boolean isChecked;
 	final Canvas canvas;
 	BufferedImage content;
 	
-	public DrawThread(Canvas canvas, int width, int height, JSlider slider)
+	public DrawThread(final Canvas canvas, final int width, final int height, final JSlider slider)
 	{
 		this.canvas = canvas;
 		this.width = width;
 		this.height = height;
 		this.slider = slider;
+		isChecked = false;
 		content = new BufferedImage(canvas.getWidth(), canvas.getHeight(), BufferedImage.TYPE_INT_RGB);
 	}
 	
@@ -184,31 +200,35 @@ class DrawThread implements Runnable {
 			try
 			{
 				Thread.sleep(10);
-			} catch (InterruptedException e)
+			} catch (final InterruptedException e)
 			{
 				e.printStackTrace();
 			}
 		}
-		synchronized(this)
+		synchronized (this)
 		{
 			notifyAll();
 			System.out.println("notified");
 		}
 		System.out.println("drawThread finished");
 	}
+	
 	public synchronized void draw()
 	{
 		content.getGraphics().setColor(Color.white);
-		content.getGraphics().fillRect(0,0,width+100,height+100);
-		if(currentPlot != null)
-			currentPlot.draw(content.getGraphics(), width, height, 0.01*slider.getValue());
-		canvas.getGraphics().drawImage(content,0,0,null);
+		content.getGraphics().fillRect(0, 0, width + 100, height + 100);
+		if (currentPlot != null)
+			currentPlot.draw(content.getGraphics(), width, height, 0.01 * slider.getValue(),
+			                 isChecked);
+		canvas.getGraphics().drawImage(content, 0, 0, null);
 	}
-	public synchronized void setPlot(Plot p)
+	
+	public synchronized void setPlot(final Plot p)
 	{
 		currentPlot = p;
 	}
-	public synchronized void setSize(int width, int height)
+	
+	public synchronized void setSize(final int width, final int height)
 	{
 		this.width = width;
 		this.height = height;

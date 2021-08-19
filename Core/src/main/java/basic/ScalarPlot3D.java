@@ -3,12 +3,13 @@ package basic;
 import linalg.CoordinateVector;
 
 import java.awt.*;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
-import java.util.function.Function;
+import java.util.Map;
 import java.util.function.ToDoubleFunction;
 
-public class ScalarPlot3D implements Plot
+public class ScalarPlot3D extends Plot
 {
 	final public Map<CoordinateVector, Double> values;
 	final public int pointsPerDimension;
@@ -19,20 +20,23 @@ public class ScalarPlot3D implements Plot
 	public int pixelWidth;
 	public int pixelHeight;
 	public final String title;
-	public ScalarPlot3D(ScalarFunction function, List<CoordinateVector> points, int pointsPerDimension)
+	
+	public ScalarPlot3D(final ScalarFunction function, final List<CoordinateVector> points, final int pointsPerDimension)
 	{
 		this(function.valuesInPoints(points), pointsPerDimension, "Unnamed");
 	}
-	public ScalarPlot3D(ScalarFunction function, List<CoordinateVector> points, int pointsPerDimension,
-	                    String title)
+	
+	public ScalarPlot3D(final ScalarFunction function, final List<CoordinateVector> points, final int pointsPerDimension,
+	                    final String title)
 	{
 		this(function.valuesInPoints(points), pointsPerDimension, title);
 	}
-	public ScalarPlot3D(Map<CoordinateVector, Double> values, int pointsPerDimension,
-	                    String title)
+	
+	public ScalarPlot3D(final Map<CoordinateVector, Double> values, final int pointsPerDimension,
+	                    final String title)
 	{
-		for (CoordinateVector c:values.keySet())
-			if(c.getLength() != 3)
+		for (final CoordinateVector c : values.keySet())
+			if (c.getLength() != 3)
 				throw new IllegalArgumentException("Not 3D");
 		this.values = values;
 		this.pointsPerDimension = pointsPerDimension;
@@ -42,39 +46,43 @@ public class ScalarPlot3D implements Plot
 		min = ScalarPlot2D.getMinCoordinates(values.keySet());
 		this.title = title;
 	}
-	public List<CoordinateVector> getClosestPoints(double slider)
+	
+	public List<CoordinateVector> getClosestPoints(final double slider)
 	{
-		double currentZ = min.z() + slider*(max.z() - min.z());
+		final double currentZ = min.z() + slider * (max.z() - min.z());
 		List<CoordinateVector> drawnVectors = new ArrayList<>(values.keySet());
 		
-		ToDoubleFunction<CoordinateVector> sortFunction = value -> -Math.abs(value.z() - currentZ);
-		Comparator<CoordinateVector> comparator = Comparator.comparingDouble(sortFunction)
-			.thenComparing(CoordinateVector::x).thenComparing(CoordinateVector::y);
+		final ToDoubleFunction<CoordinateVector> sortFunction = value -> -Math.abs(value.z() - currentZ);
+		final Comparator<CoordinateVector> comparator = Comparator.comparingDouble(sortFunction)
+		                                                          .thenComparing(CoordinateVector::x).thenComparing(
+				CoordinateVector::y);
 		drawnVectors.sort(comparator);
-		double multipleToSecureNoWhitespace = 2;
+		final double multipleToSecureNoWhitespace = 2;
 		drawnVectors =
-			drawnVectors.subList(drawnVectors.size()-(int)(multipleToSecureNoWhitespace
-					*pointsPerDimension*pointsPerDimension),
-				drawnVectors.size()-1);
+			drawnVectors.subList(drawnVectors.size() - (int) (multipleToSecureNoWhitespace
+				                                                  * pointsPerDimension *
+				                                                  pointsPerDimension),
+			                     drawnVectors.size() - 1);
 		return drawnVectors;
 	}
+	
 	@Override
-	public void drawValues(Graphics g, int width, int height, double slider)
+	public void drawValues(final Graphics g, final int width, final int height, final double slider)
 	{
-		pixelWidth = (width-150)/pointsPerDimension+1;
-		pixelHeight = (height-150)/pointsPerDimension+1;
+		pixelWidth = (width - 150) / pointsPerDimension + 1;
+		pixelHeight = (height - 150) / pointsPerDimension + 1;
 		
-		for(CoordinateVector co:getClosestPoints(slider))
+		for (final CoordinateVector co : getClosestPoints(slider))
 		{
 			ScalarPlot2D.drawSinglePoint(g, width, height, co, values.get(co), minValue, maxValue, min, max,
-				pixelWidth,
-				pixelHeight);
+			                             pixelWidth,
+			                             pixelHeight);
 		}
 	}
 	
 	@Override
 	public String title()
 	{
-		return "3D Plot " + title + " blue is min with " + minValue+" red is max with " + maxValue;
+		return "3D Plot " + title + " blue is min with " + minValue + " red is max with " + maxValue;
 	}
 }
