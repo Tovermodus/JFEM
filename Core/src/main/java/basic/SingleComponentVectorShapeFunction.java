@@ -7,8 +7,9 @@ import java.lang.reflect.InvocationTargetException;
 import java.util.Set;
 
 public class SingleComponentVectorShapeFunction<CT extends Cell<CT, FT>, FT extends Face<CT, FT>,
-	CST extends FastEvaluatedScalarShapeFunction<CT, FT>> implements VectorShapeFunction<CT, FT>,
-	Comparable<SingleComponentVectorShapeFunction<CT, FT, CST>>
+	CST extends FastEvaluatedScalarShapeFunction<CT, FT> & Comparable<CST>,
+	VT extends SingleComponentVectorShapeFunction<CT, FT, CST, VT>> implements VectorShapeFunction<CT, FT>,
+	Comparable<VT>
 {
 	private final CST componentFunction;
 	private final int component;
@@ -157,14 +158,13 @@ public class SingleComponentVectorShapeFunction<CT extends Cell<CT, FT>, FT exte
 	}
 	
 	@Override
-	@SuppressWarnings("unchecked")
-	public int compareTo(final SingleComponentVectorShapeFunction<CT, FT, CST> o)
+	public int compareTo(final VT o)
 	{
 		if (o.getComponent() < getComponent())
 			return 1;
 		else if (o.getComponent() > getComponent())
 			return -1;
 		else
-			return ((Comparable<CST>) componentFunction).compareTo(o.getComponentFunction());
+			return (componentFunction).compareTo(o.getComponentFunction());
 	}
 }

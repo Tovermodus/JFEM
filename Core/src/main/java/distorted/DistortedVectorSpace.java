@@ -26,12 +26,13 @@ public class DistortedVectorSpace extends CircleGridSpace<DistortedVectorShapeFu
 		shapeFunctions = new TreeSet<>();
 		for (final DistortedCell cell : grid.cells)
 		{
-			for (int localIndex = 0; localIndex < TPShapeFunction.functionsPerCell(polynomialDegree,
-			                                                                       getDimension()); localIndex++)
+			for (int localIndex = 0; localIndex < getDimension() * TPShapeFunction.functionsPerCell(
+				polynomialDegree,
+				getDimension()); localIndex++)
 			{
-				final DistortedShapeFunction function = new DistortedShapeFunction(cell,
-				                                                                   polynomialDegree,
-				                                                                   localIndex);
+				final DistortedVectorShapeFunction function = new DistortedVectorShapeFunction(cell,
+				                                                                               polynomialDegree,
+				                                                                               localIndex);
 				if (shapeFunctions.add(function))
 					function.setGlobalIndex(shapeFunctions.size() - 1);
 				
