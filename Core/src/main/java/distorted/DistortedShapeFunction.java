@@ -1,9 +1,9 @@
 package distorted;
 
 import basic.DoubleCompare;
+import basic.FastEvaluatedScalarShapeFunction;
 import basic.LagrangeNodeFunctional;
 import basic.PerformanceArguments;
-import basic.ScalarShapeFunction;
 import distorted.geometry.DistortedCell;
 import distorted.geometry.DistortedFace;
 import linalg.CoordinateMatrix;
@@ -14,7 +14,7 @@ import tensorproduct.geometry.TPFace;
 
 import java.util.*;
 
-public class DistortedShapeFunction implements ScalarShapeFunction<DistortedCell, DistortedFace>,
+public class DistortedShapeFunction implements FastEvaluatedScalarShapeFunction<DistortedCell, DistortedFace>,
 	Comparable<DistortedShapeFunction>
 
 {
@@ -62,6 +62,18 @@ public class DistortedShapeFunction implements ScalarShapeFunction<DistortedCell
 				}
 			}
 		}
+	}
+	
+	@Override
+	public double fastValueInCell(final CoordinateVector pos, final DistortedCell cell)
+	{
+		return valueInCell(pos, cell);
+	}
+	
+	@Override
+	public double[] fastGradientInCell(final CoordinateVector pos, final DistortedCell cell)
+	{
+		return gradientInCell(pos, cell).toArray();
 	}
 	
 	@Override

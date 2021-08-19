@@ -307,4 +307,9 @@ public class DenseVector implements MutableVector, MutableTensor
 	{
 		return entries;
 	}
+	
+	public double[] toArray()
+	{
+		return entries.clone();
+	}
 }
