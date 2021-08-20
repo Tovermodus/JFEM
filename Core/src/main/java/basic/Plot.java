@@ -12,7 +12,7 @@ public abstract class Plot
 		drawValues(g, width, height - 50, slider);
 		g.setColor(Color.BLACK);
 		g.drawString(title(), 20, height - 20);
-		if (overlay)
+		if (overlay && o != null)
 		{
 			System.out.println("here0");
 			o.draw(g, width, height - 50, slider);
