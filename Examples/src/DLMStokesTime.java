@@ -29,28 +29,28 @@ public class DLMStokesTime
 		final CoordinateVector start = CoordinateVector.fromValues(0, -2);
 		final CoordinateVector end = CoordinateVector.fromValues(5, 7);
 		final CoordinateVector immercedCenter = CoordinateVector.fromValues(1.3, 2.4);
-		final double immersedRadius = 0.5;
-		final double reynoldsNumber = 40000;
+		final double immersedRadius = 0.8;
+		final double reynoldsNumber = 1000;
 		final int polynomialDegree = 1;
 		final int timesteps = 100;
-		final double dt = 15;
+		final double dt = 0.1;
 		
 		final TaylorHoodSpace largeGrid = new TaylorHoodSpace(start, end,
 		                                                      Ints.asList(
-			                                                      6, 6));
+			                                                      12, 12));
 		
 		final int nPoints = 40;
 		final List<CoordinateVector> points = largeGrid.generatePlotPoints(nPoints);
 		largeGrid.assembleCells();
 		largeGrid.assembleFunctions(polynomialDegree);
-		final DistortedVectorSpace immersedGrid = new DistortedVectorSpace(immercedCenter, immersedRadius, 1);
+		final DistortedVectorSpace immersedGrid = new DistortedVectorSpace(immercedCenter, immersedRadius, 0);
 		immersedGrid.assembleCells();
 		immersedGrid.assembleFunctions(polynomialDegree);
 		
 		final MixedCellIntegral<TPCell, ContinuousTPShapeFunction, ContinuousTPVectorFunction, QkQkFunction>
 			reynolds =
 			MixedCellIntegral.fromVelocityIntegral(new TPVectorCellIntegral<>(
-				ScalarFunction.constantFunction(reynoldsNumber), TPVectorCellIntegral.GRAD_GRAD));
+				ScalarFunction.constantFunction(reynoldsNumber), TPVectorCellIntegral.SYM_GRAD));
 		final MixedTPCellIntegral<ContinuousTPShapeFunction, ContinuousTPVectorFunction, QkQkFunction>
 			divValue = new MixedTPCellIntegral<>(ScalarFunction.constantFunction(-1),
 			                                     MixedTPCellIntegral.DIV_VALUE);
