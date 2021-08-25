@@ -28,8 +28,7 @@ public class CoordinateMatrix extends DenseMatrix
 	public static CoordinateMatrix fromValues(final int rows, final int cols, final double... vals)
 	{
 		if (PerformanceArguments.getInstance().executeChecks)
-			if (rows * cols != vals.length)
-				throw new IllegalArgumentException("matrix does not fit size");
+			if (rows * cols != vals.length) throw new IllegalArgumentException("matrix does not fit size");
 		final CoordinateMatrix ret = new CoordinateMatrix(rows, cols);
 		for (int i = 0; i < rows * cols; i++)
 		{
@@ -65,13 +64,12 @@ public class CoordinateMatrix extends DenseMatrix
 	@Override
 	public CoordinateMatrix add(final Tensor other)
 	{
-		if (PerformanceArguments.getInstance().executeChecks)
-			if (!getShape().equals(other.getShape()))
-				throw new IllegalArgumentException("Incompatible sizes");
-		final CoordinateMatrix ret = new CoordinateMatrix(this);
+		if (PerformanceArguments.getInstance().executeChecks) if (!getShape().equals(other.getShape()))
+			throw new IllegalArgumentException("Incompatible sizes");
+		final CoordinateMatrix ret = new CoordinateMatrix(this.getCols(), this.getRows());
 		for (int i = 0; i < ret.getRows(); i++)
 			for (int j = 0; j < ret.getCols(); j++)
-				ret.add(other.at(i, j), i, j);
+				ret.add(other.at(i, j) + at(i, j), i, j);
 		return ret;
 	}
 	
@@ -79,9 +77,8 @@ public class CoordinateMatrix extends DenseMatrix
 	public CoordinateMatrix sub(final Tensor other)
 	{
 		
-		if (PerformanceArguments.getInstance().executeChecks)
-			if (!getShape().equals(other.getShape()))
-				throw new IllegalArgumentException("Incompatible sizes");
+		if (PerformanceArguments.getInstance().executeChecks) if (!getShape().equals(other.getShape()))
+			throw new IllegalArgumentException("Incompatible sizes");
 		final CoordinateMatrix ret = new CoordinateMatrix(this);
 		for (int i = 0; i < ret.getRows(); i++)
 			for (int j = 0; j < ret.getCols(); j++)
@@ -108,7 +105,7 @@ public class CoordinateMatrix extends DenseMatrix
 	@Override
 	public CoordinateMatrix mul(final double scalar)
 	{
-		final CoordinateMatrix ret = new CoordinateMatrix(entries.length, entries[0].length);
+		final CoordinateMatrix ret = new CoordinateMatrix(getCols(), getRows());
 		for (int i = 0; i < ret.getRows(); i++)
 			for (int j = 0; j < ret.getCols(); j++)
 				ret.set(scalar * at(i, j), i, j);
@@ -128,24 +125,19 @@ public class CoordinateMatrix extends DenseMatrix
 	@Override
 	public CoordinateVector solve(final Vector rhs)
 	{
-		if (entries.length == 2)
-			return inverse().mvMul(rhs);
+		if (entries.length == 2) return inverse().mvMul(rhs);
 		return new CoordinateVector(super.solve(rhs));
 	}
 	
 	public double determinant()
 	{
-		if (this.getCols() == 1)
-			return at(0, 0);
-		if (this.getCols() == 2)
-			return at(0, 0) * at(1, 1) - at(1, 0) * at(0, 1);
+		if (this.getCols() == 1) return at(0, 0);
+		if (this.getCols() == 2) return at(0, 0) * at(1, 1) - at(1, 0) * at(0, 1);
 		if (this.getCols() == 3)
-			return at(0, 0) * at(1, 1) * at(2, 2)
-				+ at(0, 1) * at(1, 2) * at(2, 0)
-				+ at(0, 2) * at(1, 0) * at(2, 1)
-				- at(0, 0) * at(1, 2) * at(2, 1)
-				- at(1, 0) * at(2, 2) * at(0, 1)
-				- at(2, 0) * at(0, 2) * at(1, 1);
+			return at(0, 0) * at(1, 1) * at(2, 2) + at(0, 1) * at(1, 2) * at(2, 0) + at(0, 2) * at(1,
+			                                                                                       0) * at(
+				2, 1) - at(0, 0) * at(1, 2) * at(2, 1) - at(1, 0) * at(2, 2) * at(0, 1) - at(2, 0) * at(
+				0, 2) * at(1, 1);
 		throw new IllegalStateException("Dimension not allowed");
 	}
 }

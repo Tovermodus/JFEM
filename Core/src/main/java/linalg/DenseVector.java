@@ -12,17 +12,14 @@ public class DenseVector implements MutableVector, MutableTensor
 	
 	public DenseVector(int size)
 	{
-		if (size <= 0)
-			size = 1;
+		if (size <= 0) size = 1;
 		entries = new double[size];
 	}
 	
 	public DenseVector(final DenseVector vect, final boolean wrap)
 	{
-		if (wrap)
-			entries = vect.entries;
-		else
-			entries = vect.entries.clone();
+		if (wrap) entries = vect.entries;
+		else entries = vect.entries.clone();
 	}
 	
 	public DenseVector(final Vector vect)
@@ -65,9 +62,8 @@ public class DenseVector implements MutableVector, MutableTensor
 	@Override
 	public double inner(final Vector other)
 	{
-		if (PerformanceArguments.getInstance().executeChecks)
-			if (getLength() != other.getLength())
-				throw new IllegalArgumentException("Vectors have different size");
+		if (PerformanceArguments.getInstance().executeChecks) if (getLength() != other.getLength())
+			throw new IllegalArgumentException("Vectors have different size");
 		if (other instanceof DenseVector)
 		{
 			double ret = 0;
@@ -106,8 +102,7 @@ public class DenseVector implements MutableVector, MutableTensor
 	{
 		double max = 0;
 		for (int i = 0; i < getLength(); i++)
-			if (Math.abs(entries[i]) > max)
-				max = Math.abs(entries[i]);
+			if (Math.abs(entries[i]) > max) max = Math.abs(entries[i]);
 		return max;
 	}
 	
@@ -115,8 +110,7 @@ public class DenseVector implements MutableVector, MutableTensor
 	public double at(final int... coordinates)
 	{
 		if (PerformanceArguments.getInstance().executeChecks)
-			if (coordinates.length != 1)
-				throw new IllegalArgumentException("Wrong number of coordinates");
+			if (coordinates.length != 1) throw new IllegalArgumentException("Wrong number of coordinates");
 		return entries[coordinates[0]];
 	}
 	
@@ -124,8 +118,7 @@ public class DenseVector implements MutableVector, MutableTensor
 	public void set(final double value, final int... coordinates)
 	{
 		if (PerformanceArguments.getInstance().executeChecks)
-			if (coordinates.length != 1)
-				throw new IllegalArgumentException("Wrong number of coordinates");
+			if (coordinates.length != 1) throw new IllegalArgumentException("Wrong number of coordinates");
 		entries[coordinates[0]] = value;
 	}
 	
@@ -133,8 +126,7 @@ public class DenseVector implements MutableVector, MutableTensor
 	public void add(final double value, final int... coordinates)
 	{
 		if (PerformanceArguments.getInstance().executeChecks)
-			if (coordinates.length != 1)
-				throw new IllegalArgumentException("Wrong number of coordinates");
+			if (coordinates.length != 1) throw new IllegalArgumentException("Wrong number of coordinates");
 		entries[coordinates[0]] += value;
 	}
 	
@@ -147,9 +139,8 @@ public class DenseVector implements MutableVector, MutableTensor
 	@Override
 	public void subInPlace(final Tensor other)
 	{
-		if (PerformanceArguments.getInstance().executeChecks)
-			if (!other.getShape().equals(getShape()))
-				throw new IllegalArgumentException("Other has wrong shape");
+		if (PerformanceArguments.getInstance().executeChecks) if (!other.getShape().equals(getShape()))
+			throw new IllegalArgumentException("Other has wrong shape");
 		for (int i = 0; i < getLength(); i++)
 			entries[i] -= other.at(i);
 	}
@@ -169,9 +160,8 @@ public class DenseVector implements MutableVector, MutableTensor
 	@Override
 	public DenseVector add(final Tensor other)
 	{
-		if (PerformanceArguments.getInstance().executeChecks)
-			if (!getShape().equals(other.getShape()))
-				throw new IllegalArgumentException("Vectors are of different size");
+		if (PerformanceArguments.getInstance().executeChecks) if (!getShape().equals(other.getShape()))
+			throw new IllegalArgumentException("Vectors are of different size");
 		final DenseVector ret = new DenseVector(this);
 		if (!other.isSparse())
 		{
@@ -179,23 +169,20 @@ public class DenseVector implements MutableVector, MutableTensor
 			{
 				for (int i = 0; i < getLength(); i++)
 					ret.entries[i] = entries[i] + ((DenseVector) other).entries[i];
-			} else
-				for (int i = 0; i < getLength(); i++)
-				{
-					ret.add(other.at(i), i);
-				}
-		} else
-			for (final IntCoordinates key : other.getCoordinateEntryList().keySet())
-				ret.add(other.getCoordinateEntryList().get(key), key);
+			} else for (int i = 0; i < getLength(); i++)
+			{
+				ret.add(other.at(i), i);
+			}
+		} else for (final IntCoordinates key : other.getCoordinateEntryList().keySet())
+			ret.add(other.getCoordinateEntryList().get(key), key);
 		return ret;
 	}
 	
 	@Override
 	public DenseVector sub(final Tensor other)
 	{
-		if (PerformanceArguments.getInstance().executeChecks)
-			if (!getShape().equals(other.getShape()))
-				throw new IllegalArgumentException("Vectors are of different size");
+		if (PerformanceArguments.getInstance().executeChecks) if (!getShape().equals(other.getShape()))
+			throw new IllegalArgumentException("Vectors are of different size");
 		final DenseVector ret = new DenseVector(getLength());
 		if (other instanceof DenseVector)
 		{
@@ -248,8 +235,7 @@ public class DenseVector implements MutableVector, MutableTensor
 	{
 		if (PerformanceArguments.getInstance().executeChecks)
 		{
-			if (coordinates.length != 1)
-				throw new IllegalArgumentException("Wrong number of coordinates");
+			if (coordinates.length != 1) throw new IllegalArgumentException("Wrong number of coordinates");
 			if (coordinates[0] + small.getLength() > getLength())
 				throw new IllegalArgumentException("small Vector too large position");
 		}
@@ -280,8 +266,7 @@ public class DenseVector implements MutableVector, MutableTensor
 	@Override
 	public boolean equals(final Object obj)
 	{
-		if (!(obj instanceof Vector))
-			return false;
+		if (!(obj instanceof Vector)) return false;
 		return almostEqual((Tensor) obj);
 	}
 	
@@ -292,7 +277,7 @@ public class DenseVector implements MutableVector, MutableTensor
 		for (int i = 0; i < getLength(); i++)
 		{
 			final int elementHash = DoubleCompare.doubleHash(at(i));
-			ret = ret * 37 + (i + 2) * ((int) Math.signum(elementHash) + i + 3) * elementHash;
+			ret = ret * 37 + (i + 2) * (elementHash < 0 ? 3 : 2 + i + 3) * elementHash;
 		}
 		return ret;
 	}

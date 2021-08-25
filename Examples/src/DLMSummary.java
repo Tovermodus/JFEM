@@ -36,7 +36,7 @@ public class DLMSummary
 		nu = 10;
 		kappa = 10;
 		dt = 0.03;
-		timeSteps = 5;
+		timeSteps = 3;
 		initializeEulerian();
 		initializeLagrangian();
 		
@@ -201,7 +201,7 @@ public class DLMSummary
 			@Override
 			public CoordinateVector value(final CoordinateVector pos)
 			{
-				return new CoordinateVector(2);
+				return CoordinateVector.fromValues(-7, -7);
 			}
 		};
 	}

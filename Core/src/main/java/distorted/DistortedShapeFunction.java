@@ -14,8 +14,7 @@ import tensorproduct.geometry.TPFace;
 
 import java.util.*;
 
-public class DistortedShapeFunction implements FastEvaluatedScalarShapeFunction<DistortedCell, DistortedFace>,
-	Comparable<DistortedShapeFunction>
+public class DistortedShapeFunction implements FastEvaluatedScalarShapeFunction<DistortedCell, DistortedFace>, Comparable<DistortedShapeFunction>
 
 {
 	private final Map<DistortedCell, TPShapeFunction> shapeFunctionsOnCell;
@@ -30,8 +29,7 @@ public class DistortedShapeFunction implements FastEvaluatedScalarShapeFunction<
 		shapeFunctionsOnCell = new HashMap<>();
 		faces = new HashSet<>();
 		this.polynomialDegree = polynomialDegree;
-		firstDefinedFunction = new TPShapeFunction(cell.referenceCell, polynomialDegree,
-		                                           localIndex);
+		firstDefinedFunction = new TPShapeFunction(cell.referenceCell, polynomialDegree, localIndex);
 		firstDefinedCell = cell;
 		shapeFunctionsOnCell.put(cell, firstDefinedFunction);
 		checkIfPointOnFace(cell);
@@ -51,11 +49,9 @@ public class DistortedShapeFunction implements FastEvaluatedScalarShapeFunction<
 					for (final DistortedCell cellOfFace : face.getCells())
 					{
 						final TPShapeFunction newFunction = new TPShapeFunction(
-							cell.referenceCell,
-							polynomialDegree,
+							cell.referenceCell, polynomialDegree,
 							cellOfFace.transformPreciseToReferenceCell(
-								getNodeFunctional()
-									.getPoint()));
+								getNodeFunctional().getPoint()));
 						shapeFunctionsOnCell.put(cellOfFace, newFunction);
 						checkIfPointOnFace(cellOfFace);
 					}
@@ -85,11 +81,10 @@ public class DistortedShapeFunction implements FastEvaluatedScalarShapeFunction<
 	public double valueOnReferenceCell(final CoordinateVector pos, final DistortedCell cell)
 	{
 		if (PerformanceArguments.getInstance().executeChecks)
-			if (!cell.referenceCell.isInCell(pos))
-				throw new IllegalArgumentException("pos is not in cell");
-		if (shapeFunctionsOnCell.containsKey(cell))
-			return shapeFunctionsOnCell.get(cell).fastValue(pos);
-		return 0;
+			if (!cell.referenceCell.isInCell(pos)) throw new IllegalArgumentException("pos is not in cell");
+		//if (shapeFunctionsOnCell.containsKey(cell))
+		return shapeFunctionsOnCell.get(cell).fastValue(pos);
+		//return 0;
 	}
 	
 	public LagrangeNodeFunctional nodeFunctionalOnReferenceCell(final DistortedCell cell)
@@ -100,15 +95,14 @@ public class DistortedShapeFunction implements FastEvaluatedScalarShapeFunction<
 	public CoordinateVector gradientOnReferenceCell(final CoordinateVector pos, final DistortedCell cell)
 	{
 		if (PerformanceArguments.getInstance().executeChecks)
-			if (!cell.referenceCell.isInCell(pos))
-				throw new IllegalArgumentException("pos is not in cell");
-		if (shapeFunctionsOnCell.containsKey(cell))
-		{
-			final CoordinateMatrix mat = cell.transformationGradientFromReferenceCell(pos).inverse();
-			final CoordinateVector grad = shapeFunctionsOnCell.get(cell).gradient(pos);
-			return mat.tvMul(grad);
-		}
-		return new CoordinateVector(pos.getLength());
+			if (!cell.referenceCell.isInCell(pos)) throw new IllegalArgumentException("pos is not in cell");
+		//if (shapeFunctionsOnCell.containsKey(cell))
+		//{
+		final CoordinateMatrix mat = cell.transformationGradientFromReferenceCell(pos).inverse();
+		final CoordinateVector grad = shapeFunctionsOnCell.get(cell).gradient(pos);
+		return mat.tvMul(grad);
+		//}
+		//return new CoordinateVector(pos.getLength());
 	}
 	
 	@Override
@@ -132,9 +126,8 @@ public class DistortedShapeFunction implements FastEvaluatedScalarShapeFunction<
 	@Override
 	public LagrangeNodeFunctional getNodeFunctional()
 	{
-		return new LagrangeNodeFunctional(firstDefinedCell.transformFromReferenceCell(firstDefinedFunction
-			                                                                              .getNodeFunctional()
-			                                                                              .getPoint()));
+		return new LagrangeNodeFunctional(firstDefinedCell.transformFromReferenceCell(
+			firstDefinedFunction.getNodeFunctional().getPoint()));
 	}
 	
 	@Override
@@ -166,13 +159,11 @@ public class DistortedShapeFunction implements FastEvaluatedScalarShapeFunction<
 	@Override
 	public String toString()
 	{
-		return "DistortedShapeFunction{" +
-			"functionalpoint: " + getNodeFunctional().getPoint() + " ::: \t" +
-			getNodeFunctional().getPoint().at(0) + " " + DoubleCompare.doubleHash(
-			getNodeFunctional().getPoint().at(0)) +
-			" \t" +
-			getNodeFunctional().getPoint().at(1) + " " + DoubleCompare.doubleHash(
-			getNodeFunctional().getPoint().at(1)) + " \t" + hashCode() +
-			'}' + "\n";
+		return "DistortedShapeFunction{" + "functionalpoint: " + getNodeFunctional()
+			.getPoint() + " ::: \t" + getNodeFunctional().getPoint().at(0) + " " + DoubleCompare.doubleHash(
+			getNodeFunctional().getPoint().at(0)) + " \t" + getNodeFunctional()
+			.getPoint()
+			.at(1) + " " + DoubleCompare.doubleHash(
+			getNodeFunctional().getPoint().at(1)) + " \t" + hashCode() + '}' + "\n";
 	}
 }

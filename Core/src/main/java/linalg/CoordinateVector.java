@@ -71,7 +71,15 @@ public class CoordinateVector extends DenseVector implements Comparable<Coordina
 	
 	public CoordinateMatrix outer(final CoordinateVector other)
 	{
-		return new CoordinateMatrix(super.outer(other));
+		final CoordinateMatrix ret = new CoordinateMatrix(getLength(), other.getLength());
+		for (int i = 0; i < getLength(); i++)
+		{
+			for (int j = 0; j < other.getLength(); j++)
+			{
+				ret.set(at(i) * other.at(j), i, j);
+			}
+		}
+		return ret;
 	}
 	
 	public CoordinateMatrix asCoordinateMatrix()
