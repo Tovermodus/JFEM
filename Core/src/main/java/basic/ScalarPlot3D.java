@@ -20,24 +20,22 @@ public class ScalarPlot3D extends Plot
 	public int pixelWidth;
 	public int pixelHeight;
 	public final String title;
+	public double z;
 	
 	public ScalarPlot3D(final ScalarFunction function, final List<CoordinateVector> points, final int pointsPerDimension)
 	{
 		this(function.valuesInPoints(points), pointsPerDimension, "Unnamed");
 	}
 	
-	public ScalarPlot3D(final ScalarFunction function, final List<CoordinateVector> points, final int pointsPerDimension,
-	                    final String title)
+	public ScalarPlot3D(final ScalarFunction function, final List<CoordinateVector> points, final int pointsPerDimension, final String title)
 	{
 		this(function.valuesInPoints(points), pointsPerDimension, title);
 	}
 	
-	public ScalarPlot3D(final Map<CoordinateVector, Double> values, final int pointsPerDimension,
-	                    final String title)
+	public ScalarPlot3D(final Map<CoordinateVector, Double> values, final int pointsPerDimension, final String title)
 	{
 		for (final CoordinateVector c : values.keySet())
-			if (c.getLength() != 3)
-				throw new IllegalArgumentException("Not 3D");
+			if (c.getLength() != 3) throw new IllegalArgumentException("Not 3D");
 		this.values = values;
 		this.pointsPerDimension = pointsPerDimension;
 		maxValue = values.values().stream().parallel().max(Double::compare).orElse(0.0);
@@ -50,19 +48,19 @@ public class ScalarPlot3D extends Plot
 	public List<CoordinateVector> getClosestPoints(final double slider)
 	{
 		final double currentZ = min.z() + slider * (max.z() - min.z());
+		z = currentZ;
 		List<CoordinateVector> drawnVectors = new ArrayList<>(values.keySet());
 		
 		final ToDoubleFunction<CoordinateVector> sortFunction = value -> -Math.abs(value.z() - currentZ);
-		final Comparator<CoordinateVector> comparator = Comparator.comparingDouble(sortFunction)
-		                                                          .thenComparing(CoordinateVector::x).thenComparing(
-				CoordinateVector::y);
+		final Comparator<CoordinateVector> comparator = Comparator
+			.comparingDouble(sortFunction)
+			.thenComparing(CoordinateVector::x)
+			.thenComparing(CoordinateVector::y);
 		drawnVectors.sort(comparator);
 		final double multipleToSecureNoWhitespace = 2;
-		drawnVectors =
-			drawnVectors.subList(drawnVectors.size() - (int) (multipleToSecureNoWhitespace
-				                                                  * pointsPerDimension *
-				                                                  pointsPerDimension),
-			                     drawnVectors.size() - 1);
+		drawnVectors = drawnVectors.subList(
+			drawnVectors.size() - (int) (multipleToSecureNoWhitespace * pointsPerDimension * pointsPerDimension),
+			drawnVectors.size() - 1);
 		return drawnVectors;
 	}
 	
@@ -75,8 +73,7 @@ public class ScalarPlot3D extends Plot
 		for (final CoordinateVector co : getClosestPoints(slider))
 		{
 			ScalarPlot2D.drawSinglePoint(g, width, height, co, values.get(co), minValue, maxValue, min, max,
-			                             pixelWidth,
-			                             pixelHeight);
+			                             pixelWidth, pixelHeight);
 		}
 	}
 	

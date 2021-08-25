@@ -1,92 +1,99 @@
 package mixed;
 
-import basic.LagrangeNodeFunctional;
-import basic.PerformanceArguments;
 import basic.ScalarFunction;
 import basic.VectorFunction;
-import com.google.common.collect.Lists;
 import linalg.CoordinateVector;
-import linalg.DenseVector;
+import linalg.IntCoordinates;
 import linalg.SparseMatrix;
-import tensorproduct.*;
+import tensorproduct.CartesianGridSpace;
+import tensorproduct.ContinuousTPShapeFunction;
+import tensorproduct.ContinuousTPVectorFunction;
 import tensorproduct.geometry.TPCell;
 import tensorproduct.geometry.TPFace;
 
 import java.util.List;
 import java.util.TreeSet;
-import java.util.stream.Stream;
 
 public class TaylorHoodSpace extends CartesianGridSpace<QkQkFunction, MixedValue, MixedGradient, MixedHessian>
 {
 	
-	public TaylorHoodSpace(CoordinateVector startCoordinates, CoordinateVector endCoordinates,
-	                       List<Integer> cellsPerDimension)
+	public TaylorHoodSpace(final CoordinateVector startCoordinates, final CoordinateVector endCoordinates,
+	                       final List<Integer> cellsPerDimension)
+	{
+		super(startCoordinates, endCoordinates, cellsPerDimension);
+	}
+	
+	public TaylorHoodSpace(final CoordinateVector startCoordinates, final CoordinateVector endCoordinates,
+	                       final IntCoordinates cellsPerDimension)
 	{
 		super(startCoordinates, endCoordinates, cellsPerDimension);
 	}
 	
 	@Override
-	public void assembleFunctions(int polynomialDegree)
+	public void assembleFunctions(final int polynomialDegree)
 	{
 		shapeFunctions = new TreeSet<>();
 		assemblePressureFunctions(polynomialDegree);
 		assembleVelocityFunctions(polynomialDegree);
 		int i = 0;
-		for (QkQkFunction shapeFunction : shapeFunctions)
+		for (final QkQkFunction shapeFunction : shapeFunctions)
 			shapeFunction.setGlobalIndex(i++);
 	}
 	
-	private void assemblePressureFunctions(int polynomialDegree)
+	private void assemblePressureFunctions(final int polynomialDegree)
 	{
 		
-		for (TPCell cell : getCells())
+		for (final TPCell cell : getCells())
 		{
 			for (int i = 0; i < Math.pow(polynomialDegree + 1, getDimension()); i++)
 			{
-				QkQkFunction shapeFunction = new QkQkFunction(new ContinuousTPShapeFunction(cell,
-					polynomialDegree, i));
+				final QkQkFunction shapeFunction = new QkQkFunction(new ContinuousTPShapeFunction(cell,
+				                                                                                  polynomialDegree,
+				                                                                                  i));
 				shapeFunction.setGlobalIndex(shapeFunctions.size());
 				shapeFunctions.add(shapeFunction);
-				for (TPCell ce : shapeFunction.getCells())
+				for (final TPCell ce : shapeFunction.getCells())
 					supportOnCell.put(ce, shapeFunction);
-				for (TPFace face : shapeFunction.getFaces())
+				for (final TPFace face : shapeFunction.getFaces())
 					supportOnFace.put(face, shapeFunction);
 			}
 		}
 	}
 	
-	private void assembleVelocityFunctions(int polynomialDegree)
+	private void assembleVelocityFunctions(final int polynomialDegree)
 	{
 		
-		for (TPCell cell : getCells())
+		for (final TPCell cell : getCells())
 		{
 			for (int i = 0; i < Math.pow(polynomialDegree + 2, getDimension()) * getDimension(); i++)
 			{
-				QkQkFunction shapeFunction = new QkQkFunction(new ContinuousTPVectorFunction(cell,
-					polynomialDegree + 1, i));
+				final QkQkFunction shapeFunction = new QkQkFunction(new ContinuousTPVectorFunction(cell,
+				                                                                                   polynomialDegree +
+					                                                                                   1,
+				                                                                                   i));
 				shapeFunction.setGlobalIndex(shapeFunctions.size());
 				shapeFunctions.add(shapeFunction);
-				for (TPCell ce : shapeFunction.getCells())
+				for (final TPCell ce : shapeFunction.getCells())
 					supportOnCell.put(ce, shapeFunction);
-				for (TPFace face : shapeFunction.getFaces())
+				for (final TPFace face : shapeFunction.getFaces())
 					supportOnFace.put(face, shapeFunction);
-				
 			}
 		}
 	}
 	
-	public void setVelocityBoundaryValues(VectorFunction boundaryValues)
+	public void setVelocityBoundaryValues(final VectorFunction boundaryValues)
 	{
-		MixedFunction boundaryMixed = new MixedFunction(boundaryValues);
-		setBoundaryValues(boundaryMixed);
-	}
-	public void setPressureBoundaryValues(ScalarFunction boundaryValues)
-	{
-		MixedFunction boundaryMixed = new MixedFunction(boundaryValues);
+		final MixedFunction boundaryMixed = new MixedFunction(boundaryValues);
 		setBoundaryValues(boundaryMixed);
 	}
 	
-	public void setVelocityBoundaryValues(ScalarFunction indicatorFunction, SparseMatrix mad)
+	public void setPressureBoundaryValues(final ScalarFunction boundaryValues)
+	{
+		final MixedFunction boundaryMixed = new MixedFunction(boundaryValues);
+		setBoundaryValues(boundaryMixed);
+	}
+	
+	public static void setVelocityBoundaryValues(final ScalarFunction indicatorFunction, final SparseMatrix mad)
 	{
 		throw new UnsupportedOperationException("slkdjfhl");
 	}

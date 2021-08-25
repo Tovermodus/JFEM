@@ -51,6 +51,18 @@ public class CoordinateMatrix extends DenseMatrix
 	}
 	
 	@Override
+	public CoordinateMatrix mmMul(final Matrix matrix)
+	{
+		return new CoordinateMatrix(super.mmMul(matrix));
+	}
+	
+	@Override
+	public CoordinateMatrix tmMul(final Matrix matrix)
+	{
+		return new CoordinateMatrix(super.tmMul(matrix));
+	}
+	
+	@Override
 	public CoordinateMatrix add(final Tensor other)
 	{
 		if (PerformanceArguments.getInstance().executeChecks)

@@ -15,6 +15,8 @@ public class DistortedVectorCellIntegral extends CellIntegral<DistortedCell, Dis
 {
 	
 	public static final String H1 = "H1";
+	public static final String VALUE_VALUE = "ValueValue";
+	public static final String GRAD_GRAD = "GradGrad";
 	
 	public DistortedVectorCellIntegral(final double weight, final String name, final QuadratureRule1D quadratureRule1D)
 	{
@@ -88,6 +90,25 @@ public class DistortedVectorCellIntegral extends CellIntegral<DistortedCell, Dis
 				                                      + shapeFunction1
 				                                .gradientOnReferenceCell(x, cell)
 				                                .frobeniusInner(shapeFunction2.gradientOnReferenceCell(x, cell)))
+				                                * (Double) weight.value(x),
+			                                cell,
+			                                quadratureRule1D);
+		}
+		if (name.equals(VALUE_VALUE))
+		{
+			return integrateOnReferenceCell(x -> (shapeFunction1.valueOnReferenceCell(x, cell).inner(
+				shapeFunction2.valueOnReferenceCell(x, cell))
+				                                      * (Double) weight.value(x)),
+			                                cell,
+			                                quadratureRule1D);
+		}
+		if (name.equals(GRAD_GRAD))
+		{
+			return integrateOnReferenceCell(x -> (shapeFunction1
+				                                      .gradientOnReferenceCell(x, cell)
+				                                      .frobeniusInner(
+					                                      shapeFunction2.gradientOnReferenceCell(x,
+					                                                                             cell)))
 				                                * (Double) weight.value(x),
 			                                cell,
 			                                quadratureRule1D);

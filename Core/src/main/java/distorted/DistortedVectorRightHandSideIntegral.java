@@ -9,6 +9,7 @@ import linalg.CoordinateVector;
 public class DistortedVectorRightHandSideIntegral extends RightHandSideIntegral<DistortedCell, DistortedVectorShapeFunction>
 {
 	public static final String H1 = "H1";
+	public static final String VALUE = "Value";
 	
 	public DistortedVectorRightHandSideIntegral(final VectorFunction rightHandSide, final String name)
 	{
@@ -27,11 +28,24 @@ public class DistortedVectorRightHandSideIntegral extends RightHandSideIntegral<
 						 final CoordinateVector xOnGrid = cell.transformFromReferenceCell(x);
 						 return shapeFunction1.valueOnReferenceCell(x, cell).inner(
 							 (CoordinateVector) (rightHandSide.value(
-								 cell.transformFromReferenceCell(x))))
+								 cell.transformFromReferenceCell(xOnGrid))))
 							 + shapeFunction1.gradientOnReferenceCell(x, cell)
 							                 .frobeniusInner(
 								                 (CoordinateMatrix) (rightHandSide.gradient(
 									                 xOnGrid)));
+					 },
+					 cell,
+					 quadratureRule1D);
+		}
+		if (name.equals(VALUE))
+		{
+			return DistortedCellIntegral
+				.integrateOnReferenceCell
+					(x ->
+					 {
+						 return shapeFunction1.valueOnReferenceCell(x, cell).inner(
+							 (CoordinateVector) (rightHandSide.value(
+								 cell.transformFromReferenceCell(x))));
 					 },
 					 cell,
 					 quadratureRule1D);

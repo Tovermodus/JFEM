@@ -5,25 +5,29 @@ import basic.Assembleable;
 import basic.ShapeFunction;
 import com.google.common.collect.HashMultimap;
 import com.google.common.collect.Sets;
-import linalg.*;
+import linalg.CoordinateVector;
+import linalg.DenseVector;
+import linalg.IntCoordinates;
+import linalg.SparseMatrix;
 import tensorproduct.geometry.CartesianGrid;
 import tensorproduct.geometry.TPCell;
 import tensorproduct.geometry.TPFace;
 
-import java.util.*;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.TreeMap;
 
 public abstract class CartesianGridSpace<ST extends ShapeFunction<TPCell, TPFace, valueT, gradientT, hessianT>,
 	valueT, gradientT, hessianT>
 	implements AcceptsMatrixBoundaryValues<TPCell, TPFace, ST, valueT, gradientT, hessianT>, Assembleable
 {
 	protected final CartesianGrid grid;
-	protected final HashMultimap<TPCell,ST> supportOnCell;
-	protected final HashMultimap<TPFace,ST> supportOnFace;
+	protected final HashMultimap<TPCell, ST> supportOnCell;
+	protected final HashMultimap<TPFace, ST> supportOnFace;
 	protected Set<ST> shapeFunctions;
 	protected SparseMatrix systemMatrix;
 	protected DenseVector rhs;
-	private volatile int cellCounter = 0;
-	private volatile int faceCounter = 0;
 	Set<Integer> fixedNodes;
 	
 	@Override
@@ -32,16 +36,24 @@ public abstract class CartesianGridSpace<ST extends ShapeFunction<TPCell, TPFace
 		return fixedNodes;
 	}
 	
-	public CartesianGridSpace(CoordinateVector startCoordinates, CoordinateVector endCoordinates,
-	                          List<Integer> cellsPerDimension)
+	public CartesianGridSpace(final CoordinateVector startCoordinates, final CoordinateVector endCoordinates,
+	                          final List<Integer> cellsPerDimension)
 	{
-		if(startCoordinates.getLength() != endCoordinates.getLength()|| startCoordinates.getLength() != cellsPerDimension.size())
+		this(startCoordinates, endCoordinates, new IntCoordinates(cellsPerDimension));
+	}
+	
+	public CartesianGridSpace(final CoordinateVector startCoordinates, final CoordinateVector endCoordinates,
+	                          final IntCoordinates cellsPerDimension)
+	{
+		if (startCoordinates.getLength() != endCoordinates.getLength() ||
+			startCoordinates.getLength() != cellsPerDimension.getDimension())
 			throw new IllegalArgumentException();
 		supportOnCell = HashMultimap.create();
 		supportOnFace = HashMultimap.create();
-		grid = new CartesianGrid(startCoordinates, endCoordinates, new IntCoordinates(cellsPerDimension));
+		grid = new CartesianGrid(startCoordinates, endCoordinates, cellsPerDimension);
 		fixedNodes = Sets.newConcurrentHashSet();
 	}
+	
 	@Override
 	public void assembleCells()
 	{
@@ -54,7 +66,7 @@ public abstract class CartesianGridSpace<ST extends ShapeFunction<TPCell, TPFace
 	@Override
 	public void initializeSystemMatrix()
 	{
-		systemMatrix = new SparseMatrix(shapeFunctions.size(),shapeFunctions.size());
+		systemMatrix = new SparseMatrix(shapeFunctions.size(), shapeFunctions.size());
 	}
 	
 	@Override
@@ -91,8 +103,8 @@ public abstract class CartesianGridSpace<ST extends ShapeFunction<TPCell, TPFace
 	public Map<Integer, ST> getShapeFunctions()
 	{
 		
-		Map<Integer, ST> functionNumbers = new TreeMap<>();
-		for(ST shapeFunction:shapeFunctions)
+		final Map<Integer, ST> functionNumbers = new TreeMap<>();
+		for (final ST shapeFunction : shapeFunctions)
 			functionNumbers.put(shapeFunction.getGlobalIndex(), shapeFunction);
 		return functionNumbers;
 	}
@@ -104,22 +116,20 @@ public abstract class CartesianGridSpace<ST extends ShapeFunction<TPCell, TPFace
 	}
 	
 	@Override
-	public Set<ST> getShapeFunctionsWithSupportOnCell(TPCell cell)
+	public Set<ST> getShapeFunctionsWithSupportOnCell(final TPCell cell)
 	{
 		return supportOnCell.get(cell);
 	}
 	
 	@Override
-	public Set<ST> getShapeFunctionsWithSupportOnFace(TPFace face)
+	public Set<ST> getShapeFunctionsWithSupportOnFace(final TPFace face)
 	{
 		return supportOnFace.get(face);
 	}
 	
 	@Override
-	public List<CoordinateVector> generatePlotPoints(int resolution)
+	public List<CoordinateVector> generatePlotPoints(final int resolution)
 	{
 		return grid.generatePlotPoints(resolution);
 	}
-	
-	
 }

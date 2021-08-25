@@ -1,28 +1,31 @@
 package basic;
 
+import linalg.CoordinateMatrix;
 import linalg.CoordinateVector;
 import linalg.Vector;
 
 import java.util.HashMap;
 import java.util.Map;
 
-public class VectorFESpaceFunction<ST extends VectorShapeFunction<?,?>> implements VectorFunction
+public class VectorFESpaceFunction<ST extends VectorShapeFunction<?, ?>> implements VectorFunction
 {
-	private final HashMap<ST, Double> coefficients;
-	public VectorFESpaceFunction(ST[] functions, double[] coefficients)
+	protected final HashMap<ST, Double> coefficients;
+	
+	public VectorFESpaceFunction(final ST[] functions, final double[] coefficients)
 	{
-		assert(functions.length == coefficients.length);
+		assert (functions.length == coefficients.length);
 		this.coefficients = new HashMap<>();
-		for(int i = 0; i < functions.length; i++)
+		for (int i = 0; i < functions.length; i++)
 		{
 			this.coefficients.put(functions[i], coefficients[i]);
 		}
 	}
-	public VectorFESpaceFunction(Map<Integer, ST> functions, Vector coefficients)
+	
+	public VectorFESpaceFunction(final Map<Integer, ST> functions, final Vector coefficients)
 	{
-		assert(functions.size() == coefficients.size());
+		assert (functions.size() == coefficients.size());
 		this.coefficients = new HashMap<>();
-		for(Map.Entry<Integer,ST> function:functions.entrySet())
+		for (final Map.Entry<Integer, ST> function : functions.entrySet())
 		{
 			this.coefficients.put(function.getValue(), coefficients.at(function.getKey()));
 		}
@@ -35,9 +38,25 @@ public class VectorFESpaceFunction<ST extends VectorShapeFunction<?,?>> implemen
 	}
 	
 	@Override
-	public CoordinateVector value(CoordinateVector pos)
+	public CoordinateVector value(final CoordinateVector pos)
 	{
-		return coefficients.entrySet().stream().parallel().map(entry->entry.getKey().value(pos).mul(entry.getValue())).reduce(new CoordinateVector(getDomainDimension()), CoordinateVector::add);
+		return coefficients
+			.entrySet()
+			.stream()
+			.parallel()
+			.map(entry -> entry.getKey().value(pos).mul(entry.getValue()))
+			.reduce(new CoordinateVector(getDomainDimension()), CoordinateVector::add);
+	}
+	
+	@Override
+	public CoordinateMatrix gradient(final CoordinateVector pos)
+	{
+		return coefficients
+			.entrySet()
+			.stream()
+			.parallel()
+			.map(entry -> entry.getKey().gradient(pos).mul(entry.getValue()))
+			.reduce(new CoordinateMatrix(getRangeDimension(), getDomainDimension()), CoordinateMatrix::add);
 	}
 	
 	@Override

@@ -6,8 +6,7 @@ import distorted.geometry.DistortedFace;
 import linalg.CoordinateMatrix;
 import linalg.CoordinateVector;
 
-public class DistortedVectorShapeFunction extends SingleComponentVectorShapeFunction<DistortedCell, DistortedFace,
-	DistortedShapeFunction, DistortedVectorShapeFunction>
+public class DistortedVectorShapeFunction extends SingleComponentVectorShapeFunction<DistortedCell, DistortedFace, DistortedShapeFunction, DistortedVectorShapeFunction> implements DistortedVectorFunction
 
 {
 	public DistortedVectorShapeFunction(final DistortedCell supportCell, final int polynomialDegree, final int localIndex)
@@ -20,16 +19,17 @@ public class DistortedVectorShapeFunction extends SingleComponentVectorShapeFunc
 		super(componentFunction, component);
 	}
 	
-	public CoordinateVector valueOnReferenceCell(CoordinateVector x, DistortedCell cell)
+	public CoordinateVector valueOnReferenceCell(final CoordinateVector x, final DistortedCell cell)
 	{
-		return CoordinateVector.getUnitVector(getRangeDimension(), getComponent())
-		                       .mul(getComponentFunction().valueOnReferenceCell(x, cell));
+		return CoordinateVector
+			.getUnitVector(getRangeDimension(), getComponent())
+			.mul(getComponentFunction().valueOnReferenceCell(x, cell));
 	}
 	
-	public CoordinateMatrix gradientOnReferenceCell(CoordinateVector x, DistortedCell cell)
+	public CoordinateMatrix gradientOnReferenceCell(final CoordinateVector x, final DistortedCell cell)
 	{
-		return getComponentFunction().gradientOnReferenceCell(x, cell)
-		                             .outer(CoordinateVector.getUnitVector(getDomainDimension(),
-		                                                                   getComponent()));
+		return getComponentFunction()
+			.gradientOnReferenceCell(x, cell)
+			.outer(CoordinateVector.getUnitVector(getDomainDimension(), getComponent()));
 	}
 }

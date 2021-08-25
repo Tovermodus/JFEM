@@ -53,7 +53,7 @@ public class SparseMatrix implements MutableMatrix, DirectlySolvable, Decomposab
 	}
 	
 	@Override
-	public Vector solve(final Vector rhs)
+	public DenseVector solve(final Vector rhs)
 	{
 		return new DenseMatrix(this).solve(rhs);
 	}
@@ -315,7 +315,7 @@ public class SparseMatrix implements MutableMatrix, DirectlySolvable, Decomposab
 	}
 	
 	@Override
-	public Vector mvMul(final Vector vector)
+	public DenseVector mvMul(final Vector vector)
 	{
 		if (PerformanceArguments.getInstance().executeChecks)
 			if (getCols() != (vector.getLength()))
@@ -327,7 +327,7 @@ public class SparseMatrix implements MutableMatrix, DirectlySolvable, Decomposab
 	}
 	
 	@Override
-	public Vector tvMul(final Vector vector)
+	public DenseVector tvMul(final Vector vector)
 	{
 		if (PerformanceArguments.getInstance().executeChecks)
 			if (getCols() != (vector.getLength()))
