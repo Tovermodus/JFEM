@@ -36,7 +36,7 @@ public class DLMSummary
 		nu = 10;
 		kappa = 10;
 		dt = 0.03;
-		timeSteps = 3;
+		timeSteps = 2;
 		initializeEulerian();
 		initializeLagrangian();
 		
@@ -49,12 +49,15 @@ public class DLMSummary
 		System.out.println("abf");
 		writeAs(constantSystemMatrix);
 		System.out.println("as");
+		
 		writeCs(constantSystemMatrix);
 		System.out.println("Cs");
 		DenseVector currentIterate = new DenseVector(nEulerian + nLagrangian + nTransfer);
 		DenseVector lastIterate = new DenseVector(nEulerian + nLagrangian + nTransfer);
 		generateFirstEulerianIterates(currentIterate);
 		generateFirstLagrangianIterates(currentIterate, lastIterate);
+		System.out.println(lastIterate.slice(nEulerian, nEulerian + nLagrangian));
+		System.out.println(currentIterate.slice(nEulerian, nEulerian + nLagrangian));
 		System.out.println("firstIts");
 		writeBoundaryValues(constantSystemMatrix, currentIterate, 0);
 		writeBoundaryValues(constantSystemMatrix, lastIterate, -dt);
@@ -64,21 +67,29 @@ public class DLMSummary
 			eulerianPoints, -dt));
 		final Map<CoordinateVector, CoordinateVector> vvals = (new MixedFESpaceFunction<>(
 			eulerian.getShapeFunctions(), lastIterate).velocityValuesInPointsAtTime(eulerianPoints, -dt));
-		pvals.putAll(new MixedFESpaceFunction<>(eulerian.getShapeFunctions(),
-		                                        currentIterate).pressureValuesInPointsAtTime(eulerianPoints,
-		                                                                                     0));
-		vvals.putAll(new MixedFESpaceFunction<>(eulerian.getShapeFunctions(),
-		                                        currentIterate).velocityValuesInPointsAtTime(eulerianPoints,
-		                                                                                     0));
 		
+		final PlotWindow p = new PlotWindow();
+		p.addPlot(new MatrixPlot(constantSystemMatrix));
+		p.addPlot(new MatrixPlot(constantSystemMatrix.slice(new IntCoordinates(nEulerian, nEulerian),
+		                                                    new IntCoordinates(nEulerian + nLagrangian,
+		                                                                       nEulerian + nLagrangian))));
 		for (int i = 1; i < timeSteps; i++)
 		{
-			rightHandSide = constantRightHandSide;
-			systemMatrix = constantSystemMatrix;
+			rightHandSide = new DenseVector(constantRightHandSide);
+			systemMatrix = new SparseMatrix(constantSystemMatrix);
+			pvals.putAll(new MixedFESpaceFunction<>(eulerian.getShapeFunctions(),
+			                                        currentIterate).pressureValuesInPointsAtTime(
+				eulerianPoints, (i - 1) * dt));
+			vvals.putAll(new MixedFESpaceFunction<>(eulerian.getShapeFunctions(),
+			                                        currentIterate).velocityValuesInPointsAtTime(
+				eulerianPoints, (i - 1) * dt));
+			System.out.println("saved Iterate");
 			writeF(rightHandSide, currentIterate.slice(0, nEulerian));
 			System.out.println("f");
+			System.out.println("RHS beforeG" + rightHandSide.slice(nEulerian, nEulerian + nLagrangian));
 			writeG(rightHandSide, currentIterate.slice(nEulerian, nEulerian + nLagrangian),
 			       lastIterate.slice(nEulerian, nEulerian + nLagrangian));
+			System.out.println("RHS afterG" + rightHandSide.slice(nEulerian, nEulerian + nLagrangian));
 			System.out.println("g");
 			writeD(rightHandSide, currentIterate.slice(nEulerian, nEulerian + nLagrangian));
 			System.out.println("d");
@@ -87,20 +98,22 @@ public class DLMSummary
 			writeBoundaryValues(systemMatrix, currentIterate, i * dt);
 			System.out.println("bdr");
 			System.out.println(i + "th iteration");
-			lastIterate = currentIterate;
+			lastIterate = new DenseVector(currentIterate);
 			currentIterate = systemMatrix.solve(rightHandSide);
-			writeBoundaryValues(systemMatrix, currentIterate, i * dt);
 			System.out.println("solved");
-			pvals.putAll(new MixedFESpaceFunction<>(eulerian.getShapeFunctions(),
-			                                        currentIterate).pressureValuesInPointsAtTime(
-				eulerianPoints, i * dt));
-			vvals.putAll(new MixedFESpaceFunction<>(eulerian.getShapeFunctions(),
-			                                        currentIterate).velocityValuesInPointsAtTime(
-				eulerianPoints, i * dt));
+			System.out.println(
+				"solved current iterate" + currentIterate.slice(nEulerian, nEulerian + nLagrangian));
+			if (i ==1)
+			{
+				p.addPlot(new MatrixPlot(systemMatrix));
+				p.addPlot(new MatrixPlot(systemMatrix.slice(new IntCoordinates(nEulerian, nEulerian),
+				                                            new IntCoordinates(nEulerian + nLagrangian,
+				                                                               nEulerian + nLagrangian))));
+			}
 		}
 		
-		final PlotWindow p = new PlotWindow();
 		final MixedPlot2DTime plot = new MixedPlot2DTime(pvals, vvals, eulerianPointsPerDimension);
+		p.addPlot(plot.addOverlay(new CircleOverlay(lagrangian, plot)));
 		p.addPlot(plot.addOverlay(new CircleOverlay(lagrangian, plot)));
 	}
 	
@@ -201,7 +214,7 @@ public class DLMSummary
 			@Override
 			public CoordinateVector value(final CoordinateVector pos)
 			{
-				return CoordinateVector.fromValues(-7, -7);
+				return CoordinateVector.fromValues(-7000, -7000);
 			}
 		};
 	}
@@ -229,7 +242,7 @@ public class DLMSummary
 	{
 		final CoordinateVector startCoordinates = CoordinateVector.fromValues(0, 0);
 		final CoordinateVector endCoordinates = CoordinateVector.fromValues(1, 1);
-		final IntCoordinates cellCounts = new IntCoordinates(10, 10);
+		final IntCoordinates cellCounts = new IntCoordinates(3, 3);
 		eulerian = new TaylorHoodSpace(startCoordinates, endCoordinates, cellCounts);
 		eulerian.assembleCells();
 		eulerian.assembleFunctions(1);
@@ -241,7 +254,7 @@ public class DLMSummary
 	{
 		final CoordinateVector center = CoordinateVector.fromValues(0.5, 0.5);
 		final double radius = 0.2;
-		lagrangian = new DistortedVectorSpace(center, radius, 0);
+		lagrangian = new DistortedVectorSpace(center, radius, 1);
 		lagrangian.assembleCells();
 		lagrangian.assembleFunctions(1);
 		nLagrangian = lagrangian.getShapeFunctions().size();
@@ -338,7 +351,7 @@ public class DLMSummary
 		int i = 0;
 		for (final Map.Entry<Integer, QkQkFunction> sfEntry : eulerian.getShapeFunctions().entrySet())
 		{
-			System.out.println(100.0 * (i++) / nEulerian);
+			if (i++ % 40 == 0) System.out.println(100.0 * i / nEulerian);
 			final QkQkFunction sf = sfEntry.getValue();
 			final DistortedVectorFunction vOfX = new DistortedVectorFunction()
 			{

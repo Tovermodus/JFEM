@@ -16,32 +16,30 @@ public class MatrixPlot extends Plot
 	{
 		this.m = m;
 		this.maxValue = m.absMaxElement();
-		if (maxValue > 1e30)
-			maxValue = 1e30;
+		if (maxValue > 1e30) maxValue = 1e30;
 	}
 	
 	@Override
 	public void drawValues(final Graphics g, final int width, final int height, final double slider)
 	{
-		pixelWidth = (width - 150) / m.getCols() + 1;
-		pixelHeight = (height - 150) / m.getRows() + 1;
+		pixelWidth = (width - 150) / Math.min(m.getCols(), 300) + 1;
+		pixelHeight = (height - 150) / Math.min(m.getRows(), 300) + 1;
+		final int skips = Math.max(1,m.getShape().size() / 90000);
+		int i = 0;
 		for (final IntCoordinates c : m.getShape().range())
 		{
-			drawSinglePoint(g, width, height, m.at(c), c);
+			if (i++ % skips == 0) drawSinglePoint(g, width, height, m.at(c), c);
 		}
 	}
 	
 	public void drawSinglePoint(final Graphics g, final int width, final int height, double val, final IntCoordinates coords)
 	{
-		if (Math.abs(val) > 1e30)
-			val = 1e30;
+		if (Math.abs(val) > 1e30) val = 1e30;
 		double logval = 0;
 		final double minlog = Math.log(IDENTIFIED_AS_ZERO);
-		if (Math.abs(val) > IDENTIFIED_AS_ZERO)
-			logval = Math.log(Math.abs(val)) - minlog;
+		if (Math.abs(val) > IDENTIFIED_AS_ZERO) logval = Math.log(Math.abs(val)) - minlog;
 		double maxlog = 1;
-		if (maxValue > IDENTIFIED_AS_ZERO)
-			maxlog = Math.log(maxValue) - minlog;
+		if (maxValue > IDENTIFIED_AS_ZERO) maxlog = Math.log(maxValue) - minlog;
 		//System.out.println(Math.log(Math.abs(val))+" "+logval+ " " + minlog + " " + maxlog + " " + Math.log
 		// (maxValue));
 		final int red = (int) (logval / maxlog * 255);

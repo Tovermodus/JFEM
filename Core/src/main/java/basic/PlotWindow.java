@@ -32,11 +32,14 @@ public class PlotWindow extends JFrame implements KeyListener, WindowListener, C
 		pan.add(slider, BorderLayout.CENTER);
 		pan.add(overlay, BorderLayout.EAST);
 		add(pan, BorderLayout.NORTH);
+		pan.setFocusable(true);
+		this.setFocusable(true);
 		setVisible(true);
 		d = new DrawThread(canvas, canvas.getWidth(), canvas.getHeight(), slider);
 		plots = new CopyOnWriteArrayList<>();
 		addComponentListener(this);
 		addKeyListener(this);
+		canvas.addKeyListener(this);
 		addMouseWheelListener(this);
 		addWindowListener(this);
 		overlay.addChangeListener(e ->
@@ -48,8 +51,7 @@ public class PlotWindow extends JFrame implements KeyListener, WindowListener, C
 	
 	public void addPlot(final Plot plot)
 	{
-		if (plots.size() == 0)
-			d.setPlot(plot);
+		if (plots.size() == 0) d.setPlot(plot);
 		plots.add(plot);
 	}
 	
@@ -83,25 +85,16 @@ public class PlotWindow extends JFrame implements KeyListener, WindowListener, C
 	public void keyPressed(final KeyEvent e)
 	{
 		int newValue = slider.getValue();
-		if (e.getKeyCode() == KeyEvent.VK_DOWN)
-			currentPlot--;
-		if (e.getKeyCode() == KeyEvent.VK_UP)
-			currentPlot++;
-		if (e.getKeyCode() == KeyEvent.VK_RIGHT)
-			newValue++;
-		if (e.getKeyCode() == KeyEvent.VK_LEFT)
-			newValue--;
-		if (newValue < 0)
-			newValue = 99;
-		if (newValue > 99)
-			newValue = 0;
-		if (plots.size() != 0)
-			currentPlot = currentPlot % plots.size();
-		while (currentPlot < 0)
-			currentPlot += plots.size();
-		//System.out.println(currentPlot);
-		if (plots.size() != 0)
-			d.setPlot(plots.get(currentPlot));
+		if (e.getKeyCode() == KeyEvent.VK_DOWN) currentPlot--;
+		if (e.getKeyCode() == KeyEvent.VK_UP) currentPlot++;
+		if (e.getKeyCode() == KeyEvent.VK_RIGHT) newValue++;
+		if (e.getKeyCode() == KeyEvent.VK_LEFT) newValue--;
+		if (newValue < 0) newValue = 99;
+		if (newValue > 99) newValue = 0;
+		if (plots.size() != 0) currentPlot = currentPlot % plots.size();
+		while (currentPlot < 0) currentPlot += plots.size();
+		System.out.println(currentPlot);
+		if (plots.size() != 0) d.setPlot(plots.get(currentPlot));
 		slider.setValue(newValue);
 	}
 	
@@ -114,8 +107,7 @@ public class PlotWindow extends JFrame implements KeyListener, WindowListener, C
 	public void mouseWheelMoved(final MouseWheelEvent e)
 	{
 		int newValue = (slider.getValue() + e.getWheelRotation());
-		if (newValue < 0)
-			newValue = 99;
+		if (newValue < 0) newValue = 99;
 		slider.setValue(newValue % 100);
 	}
 	
@@ -218,8 +210,7 @@ class DrawThread implements Runnable
 		content.getGraphics().setColor(Color.white);
 		content.getGraphics().fillRect(0, 0, width + 100, height + 100);
 		if (currentPlot != null)
-			currentPlot.draw(content.getGraphics(), width, height, 0.01 * slider.getValue(),
-			                 isChecked);
+			currentPlot.draw(content.getGraphics(), width, height, 0.01 * slider.getValue(), isChecked);
 		canvas.getGraphics().drawImage(content, 0, 0, null);
 	}
 	
