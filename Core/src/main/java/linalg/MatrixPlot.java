@@ -22,9 +22,9 @@ public class MatrixPlot extends Plot
 	@Override
 	public void drawValues(final Graphics g, final int width, final int height, final double slider)
 	{
-		pixelWidth = (width - 150) / Math.min(m.getCols(), 300) + 1;
-		pixelHeight = (height - 150) / Math.min(m.getRows(), 300) + 1;
-		final int skips = Math.max(1,m.getShape().size() / 90000);
+		pixelWidth = (width - 150) / Math.min(m.getCols(), 300) + 2;
+		pixelHeight = (height - 150) / Math.min(m.getRows(), 300) + 2;
+		final int skips = Math.max(1, m.getShape().size() / 90000);
 		int i = 0;
 		for (final IntCoordinates c : m.getShape().range())
 		{

@@ -56,6 +56,14 @@ public class CoordinateMatrix extends DenseMatrix
 	}
 	
 	@Override
+	public CoordinateMatrix mtMul(Matrix matrix)
+	{
+		if (PerformanceArguments.getInstance().executeChecks)
+			if (getCols() != (matrix.getCols()))
+				throw new IllegalArgumentException("Incompatible sizes");
+		return mmMul(matrix.transpose());
+	}
+	@Override
 	public CoordinateMatrix tmMul(final Matrix matrix)
 	{
 		return new CoordinateMatrix(super.tmMul(matrix));

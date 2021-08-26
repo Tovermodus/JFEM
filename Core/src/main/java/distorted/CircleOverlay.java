@@ -39,23 +39,17 @@ public class CircleOverlay extends Overlay
 	@Override
 	public void draw(final Graphics g, final int width, final int height, final double slider)
 	{
-		System.out.println("here");
 		for (int i = 0; i < 3600; i++)
 		{
-			final CoordinateVector circleCoordinate =
-				center.add(CoordinateVector
-					           .getUnitVector(2, 0)
-					           .mul(Math.cos(Math.PI * i / 1800))
-					           .mul(radius))
-				      .add(CoordinateVector
-					           .getUnitVector(2, 1)
-					           .mul(Math.sin(Math.PI * i / 1800))
-					           .mul(radius));
+			final CoordinateVector circleCoordinate = center
+				.add(CoordinateVector.getUnitVector(2, 0).mul(Math.cos(Math.PI * i / 1800)).mul(radius))
+				.add(CoordinateVector
+					     .getUnitVector(2, 1)
+					     .mul(Math.sin(Math.PI * i / 1800))
+					     .mul(radius));
 			ScalarPlot2D.drawSinglePoint(g, width, height, circleCoordinate,
-			                             minValue + (maxValue - minValue) * (i % 100) / 100,
-			                             minValue,
-			                             maxValue
-				, mins, maxs, 5, 5);
+			                             minValue + (maxValue - minValue) * (i % 100) / 100, minValue,
+			                             maxValue, mins, maxs, 5, 5);
 		}
 	}
 }

@@ -14,7 +14,6 @@ public abstract class Plot
 		g.drawString(title(), 20, height - 20);
 		if (overlay && o != null)
 		{
-			System.out.println("here0");
 			o.draw(g, width, height - 50, slider);
 		}
 	}

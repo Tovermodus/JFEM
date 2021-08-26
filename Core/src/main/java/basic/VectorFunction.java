@@ -1,27 +1,31 @@
 package basic;
 
 import com.google.common.base.Stopwatch;
-import linalg.*;
+import linalg.CoordinateMatrix;
+import linalg.CoordinateTensor;
+import linalg.CoordinateVector;
 
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentSkipListMap;
 import java.util.stream.Stream;
 
 public interface VectorFunction extends Function<CoordinateVector, CoordinateMatrix, CoordinateTensor>
 {
-	private double getComponentValue(CoordinateVector pos, int component)
+	private double getComponentValue(final CoordinateVector pos, final int component)
 	{
 		return value(pos).at(component);
 	}
-	private CoordinateVector getComponentGradient(CoordinateVector pos, int component)
+	
+	private CoordinateVector getComponentGradient(final CoordinateVector pos, final int component)
 	{
 		return (CoordinateVector) gradient(pos).unfoldDimension(0).get(component);
 	}
 	
 	int getRangeDimension();
 	
-	static VectorFunction fromRawFunction(Function<CoordinateVector, CoordinateMatrix, CoordinateTensor> function)
+	static VectorFunction fromRawFunction(final Function<CoordinateVector, CoordinateMatrix, CoordinateTensor> function)
 	{
 		return new VectorFunction()
 		{
@@ -38,24 +42,25 @@ public interface VectorFunction extends Function<CoordinateVector, CoordinateMat
 			}
 			
 			@Override
-			public CoordinateVector value(CoordinateVector pos)
+			public CoordinateVector value(final CoordinateVector pos)
 			{
 				return function.value(pos);
 			}
+			
 			@Override
-			public CoordinateMatrix gradient(CoordinateVector pos)
+			public CoordinateMatrix gradient(final CoordinateVector pos)
 			{
 				return function.gradient(pos);
 			}
 			
 			@Override
-			public CoordinateTensor hessian(CoordinateVector pos)
+			public CoordinateTensor hessian(final CoordinateVector pos)
 			{
 				return function.hessian(pos);
 			}
-			
 		};
 	}
+	
 	@Override
 	default CoordinateVector defaultValue()
 	{
@@ -74,50 +79,60 @@ public interface VectorFunction extends Function<CoordinateVector, CoordinateMat
 		return new CoordinateTensor(getRangeDimension(), getDomainDimension(), getDomainDimension());
 	}
 	
-	default Map<CoordinateVector, CoordinateVector> valuesInPoints(List<CoordinateVector> points)
+	default Map<CoordinateVector, CoordinateVector> valuesInPoints(final List<CoordinateVector> points)
 	{
-		ConcurrentHashMap<CoordinateVector, CoordinateVector> ret = new ConcurrentHashMap<>();
+		final ConcurrentHashMap<CoordinateVector, CoordinateVector> ret = new ConcurrentHashMap<>();
 		Stream<CoordinateVector> stream = points.stream();
-		if(PerformanceArguments.getInstance().parallelizeThreads)
-			stream = stream.parallel();
-		stream.forEach(point->ret.put(point, value(point)));
+		if (PerformanceArguments.getInstance().parallelizeThreads) stream = stream.parallel();
+		stream.forEach(point -> ret.put(point, value(point)));
 		return ret;
 	}
-	default Map<CoordinateVector, Double> componentValuesInPoints(List<CoordinateVector> points,
-	                                                                       int component)
+	
+	default Map<CoordinateVector, CoordinateVector> valuesInPointsAtTime(final List<CoordinateVector> points, final double t)
 	{
-		ConcurrentHashMap<CoordinateVector, Double> ret = new ConcurrentHashMap<>();
+		final ConcurrentSkipListMap<CoordinateVector, CoordinateVector> ret = new ConcurrentSkipListMap<>();
 		Stream<CoordinateVector> stream = points.stream();
-		if(PerformanceArguments.getInstance().parallelizeThreads)
-			stream = stream.parallel();
-		stream.forEach(point->ret.put(point, value(point).at(component)));
+		if (PerformanceArguments.getInstance().parallelizeThreads) stream = stream.parallel();
+		stream.forEach(point -> ret.put(point.addCoordinate(t), value(point)));
 		return ret;
 	}
-	default double divergence(CoordinateVector pos)
+	
+	default Map<CoordinateVector, Double> componentValuesInPoints(final List<CoordinateVector> points, final int component)
+	{
+		final ConcurrentHashMap<CoordinateVector, Double> ret = new ConcurrentHashMap<>();
+		Stream<CoordinateVector> stream = points.stream();
+		if (PerformanceArguments.getInstance().parallelizeThreads) stream = stream.parallel();
+		stream.forEach(point -> ret.put(point, value(point).at(component)));
+		return ret;
+	}
+	
+	default double divergence(final CoordinateVector pos)
 	{
 		double ret = 0;
-		CoordinateMatrix grad = gradient(pos);
-		for(int i = 0; i < getDomainDimension(); i++)
-			ret += grad.at(i,i);
+		final CoordinateMatrix grad = gradient(pos);
+		for (int i = 0; i < getDomainDimension(); i++)
+			ret += grad.at(i, i);
 		return ret;
 	}
-	default CoordinateVector curl(CoordinateVector pos)
+	
+	default CoordinateVector curl(final CoordinateVector pos)
 	{
-		Stopwatch s = Stopwatch.createStarted();
-		if(getDomainDimension() == 2)
+		final Stopwatch s = Stopwatch.createStarted();
+		if (getDomainDimension() == 2)
 		{
 			throw new IllegalStateException("wrong domain dimension");
 		}
-		CoordinateVector ret = new CoordinateVector(getDomainDimension());
-		CoordinateMatrix grad = gradient(pos);
-		ret.set(grad.at(2,1)-grad.at(1,2),0);
-		ret.set(grad.at(0,2)-grad.at(2,0),1);
-		ret.set(grad.at(1,0)-grad.at(0,1),2);
+		final CoordinateVector ret = new CoordinateVector(getDomainDimension());
+		final CoordinateMatrix grad = gradient(pos);
+		ret.set(grad.at(2, 1) - grad.at(1, 2), 0);
+		ret.set(grad.at(0, 2) - grad.at(2, 0), 1);
+		ret.set(grad.at(1, 0) - grad.at(0, 1), 2);
 		return ret;
 	}
+	
 	default ScalarFunction getDivergenceFunction()
 	{
-		VectorFunction me  = this;
+		final VectorFunction me = this;
 		return new ScalarFunction()
 		{
 			@Override
@@ -127,15 +142,16 @@ public interface VectorFunction extends Function<CoordinateVector, CoordinateMat
 			}
 			
 			@Override
-			public Double value(CoordinateVector pos)
+			public Double value(final CoordinateVector pos)
 			{
 				return me.divergence(pos);
 			}
 		};
 	}
-	default ScalarFunction getComponentFunction(int component)
+	
+	default ScalarFunction getComponentFunction(final int component)
 	{
-		int domainDimension = getDomainDimension();
+		final int domainDimension = getDomainDimension();
 		return new ScalarFunction()
 		{
 			@Override
@@ -145,13 +161,13 @@ public interface VectorFunction extends Function<CoordinateVector, CoordinateMat
 			}
 			
 			@Override
-			public Double value(CoordinateVector pos)
+			public Double value(final CoordinateVector pos)
 			{
-				return getComponentValue(pos,component);
+				return getComponentValue(pos, component);
 			}
 			
 			@Override
-			public CoordinateVector gradient(CoordinateVector pos)
+			public CoordinateVector gradient(final CoordinateVector pos)
 			{
 				return getComponentGradient(pos, component);
 			}

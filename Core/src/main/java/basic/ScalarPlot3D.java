@@ -17,9 +17,9 @@ public class ScalarPlot3D extends Plot
 	final public double maxValue;
 	final public CoordinateVector min;
 	final public CoordinateVector max;
+	public final String title;
 	public int pixelWidth;
 	public int pixelHeight;
-	public final String title;
 	public double z;
 	
 	public ScalarPlot3D(final ScalarFunction function, final List<CoordinateVector> points, final int pointsPerDimension)
@@ -57,10 +57,10 @@ public class ScalarPlot3D extends Plot
 			.thenComparing(CoordinateVector::x)
 			.thenComparing(CoordinateVector::y);
 		drawnVectors.sort(comparator);
-		final double multipleToSecureNoWhitespace = 2;
-		drawnVectors = drawnVectors.subList(
-			drawnVectors.size() - (int) (multipleToSecureNoWhitespace * pointsPerDimension * pointsPerDimension),
-			drawnVectors.size() - 1);
+		final double multipleToSecureNoWhitespace = 1;
+		drawnVectors = drawnVectors.subList(Math.max(0,
+		                                             drawnVectors.size() - (int) (multipleToSecureNoWhitespace * pointsPerDimension * pointsPerDimension)),
+		                                    drawnVectors.size() - 1);
 		return drawnVectors;
 	}
 	
