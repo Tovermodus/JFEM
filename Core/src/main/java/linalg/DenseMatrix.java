@@ -140,6 +140,18 @@ public class DenseMatrix implements MutableMatrix, Decomposable, DirectlySolvabl
 	}
 	
 	@Override
+	public int getRows()
+	{
+		return entries.length;
+	}
+	
+	@Override
+	public int getCols()
+	{
+		return entries[0].length;
+	}
+	
+	@Override
 	public void addInPlace(final Tensor other)
 	{
 		for (int i = 0; i < getRows(); i++)

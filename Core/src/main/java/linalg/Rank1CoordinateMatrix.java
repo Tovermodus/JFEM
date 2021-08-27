@@ -2,6 +2,11 @@ package linalg;
 
 public class Rank1CoordinateMatrix extends Rank1Matrix implements CoordinateMatrix
 {
+	public Rank1CoordinateMatrix(final CoordinateVector ver, final CoordinateVector hor)
+	{
+		super(ver, hor);
+	}
+	
 	@Override
 	public CoordinateVector mvMul(final Vector vector)
 	{
@@ -9,14 +14,12 @@ public class Rank1CoordinateMatrix extends Rank1Matrix implements CoordinateMatr
 	}
 	
 	@Override
-	public CoordinateDenseMatrix mmMul(Matrix matrix)
+	public Rank1CoordinateMatrix mmMul(final Matrix matrix)
 	{
-		return new CoordinateDenseMatrix(super.mmMul(matrix));
-	}
-	
-	public Rank1CoordinateMatrix(final CoordinateVector ver, final CoordinateVector hor)
-	{
-		super(ver, hor);
+		Vector tvm = matrix.tvMul(hor);
+		if (tvm instanceof CoordinateVector)
+			return new Rank1CoordinateMatrix((CoordinateVector) ver, (CoordinateVector) tvm);
+		else return new Rank1CoordinateMatrix((CoordinateVector) ver, new CoordinateVector(tvm));
 	}
 	
 	@Override

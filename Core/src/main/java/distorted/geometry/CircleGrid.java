@@ -40,10 +40,10 @@ public class CircleGrid
 		}
 		int hash = 379;
 		cells = ImmutableSet.copyOf(refinedCells.values());
-		for(DistortedCell cell:cells)
-			cell.setDone(hash++);
 		System.out.println(cells.size());
 		faces = ImmutableSet.copyOf(genFaces);
+		for(DistortedCell cell:cells)
+			cell.setDone(hash++);
 	}
 	
 	private static HashSet<DistortedCell> getCellsBelongingToFace(final DistortedFace f, final Collection<DistortedCell> from)

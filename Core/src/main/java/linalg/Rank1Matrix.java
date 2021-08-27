@@ -50,6 +50,12 @@ public class Rank1Matrix implements Matrix
 	}
 	
 	@Override
+	public double frobeniusInner(final Matrix other)
+	{
+		return ver.inner(other.mvMul(hor));
+	}
+	
+	@Override
 	public boolean isSparse()
 	{
 		return false;
@@ -74,8 +80,10 @@ public class Rank1Matrix implements Matrix
 	}
 	
 	@Override
-	public DenseMatrix mmMul(final Matrix matrix)
+	public Rank1Matrix mmMul(final Matrix matrix)
 	{
-		return new DenseMatrix(this).mmMul(matrix);
+		
+		Vector tvm = matrix.tvMul(hor);
+		return new Rank1Matrix(ver, tvm);
 	}
 }

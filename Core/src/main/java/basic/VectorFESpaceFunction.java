@@ -11,11 +11,13 @@ import java.util.Map;
 public class VectorFESpaceFunction<ST extends VectorShapeFunction<?, ?>> implements VectorFunction
 {
 	protected final HashMap<ST, Double> coefficients;
+	final ST someFunction;
 	
 	public VectorFESpaceFunction(final ST[] functions, final double[] coefficients)
 	{
 		assert (functions.length == coefficients.length);
 		this.coefficients = new HashMap<>();
+		someFunction = functions[0];
 		for (int i = 0; i < functions.length; i++)
 		{
 			this.coefficients.put(functions[i], coefficients[i]);
@@ -26,16 +28,20 @@ public class VectorFESpaceFunction<ST extends VectorShapeFunction<?, ?>> impleme
 	{
 		assert (functions.size() == coefficients.size());
 		this.coefficients = new HashMap<>();
+		boolean someFunctionPresent = false;
+		ST someOtherFunction = null;
 		for (final Map.Entry<Integer, ST> function : functions.entrySet())
 		{
-			this.coefficients.put(function.getValue(), coefficients.at(function.getKey()));
+			someOtherFunction = function.getValue();
+			this.coefficients.put(someOtherFunction, coefficients.at(function.getKey()));
 		}
+		someFunction = someOtherFunction;
 	}
 	
 	@Override
 	public int getDomainDimension()
 	{
-		return coefficients.keySet().iterator().next().getDomainDimension();
+		return someFunction.getDomainDimension();
 	}
 	
 	@Override

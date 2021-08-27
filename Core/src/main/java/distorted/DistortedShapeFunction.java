@@ -6,6 +6,8 @@ import basic.LagrangeNodeFunctional;
 import basic.PerformanceArguments;
 import distorted.geometry.DistortedCell;
 import distorted.geometry.DistortedFace;
+import it.unimi.dsi.fastutil.ints.Int2ObjectArrayMap;
+import it.unimi.dsi.fastutil.ints.Int2ObjectMap;
 import linalg.CoordinateMatrix;
 import linalg.CoordinateVector;
 import org.jetbrains.annotations.NotNull;
@@ -18,20 +20,23 @@ public class DistortedShapeFunction implements FastEvaluatedScalarShapeFunction<
 
 {
 	private final Map<DistortedCell, TPShapeFunction> shapeFunctionsOnCell;
+	private final Int2ObjectMap<TPShapeFunction> shapeFunctionsOnCellFast;
 	private final Set<DistortedFace> faces;
 	private final TPShapeFunction firstDefinedFunction;
 	private final DistortedCell firstDefinedCell;
 	int polynomialDegree;
-	private int globalIndex = -1;
+	private int globalIndex;
 	
 	public DistortedShapeFunction(final DistortedCell cell, final int polynomialDegree, final int localIndex)
 	{
 		shapeFunctionsOnCell = new HashMap<>();
+		shapeFunctionsOnCellFast = new Int2ObjectArrayMap<>();
 		faces = new HashSet<>();
 		this.polynomialDegree = polynomialDegree;
 		firstDefinedFunction = new TPShapeFunction(cell.referenceCell, polynomialDegree, localIndex);
 		firstDefinedCell = cell;
 		shapeFunctionsOnCell.put(cell, firstDefinedFunction);
+		shapeFunctionsOnCellFast.put(cell.doneCode(), firstDefinedFunction);
 		checkIfPointOnFace(cell);
 	}
 	
@@ -53,6 +58,7 @@ public class DistortedShapeFunction implements FastEvaluatedScalarShapeFunction<
 							cellOfFace.transformPreciseToReferenceCell(
 								getNodeFunctional().getPoint()));
 						shapeFunctionsOnCell.put(cellOfFace, newFunction);
+						shapeFunctionsOnCellFast.put(cellOfFace.doneCode(), newFunction);
 						checkIfPointOnFace(cellOfFace);
 					}
 				}
@@ -83,13 +89,13 @@ public class DistortedShapeFunction implements FastEvaluatedScalarShapeFunction<
 		if (PerformanceArguments.getInstance().executeChecks)
 			if (!cell.referenceCell.isInCell(pos)) throw new IllegalArgumentException("pos is not in cell");
 		//if (shapeFunctionsOnCell.containsKey(cell))
-		return shapeFunctionsOnCell.get(cell).fastValue(pos);
+		return shapeFunctionsOnCellFast.get(cell.doneCode()).fastValue(pos);
 		//return 0;
 	}
 	
 	public LagrangeNodeFunctional nodeFunctionalOnReferenceCell(final DistortedCell cell)
 	{
-		return shapeFunctionsOnCell.get(cell).getNodeFunctional();
+		return shapeFunctionsOnCellFast.get(cell.doneCode()).getNodeFunctional();
 	}
 	
 	public CoordinateVector gradientOnReferenceCell(final CoordinateVector pos, final DistortedCell cell)
@@ -99,7 +105,7 @@ public class DistortedShapeFunction implements FastEvaluatedScalarShapeFunction<
 		//if (shapeFunctionsOnCell.containsKey(cell))
 		//{
 		final CoordinateMatrix mat = cell.transformationGradientFromReferenceCell(pos).inverse();
-		final CoordinateVector grad = shapeFunctionsOnCell.get(cell).gradient(pos);
+		final CoordinateVector grad = shapeFunctionsOnCellFast.get(cell.doneCode()).gradient(pos);
 		return mat.tvMul(grad);
 		//}
 		//return new CoordinateVector(pos.getLength());

@@ -529,7 +529,6 @@ public class DistortedCell implements CellWithReferenceCell<DistortedCell, Disto
 	@Override
 	public int hashCode()
 	{
-		//if (this.hash != -1) return this.hash;
 		int hash = 7;
 		for (final CoordinateVector vertex : vertices)
 		{
@@ -566,5 +565,10 @@ public class DistortedCell implements CellWithReferenceCell<DistortedCell, Disto
 	public String toString()
 	{
 		return "DistortedCell{" + "vertices=" + Arrays.toString(vertices) + '}';
+	}
+	
+	public int doneCode()
+	{
+		return hash;
 	}
 }
