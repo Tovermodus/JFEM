@@ -28,7 +28,7 @@ public class VectorFESpaceFunction<ST extends VectorShapeFunction<?, ?>> impleme
 	{
 		assert (functions.size() == coefficients.size());
 		this.coefficients = new HashMap<>();
-		boolean someFunctionPresent = false;
+		final boolean someFunctionPresent = false;
 		ST someOtherFunction = null;
 		for (final Map.Entry<Integer, ST> function : functions.entrySet())
 		{
@@ -70,6 +70,6 @@ public class VectorFESpaceFunction<ST extends VectorShapeFunction<?, ?>> impleme
 	@Override
 	public int getRangeDimension()
 	{
-		return coefficients.keySet().iterator().next().getRangeDimension();
+		return someFunction.getRangeDimension();
 	}
 }

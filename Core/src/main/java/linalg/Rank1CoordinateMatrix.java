@@ -16,7 +16,7 @@ public class Rank1CoordinateMatrix extends Rank1Matrix implements CoordinateMatr
 	@Override
 	public Rank1CoordinateMatrix mmMul(final Matrix matrix)
 	{
-		Vector tvm = matrix.tvMul(hor);
+		final Vector tvm = matrix.tvMul(hor);
 		if (tvm instanceof CoordinateVector)
 			return new Rank1CoordinateMatrix((CoordinateVector) ver, (CoordinateVector) tvm);
 		else return new Rank1CoordinateMatrix((CoordinateVector) ver, new CoordinateVector(tvm));
@@ -49,7 +49,7 @@ public class Rank1CoordinateMatrix extends Rank1Matrix implements CoordinateMatr
 	@Override
 	public CoordinateDenseMatrix add(final Tensor other)
 	{
-		return new CoordinateDenseMatrix(super.add(other));
+		return new CoordinateDenseMatrix(this).add(other);
 	}
 	
 	@Override
