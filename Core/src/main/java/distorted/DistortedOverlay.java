@@ -43,8 +43,8 @@ public class DistortedOverlay extends Overlay
 		int i = 0;
 		for (final CoordinateVector c : space.generatePlotPoints(pointsPerCell))
 		{
-			ScalarPlot2D.drawSinglePoint(g, width, height, X.value(c), (i++ % pointsPerCell*3.3), 0, 100,
-			                             min, max, 2, 2);
+			ScalarPlot2D.drawSinglePoint(g, width, height, X.value(c), (i++ % pointsPerCell*3.3) % 100, 0,
+			                             100, min, max, 2, 2);
 		}
 	}
 }
