@@ -45,6 +45,8 @@ public class PlotWindow extends JFrame implements KeyListener, WindowListener, C
 		overlay.addChangeListener(e ->
 		                          {
 			                          d.isChecked = overlay.isSelected();
+			                          pan.setFocusable(true);
+			                          this.setFocusable(true);
 		                          });
 		Executors.newSingleThreadExecutor().execute(d);
 	}

@@ -1,6 +1,5 @@
 import basic.PlotWindow;
 import basic.ScalarFunction;
-import basic.VectorFESpaceFunction;
 import basic.VectorFunction;
 import distorted.*;
 import distorted.geometry.DistortedCell;
@@ -38,9 +37,9 @@ public class DLMSummary
 		rhoF = 1;
 		rhoS = 2;
 		nu = 1;
-		kappa = 1;
-		dt = 0.01;
-		timeSteps = 10;
+		kappa = 0;
+		dt = 0.001;
+		timeSteps = 7;
 		initializeEulerian();
 		initializeLagrangian();
 		
@@ -64,19 +63,18 @@ public class DLMSummary
 		writeBoundaryValues(constantSystemMatrix, currentIterate, 0);
 		writeBoundaryValues(constantSystemMatrix, lastIterate, -dt);
 		System.out.println("bdrs");
-		final Map<CoordinateVector, Double> pvals = (new MixedFESpaceFunction<>(eulerian.getShapeFunctions(),
-		                                                                        currentIterate.slice(0,
-		                                                                                             nEulerian))
-			                                             .pressureValuesInPointsAtTime(eulerianPoints,
-			                                                                           -dt));
-		final Map<CoordinateVector, CoordinateVector> vvals = (new MixedFESpaceFunction<>(
-			eulerian.getShapeFunctions(), currentIterate.slice(0, nEulerian)).velocityValuesInPointsAtTime(
-			eulerianPoints, -dt));
-		final Map<CoordinateVector, CoordinateVector> dvals = (new VectorFESpaceFunction<>(
-			lagrangian.getShapeFunctions(), currentIterate
-			.slice(nEulerian, nEulerian + nLagrangian)
-			.sub(lastIterate.slice(nEulerian, nEulerian + nLagrangian))).valuesInPointsAtTime(
-			eulerianPoints, -dt));
+		final Map<CoordinateVector, Double> pvals = getUp(currentIterate)
+			.pressureValuesInPointsAtTime(eulerianPoints, -dt);
+		final Map<CoordinateVector, CoordinateVector> vvals = getUp(currentIterate)
+			.velocityValuesInPointsAtTime(eulerianPoints, -dt);
+		final Map<CoordinateVector, CoordinateVector> dvals = getX(lastIterate)
+			.valuesInPointsAtTime(eulerianPoints, -dt);
+		final Map<CoordinateVector, CoordinateVector> derivVals = getX(lastIterate.mul(0))
+			.valuesInPointsAtTime(eulerianPoints, -dt);
+		dvals.forEach(this::subtractIdentityOnLagrangianMesh);
+		final Map<CoordinateVector, CoordinateVector> uXvals = concatenateVelocityWithX(getUp(lastIterate),
+		                                                                                lastIterate)
+			.valuesInPointsAtTime(eulerianPoints, -dt);
 		
 		final DenseMatrix iterateHistory = new DenseMatrix(timeSteps + 1, nEulerian + nLagrangian + nTransfer);
 		final DenseMatrix rhsHistory = new DenseMatrix(timeSteps + 1, nEulerian + nLagrangian + nTransfer);
@@ -86,25 +84,24 @@ public class DLMSummary
 		{
 			rightHandSide = new DenseVector(constantRightHandSide);
 			systemMatrix = new SparseMatrix(constantSystemMatrix);
-			pvals.putAll(new MixedFESpaceFunction<>(eulerian.getShapeFunctions(),
-			                                        currentIterate).pressureValuesInPointsAtTime(
-				eulerianPoints, (i - 1) * dt));
-			vvals.putAll(new MixedFESpaceFunction<>(eulerian.getShapeFunctions(),
-			                                        currentIterate).velocityValuesInPointsAtTime(
-				eulerianPoints, (i - 1) * dt));
-			dvals.putAll((new VectorFESpaceFunction<>(lagrangian.getShapeFunctions(), currentIterate
-				.slice(nEulerian, nEulerian + nLagrangian)
-				.sub(lastIterate.slice(nEulerian, nEulerian + nLagrangian))).valuesInPointsAtTime(
-				eulerianPoints, (i - 1) * dt)));
+			pvals.putAll(getUp(currentIterate).pressureValuesInPointsAtTime(eulerianPoints, (i - 1) * dt));
+			vvals.putAll(getUp(currentIterate).velocityValuesInPointsAtTime(eulerianPoints, (i - 1) * dt));
+			final Map<CoordinateVector, CoordinateVector> XValues = getX(currentIterate)
+				.valuesInPointsAtTime(eulerianPoints, (i - 1) * dt);
+			XValues.forEach(this::subtractIdentityOnLagrangianMesh);
+			dvals.putAll(XValues);
+			derivVals.putAll(getX(currentIterate.sub(lastIterate).mul(1. / dt))
+				                 .valuesInPointsAtTime(eulerianPoints, (i - 1) * dt));
+			uXvals.putAll(concatenateVelocityWithX(getUp(currentIterate), currentIterate)
+				              .valuesInPointsAtTime(eulerianPoints, (i - 1) * dt));
 			System.out.println("saved Iterate");
-			writeF(rightHandSide, currentIterate.slice(0, nEulerian));
+			writeF(rightHandSide, currentIterate);
 			System.out.println("f");
-			writeG(rightHandSide, currentIterate.slice(nEulerian, nEulerian + nLagrangian),
-			       lastIterate.slice(nEulerian, nEulerian + nLagrangian));
+			writeG(rightHandSide, currentIterate, lastIterate);
 			System.out.println("g");
-			writeD(rightHandSide, currentIterate.slice(nEulerian, nEulerian + nLagrangian));
+			writeD(rightHandSide, currentIterate);
 			System.out.println("d");
-			writeCf(systemMatrix, currentIterate.slice(nEulerian, nEulerian + nLagrangian));
+			writeCf(systemMatrix, currentIterate);
 			System.out.println("cf");
 			writeBoundaryValues(systemMatrix, rightHandSide, i * dt);
 			System.out.println("bdr");
@@ -112,21 +109,26 @@ public class DLMSummary
 			lastIterate = new DenseVector(currentIterate);
 			rhsHistory.addRow(rightHandSide, i + 1);
 			currentIterate = systemMatrix.solve(rightHandSide);
+			System.out.println("newit" + getLagrangiafnIterate(currentIterate));
 			iterateHistory.addRow(currentIterate, i + 1);
 			System.out.println("solved");
 		}
 		final PlotWindow p = new PlotWindow();
-		p.addPlot(new MatrixPlot(iterateHistory));
-		p.addPlot(new MatrixPlot(rhsHistory));
-		final MixedPlot2DTime plot = new MixedPlot2DTime(pvals, vvals, eulerianPointsPerDimension);
+		p.addPlot(new MatrixPlot(iterateHistory, "iterateHistory"));
+		p.addPlot(new MatrixPlot(rhsHistory, "rhsHistory"));
+		final MixedPlot2DTime plot = new MixedPlot2DTime(pvals, vvals, eulerianPointsPerDimension, "VVals");
+		p.addPlot(new MixedPlot2DTime(pvals, uXvals, eulerianPointsPerDimension, "uXVals"));
+		p.addPlot(new MixedPlot2DTime(pvals, derivVals, eulerianPointsPerDimension, "derivVals"));
+		
 		p.addPlot(plot.addOverlay(new CircleOverlay(lagrangian, plot)));
-		final MixedPlot2DTime disPLacementplot = new MixedPlot2DTime(pvals, dvals, eulerianPointsPerDimension);
+		final MixedPlot2DTime disPLacementplot = new MixedPlot2DTime(pvals, dvals, eulerianPointsPerDimension,
+		                                                             "dVals");
 		p.addPlot(disPLacementplot.addOverlay(new CircleOverlay(lagrangian, plot)));
 	}
 	
 	public static void main(final String[] args)
 	{
-		final DLMSummary summary = new DLMSummary();
+		new DLMSummary();
 	}
 	
 	public static VectorFunction initialVelocityValues()
@@ -196,7 +198,7 @@ public class DLMSummary
 			@Override
 			public CoordinateVector value(final CoordinateVector pos)
 			{
-				return new CoordinateVector(2);
+				return pos;
 			}
 		};
 	}
@@ -221,7 +223,7 @@ public class DLMSummary
 			@Override
 			public CoordinateVector value(final CoordinateVector pos)
 			{
-				return CoordinateVector.fromValues(-8, 1);
+				return CoordinateVector.fromValues(0.0, 0.0);
 			}
 		};
 	}
@@ -260,7 +262,7 @@ public class DLMSummary
 	public void initializeLagrangian()
 	{
 		final CoordinateVector center = CoordinateVector.fromValues(0.5, 0.5);
-		final double radius = 0.3;
+		final double radius = 0.2;
 		lagrangian = new DistortedVectorSpace(center, radius, 1);
 		lagrangian.assembleCells();
 		lagrangian.assembleFunctions(1);
@@ -303,9 +305,6 @@ public class DLMSummary
 	{
 		eulerian.writeBoundaryValuesTo(new MixedFunction(boundaryVelocityValues(t)), f -> f.center().x() == 0,
 		                               (f, sf) -> sf.hasVelocityFunction(), currentMatrix, rightHandSide);
-//		eulerian.writeBoundaryValuesTo(new MixedFunction(ScalarFunction.constantFunction(0)),
-//		                               f -> f.center().x() == 0, (f, sf) -> sf.hasPressureFunction(),
-//		                               currentMatrix, rightHandSide);
 		final int firstPressure = eulerian
 			.getShapeFunctions()
 			.values()
@@ -352,52 +351,15 @@ public class DLMSummary
 		constantMatrix.addSmallMatrixAt(As, nEulerian, nEulerian);
 	}
 	
-	public void writeCf(final SparseMatrix currentMatrix, final Vector lagrangianIterate)
+	public void writeCf(final SparseMatrix currentMatrix, final DenseVector currentIterate)
 	{
-		final DistortedVectorFESpaceFunction X = new DistortedVectorFESpaceFunction(
-			lagrangian.getShapeFunctions(), lagrangianIterate);
 		final SparseMatrix Cf = new SparseMatrix(nTransfer, nEulerian);
 		int i = 0;
 		for (final Map.Entry<Integer, QkQkFunction> sfEntry : eulerian.getShapeFunctions().entrySet())
 		{
 			if (i++ % 40 == 0) System.out.println(100.0 * i / nEulerian);
 			final QkQkFunction sf = sfEntry.getValue();
-			final DistortedVectorFunction vOfX = new DistortedVectorFunction()
-			{
-				
-				@Override
-				public CoordinateVector valueOnReferenceCell(final CoordinateVector pos, final DistortedCell cell)
-				{
-					return sf.getVelocityFunction().value(X.valueOnReferenceCell(pos, cell));
-				}
-				
-				@Override
-				public CoordinateMatrix gradientOnReferenceCell(final CoordinateVector pos, final DistortedCell cell)
-				{
-					return sf
-						.getVelocityShapeFunction()
-						.gradient(X.valueOnReferenceCell(pos, cell))
-						.mmMul(X.gradientOnReferenceCell(pos, cell));
-				}
-				
-				@Override
-				public int getRangeDimension()
-				{
-					return 2;
-				}
-				
-				@Override
-				public int getDomainDimension()
-				{
-					return 2;
-				}
-				
-				@Override
-				public CoordinateVector value(final CoordinateVector pos)
-				{
-					throw new UnsupportedOperationException("Should not be evaluated");
-				}
-			};
+			final DistortedVectorFunction vOfX = concatenateVelocityWithX(sf, currentIterate);
 			
 			final DistortedFESpaceVectorRightHandSideIntegral transferEulerian
 				= new DistortedFESpaceVectorRightHandSideIntegral(vOfX,
@@ -407,11 +369,77 @@ public class DLMSummary
 			
 			{
 				lagrangian.writeCellIntegralsToRhs(List.of(transferEulerian), column);
-				Cf.addColumn(column, sfEntry.getKey());
+				Cf.addColumn(column.mul(1), sfEntry.getKey());
 			}
 		}
-		currentMatrix.addSmallMatrixAt(Cf, nEulerian + nLagrangian, 0);
-		currentMatrix.addSmallMatrixAt(Cf.transpose(), 0, nEulerian + nLagrangian);
+		currentMatrix.addSmallMatrixAt(Cf.mul(1), nEulerian + nLagrangian, 0);
+		currentMatrix.addSmallMatrixAt(Cf.transpose().mul(1), 0, nEulerian + nLagrangian);
+	}
+	
+	private DistortedVectorFESpaceFunction getX(final DenseVector currentIterate)
+	{
+		return new DistortedVectorFESpaceFunction(lagrangian.getShapeFunctions(),
+		                                          getLagrangiafnIterate(currentIterate));
+	}
+	
+	private MixedFESpaceFunction<QkQkFunction> getUp(final DenseVector currentIterate)
+	{
+		return new MixedFESpaceFunction<>(eulerian.getShapeFunctions(), getEulerianfIterate(currentIterate));
+	}
+	
+	private DistortedVectorFunction concatenateVelocityWithX(final MixedFunction sf, final DenseVector currentIterate)
+	{
+		final DistortedVectorFESpaceFunction X = getX(currentIterate);
+		return new DistortedVectorFunction()
+		{
+			
+			@Override
+			public CoordinateVector valueOnReferenceCell(final CoordinateVector pos, final DistortedCell cell)
+			{
+				return sf.getVelocityFunction().value(X.valueOnReferenceCell(pos, cell));
+			}
+			
+			@Override
+			public CoordinateMatrix gradientOnReferenceCell(final CoordinateVector pos, final DistortedCell cell)
+			{
+				return sf
+					.getVelocityFunction()
+					.gradient(X.valueOnReferenceCell(pos, cell))
+					.mmMul(X.gradientOnReferenceCell(pos, cell));
+			}
+			
+			@Override
+			public int getRangeDimension()
+			{
+				return 2;
+			}
+			
+			@Override
+			public int getDomainDimension()
+			{
+				return 2;
+			}
+			
+			@Override
+			public CoordinateVector value(final CoordinateVector pos)
+			{
+				return sf.getVelocityFunction().value(X.value(pos));
+			}
+		};
+	}
+	
+	private DenseVector getLagrangiafnIterate(final DenseVector currentIterate)
+	{
+		if (currentIterate.getLength() != nEulerian + nLagrangian + nTransfer)
+			throw new IllegalArgumentException("give currentIterate");
+		return currentIterate.slice(nEulerian, nEulerian + nLagrangian);
+	}
+	
+	private DenseVector getEulerianfIterate(final DenseVector currentIterate)
+	{
+		if (currentIterate.getLength() != nEulerian + nLagrangian + nTransfer)
+			throw new IllegalArgumentException("give currentIterate");
+		return currentIterate.slice(0, nEulerian);
 	}
 	
 	public void writeCs(final SparseMatrix constantMatrix)
@@ -422,25 +450,32 @@ public class DLMSummary
 		lagrangian.writeCellIntegralsToMatrix(List.of(transferLagrangian), Cs);
 		lagrangianDual = Cs;
 		constantMatrix.addSmallMatrixAt(Cs.mul(1. / dt), nEulerian + nLagrangian, nEulerian);
-		constantMatrix.addSmallMatrixAt(Cs.transpose(), nEulerian, nEulerian + nLagrangian);
+		constantMatrix.addSmallMatrixAt(Cs.transpose().mul(0), nEulerian, nEulerian + nLagrangian);
 	}
 	
-	public void writeF(final DenseVector currentVector, final Vector eulerianIterate)
+	public void writeF(final DenseVector currentVector, final DenseVector currentIterate)
 	{
-		System.out.println(eulerianIterate);
-		final DenseVector f = eulerianAlphaMass.mvMul(eulerianIterate);
+		final DenseVector f = eulerianAlphaMass.mvMul(getEulerianfIterate(currentIterate));
 		currentVector.addSmallVectorAt(f, 0);
 	}
 	
-	public void writeG(final DenseVector currentVector, final Vector lagrangianIterate, final Vector lastLagrangianIterate)
+	public void writeG(final DenseVector currentVector, final DenseVector currentIterate, final DenseVector lastIterate)
 	{
-		final DenseVector g = lagrangianBetaMass.mvMul(lagrangianIterate.mul(2).sub(lastLagrangianIterate));
+		final DenseVector g = lagrangianBetaMass.mvMul(
+			getLagrangiafnIterate(currentIterate).mul(2).sub(getLagrangiafnIterate(lastIterate)));
 		currentVector.addSmallVectorAt(g, nEulerian);
 	}
 	
-	public void writeD(final DenseVector currentVector, final Vector lagrangianIterate)
+	public void writeD(final DenseVector currentVector, final DenseVector currentIterate)
 	{
-		final DenseVector d = lagrangianDual.mvMul(lagrangianIterate).mul(-1. / dt);
+		final DenseVector d = lagrangianDual.mvMul(getLagrangiafnIterate(currentIterate)).mul(-1. / dt);
 		currentVector.addSmallVectorAt(d, nEulerian + nLagrangian);
+	}
+	
+	private void subtractIdentityOnLagrangianMesh(final CoordinateVector k, final CoordinateVector v)
+	{
+		final CoordinateVector keyWithoutTime = CoordinateVector.fromValues(k.x(), k.y());
+		if (keyWithoutTime.sub(lagrangian.center).euclidianNorm() < lagrangian.radius - 1e-4)
+			v.subInPlace(keyWithoutTime);
 	}
 }

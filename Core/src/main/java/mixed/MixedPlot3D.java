@@ -32,9 +32,9 @@ public class MixedPlot3D extends ScalarPlot3D
 		maxV = maxVelocity.orElse(1);
 	}
 	
-	public MixedPlot3D(final Map<CoordinateVector, Double> pressures, final Map<CoordinateVector, CoordinateVector> velocities, final int pointsPerDimension)
+	public MixedPlot3D(final Map<CoordinateVector, Double> pressures, final Map<CoordinateVector, CoordinateVector> velocities, final int pointsPerDimension, final String title)
 	{
-		super(pressures, pointsPerDimension, "");
+		super(pressures, pointsPerDimension, title);
 		this.velocities = velocities;
 		final OptionalDouble maxVelocity = velocities
 			.values()

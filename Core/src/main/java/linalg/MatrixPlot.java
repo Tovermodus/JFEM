@@ -11,12 +11,21 @@ public class MatrixPlot extends Plot
 	public int pixelHeight;
 	public double maxValue;
 	final double IDENTIFIED_AS_ZERO = 1e-4;
+	private String title;
 	
 	public MatrixPlot(final Matrix m)
 	{
 		this.m = m;
 		this.maxValue = m.absMaxElement();
 		if (maxValue > 1e30) maxValue = 1e30;
+		this.title = "Matrix";
+	}
+	public MatrixPlot(final Matrix m,String title)
+	{
+		this.m = m;
+		this.maxValue = m.absMaxElement();
+		if (maxValue > 1e30) maxValue = 1e30;
+		this.title = title;
 	}
 	
 	@Override
@@ -55,6 +64,6 @@ public class MatrixPlot extends Plot
 	@Override
 	public String title()
 	{
-		return "Matrix. Scale logarithmic: blue = " + IDENTIFIED_AS_ZERO + ", red = " + maxValue;
+		return title+". Scale logarithmic: blue = " + IDENTIFIED_AS_ZERO + ", red = " + maxValue;
 	}
 }

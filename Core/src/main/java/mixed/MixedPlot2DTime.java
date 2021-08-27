@@ -9,7 +9,12 @@ public class MixedPlot2DTime extends MixedPlot3D
 {
 	public MixedPlot2DTime(final Map<CoordinateVector, Double> pressures, final Map<CoordinateVector, CoordinateVector> velocities, final int pointsPerDimension)
 	{
-		super(pressures, velocities, pointsPerDimension);
+		this(pressures, velocities, pointsPerDimension, "unnamed");
+	}
+	
+	public MixedPlot2DTime(final Map<CoordinateVector, Double> pressures, final Map<CoordinateVector, CoordinateVector> velocities, final int pointsPerDimension, final String title)
+	{
+		super(pressures, velocities, pointsPerDimension, title);
 		final OptionalDouble maxVelocity = velocities
 			.values()
 			.stream()

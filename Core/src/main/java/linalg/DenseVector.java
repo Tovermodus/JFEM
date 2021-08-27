@@ -59,6 +59,14 @@ public class DenseVector implements MutableVector, MutableTensor
 		return ret;
 	}
 	
+	public static DenseVector repeat(final double value, final int length)
+	{
+		final double[] values = new double[length];
+		for (int i = 0; i < length; i++)
+			values[i] = value;
+		return DenseVector.vectorFromValues(values);
+	}
+	
 	@Override
 	public double inner(final Vector other)
 	{
