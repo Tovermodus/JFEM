@@ -1,5 +1,6 @@
 package basic;
 
+import linalg.CoordinateDenseMatrix;
 import linalg.CoordinateMatrix;
 import linalg.CoordinateVector;
 import linalg.Vector;
@@ -56,7 +57,8 @@ public class VectorFESpaceFunction<ST extends VectorShapeFunction<?, ?>> impleme
 			.stream()
 			.parallel()
 			.map(entry -> entry.getKey().gradient(pos).mul(entry.getValue()))
-			.reduce(new CoordinateMatrix(getRangeDimension(), getDomainDimension()), CoordinateMatrix::add);
+			.reduce(new CoordinateDenseMatrix(getRangeDimension(), getDomainDimension()),
+			        CoordinateMatrix::add);
 	}
 	
 	@Override

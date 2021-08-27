@@ -38,7 +38,10 @@ public class CircleGrid
 					System.out.println(f);
 			}
 		}
+		int hash = 379;
 		cells = ImmutableSet.copyOf(refinedCells.values());
+		for(DistortedCell cell:cells)
+			cell.setDone(hash++);
 		System.out.println(cells.size());
 		faces = ImmutableSet.copyOf(genFaces);
 	}

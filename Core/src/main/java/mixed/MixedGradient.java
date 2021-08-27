@@ -8,18 +8,18 @@ import java.util.List;
 public class MixedGradient implements MutableMatrix
 {
 	private CoordinateVector pressureGradient;
-	private CoordinateMatrix velocityGradient;
+	private CoordinateDenseMatrix velocityGradient;
 	
-	protected MixedGradient(int domainDimension)
+	protected MixedGradient(final int domainDimension)
 	{
 		pressureGradient = new CoordinateVector(domainDimension);
-		velocityGradient = new CoordinateMatrix(domainDimension, domainDimension);
+		velocityGradient = new CoordinateDenseMatrix(domainDimension, domainDimension);
 	}
 	
-	public MixedGradient(MixedGradient mixedGradient)
+	public MixedGradient(final MixedGradient mixedGradient)
 	{
 		this.pressureGradient = new CoordinateVector(mixedGradient.pressureGradient);
-		this.velocityGradient = new CoordinateMatrix(mixedGradient.velocityGradient);
+		this.velocityGradient = new CoordinateDenseMatrix(mixedGradient.velocityGradient);
 	}
 	
 	public CoordinateVector getPressureGradient()
@@ -27,87 +27,80 @@ public class MixedGradient implements MutableMatrix
 		return pressureGradient;
 	}
 	
-	public void setPressureGradient(CoordinateVector pressureGradient)
+	public void setPressureGradient(final CoordinateVector pressureGradient)
 	{
 		this.pressureGradient = pressureGradient;
 	}
 	
-	public void addPressureGradient(CoordinateVector pressureGradient)
+	public void addPressureGradient(final CoordinateVector pressureGradient)
 	{
 		this.setPressureGradient(getPressureGradient().add(pressureGradient));
 	}
 	
-	public CoordinateMatrix getVelocityGradient()
+	public CoordinateDenseMatrix getVelocityGradient()
 	{
 		return velocityGradient;
 	}
 	
-	public void setVelocityGradient(CoordinateMatrix velocityGradient)
+	public void setVelocityGradient(final CoordinateMatrix velocityGradient)
 	{
-		this.velocityGradient = velocityGradient;
+		if (velocityGradient instanceof CoordinateDenseMatrix)
+			this.velocityGradient = (CoordinateDenseMatrix) velocityGradient;
+		else this.velocityGradient = new CoordinateDenseMatrix(velocityGradient);
 	}
 	
-	public void addVelocityGradient(CoordinateMatrix velocityGradient)
+	public void addVelocityGradient(final CoordinateDenseMatrix velocityGradient)
 	{
 		this.setVelocityGradient(getVelocityGradient().add(velocityGradient));
 	}
 	
 	@Override
-	public double at(int... coordinates)
+	public double at(final int... coordinates)
 	{
-		if (PerformanceArguments.getInstance().executeChecks) if (coordinates.length != 2)
-			throw new IllegalArgumentException("Wrong number of coordinates");
-		if (coordinates[0] == 0)
-			return pressureGradient.at(coordinates[1]);
-		else
-			return velocityGradient.at(coordinates[0] - 1, coordinates[1]);
+		if (PerformanceArguments.getInstance().executeChecks)
+			if (coordinates.length != 2) throw new IllegalArgumentException("Wrong number of coordinates");
+		if (coordinates[0] == 0) return pressureGradient.at(coordinates[1]);
+		else return velocityGradient.at(coordinates[0] - 1, coordinates[1]);
+	}
+	
+	@Override
+	public void set(final double value, final int... coordinates)
+	{
+		if (coordinates.length != 2) throw new IllegalArgumentException("Wrong number of coordinates");
+		if (coordinates[0] == 0) pressureGradient.set(value, coordinates[1]);
+		else velocityGradient.set(value, coordinates[0] - 1, coordinates[1]);
+	}
+	
+	@Override
+	public void add(final double value, final int... coordinates)
+	{
+		if (PerformanceArguments.getInstance().executeChecks)
+			if (coordinates.length != 2) throw new IllegalArgumentException("Wrong number of coordinates");
 		
+		if (coordinates[0] == 0) pressureGradient.add(value, coordinates[1]);
+		else velocityGradient.add(value, coordinates[0] - 1, coordinates[1]);
 	}
 	
 	@Override
-	public void set(double value, int... coordinates)
-	{
-		if (coordinates.length != 2)
-			throw new IllegalArgumentException("Wrong number of coordinates");
-		if (coordinates[0] == 0)
-			pressureGradient.set(value, coordinates[1]);
-		else
-			velocityGradient.set(value, coordinates[0] - 1, coordinates[1]);
-	}
-	
-	@Override
-	public void add(double value, int... coordinates)
-	{
-		if (PerformanceArguments.getInstance().executeChecks) if (coordinates.length != 2)
-			throw new IllegalArgumentException("Wrong number of coordinates");
-		
-		if (coordinates[0] == 0)
-			pressureGradient.add(value, coordinates[1]);
-		else
-			velocityGradient.add(value, coordinates[0] - 1, coordinates[1]);
-	}
-	
-	@Override
-	public void addInPlace(Tensor other)
+	public void addInPlace(final Tensor other)
 	{
 	
 	}
 	
 	@Override
-	public void subInPlace(Tensor other)
+	public void subInPlace(final Tensor other)
 	{
 		MutableMatrix.super.subInPlace(other);
 	}
 	
 	@Override
-	public void mulInPlace(double scalar)
+	public void mulInPlace(final double scalar)
 	{
 	
 	}
 	
-	
 	@Override
-	public MixedGradient add(Tensor other)
+	public MixedGradient add(final Tensor other)
 	{
 		if (PerformanceArguments.getInstance().executeChecks)
 		{
@@ -116,7 +109,7 @@ public class MixedGradient implements MutableMatrix
 			if (!getShape().equals(other.getShape()))
 				throw new IllegalArgumentException("Wrong domain dimension");
 		}
-		MixedGradient ret = new MixedGradient(this);
+		final MixedGradient ret = new MixedGradient(this);
 		if (!(other instanceof PressureGradient))
 			ret.addVelocityGradient(((MixedGradient) other).getVelocityGradient());
 		if (!(other instanceof VelocityGradient))
@@ -130,16 +123,16 @@ public class MixedGradient implements MutableMatrix
 	}
 	
 	@Override
-	public MixedGradient mul(double scalar)
+	public MixedGradient mul(final double scalar)
 	{
-		MixedGradient ret = new MixedGradient(getDomainDimension());
+		final MixedGradient ret = new MixedGradient(getDomainDimension());
 		ret.setVelocityGradient(getVelocityGradient().mul(scalar));
 		ret.setPressureGradient(getPressureGradient().mul(scalar));
 		return ret;
 	}
 	
 	@Override
-	public List<Vector> unfoldDimension(int dimension)
+	public List<Vector> unfoldDimension(final int dimension)
 	{
 		throw new UnsupportedOperationException("not implemented yet");
 	}
@@ -159,7 +152,8 @@ public class MixedGradient implements MutableMatrix
 	@Override
 	public IntCoordinates getShape()
 	{
-		return new IntCoordinates(velocityGradient.getShape().get(0) + 1, velocityGradient.getShape().get(1) + 1);
+		return new IntCoordinates(velocityGradient.getShape().get(0) + 1,
+		                          velocityGradient.getShape().get(1) + 1);
 	}
 	
 	@Override
@@ -169,30 +163,28 @@ public class MixedGradient implements MutableMatrix
 	}
 	
 	@Override
-	public Vector mvMul(Vector vector)
+	public Vector mvMul(final Vector vector)
 	{
 		throw new UnsupportedOperationException("not implemented yet");
 	}
 	
 	@Override
-	public Matrix mmMul(Matrix matrix)
+	public Matrix mmMul(final Matrix matrix)
 	{
 		throw new UnsupportedOperationException("not implemented yet");
 	}
 	
 	@Override
-	public void deleteRow(int row)
+	public void deleteRow(final int row)
 	{
-		if(row == 0)
-			pressureGradient.mulInPlace(0);
-		else
-			velocityGradient.deleteRow(row-1);
+		if (row == 0) pressureGradient.mulInPlace(0);
+		else velocityGradient.deleteRow(row - 1);
 	}
 	
 	@Override
-	public void deleteColumn(int column)
+	public void deleteColumn(final int column)
 	{
-		pressureGradient.set(0,column);
+		pressureGradient.set(0, column);
 		velocityGradient.deleteColumn(column);
 	}
 }

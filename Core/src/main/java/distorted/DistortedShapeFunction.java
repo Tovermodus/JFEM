@@ -22,7 +22,7 @@ public class DistortedShapeFunction implements FastEvaluatedScalarShapeFunction<
 	private final TPShapeFunction firstDefinedFunction;
 	private final DistortedCell firstDefinedCell;
 	int polynomialDegree;
-	private int globalIndex;
+	private int globalIndex = -1;
 	
 	public DistortedShapeFunction(final DistortedCell cell, final int polynomialDegree, final int localIndex)
 	{

@@ -1,89 +1,87 @@
 package basic;
 
-import linalg.*;
+import linalg.CoordinateDenseMatrix;
+import linalg.CoordinateMatrix;
+import linalg.CoordinateTensor;
+import linalg.CoordinateVector;
 
 import java.util.Map;
 import java.util.Set;
 
-public interface VectorShapeFunction<CT extends Cell<CT,FT>,FT extends Face<CT,FT>>
-	extends VectorFunction, ShapeFunction<CT,FT,
-	CoordinateVector,
-	CoordinateMatrix, CoordinateTensor>
+public interface VectorShapeFunction<CT extends Cell<CT, FT>, FT extends Face<CT, FT>> extends VectorFunction, ShapeFunction<CT, FT, CoordinateVector, CoordinateMatrix, CoordinateTensor>
 {
 	
 	@Override
-	default <ST extends ShapeFunction<CT, FT, CoordinateVector, CoordinateMatrix, CoordinateTensor>> Map<Integer,
-	Double> prolongate(Set<ST> refinedFunctions)
+	default <ST extends ShapeFunction<CT, FT, CoordinateVector, CoordinateMatrix, CoordinateTensor>> Map<Integer, Double> prolongate(final Set<ST> refinedFunctions)
 	{
 		throw new UnsupportedOperationException("Not Yet Implemented");
 	}
 	
 	@Override
-	default CoordinateVector value(CoordinateVector pos)
+	default CoordinateVector value(final CoordinateVector pos)
 	{
-		for(CT cell: getCells())
-			if(cell.isInCell(pos))
-				return valueInCell(pos, cell);
+		for (final CT cell : getCells())
+			if (cell.isInCell(pos)) return valueInCell(pos, cell);
 		return new CoordinateVector(pos.getLength());
 	}
 	
 	@Override
-	default CoordinateMatrix gradient(CoordinateVector pos)
+	default CoordinateMatrix gradient(final CoordinateVector pos)
 	{
-		for(CT cell: getCells())
-			if(cell.isInCell(pos))
-				return gradientInCell(pos, cell);
-		return new CoordinateMatrix(pos.getLength(),pos.getLength());
+		for (final CT cell : getCells())
+			if (cell.isInCell(pos)) return gradientInCell(pos, cell);
+		return new CoordinateDenseMatrix(pos.getLength(), pos.getLength());
 	}
 	
 	@Override
-	default CoordinateVector jumpInValue(FT face, CoordinateVector pos)
+	default CoordinateVector jumpInValue(final FT face, final CoordinateVector pos)
 	{
-		return valueInCell(pos, face.getNormalUpstreamCell()).sub(valueInCell(pos,
-			face.getNormalDownstreamCell()));
-	}
-	@Override
-	default CoordinateMatrix jumpInDerivative(FT face, CoordinateVector pos)
-	{
-		return gradientInCell(pos,face.getNormalUpstreamCell()).sub(
-			gradientInCell(pos, face.getNormalDownstreamCell()));
+		return valueInCell(pos, face.getNormalUpstreamCell())
+			.sub(valueInCell(pos, face.getNormalDownstreamCell()));
 	}
 	
 	@Override
-	default CoordinateVector averageInValue(FT face, CoordinateVector pos)
+	default CoordinateMatrix jumpInDerivative(final FT face, final CoordinateVector pos)
 	{
-		return  valueInCell(pos,face.getNormalUpstreamCell()).add(valueInCell(pos,
-			face.getNormalDownstreamCell())).mul(0.5);
+		return gradientInCell(pos, face.getNormalUpstreamCell())
+			.sub(gradientInCell(pos, face.getNormalDownstreamCell()));
 	}
 	
 	@Override
-	default CoordinateMatrix averageInDerivative(FT face, CoordinateVector pos)
+	default CoordinateVector averageInValue(final FT face, final CoordinateVector pos)
 	{
-		return gradientInCell(pos,face.getNormalUpstreamCell()).add(
-			gradientInCell(pos,face.getNormalDownstreamCell())).mul(0.5);
+		return valueInCell(pos, face.getNormalUpstreamCell())
+			.add(valueInCell(pos, face.getNormalDownstreamCell()))
+			.mul(0.5);
 	}
 	
 	@Override
-	NodeFunctional<CoordinateVector,
-		CoordinateMatrix, CoordinateTensor> getNodeFunctional();
-	 
-	@Override
-	default CoordinateMatrix normalAverageInValue(FT face, CoordinateVector pos)
+	default CoordinateMatrix averageInDerivative(final FT face, final CoordinateVector pos)
 	{
-		return (CoordinateMatrix) face.getNormal().value(pos).outer(jumpInValue(face,pos).mul(0.5));
+		return gradientInCell(pos, face.getNormalUpstreamCell())
+			.add(gradientInCell(pos, face.getNormalDownstreamCell()))
+			.mul(0.5);
 	}
 	
 	@Override
-	default CoordinateVector normalAverageInDerivative(FT face, CoordinateVector pos)
+	NodeFunctional<CoordinateVector, CoordinateMatrix, CoordinateTensor> getNodeFunctional();
+	
+	@Override
+	default CoordinateMatrix normalAverageInValue(final FT face, final CoordinateVector pos)
+	{
+		return (CoordinateMatrix) face.getNormal().value(pos).outer(jumpInValue(face, pos).mul(0.5));
+	}
+	
+	@Override
+	default CoordinateVector normalAverageInDerivative(final FT face, final CoordinateVector pos)
 	{
 		return jumpInDerivative(face, pos).mvMul(face.getNormal().value(pos));
 	}
-	default double divergenceInCell( CoordinateVector pos, CT cell)
+	
+	default double divergenceInCell(final CoordinateVector pos, final CT cell)
 	{
-		if(cell.isInCell(pos))
-			return divergence(pos);
-		else
-			return 0;
+		if (cell.isInCell(pos)) return divergence(pos);
+		else return 0;
 	}
 	
 	/*@Override

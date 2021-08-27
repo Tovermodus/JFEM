@@ -143,7 +143,8 @@ public class DenseVector implements MutableVector, MutableTensor
 	@Override
 	public void addInPlace(final Tensor other)
 	{
-		entries = add(other).entries;
+		for (int i = 0; i < getLength(); i++)
+			entries[i] += other.at(i);
 	}
 	
 	@Override

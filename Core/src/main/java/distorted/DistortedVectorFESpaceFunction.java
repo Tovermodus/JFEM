@@ -2,9 +2,7 @@ package distorted;
 
 import basic.VectorFESpaceFunction;
 import distorted.geometry.DistortedCell;
-import linalg.CoordinateMatrix;
-import linalg.CoordinateVector;
-import linalg.Vector;
+import linalg.*;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -42,25 +40,30 @@ public class DistortedVectorFESpaceFunction extends VectorFESpaceFunction<Distor
 		}
 	}
 	
+	@Override
 	public CoordinateVector valueOnReferenceCell(final CoordinateVector pos, final DistortedCell cell)
 	{
-		return supportOnCell
-			.get(cell)
-			.stream()
-			.map(distortedVectorShapeFunction -> distortedVectorShapeFunction
-				.valueOnReferenceCell(pos, cell)
-				.mul(coefficients.get(distortedVectorShapeFunction)))
-			.reduce(new CoordinateVector(getDomainDimension()), CoordinateVector::add);
+		final CoordinateVector acc = new CoordinateVector(getDomainDimension());
+		for (final DistortedVectorShapeFunction distortedVectorShapeFunction : supportOnCell.get(cell))
+		{
+			final CoordinateVector mul = distortedVectorShapeFunction.valueOnReferenceCell(pos, cell);
+			mul.mulInPlace(coefficients.get(distortedVectorShapeFunction));
+			acc.addInPlace(mul);
+		}
+		return acc;
 	}
 	
+	@Override
 	public CoordinateMatrix gradientOnReferenceCell(final CoordinateVector pos, final DistortedCell cell)
 	{
-		return supportOnCell
-			.get(cell)
-			.stream()
-			.map(distortedVectorShapeFunction -> distortedVectorShapeFunction
-				.gradientOnReferenceCell(pos, cell)
-				.mul(coefficients.get(distortedVectorShapeFunction)))
-			.reduce(new CoordinateMatrix(getRangeDimension(), getDomainDimension()), CoordinateMatrix::add);
+		final CoordinateDenseMatrix acc = new CoordinateDenseMatrix(getRangeDimension(), getDomainDimension());
+		for (final DistortedVectorShapeFunction distortedVectorShapeFunction : supportOnCell.get(cell))
+		{
+			final Rank1CoordinateMatrix mul = distortedVectorShapeFunction.gradientOnReferenceCell(pos,
+			                                                                                       cell);
+			mul.mulInPlace(coefficients.get(distortedVectorShapeFunction));
+			acc.addInPlace(mul);
+		}
+		return acc;
 	}
 }

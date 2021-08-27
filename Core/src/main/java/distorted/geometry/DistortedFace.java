@@ -7,7 +7,7 @@ import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Multimap;
 import linalg.AffineTransformation;
-import linalg.CoordinateMatrix;
+import linalg.CoordinateDenseMatrix;
 import linalg.CoordinateVector;
 import linalg.IntCoordinates;
 import org.jetbrains.annotations.NotNull;
@@ -43,9 +43,7 @@ public class DistortedFace implements FaceWithReferenceFace<DistortedCell, Disto
 			normalVector = CoordinateVector.fromValues(tangent.at(1), -tangent.at(0));
 		} else
 		{
-			normalVector = vertices[1]
-				.sub(vertices[0])
-				.cross(vertices[2].sub(vertices[1]));
+			normalVector = vertices[1].sub(vertices[0]).cross(vertices[2].sub(vertices[1]));
 		}
 		normalVector.mulInPlace(1. / normalVector.euclidianNorm());
 		normal = new VectorFunction()
@@ -81,11 +79,8 @@ public class DistortedFace implements FaceWithReferenceFace<DistortedCell, Disto
 	@Override
 	public String toString()
 	{
-		return "DistortedFace{" +
-			"vertices=" + Arrays.toString(vertices) +
-			", normalvector=" + normalVector +
-			", isBoundaryFace=" + isBoundaryFace +
-			'}';
+		return "DistortedFace{" + "vertices=" + Arrays.toString(
+			vertices) + ", normalvector=" + normalVector + ", isBoundaryFace=" + isBoundaryFace + '}';
 	}
 	
 	@Override
@@ -98,31 +93,22 @@ public class DistortedFace implements FaceWithReferenceFace<DistortedCell, Disto
 	{
 		//System.out.println(Arrays.toString(Arrays.stream(vertices).mapToInt(cell::getPositionOfVertex)
 		// .toArray()));
-		return Arrays
-			.stream(vertices)
-			.mapToInt(cell::getPositionOfVertex)
-			.noneMatch(i -> i == -1);
+		return Arrays.stream(vertices).mapToInt(cell::getPositionOfVertex).noneMatch(i -> i == -1);
 	}
 	
 	public AffineTransformation getTransformationFromReferenceFaceToFaceOfReferenceCell(final DistortedCell cell)
 	{
-		if (!isOnCell(cell))
-			throw new IllegalArgumentException("Face does not belong to cell");
-		final IntCoordinates vertexNumbers =
-			new IntCoordinates(Arrays
-				                   .stream(vertices)
-				                   .mapToInt(cell::getPositionOfVertex)
-				                   .toArray());
+		if (!isOnCell(cell)) throw new IllegalArgumentException("Face does not belong to cell");
+		final IntCoordinates vertexNumbers = new IntCoordinates(
+			Arrays.stream(vertices).mapToInt(cell::getPositionOfVertex).toArray());
 		final DistortedCell referenceCell = cell.getReferenceCell();
 		final CoordinateVector vector = referenceCell.vertices[vertexNumbers.get(0)];
-		final CoordinateMatrix matrix = new CoordinateMatrix(dimension, dimension);
+		final CoordinateDenseMatrix matrix = new CoordinateDenseMatrix(dimension, dimension);
 		if (dimension == 2)
 		{
 			final CoordinateVector mapsFromX = referenceCell.vertices[vertexNumbers.get(1)].sub(vector);
 			matrix.addColumn(mapsFromX, 0);
-			matrix.addColumn(CoordinateVector
-				                 .repeat(1, 2)
-				                 .sub(mapsFromX.componentWise(Math::abs)), 1);
+			matrix.addColumn(CoordinateVector.repeat(1, 2).sub(mapsFromX.componentWise(Math::abs)), 1);
 		} else if (dimension == 3)
 		{
 			final CoordinateVector mapsFromY = referenceCell.vertices[vertexNumbers.get(1)].sub(vector);
@@ -133,8 +119,7 @@ public class DistortedFace implements FaceWithReferenceFace<DistortedCell, Disto
 				                 .repeat(1, 3)
 				                 .sub(mapsFromX.componentWise(Math::abs))
 				                 .sub(mapsFromY.componentWise(Math::abs)), 2);
-		} else
-			throw new IllegalStateException("Dimension must be 2 or 3");
+		} else throw new IllegalStateException("Dimension must be 2 or 3");
 		return new AffineTransformation(matrix, vector);
 	}
 	
@@ -162,10 +147,7 @@ public class DistortedFace implements FaceWithReferenceFace<DistortedCell, Disto
 	{
 		for (final DistortedCell c : getCells())
 		{
-			if (center()
-				.sub(c.center())
-				.inner(normalVector) < 0)
-				return c;
+			if (center().sub(c.center()).inner(normalVector) < 0) return c;
 		}
 		return null;
 	}
@@ -175,10 +157,7 @@ public class DistortedFace implements FaceWithReferenceFace<DistortedCell, Disto
 	{
 		for (final DistortedCell c : getCells())
 		{
-			if (center()
-				.sub(c.center())
-				.inner(normalVector) > 0)
-				return c;
+			if (center().sub(c.center()).inner(normalVector) > 0) return c;
 		}
 		return null;
 	}
@@ -189,8 +168,7 @@ public class DistortedFace implements FaceWithReferenceFace<DistortedCell, Disto
 		return Arrays
 			.stream(vertices)
 			.reduce(new CoordinateVector(dimension), CoordinateVector::add)
-			.mul(
-				1. / vertices.length);
+			.mul(1. / vertices.length);
 	}
 	
 	@Override
@@ -199,8 +177,7 @@ public class DistortedFace implements FaceWithReferenceFace<DistortedCell, Disto
 		if (this == o) return true;
 		if (o == null || getClass() != o.getClass()) return false;
 		final DistortedFace that = (DistortedFace) o;
-		if (isBoundaryFace != that.isBoundaryFace)
-			return false;
+		if (isBoundaryFace != that.isBoundaryFace) return false;
 		for (final CoordinateVector vertex : vertices)
 		{
 			boolean otherHasVertex = false;
@@ -240,12 +217,12 @@ public class DistortedFace implements FaceWithReferenceFace<DistortedCell, Disto
 				                              .applyInverse(getNormalUpstreamCell()
 					                                            .transformPreciseToReferenceCell(
 						                                            pos)));
-		} else if (getNormalDownstreamCell() != null)
-			return referenceFace.isOnFace(cellsWithTransformation
-				                              .get(getNormalDownstreamCell())
-				                              .applyInverse(getNormalDownstreamCell()
-					                                            .transformPreciseToReferenceCell(
-						                                            pos)));
+		} else if (getNormalDownstreamCell() != null) return referenceFace.isOnFace(cellsWithTransformation
+			                                                                            .get(getNormalDownstreamCell())
+			                                                                            .applyInverse(
+				                                                                            getNormalDownstreamCell()
+					                                                                            .transformPreciseToReferenceCell(
+						                                                                            pos)));
 		else throw new IllegalStateException("Face is isolated");
 	}
 	
@@ -259,26 +236,19 @@ public class DistortedFace implements FaceWithReferenceFace<DistortedCell, Disto
 	public int compareTo(@NotNull final DistortedFace o)
 	{
 		
-		if (o.getDimension() < getDimension())
-			return -1;
-		if (o.getDimension() > getDimension())
-			return 1;
-		if (o.isBoundaryFace != isBoundaryFace())
-			return Boolean.compare(o.isBoundaryFace, isBoundaryFace);
-		if (this.equals(o))
-			return 0;
+		if (o.getDimension() < getDimension()) return -1;
+		if (o.getDimension() > getDimension()) return 1;
+		if (o.isBoundaryFace != isBoundaryFace()) return Boolean.compare(o.isBoundaryFace, isBoundaryFace);
+		if (this.equals(o)) return 0;
 		for (int i = 0; i < vertices.length; i++)
-			if (vertices[i].compareTo(o.vertices[i]) != 0)
-				return vertices[i].compareTo(o.vertices[i]);
+			if (vertices[i].compareTo(o.vertices[i]) != 0) return vertices[i].compareTo(o.vertices[i]);
 		return 0;
 	}
 	
 	public ImmutableList<CoordinateVector> getVertices()
 	{
-		return ImmutableList.copyOf(Arrays
-			                            .stream(vertices)
-			                            .map(CoordinateVector::new)
-			                            .collect(Collectors.toList()));
+		return ImmutableList.copyOf(
+			Arrays.stream(vertices).map(CoordinateVector::new).collect(Collectors.toList()));
 	}
 	
 	@Override

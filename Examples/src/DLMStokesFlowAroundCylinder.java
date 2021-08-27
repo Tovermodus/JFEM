@@ -137,7 +137,7 @@ public class DLMStokesFlowAroundCylinder
 			@Override
 			public CoordinateMatrix gradient(final CoordinateVector pos)
 			{
-				return CoordinateMatrix.fromValues(2, 2, 1, 0, 0, 1);
+				return CoordinateDenseMatrix.fromValues(2, 2, 1, 0, 0, 1);
 			}
 		};
 		for (final Map.Entry<Integer, QkQkFunction> sf : largeGrid.getShapeFunctions().entrySet())
@@ -240,7 +240,7 @@ public class DLMStokesFlowAroundCylinder
 		final Map<CoordinateVector, CoordinateVector> vvals = (new MixedFESpaceFunction<>(
 			largeGrid.getShapeFunctions(), iterate).velocityValuesInPointsAtTime(points, 0));
 		System.out.println("inverting");
-		final DenseMatrix Ainv = A.inverse();
+		final DirectlySolvable Ainv = A.inverse();
 		System.out.println("inverted");
 		for (int i = 1; i < timesteps; i++)
 		{

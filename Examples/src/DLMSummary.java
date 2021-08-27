@@ -1,7 +1,4 @@
-import basic.PlotWindow;
-import basic.ScalarFunction;
-import basic.ScalarPlot2DTime;
-import basic.VectorFunction;
+import basic.*;
 import distorted.*;
 import distorted.geometry.DistortedCell;
 import linalg.*;
@@ -36,12 +33,16 @@ public class DLMSummary
 	
 	public DLMSummary()
 	{
+//		PerformanceArguments.PerformanceArgumentBuilder builder =
+//			new PerformanceArguments.PerformanceArgumentBuilder();
+//		builder.executeChecks = false;
+//		builder.build();
 		rhoF = 1;
 		rhoS = 10;
 		nu = 1;
-		kappa = 1;
-		dt = 0.05;
-		timeSteps = 8;
+		kappa = 10;
+		dt = 0.005;
+		timeSteps = 2;
 		initializeEulerian();
 		initializeLagrangian();
 		
@@ -137,16 +138,6 @@ public class DLMSummary
 			System.out.println(i + "th iteration");
 			lastIterate = new DenseVector(currentIterate);
 			rhsHistory.addRow(rightHandSide, i + 1);
-			
-			System.out.println("c(mu,u) " + systemMatrix
-				.slice(new IntCoordinates(nEulerian + nLagrangian, 0),
-				       new IntCoordinates(nEulerian + nLagrangian + nTransfer, nEulerian))
-				.mvMul(getEulerianfIterate(currentIterate)));
-			System.out.println("c(mu,X_n+1/dt) " + systemMatrix
-				.slice(new IntCoordinates(nEulerian + nLagrangian, nEulerian),
-				       new IntCoordinates(nEulerian + nLagrangian + nTransfer, nEulerian + nLagrangian))
-				.mvMul(getLagrangiafnIterate(currentIterate)));
-			System.out.println("c(mu,X_n/dt) " + getTransferIterate(rightHandSide));
 			
 			currentIterate = systemMatrix.solve(rightHandSide);
 			System.out.println("newit" + getLagrangiafnIterate(currentIterate));
@@ -302,7 +293,7 @@ public class DLMSummary
 	{
 		final CoordinateVector startCoordinates = CoordinateVector.fromValues(0, 0);
 		final CoordinateVector endCoordinates = CoordinateVector.fromValues(1, 1);
-		final IntCoordinates cellCounts = new IntCoordinates(6, 6);
+		final IntCoordinates cellCounts = new IntCoordinates(12, 12);
 		eulerian = new TaylorHoodSpace(startCoordinates, endCoordinates, cellCounts);
 		eulerian.assembleCells();
 		eulerian.assembleFunctions(1);
@@ -314,7 +305,7 @@ public class DLMSummary
 	{
 		final CoordinateVector center = CoordinateVector.fromValues(0.5, 0.5);
 		final double radius = 0.2;
-		lagrangian = new DistortedVectorSpace(center, radius, 1);
+		lagrangian = new DistortedVectorSpace(center, radius, 2);
 		lagrangian.assembleCells();
 		lagrangian.assembleFunctions(1);
 		nLagrangian = lagrangian.getShapeFunctions().size();

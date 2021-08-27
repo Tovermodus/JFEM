@@ -3,8 +3,8 @@ package distorted;
 import basic.SingleComponentVectorShapeFunction;
 import distorted.geometry.DistortedCell;
 import distorted.geometry.DistortedFace;
-import linalg.CoordinateMatrix;
 import linalg.CoordinateVector;
+import linalg.Rank1CoordinateMatrix;
 
 public class DistortedVectorShapeFunction extends SingleComponentVectorShapeFunction<DistortedCell, DistortedFace, DistortedShapeFunction, DistortedVectorShapeFunction> implements DistortedVectorFunction
 
@@ -19,6 +19,7 @@ public class DistortedVectorShapeFunction extends SingleComponentVectorShapeFunc
 		super(componentFunction, component);
 	}
 	
+	@Override
 	public CoordinateVector valueOnReferenceCell(final CoordinateVector x, final DistortedCell cell)
 	{
 		return CoordinateVector
@@ -26,7 +27,8 @@ public class DistortedVectorShapeFunction extends SingleComponentVectorShapeFunc
 			.mul(getComponentFunction().valueOnReferenceCell(x, cell));
 	}
 	
-	public CoordinateMatrix gradientOnReferenceCell(final CoordinateVector x, final DistortedCell cell)
+	@Override
+	public Rank1CoordinateMatrix gradientOnReferenceCell(final CoordinateVector x, final DistortedCell cell)
 	{
 		return getComponentFunction()
 			.gradientOnReferenceCell(x, cell)

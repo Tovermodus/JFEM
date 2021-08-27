@@ -1,5 +1,6 @@
 package basic;
 
+import linalg.CoordinateDenseMatrix;
 import linalg.CoordinateMatrix;
 import linalg.CoordinateVector;
 
@@ -10,7 +11,7 @@ import java.util.stream.Stream;
 
 public interface ScalarFunction extends Function<Double, CoordinateVector, CoordinateMatrix>
 {
-	static ScalarFunction constantFunction(double constant)
+	static ScalarFunction constantFunction(final double constant)
 	{
 		return new ScalarFunction()
 		{
@@ -21,25 +22,26 @@ public interface ScalarFunction extends Function<Double, CoordinateVector, Coord
 			}
 			
 			@Override
-			public Double value(CoordinateVector pos)
+			public Double value(final CoordinateVector pos)
 			{
 				return constant;
 			}
+			
 			@Override
-			public CoordinateVector gradient(CoordinateVector pos)
+			public CoordinateVector gradient(final CoordinateVector pos)
 			{
 				return new CoordinateVector((int) pos.size());
 			}
 			
 			@Override
-			public CoordinateMatrix hessian(CoordinateVector pos)
+			public CoordinateMatrix hessian(final CoordinateVector pos)
 			{
-				return new CoordinateMatrix((int)pos.size(), (int)pos.size());
+				return new CoordinateDenseMatrix((int) pos.size(), (int) pos.size());
 			}
-			
 		};
 	}
-	static ScalarFunction fromRawFunction(Function<Double, CoordinateVector, CoordinateMatrix> function)
+	
+	static ScalarFunction fromRawFunction(final Function<Double, CoordinateVector, CoordinateMatrix> function)
 	{
 		return new ScalarFunction()
 		{
@@ -50,45 +52,46 @@ public interface ScalarFunction extends Function<Double, CoordinateVector, Coord
 			}
 			
 			@Override
-			public Double value(CoordinateVector pos)
+			public Double value(final CoordinateVector pos)
 			{
 				return function.value(pos);
 			}
+			
 			@Override
-			public CoordinateVector gradient(CoordinateVector pos)
+			public CoordinateVector gradient(final CoordinateVector pos)
 			{
 				return function.gradient(pos);
 			}
 			
 			@Override
-			public CoordinateMatrix hessian(CoordinateVector pos)
+			public CoordinateMatrix hessian(final CoordinateVector pos)
 			{
 				return function.hessian(pos);
 			}
-			
 		};
 	}
-	default Map<CoordinateVector, Double> valuesInPoints(List<CoordinateVector> points)
+	
+	default Map<CoordinateVector, Double> valuesInPoints(final List<CoordinateVector> points)
 	{
-		ConcurrentHashMap<CoordinateVector, Double> ret = new ConcurrentHashMap<>();
+		final ConcurrentHashMap<CoordinateVector, Double> ret = new ConcurrentHashMap<>();
 		Stream<CoordinateVector> stream = points.stream();
-		if(PerformanceArguments.getInstance().parallelizeThreads)
-			stream = stream.parallel();
-		stream.forEach(point->ret.put(point, value(point)));
+		if (PerformanceArguments.getInstance().parallelizeThreads) stream = stream.parallel();
+		stream.forEach(point -> ret.put(point, value(point)));
 		return ret;
 	}
-	default Map<CoordinateVector, Double> valuesInPointsAtTime(List<CoordinateVector> points, double t)
+	
+	default Map<CoordinateVector, Double> valuesInPointsAtTime(final List<CoordinateVector> points, final double t)
 	{
-		ConcurrentHashMap<CoordinateVector, Double> ret = new ConcurrentHashMap<>();
+		final ConcurrentHashMap<CoordinateVector, Double> ret = new ConcurrentHashMap<>();
 		Stream<CoordinateVector> stream = points.stream();
-		if(PerformanceArguments.getInstance().parallelizeThreads)
-			stream = stream.parallel();
-		stream.forEach(point->ret.put(point.addCoordinate(t), value(point)));
+		if (PerformanceArguments.getInstance().parallelizeThreads) stream = stream.parallel();
+		stream.forEach(point -> ret.put(point.addCoordinate(t), value(point)));
 		return ret;
 	}
+	
 	default VectorFunction getGradientFunction()
 	{
-		ScalarFunction me = this;
+		final ScalarFunction me = this;
 		return new VectorFunction()
 		{
 			@Override
@@ -104,29 +107,32 @@ public interface ScalarFunction extends Function<Double, CoordinateVector, Coord
 			}
 			
 			@Override
-			public CoordinateVector value(CoordinateVector pos)
+			public CoordinateVector value(final CoordinateVector pos)
 			{
 				return me.gradient(pos);
 			}
+			
 			@Override
-			public CoordinateMatrix gradient(CoordinateVector pos)
+			public CoordinateMatrix gradient(final CoordinateVector pos)
 			{
-				return new CoordinateMatrix(me.hessian(pos));
+				return new CoordinateDenseMatrix(me.hessian(pos));
 			}
 		};
 	}
-	default Double directionalDerivative(CoordinateVector pos, CoordinateVector direction)
+	
+	default Double directionalDerivative(final CoordinateVector pos, final CoordinateVector direction)
 	{
 		return direction.inner(gradient(pos));
 	}
-	default Double delI(CoordinateVector pos, int i)
+	
+	default Double delI(final CoordinateVector pos, final int i)
 	{
 		return gradient(pos).at(i);
 	}
 	
 	default VectorFunction makeIsotropicVectorFunction()
 	{
-		ScalarFunction me = this;
+		final ScalarFunction me = this;
 		return new VectorFunction()
 		{
 			@Override
@@ -142,10 +148,10 @@ public interface ScalarFunction extends Function<Double, CoordinateVector, Coord
 			}
 			
 			@Override
-			public CoordinateVector value(CoordinateVector pos)
+			public CoordinateVector value(final CoordinateVector pos)
 			{
-				CoordinateVector ret = new CoordinateVector(pos.getLength());
-				for(int i = 0; i < pos.getLength(); i++)
+				final CoordinateVector ret = new CoordinateVector(pos.getLength());
+				for (int i = 0; i < pos.getLength(); i++)
 					ret.set(me.value(pos), i);
 				return ret;
 			}
@@ -167,6 +173,6 @@ public interface ScalarFunction extends Function<Double, CoordinateVector, Coord
 	@Override
 	default CoordinateMatrix defaultHessian()
 	{
-		return new CoordinateMatrix(getDomainDimension(), getDomainDimension());
+		return new CoordinateDenseMatrix(getDomainDimension(), getDomainDimension());
 	}
 }

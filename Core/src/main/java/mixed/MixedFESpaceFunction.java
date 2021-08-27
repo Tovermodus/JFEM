@@ -2,6 +2,7 @@ package mixed;
 
 import basic.ScalarFunction;
 import basic.VectorFunction;
+import linalg.CoordinateDenseMatrix;
 import linalg.CoordinateMatrix;
 import linalg.CoordinateVector;
 import linalg.Vector;
@@ -21,11 +22,12 @@ public class MixedFESpaceFunction<MF extends MixedShapeFunction<?, ?, ?, ?>> ext
 	public MixedFESpaceFunction(final MF[] functions, final double[] coefficients)
 	{
 		super();
-		diam = functions[0].getCells()
-		                   .stream()
-		                   .findAny()
-		                   .orElseThrow(() -> new IllegalArgumentException("Function Has No Cells"))
-		                   .diam();
+		diam = functions[0]
+			.getCells()
+			.stream()
+			.findAny()
+			.orElseThrow(() -> new IllegalArgumentException("Function Has No Cells"))
+			.diam();
 		assert (functions.length == coefficients.length);
 		this.coefficients = new HashMap<>();
 		for (int i = 0; i < functions.length; i++)
@@ -38,17 +40,16 @@ public class MixedFESpaceFunction<MF extends MixedShapeFunction<?, ?, ?, ?>> ext
 	public MixedFESpaceFunction(final Map<Integer, MF> functions, final Vector coefficients)
 	{
 		assert (functions.size() == coefficients.size());
-		diam =
-			functions
-				.values()
-				.stream()
-				.findAny()
-				.orElseThrow(() -> new IllegalArgumentException("Has no Functions"))
-				.getCells()
-				.stream()
-				.findAny()
-				.orElseThrow(() -> new IllegalArgumentException("Function Has No Cells"))
-				.diam();
+		diam = functions
+			.values()
+			.stream()
+			.findAny()
+			.orElseThrow(() -> new IllegalArgumentException("Has no Functions"))
+			.getCells()
+			.stream()
+			.findAny()
+			.orElseThrow(() -> new IllegalArgumentException("Function Has No Cells"))
+			.diam();
 		;
 		this.coefficients = new HashMap<>();
 		for (final Map.Entry<Integer, MF> function : functions.entrySet())
@@ -66,8 +67,7 @@ public class MixedFESpaceFunction<MF extends MixedShapeFunction<?, ?, ?, ?>> ext
 		{
 			if (shapeFunction.hasPressureFunction())
 				pressureCoefficients.put(shapeFunction, coefficients.get(shapeFunction));
-			else
-				velocityCoefficients.put(shapeFunction, coefficients.get(shapeFunction));
+			else velocityCoefficients.put(shapeFunction, coefficients.get(shapeFunction));
 		}
 	}
 	
@@ -150,48 +150,47 @@ public class MixedFESpaceFunction<MF extends MixedShapeFunction<?, ?, ?, ?>> ext
 	@Override
 	public MixedValue value(final CoordinateVector pos)
 	{
-		final PressureValue pf =
-			new PressureValue(pressureCoefficients
-				                  .entrySet()
-				                  .stream()
-				                  .parallel()
-				                  .filter(entry -> entry.getKey().hasPressureFunction())
-				                  .mapToDouble(entry -> entry.getKey().value(pos).getPressure() *
-					                  entry.getValue())
-				                  .sum());
-		final VelocityValue vf =
-			velocityCoefficients.entrySet()
-			                    .stream()
-			                    .parallel()
-			                    .filter(entry -> entry.getKey().hasVelocityFunction())
-			                    .map(entry -> (VelocityValue) (entry.getKey().value(pos)).mul(
-				                    entry.getValue()))
-			                    .reduce(new VelocityValue(getDomainDimension()),
-			                            (a, b) -> (VelocityValue) (a.add(b)));
+		final PressureValue pf = new PressureValue(pressureCoefficients
+			                                           .entrySet()
+			                                           .stream()
+			                                           .parallel()
+			                                           .filter(entry -> entry
+				                                           .getKey()
+				                                           .hasPressureFunction())
+			                                           .mapToDouble(entry -> entry
+				                                           .getKey()
+				                                           .value(pos)
+				                                           .getPressure() * entry.getValue())
+			                                           .sum());
+		final VelocityValue vf = velocityCoefficients
+			.entrySet()
+			.stream()
+			.parallel()
+			.filter(entry -> entry.getKey().hasVelocityFunction())
+			.map(entry -> (VelocityValue) (entry.getKey().value(pos)).mul(entry.getValue()))
+			.reduce(new VelocityValue(getDomainDimension()), (a, b) -> (VelocityValue) (a.add(b)));
 		return pf.add(vf);
 	}
 	
 	@Override
 	public MixedGradient gradient(final CoordinateVector pos)
 	{
-		final Optional<CoordinateVector> pressureGradient =
-			pressureCoefficients.entrySet().stream().parallel().map(entry -> entry
-				.getKey()
-				.gradient(pos)
-				.getPressureGradient()
-				.mul(entry.getValue())).reduce(CoordinateVector::add);
+		final Optional<CoordinateVector> pressureGradient = pressureCoefficients
+			.entrySet()
+			.stream()
+			.parallel()
+			.map(entry -> entry.getKey().gradient(pos).getPressureGradient().mul(entry.getValue()))
+			.reduce(CoordinateVector::add);
 		PressureGradient pf = new PressureGradient(pos.mul(0));
-		if (pressureGradient.isPresent())
-			pf = new PressureGradient(pressureGradient.get());
-		final Optional<CoordinateMatrix> velocityGradient =
-			velocityCoefficients.entrySet().stream().parallel().map(entry -> entry
-				.getKey()
-				.gradient(pos)
-				.getVelocityGradient()
-				.mul(entry.getValue())).reduce(CoordinateMatrix::add);
-		VelocityGradient vf = new VelocityGradient(pos.outer(pos).mul(0));
-		if (velocityGradient.isPresent())
-			vf = new VelocityGradient(velocityGradient.get());
+		if (pressureGradient.isPresent()) pf = new PressureGradient(pressureGradient.get());
+		final CoordinateDenseMatrix velocityGradient = velocityCoefficients
+			.entrySet()
+			.stream()
+			.parallel()
+			.map(entry -> entry.getKey().gradient(pos).getVelocityGradient().mul(entry.getValue()))
+			.reduce(new CoordinateDenseMatrix(getDomainDimension() + 1, getDomainDimension() + 1),
+			        CoordinateDenseMatrix::add);
+		final VelocityGradient vf = new VelocityGradient(velocityGradient);
 		return pf.add(vf);
 	}
 }

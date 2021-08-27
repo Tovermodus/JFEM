@@ -1,6 +1,7 @@
 package basic;
 
 import com.google.common.base.Stopwatch;
+import linalg.CoordinateDenseMatrix;
 import linalg.CoordinateMatrix;
 import linalg.CoordinateTensor;
 import linalg.CoordinateVector;
@@ -70,7 +71,7 @@ public interface VectorFunction extends Function<CoordinateVector, CoordinateMat
 	@Override
 	default CoordinateMatrix defaultGradient()
 	{
-		return new CoordinateMatrix(getRangeDimension(), getDomainDimension());
+		return new CoordinateDenseMatrix(getRangeDimension(), getDomainDimension());
 	}
 	
 	@Override

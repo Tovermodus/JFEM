@@ -22,8 +22,8 @@ public class DLMStokesTime
 	public static void main(final String[] args)
 	{
 		
-		final PerformanceArguments.PerformanceArgumentBuilder builder =
-			new PerformanceArguments.PerformanceArgumentBuilder();
+		final PerformanceArguments.PerformanceArgumentBuilder builder
+			= new PerformanceArguments.PerformanceArgumentBuilder();
 		builder.build();
 		
 		final CoordinateVector start = CoordinateVector.fromValues(0, -2);
@@ -35,9 +35,7 @@ public class DLMStokesTime
 		final int timesteps = 100;
 		final double dt = 0.1;
 		
-		final TaylorHoodSpace largeGrid = new TaylorHoodSpace(start, end,
-		                                                      Ints.asList(
-			                                                      12, 12));
+		final TaylorHoodSpace largeGrid = new TaylorHoodSpace(start, end, Ints.asList(12, 12));
 		
 		final int nPoints = 40;
 		final List<CoordinateVector> points = largeGrid.generatePlotPoints(nPoints);
@@ -48,12 +46,11 @@ public class DLMStokesTime
 		immersedGrid.assembleFunctions(polynomialDegree);
 		
 		final MixedCellIntegral<TPCell, ContinuousTPShapeFunction, ContinuousTPVectorFunction, QkQkFunction>
-			reynolds =
-			MixedCellIntegral.fromVelocityIntegral(new TPVectorCellIntegral<>(
-				ScalarFunction.constantFunction(reynoldsNumber), TPVectorCellIntegral.SYM_GRAD));
-		final MixedTPCellIntegral<ContinuousTPShapeFunction, ContinuousTPVectorFunction, QkQkFunction>
-			divValue = new MixedTPCellIntegral<>(ScalarFunction.constantFunction(-1),
-			                                     MixedTPCellIntegral.DIV_VALUE);
+			reynolds = MixedCellIntegral.fromVelocityIntegral(
+			new TPVectorCellIntegral<>(ScalarFunction.constantFunction(reynoldsNumber),
+			                           TPVectorCellIntegral.SYM_GRAD));
+		final MixedTPCellIntegral<ContinuousTPShapeFunction, ContinuousTPVectorFunction, QkQkFunction> divValue
+			= new MixedTPCellIntegral<>(ScalarFunction.constantFunction(-1), MixedTPCellIntegral.DIV_VALUE);
 		
 		final DistortedVectorCellIntegral lagv2 = new DistortedVectorCellIntegral(
 			DistortedVectorCellIntegral.H1);
@@ -91,8 +88,7 @@ public class DLMStokesTime
 			}
 		});
 		largeGrid.writeBoundaryValuesTo(boundaryValues, (f) -> f.center().x() == 0,
-		                                (f, sf) -> sf.hasVelocityFunction(), A11,
-		                                b1);
+		                                (f, sf) -> sf.hasVelocityFunction(), A11, b1);
 		final MixedFunction pboundaryValues = new MixedFunction(new ScalarFunction()
 		{
 			@Override
@@ -108,9 +104,7 @@ public class DLMStokesTime
 			}
 		});
 		largeGrid.writeBoundaryValuesTo(pboundaryValues, (f) -> f.center().x() == 0 && f.center().y() > 4.53,
-		                                (f, sf) -> sf.hasPressureFunction(),
-		                                A11,
-		                                b1);
+		                                (f, sf) -> sf.hasPressureFunction(), A11, b1);
 		System.out.println("A11");
 		A22 = SparseMatrix.identity(m);
 		System.out.println("A22");
@@ -143,7 +137,7 @@ public class DLMStokesTime
 			@Override
 			public CoordinateMatrix gradient(final CoordinateVector pos)
 			{
-				return CoordinateMatrix.fromValues(2, 2, 1, 0, 0, 1);
+				return CoordinateDenseMatrix.fromValues(2, 2, 1, 0, 0, 1);
 			}
 		};
 		for (final Map.Entry<Integer, QkQkFunction> sf : largeGrid.getShapeFunctions().entrySet())
@@ -166,23 +160,28 @@ public class DLMStokesTime
 				@Override
 				public CoordinateVector value(final CoordinateVector pos)
 				{
-					return sf.getValue().getVelocityShapeFunction().value(
-						elasticTransformation.value(pos));
+					return sf
+						.getValue()
+						.getVelocityShapeFunction()
+						.value(elasticTransformation.value(pos));
 				}
 				
 				@Override
 				public CoordinateMatrix gradient(final CoordinateVector pos)
 				{
-					return sf.getValue().getVelocityShapeFunction().gradient(
-						elasticTransformation.value(pos));//.mvmul(elastictransformation
+					return sf
+						.getValue()
+						.getVelocityShapeFunction()
+						.gradient(
+							elasticTransformation.value(pos));//.mvmul(elastictransformation
 					// .gradient oder so
 				}
 			};
 			if (sf.getValue().hasVelocityFunction())
 			{
-				final DistortedVectorRightHandSideIntegral shapeFunctionOnImmersedGrid =
-					new DistortedVectorRightHandSideIntegral(toBeMultiplierd,
-					                                         DistortedVectorRightHandSideIntegral.H1);
+				final DistortedVectorRightHandSideIntegral shapeFunctionOnImmersedGrid
+					= new DistortedVectorRightHandSideIntegral(toBeMultiplierd,
+					                                           DistortedVectorRightHandSideIntegral.H1);
 				final DenseVector integrals = new DenseVector(m);
 				immersedGrid.writeCellIntegralsToRhs(List.of(shapeFunctionOnImmersedGrid), integrals);
 				A13.addSmallMatrixAt(integrals.asMatrix().transpose(), sf.getKey(), 0);
@@ -191,11 +190,9 @@ public class DLMStokesTime
 			}
 		}
 		
-		final SparseMatrix A =
-			new SparseMatrix(n + 2 * m, n + 2 * m);
+		final SparseMatrix A = new SparseMatrix(n + 2 * m, n + 2 * m);
 		
-		final SparseMatrix T =
-			new SparseMatrix(n + 2 * m, n + 2 * m);
+		final SparseMatrix T = new SparseMatrix(n + 2 * m, n + 2 * m);
 		
 		A.addSmallMatrixAt(A11, 0, 0);
 		A.addSmallMatrixAt(A22, n, n);
@@ -222,10 +219,9 @@ public class DLMStokesTime
 		System.out.println("b");
 		
 		final MixedCellIntegral<TPCell, ContinuousTPShapeFunction, ContinuousTPVectorFunction, QkQkFunction>
-			valueValue =
-			MixedCellIntegral.fromVelocityIntegral(new TPVectorCellIntegral<>(
-				ScalarFunction.constantFunction(1),
-				TPVectorCellIntegral.VALUE_VALUE));
+			valueValue = MixedCellIntegral.fromVelocityIntegral(
+			new TPVectorCellIntegral<>(ScalarFunction.constantFunction(1),
+			                           TPVectorCellIntegral.VALUE_VALUE));
 		
 		final SparseMatrix M11 = new SparseMatrix(n, n);
 		largeGrid.writeCellIntegralsToMatrix(List.of(valueValue), M11);
@@ -238,28 +234,25 @@ public class DLMStokesTime
 		
 		Vector iterate = new DenseVector(n + 2 * m);
 		
-		final Map<CoordinateVector, Double> pvals = (new MixedFESpaceFunction<>(
-			largeGrid.getShapeFunctions(), iterate).pressureValuesInPointsAtTime(points, 0));
+		final Map<CoordinateVector, Double> pvals = (new MixedFESpaceFunction<>(largeGrid.getShapeFunctions(),
+		                                                                        iterate).pressureValuesInPointsAtTime(
+			points, 0));
 		final Map<CoordinateVector, CoordinateVector> vvals = (new MixedFESpaceFunction<>(
-			largeGrid.getShapeFunctions(), iterate)
-			                                                       .velocityValuesInPointsAtTime(points,
-			                                                                                     0));
+			largeGrid.getShapeFunctions(), iterate).velocityValuesInPointsAtTime(points, 0));
 		System.out.println("inverting");
-		final DenseMatrix Ainv = A.inverse();
+		final DirectlySolvable Ainv = A.inverse();
 		System.out.println("inverted");
 		for (int i = 1; i < timesteps; i++)
 		{
 			System.out.println(i);
 			final Vector rhs = b.add(M.mvMul(iterate));
 			iterate = Ainv.mvMul(rhs);
-			vvals.putAll((new MixedFESpaceFunction<>(
-				largeGrid.getShapeFunctions(), iterate)
-				              .velocityValuesInPointsAtTime(points,
-				                                            i * dt)));
-			pvals.putAll((new MixedFESpaceFunction<>(
-				largeGrid.getShapeFunctions(), iterate)
-				              .pressureValuesInPointsAtTime(points,
-				                                            i * dt)));
+			vvals.putAll((new MixedFESpaceFunction<>(largeGrid.getShapeFunctions(),
+			                                         iterate).velocityValuesInPointsAtTime(points,
+			                                                                               i * dt)));
+			pvals.putAll((new MixedFESpaceFunction<>(largeGrid.getShapeFunctions(),
+			                                         iterate).pressureValuesInPointsAtTime(points,
+			                                                                               i * dt)));
 		}
 		final PlotWindow p = new PlotWindow();
 		final MixedPlot2DTime plot = new MixedPlot2DTime(pvals, vvals, nPoints);

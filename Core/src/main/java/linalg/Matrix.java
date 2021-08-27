@@ -92,7 +92,9 @@ public interface Matrix extends Tensor, VectorMultiplyable
 	
 	default double frobeniusInner(final Matrix other)
 	{
-		throw new UnsupportedOperationException("not yet implemented");
+		if (PerformanceArguments.getInstance().executeChecks) if (!getShape().equals(other.getShape()))
+			throw new IllegalArgumentException("Incompatible " + "sizes");
+		return getShape().range().stream().mapToDouble(c -> at(c) * other.at(c)).sum();
 	}
 	
 	Matrix mmMul(Matrix matrix);

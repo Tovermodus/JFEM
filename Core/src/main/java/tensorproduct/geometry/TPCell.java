@@ -7,6 +7,7 @@ import basic.VectorFunction;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
 import linalg.CoordinateComparator;
+import linalg.CoordinateDenseMatrix;
 import linalg.CoordinateMatrix;
 import linalg.CoordinateVector;
 import org.jetbrains.annotations.NotNull;
@@ -64,8 +65,7 @@ public class TPCell implements CellWithReferenceCell<TPCell, TPFace>
 	{
 		for (int d = 0; d < cell1Ds.size(); d++)
 		{
-			if (!cell1Ds.get(d).isInCell(pos.at(d)))
-				return false;
+			if (!cell1Ds.get(d).isInCell(pos.at(d))) return false;
 		}
 		return true;
 	}
@@ -83,31 +83,29 @@ public class TPCell implements CellWithReferenceCell<TPCell, TPFace>
 	public VectorFunction getOuterNormal(final TPFace face)
 	{
 		if (PerformanceArguments.getInstance().executeChecks)
-			if (!faces.contains(face))
-				throw new IllegalArgumentException("face does not belong to cell");
+			if (!faces.contains(face)) throw new IllegalArgumentException("face does not belong to cell");
 		final boolean invertNormal = (center().sub(face.center())).inner(
 			face.getNormal().value(face.center())) > 0;
-		if (invertNormal)
-			return new VectorFunction()
+		if (invertNormal) return new VectorFunction()
+		{
+			@Override
+			public int getRangeDimension()
 			{
-				@Override
-				public int getRangeDimension()
-				{
-					return face.getNormal().getRangeDimension();
-				}
-				
-				@Override
-				public int getDomainDimension()
-				{
-					return face.getNormal().getDomainDimension();
-				}
-				
-				@Override
-				public CoordinateVector value(final CoordinateVector pos)
-				{
-					return face.getNormal().value(pos).mul(-1);
-				}
-			};
+				return face.getNormal().getRangeDimension();
+			}
+			
+			@Override
+			public int getDomainDimension()
+			{
+				return face.getNormal().getDomainDimension();
+			}
+			
+			@Override
+			public CoordinateVector value(final CoordinateVector pos)
+			{
+				return face.getNormal().value(pos).mul(-1);
+			}
+		};
 		else return face.getNormal();
 	}
 	
@@ -132,8 +130,7 @@ public class TPCell implements CellWithReferenceCell<TPCell, TPFace>
 		{
 			ret = ret.concat(
 				"[" + cell1Ds.get(subd).getStart() + ", " + cell1Ds.get(subd++).getEnd() + "]");
-			if (d < getDimension() - 1)
-				ret = ret.concat("x");
+			if (d < getDimension() - 1) ret = ret.concat("x");
 		}
 		return ret;
 	}
@@ -141,20 +138,15 @@ public class TPCell implements CellWithReferenceCell<TPCell, TPFace>
 	@Override
 	public int compareTo(@NotNull final TPCell o)
 	{
-		if (o.getDimension() < getDimension())
-			return -1;
-		if (o.getDimension() > getDimension())
-			return 1;
+		if (o.getDimension() < getDimension()) return -1;
+		if (o.getDimension() > getDimension()) return 1;
 		for (int i = 0; i < cell1Ds.size(); i++)
 		{
 			if (!DoubleCompare.almostEqual(getComponentCell(i).getStart(),
 			                               o.getComponentCell(i).getStart()))
-				return Double.compare(getComponentCell(i).getStart(),
-				                      o.getComponentCell(i).getStart());
-			if (!DoubleCompare.almostEqual(getComponentCell(i).getEnd(),
-			                               o.getComponentCell(i).getEnd()))
-				return Double.compare(getComponentCell(i).getEnd(),
-				                      o.getComponentCell(i).getEnd());
+				return Double.compare(getComponentCell(i).getStart(), o.getComponentCell(i).getStart());
+			if (!DoubleCompare.almostEqual(getComponentCell(i).getEnd(), o.getComponentCell(i).getEnd()))
+				return Double.compare(getComponentCell(i).getEnd(), o.getComponentCell(i).getEnd());
 		}
 		return CoordinateComparator.comp(center().getEntries(), o.center().getEntries());
 	}
@@ -175,10 +167,8 @@ public class TPCell implements CellWithReferenceCell<TPCell, TPFace>
 	@Override
 	public boolean equals(final Object obj)
 	{
-		if (obj instanceof TPCell)
-			return 0 == compareTo((TPCell) obj);
-		else
-			return false;
+		if (obj instanceof TPCell) return 0 == compareTo((TPCell) obj);
+		else return false;
 	}
 	
 	@Override
@@ -190,7 +180,7 @@ public class TPCell implements CellWithReferenceCell<TPCell, TPFace>
 	@Override
 	public CoordinateMatrix transformationGradientFromReferenceCell(final CoordinateVector pos)
 	{
-		final CoordinateMatrix ret = new CoordinateMatrix(getDimension(), getDimension());
+		final CoordinateDenseMatrix ret = new CoordinateDenseMatrix(getDimension(), getDimension());
 		for (int i = 0; i < getDimension(); i++)
 		{
 			ret.set(cell1Ds.get(i).getEnd() - cell1Ds.get(i).getStart(), i, i);
@@ -201,7 +191,7 @@ public class TPCell implements CellWithReferenceCell<TPCell, TPFace>
 	@Override
 	public CoordinateMatrix transformationGradientToReferenceCell(final CoordinateVector pos)
 	{
-		final CoordinateMatrix ret = new CoordinateMatrix(getDimension(), getDimension());
+		final CoordinateDenseMatrix ret = new CoordinateDenseMatrix(getDimension(), getDimension());
 		for (int i = 0; i < getDimension(); i++)
 		{
 			ret.set(1. / (cell1Ds.get(i).getEnd() - cell1Ds.get(i).getStart()), i, i);
@@ -228,8 +218,9 @@ public class TPCell implements CellWithReferenceCell<TPCell, TPFace>
 		final CoordinateVector ret = new CoordinateVector(getDimension());
 		for (int i = 0; i < getDimension(); i++)
 		{
-			ret.set(pos.at(i) * (cell1Ds.get(i).getEnd() - cell1Ds.get(i).getStart()) +
-				        cell1Ds.get(i).getStart(), i);
+			ret.set(pos.at(i) * (cell1Ds.get(i).getEnd() - cell1Ds.get(i).getStart()) + cell1Ds
+				.get(i)
+				.getStart(), i);
 		}
 		return ret;
 	}

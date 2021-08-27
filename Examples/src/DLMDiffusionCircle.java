@@ -14,8 +14,8 @@ public class DLMDiffusionCircle
 	public static void main(final String[] args)
 	{
 		
-		final PerformanceArguments.PerformanceArgumentBuilder builder =
-			new PerformanceArguments.PerformanceArgumentBuilder();
+		final PerformanceArguments.PerformanceArgumentBuilder builder
+			= new PerformanceArguments.PerformanceArgumentBuilder();
 		builder.build();
 		
 		final CoordinateVector start = CoordinateVector.fromValues(0, 0);
@@ -25,9 +25,7 @@ public class DLMDiffusionCircle
 		
 		final int polynomialDegree = 2;
 		
-		final ContinuousTPFESpace largeGrid = new ContinuousTPFESpace(start, end,
-		                                                              Ints.asList(
-			                                                              20, 20));
+		final ContinuousTPFESpace largeGrid = new ContinuousTPFESpace(start, end, Ints.asList(20, 20));
 		largeGrid.assembleCells();
 		largeGrid.assembleFunctions(polynomialDegree);
 		final DistortedSpace immersedGrid = new DistortedSpace(immercedCenter, immersedRadius, 3);
@@ -41,9 +39,8 @@ public class DLMDiffusionCircle
 		
 		final TPCellIntegral<ContinuousTPShapeFunction> rhogradgrad = new TPCellIntegral<>(rho,
 		                                                                                   TPCellIntegral.GRAD_GRAD);
-		final TPFaceIntegral<ContinuousTPShapeFunction> dirichlet =
-			new TPFaceIntegral<>(ScalarFunction.constantFunction(1000),
-			                     TPFaceIntegral.VALUE_JUMP_VALUE_JUMP);
+		final TPFaceIntegral<ContinuousTPShapeFunction> dirichlet = new TPFaceIntegral<>(
+			ScalarFunction.constantFunction(1000), TPFaceIntegral.VALUE_JUMP_VALUE_JUMP);
 		final DistortedCellIntegral rho2gradgrad = new DistortedCellIntegral(rho2minrho,
 		                                                                     DistortedCellIntegral.GRAD_GRAD);
 		
@@ -76,8 +73,8 @@ public class DLMDiffusionCircle
 		int count = 0;
 		for (final Map.Entry<Integer, ContinuousTPShapeFunction> sf : largeGrid.getShapeFunctions().entrySet())
 		{
-			final DistortedRightHandSideIntegral shapeFunctionOnImmersedGrid =
-				new DistortedRightHandSideIntegral(sf.getValue(), DistortedRightHandSideIntegral.H1);
+			final DistortedRightHandSideIntegral shapeFunctionOnImmersedGrid
+				= new DistortedRightHandSideIntegral(sf.getValue(), DistortedRightHandSideIntegral.H1);
 			final DenseVector integrals = new DenseVector(m);
 			immersedGrid.writeCellIntegralsToRhs(List.of(shapeFunctionOnImmersedGrid), integrals);
 			A13.addSmallMatrixAt(integrals.asMatrix().transpose(), sf.getKey(), 0);
@@ -85,11 +82,9 @@ public class DLMDiffusionCircle
 			System.out.println("A31: " + 100.0 * (count++) / n + "%");
 		}
 		
-		final SparseMatrix A =
-			new SparseMatrix(n + 2 * m, n + 2 * m);
+		final SparseMatrix A = new SparseMatrix(n + 2 * m, n + 2 * m);
 		
-		final SparseMatrix T =
-			new SparseMatrix(n + 2 * m, n + 2 * m);
+		final SparseMatrix T = new SparseMatrix(n + 2 * m, n + 2 * m);
 		
 		A.addSmallMatrixAt(A11, 0, 0);
 		A.addSmallMatrixAt(A22, n, n);
@@ -98,7 +93,7 @@ public class DLMDiffusionCircle
 		A.addSmallMatrixAt(A13, 0, n + m);
 		A.addSmallMatrixAt(A13.transpose(), n + m, 0);
 		System.out.println("A");
-		final DenseMatrix A11inv = A11.inverse();
+		final DirectlySolvable A11inv = A11.inverse();
 		T.addSmallMatrixAt(A11inv, 0, 0);
 		System.out.println("T11");
 		T.addSmallMatrixAt((A22.add(SparseMatrix.identity(m).mul(0.01))).inverse(), n, n);
@@ -118,9 +113,8 @@ public class DLMDiffusionCircle
 		final IterativeSolver i = new IterativeSolver();
 		final Vector solut = i.solvePGMRES(A, T, b, 1e-9);//A.solve(b);
 		final Vector largeSolut = solut.slice(new IntCoordinates(0), new IntCoordinates(n));
-		final ScalarFESpaceFunction<ContinuousTPShapeFunction> solutFun =
-			new ScalarFESpaceFunction<>(
-				largeGrid.getShapeFunctions(), largeSolut);
+		final ScalarFESpaceFunction<ContinuousTPShapeFunction> solutFun = new ScalarFESpaceFunction<>(
+			largeGrid.getShapeFunctions(), largeSolut);
 		final PlotWindow p = new PlotWindow();
 		p.addPlot(new ScalarPlot2D(solutFun, largeGrid.generatePlotPoints(70), 70));
 	}

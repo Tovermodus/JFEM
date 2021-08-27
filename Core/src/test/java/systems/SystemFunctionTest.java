@@ -8,13 +8,12 @@ import linalg.*;
 import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertThrows;
 
 public class SystemFunctionTest
 {
-	private SystemFunction createSystemFunction()
+	private static SystemFunction createSystemFunction()
 	{
-		ScalarFunction f1 = new ScalarFunction()
+		final ScalarFunction f1 = new ScalarFunction()
 		{
 			@Override
 			public int getDomainDimension()
@@ -23,17 +22,18 @@ public class SystemFunctionTest
 			}
 			
 			@Override
-			public Double value(CoordinateVector pos)
+			public Double value(final CoordinateVector pos)
 			{
 				return pos.x();
 			}
+			
 			@Override
-			public CoordinateVector gradient(CoordinateVector pos)
+			public CoordinateVector gradient(final CoordinateVector pos)
 			{
-				return CoordinateVector.fromValues(1,0);
+				return CoordinateVector.fromValues(1, 0);
 			}
 		};
-		VectorFunction f2 = new VectorFunction()
+		final VectorFunction f2 = new VectorFunction()
 		{
 			@Override
 			public int getRangeDimension()
@@ -48,17 +48,18 @@ public class SystemFunctionTest
 			}
 			
 			@Override
-			public CoordinateVector value(CoordinateVector pos)
+			public CoordinateVector value(final CoordinateVector pos)
 			{
-				return CoordinateVector.fromValues(pos.x()*pos.x(), pos.y(), 1);
+				return CoordinateVector.fromValues(pos.x() * pos.x(), pos.y(), 1);
 			}
+			
 			@Override
-			public CoordinateMatrix gradient(CoordinateVector pos)
+			public CoordinateMatrix gradient(final CoordinateVector pos)
 			{
-				return CoordinateMatrix.fromValues(3,2,2*pos.x(),0,0,1,0,0);
+				return CoordinateDenseMatrix.fromValues(3, 2, 2 * pos.x(), 0, 0, 1, 0, 0);
 			}
 		};
-		ScalarFunction f3 = new ScalarFunction()
+		final ScalarFunction f3 = new ScalarFunction()
 		{
 			@Override
 			public int getDomainDimension()
@@ -67,18 +68,18 @@ public class SystemFunctionTest
 			}
 			
 			@Override
-			public Double value(CoordinateVector pos)
+			public Double value(final CoordinateVector pos)
 			{
 				return pos.y();
 			}
-			@Override
-			public CoordinateVector gradient(CoordinateVector pos)
-			{
-				return CoordinateVector.fromValues(0,1);
-			}
 			
+			@Override
+			public CoordinateVector gradient(final CoordinateVector pos)
+			{
+				return CoordinateVector.fromValues(0, 1);
+			}
 		};
-		VectorFunction f4 = new VectorFunction()
+		final VectorFunction f4 = new VectorFunction()
 		{
 			@Override
 			public int getRangeDimension()
@@ -93,42 +94,60 @@ public class SystemFunctionTest
 			}
 			
 			@Override
-			public CoordinateVector value(CoordinateVector pos)
+			public CoordinateVector value(final CoordinateVector pos)
 			{
 				return pos;
 			}
+			
 			@Override
-			public CoordinateMatrix gradient(CoordinateVector pos)
+			public CoordinateMatrix gradient(final CoordinateVector pos)
 			{
-				return CoordinateMatrix.fromValues(2,2,1,0,0,1);
+				return CoordinateDenseMatrix.fromValues(2, 2, 1, 0, 0, 1);
 			}
 		};
-		return new SystemFunction(new Function[]{f1,f2,f3,f4});
+		return new SystemFunction(new Function[]{f1, f2, f3, f4});
 	}
+	
 	@Test
-	public void testValue() {
-		SystemParameters.createInstance(new int[]{1,4,5,7}, new FunctionSignature[]{
-			new FunctionSignature(Double.class, CoordinateVector.class, CoordinateMatrix.class),
-			new FunctionSignature(CoordinateVector.class, CoordinateMatrix.class, CoordinateTensor.class),
-			new FunctionSignature(Double.class, CoordinateVector.class, CoordinateMatrix.class),
-			new FunctionSignature(CoordinateVector.class, CoordinateMatrix.class, CoordinateTensor.class)
-		});
-		SystemFunction f = createSystemFunction();
-		assertEquals(f.value(new CoordinateVector(2)), DenseVector.vectorFromValues(0,0,0,1,0,0,0));
-		assertEquals(f.value(CoordinateVector.fromValues(1.3,2)), DenseVector.vectorFromValues(1.3,1.3*1.3,2,
-			1,2,
-			1.3,2));
+	public void testValue()
+	{
+		SystemParameters.createInstance(new int[]{1, 4, 5, 7},
+		                                new FunctionSignature[]{new FunctionSignature(Double.class,
+		                                                                              CoordinateVector.class,
+		                                                                              CoordinateMatrix.class),
+		                                                        new FunctionSignature(CoordinateVector.class,
+		                                                                              CoordinateMatrix.class,
+		                                                                              CoordinateTensor.class),
+		                                                        new FunctionSignature(Double.class,
+		                                                                              CoordinateVector.class,
+		                                                                              CoordinateMatrix.class),
+		                                                        new FunctionSignature(CoordinateVector.class,
+		                                                                              CoordinateMatrix.class,
+		                                                                              CoordinateTensor.class)});
+		final SystemFunction f = createSystemFunction();
+		assertEquals(f.value(new CoordinateVector(2)), DenseVector.vectorFromValues(0, 0, 0, 1, 0, 0, 0));
+		assertEquals(f.value(CoordinateVector.fromValues(1.3, 2)),
+		             DenseVector.vectorFromValues(1.3, 1.3 * 1.3, 2, 1, 2, 1.3, 2));
 		SystemParameters.deleteInstance();
 	}
+	
 	@Test
-	public void testValueSingleComponent() {
-		SystemParameters.createInstance(new int[]{1,4,5,7}, new FunctionSignature[]{
-			new FunctionSignature(Double.class, CoordinateVector.class, CoordinateMatrix.class),
-			new FunctionSignature(CoordinateVector.class, CoordinateMatrix.class, CoordinateTensor.class),
-			new FunctionSignature(Double.class, CoordinateVector.class, CoordinateMatrix.class),
-			new FunctionSignature(CoordinateVector.class, CoordinateMatrix.class, CoordinateTensor.class)
-		});
-		SystemFunction f = new SystemFunction(new ScalarFunction()
+	public void testValueSingleComponent()
+	{
+		SystemParameters.createInstance(new int[]{1, 4, 5, 7},
+		                                new FunctionSignature[]{new FunctionSignature(Double.class,
+		                                                                              CoordinateVector.class,
+		                                                                              CoordinateMatrix.class),
+		                                                        new FunctionSignature(CoordinateVector.class,
+		                                                                              CoordinateMatrix.class,
+		                                                                              CoordinateTensor.class),
+		                                                        new FunctionSignature(Double.class,
+		                                                                              CoordinateVector.class,
+		                                                                              CoordinateMatrix.class),
+		                                                        new FunctionSignature(CoordinateVector.class,
+		                                                                              CoordinateMatrix.class,
+		                                                                              CoordinateTensor.class)});
+		final SystemFunction f = new SystemFunction(new ScalarFunction()
 		{
 			@Override
 			public int getDomainDimension()
@@ -137,24 +156,33 @@ public class SystemFunctionTest
 			}
 			
 			@Override
-			public Double value(CoordinateVector pos)
+			public Double value(final CoordinateVector pos)
 			{
 				return 7.8;
 			}
 		}, 2);
-		assertEquals(f.value(new CoordinateVector(2)), DenseVector.vectorFromValues(0,0,0,0,7.8,0,0));
+		assertEquals(f.value(new CoordinateVector(2)), DenseVector.vectorFromValues(0, 0, 0, 0, 7.8, 0, 0));
 		SystemParameters.deleteInstance();
 	}
+	
 	@Test
-	public void testGradient() {
-		SystemParameters.createInstance(new int[]{1,4,5,7}, new FunctionSignature[]{
-			new FunctionSignature(Double.class, CoordinateVector.class, CoordinateMatrix.class),
-			new FunctionSignature(CoordinateVector.class, CoordinateMatrix.class, CoordinateTensor.class),
-			new FunctionSignature(Double.class, CoordinateVector.class, CoordinateMatrix.class),
-			new FunctionSignature(CoordinateVector.class, CoordinateMatrix.class, CoordinateTensor.class)
-		});
-		SystemFunction f = createSystemFunction();
-		DenseMatrix d = new DenseMatrix(7,2);
+	public void testGradient()
+	{
+		SystemParameters.createInstance(new int[]{1, 4, 5, 7},
+		                                new FunctionSignature[]{new FunctionSignature(Double.class,
+		                                                                              CoordinateVector.class,
+		                                                                              CoordinateMatrix.class),
+		                                                        new FunctionSignature(CoordinateVector.class,
+		                                                                              CoordinateMatrix.class,
+		                                                                              CoordinateTensor.class),
+		                                                        new FunctionSignature(Double.class,
+		                                                                              CoordinateVector.class,
+		                                                                              CoordinateMatrix.class),
+		                                                        new FunctionSignature(CoordinateVector.class,
+		                                                                              CoordinateMatrix.class,
+		                                                                              CoordinateTensor.class)});
+		final SystemFunction f = createSystemFunction();
+		final DenseMatrix d = new DenseMatrix(7, 2);
 		d.set(1, 0, 0);
 		d.set(0, 0, 1);
 		d.set(0, 1, 0);

@@ -4,15 +4,13 @@ import basic.VectorFunction;
 
 public class Newton
 {
-	public static CoordinateVector solve(final CoordinateVector initial, final CoordinateVector rhs,
-	                                     final VectorFunction function, final int maxIterations)
+	public static CoordinateVector solve(final CoordinateVector initial, final CoordinateVector rhs, final VectorFunction function, final int maxIterations)
 	{
 		final CoordinateVector iterate = new CoordinateVector(initial);
 		CoordinateVector step;
 		for (int i = 0; i < maxIterations; i++)
 		{
-			final CoordinateVector fx =
-				function.value(iterate).sub(rhs);
+			final CoordinateVector fx = function.value(iterate).sub(rhs);
 //			System.out.println(iterate + "\tit");
 //			System.out.println(function.gradient(iterate));
 //			System.out.println(fx.absMaxElement() + "\tfx");
@@ -22,7 +20,10 @@ public class Newton
 			}
 			try
 			{
-				step = function.gradient(iterate).solve(fx);
+				final CoordinateMatrix fgrad = function.gradient(iterate);
+				if (fgrad instanceof CoordinateDenseMatrix)
+					step = ((CoordinateDenseMatrix) fgrad).solve(fx);
+				else step = new CoordinateDenseMatrix(fgrad).solve(fx);
 			} catch (final RuntimeException e)
 			{
 				System.out.println("Newton moved into nondifferentiable region, stopping");

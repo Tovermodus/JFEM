@@ -9,16 +9,14 @@ public class CoordinateVector extends DenseVector implements Comparable<Coordina
 	{
 		super(v);
 		if (PerformanceArguments.getInstance().executeChecks)
-			if (v.getLength() > 4)
-				throw new IllegalArgumentException("only 1D, 2D, 3D and 4D supported");
+			if (v.getLength() > 4) throw new IllegalArgumentException("only 1D, 2D, 3D and 4D supported");
 	}
 	
 	public CoordinateVector(final int d)
 	{
 		super(d);
 		if (PerformanceArguments.getInstance().executeChecks)
-			if (d > 4)
-				throw new IllegalArgumentException("only 1D, 2D, 3D and 4D supported");
+			if (d > 4) throw new IllegalArgumentException("only 1D, 2D, 3D and 4D supported");
 	}
 	
 	public CoordinateVector(final double[] vector)
@@ -69,22 +67,23 @@ public class CoordinateVector extends DenseVector implements Comparable<Coordina
 		return ret;
 	}
 	
-	public CoordinateMatrix outer(final CoordinateVector other)
+	public Rank1CoordinateMatrix outer(final CoordinateVector other)
 	{
-		final CoordinateMatrix ret = new CoordinateMatrix(getLength(), other.getLength());
-		for (int i = 0; i < getLength(); i++)
-		{
-			for (int j = 0; j < other.getLength(); j++)
-			{
-				ret.set(at(i) * other.at(j), i, j);
-			}
-		}
-		return ret;
+		return new Rank1CoordinateMatrix(this, other);
+//		final CoordinateMatrix ret = new CoordinateMatrix(getLength(), other.getLength());
+//		for (int i = 0; i < getLength(); i++)
+//		{
+//			for (int j = 0; j < other.getLength(); j++)
+//			{
+//				ret.set(at(i) * other.at(j), i, j);
+//			}
+//		}
+//		return ret;
 	}
 	
 	public CoordinateMatrix asCoordinateMatrix()
 	{
-		final CoordinateMatrix ret = new CoordinateMatrix(entries.length, 1);
+		final CoordinateDenseMatrix ret = new CoordinateDenseMatrix(entries.length, 1);
 		for (int i = 0; i < getLength(); i++)
 		{
 			ret.set(entries[i], i, 0);
@@ -167,8 +166,7 @@ public class CoordinateVector extends DenseVector implements Comparable<Coordina
 	@Override
 	public boolean equals(final Object obj)
 	{
-		if (obj instanceof CoordinateVector)
-			return compareTo((CoordinateVector) obj) == 0;
+		if (obj instanceof CoordinateVector) return compareTo((CoordinateVector) obj) == 0;
 		return false;
 	}
 	
