@@ -2,6 +2,7 @@ package distorted;
 
 import basic.AcceptsMatrixBoundaryValues;
 import basic.Assembleable;
+import basic.ScalarFunction;
 import basic.ShapeFunction;
 import com.google.common.collect.Sets;
 import distorted.geometry.CircleGrid;
@@ -13,10 +14,7 @@ import linalg.SparseMatrix;
 
 import java.util.*;
 
-public abstract class CircleGridSpace<ST extends ShapeFunction<DistortedCell, DistortedFace, valueT, gradientT,
-	hessianT> & Comparable<ST>,
-	valueT, gradientT, hessianT>
-	implements AcceptsMatrixBoundaryValues<DistortedCell, DistortedFace, ST, valueT, gradientT, hessianT>, Assembleable
+public abstract class CircleGridSpace<ST extends ShapeFunction<DistortedCell, DistortedFace, valueT, gradientT, hessianT> & Comparable<ST>, valueT, gradientT, hessianT> implements AcceptsMatrixBoundaryValues<DistortedCell, DistortedFace, ST, valueT, gradientT, hessianT>, Assembleable
 {
 	protected final CircleGrid grid;
 	private final HashMap<DistortedCell, TreeSet<ST>> supportOnCell;
@@ -46,15 +44,13 @@ public abstract class CircleGridSpace<ST extends ShapeFunction<DistortedCell, Di
 	
 	protected void addFunctionToCell(final ST function, final DistortedCell cell)
 	{
-		if (!supportOnCell.containsKey(cell))
-			supportOnCell.put(cell, new TreeSet<>());
+		if (!supportOnCell.containsKey(cell)) supportOnCell.put(cell, new TreeSet<>());
 		supportOnCell.get(cell).add(function);
 	}
 	
 	protected void addFunctionToFace(final ST function, final DistortedFace face)
 	{
-		if (!supportOnFace.containsKey(face))
-			supportOnFace.put(face, new TreeSet<>());
+		if (!supportOnFace.containsKey(face)) supportOnFace.put(face, new TreeSet<>());
 		supportOnFace.get(face).add(function);
 	}
 	
@@ -135,5 +131,25 @@ public abstract class CircleGridSpace<ST extends ShapeFunction<DistortedCell, Di
 	public List<CoordinateVector> generatePlotPoints(final int resolution)
 	{
 		return grid.generatePlotPoints(resolution);
+	}
+	
+	public ScalarFunction getIndicatorFunction()
+	{
+		return new ScalarFunction()
+		{
+			@Override
+			public int getDomainDimension()
+			{
+				return getDimension();
+			}
+			
+			@Override
+			public Double value(final CoordinateVector pos)
+			{
+				final boolean isInSide = getCells().stream().anyMatch(c -> c.isInCellPrecise(pos));
+				if (isInSide) return 1.;
+				else return 0.;
+			}
+		};
 	}
 }

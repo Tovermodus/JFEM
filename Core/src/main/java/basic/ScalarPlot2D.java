@@ -101,7 +101,6 @@ public class ScalarPlot2D extends Plot
 	                                   final double maxValue, final CoordinateVector mins, final CoordinateVector maxs,
 	                                   final int pixelWidth, final int pixelHeight)
 	{
-		
 		double maxValueDifference = maxValue - minValue;
 		if (maxValueDifference < 1e-15)
 			maxValueDifference = 1;

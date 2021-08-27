@@ -1,5 +1,6 @@
 import basic.PlotWindow;
 import basic.ScalarFunction;
+import basic.ScalarPlot2DTime;
 import basic.VectorFunction;
 import distorted.*;
 import distorted.geometry.DistortedCell;
@@ -12,6 +13,7 @@ import tensorproduct.geometry.TPCell;
 
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 public class DLMSummary
 {
@@ -35,11 +37,11 @@ public class DLMSummary
 	public DLMSummary()
 	{
 		rhoF = 1;
-		rhoS = 5;
+		rhoS = 10;
 		nu = 1;
-		kappa = 1000;
-		dt = 0.01;
-		timeSteps = 12;
+		kappa = 1;
+		dt = 0.05;
+		timeSteps = 8;
 		initializeEulerian();
 		initializeLagrangian();
 		
@@ -67,11 +69,25 @@ public class DLMSummary
 			.pressureValuesInPointsAtTime(eulerianPoints, -dt);
 		final Map<CoordinateVector, CoordinateVector> vvals = getUp(currentIterate)
 			.velocityValuesInPointsAtTime(eulerianPoints, -dt);
-		final Map<CoordinateVector, CoordinateVector> dvals = getX(lastIterate)
-			.valuesInPointsAtTime(eulerianPoints, -dt);
+		DistortedVectorFESpaceFunction X = getX(lastIterate);
+		final ScalarFunction circleIndicator = lagrangian.getIndicatorFunction();
+		final DistortedVectorFESpaceFunction finalX = X;
+		final Map<CoordinateVector, Double> dvals = eulerianPoints
+			.stream()
+			.map(p ->
+			     {
+				     double val = 1;
+				     CoordinateVector Xp = finalX.value(p);
+				     if (Xp.euclidianNorm() == 0)
+				     {
+					     Xp = p;
+					     val = 0;
+				     }
+				     return Map.entry(Xp.addCoordinate(-dt), val);
+			     })
+			.collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
 		final Map<CoordinateVector, CoordinateVector> derivVals = getX(lastIterate.mul(0))
 			.valuesInPointsAtTime(eulerianPoints, -dt);
-		dvals.forEach(this::subtractIdentityOnLagrangianMesh);
 		final Map<CoordinateVector, CoordinateVector> uXvals = concatenateVelocityWithX(getUp(lastIterate),
 		                                                                                lastIterate)
 			.valuesInPointsAtTime(eulerianPoints, -dt);
@@ -86,10 +102,23 @@ public class DLMSummary
 			systemMatrix = new SparseMatrix(constantSystemMatrix);
 			pvals.putAll(getUp(currentIterate).pressureValuesInPointsAtTime(eulerianPoints, (i - 1) * dt));
 			vvals.putAll(getUp(currentIterate).velocityValuesInPointsAtTime(eulerianPoints, (i - 1) * dt));
-			final Map<CoordinateVector, CoordinateVector> XValues = getX(currentIterate)
-				.valuesInPointsAtTime(eulerianPoints, (i - 1) * dt);
-			XValues.forEach(this::subtractIdentityOnLagrangianMesh);
-			dvals.putAll(XValues);
+			X = getX(currentIterate);
+			final DistortedVectorFESpaceFunction finalX1 = X;
+			final int finalI = i;
+			dvals.putAll(eulerianPoints
+				             .stream()
+				             .map(p ->
+				                  {
+					                  double val = 1;
+					                  CoordinateVector Xp = finalX1.value(p);
+					                  if (Xp.euclidianNorm() == 0)
+					                  {
+						                  Xp = p;
+						                  val = 0;
+					                  }
+					                  return Map.entry(Xp.addCoordinate((finalI - 1) * dt), val);
+				                  })
+				             .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue)));
 			derivVals.putAll(getX(currentIterate.sub(lastIterate).mul(1. / dt))
 				                 .valuesInPointsAtTime(eulerianPoints, (i - 1) * dt));
 			uXvals.putAll(concatenateVelocityWithX(getUp(currentIterate), currentIterate)
@@ -138,10 +167,14 @@ public class DLMSummary
 		}
 		p.addPlot(new MixedPlot2DTime(pvals, derivVals, eulerianPointsPerDimension, "derivVals"));
 		
-		p.addPlot(plot.addOverlay(new CircleOverlay(lagrangian, plot)));
-		final MixedPlot2DTime disPLacementplot = new MixedPlot2DTime(pvals, dvals, eulerianPointsPerDimension,
-		                                                             "dVals");
-		p.addPlot(disPLacementplot.addOverlay(new CircleOverlay(lagrangian, plot)));
+		p.addPlot(plot.addOverlay(new DistortedOverlay(eulerianPoints, lagrangian,
+		                                               iterateHistory.slice(new IntCoordinates(0, nEulerian),
+		                                                                    new IntCoordinates(timeSteps + 1,
+		                                                                                       nEulerian + nLagrangian)),
+		                                               10)));
+		final ScalarPlot2DTime disPLacementplot = new ScalarPlot2DTime(dvals, eulerianPointsPerDimension,
+		                                                               "dVals");
+		p.addPlot(disPLacementplot);
 	}
 	
 	public static void main(final String[] args)

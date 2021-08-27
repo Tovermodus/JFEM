@@ -118,7 +118,9 @@ public class DenseVector implements MutableVector, MutableTensor
 	public double at(final int... coordinates)
 	{
 		if (PerformanceArguments.getInstance().executeChecks)
+		{
 			if (coordinates.length != 1) throw new IllegalArgumentException("Wrong number of coordinates");
+		}
 		return entries[coordinates[0]];
 	}
 	
