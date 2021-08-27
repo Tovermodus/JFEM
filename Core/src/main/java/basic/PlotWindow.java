@@ -87,8 +87,8 @@ public class PlotWindow extends JFrame implements KeyListener, WindowListener, C
 	public void keyPressed(final KeyEvent e)
 	{
 		int newValue = slider.getValue();
-		if (e.getKeyCode() == KeyEvent.VK_DOWN) currentPlot--;
-		if (e.getKeyCode() == KeyEvent.VK_UP) currentPlot++;
+		if (e.getKeyCode() == KeyEvent.VK_DOWN) currentPlot++;
+		if (e.getKeyCode() == KeyEvent.VK_UP) currentPlot--;
 		if (e.getKeyCode() == KeyEvent.VK_RIGHT) newValue++;
 		if (e.getKeyCode() == KeyEvent.VK_LEFT) newValue--;
 		if (newValue < 0) newValue = 99;
