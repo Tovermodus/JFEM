@@ -1,4 +1,7 @@
-import basic.*;
+import basic.PlotWindow;
+import basic.ScalarFunction;
+import basic.ScalarPlot2DTime;
+import basic.VectorFunction;
 import distorted.*;
 import distorted.geometry.DistortedCell;
 import linalg.*;
@@ -40,9 +43,9 @@ public class DLMSummary
 		rhoF = 1;
 		rhoS = 10;
 		nu = 1;
-		kappa = 10;
-		dt = 0.005;
-		timeSteps = 2;
+		kappa = 10000;
+		dt = 0.025;
+		timeSteps = 20;
 		initializeEulerian();
 		initializeLagrangian();
 		

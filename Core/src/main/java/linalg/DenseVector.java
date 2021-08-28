@@ -159,7 +159,8 @@ public class DenseVector implements MutableVector, MutableTensor
 	@Override
 	public void mulInPlace(final double scalar)
 	{
-		entries = mul(scalar).entries;
+		for (int i = 0; i < getLength(); i++)
+			entries[i] *= scalar;
 	}
 	
 	@Override
