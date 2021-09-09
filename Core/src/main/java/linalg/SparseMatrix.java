@@ -4,10 +4,11 @@ import basic.DoubleCompare;
 import basic.PerformanceArguments;
 import com.google.common.collect.ImmutableMap;
 
+import java.io.Serializable;
 import java.util.*;
 import java.util.stream.IntStream;
 
-public class SparseMatrix implements MutableMatrix, DirectlySolvable, Decomposable
+public class SparseMatrix implements MutableMatrix, DirectlySolvable, Decomposable, Serializable
 {
 	private final int rows;
 	private final int cols;
@@ -132,6 +133,22 @@ public class SparseMatrix implements MutableMatrix, DirectlySolvable, Decomposab
 		for (int i = 0; i < sparseEntries; i++)
 			if (sparseXs[i] == lineCoordinate)
 				sparseValues[i] = 0;
+	}
+	
+	@Override
+	public void addColumn(Vector vector, int column, int start)
+	{
+		
+		if (PerformanceArguments.getInstance().executeChecks)
+		{
+			if (start+vector.getLength() > getRows())
+				throw new IllegalArgumentException("small Vector too large for position");
+		}
+		for(int i = 0; i < vector.getLength(); i++)
+		{
+			if(vector.at(i) != 0)
+				add(vector.at(i), i + start, column);
+		}
 	}
 	
 	@Override

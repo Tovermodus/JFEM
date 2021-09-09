@@ -4,6 +4,10 @@ import basic.DoubleCompare;
 import basic.FaceWithReferenceFace;
 import basic.PerformanceArguments;
 import basic.VectorFunction;
+import com.esotericsoftware.kryo.Kryo;
+import com.esotericsoftware.kryo.Serializer;
+import com.esotericsoftware.kryo.io.Input;
+import com.esotericsoftware.kryo.io.Output;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Multimap;
@@ -13,14 +17,14 @@ import org.jetbrains.annotations.NotNull;
 
 import java.util.*;
 
-public class TPFace implements FaceWithReferenceFace<TPCell, TPFace>, Comparable<TPFace>
+public class TPFace extends Serializer<TPFace> implements FaceWithReferenceFace<TPCell, TPFace>, Comparable<TPFace>
 {
 	public final double otherCoordinate;
 	public final int flatDimension;
 	final ImmutableList<Cell1D> cell1Ds;
 	private final boolean isBoundaryFace;
-	private final VectorFunction normal;
-	Set<TPCell> cells;
+	private final transient VectorFunction normal;
+	final Set<TPCell> cells;
 	
 	TPFace(final List<Cell1D> cell1Ds, final int flatDimension, final double otherCoordinate, final boolean isBoundaryFace)
 	{
@@ -317,5 +321,17 @@ public class TPFace implements FaceWithReferenceFace<TPCell, TPFace>, Comparable
 		if (getNormalUpstreamCell() != null)
 			refFace.cells.add(upstreamCell);
 		return refFace;
+	}
+	
+	@Override
+	public void write(final Kryo kryo, final Output output, final TPFace tpFace)
+	{
+		throw new UnsupportedOperationException("not implemented yet");
+	}
+	
+	@Override
+	public TPFace read(final Kryo kryo, final Input input, final Class<TPFace> aClass)
+	{
+		throw new UnsupportedOperationException("not implemented yet");
 	}
 }

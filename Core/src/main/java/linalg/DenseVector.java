@@ -4,9 +4,10 @@ import basic.DoubleCompare;
 import basic.PerformanceArguments;
 import org.ujmp.core.Matrix;
 
+import java.io.Serializable;
 import java.util.function.DoubleUnaryOperator;
 
-public class DenseVector implements MutableVector, MutableTensor
+public class DenseVector implements MutableVector, MutableTensor, Serializable
 {
 	protected volatile double[] entries;
 	

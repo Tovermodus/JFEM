@@ -43,9 +43,9 @@ public class DLMSummary
 		rhoF = 1;
 		rhoS = 10;
 		nu = 1;
-		kappa = 10000;
-		dt = 0.025;
-		timeSteps = 20;
+		kappa = 10;
+		dt = 0.25;
+		timeSteps = 10;
 		initializeEulerian();
 		initializeLagrangian();
 		

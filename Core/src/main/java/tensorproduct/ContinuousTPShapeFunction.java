@@ -2,10 +2,8 @@ package tensorproduct;
 
 import basic.FastEvaluatedScalarShapeFunction;
 import basic.LagrangeNodeFunctional;
-import basic.NodeFunctional;
 import basic.ScalarShapeFunctionWithReferenceShapeFunction;
 import linalg.CoordinateComparator;
-import linalg.CoordinateMatrix;
 import linalg.CoordinateVector;
 import tensorproduct.geometry.TPCell;
 import tensorproduct.geometry.TPFace;
@@ -123,7 +121,7 @@ public class ContinuousTPShapeFunction implements ScalarShapeFunctionWithReferen
 	}
 	
 	@Override
-	public NodeFunctional<Double, CoordinateVector, CoordinateMatrix> getNodeFunctional()
+	public LagrangeNodeFunctional getNodeFunctional()
 	{
 		return nodeFunctional;
 	}

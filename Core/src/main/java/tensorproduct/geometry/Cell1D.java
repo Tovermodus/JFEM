@@ -54,10 +54,9 @@ public class Cell1D implements Comparable<Cell1D>
 	
 	public boolean isInCell(final double pos)
 	{
-		return (pos >= start - 100*PerformanceArguments.getInstance().doubleTolerance &&
-			        pos <= end + 100*PerformanceArguments.getInstance().doubleTolerance);
+		return (pos >= start - 100 * PerformanceArguments.getInstance().doubleTolerance &&
+			        pos <= end + 100 * PerformanceArguments.getInstance().doubleTolerance);
 	}
-	
 	
 	public double positionOnReferenceCell(final double pos)
 	{
