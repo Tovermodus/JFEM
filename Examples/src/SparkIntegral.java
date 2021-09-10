@@ -24,11 +24,11 @@ public class SparkIntegral
 		final ContinuousTPFESpace space =
 			new ContinuousTPFESpace(CoordinateVector.fromValues(0, 0),
 			                        CoordinateVector.fromValues(1, 1),
-			                        List.of(70, 70));
+			                        List.of(20, 20));
 		space.assembleCells();
 		space.assembleFunctions(2);
 		final DistortedSpace s = new DistortedSpace(
-			CoordinateVector.fromValues(0.5, 0.5), 0.5, 3);
+			CoordinateVector.fromValues(0.5, 0.5), 0.5, 2);
 		s.assembleCells();
 		s.assembleFunctions(2);
 		return new Tuple2<>(space, s);

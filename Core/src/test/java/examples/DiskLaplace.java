@@ -8,13 +8,13 @@ import distorted.DistortedSpace;
 import linalg.CoordinateVector;
 import linalg.IterativeSolver;
 import linalg.Vector;
-import org.junit.jupiter.api.Test;
+import org.junit.Test;
 import tensorproduct.QuadratureRule1D;
 
 import java.util.ArrayList;
 import java.util.List;
 
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.Assert.assertTrue;
 
 public class DiskLaplace
 {

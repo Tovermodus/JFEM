@@ -1,94 +1,96 @@
 package mixed;
 
-import basic.*;
+import basic.ScalarFunction;
 import linalg.CoordinateVector;
 import linalg.IntCoordinates;
-import org.junit.jupiter.api.Test;
-import tensorproduct.*;
+import org.junit.Test;
+import tensorproduct.ContinuousTPShapeFunction;
+import tensorproduct.ContinuousTPVectorFunction;
+import tensorproduct.TPCellIntegral;
+import tensorproduct.TPVectorCellIntegral;
 import tensorproduct.geometry.CartesianGrid;
 import tensorproduct.geometry.TPCell;
 
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.Assert.assertTrue;
 
 public class MixedCellIntegralTest
 {
 	@Test
 	public void testPressureIntegral()
 	{
-		CartesianGrid g = new CartesianGrid(CoordinateVector.fromValues(3,0),
-			CoordinateVector.fromValues(5,4),new IntCoordinates(1,1));
-		TPCell c = g.cells.get(0);
+		final CartesianGrid g = new CartesianGrid(CoordinateVector.fromValues(3, 0),
+		                                          CoordinateVector.fromValues(5, 4), new IntCoordinates(1, 1));
+		final TPCell c = g.cells.get(0);
 		for (int k = 1; k < 5; k++)
 			for (int i = 0; i < (k + 1) * (k + 1); i++)
 				for (int j = 0; j < (k + 1) * (k + 1); j++)
 				{
-					ContinuousTPShapeFunction f1 = new ContinuousTPShapeFunction(c, k, i);
-					ContinuousTPShapeFunction f2 = new ContinuousTPShapeFunction(c, k, j);
-					QkQkFunction mf1 = new QkQkFunction(f1);
-					QkQkFunction mf2 = new QkQkFunction(f2);
-					TPCellIntegral<ContinuousTPShapeFunction> gg = new TPCellIntegral<>(ScalarFunction.constantFunction(1),
+					final ContinuousTPShapeFunction f1 = new ContinuousTPShapeFunction(c, k, i);
+					final ContinuousTPShapeFunction f2 = new ContinuousTPShapeFunction(c, k, j);
+					final QkQkFunction mf1 = new QkQkFunction(f1);
+					final QkQkFunction mf2 = new QkQkFunction(f2);
+					final TPCellIntegral<ContinuousTPShapeFunction> gg = new TPCellIntegral<>(
+						ScalarFunction.constantFunction(1),
 						TPCellIntegral.GRAD_GRAD);
-					MixedCellIntegral<TPCell,ContinuousTPShapeFunction,
-						ContinuousTPVectorFunction,QkQkFunction> gg2 =
+					final MixedCellIntegral<TPCell, ContinuousTPShapeFunction,
+						ContinuousTPVectorFunction, QkQkFunction> gg2 =
 						MixedCellIntegral.fromPressureIntegral(gg);
-					assertTrue(Math.abs(gg.evaluateCellIntegral(c, f1, f2) - gg2.evaluateCellIntegral(c,
-						mf1, mf2)) < 1e-12,
-						"Difference of " + Math.abs(gg.evaluateCellIntegral(c, f1,
-						f2) - gg2.evaluateCellIntegral(c,
-						mf1, mf2)) + " for polynomial degree " + k + " and functions " + i +
-							" and " + j);
+					assertTrue(Math.abs(
+						gg.evaluateCellIntegral(c, f1, f2) - gg2.evaluateCellIntegral(c,
+						                                                              mf1,
+						                                                              mf2)) < 1e-12);
 				}
 	}
+	
 	@Test
 	public void testVelocityIntegral()
 	{
-		CartesianGrid g = new CartesianGrid(CoordinateVector.fromValues(3,0),
-			CoordinateVector.fromValues(5,4), new IntCoordinates(1,1));
-		TPCell c = g.cells.get(0);
+		final CartesianGrid g = new CartesianGrid(CoordinateVector.fromValues(3, 0),
+		                                          CoordinateVector.fromValues(5, 4), new IntCoordinates(1, 1));
+		final TPCell c = g.cells.get(0);
 		for (int k = 1; k < 5; k++)
 			for (int i = 0; i < (k + 1) * (k + 1); i++)
 				for (int j = 0; j < (k + 1) * (k + 1); j++)
 				{
-					ContinuousTPVectorFunction f1 = new ContinuousTPVectorFunction(c, k, i);
-					ContinuousTPVectorFunction f2 = new ContinuousTPVectorFunction(c, k, j);
-					QkQkFunction mf1 = new QkQkFunction(f1);
-					QkQkFunction mf2 = new QkQkFunction(f2);
-					TPVectorCellIntegral<ContinuousTPVectorFunction> gg =
+					final ContinuousTPVectorFunction f1 = new ContinuousTPVectorFunction(c, k, i);
+					final ContinuousTPVectorFunction f2 = new ContinuousTPVectorFunction(c, k, j);
+					final QkQkFunction mf1 = new QkQkFunction(f1);
+					final QkQkFunction mf2 = new QkQkFunction(f2);
+					final TPVectorCellIntegral<ContinuousTPVectorFunction> gg =
 						new TPVectorCellIntegral<>(ScalarFunction.constantFunction(1),
-						TPCellIntegral.GRAD_GRAD);
-					MixedCellIntegral<TPCell,ContinuousTPShapeFunction,
-						ContinuousTPVectorFunction,QkQkFunction> gg2 =
+						                           TPCellIntegral.GRAD_GRAD);
+					final MixedCellIntegral<TPCell, ContinuousTPShapeFunction,
+						ContinuousTPVectorFunction, QkQkFunction> gg2 =
 						MixedCellIntegral.fromVelocityIntegral(gg);
-					assertTrue(Math.abs(gg.evaluateCellIntegral(c, f1, f2) - gg2.evaluateCellIntegral(c,
-						mf1, mf2)) < 1e-12,
-						"Difference of " + Math.abs(gg.evaluateCellIntegral(c, f1,
-							f2) - gg2.evaluateCellIntegral(c,
-							mf1, mf2)) + " for polynomial degree " + k + " and functions " + i +
-							" and " + j);
+					assertTrue(Math.abs(
+						gg.evaluateCellIntegral(c, f1, f2) - gg2.evaluateCellIntegral(c,
+						                                                              mf1,
+						                                                              mf2)) < 1e-12);
 				}
 	}
+	
 	@Test
 	public void testMixedIntegral()
 	{
-		CartesianGrid g = new CartesianGrid(CoordinateVector.fromValues(3,0),
-			CoordinateVector.fromValues(5,4), new IntCoordinates(1,1));
-		TPCell c = g.cells.get(0);
+		final CartesianGrid g = new CartesianGrid(CoordinateVector.fromValues(3, 0),
+		                                          CoordinateVector.fromValues(5, 4), new IntCoordinates(1, 1));
+		final TPCell c = g.cells.get(0);
 		
 		ContinuousTPVectorFunction f1 = null;
-		MixedTPCellIntegral<ContinuousTPShapeFunction, ContinuousTPVectorFunction, QkQkFunction> vg =
+		final MixedTPCellIntegral<ContinuousTPShapeFunction, ContinuousTPVectorFunction, QkQkFunction> vg =
 			new MixedTPCellIntegral<>(MixedTPCellIntegral.VALUE_GRAD);
-		MixedTPCellIntegral<ContinuousTPShapeFunction, ContinuousTPVectorFunction, QkQkFunction> dv =
+		final MixedTPCellIntegral<ContinuousTPShapeFunction, ContinuousTPVectorFunction, QkQkFunction> dv =
 			new MixedTPCellIntegral<>(MixedTPCellIntegral.DIV_VALUE);
-		double [] valuesVG = new double[]{-0.666, -0.666, -0.333, -0.333, -0.333, -0.1666, -0.333, -0.1666};
-		double [] valuesDV = new double[]{-0.666, 0.666, -0.333, 0.333, -0.333, -0.1666, 0.333, 0.1666};
-		for(int i = 0; i < 8; i++)
+		final double[] valuesVG = new double[]{-0.666, -0.666, -0.333, -0.333, -0.333, -0.1666, -0.333, -0.1666};
+		final double[] valuesDV = new double[]{-0.666, 0.666, -0.333, 0.333, -0.333, -0.1666, 0.333, 0.1666};
+		for (int i = 0; i < 8; i++)
 		{
 			f1 = new ContinuousTPVectorFunction(c, 1, i);
-			ContinuousTPShapeFunction f2 = new ContinuousTPShapeFunction(c,1,0);
-			QkQkFunction mf1 = new QkQkFunction(f1);
-			QkQkFunction mf2 = new QkQkFunction(f2);
-			assertTrue(Math.abs(vg.evaluateCellIntegral(c,mf1,mf2) - valuesVG[i]) < 1e-2);
-			assertTrue(Math.abs(dv.evaluateCellIntegral(c,mf1,mf2) - valuesDV[i]) < 1e-2);
+			final ContinuousTPShapeFunction f2 = new ContinuousTPShapeFunction(c, 1, 0);
+			final QkQkFunction mf1 = new QkQkFunction(f1);
+			final QkQkFunction mf2 = new QkQkFunction(f2);
+			assertTrue(Math.abs(vg.evaluateCellIntegral(c, mf1, mf2) - valuesVG[i]) < 1e-2);
+			assertTrue(Math.abs(dv.evaluateCellIntegral(c, mf1, mf2) - valuesDV[i]) < 1e-2);
 		}
 	}
 }

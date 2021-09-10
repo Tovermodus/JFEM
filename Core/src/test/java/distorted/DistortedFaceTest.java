@@ -6,16 +6,74 @@ import distorted.geometry.DistortedFace;
 import linalg.AffineTransformation;
 import linalg.CoordinateVector;
 import linalg.IntCoordinates;
-import org.junit.jupiter.api.Test;
+import org.junit.Test;
 
 import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.Assert.*;
 
 public class DistortedFaceTest
 {
+	private static DistortedFace getCentralFace2D(final int side)
+	{
+		final HashSet<DistortedFace> faces = createFaces2D(side);
+		final Optional<DistortedFace> centralFace =
+			faces.stream().filter(f -> f.getCells().size() == 2).findAny();
+		if (centralFace.isPresent())
+			return centralFace.get();
+		else throw new IllegalArgumentException("Wrong side");
+	}
+	
+	private static HashSet<DistortedFace> createFaces2D(final int side)
+	{
+		final CoordinateVector[] vertices = new CoordinateVector[4];
+		vertices[0] = CoordinateVector.fromValues(0, 0);
+		vertices[1] = CoordinateVector.fromValues(1, -0.5);
+		vertices[2] = CoordinateVector.fromValues(14, 1);
+		vertices[3] = CoordinateVector.fromValues(-4.5, 6);
+		final DistortedCell cell = new DistortedCell(vertices);
+		final CoordinateVector[] otherVertices = new CoordinateVector[4];
+		if (side == 0)
+		{
+			otherVertices[0] = CoordinateVector.fromValues(-1, -1);
+			otherVertices[1] = CoordinateVector.fromValues(1, -1);
+			otherVertices[2] = CoordinateVector.fromValues(1, -0.5);
+			otherVertices[3] = CoordinateVector.fromValues(0, 0);
+		}
+		if (side == 1)
+		{
+			otherVertices[0] = CoordinateVector.fromValues(1, -1);
+			otherVertices[1] = CoordinateVector.fromValues(5, -1);
+			otherVertices[2] = CoordinateVector.fromValues(14, 1);
+			otherVertices[3] = CoordinateVector.fromValues(1, -0.5);
+		}
+		if (side == 2)
+		{
+			otherVertices[0] = CoordinateVector.fromValues(-4.5, 6);
+			otherVertices[1] = CoordinateVector.fromValues(14, 1);
+			otherVertices[2] = CoordinateVector.fromValues(14, 5);
+			otherVertices[3] = CoordinateVector.fromValues(-4.5, 10);
+		}
+		if (side == 3)
+		{
+			otherVertices[0] = CoordinateVector.fromValues(-1, 0);
+			otherVertices[1] = CoordinateVector.fromValues(0, 0);
+			otherVertices[2] = CoordinateVector.fromValues(-4.5, 6);
+			otherVertices[3] = CoordinateVector.fromValues(-7, 8);
+		}
+		final DistortedCell otherCell = new DistortedCell(otherVertices);
+		final HashSet<DistortedFace> faces = new HashSet<>();
+		CircleGrid.createFaces(faces, cell, List.of(cell, otherCell),
+		                       vertices[0].sub(vertices[1]).euclidianNorm() / 2,
+		                       vertices[0].add(vertices[1]).mul(0.5));
+		CircleGrid.createFaces(faces, otherCell, List.of(cell, otherCell),
+		                       vertices[0].sub(vertices[1]).euclidianNorm() / 2,
+		                       vertices[0].add(vertices[1]).mul(0.5));
+		return faces;
+	}
+	
 	@Test
 	public void testRotation2D()
 	{
@@ -424,63 +482,5 @@ public class DistortedFaceTest
 				assertEquals(2, cell.getVertices().stream().filter(f::isVertex).count());
 			}
 		}
-	}
-	
-	private static DistortedFace getCentralFace2D(final int side)
-	{
-		final HashSet<DistortedFace> faces = createFaces2D(side);
-		final Optional<DistortedFace> centralFace =
-			faces.stream().filter(f -> f.getCells().size() == 2).findAny();
-		if (centralFace.isPresent())
-			return centralFace.get();
-		else throw new IllegalArgumentException("Wrong side");
-	}
-	
-	private static HashSet<DistortedFace> createFaces2D(final int side)
-	{
-		final CoordinateVector[] vertices = new CoordinateVector[4];
-		vertices[0] = CoordinateVector.fromValues(0, 0);
-		vertices[1] = CoordinateVector.fromValues(1, -0.5);
-		vertices[2] = CoordinateVector.fromValues(14, 1);
-		vertices[3] = CoordinateVector.fromValues(-4.5, 6);
-		final DistortedCell cell = new DistortedCell(vertices);
-		final CoordinateVector[] otherVertices = new CoordinateVector[4];
-		if (side == 0)
-		{
-			otherVertices[0] = CoordinateVector.fromValues(-1, -1);
-			otherVertices[1] = CoordinateVector.fromValues(1, -1);
-			otherVertices[2] = CoordinateVector.fromValues(1, -0.5);
-			otherVertices[3] = CoordinateVector.fromValues(0, 0);
-		}
-		if (side == 1)
-		{
-			otherVertices[0] = CoordinateVector.fromValues(1, -1);
-			otherVertices[1] = CoordinateVector.fromValues(5, -1);
-			otherVertices[2] = CoordinateVector.fromValues(14, 1);
-			otherVertices[3] = CoordinateVector.fromValues(1, -0.5);
-		}
-		if (side == 2)
-		{
-			otherVertices[0] = CoordinateVector.fromValues(-4.5, 6);
-			otherVertices[1] = CoordinateVector.fromValues(14, 1);
-			otherVertices[2] = CoordinateVector.fromValues(14, 5);
-			otherVertices[3] = CoordinateVector.fromValues(-4.5, 10);
-		}
-		if (side == 3)
-		{
-			otherVertices[0] = CoordinateVector.fromValues(-1, 0);
-			otherVertices[1] = CoordinateVector.fromValues(0, 0);
-			otherVertices[2] = CoordinateVector.fromValues(-4.5, 6);
-			otherVertices[3] = CoordinateVector.fromValues(-7, 8);
-		}
-		final DistortedCell otherCell = new DistortedCell(otherVertices);
-		final HashSet<DistortedFace> faces = new HashSet<>();
-		CircleGrid.createFaces(faces, cell, List.of(cell, otherCell),
-		                       vertices[0].sub(vertices[1]).euclidianNorm() / 2,
-		                       vertices[0].add(vertices[1]).mul(0.5));
-		CircleGrid.createFaces(faces, otherCell, List.of(cell, otherCell),
-		                       vertices[0].sub(vertices[1]).euclidianNorm() / 2,
-		                       vertices[0].add(vertices[1]).mul(0.5));
-		return faces;
 	}
 }

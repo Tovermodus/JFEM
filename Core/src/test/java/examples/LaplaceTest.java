@@ -1,8 +1,10 @@
 package examples;
 
 import basic.*;
-import linalg.*;
-import org.junit.jupiter.api.Test;
+import linalg.CoordinateVector;
+import linalg.IterativeSolver;
+import linalg.Vector;
+import org.junit.Test;
 import tensorproduct.*;
 import tensorproduct.geometry.TPCell;
 import tensorproduct.geometry.TPFace;
@@ -10,38 +12,38 @@ import tensorproduct.geometry.TPFace;
 import java.util.ArrayList;
 import java.util.List;
 
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.Assert.assertTrue;
 
 public class LaplaceTest
 {
 	@Test
 	public void testDGConvergence()
 	{
-		CoordinateVector start = CoordinateVector.fromValues(-1, -1);
-		CoordinateVector end = CoordinateVector.fromValues(1, 1);
-		int mult = 4;
-		List<Integer> cells = List.of(mult*2,mult*3);
+		final CoordinateVector start = CoordinateVector.fromValues(-1, -1);
+		final CoordinateVector end = CoordinateVector.fromValues(1, 1);
+		final int mult = 4;
+		final List<Integer> cells = List.of(mult * 2, mult * 3);
 		
-		double penalty = 1000;
+		final double penalty = 1000;
 		
-		TPCellIntegral<TPShapeFunction> gg =
+		final TPCellIntegral<TPShapeFunction> gg =
 			new TPCellIntegralViaReferenceCell<>(TPCellIntegral.GRAD_GRAD);
-		TPFaceIntegral<TPShapeFunction> jj =
-			new TPFaceIntegralViaReferenceFace<>(penalty,TPFaceIntegral.VALUE_JUMP_VALUE_JUMP);
-		TPRightHandSideIntegral<TPShapeFunction> rightHandSideIntegral =
+		final TPFaceIntegral<TPShapeFunction> jj =
+			new TPFaceIntegralViaReferenceFace<>(penalty, TPFaceIntegral.VALUE_JUMP_VALUE_JUMP);
+		final TPRightHandSideIntegral<TPShapeFunction> rightHandSideIntegral =
 			new TPRightHandSideIntegral<>(LaplaceReferenceSolution.scalarRightHandSide(),
-				TPRightHandSideIntegral.VALUE);
-		TPBoundaryFaceIntegral<TPShapeFunction> boundaryValues =
+			                              TPRightHandSideIntegral.VALUE);
+		final TPBoundaryFaceIntegral<TPShapeFunction> boundaryValues =
 			new TPBoundaryFaceIntegral<>(LaplaceReferenceSolution.scalarBoundaryValues(penalty),
-				TPBoundaryFaceIntegral.VALUE);
+			                             TPBoundaryFaceIntegral.VALUE);
 		
-		ArrayList<CellIntegral<TPCell,TPShapeFunction>> cellIntegrals =
+		final ArrayList<CellIntegral<TPCell, TPShapeFunction>> cellIntegrals =
 			new ArrayList<>();
-		ArrayList<FaceIntegral<TPFace,TPShapeFunction>> faceIntegrals =
+		final ArrayList<FaceIntegral<TPFace, TPShapeFunction>> faceIntegrals =
 			new ArrayList<>();
-		ArrayList<RightHandSideIntegral<TPCell, TPShapeFunction>> rightHandSideIntegrals
+		final ArrayList<RightHandSideIntegral<TPCell, TPShapeFunction>> rightHandSideIntegrals
 			= new ArrayList<>();
-		ArrayList<BoundaryRightHandSideIntegral<TPFace, TPShapeFunction>> boundaryFaceIntegrals =
+		final ArrayList<BoundaryRightHandSideIntegral<TPFace, TPShapeFunction>> boundaryFaceIntegrals =
 			new ArrayList<>();
 		
 		boundaryFaceIntegrals.add(boundaryValues);
@@ -49,8 +51,8 @@ public class LaplaceTest
 		cellIntegrals.add(gg);
 		faceIntegrals.add(jj);
 		
-		int polynomialDegree = 2;
-		TPFESpace grid = new TPFESpace(start, end, cells);
+		final int polynomialDegree = 2;
+		final TPFESpace grid = new TPFESpace(start, end, cells);
 		grid.assembleCells();
 		grid.assembleFunctions(polynomialDegree);
 		grid.initializeSystemMatrix();
@@ -58,45 +60,45 @@ public class LaplaceTest
 		grid.evaluateCellIntegrals(cellIntegrals, rightHandSideIntegrals);
 		grid.evaluateFaceIntegrals(faceIntegrals, boundaryFaceIntegrals);
 		
-		IterativeSolver it = new IterativeSolver();
+		final IterativeSolver it = new IterativeSolver();
 		it.showProgress = false;
-		Vector solution1 = it.solveGMRES(grid.getSystemMatrix(), grid.getRhs(), 1e-8);
-		ScalarFESpaceFunction<TPShapeFunction> solut =
+		final Vector solution1 = it.solveGMRES(grid.getSystemMatrix(), grid.getRhs(), 1e-8);
+		final ScalarFESpaceFunction<TPShapeFunction> solut =
 			new ScalarFESpaceFunction<>(
 				grid.getShapeFunctions(), solution1);
 		assertTrue(ConvergenceOrderEstimator.normL2Difference(solut,
-			LaplaceReferenceSolution.scalarReferenceSolution(), grid.generatePlotPoints(20)) < 1e-2);
+		                                                      LaplaceReferenceSolution.scalarReferenceSolution(),
+		                                                      grid.generatePlotPoints(20)) < 1e-2);
 	}
 	
 	@Test
 	public void testContinuousConvergence()
 	{
-		CoordinateVector start = CoordinateVector.fromValues(-1, -1);
-		CoordinateVector end = CoordinateVector.fromValues(1, 1);
-		int mult = 4;
-		List<Integer> cells = List.of(mult*2,mult*3);
+		final CoordinateVector start = CoordinateVector.fromValues(-1, -1);
+		final CoordinateVector end = CoordinateVector.fromValues(1, 1);
+		final int mult = 4;
+		final List<Integer> cells = List.of(mult * 2, mult * 3);
 		
-		
-		TPCellIntegral<ContinuousTPShapeFunction> gg =
+		final TPCellIntegral<ContinuousTPShapeFunction> gg =
 			new TPCellIntegral<>(TPCellIntegral.GRAD_GRAD);
-		TPRightHandSideIntegral<ContinuousTPShapeFunction> rightHandSideIntegral =
+		final TPRightHandSideIntegral<ContinuousTPShapeFunction> rightHandSideIntegral =
 			new TPRightHandSideIntegral<>(LaplaceReferenceSolution.scalarRightHandSide(),
-				TPRightHandSideIntegral.VALUE);
+			                              TPRightHandSideIntegral.VALUE);
 		
-		ArrayList<CellIntegral<TPCell,ContinuousTPShapeFunction>> cellIntegrals =
+		final ArrayList<CellIntegral<TPCell, ContinuousTPShapeFunction>> cellIntegrals =
 			new ArrayList<>();
-		ArrayList<FaceIntegral< TPFace,ContinuousTPShapeFunction>> faceIntegrals =
+		final ArrayList<FaceIntegral<TPFace, ContinuousTPShapeFunction>> faceIntegrals =
 			new ArrayList<>();
-		ArrayList<RightHandSideIntegral<TPCell, ContinuousTPShapeFunction>> rightHandSideIntegrals
+		final ArrayList<RightHandSideIntegral<TPCell, ContinuousTPShapeFunction>> rightHandSideIntegrals
 			= new ArrayList<>();
-		ArrayList<BoundaryRightHandSideIntegral<TPFace, ContinuousTPShapeFunction>> boundaryFaceIntegrals =
+		final ArrayList<BoundaryRightHandSideIntegral<TPFace, ContinuousTPShapeFunction>> boundaryFaceIntegrals =
 			new ArrayList<>();
 		
 		rightHandSideIntegrals.add(rightHandSideIntegral);
 		cellIntegrals.add(gg);
 		
-		int polynomialDegree = 2;
-		ContinuousTPFESpace grid = new ContinuousTPFESpace(start, end, cells);
+		final int polynomialDegree = 2;
+		final ContinuousTPFESpace grid = new ContinuousTPFESpace(start, end, cells);
 		grid.assembleCells();
 		grid.assembleFunctions(polynomialDegree);
 		grid.initializeSystemMatrix();
@@ -105,13 +107,14 @@ public class LaplaceTest
 		grid.evaluateFaceIntegrals(faceIntegrals, boundaryFaceIntegrals);
 		grid.setBoundaryValues(LaplaceReferenceSolution.scalarBoundaryValues());
 		
-		IterativeSolver it = new IterativeSolver();
+		final IterativeSolver it = new IterativeSolver();
 		it.showProgress = false;
-		Vector solution1 = it.solveGMRES(grid.getSystemMatrix(), grid.getRhs(), 1e-8);
-		ScalarFESpaceFunction<ContinuousTPShapeFunction> solut =
+		final Vector solution1 = it.solveGMRES(grid.getSystemMatrix(), grid.getRhs(), 1e-8);
+		final ScalarFESpaceFunction<ContinuousTPShapeFunction> solut =
 			new ScalarFESpaceFunction<>(
 				grid.getShapeFunctions(), solution1);
 		assertTrue(ConvergenceOrderEstimator.normL2Difference(solut,
-			LaplaceReferenceSolution.scalarReferenceSolution(), grid.generatePlotPoints(20)) < 1e-2);
+		                                                      LaplaceReferenceSolution.scalarReferenceSolution(),
+		                                                      grid.generatePlotPoints(20)) < 1e-2);
 	}
 }

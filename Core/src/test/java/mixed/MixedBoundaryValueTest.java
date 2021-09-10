@@ -1,6 +1,6 @@
 package mixed;
 
-import org.junit.jupiter.api.Test;
+import org.junit.Test;
 
 public class MixedBoundaryValueTest
 {
@@ -9,6 +9,7 @@ public class MixedBoundaryValueTest
 	{
 	
 	}
+	
 	@Test
 	public void testVelocityIntegral()
 	{

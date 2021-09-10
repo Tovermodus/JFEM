@@ -4,54 +4,56 @@ import basic.*;
 import com.google.common.primitives.Ints;
 import linalg.*;
 import mixed.*;
-import org.junit.jupiter.api.Test;
-import tensorproduct.*;
+import org.junit.Test;
+import tensorproduct.ContinuousTPShapeFunction;
+import tensorproduct.ContinuousTPVectorFunction;
+import tensorproduct.TPVectorCellIntegral;
+import tensorproduct.TPVectorRightHandSideIntegral;
 import tensorproduct.geometry.TPCell;
 import tensorproduct.geometry.TPFace;
 
 import java.util.ArrayList;
 import java.util.List;
 
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.Assert.assertTrue;
 
 public class StokesTest
 {
 	@Test
 	public void testBoundaryBeforeAfter()
 	{
-		CoordinateVector start = CoordinateVector.fromValues(0, 0);
-		CoordinateVector end = CoordinateVector.fromValues(1, 23);
-		int polynomialDegree = 2;
-		TPVectorCellIntegral<ContinuousTPVectorFunction> gradGrad =
+		final CoordinateVector start = CoordinateVector.fromValues(0, 0);
+		final CoordinateVector end = CoordinateVector.fromValues(1, 23);
+		final int polynomialDegree = 2;
+		final TPVectorCellIntegral<ContinuousTPVectorFunction> gradGrad =
 			new TPVectorCellIntegral<>(ScalarFunction.constantFunction(StokesReferenceSolution.reynolds),
-				TPVectorCellIntegral.GRAD_GRAD);
-		MixedCellIntegral<TPCell, ContinuousTPShapeFunction, ContinuousTPVectorFunction, QkQkFunction>
+			                           TPVectorCellIntegral.GRAD_GRAD);
+		final MixedCellIntegral<TPCell, ContinuousTPShapeFunction, ContinuousTPVectorFunction, QkQkFunction>
 			divValue =
 			new MixedTPCellIntegral<>(ScalarFunction.constantFunction(-1),
-				MixedTPCellIntegral.DIV_VALUE);
-		MixedCellIntegral<TPCell, ContinuousTPShapeFunction, ContinuousTPVectorFunction, QkQkFunction> vv =
+			                          MixedTPCellIntegral.DIV_VALUE);
+		final MixedCellIntegral<TPCell, ContinuousTPShapeFunction, ContinuousTPVectorFunction, QkQkFunction> vv =
 			MixedCellIntegral.fromVelocityIntegral(gradGrad);
 		
-		MixedRightHandSideIntegral<TPCell, ContinuousTPShapeFunction,
+		final MixedRightHandSideIntegral<TPCell, ContinuousTPShapeFunction,
 			ContinuousTPVectorFunction, QkQkFunction> rightHandSideIntegral =
 			MixedRightHandSideIntegral.fromVelocityIntegral(
-				new TPVectorRightHandSideIntegral<>(StokesReferenceSolution.rightHandSide(), TPVectorRightHandSideIntegral.VALUE));
+				new TPVectorRightHandSideIntegral<>(StokesReferenceSolution.rightHandSide(),
+				                                    TPVectorRightHandSideIntegral.VALUE));
 		
-		
-		TaylorHoodSpace grid = new TaylorHoodSpace(start, end,
-			Ints.asList(3, 3));
+		final TaylorHoodSpace grid = new TaylorHoodSpace(start, end,
+		                                                 Ints.asList(3, 3));
 		grid.assembleCells();
 		grid.assembleFunctions(polynomialDegree);
 		grid.initializeSystemMatrix();
 		grid.initializeRhs();
 		grid.setVelocityBoundaryValues(StokesReferenceSolution.vectorBoundaryValues());
 		grid.evaluateCellIntegrals(List.of(vv, divValue), List.of(rightHandSideIntegral));
-		grid.evaluateFaceIntegrals(new ArrayList<>(),  new ArrayList<>());
-		SparseMatrix mat = grid.getSystemMatrix();
-		DenseVector rhs = grid.getRhs();
+		grid.evaluateFaceIntegrals(new ArrayList<>(), new ArrayList<>());
+		final SparseMatrix mat = grid.getSystemMatrix();
+		final DenseVector rhs = grid.getRhs();
 		
-		
-		TaylorHoodSpace grid2 = new TaylorHoodSpace(start, end, Ints.asList(3, 3));
+		final TaylorHoodSpace grid2 = new TaylorHoodSpace(start, end, Ints.asList(3, 3));
 		grid2.assembleCells();
 		grid2.assembleFunctions(polynomialDegree);
 		grid2.initializeSystemMatrix();
@@ -60,46 +62,48 @@ public class StokesTest
 		System.out.println("Cell Integrals");
 		grid2.evaluateCellIntegrals(List.of(vv, divValue), List.of(rightHandSideIntegral));
 		System.out.println("Face Integrals");
-		grid2.evaluateFaceIntegrals(new ArrayList<>(),  new ArrayList<>());
-		SparseMatrix mat2 = grid2.getSystemMatrix();
-		DenseVector rhs2 = grid2.getRhs();
+		grid2.evaluateFaceIntegrals(new ArrayList<>(), new ArrayList<>());
+		final SparseMatrix mat2 = grid2.getSystemMatrix();
+		final DenseVector rhs2 = grid2.getRhs();
 		assertTrue(mat2.sub(mat).absMaxElement() < 1e-10);
 		//assertTrue(mat2.sub(mat2.transpose()).absMaxElement() < 1e-10);
 		assertTrue(rhs2.sub(rhs).absMaxElement() < 1e-10);
 	}
+	
 	@Test
 	public void testBoundaryConvergence()
 	{
-		CoordinateVector start = CoordinateVector.fromValues(0, 0);
-		CoordinateVector end = CoordinateVector.fromValues(1, 1);
-		int polynomialDegree = 3;
-		TaylorHoodSpace grid = new TaylorHoodSpace(start, end,
-			Ints.asList(3,3));
-		TPVectorCellIntegral<ContinuousTPVectorFunction> gradGrad =
+		final CoordinateVector start = CoordinateVector.fromValues(0, 0);
+		final CoordinateVector end = CoordinateVector.fromValues(1, 1);
+		final int polynomialDegree = 3;
+		final TaylorHoodSpace grid = new TaylorHoodSpace(start, end,
+		                                                 Ints.asList(3, 3));
+		final TPVectorCellIntegral<ContinuousTPVectorFunction> gradGrad =
 			new TPVectorCellIntegral<>(ScalarFunction.constantFunction(StokesReferenceSolution.reynolds),
-				TPVectorCellIntegral.GRAD_GRAD);
-		MixedCellIntegral<TPCell, ContinuousTPShapeFunction, ContinuousTPVectorFunction,QkQkFunction>
+			                           TPVectorCellIntegral.GRAD_GRAD);
+		final MixedCellIntegral<TPCell, ContinuousTPShapeFunction, ContinuousTPVectorFunction, QkQkFunction>
 			divValue =
 			new MixedTPCellIntegral<>(ScalarFunction.constantFunction(-1),
-				MixedTPCellIntegral.DIV_VALUE);
-		MixedCellIntegral<TPCell, ContinuousTPShapeFunction, ContinuousTPVectorFunction,QkQkFunction> vv =
+			                          MixedTPCellIntegral.DIV_VALUE);
+		final MixedCellIntegral<TPCell, ContinuousTPShapeFunction, ContinuousTPVectorFunction, QkQkFunction> vv =
 			MixedCellIntegral.fromVelocityIntegral(gradGrad);
-		List<CellIntegral<TPCell,  QkQkFunction>> cellIntegrals =
+		final List<CellIntegral<TPCell, QkQkFunction>> cellIntegrals =
 			new ArrayList<>();
 		cellIntegrals.add(vv);
 		cellIntegrals.add(divValue);
 		
-		List<FaceIntegral< TPFace, QkQkFunction>> faceIntegrals = new ArrayList<>();
+		final List<FaceIntegral<TPFace, QkQkFunction>> faceIntegrals = new ArrayList<>();
 		
-		MixedRightHandSideIntegral<TPCell, ContinuousTPShapeFunction,
-			ContinuousTPVectorFunction,QkQkFunction> rightHandSideIntegral =
+		final MixedRightHandSideIntegral<TPCell, ContinuousTPShapeFunction,
+			ContinuousTPVectorFunction, QkQkFunction> rightHandSideIntegral =
 			MixedRightHandSideIntegral.fromVelocityIntegral(
-				new TPVectorRightHandSideIntegral<>(StokesReferenceSolution.rightHandSide(), TPVectorRightHandSideIntegral.VALUE));
+				new TPVectorRightHandSideIntegral<>(StokesReferenceSolution.rightHandSide(),
+				                                    TPVectorRightHandSideIntegral.VALUE));
 		
-		List<RightHandSideIntegral<TPCell, QkQkFunction>> rightHandSideIntegrals = new ArrayList<>();
+		final List<RightHandSideIntegral<TPCell, QkQkFunction>> rightHandSideIntegrals = new ArrayList<>();
 		rightHandSideIntegrals.add(rightHandSideIntegral);
 		
-		List<BoundaryRightHandSideIntegral< TPFace, QkQkFunction>> boundaryFaceIntegrals = new ArrayList<>();
+		final List<BoundaryRightHandSideIntegral<TPFace, QkQkFunction>> boundaryFaceIntegrals = new ArrayList<>();
 		grid.assembleCells();
 		grid.assembleFunctions(polynomialDegree);
 		grid.initializeSystemMatrix();
@@ -109,55 +113,61 @@ public class StokesTest
 		grid.evaluateCellIntegrals(cellIntegrals, rightHandSideIntegrals);
 		System.out.println("Face Integrals");
 		grid.evaluateFaceIntegrals(faceIntegrals, boundaryFaceIntegrals);
-		System.out.println("solve system: " + grid.getSystemMatrix().getRows() + "×" + grid.getSystemMatrix().getCols());
-		IterativeSolver i = new IterativeSolver();
+		System.out.println(
+			"solve system: " + grid.getSystemMatrix().getRows() + "×" + grid.getSystemMatrix().getCols());
+		final IterativeSolver i = new IterativeSolver();
 		i.showProgress = false;
-		Vector solution1 = i.solveGMRES(grid.getSystemMatrix(), grid.getRhs(), 1e-10);
+		final Vector solution1 = i.solveGMRES(grid.getSystemMatrix(), grid.getRhs(), 1e-10);
 		System.out.println("solved");
 		System.out.println(grid.getSystemMatrix().sub(grid.getSystemMatrix().transpose()).absMaxElement());
-		MixedFESpaceFunction<QkQkFunction> solut =
+		final MixedFESpaceFunction<QkQkFunction> solut =
 			new MixedFESpaceFunction<>(
 				grid.getShapeFunctions(), solution1);
 		System.out.println(ConvergenceOrderEstimator.normL20Difference(solut.getPressureFunction(),
-			StokesReferenceSolution.pressureReferenceSolution(), grid.generatePlotPoints(20)) );
+		                                                               StokesReferenceSolution.pressureReferenceSolution(),
+		                                                               grid.generatePlotPoints(20)));
 		assertTrue(ConvergenceOrderEstimator.normL20Difference(solut.getPressureFunction(),
-			StokesReferenceSolution.pressureReferenceSolution(), grid.generatePlotPoints(20)) < 2e-1);
+		                                                       StokesReferenceSolution.pressureReferenceSolution(),
+		                                                       grid.generatePlotPoints(20)) < 2e-1);
 		assertTrue(ConvergenceOrderEstimator.normL2VecDifference(solut.getVelocityFunction(),
-			StokesReferenceSolution.velocityReferenceSolution(), grid.generatePlotPoints(20)) < 1e-2);
+		                                                         StokesReferenceSolution.velocityReferenceSolution(),
+		                                                         grid.generatePlotPoints(20)) < 1e-2);
 	}
+	
 	@Test
 	public void testConvergenceBoundary()
 	{
-		CoordinateVector start = CoordinateVector.fromValues(0, 0);
-		CoordinateVector end = CoordinateVector.fromValues(1, 1);
-		int polynomialDegree = 3;
-		TaylorHoodSpace grid = new TaylorHoodSpace(start, end,
-			Ints.asList(3,3));
-		TPVectorCellIntegral<ContinuousTPVectorFunction> gradGrad =
+		final CoordinateVector start = CoordinateVector.fromValues(0, 0);
+		final CoordinateVector end = CoordinateVector.fromValues(1, 1);
+		final int polynomialDegree = 3;
+		final TaylorHoodSpace grid = new TaylorHoodSpace(start, end,
+		                                                 Ints.asList(3, 3));
+		final TPVectorCellIntegral<ContinuousTPVectorFunction> gradGrad =
 			new TPVectorCellIntegral<>(ScalarFunction.constantFunction(StokesReferenceSolution.reynolds),
-				TPVectorCellIntegral.GRAD_GRAD);
-		MixedCellIntegral<TPCell, ContinuousTPShapeFunction, ContinuousTPVectorFunction,QkQkFunction>
+			                           TPVectorCellIntegral.GRAD_GRAD);
+		final MixedCellIntegral<TPCell, ContinuousTPShapeFunction, ContinuousTPVectorFunction, QkQkFunction>
 			divValue =
 			new MixedTPCellIntegral<>(ScalarFunction.constantFunction(-1),
-				MixedTPCellIntegral.DIV_VALUE);
-		MixedCellIntegral<TPCell, ContinuousTPShapeFunction, ContinuousTPVectorFunction,QkQkFunction> vv =
+			                          MixedTPCellIntegral.DIV_VALUE);
+		final MixedCellIntegral<TPCell, ContinuousTPShapeFunction, ContinuousTPVectorFunction, QkQkFunction> vv =
 			MixedCellIntegral.fromVelocityIntegral(gradGrad);
-		List<CellIntegral<TPCell,  QkQkFunction>> cellIntegrals =
+		final List<CellIntegral<TPCell, QkQkFunction>> cellIntegrals =
 			new ArrayList<>();
 		cellIntegrals.add(vv);
 		cellIntegrals.add(divValue);
 		
-		List<FaceIntegral< TPFace, QkQkFunction>> faceIntegrals = new ArrayList<>();
+		final List<FaceIntegral<TPFace, QkQkFunction>> faceIntegrals = new ArrayList<>();
 		
-		MixedRightHandSideIntegral<TPCell, ContinuousTPShapeFunction,
-			ContinuousTPVectorFunction,QkQkFunction> rightHandSideIntegral =
+		final MixedRightHandSideIntegral<TPCell, ContinuousTPShapeFunction,
+			ContinuousTPVectorFunction, QkQkFunction> rightHandSideIntegral =
 			MixedRightHandSideIntegral.fromVelocityIntegral(
-				new TPVectorRightHandSideIntegral<>(StokesReferenceSolution.rightHandSide(), TPVectorRightHandSideIntegral.VALUE));
+				new TPVectorRightHandSideIntegral<>(StokesReferenceSolution.rightHandSide(),
+				                                    TPVectorRightHandSideIntegral.VALUE));
 		
-		List<RightHandSideIntegral<TPCell, QkQkFunction>> rightHandSideIntegrals = new ArrayList<>();
+		final List<RightHandSideIntegral<TPCell, QkQkFunction>> rightHandSideIntegrals = new ArrayList<>();
 		rightHandSideIntegrals.add(rightHandSideIntegral);
 		
-		List<BoundaryRightHandSideIntegral< TPFace, QkQkFunction>> boundaryFaceIntegrals = new ArrayList<>();
+		final List<BoundaryRightHandSideIntegral<TPFace, QkQkFunction>> boundaryFaceIntegrals = new ArrayList<>();
 		grid.assembleCells();
 		grid.assembleFunctions(polynomialDegree);
 		grid.initializeSystemMatrix();
@@ -166,22 +176,26 @@ public class StokesTest
 		grid.evaluateCellIntegrals(cellIntegrals, rightHandSideIntegrals);
 		System.out.println("Face Integrals");
 		grid.evaluateFaceIntegrals(faceIntegrals, boundaryFaceIntegrals);
-		System.out.println("solve system: " + grid.getSystemMatrix().getRows() + "×" + grid.getSystemMatrix().getCols());
+		System.out.println(
+			"solve system: " + grid.getSystemMatrix().getRows() + "×" + grid.getSystemMatrix().getCols());
 		grid.setVelocityBoundaryValues(StokesReferenceSolution.vectorBoundaryValues());
-		IterativeSolver i = new IterativeSolver();
+		final IterativeSolver i = new IterativeSolver();
 		i.showProgress = true;
-		Vector solution1 = i.solveGMRES(grid.getSystemMatrix(), grid.getRhs(), 1e-10);
+		final Vector solution1 = i.solveGMRES(grid.getSystemMatrix(), grid.getRhs(), 1e-10);
 		System.out.println("solved");
 		System.out.println(grid.getSystemMatrix().sub(grid.getSystemMatrix().transpose()).absMaxElement());
 		
-		MixedFESpaceFunction<QkQkFunction> solut =
+		final MixedFESpaceFunction<QkQkFunction> solut =
 			new MixedFESpaceFunction<>(
 				grid.getShapeFunctions(), solution1);
 		System.out.println(ConvergenceOrderEstimator.normL20Difference(solut.getPressureFunction(),
-			StokesReferenceSolution.pressureReferenceSolution(), grid.generatePlotPoints(20)) );
+		                                                               StokesReferenceSolution.pressureReferenceSolution(),
+		                                                               grid.generatePlotPoints(20)));
 		assertTrue(ConvergenceOrderEstimator.normL20Difference(solut.getPressureFunction(),
-			StokesReferenceSolution.pressureReferenceSolution(), grid.generatePlotPoints(20)) < 2e-1);
+		                                                       StokesReferenceSolution.pressureReferenceSolution(),
+		                                                       grid.generatePlotPoints(20)) < 2e-1);
 		assertTrue(ConvergenceOrderEstimator.normL2VecDifference(solut.getVelocityFunction(),
-			StokesReferenceSolution.velocityReferenceSolution(), grid.generatePlotPoints(20)) < 1e-2);
+		                                                         StokesReferenceSolution.velocityReferenceSolution(),
+		                                                         grid.generatePlotPoints(20)) < 1e-2);
 	}
 }

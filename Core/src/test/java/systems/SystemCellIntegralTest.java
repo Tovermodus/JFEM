@@ -2,7 +2,6 @@ package systems;
 
 import basic.FunctionSignature;
 import linalg.*;
-import org.junit.jupiter.api.Test;
 import tensorproduct.*;
 import tensorproduct.geometry.CartesianGrid;
 import tensorproduct.geometry.Cell1D;
@@ -11,8 +10,8 @@ import tensorproduct.geometry.TPFace;
 
 import java.util.List;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-
+import org.junit.Test;
+import static org.junit.Assert.*;
 public class SystemCellIntegralTest
 {
 	@Test

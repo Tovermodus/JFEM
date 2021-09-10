@@ -4,7 +4,7 @@ import basic.DoubleCompare;
 import distorted.geometry.DistortedCell;
 import linalg.CoordinateVector;
 import linalg.IntCoordinates;
-import org.junit.jupiter.api.Test;
+import org.junit.Test;
 import tensorproduct.TPCellIntegral;
 import tensorproduct.TPShapeFunction;
 import tensorproduct.geometry.CartesianGrid;
@@ -13,7 +13,7 @@ import tensorproduct.geometry.TPCell;
 import java.util.ArrayList;
 import java.util.List;
 
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.Assert.assertTrue;
 
 public class DistortedCellIntegralTest
 {

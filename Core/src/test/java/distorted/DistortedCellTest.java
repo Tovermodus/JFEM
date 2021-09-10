@@ -3,17 +3,46 @@ package distorted;
 import distorted.geometry.CircleGrid;
 import distorted.geometry.DistortedCell;
 import linalg.CoordinateVector;
-import org.junit.jupiter.api.Test;
+import org.junit.Test;
 
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.Assert.*;
 
 public class DistortedCellTest
 {
+	private static DistortedCell createCell2D()
+	{
+		
+		final CoordinateVector[] vertices = new CoordinateVector[4];
+		vertices[0] = CoordinateVector.fromValues(0, 0);
+		vertices[1] = CoordinateVector.fromValues(1, -0.5);
+		vertices[2] = CoordinateVector.fromValues(14, 1);
+		vertices[3] = CoordinateVector.fromValues(-4.5, 6);
+		final DistortedCell cell = new DistortedCell(vertices);
+		CircleGrid.createFaces(new HashSet<>(), cell, List.of(cell), 100, vertices[0]);
+		return cell;
+	}
+	
+	private static DistortedCell createCell3D()
+	{
+		final CoordinateVector[] vertices = new CoordinateVector[8];
+		vertices[0] = CoordinateVector.fromValues(0, 0, 3);
+		vertices[1] = CoordinateVector.fromValues(1, 0, 3);
+		vertices[2] = CoordinateVector.fromValues(1, 3, 3);
+		vertices[3] = CoordinateVector.fromValues(0, 3, 3);
+		vertices[4] = CoordinateVector.fromValues(0, 0, 4);
+		vertices[5] = CoordinateVector.fromValues(2, 0, 4);
+		vertices[6] = CoordinateVector.fromValues(2, 3, 4);
+		vertices[7] = CoordinateVector.fromValues(0, 3, 4);
+		final DistortedCell cell = new DistortedCell(vertices);
+		CircleGrid.createFaces(new HashSet<>(), cell, List.of(cell), 100, vertices[0]);
+		return cell;
+	}
+	
 	@Test
 	public void testOrdering2D()
 	{
@@ -279,34 +308,5 @@ public class DistortedCellTest
 			assertEquals(0, reference.compareTo(other));
 			assertEquals(0, other.compareTo(reference));
 		}
-	}
-	
-	private static DistortedCell createCell2D()
-	{
-		
-		final CoordinateVector[] vertices = new CoordinateVector[4];
-		vertices[0] = CoordinateVector.fromValues(0, 0);
-		vertices[1] = CoordinateVector.fromValues(1, -0.5);
-		vertices[2] = CoordinateVector.fromValues(14, 1);
-		vertices[3] = CoordinateVector.fromValues(-4.5, 6);
-		final DistortedCell cell = new DistortedCell(vertices);
-		CircleGrid.createFaces(new HashSet<>(), cell, List.of(cell), 100, vertices[0]);
-		return cell;
-	}
-	
-	private static DistortedCell createCell3D()
-	{
-		final CoordinateVector[] vertices = new CoordinateVector[8];
-		vertices[0] = CoordinateVector.fromValues(0, 0, 3);
-		vertices[1] = CoordinateVector.fromValues(1, 0, 3);
-		vertices[2] = CoordinateVector.fromValues(1, 3, 3);
-		vertices[3] = CoordinateVector.fromValues(0, 3, 3);
-		vertices[4] = CoordinateVector.fromValues(0, 0, 4);
-		vertices[5] = CoordinateVector.fromValues(2, 0, 4);
-		vertices[6] = CoordinateVector.fromValues(2, 3, 4);
-		vertices[7] = CoordinateVector.fromValues(0, 3, 4);
-		final DistortedCell cell = new DistortedCell(vertices);
-		CircleGrid.createFaces(new HashSet<>(), cell, List.of(cell), 100, vertices[0]);
-		return cell;
 	}
 }

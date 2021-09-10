@@ -3,10 +3,10 @@ package systems;
 import linalg.CoordinateDenseMatrix;
 import linalg.CoordinateMatrix;
 import linalg.CoordinateVector;
-import org.junit.jupiter.api.Test;
+import org.junit.Test;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertThrows;
 
 public class SystemGradientTest
 {
