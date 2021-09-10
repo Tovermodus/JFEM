@@ -19,7 +19,7 @@ import static org.junit.Assert.assertTrue;
 
 public class MaxwellTest
 {
-	@Test
+	@Test(timeout = 200000)
 	public void testQkQkConvergence()
 	{
 		final CoordinateVector start = CoordinateVector.fromValues(0, 0, 0);
@@ -33,7 +33,8 @@ public class MaxwellTest
 			divValue =
 			new MixedTPCellIntegral<>(ScalarFunction.constantFunction(-1),
 			                          MixedTPCellIntegral.DIV_VALUE);
-		final MixedCellIntegral<TPCell, ContinuousTPShapeFunction, ContinuousTPVectorFunction, QkQkFunction> vv =
+		final MixedCellIntegral<TPCell, ContinuousTPShapeFunction, ContinuousTPVectorFunction, QkQkFunction> vv
+			=
 			MixedCellIntegral.fromVelocityIntegral(valueValue);
 		final List<CellIntegral<TPCell, QkQkFunction>> cellIntegrals =
 			new ArrayList<>();

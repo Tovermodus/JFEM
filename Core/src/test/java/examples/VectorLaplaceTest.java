@@ -4,7 +4,9 @@ import basic.*;
 import linalg.CoordinateVector;
 import linalg.IterativeSolver;
 import linalg.Vector;
+import org.junit.Rule;
 import org.junit.Test;
+import org.junit.rules.Timeout;
 import tensorproduct.*;
 import tensorproduct.geometry.TPCell;
 import tensorproduct.geometry.TPFace;
@@ -16,7 +18,10 @@ import static org.junit.Assert.assertTrue;
 
 public class VectorLaplaceTest
 {
-	@Test(timeout = 20000)
+	@Rule
+	public Timeout testTimeout = new Timeout(2000);
+	
+	@Test
 	public void testDGConvergence()
 	{
 		final CoordinateVector start = CoordinateVector.fromValues(-1, -1);
@@ -73,7 +78,7 @@ public class VectorLaplaceTest
 		                                                         grid.generatePlotPoints(20)) < 1e-2);
 	}
 	
-	@Test(timeout = 20000)
+	@Test
 	public void testContinuousConvergence()
 	{
 		final CoordinateVector start = CoordinateVector.fromValues(-1, -1);

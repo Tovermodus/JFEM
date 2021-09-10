@@ -21,7 +21,7 @@ import static org.junit.Assert.assertTrue;
 
 public class DarcyTest
 {
-	@Test
+	@Test(timeout = 20000)
 	public void testConvergence()
 	{
 		final CoordinateVector start = CoordinateVector.fromValues(-1, -1);
@@ -46,7 +46,8 @@ public class DarcyTest
 					LaplaceReferenceSolution.scalarRightHandSide(), TPRightHandSideIntegral.VALUE));
 		final List<RightHandSideIntegral<TPCell, RTMixedFunction>> rightHandSideIntegrals = new ArrayList<>();
 		rightHandSideIntegrals.add(rightHandSideIntegral);
-		final List<BoundaryRightHandSideIntegral<TPFace, RTMixedFunction>> boundaryFaceIntegrals = new ArrayList<>();
+		final List<BoundaryRightHandSideIntegral<TPFace, RTMixedFunction>> boundaryFaceIntegrals
+			= new ArrayList<>();
 		final MixedBoundaryRightHandSideIntegral<TPFace, ContinuousTPShapeFunction, RTShapeFunction, RTMixedFunction>
 			dirichlet =
 			MixedBoundaryRightHandSideIntegral.fromVelocityIntegral(

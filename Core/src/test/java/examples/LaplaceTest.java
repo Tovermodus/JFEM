@@ -16,7 +16,7 @@ import static org.junit.Assert.assertTrue;
 
 public class LaplaceTest
 {
-	@Test
+	@Test(timeout = 20000)
 	public void testDGConvergence()
 	{
 		final CoordinateVector start = CoordinateVector.fromValues(-1, -1);
@@ -71,7 +71,7 @@ public class LaplaceTest
 		                                                      grid.generatePlotPoints(20)) < 1e-2);
 	}
 	
-	@Test
+	@Test(timeout = 20000)
 	public void testContinuousConvergence()
 	{
 		final CoordinateVector start = CoordinateVector.fromValues(-1, -1);
@@ -91,7 +91,8 @@ public class LaplaceTest
 			new ArrayList<>();
 		final ArrayList<RightHandSideIntegral<TPCell, ContinuousTPShapeFunction>> rightHandSideIntegrals
 			= new ArrayList<>();
-		final ArrayList<BoundaryRightHandSideIntegral<TPFace, ContinuousTPShapeFunction>> boundaryFaceIntegrals =
+		final ArrayList<BoundaryRightHandSideIntegral<TPFace, ContinuousTPShapeFunction>> boundaryFaceIntegrals
+			=
 			new ArrayList<>();
 		
 		rightHandSideIntegrals.add(rightHandSideIntegral);

@@ -18,7 +18,7 @@ import static org.junit.Assert.assertTrue;
 
 public class DiskLaplace
 {
-	@Test
+	@Test(timeout = 20000)
 	public void testConvergence()
 	{
 		final int polynomialDegree = 3;
