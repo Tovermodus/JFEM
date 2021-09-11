@@ -4,6 +4,7 @@ import linalg.CoordinateMatrix;
 import linalg.CoordinateVector;
 
 import java.lang.reflect.InvocationTargetException;
+import java.util.Objects;
 import java.util.Set;
 
 public class SingleComponentVectorShapeFunction<CT extends Cell<CT, FT>, FT extends Face<CT, FT>, CST extends FastEvaluatedScalarShapeFunction<CT, FT> & Comparable<CST>, VT extends SingleComponentVectorShapeFunction<CT, FT, CST, VT>> implements VectorShapeFunction<CT, FT>, Comparable<VT>
@@ -156,5 +157,22 @@ public class SingleComponentVectorShapeFunction<CT extends Cell<CT, FT>, FT exte
 		if (o.getComponent() < getComponent()) return 1;
 		else if (o.getComponent() > getComponent()) return -1;
 		else return (componentFunction).compareTo(o.getComponentFunction());
+	}
+	
+	@Override
+	public boolean equals(final Object o)
+	{
+		if (this == o) return true;
+		if (o == null || getClass() != o.getClass()) return false;
+		final SingleComponentVectorShapeFunction<?, ?, ?, ?> that
+			= (SingleComponentVectorShapeFunction<?, ?, ?, ?>) o;
+		return component == that.component && dimension == that.dimension && Objects
+			.equals(componentFunction, that.componentFunction);
+	}
+	
+	@Override
+	public int hashCode()
+	{
+		return Objects.hash(componentFunction, component, dimension);
 	}
 }

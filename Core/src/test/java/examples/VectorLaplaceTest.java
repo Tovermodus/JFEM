@@ -19,7 +19,7 @@ import static org.junit.Assert.assertTrue;
 public class VectorLaplaceTest
 {
 	@Rule
-	public Timeout testTimeout = new Timeout(2000);
+	public Timeout testTimeout = new Timeout(20000);
 	
 	@Test
 	public void testDGConvergence()

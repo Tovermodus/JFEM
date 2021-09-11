@@ -6,7 +6,6 @@ import linalg.CoordinateVector;
 import tensorproduct.geometry.TPCell;
 import tensorproduct.geometry.TPFace;
 
-import java.util.HashSet;
 import java.util.List;
 import java.util.TreeSet;
 
@@ -21,7 +20,7 @@ public class TPVectorFESpace extends CartesianGridSpace<TPVectorFunction, Coordi
 	@Override
 	public void assembleFunctions(final int polynomialDegree)
 	{
-		shapeFunctions = new HashSet<>();
+		shapeFunctions = new TreeSet<>();
 		for (final TPCell cell : getCells())
 		{
 			for (int i = 0; i < Math.pow(polynomialDegree + 1, getDimension()) * getDimension(); i++)
