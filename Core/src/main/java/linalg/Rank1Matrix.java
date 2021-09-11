@@ -48,12 +48,12 @@ public class Rank1Matrix implements Matrix
 	{
 		return hor.getLength() * ver.getLength();
 	}
-	
-	@Override
-	public double frobeniusInner(final Matrix other)
-	{
-		return ver.inner(other.mvMul(hor));
-	}
+
+//	@Override
+//	public double frobeniusInner(final Matrix other)
+//	{
+//		return ver.inner(other.mvMul(hor));
+//	}
 	
 	@Override
 	public boolean isSparse()
@@ -83,7 +83,7 @@ public class Rank1Matrix implements Matrix
 	public Rank1Matrix mmMul(final Matrix matrix)
 	{
 		
-		Vector tvm = matrix.tvMul(hor);
+		final Vector tvm = matrix.tvMul(hor);
 		return new Rank1Matrix(ver, tvm);
 	}
 }

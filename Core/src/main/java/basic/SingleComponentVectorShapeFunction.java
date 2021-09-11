@@ -138,6 +138,17 @@ public class SingleComponentVectorShapeFunction<CT extends Cell<CT, FT>, FT exte
 		return componentFunction
 			.gradient(pos)
 			.outer(CoordinateVector.getUnitVector(getDomainDimension(), component));
+//		final CoordinateVector grad = componentFunction.gradient(pos);
+//		final CoordinateVector other = CoordinateVector.getUnitVector(getDomainDimension(), component);
+//		final CoordinateDenseMatrix ret = new CoordinateDenseMatrix(grad.getLength(), other.getLength());
+//		for (int i = 0; i < grad.getLength(); i++)
+//		{
+//			for (int j = 0; j < other.getLength(); j++)
+//			{
+//				ret.set(grad.at(i) * other.at(j), i, j);
+//			}
+//		}
+//		return ret;
 	}
 	
 	@Override

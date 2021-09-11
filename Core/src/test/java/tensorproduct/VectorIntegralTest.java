@@ -20,71 +20,6 @@ public class VectorIntegralTest
 	public void testTPCellIntegralDeg1()
 	{
 		final int polynomialDegree = 1;
-		final double[] testValuesgvw = new double[]{-0.3625,
-		                                            -0.3181,
-		                                            -0.2472,
-		                                            -0.2249,
-		                                            0.0000,
-		                                            0.0000,
-		                                            0.0000,
-		                                            0.0000,
-		                                            0.1486,
-		                                            -0.1097,
-		                                            0.0111,
-		                                            -0.2473,
-		                                            0.0000,
-		                                            0.0000,
-		                                            0.0000,
-		                                            0.0000,
-		                                            -0.0222,
-		                                            0.0001,
-		                                            -0.1428,
-		                                            -0.0984,
-		                                            0.0000,
-		                                            0.0000,
-		                                            0.0000,
-		                                            0.0000,
-		                                            0.2361,
-		                                            0.4277,
-		                                            0.3789,
-		                                            0.5706,
-		                                            0.0000,
-		                                            0.0000,
-		                                            0.0000,
-		                                            0.0000,
-		                                            0.0000,
-		                                            0.0000,
-		                                            0.0000,
-		                                            0.0000,
-		                                            -0.3625,
-		                                            -0.3181,
-		                                            -0.2472,
-		                                            -0.2249,
-		                                            0.0000,
-		                                            0.0000,
-		                                            0.0000,
-		                                            0.0000,
-		                                            0.1486,
-		                                            -0.1097,
-		                                            0.0111,
-		                                            -0.2473,
-		                                            0.0000,
-		                                            0.0000,
-		                                            0.0000,
-		                                            0.0000,
-		                                            -0.0222,
-		                                            0.0001,
-		                                            -0.1428,
-		                                            -0.0984,
-		                                            0.0000,
-		                                            0.0000,
-		                                            0.0000,
-		                                            0.0000,
-		                                            0.2361,
-		                                            0.4277,
-		                                            0.3789,
-		                                            0.5706
-		};
 		final double[] testValuesvv = new double[]{0.0889,
 		                                           0.0444,
 		                                           0.0444,
@@ -396,8 +331,6 @@ public class VectorIntegralTest
 		                                                                              TPVectorCellIntegral.VALUE_VALUE);
 		final TPVectorCellIntegral<TPVectorFunction> ggw = new TPVectorCellIntegral<>(weight,
 		                                                                              TPVectorCellIntegral.GRAD_GRAD);
-		final TPVectorCellIntegral<TPVectorFunction> gvw = new TPVectorCellIntegral<>(vweight,
-		                                                                              TPVectorCellIntegral.GRAD_VALUE);
 		int k = 0;
 		for (int i = 0; i < shapeFunctions.size(); i++)
 		{
@@ -415,9 +348,7 @@ public class VectorIntegralTest
 				assertTrue(Math.abs(ggw.evaluateCellIntegral(cell, shapeFunctions.get(i),
 				                                             shapeFunctions.get(
 					                                             j)) - testValuesggw[k++]) <= 1e-2);
-				assertTrue(Math.abs(gvw.evaluateCellIntegral(cell, shapeFunctions.get(i),
-				                                             shapeFunctions.get(
-					                                             j)) - testValuesgvw[k]) <= 1e-2);
+				
 			}
 		}
 	}
