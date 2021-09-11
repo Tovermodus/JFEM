@@ -8,33 +8,32 @@ import tensorproduct.geometry.TPFace;
 
 import java.util.HashSet;
 import java.util.List;
+import java.util.TreeSet;
 
 public class TPVectorFESpace extends CartesianGridSpace<TPVectorFunction, CoordinateVector, CoordinateMatrix, CoordinateTensor>
 {
-	public TPVectorFESpace(CoordinateVector startCoordinates, CoordinateVector endCoordinates,
-	                       List<Integer> cellsPerDimension)
+	public TPVectorFESpace(final CoordinateVector startCoordinates, final CoordinateVector endCoordinates,
+	                       final List<Integer> cellsPerDimension)
 	{
 		super(startCoordinates, endCoordinates, cellsPerDimension);
 	}
 	
 	@Override
-	public void assembleFunctions(int polynomialDegree)
+	public void assembleFunctions(final int polynomialDegree)
 	{
 		shapeFunctions = new HashSet<>();
-		for(TPCell cell:getCells())
+		for (final TPCell cell : getCells())
 		{
-			for(int i = 0; i < Math.pow(polynomialDegree+1,getDimension())*getDimension(); i++)
+			for (int i = 0; i < Math.pow(polynomialDegree + 1, getDimension()) * getDimension(); i++)
 			{
-				TPVectorFunction shapeFunction = new TPVectorFunction(cell, polynomialDegree, i,
-					TPShapeFunction.class);
+				final TPVectorFunction shapeFunction = new TPVectorFunction(cell, polynomialDegree, i,
+				                                                            TPShapeFunction.class);
 				shapeFunction.setGlobalIndex(shapeFunctions.size());
 				shapeFunctions.add(shapeFunction);
 				supportOnCell.put(cell, shapeFunction);
-				for(TPFace face:cell.getFaces())
+				for (final TPFace face : cell.getFaces())
 					supportOnFace.put(face, shapeFunction);
 			}
 		}
 	}
-	
-	
 }

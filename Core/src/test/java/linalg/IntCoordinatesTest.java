@@ -1,5 +1,6 @@
 package linalg;
 
+import basic.DoubleCompare;
 import org.junit.Test;
 
 import java.util.HashSet;
@@ -166,7 +167,7 @@ public class IntCoordinatesTest
 		final IntCoordinates lowerBounds = new IntCoordinates(0, 0, 1);
 		final IntCoordinates upperBounds = new IntCoordinates(1, 3, 5);
 		new IntCoordinates.Range(lowerBounds, upperBounds).stream().forEach(tree::add);
-		assertEquals(1 * 3 * 4, tree.size());
+		assertEquals(3 * 4, tree.size());
 	}
 	
 	@Test
@@ -182,6 +183,6 @@ public class IntCoordinatesTest
 		}
 		assertEquals(d.getShape(), new IntCoordinates(3, 3));
 		assertEquals(coords, new IntCoordinates(2, 2));
-		assertEquals(ret, 1 + 2 + 3 + 4);
+		assertTrue(DoubleCompare.almostEqual(ret, 1 + 2 + 3 + 4));
 	}
 }

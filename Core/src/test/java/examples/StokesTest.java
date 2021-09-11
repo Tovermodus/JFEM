@@ -71,7 +71,7 @@ public class StokesTest
 		assertTrue(rhs2.sub(rhs).absMaxElement() < 1e-10);
 	}
 	
-	@Test
+	@Test(timeout = 20000)
 	public void testBoundaryConvergence()
 	{
 		final CoordinateVector start = CoordinateVector.fromValues(0, 0);
@@ -137,7 +137,7 @@ public class StokesTest
 		                                                         grid.generatePlotPoints(20)) < 1e-2);
 	}
 	
-	@Test
+	@Test(timeout = 20000)
 	public void testConvergenceBoundary()
 	{
 		final CoordinateVector start = CoordinateVector.fromValues(0, 0);

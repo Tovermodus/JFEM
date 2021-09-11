@@ -1,5 +1,6 @@
 package linalg;
 
+import basic.DoubleCompare;
 import org.junit.Test;
 
 import static org.junit.Assert.assertEquals;
@@ -45,10 +46,10 @@ public class SparseMatrixTest1
 		}
 		assertTrue(largeSparse.almostEqual(largeDense2));
 		assertEquals(largeSparse, largeDense2);
-		final SparseMatrix largeDense3 = (SparseMatrix) largeSparse.add(largeSparse);
+		final SparseMatrix largeDense3 = largeSparse.add(largeSparse);
 		assertEquals(largeSparse, largeDense2);
 		final SparseMatrix largeDense4 = largeSparse.mul(0.1);
-		final SparseMatrix largeDenseRec = (SparseMatrix) largeSparse
+		final SparseMatrix largeDenseRec = largeSparse
 			.getLowerTriangleMatrix()
 			.add(largeSparse.getDiagonalMatrix())
 			.add(largeSparse.getUpperTriangleMatrix());
@@ -62,7 +63,7 @@ public class SparseMatrixTest1
 			{
 				assertTrue(Math.abs(largeDense4.at(i, j) - 0.1 * largeSparse.at(i, j)) < 1e-10);
 				assertTrue(Math.abs(largeDense3.at(i, j) - 2 * largeDense2.at(i, j)) < 1e-10);
-				assertEquals(largeDenseRec.at(i, j), largeSparse.at(i, j));
+				assertTrue(DoubleCompare.almostEqual(largeDenseRec.at(i, j), largeSparse.at(i, j)));
 			}
 		}
 		final DenseVector largeVector = new DenseVector(n);
@@ -75,8 +76,6 @@ public class SparseMatrixTest1
 		}
 		final Vector mul1 = largeSparse.mvMul(largeVector);
 		final Vector mul2 = largeDense3.mvMul(largeVector);
-		final Vector smul1 = largeSparse.mvMul(DenseVector);
-		final Vector smul2 = largeDense3.mvMul(DenseVector);
 		assertEquals(largeSparse, largeDense3.mul(0.5));
 		assertEquals(mul1.mul(2), mul2);
 		assertTrue(mul1.almostEqual(mul2.mul(0.5)));
@@ -130,7 +129,7 @@ public class SparseMatrixTest1
 			           .solveGMRES(largeDense, largeVector, 1e-12)
 			           .almostEqual(denseInverse.mvMul(largeVector)));
 		
-		final SparseMatrix symmDense = (SparseMatrix) largeDense.add(largeDense.transpose());
+		final SparseMatrix symmDense = largeDense.add(largeDense.transpose());
 		assertTrue(symmDense
 			           .solveSymm(largeVector)
 			           .almostEqual(new IterativeSolver().solveCG(symmDense, largeVector, 1e-12)));
@@ -146,7 +145,7 @@ public class SparseMatrixTest1
 		final DenseVector small = new DenseVector(40);
 		small.add(4.3, 4);
 		small.add(7.8, 5);
-		assertEquals(small.euclidianNorm(), Math.sqrt(4.3 * 4.3 + 7.8 * 7.8));
+		assertTrue(DoubleCompare.almostEqual(small.euclidianNorm(), Math.sqrt(4.3 * 4.3 + 7.8 * 7.8)));
 		final SparseMatrix largeDense = new SparseMatrix(500, 500);
 		final DenseVector largeVector = new DenseVector(500);
 		final DenseVector largeVector2 = new DenseVector(500);
@@ -189,7 +188,7 @@ public class SparseMatrixTest1
 		assertTrue(new IterativeSolver()
 			           .solveBiCGStab(largeDense, largeVector, 1e-12)
 			           .almostEqual(new IterativeSolver().solveGMRES(largeDense, largeVector, 1e-10)));
-		final SparseMatrix symmDense = (SparseMatrix) largeDense.add(largeDense.transpose());
+		final SparseMatrix symmDense = largeDense.add(largeDense.transpose());
 		
 		assertTrue(symmDense
 			           .solveSymm(largeVector)

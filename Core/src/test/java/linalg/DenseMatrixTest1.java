@@ -1,5 +1,6 @@
 package linalg;
 
+import basic.DoubleCompare;
 import org.junit.Test;
 
 import static org.junit.Assert.*;
@@ -30,7 +31,7 @@ public class DenseMatrixTest1
 		assertEquals(4, vector.size());
 		assertEquals(4, singularMatrix.size());
 		assertEquals(4, invertibleMatrix.size());
-		assertEquals(vector.euclidianNorm(), Math.sqrt(1 + 4 + 9));
+		assertTrue(DoubleCompare.almostEqual(vector.euclidianNorm(), Math.sqrt(1 + 4 + 9)));
 	}
 	
 	@Test
@@ -49,7 +50,7 @@ public class DenseMatrixTest1
 		for (int i = 0; i < 50; i++)
 		{
 			for (int j = 0; j < 50; j++)
-				assertEquals(largeDense.at(i, j), largeDense2.at(i, j));
+				assertTrue(DoubleCompare.almostEqual(largeDense.at(i, j), largeDense2.at(i, j)));
 		}
 		assertTrue(largeDense.almostEqual(largeDense2));
 		for (int i = 0; i < 1000; i++)
@@ -75,9 +76,9 @@ public class DenseMatrixTest1
 		{
 			for (int j = 0; j < 50; j++)
 			{
-				assertEquals(largeDense3.at(i, j), 2 * largeDense.at(i, j));
-				assertEquals(largeDense4.at(i, j), 0.1 * largeDense.at(i, j));
-				assertEquals(largeDenseRec.at(i, j), largeDense.at(i, j));
+				assertTrue(DoubleCompare.almostEqual(largeDense3.at(i, j), 2 * largeDense.at(i, j)));
+				assertTrue(DoubleCompare.almostEqual(largeDense4.at(i, j), 0.1 * largeDense.at(i, j)));
+				assertTrue(DoubleCompare.almostEqual(largeDenseRec.at(i, j), largeDense.at(i, j)));
 			}
 		}
 		final DenseVector largeVector = new DenseVector(50);
@@ -90,13 +91,11 @@ public class DenseMatrixTest1
 		}
 		final DenseVector mul1 = largeDense.mvMul(largeVector);
 		final DenseVector mul2 = largeDense3.mvMul(largeVector);
-		final DenseVector smul1 = largeDense.mvMul(sparseVector);
-		final DenseVector smul2 = largeDense3.mvMul(sparseVector);
 		assertEquals(largeDense, largeDense3.mul(0.5));
 		for (int i = 0; i < 50; i++)
 		{
-			assertEquals(mul1.mul(2).at(i), mul2.at(i));
-			assertEquals(mul1.at(i) * 2, mul2.at(i));
+			assertTrue(DoubleCompare.almostEqual(mul1.mul(2).at(i), mul2.at(i)));
+			assertTrue(DoubleCompare.almostEqual(mul1.at(i) * 2, mul2.at(i)));
 		}
 		assertTrue(mul1.almostEqual(mul2.mul(0.5)));
 		for (int i = 0; i < 50; i++)
@@ -162,7 +161,7 @@ public class DenseMatrixTest1
 		final DenseVector small = new DenseVector(40);
 		small.add(4.3, 4);
 		small.add(7.8, 5);
-		assertEquals(small.euclidianNorm(), Math.sqrt(4.3 * 4.3 + 7.8 * 7.8));
+		assertTrue(DoubleCompare.almostEqual(small.euclidianNorm(), Math.sqrt(4.3 * 4.3 + 7.8 * 7.8)));
 		final DenseMatrix largeDense = new DenseMatrix(50, 50);
 		final DenseVector largeVector = new DenseVector(50);
 		final DenseVector largeVector2 = new DenseVector(50);
@@ -189,11 +188,11 @@ public class DenseMatrixTest1
 		DenseMatrix denseInverse = largeDense.inverse();
 		for (int j = 0; j < 50; j++)
 		{
-			assertEquals(largeVector.at(j), largeVector2.at(j));
+			assertTrue(DoubleCompare.almostEqual(largeVector.at(j), largeVector2.at(j)));
 		}
 		for (int j = 0; j < 50; j++)
 		{
-			assertEquals(largeVector.mul(0.1).at(j), largeVector2.at(j) * 0.1);
+			assertTrue(DoubleCompare.almostEqual(largeVector.mul(0.1).at(j), largeVector2.at(j) * 0.1));
 		}
 		assertTrue(largeVector.almostEqual(largeVector2));
 		assertTrue(largeVector.add(largeVector).almostEqual(largeVector2.mul(2)));
