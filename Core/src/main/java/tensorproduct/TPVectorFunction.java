@@ -7,8 +7,13 @@ import tensorproduct.geometry.TPFace;
 public class TPVectorFunction extends SingleComponentVectorShapeFunction<TPCell,
 	TPFace, TPShapeFunction>
 {
-	public TPVectorFunction(TPCell supportCell, int polynomialDegree, int localIndex, Class<TPShapeFunction> componentFunctionClass)
+	public TPVectorFunction(final TPCell supportCell, final int polynomialDegree, final int localIndex, final Class<TPShapeFunction> componentFunctionClass)
 	{
 		super(supportCell, polynomialDegree, localIndex, componentFunctionClass);
+	}
+	
+	public TPVectorFunction(final TPCell supportCell, final int polynomialDegree, final int localIndex)
+	{
+		super(supportCell, polynomialDegree, localIndex, TPShapeFunction.class);
 	}
 }
