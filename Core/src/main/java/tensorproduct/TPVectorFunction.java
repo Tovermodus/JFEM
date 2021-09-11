@@ -11,4 +11,9 @@ public class TPVectorFunction extends SingleComponentVectorShapeFunction<TPCell,
 	{
 		super(supportCell, polynomialDegree, localIndex, componentFunctionClass);
 	}
+	
+	public TPVectorFunction(final TPCell supportCell, final int polynomialDegree, final int localIndex)
+	{
+		super(supportCell, polynomialDegree, localIndex, TPShapeFunction.class);
+	}
 }
