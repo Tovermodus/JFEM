@@ -17,7 +17,7 @@ public class VectorIntegralTest
 {
 	
 	@Test
-	public void testTPCellIntegralDeg1G2()
+	public void testTPCellIntegralDeg1()
 	{
 		final int polynomialDegree = 1;
 		final double[] testValuesgvw = new double[]{-0.3625,
@@ -85,6 +85,134 @@ public class VectorIntegralTest
 		                                            0.3789,
 		                                            0.5706
 		};
+		final double[] testValuesvv = new double[]{0.0889,
+		                                           0.0444,
+		                                           0.0444,
+		                                           0.0222,
+		                                           0.0000,
+		                                           0.0000,
+		                                           0.0000,
+		                                           0.0000,
+		                                           0.0444,
+		                                           0.0889,
+		                                           0.0222,
+		                                           0.0444,
+		                                           0.0000,
+		                                           0.0000,
+		                                           0.0000,
+		                                           0.0000,
+		                                           0.0444,
+		                                           0.0222,
+		                                           0.0889,
+		                                           0.0444,
+		                                           0.0000,
+		                                           0.0000,
+		                                           0.0000,
+		                                           0.0000,
+		                                           0.0222,
+		                                           0.0444,
+		                                           0.0444,
+		                                           0.0889,
+		                                           0.0000,
+		                                           0.0000,
+		                                           0.0000,
+		                                           0.0000,
+		                                           0.0000,
+		                                           0.0000,
+		                                           0.0000,
+		                                           0.0000,
+		                                           0.0889,
+		                                           0.0444,
+		                                           0.0444,
+		                                           0.0222,
+		                                           0.0000,
+		                                           0.0000,
+		                                           0.0000,
+		                                           0.0000,
+		                                           0.0444,
+		                                           0.0889,
+		                                           0.0222,
+		                                           0.0444,
+		                                           0.0000,
+		                                           0.0000,
+		                                           0.0000,
+		                                           0.0000,
+		                                           0.0444,
+		                                           0.0222,
+		                                           0.0889,
+		                                           0.0444,
+		                                           0.0000,
+		                                           0.0000,
+		                                           0.0000,
+		                                           0.0000,
+		                                           0.0222,
+		                                           0.0444,
+		                                           0.0444,
+		                                           0.0889};
+		final double[] testValuesvvw = new double[]{0.9444,
+		                                            0.5000,
+		                                            0.5100,
+		                                            0.2700,
+		                                            0.0000,
+		                                            0.0000,
+		                                            0.0000,
+		                                            0.0000,
+		                                            0.5000,
+		                                            1.0556,
+		                                            0.2700,
+		                                            0.5700,
+		                                            0.0000,
+		                                            0.0000,
+		                                            0.0000,
+		                                            0.0000,
+		                                            0.5100,
+		                                            0.2700,
+		                                            1.0956,
+		                                            0.5800,
+		                                            0.0000,
+		                                            0.0000,
+		                                            0.0000,
+		                                            0.0000,
+		                                            0.2700,
+		                                            0.5700,
+		                                            0.5800,
+		                                            1.2244,
+		                                            0.0000,
+		                                            0.0000,
+		                                            0.0000,
+		                                            0.0000,
+		                                            0.0000,
+		                                            0.0000,
+		                                            0.0000,
+		                                            0.0000,
+		                                            0.9444,
+		                                            0.5000,
+		                                            0.5100,
+		                                            0.2700,
+		                                            0.0000,
+		                                            0.0000,
+		                                            0.0000,
+		                                            0.0000,
+		                                            0.5000,
+		                                            1.0556,
+		                                            0.2700,
+		                                            0.5700,
+		                                            0.0000,
+		                                            0.0000,
+		                                            0.0000,
+		                                            0.0000,
+		                                            0.5100,
+		                                            0.2700,
+		                                            1.0956,
+		                                            0.5800,
+		                                            0.0000,
+		                                            0.0000,
+		                                            0.0000,
+		                                            0.0000,
+		                                            0.2700,
+		                                            0.5700,
+		                                            0.5800,
+		                                            1.2244};
 		
 		final double[] testValuesggw = new double[]{
 			7.7812,
@@ -262,6 +390,10 @@ public class VectorIntegralTest
 		};
 		final TPVectorCellIntegral<TPVectorFunction> gg = new TPVectorCellIntegral<>(
 			TPVectorCellIntegral.GRAD_GRAD);
+		final TPVectorCellIntegral<TPVectorFunction> vv = new TPVectorCellIntegral<>(
+			TPVectorCellIntegral.VALUE_VALUE);
+		final TPVectorCellIntegral<TPVectorFunction> vvw = new TPVectorCellIntegral<>(weight,
+		                                                                              TPVectorCellIntegral.VALUE_VALUE);
 		final TPVectorCellIntegral<TPVectorFunction> ggw = new TPVectorCellIntegral<>(weight,
 		                                                                              TPVectorCellIntegral.GRAD_GRAD);
 		final TPVectorCellIntegral<TPVectorFunction> gvw = new TPVectorCellIntegral<>(vweight,
@@ -271,15 +403,21 @@ public class VectorIntegralTest
 		{
 			for (int j = 0; j < shapeFunctions.size(); j++)
 			{
+				assertTrue(Math.abs(vv.evaluateCellIntegral(cell, shapeFunctions.get(i),
+				                                            shapeFunctions.get(
+					                                            j)) - testValuesvv[k]) <= 1e-2);
+				assertTrue(Math.abs(vvw.evaluateCellIntegral(cell, shapeFunctions.get(i),
+				                                             shapeFunctions.get(
+					                                             j)) - testValuesvvw[k]) <= 1e-2);
 				assertTrue(Math.abs(gg.evaluateCellIntegral(cell, shapeFunctions.get(i),
 				                                            shapeFunctions.get(
 					                                            j)) - testValuesgg[k]) <= 1e-2);
-				assertTrue(Math.abs(gvw.evaluateCellIntegral(cell, shapeFunctions.get(i),
-				                                             shapeFunctions.get(
-					                                             j)) - testValuesgvw[k]) <= 1e-2);
 				assertTrue(Math.abs(ggw.evaluateCellIntegral(cell, shapeFunctions.get(i),
 				                                             shapeFunctions.get(
 					                                             j)) - testValuesggw[k++]) <= 1e-2);
+				assertTrue(Math.abs(gvw.evaluateCellIntegral(cell, shapeFunctions.get(i),
+				                                             shapeFunctions.get(
+					                                             j)) - testValuesgvw[k]) <= 1e-2);
 			}
 		}
 	}
