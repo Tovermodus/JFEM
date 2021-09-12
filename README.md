@@ -39,4 +39,4 @@ For more information on how to do this and further examples, see the Examples Mo
 
 ## Example Results
 1. A very compressible ball that is moving to the top left is deformed by a fluid that flows in from the left: <img src=ball_in_water.gif/>
-2. Two heat sources heat a plate that is cooled on all four sides:
+2. Two heat sources heat a plate that is cooled on all four sides:<img src=heated_plate.gif/>
