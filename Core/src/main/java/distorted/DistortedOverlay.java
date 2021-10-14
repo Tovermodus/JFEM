@@ -2,7 +2,6 @@ package distorted;
 
 import basic.Overlay;
 import basic.ScalarPlot2D;
-import com.google.common.base.Stopwatch;
 import distorted.geometry.DistortedCell;
 import io.vavr.Tuple2;
 import linalg.CoordinateVector;
@@ -10,7 +9,6 @@ import linalg.Matrix;
 
 import java.awt.*;
 import java.util.List;
-import java.util.concurrent.TimeUnit;
 
 public class DistortedOverlay extends Overlay
 {
@@ -44,20 +42,16 @@ public class DistortedOverlay extends Overlay
 	@Override
 	public void draw(final Graphics g, final int width, final int height, final double slider)
 	{
-		Stopwatch s = Stopwatch.createStarted();
 		final int time =
 			(int) (displacementHistory.getRows() * slider * 0.999) % displacementHistory.getRows();
 		if (time != prevTime)
 			X.resetCoefficients(space.getShapeFunctions(), displacementHistory.getRow(time));
 		int i = 0;
-		System.out.println("reset" + s.elapsed(TimeUnit.MICROSECONDS));
-		s = Stopwatch.createStarted();
 		for (final Tuple2<DistortedCell, CoordinateVector> cp : refPoints)
 		{
 			ScalarPlot2D.drawSinglePoint(g, width, height, X.valueOnReferenceCell(cp._2, cp._1),
 			                             (i++ % pointsPerCell * 3.3) % 100, 0,
 			                             100, min, max, 2, 2);
 		}
-		System.out.println("draw" + s.elapsed(TimeUnit.MICROSECONDS));
 	}
 }

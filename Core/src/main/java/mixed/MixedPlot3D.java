@@ -13,6 +13,7 @@ public class MixedPlot3D extends ScalarPlot3D
 {
 	final Map<CoordinateVector, CoordinateVector> velocities;
 	double maxV;
+	double origMaxVal;
 	
 	public MixedPlot3D(final MixedFunction function, final List<CoordinateVector> points, final int pointsPerDimension)
 	{
@@ -30,6 +31,8 @@ public class MixedPlot3D extends ScalarPlot3D
 			.mapToDouble(CoordinateVector::euclidianNorm)
 			.max();
 		maxV = maxVelocity.orElse(1);
+		origMaxVal = maxValue;
+		maxValue = maxValue + (maxValue - minValue) * 3;
 	}
 	
 	public MixedPlot3D(final Map<CoordinateVector, Double> pressures, final Map<CoordinateVector, CoordinateVector> velocities, final int pointsPerDimension, final String title)

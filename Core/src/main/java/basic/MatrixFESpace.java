@@ -6,6 +6,7 @@ import linalg.MutableVector;
 
 import java.util.List;
 import java.util.function.BiFunction;
+import java.util.function.BiPredicate;
 
 public interface MatrixFESpace<CT extends Cell<CT, FT>, FT extends Face<CT, FT>,
 	ST extends ShapeFunction<CT, FT, ?, ?, ?>> extends FESpace<CT, FT, ST>
@@ -51,6 +52,23 @@ public interface MatrixFESpace<CT extends Cell<CT, FT>, FT extends Face<CT, FT>,
 			               {
 				               integral += rightHandSideIntegral.evaluateRightHandSideIntegral(K, v);
 			               }
+			               return integral;
+		               }, d);
+	}
+	
+	default void writeCellIntegralsToRhs(final List<RightHandSideIntegral<CT, ST>> rightHandSideIntegrals,
+	                                     final MutableVector d, final BiPredicate<CT, ST> functions)
+	{
+		loopRhsViaCell((K, v) ->
+		               {
+			               double integral = 0;
+			               if (functions.test(K, v))
+				               for (final RightHandSideIntegral<CT, ST> rightHandSideIntegral :
+					               rightHandSideIntegrals)
+				               {
+					               integral += rightHandSideIntegral.evaluateRightHandSideIntegral(
+						               K, v);
+				               }
 			               return integral;
 		               }, d);
 	}

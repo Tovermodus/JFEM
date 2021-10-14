@@ -32,6 +32,8 @@ public class DLMSummary
 	int nLagrangian;
 	int nTransfer;
 	int eulerianPointsPerDimension = 30;
+	int nEulerCells = 15;
+	int nLagrangeRefines = 2;
 	List<CoordinateVector> eulerianPoints;
 	
 	public DLMSummary()
@@ -296,7 +298,7 @@ public class DLMSummary
 	{
 		final CoordinateVector startCoordinates = CoordinateVector.fromValues(0, 0);
 		final CoordinateVector endCoordinates = CoordinateVector.fromValues(1, 1);
-		final IntCoordinates cellCounts = new IntCoordinates(6, 6);
+		final IntCoordinates cellCounts = new IntCoordinates(nEulerCells, nEulerCells);
 		eulerian = new TaylorHoodSpace(startCoordinates, endCoordinates, cellCounts);
 		eulerian.assembleCells();
 		eulerian.assembleFunctions(1);
@@ -308,7 +310,7 @@ public class DLMSummary
 	{
 		final CoordinateVector center = CoordinateVector.fromValues(0.5, 0.5);
 		final double radius = 0.2;
-		lagrangian = new DistortedVectorSpace(center, radius, 2);
+		lagrangian = new DistortedVectorSpace(center, radius, nLagrangeRefines);
 		lagrangian.assembleCells();
 		lagrangian.assembleFunctions(1);
 		nLagrangian = lagrangian.getShapeFunctions().size();
@@ -413,7 +415,13 @@ public class DLMSummary
 			if (sf.hasVelocityFunction())
 			
 			{
-				lagrangian.writeCellIntegralsToRhs(List.of(transferEulerian), column);
+				lagrangian.writeCellIntegralsToRhs(List.of(transferEulerian), column,
+				                                   (K, lambd) ->
+					                                   sf
+						                                   .getVelocityShapeFunction()
+						                                   .getNodeFunctionalPoint()
+						                                   .sub(K.center())
+						                                   .euclidianNorm() < 3. / nEulerCells);
 				Cf.addColumn(column.mul(1), sfEntry.getKey());
 			}
 		}

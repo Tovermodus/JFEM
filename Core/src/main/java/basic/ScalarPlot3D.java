@@ -14,7 +14,7 @@ public class ScalarPlot3D extends Plot
 	final public Map<CoordinateVector, Double> values;
 	final public int pointsPerDimension;
 	final public double minValue;
-	final public double maxValue;
+	public double maxValue;
 	final public CoordinateVector min;
 	final public CoordinateVector max;
 	public final String title;

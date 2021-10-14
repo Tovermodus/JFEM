@@ -27,6 +27,6 @@ public class MixedPlot2DTime extends MixedPlot3D
 	@Override
 	public String title()
 	{
-		return "Mixed 2D Plot in Time " + title + " blue is min with " + minValue + " red is max with " + maxValue + "\nmax velocity is" + maxV + "time is " + z;
+		return "Mixed 2D Plot in Time " + title + " blue is min with " + minValue + " red is max with " + origMaxVal + "\nmax velocity is" + maxV + "time is " + z;
 	}
 }
