@@ -4,6 +4,7 @@ import basic.DoubleCompare;
 import com.google.common.collect.HashMultimap;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Multimap;
+import io.vavr.Tuple2;
 import linalg.CoordinateVector;
 import linalg.IntCoordinates;
 import org.jetbrains.annotations.NotNull;
@@ -42,7 +43,7 @@ public class CircleGrid
 		cells = ImmutableSet.copyOf(refinedCells.values());
 		System.out.println(cells.size());
 		faces = ImmutableSet.copyOf(genFaces);
-		for(DistortedCell cell:cells)
+		for (final DistortedCell cell : cells)
 			cell.setDone(hash++);
 	}
 	
@@ -323,6 +324,32 @@ public class CircleGrid
 					                return coords;
 				                })
 				           .map(cell::transformFromReferenceCell)
+				           .collect(Collectors.toList()));
+		}
+		return ret;
+	}
+	
+	public List<Tuple2<DistortedCell, CoordinateVector>> generateReferencePlotPoints(final int resolution)
+	{
+		final int pointsPerCell = resolution / cells.size();
+		final List<Tuple2<DistortedCell, CoordinateVector>> ret = new ArrayList<>();
+		final IntCoordinates pointsPerDimension = IntCoordinates.repeat(pointsPerCell, dimension);
+		for (final DistortedCell cell : cells)
+		{
+			ret.addAll(pointsPerDimension
+				           .range()
+				           .stream()
+				           .map(c ->
+				                {
+					                final CoordinateVector coords = new CoordinateVector(dimension);
+					                for (int i = 0; i < dimension; i++)
+					                {
+						                coords.set(1. / (pointsPerCell - 1) *
+							                           (c.get(i)), i);
+					                }
+					                return coords;
+				                })
+				           .map(c -> new Tuple2<>(cell, c))
 				           .collect(Collectors.toList()));
 		}
 		return ret;

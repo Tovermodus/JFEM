@@ -8,6 +8,7 @@ import com.google.common.collect.Sets;
 import distorted.geometry.CircleGrid;
 import distorted.geometry.DistortedCell;
 import distorted.geometry.DistortedFace;
+import io.vavr.Tuple2;
 import linalg.CoordinateVector;
 import linalg.DenseVector;
 import linalg.SparseMatrix;
@@ -131,6 +132,11 @@ public abstract class CircleGridSpace<ST extends ShapeFunction<DistortedCell, Di
 	public List<CoordinateVector> generatePlotPoints(final int resolution)
 	{
 		return grid.generatePlotPoints(resolution);
+	}
+	
+	public List<Tuple2<DistortedCell, CoordinateVector>> generateReferencePlotPoints(final int resolution)
+	{
+		return grid.generateReferencePlotPoints(resolution);
 	}
 	
 	public ScalarFunction getIndicatorFunction()
