@@ -16,6 +16,7 @@ public class TPVectorCellIntegral<ST extends VectorShapeFunction<TPCell, TPFace>
 	public static final String ROT_ROT = "RotRot";
 	public static final String GRAD_VALUE = "GradValue";
 	public static final String SYM_GRAD = "SymGrad";
+	public static final String H1 = "H1";
 	
 	public TPVectorCellIntegral(final Function<?, ?, ?> weight, final String name)
 	{
@@ -71,6 +72,20 @@ public class TPVectorCellIntegral<ST extends VectorShapeFunction<TPCell, TPFace>
 			return TPCellIntegral.integrateNonTensorProduct(x -> shapeFunction1
 				                                                .gradient(x)
 				                                                .frobeniusInner(shapeFunction2.gradient(x))
+				                                                * (Double) weight.value(x),
+			                                                cell,
+			                                                quadratureRule1D);
+		}
+		if (name.equals(H1))
+		{
+			return TPCellIntegral.integrateNonTensorProduct(x -> (shapeFunction1
+				                                                      .gradient(x)
+				                                                      .frobeniusInner(
+					                                                      shapeFunction2.gradient(
+						                                                      x))
+				                                                      + shapeFunction1
+				                                                .value(x)
+				                                                .inner(shapeFunction2.value(x)))
 				                                                * (Double) weight.value(x),
 			                                                cell,
 			                                                quadratureRule1D);

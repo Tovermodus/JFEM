@@ -10,7 +10,8 @@ import java.util.Map;
 
 public class VectorFESpaceFunction<ST extends VectorShapeFunction<?, ?>> implements VectorFunction
 {
-	protected final HashMap<ST, Double> coefficients;
+	
+	protected HashMap<ST, Double> coefficients;
 	final ST someFunction;
 	
 	public VectorFESpaceFunction(final ST[] functions, final double[] coefficients)
@@ -36,6 +37,15 @@ public class VectorFESpaceFunction<ST extends VectorShapeFunction<?, ?>> impleme
 			this.coefficients.put(someOtherFunction, coefficients.at(function.getKey()));
 		}
 		someFunction = someOtherFunction;
+	}
+	
+	public void resetCoefficients(final Map<Integer, ST> functions, final Vector coefficients)
+	{
+		assert (functions.size() == coefficients.size());
+		for (final Map.Entry<Integer, ST> function : functions.entrySet())
+		{
+			this.coefficients.put(function.getValue(), coefficients.at(function.getKey()));
+		}
 	}
 	
 	@Override

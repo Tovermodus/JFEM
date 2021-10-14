@@ -7,7 +7,7 @@ import java.util.Set;
 
 public interface ShapeFunction<CT extends Cell<CT, FT>, FT extends Face<CT, FT>,
 	valueT, gradientT,
-	hessianT> extends Function<valueT, gradientT, hessianT>
+	hessianT> extends Function<valueT, gradientT, hessianT>, FunctionOnCells<CT, FT, valueT, gradientT, hessianT>
 {
 	@Override
 	default int getDomainDimension()
@@ -22,15 +22,6 @@ public interface ShapeFunction<CT extends Cell<CT, FT>, FT extends Face<CT, FT>,
 	NodeFunctional<valueT, gradientT, hessianT> getNodeFunctional();
 	
 	int getGlobalIndex();
-	
-	valueT valueInCell(CoordinateVector pos, CT cell);
-	
-	gradientT gradientInCell(CoordinateVector pos, CT cell);
-	
-	default hessianT hessianInCell(final CoordinateVector pos, final CT cell)
-	{
-		throw new UnsupportedOperationException();
-	}
 	
 	valueT jumpInValue(FT face, CoordinateVector pos);
 	

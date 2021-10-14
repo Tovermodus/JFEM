@@ -49,7 +49,7 @@ public class HeatEquation
 		};
 		final TPRightHandSideIntegral<TPShapeFunction> src = new TPRightHandSideIntegral<>(sourceFun
 			, TPRightHandSideIntegral.VALUE);
-		final double dt = 0.1;
+		final double dt = 0.02;
 		final int n = grid.getShapeFunctions().size();
 		Vector iterate = new DenseVector(n);
 		ScalarFESpaceFunction<TPShapeFunction> u_t;
@@ -69,7 +69,7 @@ public class HeatEquation
 		//System.out.println("A"+A);
 		final int timesteps = 50;
 		final Map<CoordinateVector, Double> vals;
-		final List<CoordinateVector> points = grid.generatePlotPoints(30);
+		final List<CoordinateVector> points = grid.generatePlotPoints(60);
 		vals = (new ScalarFESpaceFunction<>(
 			grid.getShapeFunctions(), iterate)
 			        .valuesInPointsAtTime(points, 0));
@@ -95,6 +95,6 @@ public class HeatEquation
 				            .valuesInPointsAtTime(points, dt * i));
 		}
 		final PlotWindow p = new PlotWindow();
-		p.addPlot(new ScalarPlot2DTime(vals, 30, ""));
+		p.addPlot(new ScalarPlot2DTime(vals, 60, ""));
 	}
 }

@@ -22,6 +22,7 @@ public class TPCell implements CellWithReferenceCell<TPCell, TPFace>
 	final ImmutableList<Cell1D> cell1Ds;
 	Set<TPFace> faces;
 	boolean refined;
+	private int doneCode;
 	
 	TPCell(final List<Cell1D> cell1Ds)
 	{
@@ -223,5 +224,15 @@ public class TPCell implements CellWithReferenceCell<TPCell, TPFace>
 				.getStart(), i);
 		}
 		return ret;
+	}
+	
+	public void setDone(final int i)
+	{
+		this.doneCode = i;
+	}
+	
+	public int doneCode()
+	{
+		return doneCode;
 	}
 }

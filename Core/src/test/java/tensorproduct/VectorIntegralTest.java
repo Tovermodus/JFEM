@@ -348,7 +348,6 @@ public class VectorIntegralTest
 				assertTrue(Math.abs(ggw.evaluateCellIntegral(cell, shapeFunctions.get(i),
 				                                             shapeFunctions.get(
 					                                             j)) - testValuesggw[k++]) <= 1e-2);
-				
 			}
 		}
 	}

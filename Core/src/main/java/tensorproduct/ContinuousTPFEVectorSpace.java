@@ -3,6 +3,7 @@ package tensorproduct;
 import linalg.CoordinateMatrix;
 import linalg.CoordinateTensor;
 import linalg.CoordinateVector;
+import linalg.IntCoordinates;
 import tensorproduct.geometry.TPCell;
 import tensorproduct.geometry.TPFace;
 
@@ -13,33 +14,41 @@ import java.util.TreeSet;
 public class ContinuousTPFEVectorSpace extends CartesianGridSpace<ContinuousTPVectorFunction, CoordinateVector, CoordinateMatrix, CoordinateTensor>
 {
 	
-	public ContinuousTPFEVectorSpace(CoordinateVector startCoordinates, CoordinateVector endCoordinates,
-	                                 List<Integer> cellsPerDimension)
+	public ContinuousTPFEVectorSpace(final CoordinateVector startCoordinates, final CoordinateVector endCoordinates,
+	                                 final List<Integer> cellsPerDimension)
+	{
+		super(startCoordinates, endCoordinates, cellsPerDimension);
+	}
+	
+	public ContinuousTPFEVectorSpace(final CoordinateVector startCoordinates, final CoordinateVector endCoordinates,
+	                                 final IntCoordinates cellsPerDimension)
 	{
 		super(startCoordinates, endCoordinates, cellsPerDimension);
 	}
 	
 	@Override
-	public void assembleFunctions(int polynomialDegree)
+	public void assembleFunctions(final int polynomialDegree)
 	{
 		
 		shapeFunctions = new TreeSet<>();
-		for (TPCell cell : grid.cells)
+		for (final TPCell cell : grid.cells)
 		{
 			for (int i = 0; i < Math.pow(polynomialDegree + 1, getDimension()) * getDimension(); i++)
 			{
-				ContinuousTPVectorFunction shapeFunction = new ContinuousTPVectorFunction(cell, polynomialDegree, i);
+				final ContinuousTPVectorFunction shapeFunction = new ContinuousTPVectorFunction(cell,
+				                                                                                polynomialDegree,
+				                                                                                i);
 				shapeFunction.setGlobalIndex(shapeFunctions.size());
 				shapeFunctions.add(shapeFunction);
-				for (TPCell supportCell : shapeFunction.getCells())
+				for (final TPCell supportCell : shapeFunction.getCells())
 					supportOnCell.put(supportCell, shapeFunction);
-				for (TPFace supportFace : shapeFunction.getFaces())
+				for (final TPFace supportFace : shapeFunction.getFaces())
 					supportOnFace.put(supportFace, shapeFunction);
 			}
 		}
-		if (shapeFunctions.size() != getDimension()*Arrays.stream(grid.cellsPerDimension.asArray())
-			.map(cellsPerDimension -> cellsPerDimension * polynomialDegree + 1)
-			.reduce(1, Math::multiplyExact))
+		if (shapeFunctions.size() != getDimension() * Arrays.stream(grid.cellsPerDimension.asArray())
+		                                                    .map(cellsPerDimension -> cellsPerDimension * polynomialDegree + 1)
+		                                                    .reduce(1, Math::multiplyExact))
 			throw new IllegalStateException("Identification did not work");
 	}
 	
@@ -72,4 +81,3 @@ public class ContinuousTPFEVectorSpace extends CartesianGridSpace<ContinuousTPVe
 		}
 	}*/
 }
-

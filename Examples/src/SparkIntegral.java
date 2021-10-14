@@ -37,8 +37,7 @@ public class SparkIntegral
 	public static void main(final String[] args)
 	{
 		final SparkConf sparkConf = new SparkConf().setAppName("JavaWordCount");
-		sparkConf.setMaster("local[*]");
-		final int nPartitions = 11;
+		final int nPartitions = 30;
 		final JavaSparkContext ctx = new JavaSparkContext(sparkConf);
 		final List<Integer> intList = new ArrayList<>();
 		for (int i = 0; i < nPartitions; i++)
