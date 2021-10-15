@@ -31,9 +31,9 @@ public class DLMSummary
 	int nEulerian;
 	int nLagrangian;
 	int nTransfer;
-	int eulerianPointsPerDimension = 30;
-	int nEulerCells = 15;
-	int nLagrangeRefines = 2;
+	int eulerianPointsPerDimension = 40;
+	int nEulerCells = 14;
+	int nLagrangeRefines = 3;
 	List<CoordinateVector> eulerianPoints;
 	
 	public DLMSummary()
@@ -46,7 +46,7 @@ public class DLMSummary
 		rhoS = 10;
 		nu = 1;
 		kappa = 100.000000;
-		dt = 0.01;
+		dt = 0.02;
 		timeSteps = 10;
 		initializeEulerian();
 		initializeLagrangian();
@@ -143,12 +143,16 @@ public class DLMSummary
 			System.out.println(i + "th iteration");
 			lastIterate = new DenseVector(currentIterate);
 			rhsHistory.addRow(rightHandSide, i + 1);
-			
+			final IterativeSolver it = new IterativeSolver();
+			it.showProgress = true;
+			//it.solveGMRES(systemMatrix, rightHandSide, 1e-7);
 			currentIterate = systemMatrix.solve(rightHandSide);
 			System.out.println("newit" + getLagrangianIterate(currentIterate));
 			iterateHistory.addRow(currentIterate, i + 1);
 			System.out.println("solved");
 		}
+		pvals.put(CoordinateVector.fromValues(0, 0, -1000),
+		          pvals.values().stream().mapToDouble(d -> d).max().orElse(1) * 10);
 		final PlotWindow p = new PlotWindow();
 		p.addPlot(new MatrixPlot(iterateHistory, "iterateHistory"));
 		p.addPlot(new MatrixPlot(rhsHistory, "rhsHistory"));
@@ -421,7 +425,8 @@ public class DLMSummary
 						                                   .getVelocityShapeFunction()
 						                                   .getNodeFunctionalPoint()
 						                                   .sub(K.center())
-						                                   .euclidianNorm() < 3. / nEulerCells);
+						                                   .euclidianNorm() < 1. / nEulerCells + lagrangian
+						                                   .getMaxDiam());
 				Cf.addColumn(column.mul(1), sfEntry.getKey());
 			}
 		}

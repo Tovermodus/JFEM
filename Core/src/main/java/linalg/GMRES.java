@@ -5,7 +5,14 @@ import java.util.stream.IntStream;
 
 class GMRES
 {
+	private final boolean showProgress;
 	int restarts = 0;
+	
+	public GMRES(final boolean showProgress, final int restarts)
+	{
+		this.showProgress = showProgress;
+		this.restarts = restarts;
+	}
 	
 	public linalg.Vector solve(final VectorMultiplyable A,
 	                           final Vector b,
@@ -61,7 +68,8 @@ class GMRES
 			h.set(beta, j, j);
 			gamma.set(-s.at(j) * gamma.at(j), j + 1);
 			gamma.set(c.at(j) * gamma.at(j), j);
-			System.out.println(Math.abs(gamma.at(j + 1)));
+			if (showProgress)
+				System.out.println(Math.abs(gamma.at(j + 1)));
 			if (Math.abs(gamma.at(j + 1)) < tol || j > 100)
 				break;
 			v.add(w.mul(1. / h.at(j + 1, j)));
@@ -85,7 +93,7 @@ class GMRES
 		if (j > 100 && restarts < 100)
 		{
 			restarts++;
-			return new GMRES().solve(A, b, x.add(alphaV), tol, interruptor);
+			return solve(A, b, x.add(alphaV), tol, interruptor);
 		}
 		return x.add(alphaV);
 	}
@@ -144,7 +152,8 @@ class GMRES
 			h.set(beta, j, j);
 			gamma.set(-s.at(j) * gamma.at(j), j + 1);
 			gamma.set(c.at(j) * gamma.at(j), j);
-			System.out.println(Math.abs(gamma.at(j + 1)));
+			if (showProgress)
+				System.out.println(Math.abs(gamma.at(j + 1)));
 			if (Math.abs(gamma.at(j + 1)) < tol || j > 100)
 				break;
 			v.add(w.mul(1. / h.at(j + 1, j)));

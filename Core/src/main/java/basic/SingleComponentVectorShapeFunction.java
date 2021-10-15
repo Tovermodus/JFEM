@@ -27,6 +27,7 @@ public class SingleComponentVectorShapeFunction<CT extends Cell<CT, FT>, FT exte
 				.newInstance(supportCell, polynomialDegree, componentLocalIndex);
 		} catch (final InstantiationException | IllegalAccessException | InvocationTargetException | NoSuchMethodException e)
 		{
+			e.printStackTrace();
 			throw new IllegalStateException();
 		}
 	}

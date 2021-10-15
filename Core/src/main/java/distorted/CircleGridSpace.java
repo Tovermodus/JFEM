@@ -26,6 +26,7 @@ public abstract class CircleGridSpace<ST extends ShapeFunction<DistortedCell, Di
 	Set<Integer> fixedNodes;
 	public final double radius;
 	public final CoordinateVector center;
+	private final double maxDiam;
 	
 	@Override
 	public Set<Integer> getFixedNodeIndices()
@@ -41,6 +42,12 @@ public abstract class CircleGridSpace<ST extends ShapeFunction<DistortedCell, Di
 		this.center = center;
 		grid = new CircleGrid(center, radius, refinements);
 		fixedNodes = Sets.newConcurrentHashSet();
+		maxDiam = getCells().stream().mapToDouble(DistortedCell::diam).max().orElse(1);
+	}
+	
+	public double getMaxDiam()
+	{
+		return maxDiam;
 	}
 	
 	protected void addFunctionToCell(final ST function, final DistortedCell cell)
@@ -132,6 +139,25 @@ public abstract class CircleGridSpace<ST extends ShapeFunction<DistortedCell, Di
 	public List<CoordinateVector> generatePlotPoints(final int resolution)
 	{
 		return grid.generatePlotPoints(resolution);
+	}
+	
+	public List<CoordinateVector> generateIsotropicPoints(final int resolution)
+	{
+		if (getDimension() != 2)
+			throw new UnsupportedOperationException("Not yetimplemented");
+		final List<CoordinateVector> ret = new ArrayList<>(resolution * resolution);
+		for (int i = 0; i < resolution; i++)
+		{
+			for (int j = 0; j < resolution; j++)
+			{
+				final double ang = 1.0 * i / resolution * Math.PI * 2;
+				final double rad = 1.0 * radius * j / resolution;
+				final CoordinateVector out =
+					CoordinateVector.fromValues(Math.cos(ang), Math.sin(ang)).mul(rad);
+				ret.add(new CoordinateVector(center.add(out)));
+			}
+		}
+		return ret;
 	}
 	
 	public List<Tuple2<DistortedCell, CoordinateVector>> generateReferencePlotPoints(final int resolution)
