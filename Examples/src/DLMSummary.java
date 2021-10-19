@@ -166,7 +166,7 @@ public class DLMSummary
 			{
 				throw new UnsupportedOperationException("not implemented yet");
 			}
-		}
+		};
 		System.out.println("created preconditioner");
 		int i;
 		for (i = 1; i < timeSteps && interruptor.isRunning(); i++)
