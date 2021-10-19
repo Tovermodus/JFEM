@@ -1,19 +1,7 @@
-import basic.*;
-import com.google.common.base.Stopwatch;
-import com.google.common.collect.Iterables;
-import multigrid.GaussSeidelSmoother;
-import multigrid.FESpaceHierarchy;
-import tensorproduct.TPCellIntegral;
-import tensorproduct.TPFaceIntegral;
-import tensorproduct.TPFESpace;
-import tensorproduct.TPRightHandSideIntegral;
-
-import java.util.ArrayList;
-
 public class LaplaceMG
 {
-        public static void main(String[] args)
-        {
+	public static void main(final String[] args)
+	{
 //                long startTime = System.nanoTime();
 //                Stopwatch stop = Stopwatch.createStarted();
 //                System.out.println("output start");
@@ -61,6 +49,6 @@ public class LaplaceMG
 //                FESpaceFunction s = new FESpaceFunction(Iterables.getLast(fESpaceHierarchy.getfESpaces()).getShapeFunctions(),sol);
 //                s.plot(100,"/home/tovermodus/plot0.dat");
 //
-
-        }
+	
+	}
 }

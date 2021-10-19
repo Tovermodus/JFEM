@@ -87,8 +87,8 @@ public class DLMDiffusion
 		A.addSmallMatrixAt(A13.transpose(), n + m, 0);
 		
 		final DirectlySolvable A11inv = A11.inverse();
-		T.addSmallMatrixAt(A11inv, 0, 0);
-		T.addSmallMatrixAt((A22.add(SparseMatrix.identity(m).mul(0.01))).inverse(), n, n);
+		T.addSmallMatrixInPlaceAt(A11inv, 0, 0);
+		T.addSmallMatrixInPlaceAt((A22.add(SparseMatrix.identity(m).mul(0.01))).inverse(), n, n);
 		T.addSmallMatrixAt(SparseMatrix.identity(m), n + m, n + m);
 		
 		final DenseVector b1 = new DenseVector(n);

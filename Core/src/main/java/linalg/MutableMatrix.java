@@ -8,7 +8,7 @@ public interface MutableMatrix extends Matrix, MutableTensor
 	
 	void deleteColumn(int column);
 	
-	default void addSmallMatrixAt(final Matrix small, final int... coordinates)
+	default void addSmallMatrixInPlaceAt(final Matrix small, final int... coordinates)
 	{
 		if (PerformanceArguments.getInstance().executeChecks)
 		{

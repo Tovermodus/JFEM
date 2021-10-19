@@ -108,7 +108,29 @@ public class ScalarPlot2D extends Plot
 		final int green = 0;
 		final int blue = 255 - red;
 		final Color c = new Color(red, green, blue);
-		final int x = (int) ((coord.x() - mins.x()) / (maxs.x() - mins.x()) * (width - 150) + 75 - pixelWidth / 2);
+		final int x
+			= (int) ((coord.x() - mins.x()) / (maxs.x() - mins.x()) * (width - 150) + 75 - pixelWidth / 2);
+		final int y =
+			(int) (height - ((coord.y() - mins.y()) / (maxs.y() - mins.y()) * (height - 150) + 75 +
+				                 pixelHeight / 2));
+		g.setColor(c);
+		g.fillRect(x, y, pixelWidth + 2, pixelHeight + 2);
+	}
+	
+	public static void drawSinglePointGreen(final Graphics g, final int width, final int height,
+	                                        final CoordinateVector coord, final double val, final double minValue,
+	                                        final double maxValue, final CoordinateVector mins, final CoordinateVector maxs,
+	                                        final int pixelWidth, final int pixelHeight)
+	{
+		double maxValueDifference = maxValue - minValue;
+		if (maxValueDifference < 1e-15)
+			maxValueDifference = 1;
+		final int green = (int) ((val - minValue) / maxValueDifference * 255);
+		final int blue = 0;
+		final int red = 0;
+		final Color c = new Color(red, green, blue);
+		final int x
+			= (int) ((coord.x() - mins.x()) / (maxs.x() - mins.x()) * (width - 150) + 75 - pixelWidth / 2);
 		final int y =
 			(int) (height - ((coord.y() - mins.y()) / (maxs.y() - mins.y()) * (height - 150) + 75 +
 				                 pixelHeight / 2));

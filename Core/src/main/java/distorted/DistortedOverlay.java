@@ -25,7 +25,7 @@ public class DistortedOverlay extends Overlay
 	{
 		this.space = space;
 		this.displacementHistory = displacementHistory;
-		System.out.println(displacementHistory);
+		System.out.println("displacemantHist " + displacementHistory);
 		max = ScalarPlot2D.getMaxCoordinates(backGroundPoints);
 		min = ScalarPlot2D.getMinCoordinates(backGroundPoints);
 		this.pointsPerCell = pointsPerCell * space.getCells().size();
@@ -42,6 +42,7 @@ public class DistortedOverlay extends Overlay
 	@Override
 	public void draw(final Graphics g, final int width, final int height, final double slider)
 	{
+		final int pixelSize = Math.min(width, height) / (int) Math.sqrt(refPoints.size()) / 8;
 		final int time =
 			(int) (displacementHistory.getRows() * slider * 0.999) % displacementHistory.getRows();
 		if (time != prevTime)
@@ -49,9 +50,9 @@ public class DistortedOverlay extends Overlay
 		int i = 0;
 		for (final Tuple2<DistortedCell, CoordinateVector> cp : refPoints)
 		{
-			ScalarPlot2D.drawSinglePoint(g, width, height, X.valueOnReferenceCell(cp._2, cp._1),
-			                             (i++ % pointsPerCell * 3.3) % 100, 0,
-			                             100, min, max, 2, 2);
+			ScalarPlot2D.drawSinglePointGreen(g, width, height, X.valueOnReferenceCell(cp._2, cp._1),
+			                                  (i++ % pointsPerCell * 3.3) % 100, 0,
+			                                  100, min, max, pixelSize, pixelSize);
 		}
 	}
 }

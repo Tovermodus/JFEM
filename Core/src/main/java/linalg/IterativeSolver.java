@@ -204,10 +204,10 @@ public class IterativeSolver
 		return iterate;
 	}
 	
-	static class Interruptor implements Runnable
+	public static class Interruptor implements Runnable
 	{
 		private JFrame f;
-		private volatile boolean running = true;
+		public volatile boolean running = true;
 		
 		public boolean isRunning()
 		{

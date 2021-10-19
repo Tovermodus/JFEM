@@ -94,9 +94,9 @@ public class DLMDiffusionCircle
 		A.addSmallMatrixAt(A13.transpose(), n + m, 0);
 		System.out.println("A");
 		final DirectlySolvable A11inv = A11.inverse();
-		T.addSmallMatrixAt(A11inv, 0, 0);
+		T.addSmallMatrixInPlaceAt(A11inv, 0, 0);
 		System.out.println("T11");
-		T.addSmallMatrixAt((A22.add(SparseMatrix.identity(m).mul(0.01))).inverse(), n, n);
+		T.addSmallMatrixInPlaceAt((A22.add(SparseMatrix.identity(m).mul(0.01))).inverse(), n, n);
 		System.out.println("T22");
 		T.addSmallMatrixAt(SparseMatrix.identity(m), n + m, n + m);
 		System.out.println("T");

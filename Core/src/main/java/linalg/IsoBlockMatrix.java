@@ -1,18 +1,16 @@
 package linalg;
 
 import basic.PerformanceArguments;
-import com.google.common.primitives.Ints;
 
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
-import java.util.stream.Stream;
 
-public class BlockMatrix implements MutableMatrix
+public class IsoBlockMatrix implements MutableMatrix
 {
 	DenseMatrix[][] blocks;
 	
-	public BlockMatrix(int blockSizeX, int blockSizeY, int blockNX, int blockNY)
+	public IsoBlockMatrix(final int blockSizeX, final int blockSizeY, final int blockNX, final int blockNY)
 	{
 		blocks = new DenseMatrix[blockNX][blockNY];
 		for (int i = 0; i < blockNX; i++)
@@ -20,13 +18,13 @@ public class BlockMatrix implements MutableMatrix
 				blocks[i][j] = new DenseMatrix(blockSizeX, blockSizeY);
 	}
 	
-	public BlockMatrix(int blockSizeX, int blockSizeY, int blockNX, int blockNY, Matrix matrix)
+	public IsoBlockMatrix(final int blockSizeX, final int blockSizeY, final int blockNX, final int blockNY, final Matrix matrix)
 	{
 		this(blockSizeX, blockSizeY, blockNX, blockNY);
 		copyFromMatrix(matrix);
 	}
 	
-	public BlockMatrix(BlockMatrix matrix)
+	public IsoBlockMatrix(final IsoBlockMatrix matrix)
 	{
 		this(matrix.getBlockSizeX(), matrix.getBlockSizeY(), matrix.getBlockNX(), matrix.getBlockNY(), matrix);
 	}
@@ -51,77 +49,78 @@ public class BlockMatrix implements MutableMatrix
 		return blocks[0].length;
 	}
 	
-	private int[] blockCoords(int... coordinates)
+	private int[] blockCoords(final int... coordinates)
 	{
-		int blockI = coordinates[0] / getBlockSizeX();
-		int blockJ = coordinates[1] / getBlockSizeY();
-		int subI = coordinates[0] % getBlockSizeX();
-		int subJ = coordinates[1] % getBlockSizeY();
+		final int blockI = coordinates[0] / getBlockSizeX();
+		final int blockJ = coordinates[1] / getBlockSizeY();
+		final int subI = coordinates[0] % getBlockSizeX();
+		final int subJ = coordinates[1] % getBlockSizeY();
 		return new int[]{blockI, blockJ, subI, subJ};
 	}
 	
-	protected void copyFromMatrix(Matrix matrix)
+	protected void copyFromMatrix(final Matrix matrix)
 	{
 		for (int i = 0; i < matrix.getRows(); i++)
 			for (int j = 0; j < matrix.getCols(); j++)
 			{
-				int[] cs = blockCoords(i, j);
+				final int[] cs = blockCoords(i, j);
 				blocks[cs[0]][cs[1]].set(matrix.at(i, j), cs[2], cs[3]);
 			}
 	}
 	
 	@Override
-	public double at(int... coordinates)
+	public double at(final int... coordinates)
 	{
 		if (PerformanceArguments.getInstance().executeChecks)
 			if (coordinates.length != 2)
 				throw new IllegalArgumentException("Wrong number of coordinates");
-		int[] cs = blockCoords(coordinates);
+		final int[] cs = blockCoords(coordinates);
 		return blocks[cs[0]][cs[1]].at(cs[2], cs[3]);
 	}
 	
 	@Override
-	public void set(double value, int... coordinates)
+	public void set(final double value, final int... coordinates)
 	{
 		if (PerformanceArguments.getInstance().executeChecks)
 			if (coordinates.length != 2)
 				throw new IllegalArgumentException("Wrong number of coordinates");
-		int[] cs = blockCoords(coordinates);
+		final int[] cs = blockCoords(coordinates);
 		blocks[cs[0]][cs[1]].set(value, cs[2], cs[3]);
 	}
 	
 	@Override
-	public void add(double value, int... coordinates)
+	public void add(final double value, final int... coordinates)
 	{
 		if (PerformanceArguments.getInstance().executeChecks)
 			if (coordinates.length != 2)
 				throw new IllegalArgumentException("Wrong number of coordinates");
-		int[] cs = blockCoords(coordinates);
+		final int[] cs = blockCoords(coordinates);
 		blocks[cs[0]][cs[1]].add(value, cs[2], cs[3]);
 	}
 	
 	@Override
-	public void addInPlace(Tensor other)
+	public void addInPlace(final Tensor other)
 	{
 		this.blocks = this.add(other).blocks;
 	}
 	
 	@Override
-	public void mulInPlace(double scalar)
+	public void mulInPlace(final double scalar)
 	{
-		Arrays.stream(blocks).parallel().forEach(matrixrow -> {
-			for(DenseMatrix d: matrixrow)
-				d.mulInPlace(scalar);
-		});
+		Arrays.stream(blocks).parallel().forEach(matrixrow ->
+		                                         {
+			                                         for (final DenseMatrix d : matrixrow)
+				                                         d.mulInPlace(scalar);
+		                                         });
 	}
 	
 	@Override
-	public BlockMatrix add(Tensor other)
+	public IsoBlockMatrix add(final Tensor other)
 	{
 		if (PerformanceArguments.getInstance().executeChecks)
 			if (!getShape().equals(other.getShape()))
 				throw new IllegalArgumentException("Incompatible sizes");
-		BlockMatrix ret = new BlockMatrix(this);
+		final IsoBlockMatrix ret = new IsoBlockMatrix(this);
 		for (int i = 0; i < ret.getRows(); i++)
 			for (int j = 0; j < ret.getCols(); j++)
 				ret.add(other.at(i, j), i, j);
@@ -129,13 +128,13 @@ public class BlockMatrix implements MutableMatrix
 	}
 	
 	@Override
-	public BlockMatrix sub(Tensor other)
+	public IsoBlockMatrix sub(final Tensor other)
 	{
 		
 		if (PerformanceArguments.getInstance().executeChecks)
 			if (getShape() != other.getShape())
 				throw new IllegalArgumentException("Incompatible sizes");
-		BlockMatrix ret = new BlockMatrix(this);
+		final IsoBlockMatrix ret = new IsoBlockMatrix(this);
 		for (int i = 0; i < ret.getRows(); i++)
 			for (int j = 0; j < ret.getCols(); j++)
 				ret.add(-other.at(i, j), i, j);
@@ -143,9 +142,9 @@ public class BlockMatrix implements MutableMatrix
 	}
 	
 	@Override
-	public BlockMatrix mul(double scalar)
+	public IsoBlockMatrix mul(final double scalar)
 	{
-		BlockMatrix ret = new BlockMatrix(getBlockSizeX(), getBlockSizeY(), getBlockNX(), getBlockNY());
+		final IsoBlockMatrix ret = new IsoBlockMatrix(getBlockSizeX(), getBlockSizeY(), getBlockNX(), getBlockNY());
 		for (int i = 0; i < ret.getRows(); i++)
 			for (int j = 0; j < ret.getCols(); j++)
 				ret.set(scalar * at(i, j), i, j);
@@ -153,17 +152,17 @@ public class BlockMatrix implements MutableMatrix
 	}
 	
 	@Override
-	public List<Vector> unfoldDimension(int dimension)
+	public List<Vector> unfoldDimension(final int dimension)
 	{
 		if (PerformanceArguments.getInstance().executeChecks)
 			if (dimension > 1)
 				throw new IllegalArgumentException("Matrix is two dimensional");
-		List<Vector> ret = new ArrayList<>();
+		final List<Vector> ret = new ArrayList<>();
 		if (dimension == 0)
 		{
 			for (int i = 0; i < getRows(); i++)
 			{
-				DenseVector d = new DenseVector(getCols());
+				final DenseVector d = new DenseVector(getCols());
 				for (int j = 0; j < getCols(); j++)
 					d.add(at(i, j), j);
 				ret.add(d);
@@ -172,7 +171,7 @@ public class BlockMatrix implements MutableMatrix
 		{
 			for (int i = 0; i < getCols(); i++)
 			{
-				DenseVector d = new DenseVector(getCols());
+				final DenseVector d = new DenseVector(getCols());
 				for (int j = 0; j < getCols(); j++)
 					d.add(at(j, i), j);
 				ret.add(d);
@@ -205,11 +204,10 @@ public class BlockMatrix implements MutableMatrix
 		return (long) getBlockSizeX() * getBlockSizeY() * getBlockNX() * getBlockNY();
 	}
 	
-	
 	@Override
 	public Matrix transpose()
 	{
-		BlockMatrix ret = new BlockMatrix(getBlockSizeX(), getBlockSizeY(), getBlockNX(), getBlockNY());
+		final IsoBlockMatrix ret = new IsoBlockMatrix(getBlockSizeX(), getBlockSizeY(), getBlockNX(), getBlockNY());
 		for (int i = 0; i < ret.getRows(); i++)
 			for (int j = 0; j < ret.getCols(); j++)
 				ret.set(at(j, i), i, j);
@@ -217,12 +215,12 @@ public class BlockMatrix implements MutableMatrix
 	}
 	
 	@Override
-	public Vector mvMul(Vector vector)
+	public Vector mvMul(final Vector vector)
 	{
 		if (PerformanceArguments.getInstance().executeChecks)
 			if (getShape().get(1) != vector.getShape().get(0))
 				throw new IllegalArgumentException("Incompatible sizes");
-		DenseVector ret = new DenseVector(getShape().get(0));
+		final DenseVector ret = new DenseVector(getShape().get(0));
 		for (int i = 0; i < getRows(); i++)
 			for (int k = 0; k < getCols(); k++)
 				ret.add(at(i, k) * vector.at(k), i);
@@ -230,11 +228,11 @@ public class BlockMatrix implements MutableMatrix
 	}
 	
 	@Override
-	public Vector tvMul(Vector vector)
+	public Vector tvMul(final Vector vector)
 	{
 		if (PerformanceArguments.getInstance().executeChecks) if (getShape().get(0) != vector.getShape().get(0))
 			throw new IllegalArgumentException("Incompatible sizes");
-		DenseVector ret = new DenseVector(getShape().get(1));
+		final DenseVector ret = new DenseVector(getShape().get(1));
 		for (int i = 0; i < getCols(); i++)
 			for (int k = 0; k < getRows(); k++)
 				ret.add(at(k, i) * vector.at(k), i);
@@ -242,12 +240,12 @@ public class BlockMatrix implements MutableMatrix
 	}
 	
 	@Override
-	public Matrix mmMul(Matrix matrix)
+	public Matrix mmMul(final Matrix matrix)
 	{
 		if (PerformanceArguments.getInstance().executeChecks)
 			if (getShape().get(1) != matrix.getShape().get(0))
 				throw new IllegalArgumentException("Incompatible sizes");
-		BlockMatrix ret = new BlockMatrix(getBlockSizeX(), getBlockSizeY(), getBlockNX(), getBlockNY());
+		final IsoBlockMatrix ret = new IsoBlockMatrix(getBlockSizeX(), getBlockSizeY(), getBlockNX(), getBlockNY());
 		for (int i = 0; i < getRows(); i++)
 			for (int j = 0; j < matrix.getCols(); j++)
 				for (int k = 0; k < getCols(); k++)
@@ -256,13 +254,13 @@ public class BlockMatrix implements MutableMatrix
 	}
 	
 	@Override
-	public void deleteRow(int row)
+	public void deleteRow(final int row)
 	{
 		throw new UnsupportedOperationException("not implemented yet");
 	}
 	
 	@Override
-	public void deleteColumn(int column)
+	public void deleteColumn(final int column)
 	{
 		throw new UnsupportedOperationException("not implemented yet");
 	}

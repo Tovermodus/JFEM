@@ -17,6 +17,21 @@ public class SparseMatrix implements MutableMatrix, DirectlySolvable, Decomposab
 	volatile int[] sparseYs;
 	volatile int sparseEntries;
 	
+	@Override
+	public SparseMatrix slice(final IntCoordinates start, final IntCoordinates end)
+	{
+		final SparseMatrix ret = new SparseMatrix(end.get(0) - start.get(0), end.get(1) - start.get(1));
+		for (int i = 0; i < sparseEntries; i++)
+		{
+			if (!(sparseXs[i] >= end.get(1)
+				      || sparseXs[i] < start.get(1)
+				      || sparseYs[i] >= end.get(0)
+				      || sparseYs[i] < start.get(0)))
+				ret.add(sparseValues[i], sparseYs[i] - start.get(0), sparseXs[i] - start.get(1));
+		}
+		return ret;
+	}
+	
 	public SparseMatrix(final int rows, final int cols)
 	{
 		this.rows = rows;
@@ -136,17 +151,17 @@ public class SparseMatrix implements MutableMatrix, DirectlySolvable, Decomposab
 	}
 	
 	@Override
-	public void addColumn(Vector vector, int column, int start)
+	public void addColumn(final Vector vector, final int column, final int start)
 	{
 		
 		if (PerformanceArguments.getInstance().executeChecks)
 		{
-			if (start+vector.getLength() > getRows())
+			if (start + vector.getLength() > getRows())
 				throw new IllegalArgumentException("small Vector too large for position");
 		}
-		for(int i = 0; i < vector.getLength(); i++)
+		for (int i = 0; i < vector.getLength(); i++)
 		{
-			if(vector.at(i) != 0)
+			if (vector.at(i) != 0)
 				add(vector.at(i), i + start, column);
 		}
 	}

@@ -46,7 +46,7 @@ class GMRES
 			final DenseVector newHValues =
 				DenseVector.vectorFromValues(
 					v.stream().mapToDouble(vec -> vec.inner(q)).toArray());
-			h.addSmallMatrixAt(newHValues.asMatrix(), 0, j);
+			h.addSmallMatrixInPlaceAt(newHValues.asMatrix(), 0, j);
 			final Vector newHV =
 				(IntStream.range(0, j + 1))
 					.mapToObj(i -> v.get(i).mul(newHValues.at(i)))
@@ -119,7 +119,7 @@ class GMRES
 		final MutableVector gamma = new linalg.DenseVector(n + 1);
 		final Vector r = preconditioner.mvMul(b.sub(A.mvMul(x)));
 		final SparseMatrix h = new SparseMatrix(n + 1, n + 1);
-		if (r.euclidianNorm() <= tol)
+		if (b.sub(A.mvMul(x)).euclidianNorm() <= tol)
 			return x;
 		gamma.set(r.euclidianNorm(), 0);
 		v.add(r.mul(1. / gamma.at(0)));

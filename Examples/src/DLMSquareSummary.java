@@ -26,7 +26,12 @@ public class DLMSquareSummary
 	int nLagrangian;
 	int nTransfer;
 	int eulerianPointsPerDimension = 30;
+	int nEulerCells = 6;
+	int nLagrangianCells = 5;
 	List<CoordinateVector> eulerianPoints;
+	private final int lagrangeDegree = 1;
+	private final int eulerDegree = 1;
+	private final String elastMethod = TPVectorCellIntegral.SYM_GRAD;
 	
 	public DLMSquareSummary()
 	{
@@ -35,11 +40,11 @@ public class DLMSquareSummary
 //		builder.executeChecks = false;
 //		builder.build();
 		rhoF = 1;
-		rhoS = 10;
+		rhoS = 2;
 		nu = 1;
 		kappa = 100.000000;
 		dt = 0.05;
-		timeSteps = 15;
+		timeSteps = 20;
 		initializeEulerian();
 		initializeLagrangian();
 		
@@ -290,10 +295,10 @@ public class DLMSquareSummary
 	{
 		final CoordinateVector startCoordinates = CoordinateVector.fromValues(0, 0);
 		final CoordinateVector endCoordinates = CoordinateVector.fromValues(1, 1);
-		final IntCoordinates cellCounts = new IntCoordinates(4, 4);
+		final IntCoordinates cellCounts = new IntCoordinates(nEulerCells, nEulerCells);
 		eulerian = new TaylorHoodSpace(startCoordinates, endCoordinates, cellCounts);
 		eulerian.assembleCells();
-		eulerian.assembleFunctions(1);
+		eulerian.assembleFunctions(eulerDegree);
 		nEulerian = eulerian.getShapeFunctions().size();
 		eulerianPoints = eulerian.generatePlotPoints(eulerianPointsPerDimension);
 	}
@@ -304,9 +309,9 @@ public class DLMSquareSummary
 		final double radius = 0.2;
 		lagrangian = new ContinuousTPFEVectorSpace(center.sub(CoordinateVector.fromValues(0.2, 0.2)),
 		                                           center.add(CoordinateVector.fromValues(0.2, 0.2)),
-		                                           new IntCoordinates(3, 3));
+		                                           new IntCoordinates(nLagrangianCells, nLagrangianCells));
 		lagrangian.assembleCells();
-		lagrangian.assembleFunctions(1);
+		lagrangian.assembleFunctions(lagrangeDegree);
 		nLagrangian = lagrangian.getShapeFunctions().size();
 		nTransfer = nLagrangian;
 	}
@@ -386,7 +391,7 @@ public class DLMSquareSummary
 			                           TPVectorCellIntegral.VALUE_VALUE);
 		final TPVectorCellIntegral<ContinuousTPVectorFunction> elast =
 			new TPVectorCellIntegral<>(ScalarFunction.constantFunction(kappa),
-			                           TPVectorCellIntegral.GRAD_GRAD);
+			                           elastMethod);
 		final SparseMatrix As = new SparseMatrix(nLagrangian, nLagrangian);
 		lagrangian.writeCellIntegralsToMatrix(List.of(mass, elast), As);
 		lagrangianBetaMass = new SparseMatrix(nLagrangian, nLagrangian);
@@ -410,7 +415,13 @@ public class DLMSquareSummary
 			final DenseVector column = new DenseVector(nTransfer);
 			if (sf.hasVelocityFunction())
 			{
-				lagrangian.writeCellIntegralsToRhs(List.of(transferEulerian), column);
+				lagrangian.writeCellIntegralsToRhs(List.of(transferEulerian), column, (K, lambd) ->
+					sf
+						.getVelocityShapeFunction()
+						.getNodeFunctionalPoint()
+						.sub(K.center())
+						.euclidianNorm() < 1. / nEulerCells + 1. / nLagrangianCells
+				);
 				Cf.addColumn(column.mul(1), sfEntry.getKey());
 			}
 		}
