@@ -389,7 +389,7 @@ public class SparseMatrix
 	public DenseVector tvMul(final Vector vector)
 	{
 		if (PerformanceArguments.getInstance().executeChecks)
-			if (getCols() != (vector.getLength()))
+			if (getRows() != (vector.getLength()))
 				throw new IllegalArgumentException("Incompatible sizes");
 		final DenseVector ret = new DenseVector(getCols());
 		for (int i = 0; i < sparseEntries; i++)

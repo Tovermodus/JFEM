@@ -8,6 +8,7 @@ import io.vavr.Tuple2;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
@@ -196,6 +197,9 @@ public class BlockSparseMatrix
 	@Override
 	public Vector mvMul(final Vector vector)
 	{
+		if (PerformanceArguments.getInstance().executeChecks)
+			if (getCols() != (vector.getLength()))
+				throw new IllegalArgumentException("Incompatible sizes");
 		final Map<Integer, Vector> subVectors =
 			IntStream.range(0, blockStarts.length)
 			         .parallel()
@@ -203,25 +207,27 @@ public class BlockSparseMatrix
 			                                                    vector.slice(blockStarts[i], blockEnds[i])))
 			         .collect(new MapCollector<>());
 		final DenseVector ret = new DenseVector(vector.getLength());
-		final Map<Integer, DenseVector> multipliedSubVectors =
-			blocks
-				.entrySet()
-				.stream()
-				.parallel()
-				.map(e -> new Tuple2<>(e.getKey()
-				                        .get(0), e.getValue()
-				                                  .mvMul(subVectors.get(
-					                                  e.getKey()
-					                                   .get(1)))))
-				.collect(new MapCollector<>());
-		multipliedSubVectors.forEach((key, value) -> ret.addSmallVectorAt(value, key));
+		final Map<Integer, List<DenseVector>> multipliedSubVectors =
+			blocks.entrySet()
+			      .stream()
+			      .parallel()
+			      .map(e -> new Tuple2<>(e.getKey()
+			                              .get(0), e.getValue()
+			                                        .mvMul(subVectors.get(
+				                                        e.getKey()
+				                                         .get(1)))))
+			      .collect(Collectors.groupingBy(Tuple2::_1, Collectors.mapping(Tuple2::_2,
+			                                                                    Collectors.toList())));
+		multipliedSubVectors.forEach((pos, list) -> list.forEach(vec -> ret.addSmallVectorAt(vec, pos)));
 		return ret;
 	}
 	
 	@Override
 	public Vector tvMul(final Vector vector)
 	{
-		
+		if (PerformanceArguments.getInstance().executeChecks)
+			if (getCols() != (vector.getLength()))
+				throw new IllegalArgumentException("Incompatible sizes");
 		final Map<Integer, Vector> subVectors =
 			IntStream.range(0, blockStarts.length)
 			         .parallel()
@@ -229,18 +235,18 @@ public class BlockSparseMatrix
 			                                                    vector.slice(blockStarts[i], blockEnds[i])))
 			         .collect(new MapCollector<>());
 		final DenseVector ret = new DenseVector(vector.getLength());
-		final Map<Integer, DenseVector> multipliedSubVectors =
-			blocks
-				.entrySet()
-				.stream()
-				.parallel()
-				.map(e -> new Tuple2<>(e.getKey()
-				                        .get(1), e.getValue()
-				                                  .tvMul(subVectors.get(
-					                                  e.getKey()
-					                                   .get(0)))))
-				.collect(new MapCollector<>());
-		multipliedSubVectors.forEach((key, value) -> ret.addSmallVectorAt(value, key));
+		final Map<Integer, List<DenseVector>> multipliedSubVectors =
+			blocks.entrySet()
+			      .stream()
+			      .parallel()
+			      .map(e -> new Tuple2<>(e.getKey()
+			                              .get(1), e.getValue()
+			                                        .tvMul(subVectors.get(
+				                                        e.getKey()
+				                                         .get(0)))))
+			      .collect(Collectors.groupingBy(Tuple2::_1, Collectors.mapping(Tuple2::_2,
+			                                                                    Collectors.toList())));
+		multipliedSubVectors.forEach((pos, list) -> list.forEach(vec -> ret.addSmallVectorAt(vec, pos)));
 		return ret;
 	}
 	

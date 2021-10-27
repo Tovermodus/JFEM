@@ -328,11 +328,69 @@ public class BlockSparseMatrixTest
 	@Test
 	public void testMvMul()
 	{
+		final DenseVector small = new DenseVector(6);
+		final DenseVector medium = new DenseVector(100);
+		final DenseVector large = new DenseVector(1000);
+		for (int i = 0; i < 1000; i++)
+		{
+			if (i < 6)
+				small.add(i, i);
+			if (i < 100)
+				medium.add(Math.random(), i);
+			large.add(Math.random(), i);
+		}
+		assertEquals(createSmallMatrix().mvMul(small),
+		             createSmallMatrix().toSparse()
+		                                .mvMul(small));
+		assertEquals(createMediumMatrix().mvMul(medium),
+		             createMediumMatrix().toSparse()
+		                                 .mvMul(medium));
+		assertEquals(createLargeMatrix().mvMul(large),
+		             createLargeMatrix().toSparse()
+		                                .mvMul(large));
+		assertEquals(createSmallMatrix2().mvMul(small),
+		             createSmallMatrix2().toSparse()
+		                                 .mvMul(small));
+		assertEquals(createMediumMatrix2().mvMul(medium),
+		             createMediumMatrix2().toSparse()
+		                                  .mvMul(medium));
+		assertEquals(createLargeMatrix2().mvMul(large),
+		             createLargeMatrix2().toSparse()
+		                                 .mvMul(large));
 	}
 	
 	@Test
 	public void testTvMul()
 	{
+		final DenseVector small = new DenseVector(6);
+		final DenseVector medium = new DenseVector(100);
+		final DenseVector large = new DenseVector(1000);
+		for (int i = 0; i < 1000; i++)
+		{
+			if (i < 6)
+				small.add(i, i);
+			if (i < 100)
+				medium.add(Math.random(), i);
+			large.add(Math.random(), i);
+		}
+		assertEquals(createSmallMatrix().tvMul(small),
+		             createSmallMatrix().toSparse()
+		                                .tvMul(small));
+		assertEquals(createMediumMatrix().tvMul(medium),
+		             createMediumMatrix().toSparse()
+		                                 .tvMul(medium));
+		assertEquals(createLargeMatrix().tvMul(large),
+		             createLargeMatrix().toSparse()
+		                                .tvMul(large));
+		assertEquals(createSmallMatrix2().tvMul(small),
+		             createSmallMatrix2().toSparse()
+		                                 .tvMul(small));
+		assertEquals(createMediumMatrix2().tvMul(medium),
+		             createMediumMatrix2().toSparse()
+		                                  .tvMul(medium));
+		assertEquals(createLargeMatrix2().tvMul(large),
+		             createLargeMatrix2().toSparse()
+		                                 .tvMul(large));
 	}
 	
 	@Test
