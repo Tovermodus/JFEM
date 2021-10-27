@@ -1,8 +1,12 @@
 package linalg;
 
+import basic.PerformanceArguments;
+
+import java.util.ArrayList;
 import java.util.List;
 
-public class Rank1Matrix implements Matrix
+public class Rank1Matrix
+	implements Matrix
 {
 	public final MutableVector hor;
 	public final MutableVector ver;
@@ -40,7 +44,26 @@ public class Rank1Matrix implements Matrix
 	@Override
 	public List<Vector> unfoldDimension(final int dimension)
 	{
-		return List.of(ver, hor);
+		if (PerformanceArguments.getInstance().executeChecks)
+			if (dimension > 1) throw new IllegalArgumentException("Matrix is two dimensional");
+		final List<Vector> ret = new ArrayList<>();
+		if (dimension == 0)
+		{
+			for (int i = 0; i < getRows(); i++)
+			{
+				
+				ret.add(hor.mul(ver.at(i)));
+			}
+		}
+		if (dimension == 1)
+		{
+			for (int i = 0; i < getCols(); i++)
+			{
+				
+				ret.add(ver.mul(hor.at(i)));
+			}
+		}
+		return ret;
 	}
 	
 	@Override
@@ -48,7 +71,18 @@ public class Rank1Matrix implements Matrix
 	{
 		return hor.getLength() * ver.getLength();
 	}
-
+	
+	public DenseMatrix toDense()
+	{
+		return new DenseMatrix(this);
+	}
+	
+	@Override
+	public boolean equals(final Object obj)
+	{
+		if (!(obj instanceof Matrix)) return false;
+		return almostEqual((Tensor) obj);
+	}
 //	@Override
 //	public double frobeniusInner(final Matrix other)
 //	{

@@ -60,7 +60,7 @@ public class BlockSparseMatrixTest
 			for (int i = 0; i < s.getRows(); i++)
 				for (int j = 0; j < s.getCols(); j++)
 					if (generator.nextDouble() < 0.05)
-						s.add(generator.nextDouble(), i, j);
+						s.add(generator.nextDouble() - 0.7, i, j);
 		}
 		return new BlockSparseMatrix(blocks);
 	}

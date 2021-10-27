@@ -1,121 +1,73 @@
 package linalg;
 
+import org.junit.Test;
+
+import java.util.Random;
+
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
+
 public class Rank1MatrixTest
 {
-	/*private static Rank1Matrix createSmallMatrix()
+	private static Rank1Matrix createSmallMatrix()
 	{
-		final Map<IntCoordinates, SparseMatrix> blocks = new HashMap<>();
-		blocks.put(new IntCoordinates(0, 0), new SparseMatrix(4, 4));
-		blocks.put(new IntCoordinates(4, 0), new SparseMatrix(2, 4));
-		blocks.put(new IntCoordinates(4, 4), new SparseMatrix(2, 2));
-		for (int i = 0; i < 16; i++)
-			blocks.get(new IntCoordinates(0, 0))
-			      .add(i, i / 4, i % 4);
-		blocks.get(new IntCoordinates(4, 4))
-		      .add(2, 0, 0);
-		blocks.get(new IntCoordinates(4, 4))
-		      .add(2, 1, 1);
-		blocks.get(new IntCoordinates(4, 0))
-		      .add(3, 0, 0);
-		blocks.get(new IntCoordinates(4, 0))
-		      .add(3, 1, 1);
-		blocks.get(new IntCoordinates(4, 0))
-		      .add(3, 0, 2);
-		blocks.get(new IntCoordinates(4, 0))
-		      .add(3, 1, 3);
-		return new BlockSparseMatrix(blocks);
+		return new Rank1Matrix(DenseVector.vectorFromValues(1, 2, 4), DenseVector.vectorFromValues(3, 5, 7));
 	}
 	
 	private static Rank1Matrix createMediumMatrix()
 	{
-		final Map<IntCoordinates, SparseMatrix> blocks = new HashMap<>();
-		blocks.put(new IntCoordinates(0, 0), new SparseMatrix(100, 100));
-		final BlockSparseMatrix m = new BlockSparseMatrix(blocks);
-		for (int i = 0; i < 100 * 100; i++)
-			blocks.get(new IntCoordinates(0, 0))
-			      .add(2.3 * i, i / 100, i % 100);
-		return m;
+		final DenseVector d1 = new DenseVector(100);
+		final DenseVector d2 = new DenseVector(100);
+		for (int i = 0; i < 100; i++)
+		{
+			d1.set(i, i);
+			d2.set(i % 17 * 0.29, i);
+		}
+		return new Rank1Matrix(d1, d2);
 	}
 	
 	private static Rank1Matrix createLargeMatrix()
 	{
-		
-		final Map<IntCoordinates, SparseMatrix> blocks = new HashMap<>();
-		blocks.put(new IntCoordinates(0, 0), new SparseMatrix(500, 500));
-		blocks.put(new IntCoordinates(500, 500), new SparseMatrix(500, 500));
-		blocks.put(new IntCoordinates(0, 500), new SparseMatrix(500, 500));
-		blocks.put(new IntCoordinates(500, 0), new SparseMatrix(500, 500));
 		final Random generator = new Random(31415);
-		for (final SparseMatrix s : blocks.values())
+		final DenseVector d1 = new DenseVector(400);
+		final DenseVector d2 = new DenseVector(400);
+		for (int i = 0; i < 400; i++)
 		{
-			for (int i = 0; i < s.getRows(); i++)
-				for (int j = 0; j < s.getCols(); j++)
-					if (generator.nextDouble() < 0.05)
-						s.add(generator.nextDouble(), i, j);
+			d1.set(i, i);
+			d2.set(generator.nextDouble(), i);
 		}
-		return new BlockSparseMatrix(blocks);
+		return new Rank1Matrix(d1, d2);
 	}
 	
 	private static Rank1Matrix createSmallMatrix2()
 	{
-		final Map<IntCoordinates, SparseMatrix> blocks = new HashMap<>();
-		blocks.put(new IntCoordinates(0, 0), new SparseMatrix(2, 2));
-		blocks.put(new IntCoordinates(2, 0), new SparseMatrix(4, 2));
-		blocks.put(new IntCoordinates(2, 2), new SparseMatrix(4, 4));
-		for (int i = 0; i < 16; i++)
-			blocks.get(new IntCoordinates(2, 2))
-			      .add(0.01 * i, i / 4, i % 4);
-		blocks.get(new IntCoordinates(2, 2))
-		      .add(7, 0, 0);
-		blocks.get(new IntCoordinates(2, 2))
-		      .add(7, 1, 1);
-		blocks.get(new IntCoordinates(2, 0))
-		      .add(8, 0, 0);
-		blocks.get(new IntCoordinates(2, 0))
-		      .add(8, 1, 1);
-		blocks.get(new IntCoordinates(2, 0))
-		      .add(8, 2, 0);
-		blocks.get(new IntCoordinates(2, 0))
-		      .add(8, 1, 1);
-		return new BlockSparseMatrix(blocks);
+		return new Rank1Matrix(DenseVector.vectorFromValues(2, 8, 4), DenseVector.vectorFromValues(-3, 6, 19));
 	}
 	
 	private static Rank1Matrix createMediumMatrix2()
 	{
-		
-		final Map<IntCoordinates, SparseMatrix> blocks = new HashMap<>();
-		blocks.put(new IntCoordinates(0, 0), new SparseMatrix(50, 50));
-		blocks.put(new IntCoordinates(50, 50), new SparseMatrix(25, 25));
-		blocks.put(new IntCoordinates(75, 75), new SparseMatrix(25, 25));
-		blocks.put(new IntCoordinates(0, 50), new SparseMatrix(50, 25));
-		blocks.put(new IntCoordinates(75, 50), new SparseMatrix(25, 25));
-		final Random generator = new Random(3141);
-		for (final SparseMatrix s : blocks.values())
+		final Random generator = new Random(3145);
+		final DenseVector d1 = new DenseVector(100);
+		final DenseVector d2 = new DenseVector(100);
+		for (int i = 0; i < 100; i++)
 		{
-			for (int i = 0; i < s.getRows(); i++)
-				for (int j = 0; j < s.getCols(); j++)
-					s.add(generator.nextDouble(), i, j);
+			d1.set(i, i);
+			d2.set(generator.nextDouble(), i);
 		}
-		return new BlockSparseMatrix(blocks);
+		return new Rank1Matrix(d1, d2);
 	}
 	
 	private static Rank1Matrix createLargeMatrix2()
 	{
-		final Map<IntCoordinates, SparseMatrix> blocks = new HashMap<>();
-		blocks.put(new IntCoordinates(0, 0), new SparseMatrix(500, 500));
-		blocks.put(new IntCoordinates(500, 500), new SparseMatrix(250, 250));
-		blocks.put(new IntCoordinates(750, 750), new SparseMatrix(250, 250));
-		blocks.put(new IntCoordinates(0, 500), new SparseMatrix(500, 250));
-		blocks.put(new IntCoordinates(750, 500), new SparseMatrix(250, 250));
-		final Random generator = new Random(314);
-		for (final SparseMatrix s : blocks.values())
+		final Random generator = new Random(3115);
+		final DenseVector d1 = new DenseVector(400);
+		final DenseVector d2 = new DenseVector(400);
+		for (int i = 0; i < 400; i++)
 		{
-			for (int i = 0; i < s.getRows(); i++)
-				for (int j = 0; j < s.getCols(); j++)
-					if (generator.nextDouble() < 0.05)
-						s.add(generator.nextDouble() * 1e7, i, j);
+			d1.set(i, i);
+			d2.set(generator.nextDouble(), i);
 		}
-		return new BlockSparseMatrix(blocks);
+		return new Rank1Matrix(d1, d2);
 	}
 	
 	@Test
@@ -135,63 +87,63 @@ public class Rank1MatrixTest
 	{
 		final Rank1Matrix large = createLargeMatrix();
 		assertEquals(createSmallMatrix().add(createSmallMatrix()),
-		             createSmallMatrix().toSparse()
-		                                .add(createSmallMatrix().toSparse()));
-		assertEquals(createSmallMatrix().add(createSmallMatrix().toSparse()),
-		             createSmallMatrix().toSparse()
-		                                .add(createSmallMatrix().toSparse()));
+		             createSmallMatrix().toDense()
+		                                .add(createSmallMatrix().toDense()));
+		assertEquals(createSmallMatrix().add(createSmallMatrix().toDense()),
+		             createSmallMatrix().toDense()
+		                                .add(createSmallMatrix().toDense()));
 		assertEquals(createSmallMatrix().add(createSmallMatrix()),
-		             createSmallMatrix().toSparse()
+		             createSmallMatrix().toDense()
 		                                .add(createSmallMatrix()));
 		
 		assertEquals(createMediumMatrix().add(createMediumMatrix()),
-		             createMediumMatrix().toSparse()
-		                                 .add(createMediumMatrix().toSparse()));
-		assertEquals(createMediumMatrix().add(createMediumMatrix().toSparse()),
-		             createMediumMatrix().toSparse()
-		                                 .add(createMediumMatrix().toSparse()));
+		             createMediumMatrix().toDense()
+		                                 .add(createMediumMatrix().toDense()));
+		assertEquals(createMediumMatrix().add(createMediumMatrix().toDense()),
+		             createMediumMatrix().toDense()
+		                                 .add(createMediumMatrix().toDense()));
 		assertEquals(createMediumMatrix().add(createMediumMatrix()),
-		             createMediumMatrix().toSparse()
+		             createMediumMatrix().toDense()
 		                                 .add(createMediumMatrix()));
 		
 		assertEquals(large.add(large),
-		             large.toSparse()
-		                  .add(large.toSparse()));
-		assertEquals(large.add(large.toSparse()),
-		             large.toSparse()
-		                  .add(large.toSparse()));
+		             large.toDense()
+		                  .add(large.toDense()));
+		assertEquals(large.add(large.toDense()),
+		             large.toDense()
+		                  .add(large.toDense()));
 		assertEquals(large.add(large),
-		             large.toSparse()
+		             large.toDense()
 		                  .add(large));
 		
 		assertEquals(createSmallMatrix2().add(createSmallMatrix()),
-		             createSmallMatrix2().toSparse()
-		                                 .add(createSmallMatrix().toSparse()));
-		assertEquals(createSmallMatrix2().add(createSmallMatrix().toSparse()),
-		             createSmallMatrix2().toSparse()
-		                                 .add(createSmallMatrix().toSparse()));
+		             createSmallMatrix2().toDense()
+		                                 .add(createSmallMatrix().toDense()));
+		assertEquals(createSmallMatrix2().add(createSmallMatrix().toDense()),
+		             createSmallMatrix2().toDense()
+		                                 .add(createSmallMatrix().toDense()));
 		assertEquals(createSmallMatrix2().add(createSmallMatrix()),
-		             createSmallMatrix2().toSparse()
+		             createSmallMatrix2().toDense()
 		                                 .add(createSmallMatrix()));
 		
 		assertEquals(createMediumMatrix2().add(createMediumMatrix()),
-		             createMediumMatrix2().toSparse()
-		                                  .add(createMediumMatrix().toSparse()));
-		assertEquals(createMediumMatrix2().add(createMediumMatrix().toSparse()),
-		             createMediumMatrix2().toSparse()
-		                                  .add(createMediumMatrix().toSparse()));
+		             createMediumMatrix2().toDense()
+		                                  .add(createMediumMatrix().toDense()));
+		assertEquals(createMediumMatrix2().add(createMediumMatrix().toDense()),
+		             createMediumMatrix2().toDense()
+		                                  .add(createMediumMatrix().toDense()));
 		assertEquals(createMediumMatrix2().add(createMediumMatrix()),
-		             createMediumMatrix2().toSparse()
+		             createMediumMatrix2().toDense()
 		                                  .add(createMediumMatrix()));
 		
 		assertEquals(createLargeMatrix2().add(large),
-		             createLargeMatrix2().toSparse()
-		                                 .add(large.toSparse()));
-		assertEquals(createLargeMatrix2().add(large.toSparse()),
-		             createLargeMatrix2().toSparse()
-		                                 .add(large.toSparse()));
+		             createLargeMatrix2().toDense()
+		                                 .add(large.toDense()));
+		assertEquals(createLargeMatrix2().add(large.toDense()),
+		             createLargeMatrix2().toDense()
+		                                 .add(large.toDense()));
 		assertEquals(createLargeMatrix2().add(large),
-		             createLargeMatrix2().toSparse()
+		             createLargeMatrix2().toDense()
 		                                 .add(large));
 	}
 	
@@ -199,23 +151,23 @@ public class Rank1MatrixTest
 	public void testMul()
 	{
 		assertEquals(createSmallMatrix().mul(3)
-		                                .toSparse(),
-		             createSmallMatrix().toSparse()
+		                                .toDense(),
+		             createSmallMatrix().toDense()
 		                                .mul(3));
 		assertEquals(createSmallMatrix().mul(1), createSmallMatrix());
 		assertEquals(createSmallMatrix().add(createSmallMatrix()), createSmallMatrix().mul(2));
 		
 		assertEquals(createMediumMatrix().mul(3.99999)
-		                                 .toSparse(),
-		             createMediumMatrix().toSparse()
+		                                 .toDense(),
+		             createMediumMatrix().toDense()
 		                                 .mul(3.99999));
 		assertEquals(createMediumMatrix().mul(1), createMediumMatrix());
 		assertEquals(createMediumMatrix().add(createMediumMatrix()), createMediumMatrix().mul(2));
 		
 		assertEquals(createLargeMatrix().mul(1), createLargeMatrix());
 		assertEquals(createLargeMatrix().mul(3)
-		                                .toSparse(),
-		             createLargeMatrix().toSparse()
+		                                .toDense(),
+		             createLargeMatrix().toDense()
 		                                .mul(3));
 		assertEquals(createLargeMatrix().add(createLargeMatrix()), createLargeMatrix().mul(2));
 	}
@@ -224,24 +176,24 @@ public class Rank1MatrixTest
 	public void testUnfoldDimension()
 	{
 		assertEquals(createSmallMatrix().unfoldDimension(0),
-		             createSmallMatrix().toSparse()
+		             createSmallMatrix().toDense()
 		                                .unfoldDimension(0));
 		assertEquals(createSmallMatrix().unfoldDimension(1),
-		             createSmallMatrix().toSparse()
+		             createSmallMatrix().toDense()
 		                                .unfoldDimension(1));
 		
 		assertEquals(createMediumMatrix().unfoldDimension(0),
-		             createMediumMatrix().toSparse()
+		             createMediumMatrix().toDense()
 		                                 .unfoldDimension(0));
 		assertEquals(createMediumMatrix().unfoldDimension(1),
-		             createMediumMatrix().toSparse()
+		             createMediumMatrix().toDense()
 		                                 .unfoldDimension(1));
 		
 		assertEquals(createLargeMatrix().unfoldDimension(0),
-		             createLargeMatrix().toSparse()
+		             createLargeMatrix().toDense()
 		                                .unfoldDimension(0));
 		assertEquals(createLargeMatrix().unfoldDimension(1),
-		             createLargeMatrix().toSparse()
+		             createLargeMatrix().toDense()
 		                                .unfoldDimension(1));
 	}
 	
@@ -249,22 +201,22 @@ public class Rank1MatrixTest
 	public void testTranspose()
 	{
 		assertEquals(createSmallMatrix().transpose()
-		                                .toSparse(),
-		             createSmallMatrix().toSparse()
+		                                .toDense(),
+		             createSmallMatrix().toDense()
 		                                .transpose());
 		assertEquals(createSmallMatrix().transpose()
 		                                .transpose(), createSmallMatrix());
 		
 		assertEquals(createMediumMatrix().transpose()
-		                                 .toSparse(),
-		             createMediumMatrix().toSparse()
+		                                 .toDense(),
+		             createMediumMatrix().toDense()
 		                                 .transpose());
 		assertEquals(createMediumMatrix().transpose()
 		                                 .transpose(), createMediumMatrix());
 		
 		assertEquals(createLargeMatrix().transpose()
-		                                .toSparse(),
-		             createLargeMatrix().toSparse()
+		                                .toDense(),
+		             createLargeMatrix().toDense()
 		                                .transpose());
 		assertEquals(createLargeMatrix().transpose()
 		                                .transpose(), createLargeMatrix());
@@ -284,27 +236,27 @@ public class Rank1MatrixTest
 	public void testMmMul()
 	{
 		assertEquals(createSmallMatrix().mmMul(createSmallMatrix()),
-		             createSmallMatrix().toSparse()
-		                                .mmMul(createSmallMatrix().toSparse()));
-		assertEquals(createSmallMatrix().mmMul(createSmallMatrix().toSparse()),
-		             createSmallMatrix().toSparse()
-		                                .mmMul(createSmallMatrix().toSparse()));
+		             createSmallMatrix().toDense()
+		                                .mmMul(createSmallMatrix().toDense()));
+		assertEquals(createSmallMatrix().mmMul(createSmallMatrix().toDense()),
+		             createSmallMatrix().toDense()
+		                                .mmMul(createSmallMatrix().toDense()));
 		assertEquals(createSmallMatrix().mmMul(createSmallMatrix()),
-		             createSmallMatrix().toSparse()
+		             createSmallMatrix().toDense()
 		                                .mmMul(createSmallMatrix()));
 		
 		assertEquals(createMediumMatrix().mmMul(createMediumMatrix()),
-		             createMediumMatrix().toSparse()
-		                                 .mmMul(createMediumMatrix().toSparse()));
-		assertEquals(createMediumMatrix().mmMul(createMediumMatrix().toSparse()),
-		             createMediumMatrix().toSparse()
-		                                 .mmMul(createMediumMatrix().toSparse()));
+		             createMediumMatrix().toDense()
+		                                 .mmMul(createMediumMatrix().toDense()));
+		assertEquals(createMediumMatrix().mmMul(createMediumMatrix().toDense()),
+		             createMediumMatrix().toDense()
+		                                 .mmMul(createMediumMatrix().toDense()));
 		assertEquals(createMediumMatrix().mmMul(createMediumMatrix()),
-		             createMediumMatrix().toSparse()
+		             createMediumMatrix().toDense()
 		                                 .mmMul(createMediumMatrix()));
-		final BlockSparseMatrix large = createLargeMatrix();
-		final SparseMatrix largeSp = large.toSparse();
-		final BlockSparseMatrix large2 = createLargeMatrix2();
+		final Rank1Matrix large = createLargeMatrix();
+		final DenseMatrix largeSp = large.toDense();
+		final Rank1Matrix large2 = createLargeMatrix2();
 		assertEquals(large.mmMul(large),
 		             largeSp
 			             .mmMul(largeSp));
@@ -316,33 +268,33 @@ public class Rank1MatrixTest
 			             .mmMul(large));
 		
 		assertEquals(createSmallMatrix2().mmMul(createSmallMatrix()),
-		             createSmallMatrix2().toSparse()
-		                                 .mmMul(createSmallMatrix().toSparse()));
-		assertEquals(createSmallMatrix2().mmMul(createSmallMatrix().toSparse()),
-		             createSmallMatrix2().toSparse()
-		                                 .mmMul(createSmallMatrix().toSparse()));
+		             createSmallMatrix2().toDense()
+		                                 .mmMul(createSmallMatrix().toDense()));
+		assertEquals(createSmallMatrix2().mmMul(createSmallMatrix().toDense()),
+		             createSmallMatrix2().toDense()
+		                                 .mmMul(createSmallMatrix().toDense()));
 		assertEquals(createSmallMatrix2().mmMul(createSmallMatrix()),
-		             createSmallMatrix2().toSparse()
+		             createSmallMatrix2().toDense()
 		                                 .mmMul(createSmallMatrix()));
 		
 		assertEquals(createMediumMatrix2().mmMul(createMediumMatrix()),
-		             createMediumMatrix2().toSparse()
-		                                  .mmMul(createMediumMatrix().toSparse()));
-		assertEquals(createMediumMatrix2().mmMul(createMediumMatrix().toSparse()),
-		             createMediumMatrix2().toSparse()
-		                                  .mmMul(createMediumMatrix().toSparse()));
+		             createMediumMatrix2().toDense()
+		                                  .mmMul(createMediumMatrix().toDense()));
+		assertEquals(createMediumMatrix2().mmMul(createMediumMatrix().toDense()),
+		             createMediumMatrix2().toDense()
+		                                  .mmMul(createMediumMatrix().toDense()));
 		assertEquals(createMediumMatrix2().mmMul(createMediumMatrix()),
-		             createMediumMatrix2().toSparse()
+		             createMediumMatrix2().toDense()
 		                                  .mmMul(createMediumMatrix()));
 		
 		assertEquals(large2.mmMul(large),
-		             large2.toSparse()
+		             large2.toDense()
 		                   .mmMul(largeSp));
 		assertEquals(large2.mmMul(largeSp),
-		             large2.toSparse()
+		             large2.toDense()
 		                   .mmMul(largeSp));
 		assertEquals(large2.mmMul(large),
-		             large2.toSparse()
+		             large2.toDense()
 		                   .mmMul(large));
-	}*/
+	}
 }
