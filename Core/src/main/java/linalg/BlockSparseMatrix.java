@@ -1,5 +1,6 @@
 package linalg;
 
+import basic.DoubleCompare;
 import basic.MapCollector;
 import basic.PerformanceArguments;
 import com.google.common.collect.ImmutableMap;
@@ -36,6 +37,40 @@ public class BlockSparseMatrix
 		                                                      .getShape())
 		                                           .get(0);
 		blocks.forEach(this::checkIfBlockFits);
+	}
+	
+	public BlockSparseMatrix(final SparseMatrix s, final int nBlocksPerDir)
+	{
+		if (PerformanceArguments.getInstance().executeChecks)
+		{
+			if (nBlocksPerDir * 10 > s.getRows())
+				throw new IllegalArgumentException("Choose less Blocks");
+			if (s.getRows() != s.getCols())
+				throw new IllegalArgumentException("Must be square");
+		}
+		blockStarts = new int[nBlocksPerDir];
+		for (int i = 0; i < nBlocksPerDir; i++)
+			blockStarts[i] = (int) (1.0 * i * s.getRows() / nBlocksPerDir);
+		blockEnds = new int[blockStarts.length];
+		if (blockEnds.length - 1 >= 0) System.arraycopy(blockStarts, 1, blockEnds, 0, blockEnds.length - 1);
+		blockEnds[blockEnds.length - 1] = s.getCols();
+		final HashMap<IntCoordinates, SparseMatrix> mutableBlocks = new HashMap<>();
+		for (final Map.Entry<IntCoordinates, Double> entry : s.getCoordinateEntryList()
+		                                                      .entrySet())
+		{
+			final IntCoordinates block = getBlock(entry.getKey()
+			                                           .asArray());
+			final IntCoordinates blockStart = block.concatenate(blockStarts);
+			if (!mutableBlocks.containsKey(blockStart))
+				mutableBlocks.put(blockStart,
+				                  new SparseMatrix(block.concatenate(blockEnds)
+				                                        .sub(blockStart)));
+			mutableBlocks.get(blockStart)
+			             .add(entry.getValue(),
+			                  entry.getKey()
+			                       .sub(blockStart));
+		}
+		blocks = ImmutableMap.copyOf(mutableBlocks);
 	}
 	
 	private void checkIfBlockFits(final IntCoordinates k, final SparseMatrix v)
@@ -77,6 +112,18 @@ public class BlockSparseMatrix
 			if (coordinates[1] < 0 || coordinates[1] >= getCols())
 				throw new IllegalArgumentException("x coordinate out of bounds");
 		}
+		final IntCoordinates blockCoords = getBlock(coordinates);
+		final SparseMatrix block = blocks.get(blockCoords.concatenate(blockStarts));
+		if (block == null)
+			return 0;
+		else
+			return block.at(coordinates[0] - blockStarts[blockCoords.get(0)],
+			                coordinates[1] - blockStarts[blockCoords.get(1)]);
+	}
+	
+	private IntCoordinates getBlock(final int... coordinates)
+	{
+		
 		int blockY = 0;
 		int blockX = 0;
 		for (int i = 0; i < blockStarts.length; i++)
@@ -86,12 +133,7 @@ public class BlockSparseMatrix
 			if (coordinates[1] >= blockStarts[i])
 				blockX = i;
 		}
-		final SparseMatrix block = blocks.get(new IntCoordinates(blockStarts[blockY], blockStarts[blockX]));
-		if (block == null)
-			return 0;
-		else
-			return block.at(coordinates[0] - blockStarts[blockY],
-			                coordinates[1] - blockStarts[blockX]);
+		return new IntCoordinates(blockY, blockX);
 	}
 	
 	@Override
@@ -177,7 +219,16 @@ public class BlockSparseMatrix
 		final double absmax = absMaxElement() + other.absMaxElement();
 		if (SparseMatrix.coordinateEntryListsEqual(myValues, otherValues, absmax)) return false;
 		if (otherValues.size() != myValues.size())
-			System.out.println("matrices have different numbers of values");
+		{
+			if (DoubleCompare.almostEqualAfterOps(0,
+			                                      this.sub(other)
+			                                          .absMaxElement(),
+			                                      absmax,
+			                                      this.size()))
+				return true;
+			System.out.println("matrices have different numbers of values. Max difference" + this.sub(other)
+			                                                                                     .absMaxElement());
+		}
 		return otherValues.size() == myValues.size();
 	}
 	

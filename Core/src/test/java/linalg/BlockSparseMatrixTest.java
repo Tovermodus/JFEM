@@ -134,6 +134,35 @@ public class BlockSparseMatrixTest
 	}
 	
 	@Test
+	public void testFromSparse()
+	{
+		SparseMatrix s = createMediumMatrix().toSparse();
+		assertEquals(s, new BlockSparseMatrix(s, 1));
+		assertEquals(s, new BlockSparseMatrix(s, 2));
+		assertEquals(s, new BlockSparseMatrix(s, 3));
+		assertEquals(s, new BlockSparseMatrix(s, 8));
+		s = createMediumMatrix2().toSparse();
+		assertEquals(s, new BlockSparseMatrix(s, 1));
+		assertEquals(s, new BlockSparseMatrix(s, 2));
+		assertEquals(s, new BlockSparseMatrix(s, 3));
+		assertEquals(s, new BlockSparseMatrix(s, 8));
+		s = createLargeMatrix().toSparse();
+		assertEquals(s, new BlockSparseMatrix(s, 1));
+		assertEquals(s, new BlockSparseMatrix(s, 2));
+		assertEquals(s, new BlockSparseMatrix(s, 3));
+		assertEquals(s, new BlockSparseMatrix(s, 8));
+		assertEquals(s, new BlockSparseMatrix(s, 20));
+		assertEquals(s, new BlockSparseMatrix(s, 80));
+		s = createLargeMatrix2().toSparse();
+		assertEquals(s, new BlockSparseMatrix(s, 1));
+		assertEquals(s, new BlockSparseMatrix(s, 2));
+		assertEquals(s, new BlockSparseMatrix(s, 3));
+		assertEquals(s, new BlockSparseMatrix(s, 8));
+		assertEquals(s, new BlockSparseMatrix(s, 20));
+		assertEquals(s, new BlockSparseMatrix(s, 80));
+	}
+	
+	@Test
 	public void testAt()
 	{
 		final BlockSparseMatrix small = createSmallMatrix();

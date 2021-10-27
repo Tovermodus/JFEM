@@ -3,6 +3,7 @@ package examples;
 import basic.*;
 import com.google.common.base.Stopwatch;
 import com.google.common.primitives.Ints;
+import linalg.BlockSparseMatrix;
 import linalg.CoordinateVector;
 import linalg.IterativeSolver;
 import linalg.Vector;
@@ -66,10 +67,13 @@ public class MaxwellTest
 		System.out.println("Face Integrals");
 		grid.evaluateFaceIntegrals(faceIntegrals, boundaryFaceIntegrals);
 		System.out.println(
-			"solve system: " + grid.getSystemMatrix().getRows() + "×" + grid.getSystemMatrix().getCols());
+			"solve system: " + grid.getSystemMatrix()
+			                       .getRows() + "×" + grid.getSystemMatrix()
+			                                              .getCols());
 		final IterativeSolver i = new IterativeSolver();
 		i.showProgress = true;
-		final Vector solution1 = i.solveGMRES(grid.getSystemMatrix(), grid.getRhs(), 1e-6);
+		final Vector solution1 = i.solveGMRES(new BlockSparseMatrix(grid.getSystemMatrix(), 5), grid.getRhs(),
+		                                      1e-6);
 		System.out.println("solved");
 		final MixedFESpaceFunction<QkQkFunction> solut =
 			new MixedFESpaceFunction<>(

@@ -39,7 +39,7 @@ public interface Tensor
 	{
 		final Map<IntCoordinates, Double> ret = new HashMap<>();
 		for (final IntCoordinates c : getShape().range())
-			if (at(c) != 0)
+			if (at(c) > 0)
 				ret.put(c, at(c));
 		return ImmutableMap.copyOf(ret);
 	}
@@ -62,8 +62,12 @@ public interface Tensor
 	default double absMaxElement()
 	{
 		final OptionalDouble max =
-			getCoordinateEntryList().values().stream().mapToDouble(Double::doubleValue).map(
-				Math::abs).max();
+			getCoordinateEntryList().values()
+			                        .stream()
+			                        .mapToDouble(Double::doubleValue)
+			                        .map(
+				                        Math::abs)
+			                        .max();
 		if (max.isPresent())
 			return max.getAsDouble();
 		else

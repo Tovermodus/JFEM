@@ -21,6 +21,11 @@ public class SparseMatrix
 	volatile int[] sparseYs;
 	volatile int sparseEntries;
 	
+	public SparseMatrix(final IntCoordinates rowCols)
+	{
+		this(rowCols.get(0), rowCols.get(1));
+	}
+	
 	@Override
 	public SparseMatrix slice(final IntCoordinates start, final IntCoordinates end)
 	{
@@ -504,7 +509,16 @@ public class SparseMatrix
 		final double absmax = absMaxElement() + other.absMaxElement();
 		if (coordinateEntryListsEqual(myValues, otherValues, absmax)) return false;
 		if (otherValues.size() != myValues.size())
-			System.out.println("matrices have different numbers of values");
+		{
+			if (DoubleCompare.almostEqualAfterOps(0,
+			                                      this.sub(other)
+			                                          .absMaxElement(),
+			                                      absmax,
+			                                      this.size()))
+				return true;
+			System.out.println("matrices have different numbers of values. Max difference" + this.sub(other)
+			                                                                                     .absMaxElement());
+		}
 		return otherValues.size() == myValues.size();
 	}
 	
