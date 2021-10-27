@@ -130,6 +130,8 @@ public interface Matrix extends Tensor, VectorMultiplyable
 	{
 		if (PerformanceArguments.getInstance().executeChecks)
 			if (tol.length > 1) throw new IllegalArgumentException("Only one Tolerance accepted");
+		if (size() > 40000)
+			return "Large Matrix of size " + getShape() + " and type " + getClass();
 		if (tol.length == 0) tol = new double[]{1e-14};
 		String ret = "[";
 		for (int i = 0; i < getRows(); i++)
