@@ -39,7 +39,7 @@ public interface Tensor
 	{
 		final Map<IntCoordinates, Double> ret = new HashMap<>();
 		for (final IntCoordinates c : getShape().range())
-			if (at(c) > 0)
+			if (!DoubleCompare.almostEqual(at(c), 0))
 				ret.put(c, at(c));
 		return ImmutableMap.copyOf(ret);
 	}

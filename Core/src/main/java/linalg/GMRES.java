@@ -36,7 +36,7 @@ class GMRES
 		final MutableVector s = new linalg.DenseVector(n);
 		final MutableVector gamma = new linalg.DenseVector(n + 1);
 		final Vector r = b.sub(A.mvMul(x));
-		final DenseMatrix h = new DenseMatrix(110, 110);
+		final DenseMatrix h = new DenseMatrix(ITERATIONS_BEFORE_RESTART + 10, ITERATIONS_BEFORE_RESTART + 10);
 		if (r.euclidianNorm() <= tol)
 			return x;
 		gamma.set(r.euclidianNorm(), 0);
@@ -131,7 +131,7 @@ class GMRES
 		final MutableVector s = new linalg.DenseVector(n);
 		final MutableVector gamma = new linalg.DenseVector(n + 1);
 		final Vector r = preconditioner.mvMul(b.sub(A.mvMul(x)));
-		final SparseMatrix h = new SparseMatrix(n + 1, n + 1);
+		final SparseMatrix h = new SparseMatrix(ITERATIONS_BEFORE_RESTART + 10, ITERATIONS_BEFORE_RESTART + 10);
 		if (b.sub(A.mvMul(x))
 		     .euclidianNorm() <= tol)
 			return x;

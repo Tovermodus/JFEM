@@ -1,16 +1,20 @@
 package linalg;
 
 import basic.DoubleCompare;
+import basic.MapKeySelectCollector;
 import basic.PerformanceArguments;
+import io.vavr.Tuple2;
 
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
-public class DenseMatrix implements MutableMatrix, Decomposable, DirectlySolvable
+public class DenseMatrix
+	implements MutableMatrix, Decomposable, DirectlySolvable
 {
 	protected volatile double[][] entries;
 	private org.ujmp.core.Matrix ujmpmat = null;
@@ -41,7 +45,9 @@ public class DenseMatrix implements MutableMatrix, Decomposable, DirectlySolvabl
 			.entrySet()
 			.stream();
 		if (PerformanceArguments.getInstance().parallelizeThreads) entryStream = entryStream.parallel();
-		entryStream.forEach(e -> entries[e.getKey().get(0)][e.getKey().get(1)] = e.getValue());
+		entryStream.forEach(e -> entries[e.getKey()
+		                                  .get(0)][e.getKey()
+		                                            .get(1)] = e.getValue());
 	}
 	
 	public DenseMatrix(final double[][] matrix)
@@ -187,6 +193,16 @@ public class DenseMatrix implements MutableMatrix, Decomposable, DirectlySolvabl
 		return ret;
 	}
 	
+	public DenseMatrix add(final SparseMatrix other)
+	{
+		if (PerformanceArguments.getInstance().executeChecks) if (!getShape().equals(other.getShape()))
+			throw new IllegalArgumentException("Incompatible sizes");
+		final DenseMatrix ret = new DenseMatrix(this);
+		other.getCoordinateEntryList()
+		     .forEach((k, v) -> ret.add(v, k));
+		return ret;
+	}
+	
 	@Override
 	public DenseMatrix sub(final Tensor other)
 	{
@@ -310,6 +326,38 @@ public class DenseMatrix implements MutableMatrix, Decomposable, DirectlySolvabl
 		return ret;
 	}
 	
+	public DenseMatrix mmMul(final SparseMatrix matrix)
+	{
+		if (PerformanceArguments.getInstance().executeChecks)
+			if (getCols() != (matrix.getRows())) throw new IllegalArgumentException("Incompatible sizes");
+		final Map<Integer, Map<Integer, Double>> columns =
+			matrix.getCoordinateEntryList()
+			      .entrySet()
+			      .stream()
+			      .map(e -> new Tuple2<>(e.getKey(), e.getValue()))
+			      .collect(Collectors.groupingBy(e -> e._1.get(1),
+			                                     new MapKeySelectCollector<>(key -> key.get(0))));
+		final DenseMatrix ret = new DenseMatrix(getRows(), matrix.getCols());
+		
+		Stream<Map.Entry<Integer, Map<Integer, Double>>> str = columns.entrySet()
+		                                                              .stream();
+		if (PerformanceArguments.getInstance().parallelizeThreads)
+			str = str.parallel();
+		str.forEach(column ->
+		            {
+			            final int colIndex = column.getKey();
+			            final Map<Integer, Double> colEntries = column.getValue();
+			            for (int i = 0; i < getRows(); i++)
+			            {
+				            double contraction = 0;
+				            for (final Map.Entry<Integer, Double> colEntry : colEntries.entrySet())
+					            contraction += entries[i][colEntry.getKey()] * colEntry.getValue();
+				            ret.add(contraction, i, colIndex);
+			            }
+		            });
+		return ret;
+	}
+	
 	@Override
 	public DenseMatrix getLowerTriangleMatrix()
 	{
@@ -393,7 +441,9 @@ public class DenseMatrix implements MutableMatrix, Decomposable, DirectlySolvabl
 	{
 		return Arrays
 			.stream(entries)
-			.mapToInt(e -> Arrays.stream(e).mapToInt(DoubleCompare::doubleHash).sum())
+			.mapToInt(e -> Arrays.stream(e)
+			                     .mapToInt(DoubleCompare::doubleHash)
+			                     .sum())
 			.sum();
 	}
 	

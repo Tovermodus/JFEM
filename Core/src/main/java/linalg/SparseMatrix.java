@@ -239,19 +239,8 @@ public class SparseMatrix
 		if (PerformanceArguments.getInstance().executeChecks)
 			if (!getShape().equals(other.getShape()))
 				throw new IllegalArgumentException("Incompatible sizes");
-		if (!(other instanceof SparseMatrix))
-		{
-			for (final IntCoordinates c : other.getShape()
-			                                   .range())
-				add(other.at(c), c);
-		} else
-		{
-			for (int i = 0; i < ((SparseMatrix) other).sparseEntries; i++)
-			{
-				add(((SparseMatrix) other).sparseValues[i], ((SparseMatrix) other).sparseYs[i],
-				    ((SparseMatrix) other).sparseXs[i]);
-			}
-		}
+		other.getCoordinateEntryList()
+		     .forEach((k, v) -> add(v, k));
 	}
 	
 	@Override
@@ -264,28 +253,23 @@ public class SparseMatrix
 	}
 	
 	@Override
-	public Matrix add(final Tensor other)
-	{
-		if (PerformanceArguments.getInstance().executeChecks)
-			if (!getShape().equals(other.getShape()))
-				throw new IllegalArgumentException("Incompatible sizes");
-		if (!(other instanceof SparseMatrix))
-			return ((Matrix) other).add(this);
-		return add((SparseMatrix) other);
-	}
-	
-	public SparseMatrix add(final SparseMatrix other)
+	public SparseMatrix add(final Tensor other)
 	{
 		if (PerformanceArguments.getInstance().executeChecks)
 			if (!getShape().equals(other.getShape()))
 				throw new IllegalArgumentException("Incompatible sizes");
 		final SparseMatrix ret = new SparseMatrix(this);
-		for (int i = 0; i < other.sparseEntries; i++)
-		{
-			ret.add(other.sparseValues[i], other.sparseYs[i],
-			        other.sparseXs[i]);
-		}
+		other.getCoordinateEntryList()
+		     .forEach((k, v) -> ret.add(v, k));
 		return ret;
+	}
+	
+	public DenseMatrix add(final DenseMatrix other)
+	{
+		if (PerformanceArguments.getInstance().executeChecks)
+			if (!getShape().equals(other.getShape()))
+				throw new IllegalArgumentException("Incompatible sizes");
+		return other.add(this);
 	}
 	
 	public SparseMatrix sub(final SparseMatrix other)
@@ -294,11 +278,8 @@ public class SparseMatrix
 			if (!getShape().equals(other.getShape()))
 				throw new IllegalArgumentException("Incompatible sizes");
 		final SparseMatrix ret = new SparseMatrix(this);
-		for (int i = 0; i < other.sparseEntries; i++)
-		{
-			ret.add(-other.sparseValues[i], other.sparseYs[i],
-			        other.sparseXs[i]);
-		}
+		other.getCoordinateEntryList()
+		     .forEach((k, v) -> ret.add(-v, k));
 		return ret;
 	}
 	
@@ -402,72 +383,60 @@ public class SparseMatrix
 		return ret;
 	}
 	
+	public SparseMatrix mmMul(final SparseMatrix matrix)
+	{
+		if (PerformanceArguments.getInstance().executeChecks)
+			if (getCols() != (matrix.getRows())) throw new IllegalArgumentException("Incompatible sizes");
+		
+		final Map<Integer, Map<Integer, Double>> columns =
+			matrix.getCoordinateEntryList()
+			      .entrySet()
+			      .stream()
+			      .map(e -> new Tuple2<>(e.getKey(), e.getValue()))
+			      .collect(Collectors.groupingBy(e -> e._1.get(1),
+			                                     new MapKeySelectCollector<>(key -> key.get(0))));
+		final Map<Integer, Map<Integer, Double>> rows =
+			getCoordinateEntryList()
+				.entrySet()
+				.stream()
+				.map(e -> new Tuple2<>(e.getKey(), e.getValue()))
+				.collect(Collectors.groupingBy(e -> e._1.get(0),
+				                               new MapKeySelectCollector<>(key -> key.get(1))));
+		final SparseMatrix ret = new SparseMatrix(getRows(), matrix.getCols());
+		
+		Stream<Map.Entry<Integer, Map<Integer, Double>>> str = columns.entrySet()
+		                                                              .stream();
+		if (PerformanceArguments.getInstance().parallelizeThreads)
+			str = str.parallel();
+		str.forEach(column ->
+		            {
+			            final int colIndex = column.getKey();
+			            final Map<Integer, Double> colEntries = column.getValue();
+			            rows.forEach((rowIndex, rowEntries) ->
+			                         {
+				                         double contraction = 0;
+				                         for (final Map.Entry<Integer, Double> colEntry : colEntries.entrySet())
+					                         contraction
+						                         += rowEntries.getOrDefault(colEntry.getKey(),
+						                                                    0.0) * colEntry.getValue();
+				                         ret.add(contraction, rowIndex, colIndex);
+			                         });
+		            });
+		return ret;
+	}
+	
+	public SparseMatrix mmMul(final BlockSparseMatrix matrix)
+	{
+		return mmMul(new SparseMatrix(matrix));
+	}
+	
 	@Override
-	public DirectlySolvable mmMul(final Matrix matrix)
+	public DenseMatrix mmMul(final Matrix matrix)
 	{
 		if (PerformanceArguments.getInstance().executeChecks)
 			if (getCols() != (matrix.getRows()))
 				throw new IllegalArgumentException("Incompatible sizes");
-		if (matrix instanceof SparseMatrix)
-		{
-			final Map<Integer, Map<Integer, Double>> rowEntries =
-				getCoordinateEntryList().entrySet()
-				                        .stream()
-				                        .map(e -> new Tuple2<>(e.getKey(), e.getValue()))
-				                        .collect(Collectors.groupingBy(e -> e._1.get(0),
-				                                                       new MapKeySelectCollector<>(key -> key.get(
-					                                                       1))));
-			final Map<Integer, Map<Integer, Double>> colEntries =
-				((SparseMatrix) matrix).getCoordinateEntryList()
-				                       .entrySet()
-				                       .stream()
-				                       .map(e -> new Tuple2<>(e.getKey(), e.getValue()))
-				                       .collect(Collectors.groupingBy(e -> e._1.get(1),
-				                                                      new MapKeySelectCollector<>(key -> key.get(
-					                                                      0))));
-			final SparseMatrix ret = new SparseMatrix(getRows(), matrix.getCols());
-			
-			Stream<Map.Entry<Integer, Map<Integer, Double>>> str = rowEntries.entrySet()
-			                                                                 .stream();
-			if (PerformanceArguments.getInstance().parallelizeThreads)
-				str = str.parallel();
-			str.forEach(rowEntry ->
-			            {
-				            final int rowIndex = rowEntry.getKey();
-				            final Map<Integer, Double> row = rowEntry.getValue();
-				            for (final Map.Entry<Integer, Map<Integer, Double>> columnEntry : colEntries.entrySet())
-				            {
-					            final int colIndex = columnEntry.getKey();
-					            final Map<Integer, Double> col = columnEntry.getValue();
-					            double contraction = 0;
-					            for (final int k : row.keySet())
-						            contraction += col.getOrDefault(k, 0.0);
-					            ret.add(contraction, rowIndex, colIndex);
-				            }
-			            });
-			return ret;
-			
-			/*final SparseMatrix m = (SparseMatrix) matrix;
-			final SparseMatrix ret = new SparseMatrix(getRows(), matrix.getCols());
-			IntStream stream = IntStream.range(0, sparseEntries);
-			if (PerformanceArguments.getInstance().parallelizeThreads)
-				stream = stream.parallel();
-			stream.forEach(i ->
-			               {
-				               for (int j = 0; j < m.sparseEntries; j++)
-				               {
-					               if (sparseXs[i] == m.sparseYs[j])
-						               ret.add(sparseValues[i] * m.sparseValues[j],
-						                       sparseYs[i],
-						                       m.sparseXs[j]);
-				               }
-			               });
-			return ret;*/
-		} else if (matrix.isSparse())
-		{
-			return this.mmMul(new SparseMatrix(matrix));
-		} else
-			return (new DenseMatrix(this)).mmMul(matrix);
+		return (new DenseMatrix(this)).mmMul(matrix);
 	}
 	
 	@Override
@@ -548,6 +517,12 @@ public class SparseMatrix
 			}
 		}
 		return false;
+	}
+	
+	@Override
+	public DenseMatrix inverse()
+	{
+		return (DenseMatrix) DirectlySolvable.super.inverse();
 	}
 	
 	@Override

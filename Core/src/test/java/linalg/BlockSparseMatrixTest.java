@@ -50,10 +50,10 @@ public class BlockSparseMatrixTest
 	{
 		
 		final Map<IntCoordinates, SparseMatrix> blocks = new HashMap<>();
-		blocks.put(new IntCoordinates(0, 0), new SparseMatrix(500, 500));
-		blocks.put(new IntCoordinates(500, 500), new SparseMatrix(500, 500));
-		blocks.put(new IntCoordinates(0, 500), new SparseMatrix(500, 500));
-		blocks.put(new IntCoordinates(500, 0), new SparseMatrix(500, 500));
+		blocks.put(new IntCoordinates(0, 0), new SparseMatrix(150, 150));
+		blocks.put(new IntCoordinates(150, 150), new SparseMatrix(150, 150));
+		blocks.put(new IntCoordinates(0, 150), new SparseMatrix(150, 150));
+		blocks.put(new IntCoordinates(150, 0), new SparseMatrix(150, 150));
 		final Random generator = new Random(31415);
 		for (final SparseMatrix s : blocks.values())
 		{
@@ -111,11 +111,11 @@ public class BlockSparseMatrixTest
 	private static BlockSparseMatrix createLargeMatrix2()
 	{
 		final Map<IntCoordinates, SparseMatrix> blocks = new HashMap<>();
-		blocks.put(new IntCoordinates(0, 0), new SparseMatrix(500, 500));
-		blocks.put(new IntCoordinates(500, 500), new SparseMatrix(250, 250));
-		blocks.put(new IntCoordinates(750, 750), new SparseMatrix(250, 250));
-		blocks.put(new IntCoordinates(0, 500), new SparseMatrix(500, 250));
-		blocks.put(new IntCoordinates(750, 500), new SparseMatrix(250, 250));
+		blocks.put(new IntCoordinates(0, 0), new SparseMatrix(150, 150));
+		blocks.put(new IntCoordinates(150, 150), new SparseMatrix(75, 75));
+		blocks.put(new IntCoordinates(225, 225), new SparseMatrix(75, 75));
+		blocks.put(new IntCoordinates(0, 150), new SparseMatrix(150, 75));
+		blocks.put(new IntCoordinates(225, 150), new SparseMatrix(75, 75));
 		final Random generator = new Random(314);
 		for (final SparseMatrix s : blocks.values())
 		{
@@ -152,14 +152,14 @@ public class BlockSparseMatrixTest
 		assertEquals(s, new BlockSparseMatrix(s, 3));
 		assertEquals(s, new BlockSparseMatrix(s, 8));
 		assertEquals(s, new BlockSparseMatrix(s, 20));
-		assertEquals(s, new BlockSparseMatrix(s, 80));
+		assertEquals(s, new BlockSparseMatrix(s, 29));
 		s = createLargeMatrix2().toSparse();
 		assertEquals(s, new BlockSparseMatrix(s, 1));
 		assertEquals(s, new BlockSparseMatrix(s, 2));
 		assertEquals(s, new BlockSparseMatrix(s, 3));
 		assertEquals(s, new BlockSparseMatrix(s, 8));
 		assertEquals(s, new BlockSparseMatrix(s, 20));
-		assertEquals(s, new BlockSparseMatrix(s, 80));
+		assertEquals(s, new BlockSparseMatrix(s, 29));
 	}
 	
 	@Test
@@ -359,8 +359,8 @@ public class BlockSparseMatrixTest
 	{
 		final DenseVector small = new DenseVector(6);
 		final DenseVector medium = new DenseVector(100);
-		final DenseVector large = new DenseVector(1000);
-		for (int i = 0; i < 1000; i++)
+		final DenseVector large = new DenseVector(300);
+		for (int i = 0; i < 300; i++)
 		{
 			if (i < 6)
 				small.add(i, i);
@@ -393,8 +393,8 @@ public class BlockSparseMatrixTest
 	{
 		final DenseVector small = new DenseVector(6);
 		final DenseVector medium = new DenseVector(100);
-		final DenseVector large = new DenseVector(1000);
-		for (int i = 0; i < 1000; i++)
+		final DenseVector large = new DenseVector(300);
+		for (int i = 0; i < 300; i++)
 		{
 			if (i < 6)
 				small.add(i, i);

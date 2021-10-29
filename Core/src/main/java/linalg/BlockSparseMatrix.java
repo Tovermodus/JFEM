@@ -21,9 +21,14 @@ public class BlockSparseMatrix
 		return blocks;
 	}
 	
-	public SparseMatrix getBlock(final IntCoordinates blockNumber)
+	public SparseMatrix getBlockMatrix(final IntCoordinates blockNumber)
 	{
 		return blocks.get(blockNumber.concatenate(blockStarts));
+	}
+	
+	public SparseMatrix getBlockMatrix(final int... blockNumber)
+	{
+		return getBlockMatrix(new IntCoordinates(blockNumber));
 	}
 	
 	public int[] getBlockStarts()
@@ -44,7 +49,7 @@ public class BlockSparseMatrix
 			              new SparseMatrix(blockEnds[i] - blockStarts[i], blockEnds[i] - blockStarts[i]));
 		for (final IntCoordinates blockNumber : blockNumbers)
 		{
-			newBlocks.put(blockNumber.concatenate(blockStarts), getBlock(blockNumber));
+			newBlocks.put(blockNumber.concatenate(blockStarts), getBlockMatrix(blockNumber));
 		}
 		return new BlockSparseMatrix(newBlocks);
 	}
@@ -345,6 +350,21 @@ public class BlockSparseMatrix
 	
 	@Override
 	public Matrix mmMul(final Matrix matrix)
+	{
+		return toSparse().mmMul(matrix);
+	}
+	
+	public DenseMatrix mmMul(final DenseMatrix matrix)
+	{
+		return toSparse().mmMul(matrix);
+	}
+	
+	public SparseMatrix mmMul(final SparseMatrix matrix)
+	{
+		return toSparse().mmMul(matrix);
+	}
+	
+	public SparseMatrix mmMul(final BlockSparseMatrix matrix)
 	{
 		return toSparse().mmMul(matrix);
 	}
