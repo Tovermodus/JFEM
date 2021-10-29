@@ -16,16 +16,49 @@ import java.util.stream.Stream;
 public class BlockSparseMatrix
 	implements Matrix
 {
-	final ImmutableMap<IntCoordinates, SparseMatrix> blocks;
-	final int[] blockStarts;
-	final int[] blockEnds;
+	public ImmutableMap<IntCoordinates, SparseMatrix> getBlocks()
+	{
+		return blocks;
+	}
+	
+	public SparseMatrix getBlock(final IntCoordinates blockNumber)
+	{
+		return blocks.get(blockNumber.concatenate(blockStarts));
+	}
+	
+	public int[] getBlockStarts()
+	{
+		return blockStarts.clone();
+	}
+	
+	public int[] getBlockEnds()
+	{
+		return blockEnds.clone();
+	}
+	
+	public BlockSparseMatrix subMatrix(final IntCoordinates[] blockNumbers)
+	{
+		final Map<IntCoordinates, SparseMatrix> newBlocks = new HashMap<>();
+		for (int i = 0; i < blockStarts.length; i++)
+			newBlocks.put(new IntCoordinates(blockStarts[i], blockStarts[i]),
+			              new SparseMatrix(blockEnds[i] - blockStarts[i], blockEnds[i] - blockStarts[i]));
+		for (final IntCoordinates blockNumber : blockNumbers)
+		{
+			newBlocks.put(blockNumber.concatenate(blockStarts), getBlock(blockNumber));
+		}
+		return new BlockSparseMatrix(newBlocks);
+	}
+	
+	final private ImmutableMap<IntCoordinates, SparseMatrix> blocks;
+	final private int[] blockStarts;
+	final private int[] blockEnds;
 	
 	public BlockSparseMatrix(final Map<IntCoordinates, SparseMatrix> blocks)
 	{
 		this.blocks = ImmutableMap.copyOf(blocks);
 		blockStarts = blocks.keySet()
 		                    .stream()
-		                    .mapToInt(ic -> ic.get(0))
+		                    .mapToInt(c -> c.get(0))
 		                    .distinct()
 		                    .sorted()
 		                    .toArray();
@@ -41,16 +74,25 @@ public class BlockSparseMatrix
 	
 	public BlockSparseMatrix(final SparseMatrix s, final int nBlocksPerDir)
 	{
+		this(s, generateEquiDist(nBlocksPerDir, s.getRows()));
+	}
+	
+	private static int[] generateEquiDist(final int nBlocksPerDir, final int rows)
+	{
+		final int[] blockst = new int[nBlocksPerDir];
+		for (int i = 0; i < nBlocksPerDir; i++)
+			blockst[i] = (int) (1.0 * i * rows / nBlocksPerDir);
+		return blockst;
+	}
+	
+	public BlockSparseMatrix(final SparseMatrix s, final int[] blockStarts)
+	{
 		if (PerformanceArguments.getInstance().executeChecks)
 		{
-			if (nBlocksPerDir * 10 > s.getRows())
-				throw new IllegalArgumentException("Choose less Blocks");
 			if (s.getRows() != s.getCols())
 				throw new IllegalArgumentException("Must be square");
 		}
-		blockStarts = new int[nBlocksPerDir];
-		for (int i = 0; i < nBlocksPerDir; i++)
-			blockStarts[i] = (int) (1.0 * i * s.getRows() / nBlocksPerDir);
+		this.blockStarts = blockStarts;
 		blockEnds = new int[blockStarts.length];
 		if (blockEnds.length - 1 >= 0) System.arraycopy(blockStarts, 1, blockEnds, 0, blockEnds.length - 1);
 		blockEnds[blockEnds.length - 1] = s.getCols();

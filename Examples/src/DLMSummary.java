@@ -1,9 +1,7 @@
-import basic.PlotWindow;
-import basic.ScalarFunction;
-import basic.ScalarPlot2DTime;
-import basic.VectorFunction;
+import basic.*;
 import distorted.*;
 import distorted.geometry.DistortedCell;
+import io.vavr.Tuple2;
 import linalg.*;
 import mixed.*;
 import tensorproduct.ContinuousTPShapeFunction;
@@ -34,11 +32,11 @@ public class DLMSummary
 	int nLagrangian;
 	int nTransfer;
 	int eulerianPointsPerDimension = 40;
-	int nEulerCells = 6;
+	int nEulerCells = 5;
 	int nLagrangeRefines = 1;
 	List<CoordinateVector> eulerianPoints;
-	private final int lagrangeDegree = 2;
-	private final int eulerDegree = 1;
+	private final int lagrangeDegree = 1;
+	private final int eulerDegree = 2;
 	private final String elastMethod = DistortedVectorCellIntegral.SYM_GRAD;
 	
 	public DLMSummary()
@@ -110,63 +108,45 @@ public class DLMSummary
 		final DenseMatrix rhsHistory = new DenseMatrix(timeSteps + 1, nEulerian + nLagrangian + nTransfer);
 		iterateHistory.addRow(lastIterate, 0);
 		iterateHistory.addRow(currentIterate, 1);
-		final SparseMatrix precond = constantSystemMatrix;
+		final SparseMatrix precond = new SparseMatrix(constantSystemMatrix);
 		//new DenseMatrix(precond).get
-		writeCf(precond, currentIterate);
-		System.out.println(nEulerian + " " + nLagrangian + " " + nTransfer);
-		System.out.println("creating preconditioner");
-		final VectorMultiplyable Afinv = precond
-			.slice(new IntCoordinates(0, 0), new IntCoordinates(nEulerian,
-			                                                    nEulerian))
-			.inverse();
-		final VectorMultiplyable Asinv = precond.slice(new IntCoordinates(nEulerian,
-		                                                                  nEulerian),
-		                                               new IntCoordinates(nEulerian + nLagrangian,
-		                                                                  nEulerian + nLagrangian))
-		                                        .inverse();
-		final VectorMultiplyable Cs = precond.slice(new IntCoordinates(nEulerian,
-		                                                               nEulerian + nLagrangian),
-		                                            new IntCoordinates(nEulerian + nLagrangian,
-		                                                               nEulerian + nLagrangian + nTransfer));
-		final VectorMultiplyable CsT = precond.slice(new IntCoordinates(nEulerian + nLagrangian,
-		                                                                nEulerian),
-		                                             new IntCoordinates(nEulerian + nLagrangian + nTransfer,
-		                                                                nEulerian + nLagrangian));
-//		final DirectlySolvable precondInverse =
-//			(precond
-//				 .getLowerTriangleMatrix()
-//				 .add(precond.getDiagonalMatrix())
-//				 .add(SparseMatrix.identity(nEulerian + nLagrangian + nTransfer).mul(10))).inverse();
-		final VectorMultiplyable precondInverse = new VectorMultiplyable()
+		//writeCf(precond, currentIterate);
+		final int blocks = nEulerCells * nEulerCells;
+		final int[] blockstarts = new int[blocks + 2];
+		final int nEulerVelocities = (int) eulerian.getShapeFunctions()
+		                                           .values()
+		                                           .stream()
+		                                           .filter(MixedFunction::hasVelocityFunction)
+		                                           .count();
+		for (int i = 0; i < blocks + 1; i++)
 		{
-			@Override
-			public int getVectorSize()
-			{
-				return nEulerian + nLagrangian + nTransfer;
-			}
-			
-			@Override
-			public int getTVectorSize()
-			{
-				return nEulerian + nLagrangian + nTransfer;
-			}
-			
-			@Override
-			public Vector mvMul(final Vector vector)
-			{
-				final Vector Xnew =
-					Asinv.mvMul(
-						getLagrangianIterate(vector).sub(Cs.mvMul(getTransferIterate(vector))));
-				final Vector transferNew = CsT.mvMul(Xnew);
-				return null;
-			}
-			
-			@Override
-			public Vector tvMul(final Vector vector)
-			{
-				throw new UnsupportedOperationException("not implemented yet");
-			}
-		};
+			blockstarts[i] = (int) (1.0 * i * nEulerVelocities / blocks);
+		}
+		blockstarts[blocks + 1] = nEulerian;
+		final BlockSparseMatrix blockPrecond = new BlockSparseMatrix(precond, blockstarts);
+		final Map<IntCoordinates, SparseMatrix> inverseBlocks
+			= blockPrecond.getBlocks()
+			              .entrySet()
+			              .stream()
+			              .parallel()
+			              .filter(block -> block.getKey()
+			                                    .get(0) == block.getKey()
+			                                                    .get(1)
+				              && block.getKey()
+				                      .get(0) != nEulerVelocities)
+			              .map(block ->
+			                   {
+				                   System.out.println(block.getValue()
+				                                           .getShape() + " " + block.getKey());
+				                   return new Tuple2<>(block.getKey(),
+				                                       new SparseMatrix(block.getValue()
+				                                                             .inverse()));
+			                   })
+			              .collect(new MapCollector<>());
+		inverseBlocks.put(new IntCoordinates(nEulerVelocities, nEulerVelocities),
+		                  SparseMatrix.identity(nEulerian - nEulerVelocities));
+		System.out.println(nLagrangian + nTransfer);
+		final BlockSparseMatrix precondInverse = new BlockSparseMatrix(inverseBlocks);
 		System.out.println("created preconditioner");
 		int i;
 		for (i = 1; i < timeSteps && interruptor.isRunning(); i++)
@@ -199,7 +179,9 @@ public class DLMSummary
 			//it.solveGMRES(systemMatrix, rightHandSide, 1e-7);
 			final IterativeSolver itp = new IterativeSolver();
 			itp.showProgress = true;
-			currentIterate = (DenseVector) itp.solvePGMRES(systemMatrix, precondInverse, rightHandSide,
+			currentIterate = (DenseVector) itp.solvePGMRES(new BlockSparseMatrix(systemMatrix, 1),
+			                                               precondInverse,
+			                                               rightHandSide,
 			                                               1e-7);
 			//currentIterate = systemMatrix.solve(rightHandSide);
 			//System.out.println(iterrr.sub(currentIterate).absMaxElement());
