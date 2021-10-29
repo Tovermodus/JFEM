@@ -216,7 +216,7 @@ public class DLMSummary
 		                                     7));
 	}
 	
-	private void writeOutVals(final DenseVector currentIterate,
+	private void writeOutVals(final DenseVedctor currentIterate,
 	                          final DenseVector lastIterate,
 	                          final Map<CoordinateVector, Double> pvals,
 	                          final Map<CoordinateVector, CoordinateVector> vvals,
