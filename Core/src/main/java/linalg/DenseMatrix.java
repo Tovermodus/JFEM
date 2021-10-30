@@ -67,6 +67,11 @@ public class DenseMatrix
 		}
 	}
 	
+	public DenseMatrix(final IntCoordinates rowCols)
+	{
+		this(rowCols.get(0), rowCols.get(1));
+	}
+	
 	public static DenseMatrix squareMatrixFromValues(final double... values)
 	{
 		if (PerformanceArguments.getInstance().executeChecks)

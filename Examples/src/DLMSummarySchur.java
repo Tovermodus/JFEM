@@ -34,11 +34,11 @@ public class DLMSummarySchur
 	int nLagrangian;
 	int nTransfer;
 	int eulerianPointsPerDimension = 40;
-	int nEulerCells = 5;
-	int nLagrangeRefines = 1;
+	int nEulerCells = 10;
+	int nLagrangeRefines = 2;
 	List<CoordinateVector> eulerianPoints;
 	private final int lagrangeDegree = 1;
-	private final int eulerDegree = 2;
+	private final int eulerDegree = 1;
 	private final String elastMethod = DistortedVectorCellIntegral.SYM_GRAD;
 	
 	public DLMSummarySchur()
@@ -121,8 +121,11 @@ public class DLMSummarySchur
 		final DenseMatrix secondmmul = firstmmul
 			.mmMul(precondBlocks.getBlockMatrix(1, 0));
 		System.out.println("laginv");
-		final DenseMatrix schur = precondBlocks.getBlockMatrix(0, 0)
-		                                       .add(secondmmul);
+		final BlockDenseMatrix schur = new BlockDenseMatrix(precondBlocks.getBlockMatrix(0, 0)
+		                                                                 .add(secondmmul),
+		                                                    nEulerCells);
+		final BlockDenseMatrix schurBlockInverse = schur.getInvertedDiagonalMatrix();
+		System.out.println(schurBlockInverse.getShape() + " " + schur.getShape());
 		System.out.println("mmul");
 		final VectorMultiplyable precondInverse = new VectorMultiplyable()
 		{
@@ -146,12 +149,15 @@ public class DLMSummarySchur
 					      .sub(precondBlocks.getBlockMatrix(0, 1)
 					                        .mvMul(lagInverse.mvMul(vector.slice(nEulerian,
 					                                                             nEulerian + nLagrangian + nTransfer))));
-				final DenseVector eul = schur.solve(g);
-				final DenseVector lag = (DenseVector) lagInverse.mvMul(vector.slice(nEulerian,
-				                                                                    nEulerian + nLagrangian + nTransfer)
-				                                                             .sub(precondBlocks.getBlockMatrix(
-					                                                             1, 0)
-				                                                                               .mvMul(eul)));
+				final IterativeSolver it = new IterativeSolver();
+				
+				final DenseVector eul = (DenseVector) it.solvePGMRES(schur, schurBlockInverse, g,
+				                                                     1e-1);
+				final DenseVector lag = lagInverse.mvMul(vector.slice(nEulerian,
+				                                                      nEulerian + nLagrangian + nTransfer)
+				                                               .sub(precondBlocks.getBlockMatrix(
+					                                               1, 0)
+				                                                                 .mvMul(eul)));
 				final DenseVector ret = new DenseVector(vector.getLength());
 				ret.addSmallVectorAt(eul, 0);
 				ret.addSmallVectorAt(lag, nEulerian);
