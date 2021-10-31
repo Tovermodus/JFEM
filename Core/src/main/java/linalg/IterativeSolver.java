@@ -12,6 +12,7 @@ public class IterativeSolver
 	private GMRES gm;
 	ExecutorService ex;
 	public boolean showProgress = true;
+	Vector lastSolution = null;
 	
 	public Vector solveCG(final VectorMultiplyable operator, final Vector rhs, final double tol)
 	{
@@ -31,8 +32,10 @@ public class IterativeSolver
 		final int n = rhs.getLength();
 		Vector z;
 		Vector newResiduum;
-		final DenseVector iterate = new DenseVector(n);
+		DenseVector iterate = new DenseVector(n);
 		iterate.set(1, 0);
+		if (lastSolution != null)
+			iterate = new DenseVector(lastSolution);
 		final Vector m = operator.mvMul(iterate);
 		Vector residuum = rhs.sub(m);
 		Vector defect = new DenseVector(residuum);
@@ -52,7 +55,7 @@ public class IterativeSolver
 		}
 		i.running = false;
 		ex.shutdown();
-		
+		lastSolution = iterate;
 		return iterate;
 	}
 	
@@ -81,8 +84,10 @@ public class IterativeSolver
 		Vector Ap;
 		Vector z, newZ;
 		Vector newResiduum;
-		final DenseVector iterate = new DenseVector(n);
+		DenseVector iterate = new DenseVector(n);
 		iterate.set(1, 0);
+		if (lastSolution != null)
+			iterate = new DenseVector(lastSolution);
 		Vector residuum = rhs.sub(operator.mvMul(iterate));
 		z = preconditioner.mvMul(residuum);
 		Vector p = new DenseVector(z);
@@ -105,6 +110,7 @@ public class IterativeSolver
 		i.running = false;
 		ex.shutdown();
 		
+		lastSolution = iterate;
 		return iterate;
 	}
 	
@@ -131,9 +137,13 @@ public class IterativeSolver
 			ex.execute(i);
 		final Vector x;
 		gm = new GMRES(showProgress, 0);
-		x = gm.solve(preconditioner, operator, rhs, tol, i);
+		if (lastSolution == null)
+			x = gm.solve(preconditioner, operator, rhs, tol, i);
+		else
+			x = gm.solve(preconditioner, operator, rhs, lastSolution, tol, i);
 		i.running = false;
 		ex.shutdown();
+		lastSolution = x;
 		return x;
 	}
 	
@@ -154,9 +164,13 @@ public class IterativeSolver
 			ex.execute(i);
 		final Vector x;
 		gm = new GMRES(showProgress, 0);
-		x = gm.solve(operator, rightHandSide, tol, i);
+		if (lastSolution == null)
+			x = gm.solve(operator, rightHandSide, tol, i);
+		else
+			x = gm.solve(operator, rightHandSide, lastSolution, tol, i);
 		i.running = false;
 		ex.shutdown();
+		lastSolution = x;
 		return x;
 	}
 	
@@ -216,6 +230,7 @@ public class IterativeSolver
 		}
 		i.running = false;
 		ex.shutdown();
+		lastSolution = iterate;
 		return iterate;
 	}
 	
@@ -282,6 +297,7 @@ public class IterativeSolver
 		}
 		i.running = false;
 		ex.shutdown();
+		lastSolution = iterate;
 		return iterate;
 	}
 	

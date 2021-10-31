@@ -1,5 +1,6 @@
 package basic;
 
+import linalg.DenseVector;
 import linalg.MutableMatrix;
 import linalg.MutableVector;
 
@@ -20,16 +21,32 @@ public interface AcceptsMatrixBoundaryValues<CT extends Cell<CT, FT>,
 		overWriteValue(index, value, getSystemMatrix(), getRhs());
 	}
 	
-	default void overWriteValue(final int index, final double value, final MutableMatrix mat, final MutableVector rhs)
+	default void overWriteValue(final int index,
+	                            final double value,
+	                            final MutableMatrix mat,
+	                            final MutableVector rhs)
 	{
-		mat.deleteRow(index);
-		mat.set(1, index, index);
-		rhs.set(value, index);
+		synchronized (this)
+		{
+			final DenseVector column = mat.getColumn(index);
+			for (int i = 0; i < column.getLength(); i++)
+			{
+				if (getFixedNodeIndices().contains(i))
+					continue;
+				rhs.add(-column.at(i) * value, i);
+			}
+			mat.deleteColumn(index);//in rechte seite schreiben
+			mat.deleteRow(index);
+			mat.set(1, index, index);
+			rhs.set(value, index);
+		}
 	}
 	
 	default void writeBoundaryValuesTo(final Function<valueT, gradientT, hessianT> boundaryValues,
 	                                   final Predicate<FT> faces,
-	                                   final BiPredicate<FT, ST> functions, final MutableMatrix A, final MutableVector rhs)
+	                                   final BiPredicate<FT, ST> functions,
+	                                   final MutableMatrix A,
+	                                   final MutableVector rhs)
 	{
 		forEachBoundaryFace(F ->
 		                    {
@@ -37,13 +54,13 @@ public interface AcceptsMatrixBoundaryValues<CT extends Cell<CT, FT>,
 			                    {
 				                    forEachFunctionOnFace(F, (v) ->
 				                    {
-					                    if (functions.test(F, v) && v.getNodeFunctional().usesFace(
-						                    F))
+					                    if (functions.test(F, v) && v.getNodeFunctional()
+					                                                 .usesFace(F))
 					                    {
 						                    overWriteValue(v.getGlobalIndex(),
-						                                   v
-							                                   .getNodeFunctional()
-							                                   .evaluate(boundaryValues), A,
+						                                   v.getNodeFunctional()
+						                                    .evaluate(boundaryValues),
+						                                   A,
 						                                   rhs);
 					                    }
 				                    });
@@ -51,13 +68,16 @@ public interface AcceptsMatrixBoundaryValues<CT extends Cell<CT, FT>,
 		                    });
 	}
 	
-	default void writeBoundaryValuesTo(final Function<valueT, gradientT, hessianT> boundaryValues, final Predicate<FT> faces,
-	                                   final MutableMatrix A, final MutableVector rhs)
+	default void writeBoundaryValuesTo(final Function<valueT, gradientT, hessianT> boundaryValues,
+	                                   final Predicate<FT> faces,
+	                                   final MutableMatrix A,
+	                                   final MutableVector rhs)
 	{
 		writeBoundaryValuesTo(boundaryValues, faces, (f, st) -> true, A, rhs);
 	}
 	
-	default void writeBoundaryValuesTo(final Function<valueT, gradientT, hessianT> boundaryValues, final MutableMatrix A,
+	default void writeBoundaryValuesTo(final Function<valueT, gradientT, hessianT> boundaryValues,
+	                                   final MutableMatrix A,
 	                                   final MutableVector rhs)
 	{
 		writeBoundaryValuesTo(boundaryValues, f -> true, (f, st) -> true, A, rhs);

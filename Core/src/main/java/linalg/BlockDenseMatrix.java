@@ -112,6 +112,12 @@ public class BlockDenseMatrix
 		if (blockEnds.length - 1 >= 0) System.arraycopy(blockStarts, 1, blockEnds, 0, blockEnds.length - 1);
 		blockEnds[blockEnds.length - 1] = s.getCols();
 		final HashMap<IntCoordinates, DenseMatrix> mutableBlocks = new HashMap<>();
+		for (int i = 0; i < blockStarts.length; i++)
+		{
+			mutableBlocks.put(new IntCoordinates(blockStarts[i], blockStarts[i]),
+			                  new DenseMatrix(blockEnds[i] - blockStarts[i],
+			                                  blockEnds[i] - blockStarts[i]));
+		}
 		for (final Map.Entry<IntCoordinates, Double> entry : s.getCoordinateEntryList()
 		                                                      .entrySet())
 		{
@@ -136,25 +142,27 @@ public class BlockDenseMatrix
 		                                                           .stream();
 		if (PerformanceArguments.getInstance().parallelizeThreads)
 			str = str.parallel();
-		System.out.println(Arrays.toString(blockStarts));
-		final BlockDenseMatrix ret = new BlockDenseMatrix(str.filter(e -> e.getKey()
-		                                                                   .get(0) == e.getKey()
-		                                                                         .get(1))
+		final BlockDenseMatrix ret = new BlockDenseMatrix(str.filter(e ->
+		                                                             {
+			                                                             return e.getKey()
+			                                                                     .get(0) == e.getKey()
+			                                                                                 .get(1);
+		                                                             })
 		                                                     .map(e ->
-		                                                    {
-			                                                    try
-			                                                    {
-				                                                    return new Tuple2<>(e.getKey(),
-				                                                                        e.getValue()
-				                                                                         .inverse());
-			                                                    } catch (final Exception exc)
-			                                                    {
-				                                                    return new Tuple2<>(e.getKey(),
-				                                                                        DenseMatrix.identity(
-					                                                                        e.getValue()
-					                                                                         .getCols()));
-			                                                    }
-		                                                    })
+		                                                          {
+			                                                          try
+			                                                          {
+				                                                          return new Tuple2<>(e.getKey(),
+				                                                                              e.getValue()
+				                                                                               .inverse());
+			                                                          } catch (final Exception exc)
+			                                                          {
+				                                                          return new Tuple2<>(e.getKey(),
+				                                                                              DenseMatrix.identity(
+					                                                                              e.getValue()
+					                                                                               .getCols()));
+			                                                          }
+		                                                          })
 		                                                     .collect(new MapCollector<>()));
 		System.out.println(Arrays.toString(ret.blockStarts));
 		return ret;

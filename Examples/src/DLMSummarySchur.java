@@ -123,12 +123,16 @@ public class DLMSummarySchur
 		System.out.println("laginv");
 		final BlockDenseMatrix schur = new BlockDenseMatrix(precondBlocks.getBlockMatrix(0, 0)
 		                                                                 .add(secondmmul),
-		                                                    nEulerCells);
+		                                                    nEulerCells * nEulerCells);
 		final BlockDenseMatrix schurBlockInverse = schur.getInvertedDiagonalMatrix();
+//		final DenseMatrix schurDense = schur.toDense()
+//		                                    .inverse();
 		System.out.println(schurBlockInverse.getShape() + " " + schur.getShape());
 		System.out.println("mmul");
 		final VectorMultiplyable precondInverse = new VectorMultiplyable()
 		{
+			final IterativeSolver it = new IterativeSolver();
+			
 			@Override
 			public int getVectorSize()
 			{
@@ -149,10 +153,11 @@ public class DLMSummarySchur
 					      .sub(precondBlocks.getBlockMatrix(0, 1)
 					                        .mvMul(lagInverse.mvMul(vector.slice(nEulerian,
 					                                                             nEulerian + nLagrangian + nTransfer))));
-				final IterativeSolver it = new IterativeSolver();
-				
-				final DenseVector eul = (DenseVector) it.solvePGMRES(schur, schurBlockInverse, g,
-				                                                     1e-1);
+				it.showProgress = true;
+				final DenseVector eul = new DenseVector(schurBlockInverse.mvMul(g));
+//					(DenseVector) it.solvePGMRES(schur, schurBlockInverse, g,
+//				                                                     1);
+				System.out.println("donnnnnnnnnnnnnnnnn");
 				final DenseVector lag = lagInverse.mvMul(vector.slice(nEulerian,
 				                                                      nEulerian + nLagrangian + nTransfer)
 				                                               .sub(precondBlocks.getBlockMatrix(
@@ -172,6 +177,7 @@ public class DLMSummarySchur
 		};
 		System.out.println("created preconditioner");
 		int i;
+		final IterativeSolver itp = new IterativeSolver();
 		for (i = 1; i < timeSteps && interruptor.isRunning(); i++)
 		{
 			rightHandSide = new DenseVector(constantRightHandSide);
@@ -200,12 +206,13 @@ public class DLMSummarySchur
 			//final IterativeSolver it = new IterativeSolver();
 			//it.showProgress = true;
 			//it.solveGMRES(systemMatrix, rightHandSide, 1e-7);
-			final IterativeSolver itp = new IterativeSolver();
 			itp.showProgress = true;
-			currentIterate = (DenseVector) itp.solvePGMRES(new BlockSparseMatrix(systemMatrix, 1),
-			                                               precondInverse,
-			                                               rightHandSide,
-			                                               1e-7);
+			System.out.println(systemMatrix.sub(systemMatrix.transpose())
+			                               .absMaxElement() + "ABBBBBB");
+			currentIterate = (DenseVector) itp.solvePCG(new BlockSparseMatrix(systemMatrix, 1),
+			                                            precondInverse,
+			                                            rightHandSide,
+			                                            1e-7);
 			//currentIterate = systemMatrix.solve(rightHandSide);
 			//System.out.println(iterrr.sub(currentIterate).absMaxElement());
 			System.out.println("newit" + getLagrangianIterate(currentIterate));
@@ -474,6 +481,7 @@ public class DLMSummarySchur
 			.mapToInt(QkQkFunction::getGlobalIndex)
 			.findFirst()
 			.orElse(0);
+		currentMatrix.deleteColumn(firstPressure);
 		currentMatrix.deleteRow(firstPressure);
 		currentMatrix.set(1, firstPressure, firstPressure);
 		rightHandSide.set(0, firstPressure);
@@ -495,6 +503,9 @@ public class DLMSummarySchur
 		eulerianAlphaMass = new SparseMatrix(nEulerian, nEulerian);
 		eulerian.writeCellIntegralsToMatrix(List.of(mass, symGrad, divValue), ABf);
 		eulerian.writeCellIntegralsToMatrix(List.of(mass), eulerianAlphaMass);
+		System.out.println(ABf.transpose()
+		                      .sub(ABf)
+		                      .absMaxElement() + "ABfAbsMax");
 		constantMatrix.addSmallMatrixAt(ABf, 0, 0);
 	}
 	
@@ -508,7 +519,10 @@ public class DLMSummarySchur
 		lagrangian.writeCellIntegralsToMatrix(List.of(mass, elast), As);
 		lagrangianBetaMass = new SparseMatrix(nLagrangian, nLagrangian);
 		lagrangian.writeCellIntegralsToMatrix(List.of(mass), lagrangianBetaMass);
-		constantMatrix.addSmallMatrixAt(As, nEulerian, nEulerian);
+		System.out.println(As.transpose()
+		                     .sub(As)
+		                     .absMaxElement() + "AsAbsMax");
+		constantMatrix.addSmallMatrixAt(As.mul(1. / dt), nEulerian, nEulerian);
 	}
 	
 	public void writeCf(final SparseMatrix currentMatrix, final DenseVector currentIterate)
@@ -631,7 +645,8 @@ public class DLMSummarySchur
 		lagrangian.writeCellIntegralsToMatrix(List.of(transferLagrangian), Cs);
 		lagrangianDual = Cs;
 		constantMatrix.addSmallMatrixAt(Cs.mul(1. / dt), nEulerian + nLagrangian, nEulerian);
-		constantMatrix.addSmallMatrixAt(Cs.transpose(), nEulerian, nEulerian + nLagrangian);
+		constantMatrix.addSmallMatrixAt(Cs.transpose()
+		                                  .mul(1. / dt), nEulerian, nEulerian + nLagrangian);
 	}
 	
 	public void writeF(final DenseVector currentVector, final DenseVector currentIterate)
@@ -647,7 +662,7 @@ public class DLMSummarySchur
 		final DenseVector g = lagrangianBetaMass.mvMul(
 			getLagrangianIterate(currentIterate).mul(2)
 			                                    .sub(getLagrangianIterate(lastIterate)));
-		currentVector.addSmallVectorAt(g, nEulerian);
+		currentVector.addSmallVectorAt(g.mul(1. / dt), nEulerian);
 	}
 	
 	public void writeD(final DenseVector currentVector, final DenseVector currentIterate)

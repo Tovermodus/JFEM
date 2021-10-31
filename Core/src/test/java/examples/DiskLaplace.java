@@ -18,7 +18,7 @@ import static org.junit.Assert.assertTrue;
 
 public class DiskLaplace
 {
-	@Test(timeout = 20000)
+	@Test(timeout = 30000)
 	public void testConvergence()
 	{
 		final int polynomialDegree = 3;
@@ -40,24 +40,26 @@ public class DiskLaplace
 		circle.evaluateCellIntegrals(List.of(gradGrad), List.of(source));
 		circle.evaluateFaceIntegrals(new ArrayList<>(), new ArrayList<>());
 		circle.setBoundaryValues(LaplaceReferenceSolution.scalarReferenceSolution());
-		System.out.println(circle.getShapeFunctions().size());
+		System.out.println(circle.getShapeFunctions()
+		                         .size());
 		
 		System.out.println("System Filled");
 //		final Vector solution = circle.getSystemMatrix().solve(circle.getRhs());
 		final IterativeSolver iterativeSolver = new IterativeSolver();
-		iterativeSolver.showProgress = false;
-		final Vector solution = iterativeSolver.solveGMRES(circle.getSystemMatrix(), circle.getRhs(),
-		                                                   1e-10);
+		iterativeSolver.showProgress = true;
+		final Vector solution = iterativeSolver.solveCG(circle.getSystemMatrix(), circle.getRhs(),
+		                                                1e-10);
 		
 		final ScalarFESpaceFunction<DistortedShapeFunction> solutionFunction =
 			new ScalarFESpaceFunction<>(circle.getShapeFunctions(), solution);
-		assertTrue(ConvergenceOrderEstimator
-			           .normL2Difference(solutionFunction,
-			                             LaplaceReferenceSolution.scalarReferenceSolution(),
-			                             circle.generatePlotPoints(6 *
-				                                                       circle
-					                                                       .getCells()
-					                                                       .size()))
-			           < 0.05);
+		final double norm = ConvergenceOrderEstimator
+			.normL2Difference(solutionFunction,
+			                  LaplaceReferenceSolution.scalarReferenceSolution(),
+			                  circle.generatePlotPoints(6 *
+				                                            circle
+					                                            .getCells()
+					                                            .size()));
+		System.out.println(norm);
+		assertTrue("" + norm, norm < 0.05);
 	}
 }

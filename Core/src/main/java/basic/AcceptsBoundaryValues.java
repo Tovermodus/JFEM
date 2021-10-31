@@ -16,7 +16,8 @@ public interface AcceptsBoundaryValues<CT extends Cell<CT, FT>,
 	
 	void setFixedNodeValue(int index, double value);
 	
-	default void setBoundaryValues(final Function<valueT, gradientT, hessianT> boundaryValues, final Predicate<FT> faces,
+	default void setBoundaryValues(final Function<valueT, gradientT, hessianT> boundaryValues,
+	                               final Predicate<FT> faces,
 	                               final BiPredicate<FT, ST> functions)
 	{
 		forEachBoundaryFace(F ->
@@ -25,21 +26,20 @@ public interface AcceptsBoundaryValues<CT extends Cell<CT, FT>,
 			                    {
 				                    forEachFunctionOnFace(F, (v) ->
 				                    {
-					                    if (functions.test(F, v) && v.getNodeFunctional().usesFace(
-						                    F))
+					                    if (functions.test(F, v) && v.getNodeFunctional()
+					                                                 .usesFace(F))
 					                    {
 						                    setFixedNodeValue(v.getGlobalIndex(),
-						                                      v
-							                                      .getNodeFunctional()
-							                                      .evaluate(
-								                                      boundaryValues));
+						                                      v.getNodeFunctional()
+						                                       .evaluate(boundaryValues));
 					                    }
 				                    });
 			                    }
 		                    });
 	}
 	
-	default void setBoundaryValues(final Function<valueT, gradientT, hessianT> boundaryValues, final Predicate<FT> faces)
+	default void setBoundaryValues(final Function<valueT, gradientT, hessianT> boundaryValues,
+	                               final Predicate<FT> faces)
 	{
 		setBoundaryValues(boundaryValues, faces, (f, st) -> true);
 	}
@@ -76,8 +76,6 @@ public interface AcceptsBoundaryValues<CT extends Cell<CT, FT>,
 	{
 		for (final ST function1 : getShapeFunctionsWithSupportOnCell(K))
 		{
-			//if (getFixedNodeIndices().contains(function1.getGlobalIndex()))
-			//	continue;
 			for (final ST function2 : getShapeFunctionsWithSupportOnCell(K))
 			{
 				if (getFixedNodeIndices().contains(function2.getGlobalIndex()))
@@ -92,8 +90,6 @@ public interface AcceptsBoundaryValues<CT extends Cell<CT, FT>,
 	{
 		for (final ST function1 : getShapeFunctionsWithSupportOnFace(F))
 		{
-			//if (getFixedNodeIndices().contains(function1.getGlobalIndex()))
-			//	continue;
 			for (final ST function2 : getShapeFunctionsWithSupportOnFace(F))
 			{
 				if (getFixedNodeIndices().contains(function2.getGlobalIndex()))

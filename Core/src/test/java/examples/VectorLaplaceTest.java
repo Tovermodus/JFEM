@@ -126,7 +126,10 @@ public class VectorLaplaceTest
 		final VectorFESpaceFunction<ContinuousTPVectorFunction> solut =
 			new VectorFESpaceFunction<>(
 				grid.getShapeFunctions(), solution1);
-		assertTrue(ConvergenceOrderEstimator.normL2VecDifference(solut,
+		assertTrue("" + ConvergenceOrderEstimator.normL2VecDifference(solut,
+		                                                              LaplaceReferenceSolution.vectorReferenceSolution(),
+		                                                              grid.generatePlotPoints(20)),
+		           ConvergenceOrderEstimator.normL2VecDifference(solut,
 		                                                         LaplaceReferenceSolution.vectorReferenceSolution(),
 		                                                         grid.generatePlotPoints(20)) < 1e-2);
 	}

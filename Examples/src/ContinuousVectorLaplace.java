@@ -13,10 +13,14 @@ public class ContinuousVectorLaplace
 {
 	public static void main(final String[] args)
 	{
+		final PerformanceArguments.PerformanceArgumentBuilder builder =
+			new PerformanceArguments.PerformanceArgumentBuilder();
+		builder.parallelizeThreads = true;
+		builder.build();
 		final CoordinateVector start = CoordinateVector.fromValues(-1, -1);
 		final CoordinateVector end = CoordinateVector.fromValues(1, 1);
-		final int mult = 8;
-		final List<Integer> cells = List.of(mult * 2, mult * 3);
+		final int mult = 4;
+		final List<Integer> cells = List.of(mult * 2, mult * 2);
 		
 		final double penalty = 100;
 		
@@ -33,32 +37,32 @@ public class ContinuousVectorLaplace
 			new ArrayList<>();
 		final ArrayList<RightHandSideIntegral<TPCell, ContinuousTPVectorFunction>> rightHandSideIntegrals
 			= new ArrayList<>();
-		final ArrayList<BoundaryRightHandSideIntegral<TPFace, ContinuousTPVectorFunction>> boundaryFaceIntegrals =
+		final ArrayList<BoundaryRightHandSideIntegral<TPFace, ContinuousTPVectorFunction>> boundaryFaceIntegrals
+			=
 			new ArrayList<>();
 		
 		rightHandSideIntegrals.add(rightHandSideIntegral);
 		cellIntegrals.add(gg);
 		
-		final int polynomialDegree = 2;
+		final int polynomialDegree = 1;
 		final ContinuousTPFEVectorSpace grid = new ContinuousTPFEVectorSpace(start, end, cells);
 		grid.assembleCells();
 		grid.assembleFunctions(polynomialDegree);
 		grid.initializeSystemMatrix();
 		grid.initializeRhs();
-		grid.setBoundaryValues(LaplaceReferenceSolution.vectorBoundaryValues());
 		grid.evaluateCellIntegrals(cellIntegrals, rightHandSideIntegrals);
 		grid.evaluateFaceIntegrals(faceIntegrals, boundaryFaceIntegrals);
-		for (final Integer s : grid.getFixedNodeIndices())
-			System.out.println(grid.getShapeFunctions().get(s).getNodeFunctionalPoint().absMaxElement());
+		grid.setBoundaryValues(LaplaceReferenceSolution.vectorBoundaryValues());
 		final IterativeSolver it = new IterativeSolver();
-		it.showProgress = false;
+		it.showProgress = true;
 		final Vector solution1 = it.solveGMRES(grid.getSystemMatrix(), grid.getRhs(), 1e-8);
 		final VectorFESpaceFunction<ContinuousTPVectorFunction> solut =
 			new VectorFESpaceFunction<>(
 				grid.getShapeFunctions(), solution1);
 		final PlotWindow p = new PlotWindow();
 		p.addPlot(new ScalarPlot2D(solut.getComponentFunction(0), grid.generatePlotPoints(30), 30));
-		p.addPlot(new ScalarPlot2D(LaplaceReferenceSolution.vectorReferenceSolution().getComponentFunction(0),
+		p.addPlot(new ScalarPlot2D(LaplaceReferenceSolution.vectorReferenceSolution()
+		                                                   .getComponentFunction(0),
 		                           grid.generatePlotPoints(30), 30));
 		System.out.println(ConvergenceOrderEstimator.normL2VecDifference(solut,
 		                                                                 LaplaceReferenceSolution.vectorReferenceSolution(),

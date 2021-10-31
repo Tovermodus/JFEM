@@ -102,6 +102,12 @@ public class BlockSparseMatrix
 		if (blockEnds.length - 1 >= 0) System.arraycopy(blockStarts, 1, blockEnds, 0, blockEnds.length - 1);
 		blockEnds[blockEnds.length - 1] = s.getCols();
 		final HashMap<IntCoordinates, SparseMatrix> mutableBlocks = new HashMap<>();
+		for (int i = 0; i < blockStarts.length; i++)
+		{
+			mutableBlocks.put(new IntCoordinates(blockStarts[i], blockStarts[i]),
+			                  new SparseMatrix(blockEnds[i] - blockStarts[i],
+			                                   blockEnds[i] - blockStarts[i]));
+		}
 		for (final Map.Entry<IntCoordinates, Double> entry : s.getCoordinateEntryList()
 		                                                      .entrySet())
 		{
