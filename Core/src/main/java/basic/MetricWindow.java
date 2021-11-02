@@ -174,7 +174,8 @@ public class MetricWindow
 			this.width = width;
 			this.height = height;
 			isChecked = false;
-			content = new BufferedImage(canvas.getWidth(), canvas.getHeight(), BufferedImage.TYPE_INT_RGB);
+			content = new BufferedImage(Math.max(canvas.getWidth(), 1), Math.max(canvas.getHeight(), 1),
+			                            BufferedImage.TYPE_INT_RGB);
 		}
 		
 		@Override

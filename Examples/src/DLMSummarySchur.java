@@ -62,20 +62,20 @@ public class DLMSummarySchur
 		DenseVector rightHandSide;
 		final DenseVector constantRightHandSide = new DenseVector(nEulerian + nLagrangian + nTransfer);
 		writeABf(constantSystemMatrix);
-		//System.out.println("abf");
+		System.out.println("abf");
 		writeAs(constantSystemMatrix);
-		//System.out.println("as");
+		System.out.println("as");
 		
 		writeCs(constantSystemMatrix);
-		//System.out.println("Cs");
+		System.out.println("Cs");
 		DenseVector currentIterate = new DenseVector(nEulerian + nLagrangian + nTransfer);
 		DenseVector lastIterate = new DenseVector(nEulerian + nLagrangian + nTransfer);
 		generateFirstEulerianIterates(currentIterate);
 		generateFirstLagrangianIterates(currentIterate, lastIterate);
-		//System.out.println("firstIts");
+		System.out.println("firstIts");
 		writeBoundaryValues(constantSystemMatrix, currentIterate, 0);
 		writeBoundaryValues(constantSystemMatrix, lastIterate, -dt);
-		//System.out.println("bdrs");
+		System.out.println("bdrs");
 		final Map<CoordinateVector, Double> pvals = getUp(currentIterate)
 			.pressureValuesInPointsAtTime(eulerianPoints, -dt);
 		final Map<CoordinateVector, CoordinateVector> vvals = getUp(currentIterate)
@@ -113,21 +113,21 @@ public class DLMSummarySchur
 		                                                                                                 1)),
 		                                                    1).getInvertedDiagonalMatrix()
 		                                                      .toDense();
-		//System.out.println("laginv");
+		System.out.println("laginv");
 		final DenseMatrix firstmmul = precondBlocks.getBlockMatrix(0, 1)
 		                                           .mmMul(lagInverse);
-		//System.out.println("laginv");
+		System.out.println("laginv");
 		final DenseMatrix secondmmul = firstmmul
 			.mmMul(precondBlocks.getBlockMatrix(1, 0));
-		//System.out.println("laginv");
+		System.out.println("laginv");
 		final BlockDenseMatrix schur = new BlockDenseMatrix(precondBlocks.getBlockMatrix(0, 0)
 		                                                                 .add(secondmmul),
 		                                                    nEulerCells * nEulerCells / 8);
-		final BlockDenseMatrix schurBlockInverse = schur.getInvertedDiagonalMatrix();
-		final DenseMatrix schurDense = schur.toDense();
-		final DenseMatrix schurDenseInverse = schurDense.inverse();
+		//final BlockDenseMatrix schurBlockInverse = schur.getInvertedDiagonalMatrix();
+		//final DenseMatrix schurDense = schur.toDense();
+		//final DenseMatrix schurDenseInverse = schurDense.inverse();
 		//System.out.println("############");
-		final DenseVector r = new DenseVector(schurDense.getVectorSize());
+		//final DenseVector r = new DenseVector(schurDense.getVectorSize());
 //		System.out.println(schur.sub(schurDense)
 //		                        .absMaxElement());
 //		System.out.println(schurDenseInverse.mmMul(schurDense)
@@ -236,17 +236,17 @@ public class DLMSummarySchur
 				drawInterval = 1;
 			if (i % drawInterval == 0 || i < 10)
 				writeOutVals(currentIterate, lastIterate, pvals, vvals, dvals, derivVals, uXvals, i);
-			//	System.out.println("saved Iterate");
+			System.out.println("saved Iterate");
 			writeF(rightHandSide, currentIterate);
-			//	System.out.println("f");
+			System.out.println("f");
 			writeG(rightHandSide, currentIterate, lastIterate);
-			//	System.out.println("g");
+			System.out.println("g");
 			writeD(rightHandSide, currentIterate);
-			//	System.out.println("d");
+			System.out.println("d");
 			writeCf(systemMatrix, currentIterate);
-			//	System.out.println("cf");
+			System.out.println("cf");
 			writeBoundaryValues(systemMatrix, rightHandSide, i * dt);
-			//	System.out.println("bdr");
+			System.out.println("bdr");
 			System.out.println(i + "th iteration");
 			lastIterate = new DenseVector(currentIterate);
 			rhsHistory.addRow(rightHandSide, i + 1);
@@ -264,7 +264,7 @@ public class DLMSummarySchur
 			//System.out.println(iterrr.sub(currentIterate).absMaxElement());
 			//	System.out.println("newit" + getLagrangianIterate(currentIterate));
 			iterateHistory.addRow(currentIterate, i + 1);
-			//	System.out.println("solved");
+			System.out.println("solved");
 		}
 		interruptor.running = false;
 		final PlotWindow p = new PlotWindow();
