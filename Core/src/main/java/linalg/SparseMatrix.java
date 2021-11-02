@@ -233,6 +233,34 @@ public class SparseMatrix
 	}
 	
 	@Override
+	public DenseVector getColumn(final int col)
+	{
+		if (PerformanceArguments.getInstance().executeChecks)
+			if (col < 0 || col > getCols()) throw new IllegalArgumentException("col out of bounds");
+		final DenseVector ret = new DenseVector(getRows());
+		for (int i = 0; i < sparseEntries; i++)
+		{
+			if (sparseXs[i] == col)
+				ret.add(sparseValues[i], sparseYs[i]);
+		}
+		return ret;
+	}
+	
+	@Override
+	public DenseVector getRow(final int row)
+	{
+		if (PerformanceArguments.getInstance().executeChecks)
+			if (row < 0 || row > getRows()) throw new IllegalArgumentException("row out of bounds");
+		final DenseVector ret = new DenseVector(getCols());
+		for (int i = 0; i < sparseEntries; i++)
+		{
+			if (sparseYs[i] == row)
+				ret.add(sparseValues[i], sparseXs[i]);
+		}
+		return ret;
+	}
+	
+	@Override
 	public void addInPlace(final Tensor other)
 	{
 		

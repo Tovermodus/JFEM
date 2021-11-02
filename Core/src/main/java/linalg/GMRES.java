@@ -1,5 +1,7 @@
 package linalg;
 
+import basic.Interruptor;
+
 import java.util.ArrayList;
 import java.util.stream.IntStream;
 
@@ -18,7 +20,7 @@ class GMRES
 	
 	public linalg.Vector solve(final VectorMultiplyable A,
 	                           final Vector b,
-	                           final double tol, final IterativeSolver.Interruptor interruptor)
+	                           final double tol, final Interruptor interruptor)
 	{
 		
 		final MutableVector x = new linalg.DenseVector(b.getLength());
@@ -28,7 +30,7 @@ class GMRES
 	
 	public linalg.Vector solve(final VectorMultiplyable A,
 	                           final Vector b, final Vector x,
-	                           final double tol, final IterativeSolver.Interruptor interruptor)
+	                           final double tol, final Interruptor interruptor)
 	{
 		final ArrayList<Vector> v = new ArrayList<>();
 		final int n = b.getLength();
@@ -74,7 +76,7 @@ class GMRES
 			gamma.set(-s.at(j) * gamma.at(j), j + 1);
 			gamma.set(c.at(j) * gamma.at(j), j);
 			if (showProgress)
-				System.out.println(Math.abs(gamma.at(j + 1)));
+				System.out.println("GMRes Gamma: " + Math.abs(gamma.at(j + 1)));
 			if (Math.abs(gamma.at(j + 1)) < tol || j > ITERATIONS_BEFORE_RESTART)
 				break;
 			v.add(w.mul(1. / h.at(j + 1, j)));
@@ -101,6 +103,8 @@ class GMRES
 		if (j > ITERATIONS_BEFORE_RESTART && restarts < MAX_RESTARTS)
 		{
 			restarts++;
+			if (showProgress)
+				System.out.println("GMRes Restart");
 			return solve(A, b, x.add(alphaV), tol, interruptor);
 		}
 		return x.add(alphaV);
@@ -110,7 +114,7 @@ class GMRES
 	                                                          final VectorMultiplyable A,
 	                                                          final Vector b,
 	                                                          final double tol,
-	                                                          final IterativeSolver.Interruptor interruptor)
+	                                                          final Interruptor interruptor)
 	{
 		
 		final MutableVector x = new linalg.DenseVector(b.getLength());
@@ -123,7 +127,7 @@ class GMRES
 	                                                          final Vector b,
 	                                                          final Vector x,
 	                                                          final double tol,
-	                                                          final IterativeSolver.Interruptor interruptor)
+	                                                          final Interruptor interruptor)
 	{
 		final ArrayList<Vector> v = new ArrayList<>();
 		final int n = b.getLength();
@@ -170,7 +174,7 @@ class GMRES
 			gamma.set(-s.at(j) * gamma.at(j), j + 1);
 			gamma.set(c.at(j) * gamma.at(j), j);
 			if (showProgress)
-				System.out.println(Math.abs(gamma.at(j + 1)));
+				System.out.println("GMRes Gamma: " + Math.abs(gamma.at(j + 1)));
 			if (Math.abs(gamma.at(j + 1)) < tol || j > ITERATIONS_BEFORE_RESTART)
 				break;
 			v.add(w.mul(1. / h.at(j + 1, j)));
@@ -197,6 +201,8 @@ class GMRES
 		if (j > ITERATIONS_BEFORE_RESTART && restarts < MAX_RESTARTS)
 		{
 			restarts++;
+			if (showProgress)
+				System.out.println("GMRES restart");
 			return solve(preconditioner, A, b, x.add(alphaV), tol, interruptor);
 		}
 		return x.add(alphaV);

@@ -1,9 +1,8 @@
 package linalg;
 
+import basic.Interruptor;
 import basic.PerformanceArguments;
 
-import javax.swing.*;
-import java.awt.*;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
@@ -12,6 +11,7 @@ public class IterativeSolver
 	private GMRES gm;
 	ExecutorService ex;
 	public boolean showProgress = true;
+	public boolean showInterrupt = false;
 	Vector lastSolution = null;
 	
 	public Vector solveCG(final VectorMultiplyable operator, final Vector rhs, final double tol)
@@ -27,7 +27,7 @@ public class IterativeSolver
 		}
 		ex = Executors.newSingleThreadExecutor();
 		final Interruptor i = new Interruptor();
-		if (showProgress)
+		if (showInterrupt)
 			ex.execute(i);
 		final int n = rhs.getLength();
 		Vector z;
@@ -45,13 +45,15 @@ public class IterativeSolver
 		{
 			z = operator.mvMul(defect);
 			alpha = residuum.inner(residuum) / defect.inner(z);
+			if (alpha < 0 && showProgress)
+				System.out.println("CG warning: Matrix not PD");
 			iterate.addInPlace(defect.mul(alpha));
 			newResiduum = residuum.sub(z.mul(alpha));
 			beta = newResiduum.inner(newResiduum) / residuum.inner(residuum);
 			defect = newResiduum.add(defect.mul(beta));
 			residuum = newResiduum;
 			if (showProgress)
-				System.out.println(residuum.euclidianNorm());
+				System.out.println("CG residuum norm: " + residuum.euclidianNorm());
 		}
 		i.running = false;
 		ex.shutdown();
@@ -78,7 +80,7 @@ public class IterativeSolver
 		}
 		ex = Executors.newSingleThreadExecutor();
 		final Interruptor i = new Interruptor();
-		if (showProgress)
+		if (showInterrupt)
 			ex.execute(i);
 		final int n = rhs.getLength();
 		Vector Ap;
@@ -97,6 +99,8 @@ public class IterativeSolver
 		{
 			Ap = operator.mvMul(p);
 			alpha = residuum.inner(z) / p.inner(Ap);
+			if (alpha < 0 && showProgress)
+				System.out.println("CG warning: Matrix not PD");
 			iterate.addInPlace(p.mul(alpha));
 			newResiduum = residuum.sub(Ap.mul(alpha));
 			newZ = preconditioner.mvMul(newResiduum);
@@ -105,7 +109,7 @@ public class IterativeSolver
 			residuum = newResiduum;
 			z = newZ;
 			if (showProgress)
-				System.out.println(residuum.euclidianNorm());
+				System.out.println("PCG residuum norm: " + residuum.euclidianNorm());
 		}
 		i.running = false;
 		ex.shutdown();
@@ -133,7 +137,7 @@ public class IterativeSolver
 		}
 		ex = Executors.newSingleThreadExecutor();
 		final Interruptor i = new Interruptor();
-		if (showProgress)
+		if (showInterrupt)
 			ex.execute(i);
 		final Vector x;
 		gm = new GMRES(showProgress, 0);
@@ -160,7 +164,7 @@ public class IterativeSolver
 		}
 		ex = Executors.newSingleThreadExecutor();
 		final Interruptor i = new Interruptor();
-		if (showProgress)
+		if (showInterrupt)
 			ex.execute(i);
 		final Vector x;
 		gm = new GMRES(showProgress, 0);
@@ -176,7 +180,24 @@ public class IterativeSolver
 	
 	public Vector solveBiCGStab(final VectorMultiplyable operator, final Vector rhs, final double tol)
 	{
-		return solveBiCGStab(operator, rhs, new DenseVector(rhs.getLength()), tol);
+		DenseVector iterate = new DenseVector(rhs.getLength());
+		if (lastSolution != null)
+			iterate = new DenseVector(lastSolution);
+		else
+			iterate.set(1, 0);
+		return solveBiCGStab(operator, rhs, iterate, tol);
+	}
+	
+	public Vector solvePBiCGStab(final VectorMultiplyable operator,
+	                             final VectorMultiplyable preconditioner, final Vector rhs,
+	                             final double tol)
+	{
+		DenseVector iterate = new DenseVector(rhs.getLength());
+		if (lastSolution != null)
+			iterate = new DenseVector(lastSolution);
+		else
+			iterate.set(1, 0);
+		return solvePBiCGStab(operator, preconditioner, rhs, iterate, tol);
 	}
 	
 	public Vector solveBiCGStab(final VectorMultiplyable operator,
@@ -195,38 +216,47 @@ public class IterativeSolver
 		}
 		ex = Executors.newSingleThreadExecutor();
 		final Interruptor i = new Interruptor();
-		if (showProgress)
+		if (showInterrupt)
 			ex.execute(i);
 		final int n = rhs.getLength();
-		Vector v;
+		Vector v = new DenseVector(n);
 		Vector s;
 		Vector t;
-		Vector iterate = new DenseVector(startIterate);
+		DenseVector iterate = new DenseVector(startIterate);
 		final Vector startResiduum = rhs.sub(operator.mvMul(iterate));
 		Vector residuum = new DenseVector(startResiduum);
-		Vector p = new DenseVector(residuum);
-		double alpha;
-		double omega;
-		double rho = residuum.inner(residuum);
-		double rhoLast;
-		double beta;
+		Vector p = new DenseVector(n);
+		double alpha = 1;
+		double omega = 1;
+		double rho = 1;
+		double rhoLast = 1;
+		double beta = 1;
 		for (int iter = 0; iter < n && residuum.euclidianNorm() > tol && i.running; iter++)
 		{
+			rho = residuum.inner(startResiduum);
+			if (Math.abs(rhoLast) < tol)
+				return solveGMRES(operator, rhs, tol);
+			beta = alpha / omega * rho / rhoLast;
+			p = residuum.add(p.mul(beta))
+			            .sub(v.mul(omega * beta));
 			v = operator.mvMul(p);
 			alpha = rho / v.inner(startResiduum);
 			s = residuum.sub(v.mul(alpha));
+			if (s.euclidianNorm() < tol)
+			{
+				if (showProgress)
+					System.out.println("BiCGStab residuum norm: " + s.euclidianNorm());
+				iterate = iterate.add(p.mul(alpha));
+				break;
+			}
 			t = operator.mvMul(s);
 			omega = t.inner(s) / t.inner(t);
 			iterate = iterate.add(p.mul(alpha))
 			                 .add(s.mul(omega));
 			residuum = s.sub(t.mul(omega));
 			rhoLast = rho;
-			rho = residuum.inner(startResiduum);
-			beta = alpha / omega * rho / rhoLast;
-			p = residuum.add(p.mul(beta))
-			            .sub(v.mul(omega * beta));
 			if (showProgress)
-				System.out.println(residuum.euclidianNorm());
+				System.out.println("BiCGStab residuum norm: " + residuum.euclidianNorm());
 		}
 		i.running = false;
 		ex.shutdown();
@@ -237,6 +267,7 @@ public class IterativeSolver
 	public <T extends VectorMultiplyable> Vector solvePBiCGStab(final VectorMultiplyable operator,
 	                                                            final T preconditioner,
 	                                                            final Vector rhs,
+	                                                            final Vector startIterate,
 	                                                            final double tol)
 	{
 		if (PerformanceArguments.getInstance().executeChecks)
@@ -253,92 +284,57 @@ public class IterativeSolver
 		}
 		ex = Executors.newSingleThreadExecutor();
 		final Interruptor i = new Interruptor();
-		if (showProgress)
+		if (showInterrupt)
 			ex.execute(i);
 		final int n = rhs.getLength();
-		Vector v;
-		Vector vP;
 		Vector s;
-		Vector sP;
 		Vector t;
-		Vector tP;
-		Vector iterate = new DenseVector(n);
+		DenseVector iterate = new DenseVector(startIterate);
 		final Vector startResiduum = rhs.sub(operator.mvMul(iterate));
-		final Vector startResiduumP = preconditioner.mvMul(startResiduum);
 		Vector residuum = new DenseVector(startResiduum);
-		Vector residuumP = preconditioner.mvMul(residuum);
-		Vector pP = preconditioner.mvMul(residuumP);
-		double alpha;
-		double omega;
-		double rho = residuumP.inner(residuumP);
-		double rhoLast;
-		double beta;
-		for (int iter = 0; iter < n && residuum.euclidianNorm() > tol && i.running; iter++)
+		double alpha = 1;
+		double omega = 1;
+		double rho = 1;
+		double rhoLast = 1;
+		double beta = 1;
+		Vector v = new DenseVector(n);
+		Vector y = new DenseVector(n);
+		Vector z = new DenseVector(n);
+		Vector pt = new DenseVector(n);
+		Vector p = new DenseVector(n);
+		for (int iter = 0; iter < n * 10 && residuum.euclidianNorm() > tol && i.running; iter++)
 		{
-			v = operator.mvMul(pP);
-			vP = preconditioner.mvMul(v);
-			alpha = rho / vP.inner(startResiduumP);
-			s = residuum.sub(v.mul(alpha));
-			sP = preconditioner.mvMul(s);
-			t = operator.mvMul(sP);
-			tP = preconditioner.mvMul(t);
-			omega = tP.inner(sP) / tP.inner(tP);
-			iterate = iterate.add(pP.mul(alpha))
-			                 .add(sP.mul(omega));
-			residuum = rhs.sub(operator.mvMul(iterate));
-			residuumP = sP.sub(tP.mul(omega));
-			rhoLast = rho;
-			rho = residuumP.inner(startResiduumP);
+			rho = residuum.inner(startResiduum);
+			if (Math.abs(rhoLast) < tol)
+				return solvePGMRES(operator, preconditioner, rhs, tol);
 			beta = alpha / omega * rho / rhoLast;
-			pP = residuumP.add(pP.mul(beta))
-			              .sub(vP.mul(omega * beta));
+			p = residuum.add(p.mul(beta))
+			            .sub(v.mul(omega * beta));
+			y = preconditioner.mvMul(p);
+			v = operator.mvMul(y);
+			alpha = rho / v.inner(startResiduum);
+			s = residuum.sub(v.mul(alpha));
+			if (s.euclidianNorm() < tol)
+			{
+				if (showProgress)
+					System.out.println("PBiCGStab residuum norm: " + s.euclidianNorm());
+				iterate = iterate.add(y.mul(alpha));
+				break;
+			}
+			z = preconditioner.mvMul(s);
+			t = operator.mvMul(z);
+			pt = preconditioner.mvMul(t);
+			omega = pt.inner(z) / pt.inner(pt);
+			iterate = iterate.add(y.mul(alpha))
+			                 .add(z.mul(omega));
+			residuum = s.sub(t.mul(omega));
+			rhoLast = rho;
 			if (showProgress)
-				System.out.println(residuum.euclidianNorm());
+				System.out.println("PBiCGStab residuum norm: " + residuum.euclidianNorm());
 		}
 		i.running = false;
 		ex.shutdown();
 		lastSolution = iterate;
 		return iterate;
-	}
-	
-	public static class Interruptor
-		implements Runnable
-	{
-		private JFrame f;
-		public volatile boolean running = true;
-		
-		public boolean isRunning()
-		{
-			return running;
-		}
-		
-		@Override
-		public void run()
-		{
-			f = new JFrame("Interrupt Solver");
-			final JButton b = new JButton("Interrupt!");
-			f.setLayout(new GridLayout());
-			f.add(b);
-			f.setBounds(0, 0, 300, 300);
-			f.setVisible(true);
-			b.addActionListener(e ->
-			                    {
-				                    System.out.println("Interrupt!!!");
-				                    running = false;
-				                    f.setVisible(false);
-				                    f.dispose();
-			                    });
-			while (running)
-			{
-				try
-				{
-					Thread.sleep(30);
-				} catch (final InterruptedException e)
-				{
-					e.printStackTrace();
-				}
-			}
-			f.dispose();
-		}
 	}
 }

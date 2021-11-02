@@ -1,7 +1,4 @@
-import basic.PlotWindow;
-import basic.ScalarFunction;
-import basic.ScalarPlot2DTime;
-import basic.VectorFunction;
+import basic.*;
 import distorted.*;
 import distorted.geometry.DistortedCell;
 import linalg.*;
@@ -34,30 +31,30 @@ public class DLMSummarySchur
 	int nLagrangian;
 	int nTransfer;
 	int eulerianPointsPerDimension = 40;
-	int nEulerCells = 10;
+	int nEulerCells = 20;
 	int nLagrangeRefines = 2;
 	List<CoordinateVector> eulerianPoints;
-	private final int lagrangeDegree = 1;
+	private final int lagrangeDegree = 2;
 	private final int eulerDegree = 1;
 	private final String elastMethod = DistortedVectorCellIntegral.SYM_GRAD;
 	
 	public DLMSummarySchur()
 	{
-//		PerformanceArguments.PerformanceArgumentBuilder builder =
-//			new PerformanceArguments.PerformanceArgumentBuilder();
-//		builder.executeChecks = false;
-//		builder.build();
+		final PerformanceArguments.PerformanceArgumentBuilder builder =
+			new PerformanceArguments.PerformanceArgumentBuilder();
+		builder.executeChecks = false;
+		builder.build();
 		rhoF = 1;
 		rhoS = 2;
 		nu = 1;
-		kappa = 1000.000000;
+		kappa = 10.000000;
 		dt = 0.01;
-		timeSteps = 3;
+		timeSteps = 10;
 		initializeEulerian();
 		initializeLagrangian();
 		
 		final ExecutorService ex = Executors.newSingleThreadExecutor();
-		final IterativeSolver.Interruptor interruptor = new IterativeSolver.Interruptor();
+		final Interruptor interruptor = new Interruptor();
 		ex.execute(interruptor);
 		final SparseMatrix constantSystemMatrix = new SparseMatrix(nEulerian + nLagrangian + nTransfer,
 		                                                           nEulerian + nLagrangian + nTransfer);
@@ -65,20 +62,20 @@ public class DLMSummarySchur
 		DenseVector rightHandSide;
 		final DenseVector constantRightHandSide = new DenseVector(nEulerian + nLagrangian + nTransfer);
 		writeABf(constantSystemMatrix);
-		System.out.println("abf");
+		//System.out.println("abf");
 		writeAs(constantSystemMatrix);
-		System.out.println("as");
+		//System.out.println("as");
 		
 		writeCs(constantSystemMatrix);
-		System.out.println("Cs");
+		//System.out.println("Cs");
 		DenseVector currentIterate = new DenseVector(nEulerian + nLagrangian + nTransfer);
 		DenseVector lastIterate = new DenseVector(nEulerian + nLagrangian + nTransfer);
 		generateFirstEulerianIterates(currentIterate);
 		generateFirstLagrangianIterates(currentIterate, lastIterate);
-		System.out.println("firstIts");
+		//System.out.println("firstIts");
 		writeBoundaryValues(constantSystemMatrix, currentIterate, 0);
 		writeBoundaryValues(constantSystemMatrix, lastIterate, -dt);
-		System.out.println("bdrs");
+		//System.out.println("bdrs");
 		final Map<CoordinateVector, Double> pvals = getUp(currentIterate)
 			.pressureValuesInPointsAtTime(eulerianPoints, -dt);
 		final Map<CoordinateVector, CoordinateVector> vvals = getUp(currentIterate)
@@ -112,23 +109,36 @@ public class DLMSummarySchur
 		//new DenseMatrix(precond).get
 		writeCf(precond, currentIterate);
 		final BlockSparseMatrix precondBlocks = new BlockSparseMatrix(precond, new int[]{0, nEulerian});
-		final DenseMatrix lagInverse = precondBlocks.getBlockMatrix(1, 1)
-		                                            .inverse();
-		System.out.println("laginv");
+		final DenseMatrix lagInverse = new BlockDenseMatrix(new DenseMatrix(precondBlocks.getBlockMatrix(1,
+		                                                                                                 1)),
+		                                                    1).getInvertedDiagonalMatrix()
+		                                                      .toDense();
+		//System.out.println("laginv");
 		final DenseMatrix firstmmul = precondBlocks.getBlockMatrix(0, 1)
 		                                           .mmMul(lagInverse);
-		System.out.println("laginv");
+		//System.out.println("laginv");
 		final DenseMatrix secondmmul = firstmmul
 			.mmMul(precondBlocks.getBlockMatrix(1, 0));
-		System.out.println("laginv");
+		//System.out.println("laginv");
 		final BlockDenseMatrix schur = new BlockDenseMatrix(precondBlocks.getBlockMatrix(0, 0)
 		                                                                 .add(secondmmul),
-		                                                    nEulerCells * nEulerCells);
+		                                                    nEulerCells * nEulerCells / 8);
 		final BlockDenseMatrix schurBlockInverse = schur.getInvertedDiagonalMatrix();
-//		final DenseMatrix schurDense = schur.toDense()
-//		                                    .inverse();
-		System.out.println(schurBlockInverse.getShape() + " " + schur.getShape());
-		System.out.println("mmul");
+		final DenseMatrix schurDense = schur.toDense();
+		final DenseMatrix schurDenseInverse = schurDense.inverse();
+		//System.out.println("############");
+		final DenseVector r = new DenseVector(schurDense.getVectorSize());
+//		System.out.println(schur.sub(schurDense)
+//		                        .absMaxElement());
+//		System.out.println(schurDenseInverse.mmMul(schurDense)
+//		                                    .sub(DenseMatrix.identity(schur.getCols()))
+//		                                    .absMaxElement());
+//		System.out.println(schurDenseInverse.mmMul(schur)
+//		                                    .sub(DenseMatrix.identity(schur.getCols()))
+//		                                    .absMaxElement());
+//		System.out.println("##########");
+//		System.out.println(schurBlockInverse.getShape() + " " + schur.getShape());
+//		System.out.println("mmul");
 		final VectorMultiplyable precondInverse = new VectorMultiplyable()
 		{
 			final IterativeSolver it = new IterativeSolver();
@@ -153,11 +163,49 @@ public class DLMSummarySchur
 					      .sub(precondBlocks.getBlockMatrix(0, 1)
 					                        .mvMul(lagInverse.mvMul(vector.slice(nEulerian,
 					                                                             nEulerian + nLagrangian + nTransfer))));
-				it.showProgress = true;
-				final DenseVector eul = new DenseVector(schurBlockInverse.mvMul(g));
+				
+				//it = new IterativeSolver();
+				it.showProgress = false;
+				final DenseVector eul = //new DenseVector(schurDense.mvMul(g));
+					(DenseVector) it.solveBiCGStab(schur, g,
+					                               1e-10);
+//				it = new IterativeSolver();
+//				it.showProgress = true;
+//				final DenseVector eul2 = //new DenseVector(schurDense.mvMul(g));
+//					(DenseVector) it.solvePCG(schurDense, schurBlockInverse, g,
+//					                          1e-8);
+//				it = new IterativeSolver();
+//				it.showProgress = false;
+//				final DenseVector eul3 = //new DenseVector(schurDense.mvMul(g));
 //					(DenseVector) it.solvePGMRES(schur, schurBlockInverse, g,
-//				                                                     1);
-				System.out.println("donnnnnnnnnnnnnnnnn");
+//					                             1e-8);
+//				final DenseVector eul4 = //new DenseVector(schurDense.mvMul(g));
+//					schurDenseInverse.mvMul(g);
+//				System.out.println(eul.sub(eul2)
+//				                      .absMaxElement() + "   12");
+//				System.out.println(eul.sub(eul3)
+//				                      .absMaxElement() + "   13");
+//				System.out.println(eul.sub(eul4)
+//				                      .absMaxElement() + "   14");
+//				System.out.println(eul2.sub(eul3)
+//				                       .absMaxElement() + "   23");
+//				System.out.println(eul2.sub(eul4)
+//				                       .absMaxElement() + "   24");
+//				System.out.println(eul3.sub(eul4)
+//				                       .absMaxElement() + "   34");
+				System.out.println(schur.mvMul(eul)
+				                        .sub(g)
+				                        .absMaxElement() + " subCG1");
+//				System.out.println(schur.mvMul(eul2)
+//				                        .sub(g)
+//				                        .absMaxElement() + " subCG2");
+//				System.out.println(schur.mvMul(eul3)
+//				                        .sub(g)
+//				                        .absMaxElement() + " subCG3");
+//				System.out.println(schur.mvMul(eul4)
+//				                        .sub(g)
+//				                        .absMaxElement() + " subCG4");
+//				System.out.println("donnnnnnnnnnnnnnnnn");
 				final DenseVector lag = lagInverse.mvMul(vector.slice(nEulerian,
 				                                                      nEulerian + nLagrangian + nTransfer)
 				                                               .sub(precondBlocks.getBlockMatrix(
@@ -189,17 +237,17 @@ public class DLMSummarySchur
 				drawInterval = 1;
 			if (i % drawInterval == 0 || i < 10)
 				writeOutVals(currentIterate, lastIterate, pvals, vvals, dvals, derivVals, uXvals, i);
-			System.out.println("saved Iterate");
+			//	System.out.println("saved Iterate");
 			writeF(rightHandSide, currentIterate);
-			System.out.println("f");
+			//	System.out.println("f");
 			writeG(rightHandSide, currentIterate, lastIterate);
-			System.out.println("g");
+			//	System.out.println("g");
 			writeD(rightHandSide, currentIterate);
-			System.out.println("d");
+			//	System.out.println("d");
 			writeCf(systemMatrix, currentIterate);
-			System.out.println("cf");
+			//	System.out.println("cf");
 			writeBoundaryValues(systemMatrix, rightHandSide, i * dt);
-			System.out.println("bdr");
+			//	System.out.println("bdr");
 			System.out.println(i + "th iteration");
 			lastIterate = new DenseVector(currentIterate);
 			rhsHistory.addRow(rightHandSide, i + 1);
@@ -209,22 +257,22 @@ public class DLMSummarySchur
 			itp.showProgress = true;
 			System.out.println(systemMatrix.sub(systemMatrix.transpose())
 			                               .absMaxElement() + "ABBBBBB");
-			currentIterate = (DenseVector) itp.solvePCG(new BlockSparseMatrix(systemMatrix, 1),
-			                                            precondInverse,
-			                                            rightHandSide,
-			                                            1e-7);
+			currentIterate = (DenseVector) itp.solvePGMRES(new BlockSparseMatrix(systemMatrix, 1),
+			                                               precondInverse,
+			                                               rightHandSide,
+			                                               1e-7);
 			//currentIterate = systemMatrix.solve(rightHandSide);
 			//System.out.println(iterrr.sub(currentIterate).absMaxElement());
-			System.out.println("newit" + getLagrangianIterate(currentIterate));
+			//	System.out.println("newit" + getLagrangianIterate(currentIterate));
 			iterateHistory.addRow(currentIterate, i + 1);
-			System.out.println("solved");
+			//	System.out.println("solved");
 		}
 		interruptor.running = false;
 		final PlotWindow p = new PlotWindow();
 		p.addPlot(new MatrixPlot(iterateHistory, "iterateHistory"));
 		p.addPlot(new MatrixPlot(rhsHistory, "rhsHistory"));
 		final MixedPlot2DTime plot = new MixedPlot2DTime(pvals, vvals, eulerianPointsPerDimension, "VVals");
-		System.out.println("plotttt");
+		//System.out.println("plotttt");
 //		p.addPlot(new MixedPlot2DTime(pvals, uXvals, eulerianPointsPerDimension, "uXVals"));
 		try
 		{
@@ -503,9 +551,9 @@ public class DLMSummarySchur
 		eulerianAlphaMass = new SparseMatrix(nEulerian, nEulerian);
 		eulerian.writeCellIntegralsToMatrix(List.of(mass, symGrad, divValue), ABf);
 		eulerian.writeCellIntegralsToMatrix(List.of(mass), eulerianAlphaMass);
-		System.out.println(ABf.transpose()
-		                      .sub(ABf)
-		                      .absMaxElement() + "ABfAbsMax");
+//		System.out.println(ABf.transpose()
+//		                      .sub(ABf)
+//		                      .absMaxElement() + "ABfAbsMax");
 		constantMatrix.addSmallMatrixAt(ABf, 0, 0);
 	}
 	
@@ -519,20 +567,20 @@ public class DLMSummarySchur
 		lagrangian.writeCellIntegralsToMatrix(List.of(mass, elast), As);
 		lagrangianBetaMass = new SparseMatrix(nLagrangian, nLagrangian);
 		lagrangian.writeCellIntegralsToMatrix(List.of(mass), lagrangianBetaMass);
-		System.out.println(As.transpose()
-		                     .sub(As)
-		                     .absMaxElement() + "AsAbsMax");
+//		System.out.println(As.transpose()
+//		                     .sub(As)
+//		                     .absMaxElement() + "AsAbsMax");
 		constantMatrix.addSmallMatrixAt(As.mul(1. / dt), nEulerian, nEulerian);
 	}
 	
 	public void writeCf(final SparseMatrix currentMatrix, final DenseVector currentIterate)
 	{
 		final SparseMatrix Cf = new SparseMatrix(nTransfer, nEulerian);
-		int i = 0;
+		final int i = 0;
 		for (final Map.Entry<Integer, QkQkFunction> sfEntry : eulerian.getShapeFunctions()
 		                                                              .entrySet())
 		{
-			if (i++ % 40 == 0) System.out.println(100.0 * i / nEulerian);
+			//if (i++ % 40 == 0) System.out.println(100.0 * i / nEulerian);
 			final QkQkFunction sf = sfEntry.getValue();
 			final DistortedVectorFunction vOfX = concatenateVelocityWithX(sf, currentIterate);
 			

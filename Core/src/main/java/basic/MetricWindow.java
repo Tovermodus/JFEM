@@ -7,56 +7,51 @@ import java.awt.image.BufferedImage;
 import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.Executors;
 
-public class PlotWindow
+public class MetricWindow
 	extends JFrame
 	implements KeyListener, WindowListener, ComponentListener, MouseWheelListener
 {
-	final JSlider slider;
-	final JCheckBox overlay;
-	final Canvas canvas;
-	final CopyOnWriteArrayList<Plot> plots;
-	final DrawThread d;
-	int currentPlot = 0;
+	private final Canvas canvas;
+	private final CopyOnWriteArrayList<Metric> plots;
+	private final DrawThread d;
+	private int currentPlot = 0;
+	private static MetricWindow INSTANCE;
 	
-	public PlotWindow()
+	public static MetricWindow getInstance()
+	{
+		if (INSTANCE == null)
+			INSTANCE = new MetricWindow();
+		return INSTANCE;
+	}
+	
+	private MetricWindow()
 	{
 		
 		setSize(800, 800);
 		setLayout(new BorderLayout());
-		slider = new JSlider(JSlider.HORIZONTAL, 0, 100, 0);
-		slider.setFocusable(false);
-		overlay = new JCheckBox("Show Overlay");
 		canvas = new Canvas();
 		canvas.setFocusable(false);
 		final JPanel pan = new JPanel();
 		add(canvas, BorderLayout.CENTER);
 		pan.setLayout(new BorderLayout());
-		pan.add(slider, BorderLayout.CENTER);
-		pan.add(overlay, BorderLayout.EAST);
 		add(pan, BorderLayout.NORTH);
 		pan.setFocusable(true);
 		this.setFocusable(true);
 		setVisible(true);
-		d = new DrawThread(canvas, canvas.getWidth(), canvas.getHeight(), slider);
+		d = new DrawThread(canvas, canvas.getWidth(), canvas.getHeight());
 		plots = new CopyOnWriteArrayList<>();
 		addComponentListener(this);
 		addKeyListener(this);
 		canvas.addKeyListener(this);
 		addMouseWheelListener(this);
 		addWindowListener(this);
-		overlay.addChangeListener(e ->
-		                          {
-			                          d.isChecked = overlay.isSelected();
-			                          this.setVisible(false);
-			                          this.setVisible(true);
-		                          });
 		Executors.newSingleThreadExecutor()
 		         .execute(d);
 	}
 	
-	public void addPlot(final Plot plot)
+	public void addMetric(final Metric plot)
 	{
-		if (plots.size() == 0) d.setPlot(plot);
+		if (plots.size() == 0) d.setMetric(plot);
 		plots.add(plot);
 	}
 	
@@ -89,18 +84,11 @@ public class PlotWindow
 	@Override
 	public void keyPressed(final KeyEvent e)
 	{
-		int newValue = slider.getValue();
 		if (e.getKeyCode() == KeyEvent.VK_DOWN) currentPlot++;
 		if (e.getKeyCode() == KeyEvent.VK_UP) currentPlot--;
-		if (e.getKeyCode() == KeyEvent.VK_RIGHT) newValue++;
-		if (e.getKeyCode() == KeyEvent.VK_LEFT) newValue--;
-		if (newValue < 0) newValue = 99;
-		if (newValue > 99) newValue = 0;
 		if (plots.size() != 0) currentPlot = currentPlot % plots.size();
 		while (currentPlot < 0) currentPlot += plots.size();
 		System.out.println(currentPlot);
-		if (plots.size() != 0) d.setPlot(plots.get(currentPlot));
-		slider.setValue(newValue);
 	}
 	
 	@Override
@@ -111,9 +99,6 @@ public class PlotWindow
 	@Override
 	public void mouseWheelMoved(final MouseWheelEvent e)
 	{
-		int newValue = (slider.getValue() + e.getWheelRotation());
-		if (newValue < 0) newValue = 99;
-		slider.setValue(newValue % 100);
 	}
 	
 	@Override
@@ -169,21 +154,19 @@ public class PlotWindow
 	static class DrawThread
 		implements Runnable
 	{
-		private volatile Plot currentPlot;
+		private volatile Metric currentPlot;
 		volatile boolean running = true;
 		volatile int width;
 		volatile int height;
-		private final JSlider slider;
 		volatile boolean isChecked;
 		final Canvas canvas;
 		BufferedImage content;
 		
-		public DrawThread(final Canvas canvas, final int width, final int height, final JSlider slider)
+		public DrawThread(final Canvas canvas, final int width, final int height)
 		{
 			this.canvas = canvas;
 			this.width = width;
 			this.height = height;
-			this.slider = slider;
 			isChecked = false;
 			content = new BufferedImage(canvas.getWidth(), canvas.getHeight(), BufferedImage.TYPE_INT_RGB);
 		}
@@ -220,13 +203,12 @@ public class PlotWindow
 				currentPlot.draw(content.getGraphics(),
 				                 width,
 				                 height,
-				                 0.01 * slider.getValue(),
 				                 isChecked);
 			canvas.getGraphics()
 			      .drawImage(content, 0, 0, null);
 		}
 		
-		public synchronized void setPlot(final Plot p)
+		public synchronized void setMetric(final Metric p)
 		{
 			currentPlot = p;
 		}

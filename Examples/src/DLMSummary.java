@@ -55,7 +55,7 @@ public class DLMSummary
 		initializeLagrangian();
 		
 		final ExecutorService ex = Executors.newSingleThreadExecutor();
-		final IterativeSolver.Interruptor interruptor = new IterativeSolver.Interruptor();
+		final Interruptor interruptor = new Interruptor();
 		ex.execute(interruptor);
 		final SparseMatrix constantSystemMatrix = new SparseMatrix(nEulerian + nLagrangian + nTransfer,
 		                                                           nEulerian + nLagrangian + nTransfer);
