@@ -25,7 +25,7 @@ public class Laplace
 		final CoordinateVector end = CoordinateVector.fromValues(1, 1);
 		final int polynomialDegree = 2;
 		final TPFESpace grid = new TPFESpace(start, end,
-		                                     Ints.asList(80, 90));
+		                                     Ints.asList(30, 30));
 		final TPCellIntegral<TPShapeFunction> gg = new TPCellIntegral<>(ScalarFunction.constantFunction(1),
 		                                                                TPCellIntegral.GRAD_GRAD);
 		final double penalty = 200000;
@@ -73,9 +73,12 @@ public class Laplace
 		grid.evaluateFaceIntegrals(faceIntegrals, boundaryFaceIntegrals);
 		System.out.println(((1.0 * System.nanoTime() - startTime) / 1e9));
 		System.out.println(
-			"solve system: " + grid.getSystemMatrix().getRows() + "×" + grid.getSystemMatrix().getCols());
+			"solve system: " + grid.getSystemMatrix()
+			                       .getRows() + "×" + grid.getSystemMatrix()
+			                                              .getCols());
 		//grid.A.makeParallelReady(12);
-		if (grid.getRhs().getLength() < 50)
+		if (grid.getRhs()
+		        .getLength() < 50)
 		{
 			System.out.println(grid.getSystemMatrix());
 			System.out.println(grid.getRhs());
@@ -83,7 +86,10 @@ public class Laplace
 		final IterativeSolver i = new IterativeSolver();
 		System.out.println("start stopwatch");
 		final Stopwatch s = Stopwatch.createStarted();
+		i.showProgress = false;
 		final Vector solution1 = i.solveCG(grid.getSystemMatrix(), grid.getRhs(), 1e-3);
+		final IterativeSolver i2 = new IterativeSolver();
+		final Vector solution2 = i2.solveGMRES(grid.getSystemMatrix(), grid.getRhs(), 1e-3);
 		System.out.println(s.elapsed());
 		//Vector solution = ((DenseMatrix)grid.getSystemMatrix()).solve(grid.getRhs());
 		System.out.println("solved");

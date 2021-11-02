@@ -2,7 +2,9 @@ package basic;
 
 import java.awt.*;
 
-public abstract class Metric
+public interface Metric
 {
-	abstract void draw(Graphics graphics, int width, int height, boolean isChecked);
+	void draw(Graphics graphics, int width, int height, boolean isChecked);
+	
+	Metric getCopy();
 }

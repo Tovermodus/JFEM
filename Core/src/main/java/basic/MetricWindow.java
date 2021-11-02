@@ -89,6 +89,7 @@ public class MetricWindow
 		if (plots.size() != 0) currentPlot = currentPlot % plots.size();
 		while (currentPlot < 0) currentPlot += plots.size();
 		System.out.println(currentPlot);
+		if (plots.size() != 0) d.setMetric(plots.get(currentPlot));
 	}
 	
 	@Override

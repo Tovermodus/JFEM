@@ -7,15 +7,18 @@ import java.util.stream.IntStream;
 
 class GMRES
 {
-	private final boolean showProgress;
+	private final boolean printProgress;
+	final IterativeSolverConvergenceMetric metric;
 	int restarts = 0;
 	int MAX_RESTARTS = 100;
 	int ITERATIONS_BEFORE_RESTART = 200;
 	
-	public GMRES(final boolean showProgress, final int restarts)
+	public GMRES(final boolean printProgress,
+	             final IterativeSolverConvergenceMetric metric, final int restarts)
 	{
-		this.showProgress = showProgress;
+		this.printProgress = printProgress;
 		this.restarts = restarts;
+		this.metric = metric;
 	}
 	
 	public linalg.Vector solve(final VectorMultiplyable A,
@@ -32,6 +35,7 @@ class GMRES
 	                           final Vector b, final Vector x,
 	                           final double tol, final Interruptor interruptor)
 	{
+		metric.goal = tol;
 		final ArrayList<Vector> v = new ArrayList<>();
 		final int n = b.getLength();
 		final MutableVector c = new linalg.DenseVector(n);
@@ -75,8 +79,9 @@ class GMRES
 			h.set(beta, j, j);
 			gamma.set(-s.at(j) * gamma.at(j), j + 1);
 			gamma.set(c.at(j) * gamma.at(j), j);
-			if (showProgress)
+			if (printProgress)
 				System.out.println("GMRes Gamma: " + Math.abs(gamma.at(j + 1)));
+			metric.publishIterate(Math.abs(gamma.at(j + 1)));
 			if (Math.abs(gamma.at(j + 1)) < tol || j > ITERATIONS_BEFORE_RESTART)
 				break;
 			v.add(w.mul(1. / h.at(j + 1, j)));
@@ -103,7 +108,7 @@ class GMRES
 		if (j > ITERATIONS_BEFORE_RESTART && restarts < MAX_RESTARTS)
 		{
 			restarts++;
-			if (showProgress)
+			if (printProgress)
 				System.out.println("GMRes Restart");
 			return solve(A, b, x.add(alphaV), tol, interruptor);
 		}
@@ -129,6 +134,7 @@ class GMRES
 	                                                          final double tol,
 	                                                          final Interruptor interruptor)
 	{
+		metric.goal = tol;
 		final ArrayList<Vector> v = new ArrayList<>();
 		final int n = b.getLength();
 		final MutableVector c = new linalg.DenseVector(n);
@@ -173,8 +179,9 @@ class GMRES
 			h.set(beta, j, j);
 			gamma.set(-s.at(j) * gamma.at(j), j + 1);
 			gamma.set(c.at(j) * gamma.at(j), j);
-			if (showProgress)
+			if (printProgress)
 				System.out.println("GMRes Gamma: " + Math.abs(gamma.at(j + 1)));
+			metric.publishIterate(Math.abs(gamma.at(j + 1)));
 			if (Math.abs(gamma.at(j + 1)) < tol || j > ITERATIONS_BEFORE_RESTART)
 				break;
 			v.add(w.mul(1. / h.at(j + 1, j)));
@@ -201,7 +208,7 @@ class GMRES
 		if (j > ITERATIONS_BEFORE_RESTART && restarts < MAX_RESTARTS)
 		{
 			restarts++;
-			if (showProgress)
+			if (printProgress)
 				System.out.println("GMRES restart");
 			return solve(preconditioner, A, b, x.add(alphaV), tol, interruptor);
 		}

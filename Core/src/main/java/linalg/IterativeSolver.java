@@ -1,6 +1,7 @@
 package linalg;
 
 import basic.Interruptor;
+import basic.MetricWindow;
 import basic.PerformanceArguments;
 
 import java.util.concurrent.ExecutorService;
@@ -10,9 +11,24 @@ public class IterativeSolver
 {
 	private GMRES gm;
 	ExecutorService ex;
-	public boolean showProgress = true;
+	public boolean showProgress = false;
 	public boolean showInterrupt = false;
 	Vector lastSolution = null;
+	public IterativeSolverConvergenceMetric metric;
+	
+	public IterativeSolver()
+	{
+		metric = new IterativeSolverConvergenceMetric(1);
+		MetricWindow.getInstance()
+		            .addMetric(metric);
+	}
+	
+	public IterativeSolver(final boolean showProgress)
+	{
+		metric = new IterativeSolverConvergenceMetric(1);
+		MetricWindow.getInstance()
+		            .addMetric(metric);
+	}
 	
 	public Vector solveCG(final VectorMultiplyable operator, final Vector rhs, final double tol)
 	{
@@ -25,6 +41,8 @@ public class IterativeSolver
 			            .absMaxElement() < 1e-14)
 				System.err.println("operator has a kernel");
 		}
+		metric.goal = tol;
+		metric.restart();
 		ex = Executors.newSingleThreadExecutor();
 		final Interruptor i = new Interruptor();
 		if (showInterrupt)
@@ -52,8 +70,11 @@ public class IterativeSolver
 			beta = newResiduum.inner(newResiduum) / residuum.inner(residuum);
 			defect = newResiduum.add(defect.mul(beta));
 			residuum = newResiduum;
+			metric.publishIterate(residuum.euclidianNorm());
 			if (showProgress)
+			{
 				System.out.println("CG residuum norm: " + residuum.euclidianNorm());
+			}
 		}
 		i.running = false;
 		ex.shutdown();
@@ -78,6 +99,8 @@ public class IterativeSolver
 			                  .absMaxElement() < 1e-14)
 				System.err.println("preconditioner has a kernel");
 		}
+		metric.goal = tol;
+		metric.restart();
 		ex = Executors.newSingleThreadExecutor();
 		final Interruptor i = new Interruptor();
 		if (showInterrupt)
@@ -108,6 +131,7 @@ public class IterativeSolver
 			p = newZ.add(p.mul(beta));
 			residuum = newResiduum;
 			z = newZ;
+			metric.publishIterate(residuum.euclidianNorm());
 			if (showProgress)
 				System.out.println("PCG residuum norm: " + residuum.euclidianNorm());
 		}
@@ -135,12 +159,14 @@ public class IterativeSolver
 			                  .absMaxElement() < 1e-14)
 				System.err.println("preconditioner has a kernel");
 		}
+		metric.goal = tol;
+		metric.restart();
 		ex = Executors.newSingleThreadExecutor();
 		final Interruptor i = new Interruptor();
 		if (showInterrupt)
 			ex.execute(i);
 		final Vector x;
-		gm = new GMRES(showProgress, 0);
+		gm = new GMRES(showProgress, metric, 0);
 		if (lastSolution == null)
 			x = gm.solve(preconditioner, operator, rhs, tol, i);
 		else
@@ -162,12 +188,14 @@ public class IterativeSolver
 			            .absMaxElement() < 1e-14)
 				System.err.println("operator has a kernel");
 		}
+		metric.goal = tol;
+		metric.restart();
 		ex = Executors.newSingleThreadExecutor();
 		final Interruptor i = new Interruptor();
 		if (showInterrupt)
 			ex.execute(i);
 		final Vector x;
-		gm = new GMRES(showProgress, 0);
+		gm = new GMRES(showProgress, metric, 0);
 		if (lastSolution == null)
 			x = gm.solve(operator, rightHandSide, tol, i);
 		else
@@ -214,6 +242,8 @@ public class IterativeSolver
 			            .absMaxElement() < 1e-14)
 				System.err.println("operator has a kernel");
 		}
+		metric.goal = tol;
+		metric.restart();
 		ex = Executors.newSingleThreadExecutor();
 		final Interruptor i = new Interruptor();
 		if (showInterrupt)
@@ -255,6 +285,7 @@ public class IterativeSolver
 			                 .add(s.mul(omega));
 			residuum = s.sub(t.mul(omega));
 			rhoLast = rho;
+			metric.publishIterate(residuum.euclidianNorm());
 			if (showProgress)
 				System.out.println("BiCGStab residuum norm: " + residuum.euclidianNorm());
 		}
@@ -282,6 +313,8 @@ public class IterativeSolver
 			                  .absMaxElement() < 1e-14)
 				System.err.println("preconditioner has a kernel");
 		}
+		metric.goal = tol;
+		metric.restart();
 		ex = Executors.newSingleThreadExecutor();
 		final Interruptor i = new Interruptor();
 		if (showInterrupt)
@@ -329,6 +362,7 @@ public class IterativeSolver
 			                 .add(z.mul(omega));
 			residuum = s.sub(t.mul(omega));
 			rhoLast = rho;
+			metric.publishIterate(residuum.euclidianNorm());
 			if (showProgress)
 				System.out.println("PBiCGStab residuum norm: " + residuum.euclidianNorm());
 		}

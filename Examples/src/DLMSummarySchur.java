@@ -35,7 +35,7 @@ public class DLMSummarySchur
 	int nLagrangeRefines = 2;
 	List<CoordinateVector> eulerianPoints;
 	private final int lagrangeDegree = 2;
-	private final int eulerDegree = 1;
+	private final int eulerDegree = 2;
 	private final String elastMethod = DistortedVectorCellIntegral.SYM_GRAD;
 	
 	public DLMSummarySchur()
@@ -165,7 +165,6 @@ public class DLMSummarySchur
 					                                                             nEulerian + nLagrangian + nTransfer))));
 				
 				//it = new IterativeSolver();
-				it.showProgress = false;
 				final DenseVector eul = //new DenseVector(schurDense.mvMul(g));
 					(DenseVector) it.solveBiCGStab(schur, g,
 					                               1e-10);
@@ -225,7 +224,7 @@ public class DLMSummarySchur
 		};
 		System.out.println("created preconditioner");
 		int i;
-		final IterativeSolver itp = new IterativeSolver();
+		final IterativeSolver itp = new IterativeSolver(true);
 		for (i = 1; i < timeSteps && interruptor.isRunning(); i++)
 		{
 			rightHandSide = new DenseVector(constantRightHandSide);
