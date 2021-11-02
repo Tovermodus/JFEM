@@ -26,27 +26,32 @@ public class MetricWindow
 	
 	private MetricWindow()
 	{
+		try
+		{
+			setSize(800, 800);
+			setLayout(new BorderLayout());
+			canvas = new Canvas();
+			canvas.setFocusable(false);
+			final JPanel pan = new JPanel();
+			add(canvas, BorderLayout.CENTER);
+			pan.setLayout(new BorderLayout());
+			add(pan, BorderLayout.NORTH);
+			pan.setFocusable(true);
+			this.setFocusable(true);
+			setVisible(true);
+			d = new DrawThread(canvas, canvas.getWidth(), canvas.getHeight());
+			plots = new CopyOnWriteArrayList<>();
+			addComponentListener(this);
+			addKeyListener(this);
+			canvas.addKeyListener(this);
+			addMouseWheelListener(this);
+			addWindowListener(this);
+			Executors.newSingleThreadExecutor()
+			         .execute(d);
+		} catch (final HeadlessException e)
+		{
 		
-		setSize(800, 800);
-		setLayout(new BorderLayout());
-		canvas = new Canvas();
-		canvas.setFocusable(false);
-		final JPanel pan = new JPanel();
-		add(canvas, BorderLayout.CENTER);
-		pan.setLayout(new BorderLayout());
-		add(pan, BorderLayout.NORTH);
-		pan.setFocusable(true);
-		this.setFocusable(true);
-		setVisible(true);
-		d = new DrawThread(canvas, canvas.getWidth(), canvas.getHeight());
-		plots = new CopyOnWriteArrayList<>();
-		addComponentListener(this);
-		addKeyListener(this);
-		canvas.addKeyListener(this);
-		addMouseWheelListener(this);
-		addWindowListener(this);
-		Executors.newSingleThreadExecutor()
-		         .execute(d);
+		}
 	}
 	
 	public void addMetric(final Metric plot)
