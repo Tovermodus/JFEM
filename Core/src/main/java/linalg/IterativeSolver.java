@@ -4,6 +4,7 @@ import basic.Interruptor;
 import basic.MetricWindow;
 import basic.PerformanceArguments;
 
+import java.awt.*;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
@@ -19,15 +20,18 @@ public class IterativeSolver
 	public IterativeSolver()
 	{
 		metric = new IterativeSolverConvergenceMetric(1);
-		MetricWindow.getInstance()
-		            .addMetric(metric);
+		if (!GraphicsEnvironment.isHeadless())
+			MetricWindow.getInstance()
+			            .addMetric(metric);
 	}
 	
 	public IterativeSolver(final boolean showProgress)
 	{
 		metric = new IterativeSolverConvergenceMetric(1);
-		MetricWindow.getInstance()
-		            .addMetric(metric);
+		if (showProgress)
+			if (!GraphicsEnvironment.isHeadless())
+				MetricWindow.getInstance()
+				            .addMetric(metric);
 	}
 	
 	public Vector solveCG(final VectorMultiplyable operator, final Vector rhs, final double tol)

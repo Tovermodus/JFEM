@@ -31,11 +31,11 @@ public class DLMSummarySchur
 	int nLagrangian;
 	int nTransfer;
 	int eulerianPointsPerDimension = 40;
-	int nEulerCells = 20;
+	int nEulerCells = 30;
 	int nLagrangeRefines = 2;
 	List<CoordinateVector> eulerianPoints;
 	private final int lagrangeDegree = 2;
-	private final int eulerDegree = 2;
+	private final int eulerDegree = 1;
 	private final String elastMethod = DistortedVectorCellIntegral.SYM_GRAD;
 	
 	public DLMSummarySchur()

@@ -47,6 +47,7 @@ public class IterativeSolverConvergenceMetric
 		graphics.drawLine(offset, height - offset, width - offset, height - offset);
 		drawYMark(graphics, goal, height, maxResidual);
 		drawYMark(graphics, maxResidual, height, maxResidual);
+		drawYMark(graphics, 1, height, maxResidual);
 		final int maxLog = (int) Math.log10(maxResidual);
 		final int goalLog = (int) Math.log10(goal);
 		for (int i = goalLog; i < maxLog; i++)
