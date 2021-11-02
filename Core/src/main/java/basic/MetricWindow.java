@@ -26,11 +26,13 @@ public class MetricWindow
 	
 	private MetricWindow()
 	{
+		canvas = new Canvas();
+		d = new DrawThread(canvas, canvas.getWidth(), canvas.getHeight());
+		plots = new CopyOnWriteArrayList<>();
 		try
 		{
 			setSize(800, 800);
 			setLayout(new BorderLayout());
-			canvas = new Canvas();
 			canvas.setFocusable(false);
 			final JPanel pan = new JPanel();
 			add(canvas, BorderLayout.CENTER);
@@ -39,8 +41,6 @@ public class MetricWindow
 			pan.setFocusable(true);
 			this.setFocusable(true);
 			setVisible(true);
-			d = new DrawThread(canvas, canvas.getWidth(), canvas.getHeight());
-			plots = new CopyOnWriteArrayList<>();
 			addComponentListener(this);
 			addKeyListener(this);
 			canvas.addKeyListener(this);
