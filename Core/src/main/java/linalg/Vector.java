@@ -4,7 +4,8 @@ import basic.PerformanceArguments;
 
 import java.util.List;
 
-public interface Vector extends Tensor
+public interface Vector
+	extends Tensor
 {
 	default int getLength()
 	{
@@ -22,7 +23,11 @@ public interface Vector extends Tensor
 	
 	default double manhattanNorm()
 	{
-		return getShape().range().stream().mapToDouble(this::at).map(Math::abs).sum();
+		return getShape().range()
+		                 .stream()
+		                 .mapToDouble(this::at)
+		                 .map(Math::abs)
+		                 .sum();
 	}
 	
 	@Override
@@ -77,7 +82,10 @@ public interface Vector extends Tensor
 		if (PerformanceArguments.getInstance().executeChecks)
 			if (getLength() != other.getLength())
 				throw new IllegalArgumentException("Vectors are of different size");
-		return getShape().range().stream().mapToDouble(c -> at(c) * other.at(c)).sum();
+		return getShape().range()
+		                 .stream()
+		                 .mapToDouble(c -> at(c) * other.at(c))
+		                 .sum();
 	}
 	
 	default double euclidianNorm()
@@ -111,6 +119,14 @@ public interface Vector extends Tensor
 			}
 		}
 		ret = ret.concat("]");
+		return ret;
+	}
+	
+	default double[] asArray()
+	{
+		final double[] ret = new double[getLength()];
+		for (int i = 0; i < getLength(); i++)
+			ret[i] = at(i);
 		return ret;
 	}
 }

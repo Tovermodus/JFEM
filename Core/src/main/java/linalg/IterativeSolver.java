@@ -159,9 +159,9 @@ public class IterativeSolver
 			if (operator.mvMul(d)
 			            .absMaxElement() < 1e-14)
 				System.err.println("operator has a kernel");
-			if (preconditioner.mvMul(d)
-			                  .absMaxElement() < 1e-14)
-				System.err.println("preconditioner has a kernel");
+//			if (preconditioner.mvMul(d)
+//			                  .absMaxElement() < 1e-14)
+//				System.err.println("preconditioner has a kernel");
 		}
 		metric.goal = tol;
 		metric.restart();

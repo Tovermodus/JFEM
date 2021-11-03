@@ -301,8 +301,12 @@ public class DenseMatrix
 			if (getCols() != (vector.getLength())) throw new IllegalArgumentException("Incompatible sizes");
 		final DenseVector ret = new DenseVector(getRows());
 		for (int i = 0; i < getRows(); i++)
+		{
+			double ret_i = 0;
 			for (int k = 0; k < getCols(); k++)
-				ret.add(at(i, k) * vector.at(k), i);
+				ret_i += at(i, k) * vector.at(k);
+			ret.add(ret_i, i);
+		}
 		return ret;
 	}
 	
@@ -312,8 +316,8 @@ public class DenseMatrix
 		if (PerformanceArguments.getInstance().executeChecks)
 			if (getRows() != (vector.getLength())) throw new IllegalArgumentException("Incompatible sizes");
 		final DenseVector ret = new DenseVector(getCols());
-		for (int i = 0; i < getCols(); i++)
-			for (int k = 0; k < getRows(); k++)
+		for (int k = 0; k < getRows(); k++)
+			for (int i = 0; i < getCols(); i++)
 				ret.add(at(k, i) * vector.at(k), i);
 		return ret;
 	}
@@ -325,9 +329,14 @@ public class DenseMatrix
 			if (getCols() != (matrix.getRows())) throw new IllegalArgumentException("Incompatible sizes");
 		final DenseMatrix ret = new DenseMatrix(getRows(), matrix.getCols());
 		for (int i = 0; i < getRows(); i++)
-			for (int j = 0; j < matrix.getCols(); j++)
-				for (int k = 0; k < getCols(); k++)
-					ret.add(at(i, k) * matrix.at(k, j), i, j);
+		{
+			for (int k = 0; k < getCols(); k++)
+			{
+				final double aik = at(i, k);
+				for (int j = 0; j < matrix.getCols(); j++)
+					ret.add(aik * matrix.at(k, j), i, j);
+			}
+		}
 		return ret;
 	}
 	

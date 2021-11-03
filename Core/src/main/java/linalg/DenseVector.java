@@ -7,7 +7,8 @@ import org.ujmp.core.Matrix;
 import java.io.Serializable;
 import java.util.function.DoubleUnaryOperator;
 
-public class DenseVector implements MutableVector, MutableTensor, Serializable
+public class DenseVector
+	implements MutableVector, MutableTensor, Serializable
 {
 	protected volatile double[] entries;
 	
@@ -35,6 +36,14 @@ public class DenseVector implements MutableVector, MutableTensor, Serializable
 	public DenseVector(final double[] vect)
 	{
 		entries = vect.clone();
+	}
+	
+	public DenseVector(final double[] vect, final boolean wrap)
+	{
+		if (wrap)
+			entries = vect;
+		else
+			entries = vect.clone();
 	}
 	
 	public static DenseVector vectorFromValues(final double... values)
@@ -151,7 +160,8 @@ public class DenseVector implements MutableVector, MutableTensor, Serializable
 	@Override
 	public void subInPlace(final Tensor other)
 	{
-		if (PerformanceArguments.getInstance().executeChecks) if (!other.getShape().equals(getShape()))
+		if (PerformanceArguments.getInstance().executeChecks) if (!other.getShape()
+		                                                                .equals(getShape()))
 			throw new IllegalArgumentException("Other has wrong shape");
 		for (int i = 0; i < getLength(); i++)
 			entries[i] -= other.at(i);
@@ -186,9 +196,17 @@ public class DenseVector implements MutableVector, MutableTensor, Serializable
 			{
 				ret.add(other.at(i), i);
 			}
-		} else for (final IntCoordinates key : other.getCoordinateEntryList().keySet())
-			ret.add(other.getCoordinateEntryList().get(key), key);
+		} else for (final IntCoordinates key : other.getCoordinateEntryList()
+		                                            .keySet())
+			ret.add(other.getCoordinateEntryList()
+			             .get(key), key);
 		return ret;
+	}
+	
+	@Override
+	public double[] asArray()
+	{
+		return entries;
 	}
 	
 	@Override

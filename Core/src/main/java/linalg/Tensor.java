@@ -91,7 +91,8 @@ public interface Tensor
 		if (PerformanceArguments.getInstance().executeChecks)
 		{
 			if (!getShape().equals(other.getShape()))
-				throw new IllegalArgumentException("Tensors are of different size");
+				throw new IllegalArgumentException("Tensors are of different size" + getShape() + " " +
+					                                   "!= " + other.getShape());
 		}
 		final double absmax = absMaxElement() + other.absMaxElement();
 		for (final IntCoordinates c : getShape().range())
