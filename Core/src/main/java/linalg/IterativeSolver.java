@@ -10,7 +10,7 @@ import java.util.concurrent.Executors;
 
 public class IterativeSolver
 {
-	private GMRES gm;
+	public GMRES gm;
 	ExecutorService ex;
 	public boolean showProgress = false;
 	public boolean showInterrupt = false;

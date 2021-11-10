@@ -4,6 +4,9 @@ import basic.Metric;
 
 import java.awt.*;
 import java.util.concurrent.CopyOnWriteArrayList;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.function.Supplier;
 
 public class IterativeSolverConvergenceMetric
 	implements Metric
@@ -13,19 +16,29 @@ public class IterativeSolverConvergenceMetric
 	private CopyOnWriteArrayList<Double> residuals;
 	public double goal;
 	public int drawnPoints = 500;
+	ExecutorService executorService;
 	
 	public IterativeSolverConvergenceMetric(final double goal)
 	{
 		this.goal = goal;
 		residuals = new CopyOnWriteArrayList<>();
+		executorService = Executors.newFixedThreadPool(6);
 	}
 	
-	public void publishIterate(final double residual)
+	public synchronized void publishIterate(final double residual)
 	{
 		residuals.add(residual);
 	}
 	
-	public void restart()
+	public void publishIterateAsync(final Supplier<Double> generatingFunction)
+	{
+		final IterativeSolverConvergenceMetric metric = this;
+		final Runnable r = () -> metric.publishIterate(generatingFunction.get());
+		executorService.execute(r);
+		//r.run();
+	}
+	
+	public synchronized void restart()
 	{
 		if (residuals.size() > 0)
 			residuals = new CopyOnWriteArrayList<>();
@@ -39,7 +52,7 @@ public class IterativeSolverConvergenceMetric
 		final double maxResidual = residuals.stream()
 		                                    .mapToDouble(x -> x)
 		                                    .max()
-		                                    .orElse(goal * 10);
+		                                    .orElse(goal * 1000);
 		graphics.setColor(Color.BLACK);
 		graphics.fillRect(0, 0, width, height);
 		graphics.setColor(Color.white);
@@ -52,7 +65,7 @@ public class IterativeSolverConvergenceMetric
 		final int goalLog = (int) Math.log10(goal);
 		for (int i = goalLog; i < maxLog; i++)
 		{
-			drawYMark(graphics, Math.pow(10, i), height, maxLog);
+			drawYMark(graphics, Math.pow(10, i), height, maxResidual);
 		}
 		final int xTicks = Math.max(1, (int) Math.pow(10, (int) Math.log10(residuals.size() * 1.2)) / 2);
 		for (int i = 0; i <= residuals.size() / xTicks; i++)
@@ -101,19 +114,19 @@ public class IterativeSolverConvergenceMetric
 	
 	private double valueToY(final double value, final int height, final double max)
 	{
-		return height - offset - (height - 2.0 * offset) * (Math.log(value) - Math.log(
+		return 1.0 * height - offset - (height * 1.0 - 2.0 * offset) * (Math.log(value) - Math.log(
 			goal)) / (Math.log(
 			max) - Math.log(goal));
 	}
 	
-	private double pointToResidual(final int point)
+	private synchronized double pointToResidual(final int point)
 	{
 		final int nIterates = residuals.size();
 		if (nIterates == 0)
 			return goal;
 		if (point == drawnPoints - 1)
 			return residuals.get(nIterates - 1);
-		double val = 100;
+		double val = 1e16;
 		final int pointIndex = (int) (1.0 * nIterates * point / (drawnPoints + 1));
 		final int pointIndex2 = (int) (1.0 * nIterates * (point + 1) / (drawnPoints + 1));
 		for (int i = pointIndex; i < pointIndex2; i++)

@@ -71,6 +71,7 @@ public class GMResTest
 		final DenseVector b = DenseVector.vectorFromValues(3, 4, 5);
 		final IterativeSolver i = new IterativeSolver();
 		final Vector sol = i.solvePGMRES(symm, SparseMatrix.identity(3), b, 1e-12);
+		assertTrue(b.almostEqual(symm.mvMul(sol)));
 	}
 	
 	@Test
@@ -87,16 +88,17 @@ public class GMResTest
 	@Test
 	public void testPLarge()
 	{
-		final int n = 10000;
+		final int n = 100000;
 		final SparseMatrix large = new SparseMatrix(n, n);
 		final DenseVector b = new DenseVector(n);
 		for (int i = 0; i < n * 10; i++)
 		{
-			b.add(1, i % n);
-			large.add(0.2, i % n, i % n);
+			b.add(Math.random(), i % n);
+			large.add(0.2 * (0.5 + Math.random()), i % n, i % n);
 			large.add(Math.random(), (int) (Math.random() * n), (int) (Math.random() * n));
 		}
 		final IterativeSolver i = new IterativeSolver();
+		i.showProgress = true;
 		final Vector sol = i.solvePGMRES(large, SparseMatrix.identity(n), b, 1e-10);
 		assertTrue(b.almostEqual(large.mvMul(sol)));
 	}

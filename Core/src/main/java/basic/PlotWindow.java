@@ -46,9 +46,12 @@ public class PlotWindow
 		addWindowListener(this);
 		overlay.addChangeListener(e ->
 		                          {
+			                          if (d.isChecked != overlay.isSelected())
+			                          {
+				                          this.setVisible(false);
+				                          this.setVisible(true);
+			                          }
 			                          d.isChecked = overlay.isSelected();
-			                          this.setVisible(false);
-			                          this.setVisible(true);
 		                          });
 		Executors.newSingleThreadExecutor()
 		         .execute(d);
@@ -92,6 +95,7 @@ public class PlotWindow
 		int newValue = slider.getValue();
 		if (e.getKeyCode() == KeyEvent.VK_DOWN) currentPlot++;
 		if (e.getKeyCode() == KeyEvent.VK_UP) currentPlot--;
+		if (e.getKeyCode() == KeyEvent.VK_S) d.isChecked = !d.isChecked;
 		if (e.getKeyCode() == KeyEvent.VK_RIGHT) newValue++;
 		if (e.getKeyCode() == KeyEvent.VK_LEFT) newValue--;
 		if (newValue < 0) newValue = 99;

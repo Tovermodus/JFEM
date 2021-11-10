@@ -1,5 +1,7 @@
 package linalg;
 
+import basic.PerformanceArguments;
+
 import java.util.ArrayList;
 import java.util.Map;
 import java.util.stream.IntStream;
@@ -13,9 +15,11 @@ public class SparseMvMul
 	final ArrayList<double[]> sparseColValues;
 	final ArrayList<int[]> sparseRowXs;
 	final ArrayList<int[]> sparseColYs;
+	boolean parallel;
 	
-	public SparseMvMul(final SparseMatrix s)
+	public SparseMvMul(final Matrix s)
 	{
+		parallel = PerformanceArguments.getInstance().parallelizeThreads;
 		rows = s.getRows();
 		cols = s.getCols();
 		sparseRowValues = new ArrayList<>();
@@ -67,40 +71,42 @@ public class SparseMvMul
 	}
 	
 	@Override
-	public Vector mvMul(final Vector vector)
+	public DenseVector mvMul(final Vector vector)
 	{
 		final double[] vectorVals = vector.asArray();
 		final double[] ret = new double[rows];
-		IntStream.range(0, rows)
-		         .parallel()
-		         .forEach(row ->
-		                  {
-			                  final double[] sparseVals = sparseRowValues.get(row);
-			                  final int[] sparseXs = sparseRowXs.get(row);
-			                  double ret_component = 0;
-			                  for (int i = 0; i < sparseVals.length; i++)
-				                  ret_component += sparseVals[i] * vectorVals[sparseXs[i]];
-			                  ret[row] = ret_component;
-		                  });
+		IntStream str = IntStream.range(0, rows);
+		if (parallel)
+			str = str.parallel();
+		str.forEach(row ->
+		            {
+			            final double[] sparseVals = sparseRowValues.get(row);
+			            final int[] sparseXs = sparseRowXs.get(row);
+			            double ret_component = 0;
+			            for (int i = 0; i < sparseVals.length; i++)
+				            ret_component += sparseVals[i] * vectorVals[sparseXs[i]];
+			            ret[row] = ret_component;
+		            });
 		return new DenseVector(ret, true);
 	}
 	
 	@Override
-	public Vector tvMul(final Vector vector)
+	public DenseVector tvMul(final Vector vector)
 	{
 		final double[] vectorVals = vector.asArray();
 		final double[] ret = new double[cols];
-		IntStream.range(0, cols)
-		         .parallel()
-		         .forEach(col ->
-		                  {
-			                  final double[] sparseVals = sparseColValues.get(col);
-			                  final int[] sparseYs = sparseColYs.get(col);
-			                  double ret_component = 0;
-			                  for (int i = 0; i < sparseVals.length; i++)
-				                  ret_component += sparseVals[i] * vectorVals[sparseYs[i]];
-			                  ret[col] = ret_component;
-		                  });
+		IntStream str = IntStream.range(0, cols);
+		if (parallel)
+			str = str.parallel();
+		str.forEach(col ->
+		            {
+			            final double[] sparseVals = sparseColValues.get(col);
+			            final int[] sparseYs = sparseColYs.get(col);
+			            double ret_component = 0;
+			            for (int i = 0; i < sparseVals.length; i++)
+				            ret_component += sparseVals[i] * vectorVals[sparseYs[i]];
+			            ret[col] = ret_component;
+		            });
 		return new DenseVector(ret, true);
 	}
 }

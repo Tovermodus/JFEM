@@ -5,13 +5,13 @@ import basic.Interruptor;
 import java.util.ArrayList;
 import java.util.stream.IntStream;
 
-class GMRES
+public class GMRES
 {
 	private final boolean printProgress;
 	final IterativeSolverConvergenceMetric metric;
+	public int MAX_RESTARTS = 200;
 	int restarts = 0;
-	int MAX_RESTARTS = 100;
-	int ITERATIONS_BEFORE_RESTART = 200;
+	public int ITERATIONS_BEFORE_RESTART = 150;
 	
 	public GMRES(final boolean printProgress,
 	             final IterativeSolverConvergenceMetric metric, final int restarts)
@@ -54,14 +54,12 @@ class GMRES
 			final DenseVector newHValues =
 				DenseVector.vectorFromValues(
 					v.stream()
+					 .parallel()
 					 .mapToDouble(vec -> vec.inner(q))
 					 .toArray());
 			h.addSmallMatrixInPlaceAt(newHValues.asMatrix(), 0, j);
 			final Vector newHV =
-				(IntStream.range(0, j + 1))
-					.mapToObj(i -> v.get(i)
-					                .mul(newHValues.at(i)))
-					.reduce(new DenseVector(n), Vector::add);
+				calculateStep(v, j, newHValues);
 			final Vector w = q.sub(newHV);
 			h.add(w.euclidianNorm(), j + 1, j);
 			for (int i = 0; i < j; i++)
@@ -81,30 +79,25 @@ class GMRES
 			gamma.set(c.at(j) * gamma.at(j), j);
 			if (printProgress)
 				System.out.println("GMRes Gamma: " + Math.abs(gamma.at(j + 1)));
-			metric.publishIterate(Math.abs(gamma.at(j + 1)));
+			final int finalJ = j;
+			metric.publishIterateAsync(() ->
+			                           {
+				                           final DenseVector alpha = calculateAlpha(gamma, h, finalJ);
+				                           final Vector step = calculateStep(v, finalJ, alpha);
+				                           final Vector newIt = x.add(step);
+				                           return A.mvMul(newIt)
+				                                   .sub(b)
+				                                   .euclidianNorm();
+			                           });
 			if (Math.abs(gamma.at(j + 1)) < tol || j > ITERATIONS_BEFORE_RESTART)
 				break;
 			v.add(w.mul(1. / h.at(j + 1, j)));
 		}
 		if (j == n || !interruptor.isRunning())
 			j--;
-		final DenseVector alpha = new DenseVector(n);
-		for (int i = j; i >= 0; i--)
-		{
-			final int finalI = i;
-			final double hAlpha = IntStream
-				.range(i + 1, j + 1)
-				.mapToDouble(k -> h.at(finalI, k) * alpha.at(k))
-				.sum();
-			alpha.set(1. / h.at(i, i) * (gamma.at(i) - hAlpha), i);
-		}
+		final DenseVector alpha = calculateAlpha(gamma, h, j);
 		final Vector alphaV =
-			IntStream.range(0, j + 1)
-			         .mapToObj(i -> v.get(i)
-			                         .mul(alpha.at(i)))
-			         .reduce(
-				         new DenseVector(n),
-				         Vector::add);
+			calculateStep(v, j, alpha);
 		if (j > ITERATIONS_BEFORE_RESTART && restarts < MAX_RESTARTS)
 		{
 			restarts++;
@@ -142,8 +135,7 @@ class GMRES
 		final MutableVector gamma = new linalg.DenseVector(n + 1);
 		final Vector r = preconditioner.mvMul(b.sub(A.mvMul(x)));
 		final SparseMatrix h = new SparseMatrix(ITERATIONS_BEFORE_RESTART + 10, ITERATIONS_BEFORE_RESTART + 10);
-		if (b.sub(A.mvMul(x))
-		     .euclidianNorm() <= tol)
+		if (r.euclidianNorm() <= tol)
 			return x;
 		gamma.set(r.euclidianNorm(), 0);
 		v.add(r.mul(1. / gamma.at(0)));
@@ -154,14 +146,12 @@ class GMRES
 			final DenseVector newHValues =
 				DenseVector.vectorFromValues(
 					v.stream()
+					 .parallel()
 					 .mapToDouble(vec -> vec.inner(q))
 					 .toArray());
 			h.addSmallMatrixAt(newHValues.asMatrix(), 0, j);
 			final Vector newHV =
-				(IntStream.range(0, j + 1))
-					.mapToObj(i -> v.get(i)
-					                .mul(newHValues.at(i)))
-					.reduce(new DenseVector(n), Vector::add);
+				calculateStep(v, j, newHValues);
 			final Vector w = q.sub(newHV);
 			h.add(w.euclidianNorm(), j + 1, j);
 			for (int i = 0; i < j; i++)
@@ -181,14 +171,51 @@ class GMRES
 			gamma.set(c.at(j) * gamma.at(j), j);
 			if (printProgress)
 				System.out.println("GMRes Gamma: " + Math.abs(gamma.at(j + 1)));
-			metric.publishIterate(Math.abs(gamma.at(j + 1)));
+			//metric.publishIterate(Math.abs(gamma.at(j + 1)));
+			final int finalJ = j;
+			metric.publishIterateAsync(() ->
+			                           {
+				                           final DenseVector alpha = calculateAlpha(gamma, h, finalJ);
+				                           final Vector step = calculateStep(v, finalJ, alpha);
+				                           final Vector newIt = x.add(step);
+				                           return A.mvMul(newIt)
+				                                   .sub(b)
+				                                   .euclidianNorm();
+			                           });
 			if (Math.abs(gamma.at(j + 1)) < tol || j > ITERATIONS_BEFORE_RESTART)
 				break;
 			v.add(w.mul(1. / h.at(j + 1, j)));
 		}
 		if (j == n || !interruptor.isRunning())
 			j--;
-		final DenseVector alpha = new DenseVector(n);
+		final DenseVector alpha = calculateAlpha(gamma, h, j);
+		final Vector alphaV =
+			calculateStep(v, j, alpha);
+		if (j > ITERATIONS_BEFORE_RESTART && restarts < MAX_RESTARTS)
+		{
+			restarts++;
+			if (printProgress)
+				System.out.println("GMRES restart");
+			return solve(preconditioner, A, b, x.add(alphaV), tol, interruptor);
+		}
+		return x.add(alphaV);
+	}
+	
+	private static Vector calculateStep(final ArrayList<Vector> v,
+	                                    final int j,
+	                                    final DenseVector alpha)
+	{
+		final int n = v.get(0)
+		               .getLength();
+		return IntStream.range(0, j + 1)
+		                .mapToObj(i -> v.get(i)
+		                                .mul(alpha.at(i)))
+		                .reduce(new DenseVector(n), Vector::add);
+	}
+	
+	private static DenseVector calculateAlpha(final MutableVector gamma, final Matrix h, final int j)
+	{
+		final DenseVector alpha = new DenseVector(j + 1);
 		for (int i = j; i >= 0; i--)
 		{
 			final int finalI = i;
@@ -198,20 +225,6 @@ class GMRES
 				.sum();
 			alpha.set(1. / h.at(i, i) * (gamma.at(i) - hAlpha), i);
 		}
-		final Vector alphaV =
-			IntStream.range(0, j + 1)
-			         .mapToObj(i -> v.get(i)
-			                         .mul(alpha.at(i)))
-			         .reduce(
-				         new DenseVector(n),
-				         Vector::add);
-		if (j > ITERATIONS_BEFORE_RESTART && restarts < MAX_RESTARTS)
-		{
-			restarts++;
-			if (printProgress)
-				System.out.println("GMRES restart");
-			return solve(preconditioner, A, b, x.add(alphaV), tol, interruptor);
-		}
-		return x.add(alphaV);
+		return alpha;
 	}
 }

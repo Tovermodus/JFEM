@@ -202,17 +202,24 @@ public class MetricWindow
 		
 		public synchronized void draw()
 		{
-			content.getGraphics()
-			       .setColor(Color.white);
-			content.getGraphics()
-			       .fillRect(0, 0, width + 100, height + 100);
-			if (currentPlot != null)
-				currentPlot.draw(content.getGraphics(),
-				                 width,
-				                 height,
-				                 isChecked);
-			canvas.getGraphics()
-			      .drawImage(content, 0, 0, null);
+			try
+			{
+				
+				content.getGraphics()
+				       .setColor(Color.white);
+				content.getGraphics()
+				       .fillRect(0, 0, width + 100, height + 100);
+				if (currentPlot != null)
+					currentPlot.draw(content.getGraphics(),
+					                 width,
+					                 height,
+					                 isChecked);
+				canvas.getGraphics()
+				      .drawImage(content, 0, 0, null);
+			} catch (final Exception e)
+			{
+				e.printStackTrace();
+			}
 		}
 		
 		public synchronized void setMetric(final Metric p)

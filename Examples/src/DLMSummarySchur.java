@@ -31,7 +31,7 @@ public class DLMSummarySchur
 	int nLagrangian;
 	int nTransfer;
 	int eulerianPointsPerDimension = 40;
-	int nEulerCells = 30;
+	int nEulerCells = 20;
 	int nLagrangeRefines = 2;
 	List<CoordinateVector> eulerianPoints;
 	private final int lagrangeDegree = 2;
@@ -122,8 +122,8 @@ public class DLMSummarySchur
 		System.out.println("laginv");
 		final BlockDenseMatrix schur = new BlockDenseMatrix(precondBlocks.getBlockMatrix(0, 0)
 		                                                                 .add(secondmmul),
-		                                                    nEulerCells * nEulerCells / 8);
-		//final BlockDenseMatrix schurBlockInverse = schur.getInvertedDiagonalMatrix();
+		                                                    nEulerCells * nEulerCells / 16);
+		final BlockDenseMatrix schurBlockInverse = schur.getInvertedDiagonalMatrix();
 		//final DenseMatrix schurDense = schur.toDense();
 		//final DenseMatrix schurDenseInverse = schurDense.inverse();
 		//System.out.println("############");
@@ -142,6 +142,11 @@ public class DLMSummarySchur
 		final VectorMultiplyable precondInverse = new VectorMultiplyable()
 		{
 			final IterativeSolver it = new IterativeSolver();
+			final SparseMvMul l = new SparseMvMul(precondBlocks.getBlockMatrix(0, 1));
+			final SparseMvMul inv = new SparseMvMul(lagInverse);
+			final SparseMvMul sch = new SparseMvMul(schur);
+			final SparseMvMul schInv = new SparseMvMul(schurBlockInverse);
+			final SparseMvMul r = new SparseMvMul(precondBlocks.getBlockMatrix(1, 0));
 			
 			@Override
 			public int getVectorSize()
@@ -160,56 +165,20 @@ public class DLMSummarySchur
 			{
 				final Vector g =
 					vector.slice(0, nEulerian)
-					      .sub(precondBlocks.getBlockMatrix(0, 1)
-					                        .mvMul(lagInverse.mvMul(vector.slice(nEulerian,
-					                                                             nEulerian + nLagrangian + nTransfer))));
+					      .sub(l.mvMul(inv.mvMul(vector.slice(nEulerian,
+					                                          nEulerian + nLagrangian + nTransfer))));
 				
 				//it = new IterativeSolver();
 				final DenseVector eul = //new DenseVector(schurDense.mvMul(g));
-					(DenseVector) it.solveBiCGStab(schur, g,
-					                               1e-10);
-//				it = new IterativeSolver();
-//				it.showProgress = true;
-//				final DenseVector eul2 = //new DenseVector(schurDense.mvMul(g));
-//					(DenseVector) it.solvePCG(schurDense, schurBlockInverse, g,
-//					                          1e-8);
-//				it = new IterativeSolver();
-//				it.showProgress = false;
-//				final DenseVector eul3 = //new DenseVector(schurDense.mvMul(g));
-//					(DenseVector) it.solvePGMRES(schur, schurBlockInverse, g,
-//					                             1e-8);
-//				final DenseVector eul4 = //new DenseVector(schurDense.mvMul(g));
-//					schurDenseInverse.mvMul(g);
-//				System.out.println(eul.sub(eul2)
-//				                      .absMaxElement() + "   12");
-//				System.out.println(eul.sub(eul3)
-//				                      .absMaxElement() + "   13");
-//				System.out.println(eul.sub(eul4)
-//				                      .absMaxElement() + "   14");
-//				System.out.println(eul2.sub(eul3)
-//				                       .absMaxElement() + "   23");
-//				System.out.println(eul2.sub(eul4)
-//				                       .absMaxElement() + "   24");
-//				System.out.println(eul3.sub(eul4)
-//				                       .absMaxElement() + "   34");
-				System.out.println(schur.mvMul(eul)
-				                        .sub(g)
-				                        .absMaxElement() + " subCG1");
-//				System.out.println(schur.mvMul(eul2)
-//				                        .sub(g)
-//				                        .absMaxElement() + " subCG2");
-//				System.out.println(schur.mvMul(eul3)
-//				                        .sub(g)
-//				                        .absMaxElement() + " subCG3");
-//				System.out.println(schur.mvMul(eul4)
-//				                        .sub(g)
-//				                        .absMaxElement() + " subCG4");
-//				System.out.println("donnnnnnnnnnnnnnnnn");
-				final DenseVector lag = lagInverse.mvMul(vector.slice(nEulerian,
-				                                                      nEulerian + nLagrangian + nTransfer)
-				                                               .sub(precondBlocks.getBlockMatrix(
-					                                               1, 0)
-				                                                                 .mvMul(eul)));
+//					(DenseVector) it.solvePGMRES(sch, schInv, g,
+//					                             1e-10);
+					schInv.mvMul(g);
+				System.out.println(sch.mvMul(eul)
+				                      .sub(g)
+				                      .absMaxElement() + " subCG1");
+				final DenseVector lag = inv.mvMul(vector.slice(nEulerian,
+				                                               nEulerian + nLagrangian + nTransfer)
+				                                        .sub(r.mvMul(eul)));
 				final DenseVector ret = new DenseVector(vector.getLength());
 				ret.addSmallVectorAt(eul, 0);
 				ret.addSmallVectorAt(lag, nEulerian);
@@ -256,7 +225,7 @@ public class DLMSummarySchur
 			itp.showProgress = true;
 			System.out.println(systemMatrix.sub(systemMatrix.transpose())
 			                               .absMaxElement() + "ABBBBBB");
-			currentIterate = (DenseVector) itp.solvePGMRES(new BlockSparseMatrix(systemMatrix, 1),
+			currentIterate = (DenseVector) itp.solvePGMRES(new SparseMvMul(systemMatrix),
 			                                               precondInverse,
 			                                               rightHandSide,
 			                                               1e-7);

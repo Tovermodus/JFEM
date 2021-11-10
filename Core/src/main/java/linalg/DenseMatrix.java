@@ -328,15 +328,18 @@ public class DenseMatrix
 		if (PerformanceArguments.getInstance().executeChecks)
 			if (getCols() != (matrix.getRows())) throw new IllegalArgumentException("Incompatible sizes");
 		final DenseMatrix ret = new DenseMatrix(getRows(), matrix.getCols());
-		for (int i = 0; i < getRows(); i++)
-		{
-			for (int k = 0; k < getCols(); k++)
-			{
-				final double aik = at(i, k);
-				for (int j = 0; j < matrix.getCols(); j++)
-					ret.add(aik * matrix.at(k, j), i, j);
-			}
-		}
+		IntStream str = IntStream.range(0, getRows());
+		if (PerformanceArguments.getInstance().parallelizeThreads)
+			str = str.parallel();
+		str.forEach(i ->
+		            {
+			            for (int k = 0; k < getCols(); k++)
+			            {
+				            final double aik = at(i, k);
+				            for (int j = 0; j < matrix.getCols(); j++)
+					            ret.add(aik * matrix.at(k, j), i, j);
+			            }
+		            });
 		return ret;
 	}
 	
