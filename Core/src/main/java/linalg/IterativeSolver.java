@@ -46,7 +46,7 @@ public class IterativeSolver
 				System.err.println("operator has a kernel");
 		}
 		metric.goal = tol;
-		metric.restart();
+		metric.restart(metric.version++);
 		ex = Executors.newSingleThreadExecutor();
 		final Interruptor i = new Interruptor();
 		if (showInterrupt)
@@ -104,7 +104,7 @@ public class IterativeSolver
 				System.err.println("preconditioner has a kernel");
 		}
 		metric.goal = tol;
-		metric.restart();
+		metric.restart(metric.version++);
 		ex = Executors.newSingleThreadExecutor();
 		final Interruptor i = new Interruptor();
 		if (showInterrupt)
@@ -164,7 +164,7 @@ public class IterativeSolver
 //				System.err.println("preconditioner has a kernel");
 		}
 		metric.goal = tol;
-		metric.restart();
+		metric.restart(metric.version++);
 		ex = Executors.newSingleThreadExecutor();
 		final Interruptor i = new Interruptor();
 		if (showInterrupt)
@@ -193,7 +193,7 @@ public class IterativeSolver
 				System.err.println("operator has a kernel");
 		}
 		metric.goal = tol;
-		metric.restart();
+		metric.restart(metric.version++);
 		ex = Executors.newSingleThreadExecutor();
 		final Interruptor i = new Interruptor();
 		if (showInterrupt)
@@ -247,7 +247,7 @@ public class IterativeSolver
 				System.err.println("operator has a kernel");
 		}
 		metric.goal = tol;
-		metric.restart();
+		metric.restart(metric.version++);
 		ex = Executors.newSingleThreadExecutor();
 		final Interruptor i = new Interruptor();
 		if (showInterrupt)
@@ -318,7 +318,7 @@ public class IterativeSolver
 				System.err.println("preconditioner has a kernel");
 		}
 		metric.goal = tol;
-		metric.restart();
+		metric.restart(metric.version++);
 		ex = Executors.newSingleThreadExecutor();
 		final Interruptor i = new Interruptor();
 		if (showInterrupt)

@@ -17,12 +17,14 @@ public class IterativeSolverConvergenceMetric
 	public double goal;
 	public int drawnPoints = 500;
 	ExecutorService executorService;
+	volatile int version;
 	
 	public IterativeSolverConvergenceMetric(final double goal)
 	{
 		this.goal = goal;
 		residuals = new CopyOnWriteArrayList<>();
 		executorService = Executors.newFixedThreadPool(6);
+		this.version = 0;
 	}
 	
 	public synchronized void publishIterate(final double residual)
@@ -33,13 +35,20 @@ public class IterativeSolverConvergenceMetric
 	public void publishIterateAsync(final Supplier<Double> generatingFunction)
 	{
 		final IterativeSolverConvergenceMetric metric = this;
-		final Runnable r = () -> metric.publishIterate(generatingFunction.get());
+		final int oldVersion = version;
+		final Runnable r = () ->
+		{
+			final Double residual = generatingFunction.get();
+			if (oldVersion == this.version)
+				metric.publishIterate(residual);
+		};
 		executorService.execute(r);
 		//r.run();
 	}
 	
-	public synchronized void restart()
+	public synchronized void restart(final int version)
 	{
+		this.version = version;
 		if (residuals.size() > 0)
 			residuals = new CopyOnWriteArrayList<>();
 	}

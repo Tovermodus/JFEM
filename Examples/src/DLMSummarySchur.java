@@ -47,7 +47,7 @@ public class DLMSummarySchur
 		rhoF = 1;
 		rhoS = 2;
 		nu = 1;
-		kappa = 10.000000;
+		kappa = 100.000000;
 		dt = 0.01;
 		timeSteps = 10;
 		initializeEulerian();
@@ -170,9 +170,9 @@ public class DLMSummarySchur
 				
 				//it = new IterativeSolver();
 				final DenseVector eul = //new DenseVector(schurDense.mvMul(g));
-//					(DenseVector) it.solvePGMRES(sch, schInv, g,
-//					                             1e-10);
-					schInv.mvMul(g);
+					(DenseVector) it.solvePGMRES(sch, schInv, g,
+					                             1e-10);
+//					schInv.mvMul(g);
 				System.out.println(sch.mvMul(eul)
 				                      .sub(g)
 				                      .absMaxElement() + " subCG1");
@@ -544,32 +544,35 @@ public class DLMSummarySchur
 	public void writeCf(final SparseMatrix currentMatrix, final DenseVector currentIterate)
 	{
 		final SparseMatrix Cf = new SparseMatrix(nTransfer, nEulerian);
-		final int i = 0;
-		for (final Map.Entry<Integer, QkQkFunction> sfEntry : eulerian.getShapeFunctions()
-		                                                              .entrySet())
-		{
-			//if (i++ % 40 == 0) System.out.println(100.0 * i / nEulerian);
-			final QkQkFunction sf = sfEntry.getValue();
-			final DistortedVectorFunction vOfX = concatenateVelocityWithX(sf, currentIterate);
-			
-			final DistortedFESpaceVectorRightHandSideIntegral transferEulerian
-				= new DistortedFESpaceVectorRightHandSideIntegral(vOfX,
-				                                                  DistortedRightHandSideIntegral.H1);
-			final DenseVector column = new DenseVector(nTransfer);
-			if (sf.hasVelocityFunction())
-			
-			{
-				lagrangian.writeCellIntegralsToRhs(List.of(transferEulerian), column,
-				                                   (K, lambd) ->
-					                                   sf
-						                                   .getVelocityShapeFunction()
-						                                   .getNodeFunctionalPoint()
-						                                   .sub(K.center())
-						                                   .euclidianNorm() < 1. / nEulerCells + lagrangian
-						                                   .getMaxDiam());
-				Cf.addColumn(column.mul(1), sfEntry.getKey());
-			}
-		}
+		eulerian.getShapeFunctions()
+		        .entrySet()
+		        .stream()
+		        .parallel()
+		        .forEach(
+			        sfEntry ->
+			        {
+				        final QkQkFunction sf = sfEntry.getValue();
+				        final DistortedVectorFunction vOfX = concatenateVelocityWithX(sf,
+				                                                                      currentIterate);
+				
+				        final DistortedFESpaceVectorRightHandSideIntegral transferEulerian
+					        = new DistortedFESpaceVectorRightHandSideIntegral(vOfX,
+					                                                          DistortedRightHandSideIntegral.H1);
+				        final DenseVector column = new DenseVector(nTransfer);
+				        if (sf.hasVelocityFunction())
+				
+				        {
+					        lagrangian.writeCellIntegralsToRhs(List.of(transferEulerian), column,
+					                                           (K, lambd) ->
+						                                           sf.getVelocityShapeFunction()
+						                                             .getNodeFunctionalPoint()
+						                                             .sub(K.center())
+						                                             .euclidianNorm() < 1. / nEulerCells + lagrangian
+							                                           .getMaxDiam());
+					        Cf.addColumn(column.mul(1), sfEntry.getKey());
+				        }
+			        }
+		                );
 		currentMatrix.addSmallMatrixAt(Cf.mul(1), nEulerian + nLagrangian, 0);
 		currentMatrix.addSmallMatrixAt(Cf.transpose()
 		                                 .mul(1), 0, nEulerian + nLagrangian);

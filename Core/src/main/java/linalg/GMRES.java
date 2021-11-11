@@ -11,7 +11,7 @@ public class GMRES
 {
 	private final boolean printProgress;
 	final IterativeSolverConvergenceMetric metric;
-	public int MAX_RESTARTS = 200;
+	public int MAX_RESTARTS = 6;
 	int restarts;
 	public int ITERATIONS_BEFORE_RESTART = 150;
 	
