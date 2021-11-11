@@ -88,7 +88,7 @@ public class GMResTest
 	@Test
 	public void testPLarge()
 	{
-		final int n = 100000;
+		final int n = 30000;
 		final SparseMatrix large = new SparseMatrix(n, n);
 		final DenseVector b = new DenseVector(n);
 		for (int i = 0; i < n * 10; i++)
