@@ -21,7 +21,7 @@ import static org.junit.Assert.assertTrue;
 
 public class DarcyTest
 {
-	@Test(timeout = 20000)
+	@Test(timeout = 40000)
 	public void testConvergence()
 	{
 		final CoordinateVector start = CoordinateVector.fromValues(-1, -1);
@@ -63,7 +63,9 @@ public class DarcyTest
 		System.out.println("Face Integrals");
 		grid.evaluateFaceIntegrals(faceIntegrals, boundaryFaceIntegrals);
 		System.out.println(
-			"solve system: " + grid.getSystemMatrix().getRows() + "×" + grid.getSystemMatrix().getCols());
+			"solve system: " + grid.getSystemMatrix()
+			                       .getRows() + "×" + grid.getSystemMatrix()
+			                                              .getCols());
 		final IterativeSolver i = new IterativeSolver();
 		i.showProgress = false;
 		final Vector solution1 = i.solveGMRES(grid.getSystemMatrix(), grid.getRhs(), 1e-10);

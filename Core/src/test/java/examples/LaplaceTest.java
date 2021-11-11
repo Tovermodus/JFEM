@@ -16,7 +16,7 @@ import static org.junit.Assert.assertTrue;
 
 public class LaplaceTest
 {
-	@Test(timeout = 20000)
+	@Test(timeout = 40000)
 	public void testDGConvergence()
 	{
 		final CoordinateVector start = CoordinateVector.fromValues(-1, -1);
@@ -71,7 +71,7 @@ public class LaplaceTest
 		                                                      grid.generatePlotPoints(20)) < 1e-2);
 	}
 	
-	@Test(timeout = 20000)
+	@Test(timeout = 40000)
 	public void testContinuousConvergence()
 	{
 		final CoordinateVector start = CoordinateVector.fromValues(-1, -1);

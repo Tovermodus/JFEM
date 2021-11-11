@@ -22,7 +22,7 @@ import static org.junit.Assert.assertTrue;
 public class StokesTest
 {
 	
-	@Test(timeout = 20000)
+	@Test(timeout = 40000)
 	public void testBoundaryConvergence()
 	{
 		final CoordinateVector start = CoordinateVector.fromValues(0, 0);

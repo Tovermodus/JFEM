@@ -23,7 +23,7 @@ public class IterativeSolverConvergenceMetric
 	{
 		this.goal = goal;
 		residuals = new CopyOnWriteArrayList<>();
-		executorService = Executors.newFixedThreadPool(6);
+		executorService = Executors.newFixedThreadPool(2);
 		this.version = 0;
 	}
 	
