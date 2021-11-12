@@ -10,12 +10,15 @@ import java.util.ArrayList;
 import java.util.Map;
 import java.util.TreeSet;
 
-public class DistortedVectorFESpaceFunction extends VectorFESpaceFunction<DistortedVectorShapeFunction> implements DistortedVectorFunction
+public class DistortedVectorFESpaceFunction
+	extends VectorFESpaceFunction<DistortedVectorShapeFunction>
+	implements DistortedVectorFunction
 {
 	final Int2ObjectMap<TreeSet<DistortedVectorShapeFunction>> supportOnCell;
 	final Int2ObjectMap<ArrayList<DistortedVectorShapeFunction>> supportOnCellFast;
 	
-	public DistortedVectorFESpaceFunction(final DistortedVectorShapeFunction[] functions, final double[] coefficients)
+	public DistortedVectorFESpaceFunction(final DistortedVectorShapeFunction[] functions,
+	                                      final double[] coefficients)
 	{
 		super(functions, coefficients);
 		supportOnCell = new Int2ObjectLinkedOpenHashMap<>();
@@ -26,16 +29,18 @@ public class DistortedVectorFESpaceFunction extends VectorFESpaceFunction<Distor
 			{
 				if (!supportOnCell.containsKey(cell.doneCode()))
 					supportOnCell.put(cell.doneCode(), new TreeSet<>());
-				supportOnCell.get(cell.doneCode()).add(function);
+				supportOnCell.get(cell.doneCode())
+				             .add(function);
 			}
 		}
-		for (int cellCode : supportOnCell.keySet())
+		for (final int cellCode : supportOnCell.keySet())
 		{
 			supportOnCellFast.put(cellCode, new ArrayList<>(supportOnCell.get(cellCode)));
 		}
 	}
 	
-	public DistortedVectorFESpaceFunction(final Map<Integer, DistortedVectorShapeFunction> functions, final Vector coefficients)
+	public DistortedVectorFESpaceFunction(final Map<Integer, DistortedVectorShapeFunction> functions,
+	                                      final Vector coefficients)
 	{
 		super(functions, coefficients);
 		supportOnCell = new Int2ObjectLinkedOpenHashMap<>();
@@ -46,10 +51,11 @@ public class DistortedVectorFESpaceFunction extends VectorFESpaceFunction<Distor
 			{
 				if (!supportOnCell.containsKey(cell.doneCode()))
 					supportOnCell.put(cell.doneCode(), new TreeSet<>());
-				supportOnCell.get(cell.doneCode()).add(function);
+				supportOnCell.get(cell.doneCode())
+				             .add(function);
 			}
 		}
-		for (int cellCode : supportOnCell.keySet())
+		for (final int cellCode : supportOnCell.keySet())
 		{
 			supportOnCellFast.put(cellCode, new ArrayList<>(supportOnCell.get(cellCode)));
 		}

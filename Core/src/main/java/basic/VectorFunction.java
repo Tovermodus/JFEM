@@ -12,7 +12,8 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentSkipListMap;
 import java.util.stream.Stream;
 
-public interface VectorFunction extends Function<CoordinateVector, CoordinateMatrix, CoordinateTensor>
+public interface VectorFunction
+	extends Function<CoordinateVector, CoordinateMatrix, CoordinateTensor>
 {
 	private double getComponentValue(final CoordinateVector pos, final int component)
 	{
@@ -21,7 +22,8 @@ public interface VectorFunction extends Function<CoordinateVector, CoordinateMat
 	
 	private CoordinateVector getComponentGradient(final CoordinateVector pos, final int component)
 	{
-		return (CoordinateVector) gradient(pos).unfoldDimension(0).get(component);
+		return (CoordinateVector) gradient(pos).unfoldDimension(0)
+		                                       .get(component);
 	}
 	
 	int getRangeDimension();
@@ -33,7 +35,8 @@ public interface VectorFunction extends Function<CoordinateVector, CoordinateMat
 			@Override
 			public int getRangeDimension()
 			{
-				return function.defaultValue().getLength();
+				return function.defaultValue()
+				               .getLength();
 			}
 			
 			@Override
@@ -89,7 +92,8 @@ public interface VectorFunction extends Function<CoordinateVector, CoordinateMat
 		return ret;
 	}
 	
-	default Map<CoordinateVector, CoordinateVector> valuesInPointsAtTime(final List<CoordinateVector> points, final double t)
+	default Map<CoordinateVector, CoordinateVector> valuesInPointsAtTime(final List<CoordinateVector> points,
+	                                                                     final double t)
 	{
 		final ConcurrentSkipListMap<CoordinateVector, CoordinateVector> ret = new ConcurrentSkipListMap<>();
 		Stream<CoordinateVector> stream = points.stream();
@@ -98,7 +102,8 @@ public interface VectorFunction extends Function<CoordinateVector, CoordinateMat
 		return ret;
 	}
 	
-	default Map<CoordinateVector, Double> componentValuesInPoints(final List<CoordinateVector> points, final int component)
+	default Map<CoordinateVector, Double> componentValuesInPoints(final List<CoordinateVector> points,
+	                                                              final int component)
 	{
 		final ConcurrentHashMap<CoordinateVector, Double> ret = new ConcurrentHashMap<>();
 		Stream<CoordinateVector> stream = points.stream();
@@ -171,6 +176,55 @@ public interface VectorFunction extends Function<CoordinateVector, CoordinateMat
 			public CoordinateVector gradient(final CoordinateVector pos)
 			{
 				return getComponentGradient(pos, component);
+			}
+		};
+	}
+	
+	default CoordinateMatrix jacobian(final CoordinateVector pos)
+	{
+		return gradient(pos).transpose();
+	}
+	
+	default CoordinateMatrix jacobianTransposed(final CoordinateVector pos)
+	{
+		return gradient(pos);
+	}
+	
+	@Override
+	default VectorFunction concatenateWith(final VectorFunction f)
+	{
+		if (PerformanceArguments.getInstance().executeChecks)
+		{
+			if (f.getRangeDimension() != getDomainDimension())
+				throw new IllegalArgumentException("Inner function has the wrong range");
+		}
+		
+		final VectorFunction vectorFunction = this;
+		return new VectorFunction()
+		{
+			@Override
+			public int getRangeDimension()
+			{
+				return vectorFunction.getRangeDimension();
+			}
+			
+			@Override
+			public int getDomainDimension()
+			{
+				return vectorFunction.getDomainDimension();
+			}
+			
+			@Override
+			public CoordinateVector value(final CoordinateVector pos)
+			{
+				return vectorFunction.value(f.value(pos));
+			}
+			
+			@Override
+			public CoordinateMatrix gradient(final CoordinateVector pos)
+			{
+				return f.gradient(pos)
+				        .mmMul(vectorFunction.gradient(f.value(pos)));
 			}
 		};
 	}

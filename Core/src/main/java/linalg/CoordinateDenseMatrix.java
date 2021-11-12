@@ -2,7 +2,9 @@ package linalg;
 
 import basic.PerformanceArguments;
 
-public class CoordinateDenseMatrix extends DenseMatrix implements CoordinateMatrix
+public class CoordinateDenseMatrix
+	extends DenseMatrix
+	implements CoordinateMatrix
 {
 	public CoordinateDenseMatrix(final int i, final int j)
 	{
@@ -16,7 +18,9 @@ public class CoordinateDenseMatrix extends DenseMatrix implements CoordinateMatr
 	{
 		super(matrix);
 		if (PerformanceArguments.getInstance().executeChecks)
-			if (matrix.getShape().get(0) > 3 || matrix.getShape().get(1) > 3)
+			if (matrix.getShape()
+			          .get(0) > 3 || matrix.getShape()
+			                               .get(1) > 3)
 				throw new IllegalArgumentException("only 1D, 2D and 3D supported");
 	}
 	
@@ -34,6 +38,14 @@ public class CoordinateDenseMatrix extends DenseMatrix implements CoordinateMatr
 		{
 			ret.entries[i / cols][i % cols] = vals[i];
 		}
+		return ret;
+	}
+	
+	public static CoordinateDenseMatrix identity(final int n)
+	{
+		final CoordinateDenseMatrix ret = new CoordinateDenseMatrix(n, n);
+		for (int i = 0; i < n; i++)
+			ret.add(1, i, i);
 		return ret;
 	}
 	

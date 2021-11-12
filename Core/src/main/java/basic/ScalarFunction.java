@@ -9,7 +9,8 @@ import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.Stream;
 
-public interface ScalarFunction extends Function<Double, CoordinateVector, CoordinateMatrix>
+public interface ScalarFunction
+	extends Function<Double, CoordinateVector, CoordinateMatrix>
 {
 	static ScalarFunction constantFunction(final double constant)
 	{
@@ -174,5 +175,38 @@ public interface ScalarFunction extends Function<Double, CoordinateVector, Coord
 	default CoordinateMatrix defaultHessian()
 	{
 		return new CoordinateDenseMatrix(getDomainDimension(), getDomainDimension());
+	}
+	
+	@Override
+	default ScalarFunction concatenateWith(final VectorFunction f)
+	{
+		if (PerformanceArguments.getInstance().executeChecks)
+		{
+			if (f.getRangeDimension() != getDomainDimension())
+				throw new IllegalArgumentException("Inner function has the wrong range");
+		}
+		
+		final ScalarFunction scalarFunction = this;
+		return new ScalarFunction()
+		{
+			@Override
+			public int getDomainDimension()
+			{
+				return scalarFunction.getDomainDimension();
+			}
+			
+			@Override
+			public Double value(final CoordinateVector pos)
+			{
+				return scalarFunction.value(f.value(pos));
+			}
+			
+			@Override
+			public CoordinateVector gradient(final CoordinateVector pos)
+			{
+				return f.gradient(pos)
+				        .mvMul(scalarFunction.gradient(f.value(pos)));
+			}
+		};
 	}
 }

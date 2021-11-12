@@ -17,14 +17,12 @@ public class IterativeSolverConvergenceMetric
 	public double goal;
 	public int drawnPoints = 500;
 	ExecutorService executorService;
-	volatile int version;
 	
 	public IterativeSolverConvergenceMetric(final double goal)
 	{
 		this.goal = goal;
 		residuals = new CopyOnWriteArrayList<>();
 		executorService = Executors.newFixedThreadPool(2);
-		this.version = 0;
 	}
 	
 	public synchronized void publishIterate(final double residual)
@@ -35,20 +33,17 @@ public class IterativeSolverConvergenceMetric
 	public void publishIterateAsync(final Supplier<Double> generatingFunction)
 	{
 		final IterativeSolverConvergenceMetric metric = this;
-		final int oldVersion = version;
 		final Runnable r = () ->
 		{
 			final Double residual = generatingFunction.get();
-			if (oldVersion == this.version)
-				metric.publishIterate(residual);
+			metric.publishIterate(residual);
 		};
 		executorService.execute(r);
 		//r.run();
 	}
 	
-	public synchronized void restart(final int version)
+	public synchronized void restart()
 	{
-		this.version = version;
 		if (residuals.size() > 0)
 			residuals = new CopyOnWriteArrayList<>();
 	}
@@ -87,7 +82,6 @@ public class IterativeSolverConvergenceMetric
 		{
 			final double x = offset + (width - 2.0 * offset) * i / drawnPoints;
 			final double y = valueToY(pointToResidual(i), height, maxResidual);
-			
 			graphics.fillOval((int) x - size, (int) y - size, 2 * size, 2 * size);
 			//graphics.drawLine((int) x + size, (int) y - size, (int) x - size, (int) y + size);
 		}
@@ -135,12 +129,9 @@ public class IterativeSolverConvergenceMetric
 			return goal;
 		if (point == drawnPoints - 1)
 			return residuals.get(nIterates - 1);
-		double val = 1e16;
+		final double val = 100;
 		final int pointIndex = (int) (1.0 * nIterates * point / (drawnPoints + 1));
 		final int pointIndex2 = (int) (1.0 * nIterates * (point + 1) / (drawnPoints + 1));
-		for (int i = pointIndex; i < pointIndex2; i++)
-			if (residuals.get(i) < val)
-				val = residuals.get(i);
-		return val;
+		return residuals.get(pointIndex);
 	}
 }

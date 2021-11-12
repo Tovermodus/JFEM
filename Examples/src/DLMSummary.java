@@ -37,7 +37,7 @@ public class DLMSummary
 	List<CoordinateVector> eulerianPoints;
 	private final int lagrangeDegree = 1;
 	private final int eulerDegree = 2;
-	private final String elastMethod = DistortedVectorCellIntegral.SYM_GRAD;
+	private final String elastMethod = DistortedVectorCellIntegral.SYM_SYM;
 	
 	public DLMSummary()
 	{

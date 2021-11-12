@@ -1,6 +1,7 @@
 package linalg;
 
 import basic.Interruptor;
+import basic.PerformanceArguments;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.ArrayList;
@@ -11,7 +12,7 @@ public class GMRES
 {
 	private final boolean printProgress;
 	final IterativeSolverConvergenceMetric metric;
-	public int MAX_RESTARTS = 6;
+	public int MAX_RESTARTS = 200;
 	int restarts;
 	public int ITERATIONS_BEFORE_RESTART = 150;
 	
@@ -155,15 +156,18 @@ public class GMRES
 	                          final Vector x,
 	                          final int j)
 	{
-		metric.publishIterateAsync(() ->
-		                           {
-			                           final DenseVector alpha = calculateAlpha(gamma, h, j);
-			                           final Vector step = linearCombination(v, alpha);
-			                           final Vector newIt = x.add(step);
-			                           return A.mvMul(newIt)
-			                                   .sub(b)
-			                                   .euclidianNorm();
-		                           });
+		if (PerformanceArguments.getInstance().GMResData == PerformanceArguments.GMRESResidual)
+			metric.publishIterateAsync(() ->
+			                           {
+				                           final DenseVector alpha = calculateAlpha(gamma, h, j);
+				                           final Vector step = linearCombination(v, alpha);
+				                           final Vector newIt = x.add(step);
+				                           return A.mvMul(newIt)
+				                                   .sub(b)
+				                                   .euclidianNorm();
+			                           });
+		else
+			metric.publishIterate(gamma.at(j + 1));
 	}
 	
 	@NotNull

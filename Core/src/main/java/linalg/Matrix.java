@@ -4,7 +4,8 @@ import basic.PerformanceArguments;
 
 import java.util.List;
 
-public interface Matrix extends Tensor, VectorMultiplyable
+public interface Matrix
+	extends Tensor, VectorMultiplyable
 {
 	@Override
 	default int getTVectorSize()
@@ -94,7 +95,10 @@ public interface Matrix extends Tensor, VectorMultiplyable
 	{
 		if (PerformanceArguments.getInstance().executeChecks) if (!getShape().equals(other.getShape()))
 			throw new IllegalArgumentException("Incompatible " + "sizes");
-		return getShape().range().stream().mapToDouble(c -> at(c) * other.at(c)).sum();
+		return getShape().range()
+		                 .stream()
+		                 .mapToDouble(c -> at(c) * other.at(c))
+		                 .sum();
 	}
 	
 	Matrix mmMul(Matrix matrix);
@@ -122,6 +126,16 @@ public interface Matrix extends Tensor, VectorMultiplyable
 		{
 			ret.add(at(i, i), i, i);
 		}
+		return ret;
+	}
+	
+	default double trace()
+	{
+		if (PerformanceArguments.getInstance().executeChecks)
+			if (getRows() != getCols()) throw new IllegalArgumentException("Only for aquare matrices");
+		double ret = 0;
+		for (int i = 0; i < getRows(); i++)
+			ret += at(i, i);
 		return ret;
 	}
 	
