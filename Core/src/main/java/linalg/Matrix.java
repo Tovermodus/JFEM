@@ -5,7 +5,7 @@ import basic.PerformanceArguments;
 import java.util.List;
 
 public interface Matrix
-	extends Tensor, VectorMultiplyable
+	extends Tensor, AddableVectorMultiplyable<Matrix>
 {
 	@Override
 	default int getTVectorSize()

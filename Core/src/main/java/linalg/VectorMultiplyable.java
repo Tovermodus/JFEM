@@ -8,13 +8,16 @@ import java.util.stream.IntStream;
 public interface VectorMultiplyable
 {
 	int getVectorSize();
+	
 	int getTVectorSize();
+	
 	Vector mvMul(Vector vector);
+	
 	Vector tvMul(Vector vector);
 	
-	default VectorMultiplyable transpose()
+	default VectorMultiplyable add(final VectorMultiplyable other)
 	{
-		VectorMultiplyable me = this;
+		final VectorMultiplyable me = this;
 		return new VectorMultiplyable()
 		{
 			@Override
@@ -30,13 +33,79 @@ public interface VectorMultiplyable
 			}
 			
 			@Override
-			public Vector mvMul(Vector vector)
+			public Vector mvMul(final Vector vector)
+			{
+				return me.mvMul(vector)
+				         .add(other.mvMul(vector));
+			}
+			
+			@Override
+			public Vector tvMul(final Vector vector)
+			{
+				return me.tvMul(vector)
+				         .add(other.tvMul(vector));
+			}
+		};
+	}
+	
+	default VectorMultiplyable mul(final double scalar)
+	{
+		final VectorMultiplyable me = this;
+		return new VectorMultiplyable()
+		{
+			@Override
+			public int getVectorSize()
+			{
+				return me.getTVectorSize();
+			}
+			
+			@Override
+			public int getTVectorSize()
+			{
+				return me.getVectorSize();
+			}
+			
+			@Override
+			public Vector mvMul(final Vector vector)
+			{
+				return me.mvMul(vector)
+				         .mul(scalar);
+			}
+			
+			@Override
+			public Vector tvMul(final Vector vector)
+			{
+				return me.tvMul(vector)
+				         .mul(scalar);
+			}
+		};
+	}
+	
+	default VectorMultiplyable transpose()
+	{
+		final VectorMultiplyable me = this;
+		return new VectorMultiplyable()
+		{
+			@Override
+			public int getVectorSize()
+			{
+				return me.getTVectorSize();
+			}
+			
+			@Override
+			public int getTVectorSize()
+			{
+				return me.getVectorSize();
+			}
+			
+			@Override
+			public Vector mvMul(final Vector vector)
 			{
 				return me.tvMul(vector);
 			}
 			
 			@Override
-			public Vector tvMul(Vector vector)
+			public Vector tvMul(final Vector vector)
 			{
 				return me.mvMul(vector);
 			}
@@ -45,34 +114,36 @@ public interface VectorMultiplyable
 	
 	default double powerIterationSymmetric()
 	{
-		if(PerformanceArguments.getInstance().executeChecks)
+		if (PerformanceArguments.getInstance().executeChecks)
 		{
-			if(getVectorSize() != getTVectorSize())
+			if (getVectorSize() != getTVectorSize())
 				throw new IllegalStateException("Object is not square");
-			if(IntStream.range(0, getVectorSize()).parallel()
-				.mapToObj(i -> DenseVector.getUnitVector(getVectorSize(), i))
-				.anyMatch(v -> !mvMul(v).almostEqual(tvMul(v))))
+			if (IntStream.range(0, getVectorSize())
+			             .parallel()
+			             .mapToObj(i -> DenseVector.getUnitVector(getVectorSize(), i))
+			             .anyMatch(v -> !mvMul(v).almostEqual(tvMul(v))))
 				throw new IllegalStateException("Not Symmetric");
 		}
 		DenseVector d;
 		d = new DenseVector(getVectorSize());
 		int component = 0;
-		d.set(1,component++);
-		while (this.mvMul(d).absMaxElement() < PerformanceArguments.getInstance().doubleTolerance*getVectorSize())
+		d.set(1, component++);
+		while (this.mvMul(d)
+		           .absMaxElement() < PerformanceArguments.getInstance().doubleTolerance * getVectorSize())
 		{
 			d = new DenseVector(getVectorSize());
-			d.set(1,component++);
+			d.set(1, component++);
 		}
 		Vector b = d;
 		Vector Ab;
 		double old_lamb = 7.0;
 		double new_lamb = 6.0;
-		while (!DoubleCompare.almostEqualAfterOps(old_lamb/new_lamb, 1, this.getVectorSize()))
+		while (!DoubleCompare.almostEqualAfterOps(old_lamb / new_lamb, 1, this.getVectorSize()))
 		{
 			old_lamb = new_lamb;
 			Ab = this.mvMul(b);
-			new_lamb = b.inner(Ab)/Math.pow(b.euclidianNorm(),2);
-			b = Ab.mul(1./Ab.euclidianNorm());
+			new_lamb = b.inner(Ab) / Math.pow(b.euclidianNorm(), 2);
+			b = Ab.mul(1. / Ab.euclidianNorm());
 		}
 		return new_lamb;
 	}

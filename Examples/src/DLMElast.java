@@ -617,11 +617,11 @@ public class DLMElast
 	private DistortedVectorFunction concatenateVelocityWithX(final MixedFunction sf,
 	                                                         final DenseVector currentIterate)
 	{
+		
 		final DistortedVectorFESpaceFunction X = getX(currentIterate);
 		
 		return new DistortedVectorFunction()
 		{
-			
 			@Override
 			public CoordinateVector valueOnReferenceCell(final CoordinateVector pos,
 			                                             final DistortedCell cell)
