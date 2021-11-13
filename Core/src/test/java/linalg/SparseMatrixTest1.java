@@ -142,10 +142,10 @@ public class SparseMatrixTest1
 		final SparseMatrix symmDense = largeDense.add(largeDense.transpose());
 		assertTrue(symmDense
 			           .solveSymm(largeVector)
-			           .almostEqual(new IterativeSolver().solveCG(symmDense, largeVector, 1e-12)));
+			           .almostEqual(new IterativeSolver().solveCG(symmDense, largeVector, 1e-11)));
 		assertTrue(symmDense
 			           .solve(largeVector)
-			           .almostEqual(new IterativeSolver().solveCG(symmDense, largeVector, 1e-12)));
+			           .almostEqual(new IterativeSolver().solveCG(symmDense, largeVector, 1e-11)));
 		assertTrue(symmDense.solve(largeVector)
 		                    .almostEqual(symmDense.solveSymm(largeVector)));
 	}

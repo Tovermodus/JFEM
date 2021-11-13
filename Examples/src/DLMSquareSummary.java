@@ -122,7 +122,8 @@ public class DLMSquareSummary
 					                  return Map.entry(Xp.addCoordinate((finalI - 1) * dt), val);
 				                  })
 				             .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue)));
-			derivVals.putAll(getX(currentIterate.sub(lastIterate).mul(1. / dt))
+			derivVals.putAll(getX(currentIterate.sub(lastIterate)
+			                                    .mul(1. / dt))
 				                 .valuesInPointsAtTime(eulerianPoints, (i - 1) * dt));
 			uXvals.putAll(concatenateVelocityWithX(getUp(currentIterate), currentIterate)
 				              .valuesInPointsAtTime(eulerianPoints, (i - 1) * dt));
@@ -299,7 +300,8 @@ public class DLMSquareSummary
 		eulerian = new TaylorHoodSpace(startCoordinates, endCoordinates, cellCounts);
 		eulerian.assembleCells();
 		eulerian.assembleFunctions(eulerDegree);
-		nEulerian = eulerian.getShapeFunctions().size();
+		nEulerian = eulerian.getShapeFunctions()
+		                    .size();
 		eulerianPoints = eulerian.generatePlotPoints(eulerianPointsPerDimension);
 	}
 	
@@ -312,7 +314,8 @@ public class DLMSquareSummary
 		                                           new IntCoordinates(nLagrangianCells, nLagrangianCells));
 		lagrangian.assembleCells();
 		lagrangian.assembleFunctions(lagrangeDegree);
-		nLagrangian = lagrangian.getShapeFunctions().size();
+		nLagrangian = lagrangian.getShapeFunctions()
+		                        .size();
 		nTransfer = nLagrangian;
 	}
 	
@@ -323,11 +326,13 @@ public class DLMSquareSummary
 		eulerian
 			.getShapeFunctions()
 			.forEach((key, value) -> initialVector.add(
-				value.getNodeFunctional().evaluate(initialVelocityFunction), key));
+				value.getNodeFunctional()
+				     .evaluate(initialVelocityFunction), key));
 		eulerian
 			.getShapeFunctions()
 			.forEach((key, value) -> initialVector.add(
-				value.getNodeFunctional().evaluate(initialPressureFunction), key));
+				value.getNodeFunctional()
+				     .evaluate(initialPressureFunction), key));
 	}
 	
 	public void generateFirstLagrangianIterates(final DenseVector initialVector, final DenseVector previousVector)
@@ -335,22 +340,31 @@ public class DLMSquareSummary
 		lagrangian
 			.getShapeFunctions()
 			.forEach((key, value) -> initialVector.add(
-				value.getNodeFunctional().evaluate(initialDisplacementValues()), nEulerian + key));
+				value.getNodeFunctional()
+				     .evaluate(initialDisplacementValues()), nEulerian + key));
 		lagrangian
 			.getShapeFunctions()
 			.forEach((key, value) -> previousVector.add(
-				value.getNodeFunctional().evaluate(initialDisplacementValues()), nEulerian + key));
+				value.getNodeFunctional()
+				     .evaluate(initialDisplacementValues()), nEulerian + key));
 		lagrangian
 			.getShapeFunctions()
 			.forEach((key, value) -> previousVector.add(
-				-value.getNodeFunctional().evaluate(initialDisplacementDerivatives()) * dt,
+				-value.getNodeFunctional()
+				      .evaluate(initialDisplacementDerivatives()) * dt,
 				nEulerian + key));
 	}
 	
-	public void writeBoundaryValues(final SparseMatrix currentMatrix, final DenseVector rightHandSide, final double t)
+	public void writeBoundaryValues(final SparseMatrix currentMatrix,
+	                                final DenseVector rightHandSide,
+	                                final double t)
 	{
-		eulerian.writeBoundaryValuesTo(new MixedFunction(boundaryVelocityValues(t)), f -> f.center().x() == 0,
-		                               (f, sf) -> sf.hasVelocityFunction(), currentMatrix, rightHandSide);
+		eulerian.writeBoundaryValuesTo(new MixedFunction(boundaryVelocityValues(t)),
+		                               f -> f.center()
+		                                     .x() == 0,
+		                               (f, sf) -> sf.hasVelocityFunction(),
+		                               currentMatrix,
+		                               rightHandSide);
 		final int firstPressure = eulerian
 			.getShapeFunctions()
 			.values()
@@ -403,7 +417,8 @@ public class DLMSquareSummary
 	{
 		final SparseMatrix Cf = new SparseMatrix(nTransfer, nEulerian);
 		int i = 0;
-		for (final Map.Entry<Integer, QkQkFunction> sfEntry : eulerian.getShapeFunctions().entrySet())
+		for (final Map.Entry<Integer, QkQkFunction> sfEntry : eulerian.getShapeFunctions()
+		                                                              .entrySet())
 		{
 			if (i++ % 40 == 0) System.out.println(100.0 * i / nEulerian);
 			final QkQkFunction sf = sfEntry.getValue();
@@ -416,17 +431,18 @@ public class DLMSquareSummary
 			if (sf.hasVelocityFunction())
 			{
 				lagrangian.writeCellIntegralsToRhs(List.of(transferEulerian), column, (K, lambd) ->
-					sf
-						.getVelocityShapeFunction()
-						.getNodeFunctionalPoint()
-						.sub(K.center())
-						.euclidianNorm() < 1. / nEulerCells + 1. / nLagrangianCells
-				);
+					                                   sf
+						                                   .getVelocityShapeFunction()
+						                                   .getNodeFunctionalPoint()
+						                                   .sub(K.center())
+						                                   .euclidianNorm() < 1. / nEulerCells + 1. / nLagrangianCells
+				                                  );
 				Cf.addColumn(column.mul(1), sfEntry.getKey());
 			}
 		}
 		currentMatrix.addSmallMatrixAt(Cf.mul(1), nEulerian + nLagrangian, 0);
-		currentMatrix.addSmallMatrixAt(Cf.transpose().mul(1), 0, nEulerian + nLagrangian);
+		currentMatrix.addSmallMatrixAt(Cf.transpose()
+		                                 .mul(1), 0, nEulerian + nLagrangian);
 	}
 	
 	private VectorTPFESpaceFunction<ContinuousTPVectorFunction> getX(final DenseVector currentIterate)
@@ -443,47 +459,55 @@ public class DLMSquareSummary
 	private VectorFunctionOnCells<TPCell, TPFace> concatenateVelocityWithX(final MixedFunction sf,
 	                                                                       final DenseVector currentIterate)
 	{
-		final VectorTPFESpaceFunction<ContinuousTPVectorFunction> X = getX(currentIterate);
-		return new VectorFunctionOnCells<TPCell, TPFace>()
-		{
-			@Override
-			public int getRangeDimension()
-			{
-				return 2;
-			}
-			
-			@Override
-			public CoordinateVector valueInCell(final CoordinateVector pos, final TPCell cell)
-			{
-				return sf.getVelocityFunction().value(X.valueInCell(pos, cell));
-			}
-			
-			@Override
-			public CoordinateMatrix gradientInCell(final CoordinateVector pos, final TPCell cell)
-			{
-				
-				return sf.getVelocityFunction().gradient(X.value(pos)).mmMul(X.gradientInCell(pos,
-				                                                                              cell));
-			}
-			
-			@Override
-			public int getDomainDimension()
-			{
-				return 2;
-			}
-			
-			@Override
-			public CoordinateVector value(final CoordinateVector pos)
-			{
-				return sf.getVelocityFunction().value(X.value(pos));
-			}
-			
-			@Override
-			public CoordinateMatrix gradient(final CoordinateVector pos)
-			{
-				return sf.getVelocityFunction().gradient(X.value(pos)).mmMul(X.gradient(pos));
-			}
-		};
+		return sf.getVelocityFunction()
+		         .concatenateWithOnCells(getX(currentIterate));
+//		final VectorTPFESpaceFunction<ContinuousTPVectorFunction> X = getX(currentIterate);
+//		return new VectorFunctionOnCells<TPCell, TPFace>()
+//		{
+//			@Override
+//			public int getRangeDimension()
+//			{
+//				return 2;
+//			}
+//
+//			@Override
+//			public CoordinateVector valueInCell(final CoordinateVector pos, final TPCell cell)
+//			{
+//				return sf.getVelocityFunction()
+//				         .value(X.valueInCell(pos, cell));
+//			}
+//
+//			@Override
+//			public CoordinateMatrix gradientInCell(final CoordinateVector pos, final TPCell cell)
+//			{
+//
+//				return sf.getVelocityFunction()
+//				         .gradient(X.value(pos))
+//				         .mmMul(X.gradientInCell(pos,
+//				                                 cell));
+//			}
+//
+//			@Override
+//			public int getDomainDimension()
+//			{
+//				return 2;
+//			}
+//
+//			@Override
+//			public CoordinateVector value(final CoordinateVector pos)
+//			{
+//				return sf.getVelocityFunction()
+//				         .value(X.value(pos));
+//			}
+//
+//			@Override
+//			public CoordinateMatrix gradient(final CoordinateVector pos)
+//			{
+//				return sf.getVelocityFunction()
+//				         .gradient(X.value(pos))
+//				         .mmMul(X.gradient(pos));
+//			}
+//		};
 	}
 	
 	private DenseVector getLagrangianIterate(final DenseVector currentIterate)
@@ -525,16 +549,20 @@ public class DLMSquareSummary
 		currentVector.addSmallVectorAt(f, 0);
 	}
 	
-	public void writeG(final DenseVector currentVector, final DenseVector currentIterate, final DenseVector lastIterate)
+	public void writeG(final DenseVector currentVector,
+	                   final DenseVector currentIterate,
+	                   final DenseVector lastIterate)
 	{
 		final DenseVector g = lagrangianBetaMass.mvMul(
-			getLagrangianIterate(currentIterate).mul(2).sub(getLagrangianIterate(lastIterate)));
+			getLagrangianIterate(currentIterate).mul(2)
+			                                    .sub(getLagrangianIterate(lastIterate)));
 		currentVector.addSmallVectorAt(g, nEulerian);
 	}
 	
 	public void writeD(final DenseVector currentVector, final DenseVector currentIterate)
 	{
-		final DenseVector d = lagrangianDual.mvMul(getLagrangianIterate(currentIterate)).mul(1. / dt);
+		final DenseVector d = lagrangianDual.mvMul(getLagrangianIterate(currentIterate))
+		                                    .mul(1. / dt);
 		currentVector.addSmallVectorAt(d, nEulerian + nLagrangian);
 	}
 }

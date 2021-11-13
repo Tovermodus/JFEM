@@ -56,7 +56,7 @@ public class SystemFunctionTest
 			@Override
 			public CoordinateMatrix gradient(final CoordinateVector pos)
 			{
-				return CoordinateDenseMatrix.fromValues(3, 2, 2 * pos.x(), 0, 0, 1, 0, 0);
+				return CoordinateDenseMatrix.fromValues(2, 3, 2 * pos.x(), 0, 0, 0, 1, 0);
 			}
 		};
 		final ScalarFunction f3 = new ScalarFunction()
@@ -197,7 +197,7 @@ public class SystemFunctionTest
 		d.set(0, 5, 1);
 		d.set(0, 6, 0);
 		d.set(1, 6, 1);
-		assertEquals(f.gradient(new CoordinateVector(2)), d);
+		assertEquals(f.gradient(new CoordinateVector(2)), d.transpose());
 		SystemParameters.deleteInstance();
 	}
 }

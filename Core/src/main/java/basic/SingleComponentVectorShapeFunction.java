@@ -7,14 +7,18 @@ import java.lang.reflect.InvocationTargetException;
 import java.util.Objects;
 import java.util.Set;
 
-public class SingleComponentVectorShapeFunction<CT extends Cell<CT, FT>, FT extends Face<CT, FT>, CST extends FastEvaluatedScalarShapeFunction<CT, FT> & Comparable<CST>, VT extends SingleComponentVectorShapeFunction<CT, FT, CST, VT>> implements VectorShapeFunction<CT, FT>, Comparable<VT>
+public class SingleComponentVectorShapeFunction<CT extends Cell<CT, FT>, FT extends Face<CT, FT>, CST extends FastEvaluatedScalarShapeFunction<CT, FT> & Comparable<CST>, VT extends SingleComponentVectorShapeFunction<CT, FT, CST, VT>>
+	implements VectorShapeFunction<CT, FT>, Comparable<VT>
 {
 	private final CST componentFunction;
 	private final int component;
 	private int globalIndex = -1;
 	private final int dimension;
 	
-	public SingleComponentVectorShapeFunction(final CT supportCell, final int polynomialDegree, final int localIndex, final Class<CST> componentFunctionClass)
+	public SingleComponentVectorShapeFunction(final CT supportCell,
+	                                          final int polynomialDegree,
+	                                          final int localIndex,
+	                                          final Class<CST> componentFunctionClass)
 	{
 		component = (int) (localIndex / Math.pow((polynomialDegree + 1), supportCell.getDimension()));
 		dimension = supportCell.getDimension();
@@ -98,7 +102,8 @@ public class SingleComponentVectorShapeFunction<CT extends Cell<CT, FT>, FT exte
 	@Override
 	public double divergenceInCell(final CoordinateVector pos, final CT cell)
 	{
-		return componentFunction.gradientInCell(pos, cell).at(component);
+		return componentFunction.gradientInCell(pos, cell)
+		                        .at(component);
 	}
 	
 	@Override
@@ -110,7 +115,8 @@ public class SingleComponentVectorShapeFunction<CT extends Cell<CT, FT>, FT exte
 	@Override
 	public double divergence(final CoordinateVector pos)
 	{
-		return componentFunction.gradient(pos).at(component);
+		return componentFunction.gradient(pos)
+		                        .at(component);
 	}
 	
 	@Override
@@ -136,20 +142,15 @@ public class SingleComponentVectorShapeFunction<CT extends Cell<CT, FT>, FT exte
 	@Override
 	public CoordinateMatrix gradient(final CoordinateVector pos)
 	{
-		return componentFunction
-			.gradient(pos)
-			.outer(CoordinateVector.getUnitVector(getDomainDimension(), component));
-//		final CoordinateVector grad = componentFunction.gradient(pos);
-//		final CoordinateVector other = CoordinateVector.getUnitVector(getDomainDimension(), component);
-//		final CoordinateDenseMatrix ret = new CoordinateDenseMatrix(grad.getLength(), other.getLength());
-//		for (int i = 0; i < grad.getLength(); i++)
-//		{
-//			for (int j = 0; j < other.getLength(); j++)
-//			{
-//				ret.set(grad.at(i) * other.at(j), i, j);
-//			}
-//		}
-//		return ret;
+		return componentFunction.gradient(pos)
+		                        .outer(CoordinateVector.getUnitVector(getDomainDimension(), component));
+	}
+	
+	@Override
+	public CoordinateMatrix jacobian(final CoordinateVector pos)
+	{
+		return CoordinateVector.getUnitVector(getDomainDimension(), component)
+		                       .outer(componentFunction.gradient(pos));
 	}
 	
 	@Override

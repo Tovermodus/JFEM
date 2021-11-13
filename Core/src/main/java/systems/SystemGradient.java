@@ -3,10 +3,12 @@ package systems;
 import basic.PerformanceArguments;
 import linalg.*;
 
+import java.util.Arrays;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
-public class SystemGradient extends DenseMatrix
+public class SystemGradient
+	extends DenseMatrix
 {
 	final int[] starts;
 	final int[] ends;
@@ -20,7 +22,7 @@ public class SystemGradient extends DenseMatrix
 	
 	public SystemGradient(final int[] ends, final int d)
 	{
-		super(ends[ends.length - 1], d);
+		super(d, ends[ends.length - 1]);
 		starts = new int[ends.length];
 		this.ends = ends.clone();
 		for (int i = 0; i < ends.length - 1; i++)
@@ -31,7 +33,7 @@ public class SystemGradient extends DenseMatrix
 	
 	public SystemGradient(final int d)
 	{
-		super(SystemParameters.getInstance().ends[SystemParameters.getInstance().ends.length - 1], d);
+		super(d, SystemParameters.getInstance().ends[SystemParameters.getInstance().ends.length - 1]);
 		starts = SystemParameters.getInstance().starts;
 		ends = SystemParameters.getInstance().ends;
 	}
@@ -55,11 +57,12 @@ public class SystemGradient extends DenseMatrix
 			if (component >= ends.length || component < 0)
 				throw new IllegalArgumentException("Component does not exist");
 		}
-		final CoordinateDenseMatrix ret = new CoordinateDenseMatrix(ends[component] - starts[component], getCols());
+		final CoordinateDenseMatrix ret = new CoordinateDenseMatrix(getRows(),
+		                                                            ends[component] - starts[component]);
 		for (int i = 0; i < ret.getRows(); i++)
 		{
 			for (int j = 0; j < ret.getCols(); j++)
-				ret.set(entries[starts[component] + i][j], i, j);
+				ret.set(entries[i][starts[component] + j], i, j);
 		}
 		return ret;
 	}
@@ -70,13 +73,17 @@ public class SystemGradient extends DenseMatrix
 		{
 			if (component >= ends.length || component < 0)
 				throw new IllegalArgumentException("Component does not exist");
-			if (!new IntCoordinates(ends[component] - starts[component], getCols()).equals(c.getShape()))
+			if (!new IntCoordinates(getRows(), ends[component] - starts[component]).equals(c.getShape()))
+			{
+				System.out.println(getRows() + " " + getCols() + " " + Arrays.toString(starts) + " " + Arrays.toString(
+					ends) + " " + c.getShape() + " " + component);
 				throw new IllegalArgumentException("Vectors have different size");
+			}
 		}
 		for (int i = 0; i < c.getRows(); i++)
 		{
 			for (int j = 0; j < c.getCols(); j++)
-				entries[starts[component] + i][j] = c.at(i, j);
+				entries[i][starts[component] + j] = c.at(i, j);
 		}
 	}
 	
@@ -91,7 +98,7 @@ public class SystemGradient extends DenseMatrix
 		}
 		for (int i = 0; i < c.getLength(); i++)
 		{
-			entries[starts[component]][i] = c.at(i);
+			entries[i][starts[component]] = c.at(i);
 		}
 	}
 	

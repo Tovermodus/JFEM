@@ -16,7 +16,8 @@ import tensorproduct.geometry.TPFace;
 
 import java.util.*;
 
-public class DistortedShapeFunction implements FastEvaluatedScalarShapeFunction<DistortedCell, DistortedFace>, Comparable<DistortedShapeFunction>
+public class DistortedShapeFunction
+	implements FastEvaluatedScalarShapeFunction<DistortedCell, DistortedFace>, Comparable<DistortedShapeFunction>
 
 {
 	private final Map<DistortedCell, TPShapeFunction> shapeFunctionsOnCell;
@@ -47,7 +48,9 @@ public class DistortedShapeFunction implements FastEvaluatedScalarShapeFunction<
 		{
 			final TPFace referenceFace = TPFace.fromVertices(cell.getReferenceVerticesOfFace(face),
 			                                                 face.isBoundaryFace());
-			if (shapeFunctionsOnCell.get(cell).getNodeFunctional().usesFace(referenceFace))
+			if (shapeFunctionsOnCell.get(cell)
+			                        .getNodeFunctional()
+			                        .usesFace(referenceFace))
 			{
 				if (faces.add(face))
 				{
@@ -89,13 +92,15 @@ public class DistortedShapeFunction implements FastEvaluatedScalarShapeFunction<
 		if (PerformanceArguments.getInstance().executeChecks)
 			if (!cell.referenceCell.isInCell(pos)) throw new IllegalArgumentException("pos is not in cell");
 		//if (shapeFunctionsOnCell.containsKey(cell))
-		return shapeFunctionsOnCellFast.get(cell.doneCode()).fastValue(pos);
+		return shapeFunctionsOnCellFast.get(cell.doneCode())
+		                               .fastValue(pos);
 		//return 0;
 	}
 	
 	public LagrangeNodeFunctional nodeFunctionalOnReferenceCell(final DistortedCell cell)
 	{
-		return shapeFunctionsOnCellFast.get(cell.doneCode()).getNodeFunctional();
+		return shapeFunctionsOnCellFast.get(cell.doneCode())
+		                               .getNodeFunctional();
 	}
 	
 	public CoordinateVector gradientOnReferenceCell(final CoordinateVector pos, final DistortedCell cell)
@@ -104,9 +109,11 @@ public class DistortedShapeFunction implements FastEvaluatedScalarShapeFunction<
 			if (!cell.referenceCell.isInCell(pos)) throw new IllegalArgumentException("pos is not in cell");
 		//if (shapeFunctionsOnCell.containsKey(cell))
 		//{
-		final CoordinateMatrix mat = cell.transformationGradientFromReferenceCell(pos).inverse();
-		final CoordinateVector grad = shapeFunctionsOnCellFast.get(cell.doneCode()).gradient(pos);
-		return mat.tvMul(grad);
+		final CoordinateMatrix mat = cell.transformationGradientFromReferenceCell(pos)
+		                                 .inverse();
+		final CoordinateVector grad = shapeFunctionsOnCellFast.get(cell.doneCode())
+		                                                      .gradient(pos);
+		return mat.mvMul(grad);
 		//}
 		//return new CoordinateVector(pos.getLength());
 	}
@@ -133,7 +140,8 @@ public class DistortedShapeFunction implements FastEvaluatedScalarShapeFunction<
 	public LagrangeNodeFunctional getNodeFunctional()
 	{
 		return new LagrangeNodeFunctional(firstDefinedCell.transformFromReferenceCell(
-			firstDefinedFunction.getNodeFunctional().getPoint()));
+			firstDefinedFunction.getNodeFunctional()
+			                    .getPoint()));
 	}
 	
 	@Override
@@ -153,23 +161,30 @@ public class DistortedShapeFunction implements FastEvaluatedScalarShapeFunction<
 		if (this == o) return true;
 		if (o == null || getClass() != o.getClass()) return false;
 		final DistortedShapeFunction that = (DistortedShapeFunction) o;
-		return Objects.equals(getNodeFunctional().getPoint(), that.getNodeFunctional().getPoint());
+		return Objects.equals(getNodeFunctional().getPoint(),
+		                      that.getNodeFunctional()
+		                          .getPoint());
 	}
 	
 	@Override
 	public int compareTo(@NotNull final DistortedShapeFunction o)
 	{
-		return getNodeFunctional().getPoint().compareTo(o.getNodeFunctional().getPoint());
+		return getNodeFunctional().getPoint()
+		                          .compareTo(o.getNodeFunctional()
+		                                      .getPoint());
 	}
 	
 	@Override
 	public String toString()
 	{
 		return "DistortedShapeFunction{" + "functionalpoint: " + getNodeFunctional()
-			.getPoint() + " ::: \t" + getNodeFunctional().getPoint().at(0) + " " + DoubleCompare.doubleHash(
-			getNodeFunctional().getPoint().at(0)) + " \t" + getNodeFunctional()
+			.getPoint() + " ::: \t" + getNodeFunctional().getPoint()
+		                                                     .at(0) + " " + DoubleCompare.doubleHash(
+			getNodeFunctional().getPoint()
+			                   .at(0)) + " \t" + getNodeFunctional()
 			.getPoint()
 			.at(1) + " " + DoubleCompare.doubleHash(
-			getNodeFunctional().getPoint().at(1)) + " \t" + hashCode() + '}' + "\n";
+			getNodeFunctional().getPoint()
+			                   .at(1)) + " \t" + hashCode() + '}' + "\n";
 	}
 }

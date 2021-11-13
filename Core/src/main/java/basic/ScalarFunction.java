@@ -209,4 +209,51 @@ public interface ScalarFunction
 			}
 		};
 	}
+	
+	@Override
+	default <CT extends Cell<CT, FT>, FT extends Face<CT, FT>> ScalarFunctionOnCells<CT, FT> concatenateWithOnCells(
+		final VectorFunctionOnCells<CT, FT> f)
+	{
+		if (PerformanceArguments.getInstance().executeChecks)
+		{
+			if (f.getRangeDimension() != getDomainDimension())
+				throw new IllegalArgumentException("Inner function has the wrong range");
+		}
+		
+		final ScalarFunction scalarFunction = this;
+		return new ScalarFunctionOnCells<CT, FT>()
+		{
+			@Override
+			public Double valueInCell(final CoordinateVector pos, final CT cell)
+			{
+				return scalarFunction.value(f.valueInCell(pos, cell));
+			}
+			
+			@Override
+			public CoordinateVector gradientInCell(final CoordinateVector pos, final CT cell)
+			{
+				return f.gradientInCell(pos, cell)
+				        .mvMul(scalarFunction.gradient(f.valueInCell(pos, cell)));
+			}
+			
+			@Override
+			public int getDomainDimension()
+			{
+				return scalarFunction.getDomainDimension();
+			}
+			
+			@Override
+			public Double value(final CoordinateVector pos)
+			{
+				return scalarFunction.value(f.value(pos));
+			}
+			
+			@Override
+			public CoordinateVector gradient(final CoordinateVector pos)
+			{
+				return f.gradient(pos)
+				        .mvMul(scalarFunction.gradient(f.value(pos)));
+			}
+		};
+	}
 }

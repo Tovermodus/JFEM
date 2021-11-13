@@ -2,7 +2,8 @@ package basic;
 
 import linalg.CoordinateVector;
 
-public interface FunctionOnCells<CT extends Cell<CT, FT>, FT extends Face<CT, FT>, valueT, gradientT, hessianT> extends Function<valueT, gradientT, hessianT>
+public interface FunctionOnCells<CT extends Cell<CT, FT>, FT extends Face<CT, FT>, valueT, gradientT, hessianT>
+	extends Function<valueT, gradientT, hessianT>
 {
 	valueT valueInCell(CoordinateVector pos, CT cell);
 	

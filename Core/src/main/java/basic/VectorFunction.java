@@ -22,8 +22,7 @@ public interface VectorFunction
 	
 	private CoordinateVector getComponentGradient(final CoordinateVector pos, final int component)
 	{
-		return (CoordinateVector) gradient(pos).unfoldDimension(0)
-		                                       .get(component);
+		return new CoordinateVector(gradient(pos).getColumn(component));
 	}
 	
 	int getRangeDimension();
@@ -74,13 +73,13 @@ public interface VectorFunction
 	@Override
 	default CoordinateMatrix defaultGradient()
 	{
-		return new CoordinateDenseMatrix(getRangeDimension(), getDomainDimension());
+		return new CoordinateDenseMatrix(getDomainDimension(), getRangeDimension());
 	}
 	
 	@Override
 	default CoordinateTensor defaultHessian()
 	{
-		return new CoordinateTensor(getRangeDimension(), getDomainDimension(), getDomainDimension());
+		return new CoordinateTensor(getDomainDimension(), getDomainDimension(), getRangeDimension());
 	}
 	
 	default Map<CoordinateVector, CoordinateVector> valuesInPoints(final List<CoordinateVector> points)
@@ -202,6 +201,59 @@ public interface VectorFunction
 		final VectorFunction vectorFunction = this;
 		return new VectorFunction()
 		{
+			@Override
+			public int getRangeDimension()
+			{
+				return vectorFunction.getRangeDimension();
+			}
+			
+			@Override
+			public int getDomainDimension()
+			{
+				return vectorFunction.getDomainDimension();
+			}
+			
+			@Override
+			public CoordinateVector value(final CoordinateVector pos)
+			{
+				return vectorFunction.value(f.value(pos));
+			}
+			
+			@Override
+			public CoordinateMatrix gradient(final CoordinateVector pos)
+			{
+				return f.gradient(pos)
+				        .mmMul(vectorFunction.gradient(f.value(pos)));
+			}
+		};
+	}
+	
+	@Override
+	default <CT extends Cell<CT, FT>, FT extends Face<CT, FT>> VectorFunctionOnCells<CT, FT> concatenateWithOnCells(
+		final VectorFunctionOnCells<CT, FT> f)
+	{
+		if (PerformanceArguments.getInstance().executeChecks)
+		{
+			if (f.getRangeDimension() != getDomainDimension())
+				throw new IllegalArgumentException("Inner function has the wrong range");
+		}
+		
+		final VectorFunction vectorFunction = this;
+		return new VectorFunctionOnCells<CT, FT>()
+		{
+			@Override
+			public CoordinateVector valueInCell(final CoordinateVector pos, final CT cell)
+			{
+				return vectorFunction.value(f.valueInCell(pos, cell));
+			}
+			
+			@Override
+			public CoordinateMatrix gradientInCell(final CoordinateVector pos, final CT cell)
+			{
+				return f.gradientInCell(pos, cell)
+				        .mmMul(vectorFunction.gradient(f.valueInCell(pos, cell)));
+			}
+			
 			@Override
 			public int getRangeDimension()
 			{

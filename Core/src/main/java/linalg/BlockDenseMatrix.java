@@ -77,7 +77,7 @@ public class BlockDenseMatrix
 		blocks.forEach(this::checkIfBlockFits);
 	}
 	
-	public BlockDenseMatrix(final DenseMatrix s, final int nBlocksPerDir)
+	public BlockDenseMatrix(final Matrix s, final int nBlocksPerDir)
 	{
 		this(s, generateEquiDist(nBlocksPerDir, s.getRows()));
 	}
@@ -100,7 +100,7 @@ public class BlockDenseMatrix
 		return blockst;
 	}
 	
-	public BlockDenseMatrix(final DenseMatrix s, final int[] blockStarts)
+	public BlockDenseMatrix(final Matrix s, final int[] blockStarts)
 	{
 		if (PerformanceArguments.getInstance().executeChecks)
 		{

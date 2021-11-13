@@ -218,7 +218,7 @@ public class DistortedMappingTest
 	public void testMappingRotated2D()
 	{
 		final DistortedCell cell = getRotated2D();
-		final CoordinateDenseMatrix rotation = CoordinateDenseMatrix.fromValues(2, 2, 1, 1, -1, 1);
+		final CoordinateDenseMatrix rotation = CoordinateDenseMatrix.fromValues(2, 2, 1, -1, 1, 1);
 		final CoordinateMatrix rotationInv = rotation.inverse();
 		for (int i = 0; i <= 10; i++)
 		{
@@ -238,7 +238,7 @@ public class DistortedMappingTest
 	public void testMappingRotated3D()
 	{
 		final DistortedCell cell = getRotated3D();
-		final CoordinateDenseMatrix rotation = CoordinateDenseMatrix.fromValues(3, 3, 1, 1, 0, -1, 1, 0, 0, 0,
+		final CoordinateDenseMatrix rotation = CoordinateDenseMatrix.fromValues(3, 3, 1, -1, 0, 1, 1, 0, 0, 0,
 		                                                                        1);
 		final CoordinateMatrix rotationInv = rotation.inverse();
 		for (int i = 0; i <= 10; i++)

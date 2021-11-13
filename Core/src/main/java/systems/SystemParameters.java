@@ -12,7 +12,7 @@ public class SystemParameters
 	final int[] starts;
 	public final FunctionSignature[] signatures;
 	
-	private SystemParameters(int[] ends, FunctionSignature[] signatures)
+	private SystemParameters(final int[] ends, final FunctionSignature[] signatures)
 	{
 		starts = new int[ends.length];
 		this.ends = ends.clone();
@@ -23,33 +23,39 @@ public class SystemParameters
 		}
 		for (int i = 0; i < ends.length; i++)
 		{
-			if(!Double.class.isAssignableFrom(signatures[i].getValueT()) &&  !CoordinateVector.class.isAssignableFrom(signatures[i].getValueT()))
+			if (!Double.class.isAssignableFrom(signatures[i].getValueT()) && !CoordinateVector.class.isAssignableFrom(
+				signatures[i].getValueT()))
 				throw new UnsupportedOperationException("Only Double and CoordinateVector implemented" +
-					" as value");
-			if(!CoordinateVector.class.isAssignableFrom(signatures[i].getGradientT()) &&  ! CoordinateMatrix.class.isAssignableFrom(signatures[i].getGradientT()))
+					                                        " as value");
+			if (!CoordinateVector.class.isAssignableFrom(signatures[i].getGradientT()) && !CoordinateMatrix.class.isAssignableFrom(
+				signatures[i].getGradientT()))
 				throw new UnsupportedOperationException("Only CoordinateVector and CoordinateMatrix " +
-					"implemented" +
-					" as gradient");
-			if(!CoordinateMatrix.class.isAssignableFrom(signatures[i].getHessianT()) &&  ! CoordinateTensor.class.isAssignableFrom(signatures[i].getHessianT()))
-				throw new UnsupportedOperationException("Only CoordinateMatrix and CoordinateTensor implemented" +
-					" as hessian");
+					                                        "implemented" +
+					                                        " as gradient");
+			if (!CoordinateMatrix.class.isAssignableFrom(signatures[i].getHessianT()) && !CoordinateTensor.class.isAssignableFrom(
+				signatures[i].getHessianT()))
+				throw new UnsupportedOperationException(
+					"Only CoordinateMatrix and CoordinateTensor implemented" +
+						" as hessian");
 		}
 	}
-	public static void createInstance(int[] ends, FunctionSignature[] signatures)
+	
+	public static void createInstance(final int[] ends, final FunctionSignature[] signatures)
 	{
 		if (INSTANCE == null)
 			INSTANCE = new SystemParameters(ends, signatures);
 		else
 			throw new IllegalStateException("Parameters already set");
 	}
-	public static void createInstance(int[] ends)
+	
+	public static void createInstance(final int[] ends)
 	{
-		FunctionSignature[] signats = new FunctionSignature[ends.length];
+		final FunctionSignature[] signats = new FunctionSignature[ends.length];
 		for (int i = 0; i < ends.length; i++)
 		{
-			signats[i] =new FunctionSignature(Double.class,
-				CoordinateVector.class,
-				CoordinateMatrix.class);
+			signats[i] = new FunctionSignature(Double.class,
+			                                   CoordinateVector.class,
+			                                   CoordinateMatrix.class);
 		}
 		if (INSTANCE == null)
 			INSTANCE = new SystemParameters(ends, signats);
@@ -68,6 +74,4 @@ public class SystemParameters
 			throw new IllegalStateException("No Parameters set");
 		return INSTANCE;
 	}
-	
-	
 }
