@@ -1,14 +1,11 @@
 package basic;
 
-import linalg.AddableVectorMultiplyable;
 import linalg.DenseMatrix;
 import linalg.DenseVector;
+import linalg.VectorMultiplyable;
 import scala.Function2;
 
-import java.util.ArrayList;
-import java.util.function.Function;
-
-public abstract class FullyImplicitHyperbolicIntegrator<M extends AddableVectorMultiplyable<M>>
+public abstract class FullyImplicitHyperbolicIntegrator
 {
 	final public double dt;
 	final public int timeSteps;
@@ -16,6 +13,7 @@ public abstract class FullyImplicitHyperbolicIntegrator<M extends AddableVectorM
 	protected DenseVector lastIterate;
 	final public DenseMatrix iterateHistory;
 	protected double time = 0.0;
+	
 	public FullyImplicitHyperbolicIntegrator(final double dt, final int timeSteps)
 	{
 		this.dt = dt;
@@ -43,30 +41,33 @@ public abstract class FullyImplicitHyperbolicIntegrator<M extends AddableVectorM
 	
 	private void timeStep()
 	{
-		final M twoDerivOp = getDoubleDerivativeOperator();
-		final M oneDerivOp = getSingleDerivativeOperator();
-		final M zeroDerivOp = getNoDerivativeOperator();
-		final M implicitOperator
+		final VectorMultiplyable twoDerivOp = getDoubleDerivativeOperator();
+		final VectorMultiplyable oneDerivOp = getSingleDerivativeOperator();
+		final VectorMultiplyable zeroDerivOp = getNoDerivativeOperator();
+		final VectorMultiplyable implicitOperator
 			= twoDerivOp.mul(1. / (dt * dt))
-			                .add(oneDerivOp.mul((1. / dt)))
-			                .add(zeroDerivOp);
-		DenseVector rhs = getAdditionalRhs();
-		rhs.addInPlace(twoDerivOp.mvMul(currentIterate).mul(2.0/(dt*dt)));
-		rhs.addInPlace(twoDerivOp.mvMul(lastIterate).mul(-1.0/(dt*dt)));
-		rhs.addInPlace(oneDerivOp.mvMul(currentIterate).mul(1.0/(dt)));
+			            .addVm(oneDerivOp.mul((1. / dt)))
+			            .addVm(zeroDerivOp);
+		final DenseVector rhs = getAdditionalRhs();
+		rhs.addInPlace(twoDerivOp.mvMul(currentIterate)
+		                         .mul(2.0 / (dt * dt)));
+		rhs.addInPlace(twoDerivOp.mvMul(lastIterate)
+		                         .mul(-1.0 / (dt * dt)));
+		rhs.addInPlace(oneDerivOp.mvMul(currentIterate)
+		                         .mul(1.0 / (dt)));
 		lastIterate = currentIterate;
 		currentIterate = getSolver().apply(implicitOperator, rhs);
 	}
 	
 	protected abstract DenseVector getAdditionalRhs();
 	
-	protected abstract M getDoubleDerivativeOperator();
+	protected abstract VectorMultiplyable getDoubleDerivativeOperator();
 	
-	protected abstract M getSingleDerivativeOperator();
+	protected abstract VectorMultiplyable getSingleDerivativeOperator();
 	
-	protected abstract M getNoDerivativeOperator();
+	protected abstract VectorMultiplyable getNoDerivativeOperator();
 	
-	protected abstract Function2<M, DenseVector, DenseVector> getSolver();
+	protected abstract Function2<VectorMultiplyable, DenseVector, DenseVector> getSolver();
 	
 	protected abstract void postIterationCallback();
 }

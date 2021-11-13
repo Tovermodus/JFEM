@@ -15,7 +15,7 @@ public interface VectorMultiplyable
 	
 	Vector tvMul(Vector vector);
 	
-	default VectorMultiplyable add(final VectorMultiplyable other)
+	default VectorMultiplyable addVm(final VectorMultiplyable other)
 	{
 		final VectorMultiplyable me = this;
 		return new VectorMultiplyable()
