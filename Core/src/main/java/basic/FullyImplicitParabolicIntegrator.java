@@ -10,26 +10,27 @@ public abstract class FullyImplicitParabolicIntegrator
 	final public double dt;
 	final public int timeSteps;
 	protected DenseVector currentIterate;
-	final public DenseMatrix iterateHistory;
+	public DenseMatrix iterateHistory;
 	protected double time = 0.0;
 	
 	public FullyImplicitParabolicIntegrator(final double dt, final int timeSteps)
 	{
 		this.dt = dt;
 		this.timeSteps = timeSteps;
-		currentIterate = initializeInitialIterate();
-		iterateHistory = new DenseMatrix(timeSteps, currentIterate.getLength());
-		iterateHistory.addRow(currentIterate, 0);
 	}
 	
 	protected abstract DenseVector initializeInitialIterate();
 	
 	public void loop()
 	{
+		currentIterate = initializeInitialIterate();
+		iterateHistory = new DenseMatrix(timeSteps + 2, currentIterate.getLength());
+		iterateHistory.addRow(currentIterate, 0);
 		for (int i = 0; i < timeSteps; i++)
 		{
 			time += dt;
 			timeStep();
+			iterateHistory.addRow(currentIterate, i + 2);
 			postIterationCallback();
 		}
 	}
