@@ -7,7 +7,8 @@ import java.lang.reflect.InvocationTargetException;
 import java.util.Objects;
 import java.util.Set;
 
-public class SingleComponentVectorShapeFunction<CT extends Cell<CT, FT>, FT extends Face<CT, FT>, CST extends FastEvaluatedScalarShapeFunction<CT, FT> & Comparable<CST>, VT extends SingleComponentVectorShapeFunction<CT, FT, CST, VT>>
+public class SingleComponentVectorShapeFunction<CT extends Cell<CT, FT>, FT extends Face<CT, FT>, CST extends ScalarShapeFunction<CT,
+	FT> & Comparable<CST>, VT extends SingleComponentVectorShapeFunction<CT, FT, CST, VT>>
 	implements VectorShapeFunction<CT, FT>, Comparable<VT>
 {
 	private final CST componentFunction;
@@ -76,7 +77,7 @@ public class SingleComponentVectorShapeFunction<CT extends Cell<CT, FT>, FT exte
 	{
 		return CoordinateVector
 			.getUnitVector(getDomainDimension(), component)
-			.mul(componentFunction.fastValueInCell(pos, cell));
+			.mul(componentFunction.valueInCell(pos, cell));
 	}
 	
 	@Override
@@ -136,7 +137,7 @@ public class SingleComponentVectorShapeFunction<CT extends Cell<CT, FT>, FT exte
 	{
 		return CoordinateVector
 			.getUnitVector(getDomainDimension(), component)
-			.mul(componentFunction.fastValue(pos));
+			.mul(componentFunction.value(pos));
 	}
 	
 	@Override

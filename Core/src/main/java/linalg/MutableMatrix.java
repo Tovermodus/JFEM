@@ -2,7 +2,8 @@ package linalg;
 
 import basic.PerformanceArguments;
 
-public interface MutableMatrix extends Matrix, MutableTensor
+public interface MutableMatrix
+	extends Matrix, MutableTensor
 {
 	void deleteRow(int row);
 	
@@ -19,7 +20,8 @@ public interface MutableMatrix extends Matrix, MutableTensor
 			if (coordinates[1] + small.getCols() > getCols())
 				throw new IllegalArgumentException("small Matrix too large in x for position");
 		}
-		for (final IntCoordinates c : small.getShape().range())
+		for (final IntCoordinates c : small.getShape()
+		                                   .range())
 		{
 			add(small.at(c), c.get(0) + coordinates[0], c.get(1) + coordinates[1]);
 		}
@@ -37,9 +39,11 @@ public interface MutableMatrix extends Matrix, MutableTensor
 			if (start + vector.getLength() > getRows())
 				throw new IllegalArgumentException("small Vector too large for position");
 		}
-		for (final IntCoordinates c : vector.getShape().range())
+		for (final IntCoordinates c : vector.getShape()
+		                                    .range())
 		{
-			add(vector.at(c), c.get(0) + start, column);
+			if (vector.at(c) != 0)
+				add(vector.at(c), c.get(0) + start, column);
 		}
 	}
 	
@@ -55,7 +59,8 @@ public interface MutableMatrix extends Matrix, MutableTensor
 			if (start + vector.getLength() > getCols())
 				throw new IllegalArgumentException("small Vector too large for position");
 		}
-		for (final IntCoordinates c : vector.getShape().range())
+		for (final IntCoordinates c : vector.getShape()
+		                                    .range())
 		{
 			add(vector.at(c), row, c.get(0) + start);
 		}

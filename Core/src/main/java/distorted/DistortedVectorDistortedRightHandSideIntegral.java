@@ -3,20 +3,23 @@ package distorted;
 import basic.RightHandSideIntegral;
 import distorted.geometry.DistortedCell;
 
-public class DistortedFESpaceVectorRightHandSideIntegral extends RightHandSideIntegral<DistortedCell, DistortedVectorShapeFunction>
+public class DistortedVectorDistortedRightHandSideIntegral
+	extends RightHandSideIntegral<DistortedCell, DistortedVectorShapeFunction>
 {
 	public static final String H1 = "H1";
 	public static final String VALUE = "Value";
 	DistortedVectorFunction rightHandSide;
 	
-	public DistortedFESpaceVectorRightHandSideIntegral(final DistortedVectorFunction rightHandSide, final String name)
+	public DistortedVectorDistortedRightHandSideIntegral(final DistortedVectorFunction rightHandSide,
+	                                                     final String name)
 	{
 		super(rightHandSide, name);
 		this.rightHandSide = rightHandSide;
 	}
 	
 	@Override
-	public double evaluateRightHandSideIntegral(final DistortedCell cell, final DistortedVectorShapeFunction shapeFunction1)
+	public double evaluateRightHandSideIntegral(final DistortedCell cell,
+	                                            final DistortedVectorShapeFunction shapeFunction1)
 	{
 		if (name.equals(H1))
 		{

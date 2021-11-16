@@ -7,10 +7,14 @@ import linalg.CoordinateVector;
 import java.util.Map;
 import java.util.Set;
 
-public interface ScalarShapeFunction<CT extends Cell<CT, FT>, FT extends Face<CT, FT>> extends ScalarFunction, ShapeFunction<CT, FT, Double, CoordinateVector, CoordinateMatrix>
+public interface ScalarShapeFunction<CT extends Cell<CT, FT>, FT extends Face<CT, FT>>
+	extends ScalarFunctionOnCells<CT, FT>
+	, ShapeFunction<CT,
+		FT, Double, CoordinateVector, CoordinateMatrix>
 {
 	@Override
-	default <ST extends ShapeFunction<CT, FT, Double, CoordinateVector, CoordinateMatrix>> Map<Integer, Double> prolongate(final Set<ST> refinedFunctions)
+	default <ST extends ShapeFunction<CT, FT, Double, CoordinateVector, CoordinateMatrix>> Map<Integer, Double> prolongate(
+		final Set<ST> refinedFunctions)
 	{
 		throw new UnsupportedOperationException("Not Yet Implemented");
 	}
@@ -74,13 +78,17 @@ public interface ScalarShapeFunction<CT extends Cell<CT, FT>, FT extends Face<CT
 	@Override
 	default CoordinateVector normalAverageInValue(final FT face, final CoordinateVector pos)
 	{
-		return face.getNormal().value(pos).mul(0.5 * jumpInValue(face, pos));
+		return face.getNormal()
+		           .value(pos)
+		           .mul(0.5 * jumpInValue(face, pos));
 	}
 	
 	@Override
 	default Double normalAverageInDerivative(final FT face, final CoordinateVector pos)
 	{
-		return face.getNormal().value(pos).inner(jumpInDerivative(face, pos));
+		return face.getNormal()
+		           .value(pos)
+		           .inner(jumpInDerivative(face, pos));
 	}
 	
 	/*@Override

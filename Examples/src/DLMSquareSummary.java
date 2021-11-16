@@ -451,16 +451,15 @@ public class DLMSquareSummary
 		                                     getLagrangianIterate(currentIterate));
 	}
 	
-	private MixedFESpaceFunction<QkQkFunction> getUp(final DenseVector currentIterate)
+	private MixedTPFESpaceFunction<QkQkFunction> getUp(final DenseVector currentIterate)
 	{
-		return new MixedFESpaceFunction<>(eulerian.getShapeFunctions(), getEulerianfIterate(currentIterate));
+		return new MixedTPFESpaceFunction<>(eulerian.getShapeFunctions(), getEulerianfIterate(currentIterate));
 	}
 	
 	private VectorFunctionOnCells<TPCell, TPFace> concatenateVelocityWithX(final MixedFunction sf,
 	                                                                       final DenseVector currentIterate)
 	{
-		return sf.getVelocityFunction()
-		         .concatenateWithOnCells(getX(currentIterate));
+		return VectorFunctionOnCells.concatenate(sf.getVelocityFunction(), getX(currentIterate));
 //		final VectorTPFESpaceFunction<ContinuousTPVectorFunction> X = getX(currentIterate);
 //		return new VectorFunctionOnCells<TPCell, TPFace>()
 //		{

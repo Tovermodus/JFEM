@@ -228,55 +228,28 @@ public interface VectorFunction
 		};
 	}
 	
-	@Override
-	default <CT extends Cell<CT, FT>, FT extends Face<CT, FT>> VectorFunctionOnCells<CT, FT> concatenateWithOnCells(
-		final VectorFunctionOnCells<CT, FT> f)
+	static VectorFunction fromLambda(final java.util.function.Function<CoordinateVector, CoordinateVector> lambdaFunction,
+	                                 final int domainDimension,
+	                                 final int rangeDimension)
 	{
-		if (PerformanceArguments.getInstance().executeChecks)
+		return new VectorFunction()
 		{
-			if (f.getRangeDimension() != getDomainDimension())
-				throw new IllegalArgumentException("Inner function has the wrong range");
-		}
-		
-		final VectorFunction vectorFunction = this;
-		return new VectorFunctionOnCells<CT, FT>()
-		{
-			@Override
-			public CoordinateVector valueInCell(final CoordinateVector pos, final CT cell)
-			{
-				return vectorFunction.value(f.valueInCell(pos, cell));
-			}
-			
-			@Override
-			public CoordinateMatrix gradientInCell(final CoordinateVector pos, final CT cell)
-			{
-				return f.gradientInCell(pos, cell)
-				        .mmMul(vectorFunction.gradient(f.valueInCell(pos, cell)));
-			}
-			
 			@Override
 			public int getRangeDimension()
 			{
-				return vectorFunction.getRangeDimension();
+				return rangeDimension;
 			}
 			
 			@Override
 			public int getDomainDimension()
 			{
-				return vectorFunction.getDomainDimension();
+				return domainDimension;
 			}
 			
 			@Override
 			public CoordinateVector value(final CoordinateVector pos)
 			{
-				return vectorFunction.value(f.value(pos));
-			}
-			
-			@Override
-			public CoordinateMatrix gradient(final CoordinateVector pos)
-			{
-				return f.gradient(pos)
-				        .mmMul(vectorFunction.gradient(f.value(pos)));
+				return lambdaFunction.apply(pos);
 			}
 		};
 	}

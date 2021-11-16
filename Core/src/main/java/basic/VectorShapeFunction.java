@@ -8,11 +8,15 @@ import linalg.CoordinateVector;
 import java.util.Map;
 import java.util.Set;
 
-public interface VectorShapeFunction<CT extends Cell<CT, FT>, FT extends Face<CT, FT>> extends VectorFunction, ShapeFunction<CT, FT, CoordinateVector, CoordinateMatrix, CoordinateTensor>
+public interface VectorShapeFunction<CT extends Cell<CT, FT>, FT extends Face<CT, FT>>
+	extends VectorFunctionOnCells<CT, FT>
+	, ShapeFunction<CT,
+		FT, CoordinateVector, CoordinateMatrix, CoordinateTensor>
 {
 	
 	@Override
-	default <ST extends ShapeFunction<CT, FT, CoordinateVector, CoordinateMatrix, CoordinateTensor>> Map<Integer, Double> prolongate(final Set<ST> refinedFunctions)
+	default <ST extends ShapeFunction<CT, FT, CoordinateVector, CoordinateMatrix, CoordinateTensor>> Map<Integer, Double> prolongate(
+		final Set<ST> refinedFunctions)
 	{
 		throw new UnsupportedOperationException("Not Yet Implemented");
 	}
@@ -80,13 +84,16 @@ public interface VectorShapeFunction<CT extends Cell<CT, FT>, FT extends Face<CT
 //			}
 //		}
 //		return ret;
-		return (CoordinateMatrix) face.getNormal().value(pos).outer(jumpInValue(face, pos).mul(0.5));
+		return (CoordinateMatrix) face.getNormal()
+		                              .value(pos)
+		                              .outer(jumpInValue(face, pos).mul(0.5));
 	}
 	
 	@Override
 	default CoordinateVector normalAverageInDerivative(final FT face, final CoordinateVector pos)
 	{
-		return jumpInDerivative(face, pos).mvMul(face.getNormal().value(pos));
+		return jumpInDerivative(face, pos).mvMul(face.getNormal()
+		                                             .value(pos));
 	}
 	
 	default double divergenceInCell(final CoordinateVector pos, final CT cell)

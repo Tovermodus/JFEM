@@ -75,8 +75,8 @@ public class MaxwellTest
 		final Vector solution1 = i.solveGMRES(new BlockSparseMatrix(grid.getSystemMatrix(), 5), grid.getRhs(),
 		                                      1e-6);
 		System.out.println("solved");
-		final MixedFESpaceFunction<QkQkFunction> solut =
-			new MixedFESpaceFunction<>(
+		final MixedTPFESpaceFunction<QkQkFunction> solut =
+			new MixedTPFESpaceFunction<>(
 				grid.getShapeFunctions(), solution1);
 		assertTrue(ConvergenceOrderEstimator.normL2Difference(solut.getPressureFunction(),
 		                                                      MaxwellReferenceSolution.pressureReferenceSolution(),

@@ -33,10 +33,10 @@ public class DLMElast
 	int nLagrangian;
 	int nTransfer;
 	int eulerianPointsPerDimension = 40;
-	int nEulerCells = 6;
+	int nEulerCells = 14;
 	int nLagrangeRefines = 1;
 	List<CoordinateVector> eulerianPoints;
-	private final int lagrangeDegree = 1;
+	private final int lagrangeDegree = 2;
 	private final int eulerDegree = 1;
 	private final String elastMethod = DistortedVectorCellIntegral.GRAD_GRAD;
 	
@@ -48,7 +48,7 @@ public class DLMElast
 		builder.build();
 		rhoF = 1;
 		rhoS = 2;
-		lameLamb = 1000;
+		lameLamb = 10;
 		lameMu = 1;
 		nu = 1;
 		dt = 0.01;
@@ -221,6 +221,8 @@ public class DLMElast
 			System.out.println("d");
 			writeCf(systemMatrix, currentIterate);
 			System.out.println("cf");
+			writeAfSemiImplicit(systemMatrix, currentIterate);
+			System.out.println("AfImplicit");
 			writeBoundaryValues(systemMatrix, rightHandSide, i * dt);
 			System.out.println("bdr");
 			System.out.println(i + "th iteration");
@@ -550,6 +552,26 @@ public class DLMElast
 		constantMatrix.addSmallMatrixAt(ABf, 0, 0);
 	}
 	
+	public void writeAfSemiImplicit(final SparseMatrix currentMatrix, final DenseVector currentIterate)
+	{
+//		final VectorFunctionOnCells<TPCell, TPFace> vel = getUp(currentIterate).getVelocityFunction();
+//		final VectorFunction semiImplicitWeight1 = VectorFunction.fromLambda((x) -> vel.value(x)
+//		                                                                               .mul(rhoF / 2), 2, 2);
+//		final VectorFunction semiImplicitWeight2 = VectorFunction.fromLambda((x) -> vel.value(x)
+//		                                                                               .mul(-rhoF / 2), 2, 2);
+//		final TPVectorCellIntegralOnCell<ContinuousTPVectorFunction> convection1 =
+//			new TPVectorCellIntegralOnCell<>(semiImplicitWeight1, TPVectorCellIntegral.GRAD_VALUE);
+//		final TPVectorCellIntegralOnCell<ContinuousTPVectorFunction> convection2 =
+//			new TPVectorCellIntegralOnCell<>(semiImplicitWeight2, TPVectorCellIntegral.VALUE_GRAD);
+//		final MixedCellIntegral<TPCell, ContinuousTPShapeFunction, ContinuousTPVectorFunction,
+//			QkQkFunction> mixedConvection1 = MixedCellIntegral.fromVelocityIntegral(convection1);
+//		final MixedCellIntegral<TPCell, ContinuousTPShapeFunction, ContinuousTPVectorFunction,
+//			QkQkFunction> mixedConvection2 = MixedCellIntegral.fromVelocityIntegral(convection2);
+//		final SparseMatrix convection = new SparseMatrix(nEulerian, nEulerian);
+//		eulerian.writeCellIntegralsToMatrix(List.of(mixedConvection1, mixedConvection2), convection);
+//		currentMatrix.addSmallMatrixAt(convection, 0, 0);
+	}
+	
 	public void writeAs(final SparseMatrix constantMatrix)
 	{
 		final DistortedVectorCellIntegral mass = new DistortedVectorCellIntegral(rhoS,
@@ -586,9 +608,9 @@ public class DLMElast
 				        final DistortedVectorFunction vOfX = concatenateVelocityWithX(sf,
 				                                                                      currentIterate);
 				
-				        final DistortedFESpaceVectorRightHandSideIntegral transferEulerian
-					        = new DistortedFESpaceVectorRightHandSideIntegral(vOfX,
-					                                                          DistortedFESpaceVectorRightHandSideIntegral.VALUE);
+				        final DistortedVectorDistortedRightHandSideIntegral transferEulerian
+					        = new DistortedVectorDistortedRightHandSideIntegral(vOfX,
+					                                                            DistortedVectorDistortedRightHandSideIntegral.VALUE);
 				        final DenseVector column = new DenseVector(nTransfer);
 				        lagrangian.writeCellIntegralsToRhs(List.of(transferEulerian), column,
 				                                           (K, lambd) ->
@@ -609,9 +631,9 @@ public class DLMElast
 		                                          getLagrangianIterate(currentIterate));
 	}
 	
-	private MixedFESpaceFunction<QkQkFunction> getUp(final DenseVector currentIterate)
+	private MixedTPFESpaceFunction<QkQkFunction> getUp(final DenseVector currentIterate)
 	{
-		return new MixedFESpaceFunction<>(eulerian.getShapeFunctions(), getEulerianfIterate(currentIterate));
+		return new MixedTPFESpaceFunction<>(eulerian.getShapeFunctions(), getEulerianfIterate(currentIterate));
 	}
 	
 	private DistortedVectorFunction concatenateVelocityWithX(final MixedFunction sf,

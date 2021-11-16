@@ -14,45 +14,46 @@ import java.util.Map;
 
 public class RTDarcy
 {
-	public static void main(String[] args)
+	public static void main(final String[] args)
 	{
 		
-		PerformanceArguments.PerformanceArgumentBuilder builder =
+		final PerformanceArguments.PerformanceArgumentBuilder builder =
 			new PerformanceArguments.PerformanceArgumentBuilder();
-		builder.build();CoordinateVector start = CoordinateVector.fromValues(-1, -1,-1);
-		CoordinateVector end = CoordinateVector.fromValues(1, 1,1);
-		int polynomialDegree = 2;
-		MixedRTSpace grid = new MixedRTSpace(start, end,
-			Ints.asList(3,3,3));
-		TPVectorCellIntegral<RTShapeFunction> valueValue =
+		builder.build();
+		final CoordinateVector start = CoordinateVector.fromValues(-1, -1, -1);
+		final CoordinateVector end = CoordinateVector.fromValues(1, 1, 1);
+		final int polynomialDegree = 2;
+		final MixedRTSpace grid = new MixedRTSpace(start, end,
+		                                           Ints.asList(3, 3, 3));
+		final TPVectorCellIntegral<RTShapeFunction> valueValue =
 			new TPVectorCellIntegral<>(TPVectorCellIntegral.VALUE_VALUE);
-		MixedCellIntegral<TPCell, ContinuousTPShapeFunction, RTShapeFunction,RTMixedFunction>
+		final MixedCellIntegral<TPCell, ContinuousTPShapeFunction, RTShapeFunction, RTMixedFunction>
 			divValue = new MixedTPCellIntegral<>(MixedTPCellIntegral.DIV_VALUE);
-		MixedCellIntegral<TPCell, ContinuousTPShapeFunction, RTShapeFunction,RTMixedFunction> vv =
+		final MixedCellIntegral<TPCell, ContinuousTPShapeFunction, RTShapeFunction, RTMixedFunction> vv =
 			MixedCellIntegral.fromVelocityIntegral(valueValue);
-		List<CellIntegral<TPCell,  RTMixedFunction>> cellIntegrals =
+		final List<CellIntegral<TPCell, RTMixedFunction>> cellIntegrals =
 			new ArrayList<>();
 		cellIntegrals.add(vv);
 		cellIntegrals.add(divValue);
-		List<FaceIntegral< TPFace, RTMixedFunction>> faceIntegrals = new ArrayList<>();
+		final List<FaceIntegral<TPFace, RTMixedFunction>> faceIntegrals = new ArrayList<>();
 		
-		MixedRightHandSideIntegral<TPCell, ContinuousTPShapeFunction, RTShapeFunction,RTMixedFunction> rightHandSideIntegral =
+		final MixedRightHandSideIntegral<TPCell, ContinuousTPShapeFunction, RTShapeFunction, RTMixedFunction>
+			rightHandSideIntegral =
 			MixedRightHandSideIntegral.fromPressureIntegral(
 				new TPRightHandSideIntegral<ContinuousTPShapeFunction>(ScalarFunction.constantFunction(-1),
-					TPRightHandSideIntegral.VALUE));
+				                                                       TPRightHandSideIntegral.VALUE));
 		
-		
-		List<RightHandSideIntegral<TPCell,  RTMixedFunction>> rightHandSideIntegrals = new ArrayList<>();
+		final List<RightHandSideIntegral<TPCell, RTMixedFunction>> rightHandSideIntegrals = new ArrayList<>();
 		rightHandSideIntegrals.add(rightHandSideIntegral);
 		
-		
-		List<BoundaryRightHandSideIntegral< TPFace, RTMixedFunction>> boundaryFaceIntegrals =
+		final List<BoundaryRightHandSideIntegral<TPFace, RTMixedFunction>> boundaryFaceIntegrals =
 			new ArrayList<>();
 		
-		MixedBoundaryRightHandSideIntegral< TPFace, ContinuousTPShapeFunction, RTShapeFunction,RTMixedFunction> dirichlet =
+		final MixedBoundaryRightHandSideIntegral<TPFace, ContinuousTPShapeFunction, RTShapeFunction, RTMixedFunction>
+			dirichlet =
 			MixedBoundaryRightHandSideIntegral.fromVelocityIntegral(
 				new TPVectorBoundaryFaceIntegral<RTShapeFunction>(ScalarFunction.constantFunction(0),
-					TPVectorBoundaryFaceIntegral.NORMAL_VALUE));
+				                                                  TPVectorBoundaryFaceIntegral.NORMAL_VALUE));
 		boundaryFaceIntegrals.add(dirichlet);
 		grid.assembleCells();
 		grid.assembleFunctions(polynomialDegree);
@@ -62,25 +63,29 @@ public class RTDarcy
 		grid.evaluateCellIntegrals(cellIntegrals, rightHandSideIntegrals);
 		System.out.println("Face Integrals");
 		grid.evaluateFaceIntegrals(faceIntegrals, boundaryFaceIntegrals);
-		System.out.println("solve system: " + grid.getSystemMatrix().getRows() + "×" + grid.getSystemMatrix().getCols());
+		System.out.println("solve system: " + grid.getSystemMatrix()
+		                                          .getRows() + "×" + grid.getSystemMatrix()
+		                                                                 .getCols());
 		//grid.A.makeParallelReady(12);
-		if (grid.getRhs().getLength() < 100)
+		if (grid.getRhs()
+		        .getLength() < 100)
 		{
 			System.out.println(grid.getSystemMatrix());
 			System.out.println(grid.getRhs());
 		}
-		IterativeSolver i = new IterativeSolver();
-		Vector solution1 = i.solveGMRES(grid.getSystemMatrix(), grid.getRhs(), 1e-10);
+		final IterativeSolver i = new IterativeSolver();
+		final Vector solution1 = i.solveGMRES(grid.getSystemMatrix(), grid.getRhs(), 1e-10);
 		//Vector solution1 = new DenseMatrix(grid.getSystemMatrix()).solve(grid.getRhs());
 		System.out.println("solved");
 		System.out.println(solution1);
-		System.out.println(grid.getSystemMatrix().mvMul(solution1));
+		System.out.println(grid.getSystemMatrix()
+		                       .mvMul(solution1));
 		//grid.A.print_formatted();
 		//grid.rhs.print_formatted();
-		MixedFESpaceFunction<RTMixedFunction> solut =
-			new MixedFESpaceFunction<>(
+		final MixedTPFESpaceFunction<RTMixedFunction> solut =
+			new MixedTPFESpaceFunction<>(
 				grid.getShapeFunctions(), solution1);
-		ArrayList<Map<CoordinateVector, Double>> valList = new ArrayList<>();
+		final ArrayList<Map<CoordinateVector, Double>> valList = new ArrayList<>();
 		/*valList.add(solut.pressureValuesInPoints(grid.generatePlotPoints(50)));
 		valList.add(LaplaceReferenceSolution.scalarReferenceSolution().valuesInPoints(grid.generatePlotPoints(50)));
 		valList.add(solut.velocityComponentsInPoints(grid.generatePlotPoints(50), 0));
@@ -88,7 +93,8 @@ public class RTDarcy
 		valList.add(solut.velocityComponentsInPoints(grid.generatePlotPoints(50), 1));
 		valList.add(LaplaceReferenceSolution.scalarReferenceSolution().getGradientFunction()
 		.componentValuesInPoints(grid.generatePlotPoints(50),1));*/
-		valList.add(solut.getPressureFunction().valuesInPoints(grid.generatePlotPoints(20)));
+		valList.add(solut.getPressureFunction()
+		                 .valuesInPoints(grid.generatePlotPoints(20)));
 		//valList.add(solut.getVelocityFunction().getDivergenceFunction().valuesInPoints(grid
 		// .generatePlotPoints(20)));
 		//valList.add(LaplaceReferenceSolution.scalarReferenceSolution().getGradientFunction()

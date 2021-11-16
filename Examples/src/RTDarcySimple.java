@@ -14,45 +14,45 @@ import java.util.List;
 
 public class RTDarcySimple
 {
-	public static void main(String[] args)
+	public static void main(final String[] args)
 	{
-		PerformanceArguments.PerformanceArgumentBuilder builder =
+		final PerformanceArguments.PerformanceArgumentBuilder builder =
 			new PerformanceArguments.PerformanceArgumentBuilder();
 		builder.parallelizeThreads = false;
 		builder.build();
-		CoordinateVector start = CoordinateVector.fromValues(0,0);
-		CoordinateVector end = CoordinateVector.fromValues(1, 1);
-		int polynomialDegree = 1;
-		TPVectorCellIntegral<RTShapeFunction> valueValue =
+		final CoordinateVector start = CoordinateVector.fromValues(0, 0);
+		final CoordinateVector end = CoordinateVector.fromValues(1, 1);
+		final int polynomialDegree = 1;
+		final TPVectorCellIntegral<RTShapeFunction> valueValue =
 			new TPVectorCellIntegral<>(TPVectorCellIntegral.VALUE_VALUE);
-		MixedCellIntegral<TPCell, ContinuousTPShapeFunction, RTShapeFunction,RTMixedFunction>
+		final MixedCellIntegral<TPCell, ContinuousTPShapeFunction, RTShapeFunction, RTMixedFunction>
 			divValue = new MixedTPCellIntegral<>(MixedTPCellIntegral.DIV_VALUE);
-		MixedCellIntegral<TPCell, ContinuousTPShapeFunction, RTShapeFunction,RTMixedFunction> vv =
+		final MixedCellIntegral<TPCell, ContinuousTPShapeFunction, RTShapeFunction, RTMixedFunction> vv =
 			MixedCellIntegral.fromVelocityIntegral(valueValue);
-		List<CellIntegral<TPCell,  RTMixedFunction>> cellIntegrals =
+		final List<CellIntegral<TPCell, RTMixedFunction>> cellIntegrals =
 			new ArrayList<>();
 		cellIntegrals.add(vv);
 		cellIntegrals.add(divValue);
-		List<FaceIntegral< TPFace, RTMixedFunction>> faceIntegrals = new ArrayList<>();
-		MixedRightHandSideIntegral<TPCell, ContinuousTPShapeFunction, RTShapeFunction,RTMixedFunction> rightHandSideIntegral =
+		final List<FaceIntegral<TPFace, RTMixedFunction>> faceIntegrals = new ArrayList<>();
+		final MixedRightHandSideIntegral<TPCell, ContinuousTPShapeFunction, RTShapeFunction, RTMixedFunction>
+			rightHandSideIntegral =
 			MixedRightHandSideIntegral.fromPressureIntegral(
 				new TPRightHandSideIntegral<>(ScalarFunction.constantFunction(-1),
-					TPRightHandSideIntegral.VALUE));
-		List<RightHandSideIntegral<TPCell,  RTMixedFunction>> rightHandSideIntegrals = new ArrayList<>();
+				                              TPRightHandSideIntegral.VALUE));
+		final List<RightHandSideIntegral<TPCell, RTMixedFunction>> rightHandSideIntegrals = new ArrayList<>();
 		rightHandSideIntegrals.add(rightHandSideIntegral);
-		List<BoundaryRightHandSideIntegral<TPFace, RTMixedFunction>> boundaryFaceIntegrals =
+		final List<BoundaryRightHandSideIntegral<TPFace, RTMixedFunction>> boundaryFaceIntegrals =
 			new ArrayList<>();
 		
-		MixedBoundaryRightHandSideIntegral<TPFace, ContinuousTPShapeFunction, RTShapeFunction,RTMixedFunction> dirichlet =
+		final MixedBoundaryRightHandSideIntegral<TPFace, ContinuousTPShapeFunction, RTShapeFunction, RTMixedFunction>
+			dirichlet =
 			MixedBoundaryRightHandSideIntegral.fromVelocityIntegral(
 				new TPVectorBoundaryFaceIntegral<>(ScalarFunction.constantFunction(0),
-					TPVectorBoundaryFaceIntegral.NORMAL_VALUE));
+				                                   TPVectorBoundaryFaceIntegral.NORMAL_VALUE));
 		boundaryFaceIntegrals.add(dirichlet);
 		
-		
-		
-		MixedRTSpace grid = new MixedRTSpace(start, end,
-			Ints.asList(3,3));
+		final MixedRTSpace grid = new MixedRTSpace(start, end,
+		                                           Ints.asList(3, 3));
 		grid.assembleCells();
 		grid.assembleFunctions(polynomialDegree);
 		grid.initializeSystemMatrix();
@@ -61,15 +61,17 @@ public class RTDarcySimple
 		grid.evaluateCellIntegrals(cellIntegrals, rightHandSideIntegrals);
 		System.out.println("Face Integrals");
 		grid.evaluateFaceIntegrals(faceIntegrals, boundaryFaceIntegrals);
-		System.out.println("solve system: " + grid.getSystemMatrix().getRows() + "×" + grid.getSystemMatrix().getCols());
+		System.out.println("solve system: " + grid.getSystemMatrix()
+		                                          .getRows() + "×" + grid.getSystemMatrix()
+		                                                                 .getCols());
 		
-		IterativeSolver i = new IterativeSolver();
-		Vector solution1 = i.solveGMRES(grid.getSystemMatrix(), grid.getRhs(), 1e-10);
-		MixedFESpaceFunction<RTMixedFunction> solut =
-			new MixedFESpaceFunction<>(
+		final IterativeSolver i = new IterativeSolver();
+		final Vector solution1 = i.solveGMRES(grid.getSystemMatrix(), grid.getRhs(), 1e-10);
+		final MixedTPFESpaceFunction<RTMixedFunction> solut =
+			new MixedTPFESpaceFunction<>(
 				grid.getShapeFunctions(), solution1);
 		
-		PlotWindow p = new PlotWindow();
+		final PlotWindow p = new PlotWindow();
 		p.addPlot(new MatrixPlot(grid.getSystemMatrix()));
 		p.addPlot(new MixedPlot2D(solut, grid.generatePlotPoints(30), 30));
 	}

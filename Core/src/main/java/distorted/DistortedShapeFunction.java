@@ -1,9 +1,9 @@
 package distorted;
 
 import basic.DoubleCompare;
-import basic.FastEvaluatedScalarShapeFunction;
 import basic.LagrangeNodeFunctional;
 import basic.PerformanceArguments;
+import basic.ScalarShapeFunction;
 import distorted.geometry.DistortedCell;
 import distorted.geometry.DistortedFace;
 import it.unimi.dsi.fastutil.ints.Int2ObjectArrayMap;
@@ -17,7 +17,9 @@ import tensorproduct.geometry.TPFace;
 import java.util.*;
 
 public class DistortedShapeFunction
-	implements FastEvaluatedScalarShapeFunction<DistortedCell, DistortedFace>, Comparable<DistortedShapeFunction>
+	implements ScalarShapeFunction<DistortedCell, DistortedFace>,
+	DistortedScalarFunction,
+	Comparable<DistortedShapeFunction>
 
 {
 	private final Map<DistortedCell, TPShapeFunction> shapeFunctionsOnCell;
@@ -70,24 +72,7 @@ public class DistortedShapeFunction
 	}
 	
 	@Override
-	public double fastValueInCell(final CoordinateVector pos, final DistortedCell cell)
-	{
-		return valueInCell(pos, cell);
-	}
-	
-	@Override
-	public double[] fastGradientInCell(final CoordinateVector pos, final DistortedCell cell)
-	{
-		return gradientInCell(pos, cell).toArray();
-	}
-	
-	@Override
-	public Double valueInCell(final CoordinateVector pos, final DistortedCell cell)
-	{
-		return valueOnReferenceCell(cell.transformToReferenceCell(pos), cell);
-	}
-	
-	public double valueOnReferenceCell(final CoordinateVector pos, final DistortedCell cell)
+	public Double valueOnReferenceCell(final CoordinateVector pos, final DistortedCell cell)
 	{
 		if (PerformanceArguments.getInstance().executeChecks)
 			if (!cell.referenceCell.isInCell(pos)) throw new IllegalArgumentException("pos is not in cell");
@@ -103,6 +88,7 @@ public class DistortedShapeFunction
 		                               .getNodeFunctional();
 	}
 	
+	@Override
 	public CoordinateVector gradientOnReferenceCell(final CoordinateVector pos, final DistortedCell cell)
 	{
 		if (PerformanceArguments.getInstance().executeChecks)
@@ -116,12 +102,6 @@ public class DistortedShapeFunction
 		return mat.mvMul(grad);
 		//}
 		//return new CoordinateVector(pos.getLength());
-	}
-	
-	@Override
-	public CoordinateVector gradientInCell(final CoordinateVector pos, final DistortedCell cell)
-	{
-		return gradientOnReferenceCell(cell.transformToReferenceCell(pos), cell);
 	}
 	
 	@Override

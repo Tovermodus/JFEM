@@ -144,6 +144,11 @@ public class SparseMatrix
 		resetFromEntries(sparseEntriesMap);
 	}
 	
+	public void overrideBy(final SparseMatrix o)
+	{
+		resetFromEntries(o.getCoordinateEntryList());
+	}
+	
 	private void resetFromEntries(final Map<IntCoordinates, Double> sparseEntriesMap)
 	{
 		final double[] sparseVals = new double[sparseEntriesMap.size() * 2];

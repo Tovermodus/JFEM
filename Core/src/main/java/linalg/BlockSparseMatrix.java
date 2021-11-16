@@ -41,6 +41,14 @@ public class BlockSparseMatrix
 		return blockEnds.clone();
 	}
 	
+	public int[] getBlockSizes()
+	{
+		final int[] sizes = new int[blockStarts.length];
+		for (int i = 0; i < sizes.length; i++)
+			sizes[i] = blockEnds[i] - blockStarts[i];
+		return sizes;
+	}
+	
 	public BlockSparseMatrix subMatrix(final IntCoordinates[] blockNumbers)
 	{
 		final Map<IntCoordinates, SparseMatrix> newBlocks = new HashMap<>();
@@ -75,6 +83,17 @@ public class BlockSparseMatrix
 		                                                      .getShape())
 		                                           .get(0);
 		blocks.forEach(this::checkIfBlockFits);
+	}
+	
+	public BlockSparseMatrix(final BlockSparseMatrix s)
+	{
+		blockStarts = s.getBlockStarts();
+		blockEnds = s.getBlockEnds();
+		blocks = ImmutableMap.copyOf(s.getBlocks()
+		                              .entrySet()
+		                              .stream()
+		                              .map(e -> new Tuple2<>(e.getKey(), new SparseMatrix(e.getValue())))
+		                              .collect(new MapCollector<>()));
 	}
 	
 	public BlockSparseMatrix(final SparseMatrix s, final int nBlocksPerDir)

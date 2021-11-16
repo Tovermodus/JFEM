@@ -557,9 +557,9 @@ public class DLMSummarySchur
 				        final DistortedVectorFunction vOfX = concatenateVelocityWithX(sf,
 				                                                                      currentIterate);
 				
-				        final DistortedFESpaceVectorRightHandSideIntegral transferEulerian
-					        = new DistortedFESpaceVectorRightHandSideIntegral(vOfX,
-					                                                          DistortedRightHandSideIntegral.H1);
+				        final DistortedVectorDistortedRightHandSideIntegral transferEulerian
+					        = new DistortedVectorDistortedRightHandSideIntegral(vOfX,
+					                                                            DistortedRightHandSideIntegral.H1);
 				        final DenseVector column = new DenseVector(nTransfer);
 				        lagrangian.writeCellIntegralsToRhs(List.of(transferEulerian), column,
 				                                           (K, lambd) ->
@@ -581,9 +581,9 @@ public class DLMSummarySchur
 		                                          getLagrangianIterate(currentIterate));
 	}
 	
-	private MixedFESpaceFunction<QkQkFunction> getUp(final DenseVector currentIterate)
+	private MixedTPFESpaceFunction<QkQkFunction> getUp(final DenseVector currentIterate)
 	{
-		return new MixedFESpaceFunction<>(eulerian.getShapeFunctions(), getEulerianfIterate(currentIterate));
+		return new MixedTPFESpaceFunction<>(eulerian.getShapeFunctions(), getEulerianfIterate(currentIterate));
 	}
 	
 	private DistortedVectorFunction concatenateVelocityWithX(final MixedFunction sf,

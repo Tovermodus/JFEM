@@ -1,6 +1,5 @@
 package tensorproduct;
 
-import basic.FastEvaluatedScalarShapeFunction;
 import basic.LagrangeNodeFunctional;
 import basic.ScalarShapeFunctionWithReferenceShapeFunction;
 import linalg.CoordinateComparator;
@@ -11,7 +10,8 @@ import tensorproduct.geometry.TPFace;
 import java.util.*;
 import java.util.stream.IntStream;
 
-public class ContinuousTPShapeFunction implements ScalarShapeFunctionWithReferenceShapeFunction<TPCell, TPFace>, FastEvaluatedScalarShapeFunction<TPCell, TPFace>,
+public class ContinuousTPShapeFunction
+	implements ScalarShapeFunctionWithReferenceShapeFunction<TPCell, TPFace>,
 	Comparable<ContinuousTPShapeFunction>
 {
 	
@@ -38,7 +38,9 @@ public class ContinuousTPShapeFunction implements ScalarShapeFunctionWithReferen
 		checkIfPointOnFace(functionalPoint, supportCell);
 	}
 	
-	public ContinuousTPShapeFunction(final TPCell supportCell, final int polynomialDegree, final CoordinateVector functionalPoint)
+	public ContinuousTPShapeFunction(final TPCell supportCell,
+	                                 final int polynomialDegree,
+	                                 final CoordinateVector functionalPoint)
 	{
 		cells = new TreeMap<>();
 		faces = new TreeSet<>();
@@ -137,7 +139,6 @@ public class ContinuousTPShapeFunction implements ScalarShapeFunctionWithReferen
 		globalIndex = index;
 	}
 	
-	@Override
 	public double fastValueInCell(final CoordinateVector pos, final TPCell cell)
 	{
 		double ret = 1;
@@ -149,14 +150,14 @@ public class ContinuousTPShapeFunction implements ScalarShapeFunctionWithReferen
 			function1Ds = cells.get(cell);
 			for (int i = 0; i < pos.getLength(); i++)
 			{
-				ret *= function1Ds.get(i).value(pos.at(i));
+				ret *= function1Ds.get(i)
+				                  .value(pos.at(i));
 			}
 			return ret;
 		}
 		return 0.;
 	}
 	
-	@Override
 	public double[] fastGradientInCell(final CoordinateVector pos, final TPCell cell)
 	{
 		final double[] ret = new double[pos.getLength()];
@@ -172,9 +173,11 @@ public class ContinuousTPShapeFunction implements ScalarShapeFunctionWithReferen
 				for (int j = 0; j < pos.getLength(); j++)
 				{
 					if (i == j)
-						component *= function1Ds.get(j).derivative(pos.at(j));
+						component *= function1Ds.get(j)
+						                        .derivative(pos.at(j));
 					else
-						component *= function1Ds.get(j).value(pos.at(j));
+						component *= function1Ds.get(j)
+						                        .value(pos.at(j));
 				}
 				ret[i] = component;
 			}
@@ -185,16 +188,22 @@ public class ContinuousTPShapeFunction implements ScalarShapeFunctionWithReferen
 	@Override
 	public String toString()
 	{
-		return "Cells: ".concat(getCells().toString()).concat(", Node point: ").concat(
-			nodeFunctional.getPoint().toString()).concat(", " +
-				                                             "global " +
-				                                             "Index: ").concat(getGlobalIndex() + "");
+		return "Cells: ".concat(getCells().toString())
+		                .concat(", Node point: ")
+		                .concat(
+			                nodeFunctional.getPoint()
+			                              .toString())
+		                .concat(", " +
+			                        "global " +
+			                        "Index: ")
+		                .concat(getGlobalIndex() + "");
 	}
 	
 	@Override
 	public int hashCode()
 	{
-		return nodeFunctional.getPoint().hashCode();
+		return nodeFunctional.getPoint()
+		                     .hashCode();
 	}
 	
 	@Override
@@ -214,8 +223,10 @@ public class ContinuousTPShapeFunction implements ScalarShapeFunctionWithReferen
 			return 1;
 		if (polynomialDegree < o.polynomialDegree)
 			return -1;
-		return CoordinateComparator.comp(nodeFunctional.getPoint().getEntries(),
-		                                 o.nodeFunctional.getPoint().getEntries());
+		return CoordinateComparator.comp(nodeFunctional.getPoint()
+		                                               .getEntries(),
+		                                 o.nodeFunctional.getPoint()
+		                                                 .getEntries());
 	}
 	
 	@Override
@@ -228,7 +239,8 @@ public class ContinuousTPShapeFunction implements ScalarShapeFunctionWithReferen
 				         .mapToDouble(i -> functions
 					         .get(i)
 					         .getCell()
-					         .positionOnReferenceCell(nodeFunctional.getPoint().at(i)))
+					         .positionOnReferenceCell(nodeFunctional.getPoint()
+					                                                .at(i)))
 				         .toArray());
 		return new ContinuousTPShapeFunction(cell.getReferenceCell(), polynomialDegree, functionalPoint);
 	}
@@ -241,8 +253,10 @@ public class ContinuousTPShapeFunction implements ScalarShapeFunctionWithReferen
 		final TPCell supportCell = functionalPointIsDownStreamOfFace ? face.getNormalDownstreamCell() :
 		                           face.getNormalUpstreamCell();
 		final TPCell referenceCell =
-			functionalPointIsDownStreamOfFace ? face.getReferenceFace().getNormalDownstreamCell() :
-			face.getReferenceFace().getNormalUpstreamCell();
+			functionalPointIsDownStreamOfFace ? face.getReferenceFace()
+			                                        .getNormalDownstreamCell() :
+			face.getReferenceFace()
+			    .getNormalUpstreamCell();
 		final List<LagrangeBasisFunction1D> functions = cells.get(supportCell);
 		final CoordinateVector functionalPoint =
 			CoordinateVector.fromValues(
@@ -250,10 +264,23 @@ public class ContinuousTPShapeFunction implements ScalarShapeFunctionWithReferen
 				         .mapToDouble(i -> functions
 					         .get(i)
 					         .getCell()
-					         .positionOnReferenceCell(nodeFunctional.getPoint().at(i)))
+					         .positionOnReferenceCell(nodeFunctional.getPoint()
+					                                                .at(i)))
 				         .toArray());
 		if (!functionalPointIsDownStreamOfFace)
 			functionalPoint.add(-1, face.flatDimension);
 		return new ContinuousTPShapeFunction(referenceCell, polynomialDegree, functionalPoint);
+	}
+	
+	@Override
+	public Double valueInCell(final CoordinateVector pos, final TPCell cell)
+	{
+		return fastValueInCell(pos, cell);
+	}
+	
+	@Override
+	public CoordinateVector gradientInCell(final CoordinateVector pos, final TPCell cell)
+	{
+		return new CoordinateVector(fastGradientInCell(pos, cell));
 	}
 }

@@ -1,17 +1,19 @@
-package basic;
+package distorted;
 
+import basic.*;
+import distorted.geometry.DistortedCell;
+import distorted.geometry.DistortedFace;
 import linalg.CoordinateMatrix;
 import linalg.CoordinateTensor;
 import linalg.CoordinateVector;
 
-public interface VectorFunctionOnCells<CT extends Cell<CT, FT>, FT extends Face<CT, FT>>
-	extends FunctionOnCells<CT,
-	FT, CoordinateVector, CoordinateMatrix, CoordinateTensor>, VectorFunction
+public interface DistortedVectorFunctionOnCells
+	extends DistortedVectorFunction, VectorFunctionOnCells<DistortedCell, DistortedFace>
 {
 	
 	static <CT extends Cell<CT, FT>, FT extends Face<CT, FT>>
-	VectorFunctionOnCells<CT, FT>
-	concatenate(final VectorFunction outer, final VectorFunctionOnCells<CT, FT> inner)
+	DistortedVectorFunctionOnCells
+	concatenate(final VectorFunction outer, final DistortedVectorFunctionOnCells inner)
 	{
 		if (PerformanceArguments.getInstance().executeChecks)
 		{
@@ -20,18 +22,21 @@ public interface VectorFunctionOnCells<CT extends Cell<CT, FT>, FT extends Face<
 		}
 		
 		final VectorFunction function = outer.concatenateWith(inner);
-		return new VectorFunctionOnCells<>()
+		return new DistortedVectorFunctionOnCells()
 		{
 			@Override
-			public CoordinateVector valueInCell(final CoordinateVector pos, final CT cell)
+			public CoordinateVector valueOnReferenceCell(final CoordinateVector pos,
+			                                             final DistortedCell cell)
 			{
-				return function.value(pos);
+				return outer.value(inner.valueOnReferenceCell(pos, cell));
 			}
 			
 			@Override
-			public CoordinateMatrix gradientInCell(final CoordinateVector pos, final CT cell)
+			public CoordinateMatrix gradientOnReferenceCell(final CoordinateVector pos,
+			                                                final DistortedCell cell)
 			{
-				return function.gradient(pos);
+				return inner.gradientOnReferenceCell(pos, cell)
+				            .mmMul(outer.gradient(inner.valueOnReferenceCell(pos, cell)));
 			}
 			
 			@Override

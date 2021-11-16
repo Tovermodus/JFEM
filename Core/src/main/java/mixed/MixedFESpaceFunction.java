@@ -1,5 +1,7 @@
 package mixed;
 
+import basic.Cell;
+import basic.Face;
 import basic.ScalarFunction;
 import basic.VectorFunction;
 import linalg.CoordinateDenseMatrix;
@@ -12,7 +14,9 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.ConcurrentHashMap;
 
-public class MixedFESpaceFunction<MF extends MixedShapeFunction<?, ?, ?, ?>> extends MixedFunction
+public class MixedFESpaceFunction<MF extends MixedShapeFunction<CT, FT, ?, ?>, CT extends Cell<CT, FT>,
+	FT extends Face<CT, FT>>
+	extends MixedFunctionOnCells<CT, FT>
 {
 	final double diam;
 	private final HashMap<MF, Double> coefficients;
@@ -74,13 +78,16 @@ public class MixedFESpaceFunction<MF extends MixedShapeFunction<?, ?, ?, ?>> ext
 	@Override
 	public int getDomainDimension()
 	{
-		return coefficients.keySet().iterator().next().getDomainDimension();
+		return coefficients.keySet()
+		                   .iterator()
+		                   .next()
+		                   .getDomainDimension();
 	}
 	
 	@Override
 	public ScalarFunction getPressureFunction()
 	{
-		final MixedFESpaceFunction<MF> me = this;
+		final MixedFESpaceFunction<MF, CT, FT> me = this;
 		return new ScalarFunction()
 		{
 			@Override
@@ -92,13 +99,15 @@ public class MixedFESpaceFunction<MF extends MixedShapeFunction<?, ?, ?, ?>> ext
 			@Override
 			public Double value(final CoordinateVector pos)
 			{
-				return me.value(pos).getPressure();
+				return me.value(pos)
+				         .getPressure();
 			}
 			
 			@Override
 			public CoordinateVector gradient(final CoordinateVector pos)
 			{
-				return me.gradient(pos).getPressureGradient();
+				return me.gradient(pos)
+				         .getPressureGradient();
 			}
 		};
 	}
@@ -106,13 +115,14 @@ public class MixedFESpaceFunction<MF extends MixedShapeFunction<?, ?, ?, ?>> ext
 	@Override
 	public VectorFunction getVelocityFunction()
 	{
-		final MixedFESpaceFunction<MF> me = this;
+		final MixedFESpaceFunction<MF, CT, FT> me = this;
 		return new VectorFunction()
 		{
 			@Override
 			public int getRangeDimension()
 			{
-				return me.value(new CoordinateVector(getDomainDimension())).getLength();
+				return me.value(new CoordinateVector(getDomainDimension()))
+				         .getLength();
 			}
 			
 			@Override
@@ -124,13 +134,15 @@ public class MixedFESpaceFunction<MF extends MixedShapeFunction<?, ?, ?, ?>> ext
 			@Override
 			public CoordinateVector value(final CoordinateVector pos)
 			{
-				return me.value(pos).getVelocity();
+				return me.value(pos)
+				         .getVelocity();
 			}
 			
 			@Override
 			public CoordinateMatrix gradient(final CoordinateVector pos)
 			{
-				return me.gradient(pos).getVelocityGradient();
+				return me.gradient(pos)
+				         .getVelocityGradient();
 			}
 		};
 	}
@@ -166,8 +178,10 @@ public class MixedFESpaceFunction<MF extends MixedShapeFunction<?, ?, ?, ?>> ext
 			.entrySet()
 			.stream()
 			.parallel()
-			.filter(entry -> entry.getKey().hasVelocityFunction())
-			.map(entry -> (VelocityValue) (entry.getKey().value(pos)).mul(entry.getValue()))
+			.filter(entry -> entry.getKey()
+			                      .hasVelocityFunction())
+			.map(entry -> (VelocityValue) (entry.getKey()
+			                                    .value(pos)).mul(entry.getValue()))
 			.reduce(new VelocityValue(getDomainDimension()), (a, b) -> (VelocityValue) (a.add(b)));
 		return pf.add(vf);
 	}
@@ -179,7 +193,10 @@ public class MixedFESpaceFunction<MF extends MixedShapeFunction<?, ?, ?, ?>> ext
 			.entrySet()
 			.stream()
 			.parallel()
-			.map(entry -> entry.getKey().gradient(pos).getPressureGradient().mul(entry.getValue()))
+			.map(entry -> entry.getKey()
+			                   .gradient(pos)
+			                   .getPressureGradient()
+			                   .mul(entry.getValue()))
 			.reduce(CoordinateVector::add);
 		PressureGradient pf = new PressureGradient(pos.mul(0));
 		if (pressureGradient.isPresent()) pf = new PressureGradient(pressureGradient.get());
@@ -187,7 +204,10 @@ public class MixedFESpaceFunction<MF extends MixedShapeFunction<?, ?, ?, ?>> ext
 			.entrySet()
 			.stream()
 			.parallel()
-			.map(entry -> entry.getKey().gradient(pos).getVelocityGradient().mul(entry.getValue()))
+			.map(entry -> entry.getKey()
+			                   .gradient(pos)
+			                   .getVelocityGradient()
+			                   .mul(entry.getValue()))
 			.reduce(new CoordinateDenseMatrix(getDomainDimension() + 1, getDomainDimension() + 1),
 			        CoordinateDenseMatrix::add);
 		final VelocityGradient vf = new VelocityGradient(velocityGradient);

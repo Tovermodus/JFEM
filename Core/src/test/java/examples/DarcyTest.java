@@ -70,8 +70,8 @@ public class DarcyTest
 		i.showProgress = false;
 		final Vector solution1 = i.solveGMRES(grid.getSystemMatrix(), grid.getRhs(), 1e-10);
 		System.out.println("solved");
-		final MixedFESpaceFunction<RTMixedFunction> solut =
-			new MixedFESpaceFunction<>(
+		final MixedTPFESpaceFunction<RTMixedFunction> solut =
+			new MixedTPFESpaceFunction<>(
 				grid.getShapeFunctions(), solution1);
 //		PlotWindow p = new PlotWindow();
 //		p.addPlot(new MixedPlot2D(solut, grid.generatePlotPoints(20),20));

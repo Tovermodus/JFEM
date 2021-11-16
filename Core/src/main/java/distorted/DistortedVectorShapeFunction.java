@@ -6,10 +6,14 @@ import distorted.geometry.DistortedFace;
 import linalg.CoordinateVector;
 import linalg.Rank1CoordinateMatrix;
 
-public class DistortedVectorShapeFunction extends SingleComponentVectorShapeFunction<DistortedCell, DistortedFace, DistortedShapeFunction, DistortedVectorShapeFunction> implements DistortedVectorFunction
+public class DistortedVectorShapeFunction
+	extends SingleComponentVectorShapeFunction<DistortedCell, DistortedFace, DistortedShapeFunction, DistortedVectorShapeFunction>
+	implements DistortedVectorFunction
 
 {
-	public DistortedVectorShapeFunction(final DistortedCell supportCell, final int polynomialDegree, final int localIndex)
+	public DistortedVectorShapeFunction(final DistortedCell supportCell,
+	                                    final int polynomialDegree,
+	                                    final int localIndex)
 	{
 		super(supportCell, polynomialDegree, localIndex, DistortedShapeFunction.class);
 	}

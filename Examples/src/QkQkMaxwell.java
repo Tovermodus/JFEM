@@ -97,8 +97,8 @@ public class QkQkMaxwell
 		                                .mvMul(solution1));
 		//grid.A.print_formatted();
 		//grid.rhs.print_formatted();
-		final MixedFESpaceFunction<QkQkFunction> solut =
-			new MixedFESpaceFunction<>(
+		final MixedTPFESpaceFunction<QkQkFunction> solut =
+			new MixedTPFESpaceFunction<>(
 				grid.getShapeFunctions(), solution1);
 		
 		final PlotWindow p = new PlotWindow();

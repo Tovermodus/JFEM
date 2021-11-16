@@ -1,59 +1,58 @@
 package tensorproduct;
 
 import basic.CellIntegral;
-import basic.Function;
-import basic.ScalarFunction;
+import basic.FunctionOnCells;
+import basic.ScalarFunctionOnCells;
 import basic.VectorShapeFunction;
 import linalg.CoordinateMatrix;
 import linalg.CoordinateVector;
 import tensorproduct.geometry.TPCell;
 import tensorproduct.geometry.TPFace;
 
-public class TPVectorCellIntegral<ST extends VectorShapeFunction<TPCell, TPFace>>
+public class TPVectorCellIntegralOnCell<ST extends VectorShapeFunction<TPCell, TPFace>>
 	extends CellIntegral<TPCell,
 	ST>
 {
 	public static final String GRAD_GRAD = "GradGrad";
 	public static final String VALUE_VALUE = "ValueValue";
-	public static final String ROT_ROT = "RotRot";
 	public static final String GRAD_VALUE = "GradValue";
 	public static final String VALUE_GRAD = "ValueGrad";
 	public static final String SYM_GRAD = "SymGrad";
 	public static final String H1 = "H1";
+	FunctionOnCells<TPCell, TPFace, ?, ?, ?> weightOnCell;
 	
-	public TPVectorCellIntegral(final Function<?, ?, ?> weight, final String name)
+	public TPVectorCellIntegralOnCell(final FunctionOnCells<TPCell, TPFace, ?, ?, ?> weight, final String name)
 	{
 		this(weight, name, QuadratureRule1D.Gauss5);
 	}
 	
-	public TPVectorCellIntegral(final double value, final String name)
+	public TPVectorCellIntegralOnCell(final double value, final String name)
 	{
-		this(ScalarFunction.constantFunction(value), name);
+		this(ScalarFunctionOnCells.constantFunction(value), name);
 	}
 	
-	public TPVectorCellIntegral(final String name)
+	public TPVectorCellIntegralOnCell(final String name)
 	{
 		this(name, QuadratureRule1D.Gauss5);
 	}
 	
-	public TPVectorCellIntegral(final Function<?, ?, ?> weight,
-	                            final String name,
-	                            final QuadratureRule1D quadratureRule1D)
+	public TPVectorCellIntegralOnCell(final FunctionOnCells<TPCell, TPFace, ?, ?, ?> weight,
+	                                  final String name,
+	                                  final QuadratureRule1D quadratureRule1D)
 	{
 		super(weight, name, quadratureRule1D);
+		weightOnCell = weight;
 		if (name.equals(GRAD_GRAD) && !(weight.defaultValue() instanceof Double))
 			throw new IllegalArgumentException();
 		if (name.equals(VALUE_VALUE) && !(weight.defaultValue() instanceof Double))
-			throw new IllegalArgumentException();
-		if (name.equals(ROT_ROT) && !(weight.defaultValue() instanceof Double))
 			throw new IllegalArgumentException();
 		if (name.equals(GRAD_VALUE) && !(weight.defaultValue() instanceof CoordinateVector))
 			throw new IllegalArgumentException();
 	}
 	
-	public TPVectorCellIntegral(final String name, final QuadratureRule1D quadratureRule1D)
+	public TPVectorCellIntegralOnCell(final String name, final QuadratureRule1D quadratureRule1D)
 	{
-		super(name, quadratureRule1D);
+		this(ScalarFunctionOnCells.constantFunction(1), name, quadratureRule1D);
 	}
 	
 	@Override
@@ -65,14 +64,15 @@ public class TPVectorCellIntegral<ST extends VectorShapeFunction<TPCell, TPFace>
 				.integrateNonTensorProduct(x ->
 				                           {
 					                           final CoordinateMatrix grad1 =
-						                           shapeFunction1.gradient(x);
+						                           shapeFunction1.gradientInCell(x, cell);
 					                           final CoordinateMatrix grad2 =
-						                           shapeFunction2.gradient(x);
+						                           shapeFunction2.gradientInCell(x, cell);
 					
 					                           return grad1
 						                           .add(grad1.transpose())
 						                           .frobeniusInner(grad2.add(grad2.transpose()))
-						                           * (Double) weight.value(x) / 4;
+						                           * (Double) weightOnCell.valueInCell(x,
+						                                                               cell) / 4;
 				                           },
 				                           cell,
 				                           quadratureRule1D);
@@ -80,41 +80,32 @@ public class TPVectorCellIntegral<ST extends VectorShapeFunction<TPCell, TPFace>
 		if (name.equals(GRAD_GRAD))
 		{
 			return TPCellIntegral.integrateNonTensorProduct(x -> shapeFunction1
-				                                                .gradient(x)
-				                                                .frobeniusInner(shapeFunction2.gradient(x))
-				                                                * (Double) weight.value(x),
+				                                                .gradientInCell(x, cell)
+				                                                .frobeniusInner(shapeFunction2.gradientInCell(x, cell))
+				                                                * (Double) weightOnCell.valueInCell(x, cell),
 			                                                cell,
 			                                                quadratureRule1D);
 		}
 		if (name.equals(H1))
 		{
 			return TPCellIntegral.integrateNonTensorProduct(x -> (shapeFunction1
-				                                                      .gradient(x)
+				                                                      .gradientInCell(x, cell)
 				                                                      .frobeniusInner(
-					                                                      shapeFunction2.gradient(
-						                                                      x))
+					                                                      shapeFunction2.gradientInCell(
+						                                                      x, cell))
 				                                                      + shapeFunction1
-				                                                .value(x)
-				                                                .inner(shapeFunction2.value(x)))
-				                                                * (Double) weight.value(x),
+				                                                .valueInCell(x, cell)
+				                                                .inner(shapeFunction2.valueInCell(x, cell)))
+				                                                * (Double) weightOnCell.valueInCell(x, cell),
 			                                                cell,
 			                                                quadratureRule1D);
 		}
 		if (name.equals(VALUE_VALUE))
 		{
 			return TPCellIntegral.integrateNonTensorProduct(x -> shapeFunction1
-				                                                .value(x)
-				                                                .inner(shapeFunction2.value(x))
-				                                                * (Double) weight.value(x),
-			                                                cell,
-			                                                quadratureRule1D);
-		}
-		if (name.equals(ROT_ROT))
-		{
-			return TPCellIntegral.integrateNonTensorProduct(x -> shapeFunction1
-				                                                .curl(x)
-				                                                .inner(shapeFunction2.curl(x))
-				                                                * (Double) weight.value(x),
+				                                                .valueInCell(x, cell)
+				                                                .inner(shapeFunction2.valueInCell(x, cell))
+				                                                * (Double) weightOnCell.valueInCell(x, cell),
 			                                                cell,
 			                                                quadratureRule1D);
 		}
@@ -122,10 +113,12 @@ public class TPVectorCellIntegral<ST extends VectorShapeFunction<TPCell, TPFace>
 		{
 			return TPCellIntegral.integrateNonTensorProduct(x ->
 				                                                shapeFunction1
-					                                                .gradient(x)
-					                                                .mvMul(shapeFunction2.value(x))
-					                                                .inner((CoordinateVector) weight
-						                                                .value(x)),
+					                                                .gradientInCell(x, cell)
+					                                                .mvMul(shapeFunction2.valueInCell(
+						                                                x,
+						                                                cell))
+					                                                .inner((CoordinateVector) weightOnCell
+						                                                .valueInCell(x, cell)),
 			                                                cell,
 			                                                quadratureRule1D);
 		}
@@ -133,10 +126,12 @@ public class TPVectorCellIntegral<ST extends VectorShapeFunction<TPCell, TPFace>
 		{
 			return TPCellIntegral.integrateNonTensorProduct(x ->
 				                                                shapeFunction2
-					                                                .gradient(x)
-					                                                .mvMul(shapeFunction1.value(x))
-					                                                .inner((CoordinateVector) weight
-						                                                .value(x)),
+					                                                .gradientInCell(x, cell)
+					                                                .mvMul(shapeFunction1.valueInCell(
+						                                                x,
+						                                                cell))
+					                                                .inner((CoordinateVector) weightOnCell
+						                                                .valueInCell(x, cell)),
 			                                                cell,
 			                                                quadratureRule1D);
 		}

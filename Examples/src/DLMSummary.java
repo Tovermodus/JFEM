@@ -499,9 +499,9 @@ public class DLMSummary
 			final QkQkFunction sf = sfEntry.getValue();
 			final DistortedVectorFunction vOfX = concatenateVelocityWithX(sf, currentIterate);
 			
-			final DistortedFESpaceVectorRightHandSideIntegral transferEulerian
-				= new DistortedFESpaceVectorRightHandSideIntegral(vOfX,
-				                                                  DistortedRightHandSideIntegral.H1);
+			final DistortedVectorDistortedRightHandSideIntegral transferEulerian
+				= new DistortedVectorDistortedRightHandSideIntegral(vOfX,
+				                                                    DistortedRightHandSideIntegral.H1);
 			final DenseVector column = new DenseVector(nTransfer);
 			if (sf.hasVelocityFunction())
 			
@@ -528,9 +528,9 @@ public class DLMSummary
 		                                          getLagrangianIterate(currentIterate));
 	}
 	
-	private MixedFESpaceFunction<QkQkFunction> getUp(final DenseVector currentIterate)
+	private MixedTPFESpaceFunction<QkQkFunction> getUp(final DenseVector currentIterate)
 	{
-		return new MixedFESpaceFunction<>(eulerian.getShapeFunctions(), getEulerianfIterate(currentIterate));
+		return new MixedTPFESpaceFunction<>(eulerian.getShapeFunctions(), getEulerianfIterate(currentIterate));
 	}
 	
 	private DistortedVectorFunction concatenateVelocityWithX(final MixedFunction sf,

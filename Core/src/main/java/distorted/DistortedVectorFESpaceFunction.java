@@ -12,7 +12,7 @@ import java.util.TreeSet;
 
 public class DistortedVectorFESpaceFunction
 	extends VectorFESpaceFunction<DistortedVectorShapeFunction>
-	implements DistortedVectorFunction
+	implements DistortedVectorFunctionOnCells
 {
 	final Int2ObjectMap<TreeSet<DistortedVectorShapeFunction>> supportOnCell;
 	final Int2ObjectMap<ArrayList<DistortedVectorShapeFunction>> supportOnCellFast;
