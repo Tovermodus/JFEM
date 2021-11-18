@@ -1,29 +1,35 @@
 package mixed;
 
 import org.jetbrains.annotations.NotNull;
-import tensorproduct.*;
+import tensorproduct.ContinuousTPShapeFunction;
+import tensorproduct.ContinuousTPVectorFunction;
 import tensorproduct.geometry.TPCell;
 import tensorproduct.geometry.TPFace;
 
-public class QkQkFunction extends MixedShapeFunction<TPCell, TPFace, ContinuousTPShapeFunction,
-	ContinuousTPVectorFunction> implements Comparable<QkQkFunction>
+public class QkQkFunction
+	extends ComposeMixedShapeFunction<TPCell, TPFace, ContinuousTPShapeFunction,
+	ContinuousTPVectorFunction>
+	implements Comparable<QkQkFunction>
 {
-	public QkQkFunction(@NotNull ContinuousTPShapeFunction pressureFunction)
+	public QkQkFunction(@NotNull final ContinuousTPShapeFunction pressureFunction)
 	{
 		super(pressureFunction);
 	}
 	
-	public QkQkFunction(@NotNull ContinuousTPVectorFunction velocityFunction)
+	public QkQkFunction(@NotNull final ContinuousTPVectorFunction velocityFunction)
 	{
 		super(velocityFunction);
 	}
+	
 	int globalIndex;
+	
 	@Override
 	public int getGlobalIndex()
 	{
 		return globalIndex;
 	}
-	public void setGlobalIndex(int index)
+	
+	public void setGlobalIndex(final int index)
 	{
 		globalIndex = index;
 	}
@@ -31,26 +37,26 @@ public class QkQkFunction extends MixedShapeFunction<TPCell, TPFace, ContinuousT
 	@Override
 	public int hashCode()
 	{
-		if(hasPressureFunction())
-			return getPressureShapeFunction().hashCode()*7+1;
-		if(hasVelocityFunction())
-			return getVelocityShapeFunction().hashCode()*7+3;
+		if (hasPressureFunction())
+			return getPressureFunction().hashCode() * 7 + 1;
+		if (hasVelocityFunction())
+			return getVelocityFunction().hashCode() * 7 + 3;
 		return 0;
 	}
 	
 	@Override
-	public boolean equals(Object obj)
+	public boolean equals(final Object obj)
 	{
-		if(obj instanceof QkQkFunction)
+		if (obj instanceof QkQkFunction)
 		{
-			if(hasPressureFunction() && ((QkQkFunction) obj).hasPressureFunction())
-				return getPressureShapeFunction().equals(((QkQkFunction) obj).getPressureShapeFunction());
-			if(hasPressureFunction() && ((QkQkFunction) obj).hasVelocityFunction())
+			if (hasPressureFunction() && ((QkQkFunction) obj).hasPressureFunction())
+				return getPressureFunction().equals(((QkQkFunction) obj).getPressureFunction());
+			if (hasPressureFunction() && ((QkQkFunction) obj).hasVelocityFunction())
 				return false;
-			if(hasVelocityFunction() && ((QkQkFunction) obj).hasPressureFunction())
+			if (hasVelocityFunction() && ((QkQkFunction) obj).hasPressureFunction())
 				return false;
-			if(hasVelocityFunction() && ((QkQkFunction) obj).hasVelocityFunction())
-				return getVelocityShapeFunction().equals(((QkQkFunction) obj).getVelocityShapeFunction());
+			if (hasVelocityFunction() && ((QkQkFunction) obj).hasVelocityFunction())
+				return getVelocityFunction().equals(((QkQkFunction) obj).getVelocityFunction());
 		}
 		return false;
 	}
@@ -59,25 +65,25 @@ public class QkQkFunction extends MixedShapeFunction<TPCell, TPFace, ContinuousT
 	public String toString()
 	{
 		String ret = "|  ";
-		if(hasPressureFunction())
+		if (hasPressureFunction())
 			ret += getPressureFunction().toString();
 		ret += "  |  ";
-		if(hasVelocityFunction())
+		if (hasVelocityFunction())
 			ret += getVelocityFunction().toString();
 		ret += "  |";
 		return ret;
 	}
 	
 	@Override
-	public int compareTo(@NotNull QkQkFunction o)
+	public int compareTo(@NotNull final QkQkFunction o)
 	{
-		if(hasPressureFunction() && o.hasPressureFunction())
-			return getPressureShapeFunction().compareTo(o.getPressureShapeFunction());
-		else if(hasPressureFunction() && o.hasVelocityFunction())
+		if (hasPressureFunction() && o.hasPressureFunction())
+			return getPressureFunction().compareTo(o.getPressureFunction());
+		else if (hasPressureFunction() && o.hasVelocityFunction())
 			return 1;
-		else if(hasVelocityFunction() && o.hasPressureFunction())
+		else if (hasVelocityFunction() && o.hasPressureFunction())
 			return -1;
 		else
-			return getVelocityShapeFunction().compareTo(o.getVelocityShapeFunction());
+			return getVelocityFunction().compareTo(o.getVelocityFunction());
 	}
 }

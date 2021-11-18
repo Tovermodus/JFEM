@@ -1,79 +1,86 @@
 package mixed;
 
-import basic.*;
-import linalg.*;
-import tensorproduct.*;
+import basic.ScalarFunction;
+import basic.VectorFunction;
+import linalg.CoordinateVector;
+import tensorproduct.CartesianGridSpace;
+import tensorproduct.ContinuousTPShapeFunction;
+import tensorproduct.ContinuousTPVectorFunction;
 import tensorproduct.geometry.TPCell;
 import tensorproduct.geometry.TPFace;
 
-import java.util.*;
+import java.util.List;
+import java.util.TreeSet;
 
-public class QkQkSpace extends CartesianGridSpace<QkQkFunction, MixedValue, MixedGradient, MixedHessian>
+public class QkQkSpace
+	extends CartesianGridSpace<QkQkFunction, MixedValue, MixedGradient, MixedHessian>
 {
 	
-	
-	public QkQkSpace(CoordinateVector startCoordinates, CoordinateVector endCoordinates,
-	                 List<Integer> cellsPerDimension)
+	public QkQkSpace(final CoordinateVector startCoordinates, final CoordinateVector endCoordinates,
+	                 final List<Integer> cellsPerDimension)
 	{
 		super(startCoordinates, endCoordinates, cellsPerDimension);
 	}
 	
 	@Override
-	public void assembleFunctions(int polynomialDegree)
+	public void assembleFunctions(final int polynomialDegree)
 	{
 		shapeFunctions = new TreeSet<>();
 		assemblePressureFunctions(polynomialDegree);
 		assembleVelocityFunctions(polynomialDegree);
 		int i = 0;
-		for(QkQkFunction shapeFunction:shapeFunctions)
+		for (final QkQkFunction shapeFunction : shapeFunctions)
 			shapeFunction.setGlobalIndex(i++);
 	}
-	private void assemblePressureFunctions(int polynomialDegree)
+	
+	private void assemblePressureFunctions(final int polynomialDegree)
 	{
 		
-		for (TPCell cell : getCells())
+		for (final TPCell cell : getCells())
 		{
 			for (int i = 0; i < Math.pow(polynomialDegree + 1, getDimension()); i++)
 			{
-				QkQkFunction shapeFunction = new QkQkFunction(new ContinuousTPShapeFunction(cell,
-					polynomialDegree, i));
+				final QkQkFunction shapeFunction = new QkQkFunction(new ContinuousTPShapeFunction(cell,
+				                                                                                  polynomialDegree,
+				                                                                                  i));
 				shapeFunction.setGlobalIndex(shapeFunctions.size());
 				shapeFunctions.add(shapeFunction);
-				for(TPCell ce: shapeFunction.getCells())
+				for (final TPCell ce : shapeFunction.getCells())
 					supportOnCell.put(ce, shapeFunction);
-				for (TPFace face : shapeFunction.getFaces())
+				for (final TPFace face : shapeFunction.getFaces())
 					supportOnFace.put(face, shapeFunction);
 			}
 		}
 	}
-	private void assembleVelocityFunctions(int polynomialDegree)
+	
+	private void assembleVelocityFunctions(final int polynomialDegree)
 	{
-		for (TPCell cell : getCells())
+		for (final TPCell cell : getCells())
 		{
 			for (int i = 0; i < Math.pow(polynomialDegree + 1, getDimension()) * getDimension(); i++)
 			{
-				QkQkFunction shapeFunction = new QkQkFunction(new ContinuousTPVectorFunction(cell,
-					polynomialDegree, i));
+				final QkQkFunction shapeFunction = new QkQkFunction(new ContinuousTPVectorFunction(cell,
+				                                                                                   polynomialDegree,
+				                                                                                   i));
 				shapeFunction.setGlobalIndex(shapeFunctions.size());
 				shapeFunctions.add(shapeFunction);
-				for(TPCell ce: shapeFunction.getCells())
+				for (final TPCell ce : shapeFunction.getCells())
 					supportOnCell.put(ce, shapeFunction);
-				for (TPFace face : shapeFunction.getFaces())
+				for (final TPFace face : shapeFunction.getFaces())
 					supportOnFace.put(face, shapeFunction);
-				
 			}
 		}
 	}
 	
-	public void setVelocityBoundaryValues(VectorFunction boundaryValues)
+	public void setVelocityBoundaryValues(final VectorFunction boundaryValues)
 	{
-		MixedFunction boundaryMixed = new MixedFunction(boundaryValues);
+		final MixedFunction boundaryMixed = new ComposedMixedFunction(boundaryValues);
 		setBoundaryValues(boundaryMixed);
 	}
 	
-	public void setPressureBoundaryValues(ScalarFunction boundaryValues)
+	public void setPressureBoundaryValues(final ScalarFunction boundaryValues)
 	{
-		MixedFunction boundaryMixed = new MixedFunction(boundaryValues);
+		final MixedFunction boundaryMixed = new ComposedMixedFunction(boundaryValues);
 		setBoundaryValues(boundaryMixed);
 	}
 }

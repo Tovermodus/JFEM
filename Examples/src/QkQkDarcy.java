@@ -29,7 +29,8 @@ public class QkQkDarcy
 			new TPVectorCellIntegral<>(TPVectorCellIntegral.VALUE_VALUE);
 		final MixedCellIntegral<TPCell, ContinuousTPShapeFunction, ContinuousTPVectorFunction, QkQkFunction>
 			divValue = new MixedTPCellIntegral<>(MixedTPCellIntegral.DIV_VALUE);
-		final MixedCellIntegral<TPCell, ContinuousTPShapeFunction, ContinuousTPVectorFunction, QkQkFunction> vv =
+		final MixedCellIntegral<TPCell, ContinuousTPShapeFunction, ContinuousTPVectorFunction, QkQkFunction> vv
+			=
 			MixedCellIntegral.fromVelocityIntegral(valueValue);
 		final List<CellIntegral<TPCell, QkQkFunction>> cellIntegrals =
 			new ArrayList<>();
@@ -43,7 +44,8 @@ public class QkQkDarcy
 					LaplaceReferenceSolution.scalarRightHandSide(), TPRightHandSideIntegral.VALUE));
 		final List<RightHandSideIntegral<TPCell, QkQkFunction>> rightHandSideIntegrals = new ArrayList<>();
 		rightHandSideIntegrals.add(rightHandSideIntegral);
-		final List<BoundaryRightHandSideIntegral<TPFace, QkQkFunction>> boundaryFaceIntegrals = new ArrayList<>();
+		final List<BoundaryRightHandSideIntegral<TPFace, QkQkFunction>> boundaryFaceIntegrals
+			= new ArrayList<>();
 		final MixedBoundaryRightHandSideIntegral<TPFace, ContinuousTPShapeFunction,
 			ContinuousTPVectorFunction, QkQkFunction> dirichlet =
 			MixedBoundaryRightHandSideIntegral.fromVelocityIntegral(
@@ -82,8 +84,8 @@ public class QkQkDarcy
 		valList.add(solut.pressureValuesInPoints(grid.generatePlotPoints(50)));
 		valList.add(solut.velocityComponentsInPoints(grid.generatePlotPoints(50), 0));
 		valList.add(solut.velocityComponentsInPoints(grid.generatePlotPoints(50), 1));
-		for (final MixedShapeFunction<TPCell, TPFace, ContinuousTPShapeFunction, ContinuousTPVectorFunction> shapeFunction : grid.getShapeFunctions()
-		                                                                                                                         .values())
+		for (final ComposeMixedShapeFunction<TPCell, TPFace, ContinuousTPShapeFunction, ContinuousTPVectorFunction> shapeFunction : grid.getShapeFunctions()
+		                                                                                                                                .values())
 		{
 			if (shapeFunction.hasPressureFunction())
 				valList.add(shapeFunction.pressureValuesInPoints(grid.generatePlotPoints(50)));

@@ -15,7 +15,7 @@ import java.util.Map;
 import java.util.function.Function;
 import java.util.function.ToDoubleFunction;
 
-public abstract class HyperbolicCartesianDistorted<ST extends MixedShapeFunction<TPCell, TPFace, PF, VF>,
+public abstract class HyperbolicCartesianDistorted<ST extends ComposeMixedShapeFunction<TPCell, TPFace, PF, VF>,
 	PF extends ScalarShapeFunction<TPCell, TPFace>, VF extends VectorShapeFunction<TPCell, TPFace>>
 	extends FullyImplicitHyperbolicIntegrator
 {
@@ -191,7 +191,7 @@ public abstract class HyperbolicCartesianDistorted<ST extends MixedShapeFunction
 			                        final int index = entry.getKey();
 			                        final VF velocityShapeFunction =
 				                        entry.getValue()
-				                             .getVelocityShapeFunction();
+				                             .getVelocityFunction();
 			                        final DistortedVectorFunction concatenation =
 				                        DistortedVectorFunctionOnCells.concatenate(velocityShapeFunction,
 				                                                                   getDisplacement(
@@ -271,11 +271,11 @@ public abstract class HyperbolicCartesianDistorted<ST extends MixedShapeFunction
 	private void addInitialUp(final DenseVector ret)
 	{
 		final MixedFunction initialUpFunction
-			= new MixedFunction(ScalarFunction.fromLambda(getInitialPressure(),
-			                                              dimension),
-			                    VectorFunction.fromLambda(getInitialFluidVelocity(),
-			                                              dimension,
-			                                              dimension));
+			= new ComposedMixedFunction(ScalarFunction.fromLambda(getInitialPressure(),
+			                                                      dimension),
+			                            VectorFunction.fromLambda(getInitialFluidVelocity(),
+			                                                      dimension,
+			                                                      dimension));
 		final DenseVector initialUp = new DenseVector(getnBackgroundVelocities());
 		backgroundSpace.getShapeFunctions()
 		               .forEach((key, value) ->

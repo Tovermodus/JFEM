@@ -6,7 +6,7 @@ import tensorproduct.geometry.TPFace;
 
 import java.util.Map;
 
-public class MixedTPFESpaceFunction<MF extends MixedShapeFunction<TPCell, TPFace, ?, ?>>
+public class MixedTPFESpaceFunction<MF extends ComposeMixedShapeFunction<TPCell, TPFace, ?, ?>>
 	extends MixedFESpaceFunction<MF, TPCell, TPFace>
 {
 	public MixedTPFESpaceFunction(final MF[] functions, final double[] coefficients)

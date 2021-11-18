@@ -73,17 +73,6 @@ public interface VectorShapeFunction<CT extends Cell<CT, FT>, FT extends Face<CT
 	@Override
 	default CoordinateMatrix normalAverageInValue(final FT face, final CoordinateVector pos)
 	{
-//		final CoordinateVector grad = face.getNormal().value(pos);
-//		final CoordinateVector other = jumpInValue(face, pos).mul(0.5);
-//		final CoordinateDenseMatrix ret = new CoordinateDenseMatrix(grad.getLength(), other.getLength());
-//		for (int i = 0; i < grad.getLength(); i++)
-//		{
-//			for (int j = 0; j < other.getLength(); j++)
-//			{
-//				ret.set(grad.at(i) * other.at(j), i, j);
-//			}
-//		}
-//		return ret;
 		return (CoordinateMatrix) face.getNormal()
 		                              .value(pos)
 		                              .outer(jumpInValue(face, pos).mul(0.5));

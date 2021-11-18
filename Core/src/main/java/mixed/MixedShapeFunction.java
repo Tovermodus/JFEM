@@ -1,157 +1,111 @@
 package mixed;
 
 import basic.*;
+import linalg.CoordinateMatrix;
 import linalg.CoordinateVector;
-import org.jetbrains.annotations.NotNull;
 
-import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
 
-public abstract class MixedShapeFunction<CT extends Cell<CT, FT>,
-	FT extends Face<CT, FT>, PF extends ScalarShapeFunction<CT, FT
+public interface MixedShapeFunction<CT extends Cell<CT, FT>, FT extends Face<CT, FT>, PF extends ScalarShapeFunction<CT, FT
 	>, VF extends VectorShapeFunction<CT, FT>>
-	extends MixedFunction
-	implements ShapeFunction<CT, FT, MixedValue, MixedGradient,
-	MixedHessian>
+	extends MixedFunction, ShapeFunction<CT, FT, MixedValue, MixedGradient, MixedHessian>,
+	MixedFunctionOnCells<CT, FT>
 {
-	
-	public MixedShapeFunction(@NotNull PF pressureFunction)
-	{
-		super(pressureFunction);
-	}
-	
-	public MixedShapeFunction(@NotNull VF velocityFunction)
-	{
-		super(velocityFunction);
-	}
-	
-	
 	@Override
-	public Set<CT> getCells()
+	default int getDomainDimension()
 	{
 		if (hasPressureFunction())
-			return getPressureShapeFunction().getCells();
+			return getPressureFunction().getDomainDimension();
 		else
-			return getVelocityShapeFunction().getCells();
-	}
-	
-	@SuppressWarnings("unchecked")
-	
-	public PF getPressureShapeFunction()
-	{
-		return (PF) getPressureFunction();
-	}
-	
-	@SuppressWarnings("unchecked")
-	public VF getVelocityShapeFunction()
-	{
-		return (VF) getVelocityFunction();
+			return getVelocityFunction().getDomainDimension();
 	}
 	
 	@Override
-	public Set<FT> getFaces()
+	PF getPressureFunction();
+	
+	@Override
+	VF getVelocityFunction();
+	
+	@Override
+	default <ST extends ShapeFunction<CT, FT, MixedValue, MixedGradient, MixedHessian>> Map<Integer, Double> prolongate(
+		final Set<ST> refinedFunctions)
 	{
-		if (hasPressureFunction())
-			return getPressureShapeFunction().getFaces();
-		else
-			return getVelocityShapeFunction().getFaces();
+		throw new UnsupportedOperationException("Not Yet Implemented");
 	}
 	
 	@Override
-	public NodeFunctional<MixedValue, MixedGradient, MixedHessian> getNodeFunctional()
+	default MixedValue value(final CoordinateVector pos)
 	{
-		if (hasPressureFunction())
-			return MixedNodeFunctional.pressureFunctional(getPressureShapeFunction().getNodeFunctional());
-		else
-			return MixedNodeFunctional.velocityFunctional(getVelocityShapeFunction().getNodeFunctional());
+		for (final CT cell : getCells())
+			if (cell.isInCell(pos)) return valueInCell(pos, cell);
+		return defaultValue();
 	}
 	
 	@Override
-	public MixedValue valueInCell(CoordinateVector pos, CT cell)
+	default MixedGradient gradient(final CoordinateVector pos)
 	{
-		if (hasPressureFunction())
-			return new PressureValue(getPressureShapeFunction().valueInCell(pos, cell));
-		else
-			return new VelocityValue(getVelocityShapeFunction().valueInCell(pos, cell));
+		for (final CT cell : getCells())
+			if (cell.isInCell(pos)) return gradientInCell(pos, cell);
+		return defaultGradient();
 	}
 	
 	@Override
-	public MixedGradient gradientInCell(CoordinateVector pos, CT cell)
+	default MixedValue jumpInValue(final FT face, final CoordinateVector pos)
 	{
-		if (hasPressureFunction())
-			return new PressureGradient(getPressureShapeFunction().gradientInCell(pos, cell));
-		else
-			return new VelocityGradient(getVelocityShapeFunction().gradientInCell(pos, cell));
+		return valueInCell(pos, face.getNormalUpstreamCell())
+			.sub(valueInCell(pos, face.getNormalDownstreamCell()));
 	}
 	
 	@Override
-	public MixedValue jumpInValue(FT face, CoordinateVector pos)
+	default MixedGradient jumpInDerivative(final FT face, final CoordinateVector pos)
 	{
-		if (hasPressureFunction())
-			return new PressureValue(getPressureShapeFunction().jumpInValue(face, pos));
-		else
-			return new VelocityValue(getVelocityShapeFunction().jumpInValue(face, pos));
+		return gradientInCell(pos, face.getNormalUpstreamCell())
+			.sub(gradientInCell(pos, face.getNormalDownstreamCell()));
 	}
 	
 	@Override
-	public MixedGradient jumpInDerivative(FT face, CoordinateVector pos)
+	default MixedValue averageInValue(final FT face, final CoordinateVector pos)
 	{
-		if (hasPressureFunction())
-			return new PressureGradient(getPressureShapeFunction().jumpInDerivative(face, pos));
-		else
-			return new VelocityGradient(getVelocityShapeFunction().jumpInDerivative(face, pos));
+		return valueInCell(pos, face.getNormalUpstreamCell())
+			.add(valueInCell(pos, face.getNormalDownstreamCell()))
+			.mul(0.5);
 	}
 	
 	@Override
-	public MixedValue averageInValue(FT face, CoordinateVector pos)
+	default MixedGradient averageInDerivative(final FT face, final CoordinateVector pos)
 	{
-		if (hasPressureFunction())
-			return new PressureValue(getPressureShapeFunction().averageInValue(face, pos));
-		else
-			return new VelocityValue(getVelocityShapeFunction().averageInValue(face, pos));
+		return gradientInCell(pos, face.getNormalUpstreamCell())
+			.add(gradientInCell(pos, face.getNormalDownstreamCell()))
+			.mul(0.5);
 	}
 	
 	@Override
-	public MixedGradient averageInDerivative(FT face, CoordinateVector pos)
+	NodeFunctional<MixedValue, MixedGradient, MixedHessian> getNodeFunctional();
+	
+	@Override
+	default MixedGradient normalAverageInValue(final FT face, final CoordinateVector pos)
 	{
-		if (hasPressureFunction())
-			return new PressureGradient(getPressureShapeFunction().averageInDerivative(face, pos));
-		else
-			return new VelocityGradient(getVelocityShapeFunction().averageInDerivative(face, pos));
+		final MixedValue jump = jumpInValue(face, pos).mul(0.5);
+		final CoordinateVector pressureNormalAverageInValue = face.getNormal()
+		                                                          .value(pos)
+		                                                          .mul(jump.getPressure());
+		final CoordinateMatrix velocityNormalAverageInValue = face.getNormal()
+		                                                          .value(pos)
+		                                                          .outer(jump.getVelocity());
+		return new MixedGradient(pressureNormalAverageInValue, velocityNormalAverageInValue);
 	}
 	
 	@Override
-	public MixedGradient normalAverageInValue(FT face, CoordinateVector pos)
+	default MixedValue normalAverageInDerivative(final FT face, final CoordinateVector pos)
 	{
-		if (hasPressureFunction())
-			return new PressureGradient(getPressureShapeFunction().normalAverageInValue(face, pos));
-		else
-			return new VelocityGradient(getVelocityShapeFunction().normalAverageInValue(face, pos));
+		final MixedGradient jump = jumpInDerivative(face, pos).mul(0.5);
+		final double pressureNormalAverageInDerivative = face.getNormal()
+		                                                     .value(pos)
+		                                                     .inner(jump.getPressureGradient());
+		final CoordinateVector velocityNormalAverageInDerivative = jump.getVelocityGradient()
+		                                                               .mvMul(face.getNormal()
+		                                                                          .value(pos));
+		return new MixedValue(pressureNormalAverageInDerivative, velocityNormalAverageInDerivative);
 	}
-	
-	@Override
-	public MixedValue normalAverageInDerivative(FT face, CoordinateVector pos)
-	{
-		if (hasPressureFunction())
-			return new PressureValue(getPressureShapeFunction().normalAverageInDerivative(face, pos));
-		else
-			return new VelocityValue(getVelocityShapeFunction().normalAverageInDerivative(face, pos));
-	}
-	
-	
-	@Override
-	public <ST extends ShapeFunction<CT, FT, MixedValue, MixedGradient, MixedHessian>> Map<Integer, Double> prolongate(Set<ST> refinedFunctions)
-	{
-		Map<Integer, Double> ret = new HashMap<>();
-		for (ST shapeFunction : refinedFunctions)
-		{
-			ret.put(shapeFunction.getGlobalIndex(),
-				shapeFunction.getNodeFunctional().evaluate(this));
-		}
-		return ret;
-	}
-	public abstract boolean equals(Object other);
-	public abstract int hashCode();
-	
 }

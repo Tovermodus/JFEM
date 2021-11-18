@@ -3,31 +3,32 @@ package mixed;
 import basic.PerformanceArguments;
 import linalg.*;
 
-
-public class MixedValue implements MutableVector
+public class MixedValue
+	implements MutableVector
 {
 	private double pressure;
 	private CoordinateVector velocity;
 	
-	public MixedValue(MixedValue mv)
+	public MixedValue(final MixedValue mv)
 	{
 		pressure = mv.getPressure();
 		velocity = new CoordinateVector(mv.getVelocity());
 	}
-	public MixedValue(double pressure, CoordinateVector velocity)
+	
+	public MixedValue(final double pressure, final CoordinateVector velocity)
 	{
 		this.pressure = pressure;
 		this.velocity = velocity;
 	}
 	
-	protected MixedValue(int d)
+	protected MixedValue(final int domainDimension)
 	{
 		pressure = 0;
-		velocity = new CoordinateVector(d);
+		velocity = new CoordinateVector(domainDimension);
 	}
 	
 	@Override
-	public double at(int... coordinates)
+	public double at(final int... coordinates)
 	{
 		
 		if (PerformanceArguments.getInstance().executeChecks)
@@ -40,7 +41,7 @@ public class MixedValue implements MutableVector
 	}
 	
 	@Override
-	public void set(double value, int... coordinates)
+	public void set(final double value, final int... coordinates)
 	{
 		if (PerformanceArguments.getInstance().executeChecks)
 			if (coordinates.length != 1)
@@ -55,7 +56,7 @@ public class MixedValue implements MutableVector
 	}
 	
 	@Override
-	public void add(double value, int... coordinates)
+	public void add(final double value, final int... coordinates)
 	{
 		if (PerformanceArguments.getInstance().executeChecks)
 			if (coordinates.length != 1)
@@ -63,7 +64,6 @@ public class MixedValue implements MutableVector
 		if (coordinates[0] == 0)
 		{
 			setPressure(getPressure() + value);
-			
 		} else
 		{
 			getVelocity().add(value, coordinates[0] - 1);
@@ -71,7 +71,7 @@ public class MixedValue implements MutableVector
 	}
 	
 	@Override
-	public void addInPlace(Tensor other)
+	public void addInPlace(final Tensor other)
 	{
 		if (PerformanceArguments.getInstance().executeChecks)
 		{
@@ -85,14 +85,14 @@ public class MixedValue implements MutableVector
 	}
 	
 	@Override
-	public void mulInPlace(double scalar)
+	public void mulInPlace(final double scalar)
 	{
 		pressure *= scalar;
 		velocity.mulInPlace(scalar);
 	}
 	
 	@Override
-	public MixedValue add(Tensor other)
+	public MixedValue add(final Tensor other)
 	{
 		if (PerformanceArguments.getInstance().executeChecks)
 		{
@@ -101,7 +101,7 @@ public class MixedValue implements MutableVector
 			if (!getShape().equals(other.getShape()))
 				throw new IllegalArgumentException("Vectors are of different size");
 		}
-		MixedValue ret = new MixedValue(this);
+		final MixedValue ret = new MixedValue(this);
 		if (!(other instanceof PressureValue))
 			ret.addVelocity(((MixedValue) other).getVelocity());
 		if (!(other instanceof VelocityValue))
@@ -110,16 +110,22 @@ public class MixedValue implements MutableVector
 	}
 	
 	@Override
-	public MixedValue mul(double scalar)
+	public MixedValue sub(final Tensor other)
 	{
-		MixedValue ret = new MixedValue(getDomainDimension());
+		return this.add(other.mul(-1));
+	}
+	
+	@Override
+	public MixedValue mul(final double scalar)
+	{
+		final MixedValue ret = new MixedValue(getDomainDimension());
 		ret.setPressure(getPressure() * scalar);
 		ret.setVelocity(getVelocity().mul(scalar));
 		return ret;
 	}
 	
 	@Override
-	public Matrix outer(Vector other)
+	public Matrix outer(final Vector other)
 	{
 		throw new UnsupportedOperationException("outer makes no sense");
 	}
@@ -133,7 +139,6 @@ public class MixedValue implements MutableVector
 	{
 		return pressure;
 	}
-	
 	
 	@Override
 	public int getSparseEntryCount()
@@ -163,22 +168,22 @@ public class MixedValue implements MutableVector
 		return getVelocity().getLength();
 	}
 	
-	public void setPressure(double pressure)
+	public void setPressure(final double pressure)
 	{
 		this.pressure = pressure;
 	}
 	
-	public void setVelocity(CoordinateVector velocity)
+	public void setVelocity(final CoordinateVector velocity)
 	{
 		this.velocity = new CoordinateVector(velocity);
 	}
 	
-	public void addPressure(double pressure)
+	public void addPressure(final double pressure)
 	{
 		this.pressure += pressure;
 	}
 	
-	public void addVelocity(CoordinateVector velocity)
+	public void addVelocity(final CoordinateVector velocity)
 	{
 		setVelocity(getVelocity().add(velocity));
 	}

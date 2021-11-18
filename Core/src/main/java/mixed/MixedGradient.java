@@ -5,12 +5,25 @@ import linalg.*;
 
 import java.util.List;
 
-public class MixedGradient implements MutableMatrix
+public class MixedGradient
+	implements MutableMatrix
 {
 	private CoordinateVector pressureGradient;
 	private CoordinateDenseMatrix velocityGradient;
 	
-	protected MixedGradient(final int domainDimension)
+	public MixedGradient(final CoordinateVector pressureGradient, final CoordinateDenseMatrix velocityGradient)
+	{
+		this.pressureGradient = pressureGradient;
+		this.velocityGradient = velocityGradient;
+	}
+	
+	public MixedGradient(final CoordinateVector pressureGradient, final CoordinateMatrix velocityGradient)
+	{
+		this.pressureGradient = pressureGradient;
+		this.velocityGradient = new CoordinateDenseMatrix(velocityGradient);
+	}
+	
+	public MixedGradient(final int domainDimension)
 	{
 		pressureGradient = new CoordinateVector(domainDimension);
 		velocityGradient = new CoordinateDenseMatrix(domainDimension, domainDimension);
@@ -49,7 +62,7 @@ public class MixedGradient implements MutableMatrix
 		else this.velocityGradient = new CoordinateDenseMatrix(velocityGradient);
 	}
 	
-	public void addVelocityGradient(final CoordinateDenseMatrix velocityGradient)
+	public void addVelocityGradient(final CoordinateMatrix velocityGradient)
 	{
 		this.setVelocityGradient(getVelocityGradient().add(velocityGradient));
 	}
@@ -84,7 +97,7 @@ public class MixedGradient implements MutableMatrix
 	@Override
 	public void addInPlace(final Tensor other)
 	{
-	
+		throw new UnsupportedOperationException("Not Yet Implemented");
 	}
 	
 	@Override
@@ -96,7 +109,7 @@ public class MixedGradient implements MutableMatrix
 	@Override
 	public void mulInPlace(final double scalar)
 	{
-	
+		throw new UnsupportedOperationException("Not Yet Implemented");
 	}
 	
 	@Override
@@ -120,6 +133,12 @@ public class MixedGradient implements MutableMatrix
 	public int getDomainDimension()
 	{
 		return pressureGradient.getLength();
+	}
+	
+	@Override
+	public MixedGradient sub(final Tensor other)
+	{
+		return this.add(other.mul(-1));
 	}
 	
 	@Override
@@ -152,8 +171,10 @@ public class MixedGradient implements MutableMatrix
 	@Override
 	public IntCoordinates getShape()
 	{
-		return new IntCoordinates(velocityGradient.getShape().get(0) + 1,
-		                          velocityGradient.getShape().get(1) + 1);
+		return new IntCoordinates(velocityGradient.getShape()
+		                                          .get(0) + 1,
+		                          velocityGradient.getShape()
+		                                          .get(1) + 1);
 	}
 	
 	@Override

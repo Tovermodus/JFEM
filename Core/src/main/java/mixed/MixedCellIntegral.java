@@ -5,60 +5,64 @@ import tensorproduct.QuadratureRule1D;
 
 import java.util.Objects;
 
-public class MixedCellIntegral<CT extends Cell<CT,?>,
-	PF extends ScalarShapeFunction<CT,?>, VF extends VectorShapeFunction<CT,?>, MF extends MixedShapeFunction<CT,
-	?, PF,VF>> extends CellIntegral<CT
-	,MF>
+public class MixedCellIntegral<CT extends Cell<CT, ?>,
+	PF extends ScalarShapeFunction<CT, ?>, VF extends VectorShapeFunction<CT, ?>, MF extends ComposeMixedShapeFunction<CT,
+	?, PF, VF>>
+	extends CellIntegral<CT
+	, MF>
 {
 	private final CellIntegral<CT, PF> pressureIntegral;
 	private final CellIntegral<CT, VF> velocityIntegral;
 	
-	protected MixedCellIntegral(CellIntegral<CT, PF> pressureIntegral,
-	                            CellIntegral<CT, VF> velocityIntegral)
+	protected MixedCellIntegral(final CellIntegral<CT, PF> pressureIntegral,
+	                            final CellIntegral<CT, VF> velocityIntegral)
 	{
 		super(null);
 		this.pressureIntegral = pressureIntegral;
 		this.velocityIntegral = velocityIntegral;
 	}
 	
-	protected MixedCellIntegral(Function<?, ?, ?> weight, String name, QuadratureRule1D quadratureRule1D)
+	protected MixedCellIntegral(final Function<?, ?, ?> weight,
+	                            final String name,
+	                            final QuadratureRule1D quadratureRule1D)
 	{
 		super(weight, name, quadratureRule1D);
 		this.pressureIntegral = null;
 		this.velocityIntegral = null;
 	}
 	
-	protected MixedCellIntegral(String name, QuadratureRule1D quadratureRule1D)
+	protected MixedCellIntegral(final String name, final QuadratureRule1D quadratureRule1D)
 	{
 		super(name, quadratureRule1D);
 		this.pressureIntegral = null;
 		this.velocityIntegral = null;
 	}
-	protected MixedCellIntegral(Function<?, ?, ?> weight, String name)
+	
+	protected MixedCellIntegral(final Function<?, ?, ?> weight, final String name)
 	{
-		this(weight,name,QuadratureRule1D.Gauss5);
+		this(weight, name, QuadratureRule1D.Gauss5);
 	}
 	
-	protected MixedCellIntegral(String name)
+	protected MixedCellIntegral(final String name)
 	{
-		this(name,QuadratureRule1D.Gauss5);
+		this(name, QuadratureRule1D.Gauss5);
 	}
 	
 	public static <CT extends Cell<CT, ?>,
-		PF extends ScalarShapeFunction<CT,?>,
-		VF extends VectorShapeFunction<CT, ?>, MF extends MixedShapeFunction<CT,
-		?, PF,VF>> MixedCellIntegral<CT, PF, VF,MF> fromPressureIntegral(CellIntegral<CT
+		PF extends ScalarShapeFunction<CT, ?>,
+		VF extends VectorShapeFunction<CT, ?>, MF extends ComposeMixedShapeFunction<CT,
+		?, PF, VF>> MixedCellIntegral<CT, PF, VF, MF> fromPressureIntegral(final CellIntegral<CT
 		, PF> pressureIntegral)
 	{
 		return new MixedCellIntegral<>(pressureIntegral, null);
 	}
 	
-	public static <CT extends Cell<CT,FT>, FT extends Face<CT,FT>,
-		PF extends ScalarShapeFunction<CT,FT>, VF extends VectorShapeFunction<CT,FT>,
-		MF extends MixedShapeFunction<CT,
-	?, PF,VF>> MixedCellIntegral<CT,
+	public static <CT extends Cell<CT, FT>, FT extends Face<CT, FT>,
+		PF extends ScalarShapeFunction<CT, FT>, VF extends VectorShapeFunction<CT, FT>,
+		MF extends ComposeMixedShapeFunction<CT,
+			?, PF, VF>> MixedCellIntegral<CT,
 		PF,
-		VF,MF> fromVelocityIntegral(CellIntegral<CT
+		VF, MF> fromVelocityIntegral(final CellIntegral<CT
 		, VF> velocityIntegral)
 	{
 		return new MixedCellIntegral<>(null, velocityIntegral);
@@ -79,30 +83,32 @@ public class MixedCellIntegral<CT extends Cell<CT,?>,
 		return this.pressureIntegral == null && this.velocityIntegral == null;
 	}
 	
-	protected double evaluatePressureVelocityIntegral(CT cell,
-	                                                  MF pressureShapeFunction,
-	                                                  MF velocityShapeFunction)
+	protected double evaluatePressureVelocityIntegral(final CT cell,
+	                                                  final MF pressureShapeFunction,
+	                                                  final MF velocityShapeFunction)
 	{
 		throw new UnsupportedOperationException("needs to be overwritten");
 	}
 	
 	@Override
-	public double evaluateCellIntegral(CT cell,
-	                                   MF shapeFunction1,
-	                                   MF shapeFunction2)
+	public double evaluateCellIntegral(final CT cell,
+	                                   final MF shapeFunction1,
+	                                   final MF shapeFunction2)
 	{
 		if (isPressureIntegral())
 		{
 			if (shapeFunction1.hasVelocityFunction() || shapeFunction2.hasVelocityFunction())
 				return 0;
-			return Objects.requireNonNull(pressureIntegral).evaluateCellIntegral(cell, shapeFunction1.getPressureShapeFunction(),
-				shapeFunction2.getPressureShapeFunction());
+			return Objects.requireNonNull(pressureIntegral)
+			              .evaluateCellIntegral(cell, shapeFunction1.getPressureFunction(),
+			                                    shapeFunction2.getPressureFunction());
 		} else if (isVelocityIntegral())
 		{
 			if (shapeFunction1.hasPressureFunction() || shapeFunction2.hasPressureFunction())
 				return 0;
-			return Objects.requireNonNull(velocityIntegral).evaluateCellIntegral(cell, shapeFunction1.getVelocityShapeFunction(),
-				shapeFunction2.getVelocityShapeFunction());
+			return Objects.requireNonNull(velocityIntegral)
+			              .evaluateCellIntegral(cell, shapeFunction1.getVelocityFunction(),
+			                                    shapeFunction2.getVelocityFunction());
 		} else
 		{
 			if (shapeFunction1.hasPressureFunction() && shapeFunction2.hasVelocityFunction())

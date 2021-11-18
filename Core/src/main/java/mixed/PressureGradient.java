@@ -1,10 +1,12 @@
 package mixed;
 
 import linalg.CoordinateDenseMatrix;
+import linalg.CoordinateMatrix;
 import linalg.CoordinateVector;
 import linalg.Tensor;
 
-public class PressureGradient extends MixedGradient
+public class PressureGradient
+	extends MixedGradient
 {
 	
 	protected PressureGradient(final CoordinateVector pressureGradient)
@@ -20,7 +22,7 @@ public class PressureGradient extends MixedGradient
 	}
 	
 	@Override
-	public void addVelocityGradient(final CoordinateDenseMatrix velocityGradient)
+	public void addVelocityGradient(final CoordinateMatrix velocityGradient)
 	{
 		throw new IllegalStateException("Is not a velocity  gradient");
 	}

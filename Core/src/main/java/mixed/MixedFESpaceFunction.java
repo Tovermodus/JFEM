@@ -16,7 +16,7 @@ import java.util.concurrent.ConcurrentHashMap;
 
 public class MixedFESpaceFunction<MF extends MixedShapeFunction<CT, FT, ?, ?>, CT extends Cell<CT, FT>,
 	FT extends Face<CT, FT>>
-	extends MixedFunctionOnCells<CT, FT>
+	implements MixedFunctionOnCells<CT, FT>
 {
 	final double diam;
 	private final HashMap<MF, Double> coefficients;
@@ -162,27 +162,28 @@ public class MixedFESpaceFunction<MF extends MixedShapeFunction<CT, FT, ?, ?>, C
 	@Override
 	public MixedValue value(final CoordinateVector pos)
 	{
-		final PressureValue pf = new PressureValue(pressureCoefficients
-			                                           .entrySet()
-			                                           .stream()
-			                                           .parallel()
-			                                           .filter(entry -> entry
-				                                           .getKey()
-				                                           .hasPressureFunction())
-			                                           .mapToDouble(entry -> entry
-				                                           .getKey()
-				                                           .value(pos)
-				                                           .getPressure() * entry.getValue())
-			                                           .sum());
-		final VelocityValue vf = velocityCoefficients
+		final MixedValue pf = new PressureValue(pressureCoefficients
+			                                        .entrySet()
+			                                        .stream()
+			                                        .parallel()
+			                                        .filter(entry -> entry
+				                                        .getKey()
+				                                        .hasPressureFunction())
+			                                        .mapToDouble(entry -> entry
+				                                        .getKey()
+				                                        .value(pos)
+				                                        .getPressure() * entry.getValue())
+			                                        .sum());
+		final MixedValue vf = velocityCoefficients
 			.entrySet()
 			.stream()
 			.parallel()
 			.filter(entry -> entry.getKey()
 			                      .hasVelocityFunction())
-			.map(entry -> (VelocityValue) (entry.getKey()
-			                                    .value(pos)).mul(entry.getValue()))
-			.reduce(new VelocityValue(getDomainDimension()), (a, b) -> (VelocityValue) (a.add(b)));
+			.map(entry -> entry.getKey()
+			                   .value(pos)
+			                   .mul(entry.getValue()))
+			.reduce(new VelocityValue(getDomainDimension()), MixedValue::add);
 		return pf.add(vf);
 	}
 	
@@ -212,5 +213,17 @@ public class MixedFESpaceFunction<MF extends MixedShapeFunction<CT, FT, ?, ?>, C
 			        CoordinateDenseMatrix::add);
 		final VelocityGradient vf = new VelocityGradient(velocityGradient);
 		return pf.add(vf);
+	}
+	
+	@Override
+	public MixedValue valueInCell(final CoordinateVector pos, final CT cell)
+	{
+		return value(pos);
+	}
+	
+	@Override
+	public MixedGradient gradientInCell(final CoordinateVector pos, final CT cell)
+	{
+		return gradient(pos);
 	}
 }

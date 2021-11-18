@@ -14,7 +14,8 @@ import tensorproduct.geometry.TPFace;
 import java.util.List;
 import java.util.TreeSet;
 
-public class TaylorHoodSpace extends CartesianGridSpace<QkQkFunction, MixedValue, MixedGradient, MixedHessian>
+public class TaylorHoodSpace
+	extends CartesianGridSpace<QkQkFunction, MixedValue, MixedGradient, MixedHessian>
 {
 	
 	public TaylorHoodSpace(final CoordinateVector startCoordinates, final CoordinateVector endCoordinates,
@@ -83,13 +84,13 @@ public class TaylorHoodSpace extends CartesianGridSpace<QkQkFunction, MixedValue
 	
 	public void setVelocityBoundaryValues(final VectorFunction boundaryValues)
 	{
-		final MixedFunction boundaryMixed = new MixedFunction(boundaryValues);
+		final MixedFunction boundaryMixed = new ComposedMixedFunction(boundaryValues);
 		setBoundaryValues(boundaryMixed);
 	}
 	
 	public void setPressureBoundaryValues(final ScalarFunction boundaryValues)
 	{
-		final MixedFunction boundaryMixed = new MixedFunction(boundaryValues);
+		final MixedFunction boundaryMixed = new ComposedMixedFunction(boundaryValues);
 		setBoundaryValues(boundaryMixed);
 	}
 	
