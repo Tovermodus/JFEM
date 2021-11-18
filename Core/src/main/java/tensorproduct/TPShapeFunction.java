@@ -190,6 +190,37 @@ public class TPShapeFunction
 		return ret;
 	}
 	
+	public double fastValueInCell(final CoordinateVector pos)
+	{
+		double ret = 1;
+		for (int i = 0; i < pos.getLength(); i++)
+		{
+			ret *= function1Ds.get(i)
+			                  .value(pos.at(i));
+		}
+		return ret;
+	}
+	
+	public double[] fastGradientInCell(final CoordinateVector pos)
+	{
+		final double[] ret = new double[pos.getLength()];
+		for (int i = 0; i < pos.getLength(); i++)
+		{
+			double component = 1;
+			for (int j = 0; j < pos.getLength(); j++)
+			{
+				if (i == j)
+					component *= function1Ds.get(j)
+					                        .derivative(pos.at(j));
+				else
+					component *= function1Ds.get(j)
+					                        .value(pos.at(j));
+			}
+			ret[i] = component;
+		}
+		return ret;
+	}
+	
 	@Override
 	public Double valueInCell(final CoordinateVector pos, final TPCell cell)
 	{
@@ -197,7 +228,7 @@ public class TPShapeFunction
 			return 0.;
 		if (cell.equals(supportCell))
 		{
-			return fastValue(pos);
+			return fastValueInCell(pos);
 		} else
 			return 0.;
 	}
@@ -205,7 +236,13 @@ public class TPShapeFunction
 	@Override
 	public CoordinateVector gradientInCell(final CoordinateVector pos, final TPCell cell)
 	{
-		return new CoordinateVector(fastGradientInCell(pos, cell));
+		if (cell == null)
+			return defaultGradient();
+		if (cell.equals(supportCell))
+		{
+			return new CoordinateVector(fastGradientInCell(pos, cell));
+		} else
+			return defaultGradient();
 	}
 	
 	@Override

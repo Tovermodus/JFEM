@@ -137,8 +137,8 @@ public class DenseMatrix
 	@Override
 	public void set(final double value, final int... coordinates)
 	{
-		if (PerformanceArguments.getInstance().executeChecks)
-			if (coordinates.length != 2) throw new IllegalArgumentException("Wrong number of coordinates");
+		//if (PerformanceArguments.getInstance().executeChecks)
+		if (coordinates.length != 2) throw new IllegalArgumentException("Wrong number of coordinates");
 		entries[coordinates[0]][coordinates[1]] = value;
 	}
 	

@@ -2,6 +2,8 @@ package tensorproduct;
 
 import basic.LagrangeNodeFunctional;
 import basic.ScalarShapeFunctionWithReferenceShapeFunction;
+import it.unimi.dsi.fastutil.ints.Int2ObjectArrayMap;
+import it.unimi.dsi.fastutil.ints.Int2ObjectMap;
 import linalg.CoordinateComparator;
 import linalg.CoordinateVector;
 import tensorproduct.geometry.TPCell;
@@ -15,16 +17,18 @@ public class ContinuousTPShapeFunction
 	Comparable<ContinuousTPShapeFunction>
 {
 	
-	private final Map<TPCell, List<LagrangeBasisFunction1D>> cells;
+	private final Int2ObjectMap<List<LagrangeBasisFunction1D>> cellFunctionMapping;
 	private final Set<TPFace> faces;
+	private final List<TPCell> cells;
 	private final LagrangeNodeFunctional nodeFunctional;
 	private final int polynomialDegree;
 	private int globalIndex;
 	
 	public ContinuousTPShapeFunction(final TPCell supportCell, final int polynomialDegree, final int localIndex)
 	{
-		cells = new TreeMap<>();
+		cellFunctionMapping = new Int2ObjectArrayMap<>();
 		faces = new HashSet<>();
+		cells = new ArrayList<>();
 		this.polynomialDegree = polynomialDegree;
 		final List<LagrangeBasisFunction1D> supportCellFunctions = generateBasisFunctionOnCell(supportCell,
 		                                                                                       localIndex);
@@ -34,7 +38,8 @@ public class ContinuousTPShapeFunction
 				                            .mapToDouble(LagrangeBasisFunction1D::getDegreeOfFreedom)
 				                            .toArray());
 		nodeFunctional = new LagrangeNodeFunctional(functionalPoint);
-		cells.put(supportCell, supportCellFunctions);
+		cells.add(supportCell);
+		cellFunctionMapping.put(supportCell.doneCode(), supportCellFunctions);
 		checkIfPointOnFace(functionalPoint, supportCell);
 	}
 	
@@ -42,13 +47,15 @@ public class ContinuousTPShapeFunction
 	                                 final int polynomialDegree,
 	                                 final CoordinateVector functionalPoint)
 	{
-		cells = new TreeMap<>();
+		cellFunctionMapping = new Int2ObjectArrayMap<>();
 		faces = new TreeSet<>();
+		cells = new ArrayList<>();
 		this.polynomialDegree = polynomialDegree;
 		final List<LagrangeBasisFunction1D> supportCellFunctions = generateBasisFunctionOnCell(supportCell,
 		                                                                                       functionalPoint);
 		nodeFunctional = new LagrangeNodeFunctional(functionalPoint);
-		cells.put(supportCell, supportCellFunctions);
+		cellFunctionMapping.put(supportCell.doneCode(), supportCellFunctions);
+		cells.add(supportCell);
 		checkIfPointOnFace(functionalPoint, supportCell);
 	}
 	
@@ -74,8 +81,11 @@ public class ContinuousTPShapeFunction
 				{
 					for (final TPCell cellOfFace : face.getCells())
 					{
-						cells.put(cellOfFace,
-						          generateBasisFunctionOnCell(cellOfFace, functionalPoint));
+						if (!cellFunctionMapping.containsKey(cellOfFace.doneCode()))
+							cells.add(cellOfFace);
+						cellFunctionMapping.put(cellOfFace.doneCode(),
+						                        generateBasisFunctionOnCell(cellOfFace,
+						                                                    functionalPoint));
 						checkIfPointOnFace(functionalPoint, cellOfFace);
 					}
 				}
@@ -111,9 +121,9 @@ public class ContinuousTPShapeFunction
 	}
 	
 	@Override
-	public Set<TPCell> getCells()
+	public List<TPCell> getCells()
 	{
-		return cells.keySet();
+		return cells;
 	}
 	
 	@Override
@@ -145,9 +155,9 @@ public class ContinuousTPShapeFunction
 		if (cell == null)
 			return ret;
 		final List<? extends Function1D> function1Ds;
-		if (cells.containsKey(cell))
+		if (cellFunctionMapping.containsKey(cell.doneCode()))
 		{
-			function1Ds = cells.get(cell);
+			function1Ds = cellFunctionMapping.get(cell.doneCode());
 			for (int i = 0; i < pos.getLength(); i++)
 			{
 				ret *= function1Ds.get(i)
@@ -164,9 +174,9 @@ public class ContinuousTPShapeFunction
 		if (cell == null)
 			return ret;
 		final List<? extends Function1D> function1Ds;
-		if (cells.containsKey(cell))
+		if (cellFunctionMapping.containsKey(cell.doneCode()))
 		{
-			function1Ds = cells.get(cell);
+			function1Ds = cellFunctionMapping.get(cell.doneCode());
 			for (int i = 0; i < pos.getLength(); i++)
 			{
 				double component = 1;
@@ -232,7 +242,7 @@ public class ContinuousTPShapeFunction
 	@Override
 	public ContinuousTPShapeFunction createReferenceShapeFunctionRelativeTo(final TPCell cell)
 	{
-		final List<LagrangeBasisFunction1D> functions = cells.get(cell);
+		final List<LagrangeBasisFunction1D> functions = cellFunctionMapping.get(cell.doneCode());
 		final CoordinateVector functionalPoint =
 			CoordinateVector.fromValues(
 				IntStream.range(0, getDomainDimension())
@@ -257,7 +267,7 @@ public class ContinuousTPShapeFunction
 			                                        .getNormalDownstreamCell() :
 			face.getReferenceFace()
 			    .getNormalUpstreamCell();
-		final List<LagrangeBasisFunction1D> functions = cells.get(supportCell);
+		final List<LagrangeBasisFunction1D> functions = cellFunctionMapping.get(supportCell.doneCode());
 		final CoordinateVector functionalPoint =
 			CoordinateVector.fromValues(
 				IntStream.range(0, getDomainDimension())

@@ -4,8 +4,8 @@ import linalg.CoordinateMatrix;
 import linalg.CoordinateVector;
 
 import java.lang.reflect.InvocationTargetException;
+import java.util.Collection;
 import java.util.Objects;
-import java.util.Set;
 
 public class SingleComponentVectorShapeFunction<CT extends Cell<CT, FT>, FT extends Face<CT, FT>, CST extends ScalarShapeFunction<CT,
 	FT> & Comparable<CST>, VT extends SingleComponentVectorShapeFunction<CT, FT, CST, VT>>
@@ -61,13 +61,13 @@ public class SingleComponentVectorShapeFunction<CT extends Cell<CT, FT>, FT exte
 	}
 	
 	@Override
-	public Set<CT> getCells()
+	public Collection<CT> getCells()
 	{
 		return componentFunction.getCells();
 	}
 	
 	@Override
-	public Set<FT> getFaces()
+	public Collection<FT> getFaces()
 	{
 		return componentFunction.getFaces();
 	}
@@ -76,8 +76,7 @@ public class SingleComponentVectorShapeFunction<CT extends Cell<CT, FT>, FT exte
 	public CoordinateVector valueInCell(final CoordinateVector pos, final CT cell)
 	{
 		return CoordinateVector
-			.getUnitVector(getDomainDimension(), component)
-			.mul(componentFunction.valueInCell(pos, cell));
+			.getUnitVector(getDomainDimension(), component, componentFunction.valueInCell(pos, cell));
 	}
 	
 	@Override
@@ -187,6 +186,7 @@ public class SingleComponentVectorShapeFunction<CT extends Cell<CT, FT>, FT exte
 	@Override
 	public int hashCode()
 	{
-		return Objects.hash(componentFunction, component, dimension);
+		final int functionHash = componentFunction.hashCode();
+		return functionHash * dimension + component;
 	}
 }

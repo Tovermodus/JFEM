@@ -399,8 +399,8 @@ public class DLMSummary
 	
 	public void generateFirstEulerianIterates(final DenseVector initialVector)
 	{
-		final MixedFunction initialVelocityFunction = new MixedFunction(initialVelocityValues());
-		final MixedFunction initialPressureFunction = new MixedFunction(initialPressureValues());
+		final MixedFunction initialVelocityFunction = new ComposedMixedFunction(initialVelocityValues());
+		final MixedFunction initialPressureFunction = new ComposedMixedFunction(initialPressureValues());
 		eulerian
 			.getShapeFunctions()
 			.forEach((key, value) -> initialVector.add(
@@ -437,7 +437,7 @@ public class DLMSummary
 	                                final DenseVector rightHandSide,
 	                                final double t)
 	{
-		eulerian.writeBoundaryValuesTo(new MixedFunction(boundaryVelocityValues(t)),
+		eulerian.writeBoundaryValuesTo(new ComposedMixedFunction(boundaryVelocityValues(t)),
 		                               f -> f.center()
 		                                     .x() == 0,
 		                               (f, sf) -> sf.hasVelocityFunction(),
@@ -509,7 +509,7 @@ public class DLMSummary
 				lagrangian.writeCellIntegralsToRhs(List.of(transferEulerian), column,
 				                                   (K, lambd) ->
 					                                   sf
-						                                   .getVelocityShapeFunction()
+						                                   .getVelocityFunction()
 						                                   .getNodeFunctionalPoint()
 						                                   .sub(K.center())
 						                                   .euclidianNorm() < 1. / nEulerCells + lagrangian

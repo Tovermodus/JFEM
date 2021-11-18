@@ -127,10 +127,6 @@ public class DenseVector
 	@Override
 	public double at(final int... coordinates)
 	{
-		if (PerformanceArguments.getInstance().executeChecks)
-		{
-			if (coordinates.length != 1) throw new IllegalArgumentException("Wrong number of coordinates");
-		}
 		return entries[coordinates[0]];
 	}
 	
@@ -153,7 +149,7 @@ public class DenseVector
 	@Override
 	public void addInPlace(final Tensor other)
 	{
-		for (int i = 0; i < getLength(); i++)
+		for (int i = 0; i < entries.length; i++)
 			entries[i] += other.at(i);
 	}
 	
@@ -170,7 +166,7 @@ public class DenseVector
 	@Override
 	public void mulInPlace(final double scalar)
 	{
-		for (int i = 0; i < getLength(); i++)
+		for (int i = 0; i < entries.length; i++)
 			entries[i] *= scalar;
 	}
 	

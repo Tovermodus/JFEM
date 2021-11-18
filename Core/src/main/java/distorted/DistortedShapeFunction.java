@@ -78,7 +78,7 @@ public class DistortedShapeFunction
 			if (!cell.referenceCell.isInCell(pos)) throw new IllegalArgumentException("pos is not in cell");
 		//if (shapeFunctionsOnCell.containsKey(cell))
 		return shapeFunctionsOnCellFast.get(cell.doneCode())
-		                               .fastValue(pos);
+		                               .fastValueInCell(pos);
 		//return 0;
 	}
 	

@@ -3,7 +3,9 @@ package linalg;
 import basic.PerformanceArguments;
 import org.jetbrains.annotations.NotNull;
 
-public class CoordinateVector extends DenseVector implements Comparable<CoordinateVector>
+public class CoordinateVector
+	extends DenseVector
+	implements Comparable<CoordinateVector>
 {
 	public CoordinateVector(final Vector v)
 	{
@@ -28,6 +30,13 @@ public class CoordinateVector extends DenseVector implements Comparable<Coordina
 	{
 		final CoordinateVector ret = new CoordinateVector(d);
 		ret.set(1, index);
+		return ret;
+	}
+	
+	public static CoordinateVector getUnitVector(final int d, final int index, final double scale)
+	{
+		final CoordinateVector ret = new CoordinateVector(d);
+		ret.set(scale, index);
 		return ret;
 	}
 	

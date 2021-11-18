@@ -7,7 +7,7 @@ import basic.VectorShapeFunction;
 import linalg.CoordinateVector;
 import org.jetbrains.annotations.NotNull;
 
-import java.util.Set;
+import java.util.Collection;
 
 public abstract class ComposeMixedShapeFunction<CT extends Cell<CT, FT>,
 	FT extends Face<CT, FT>, PF extends ScalarShapeFunction<CT, FT
@@ -34,7 +34,7 @@ public abstract class ComposeMixedShapeFunction<CT extends Cell<CT, FT>,
 	}
 	
 	@Override
-	public Set<CT> getCells()
+	public Collection<CT> getCells()
 	{
 		if (hasPressureFunction())
 			return getPressureFunction().getCells();
@@ -43,7 +43,7 @@ public abstract class ComposeMixedShapeFunction<CT extends Cell<CT, FT>,
 	}
 	
 	@Override
-	public Set<FT> getFaces()
+	public Collection<FT> getFaces()
 	{
 		if (hasPressureFunction())
 			return getPressureFunction().getFaces();

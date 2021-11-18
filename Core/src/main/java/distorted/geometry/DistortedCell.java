@@ -280,11 +280,15 @@ public class DistortedCell
 	@Override
 	public boolean isInCell(final CoordinateVector pos)
 	{
-		if (Arrays
-			.stream(vertices)
-			.map(pos::sub)
-			.mapToDouble(CoordinateVector::euclidianNorm)
-			.anyMatch(dist -> dist > diam)) return false;
+		for (final CoordinateVector vertex : vertices)
+		{
+			final CoordinateVector sub = pos.sub(vertex);
+			final double dist = sub.euclidianNorm();
+			if (dist > diam)
+			{
+				return false;
+			}
+		}
 		return referenceCell.isInCell(transformToReferenceCell(pos));
 	}
 	

@@ -2,22 +2,26 @@ package basic;
 
 import linalg.CoordinateVector;
 
+import java.util.Collection;
 import java.util.Map;
 import java.util.Set;
 
 public interface ShapeFunction<CT extends Cell<CT, FT>, FT extends Face<CT, FT>,
 	valueT, gradientT,
-	hessianT> extends Function<valueT, gradientT, hessianT>, FunctionOnCells<CT, FT, valueT, gradientT, hessianT>
+	hessianT>
+	extends Function<valueT, gradientT, hessianT>, FunctionOnCells<CT, FT, valueT, gradientT, hessianT>
 {
 	@Override
 	default int getDomainDimension()
 	{
-		return getCells().iterator().next().getDimension();
+		return getCells().iterator()
+		                 .next()
+		                 .getDimension();
 	}
 	
-	Set<CT> getCells();
+	Collection<CT> getCells();
 	
-	Set<FT> getFaces();
+	Collection<FT> getFaces();
 	
 	NodeFunctional<valueT, gradientT, hessianT> getNodeFunctional();
 	

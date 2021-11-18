@@ -55,8 +55,10 @@ public class DLMStokesFlowAroundCylinder
 		final DistortedVectorCellIntegral lagv2 = new DistortedVectorCellIntegral(
 			DistortedVectorCellIntegral.H1);
 		
-		final int n = largeGrid.getShapeFunctions().size();
-		final int m = immersedGrid.getShapeFunctions().size();
+		final int n = largeGrid.getShapeFunctions()
+		                       .size();
+		final int m = immersedGrid.getShapeFunctions()
+		                          .size();
 		
 		final SparseMatrix A11 = new SparseMatrix(n, n);
 		SparseMatrix A22 = new SparseMatrix(m, m);
@@ -67,44 +69,24 @@ public class DLMStokesFlowAroundCylinder
 		final DenseVector b2 = new DenseVector(m);
 		largeGrid.writeCellIntegralsToMatrix(List.of(reynolds), A11);
 		largeGrid.writeCellIntegralsToMatrix(List.of(divValue), A11);
-		final MixedFunction boundaryValues = new MixedFunction(new VectorFunction()
-		{
-			@Override
-			public int getRangeDimension()
-			{
-				return 2;
-			}
-			
-			@Override
-			public int getDomainDimension()
-			{
-				return 2;
-			}
-			
-			@Override
-			public CoordinateVector value(final CoordinateVector pos)
-			{
-				return CoordinateVector.fromValues(1000, 0);
-			}
-		});
-		largeGrid.writeBoundaryValuesTo(boundaryValues, (f) -> f.center().x() == 0,
-		                                (f, sf) -> sf.hasVelocityFunction(), A11, b1);
-		final MixedFunction pboundaryValues = new MixedFunction(new ScalarFunction()
-		{
-			@Override
-			public int getDomainDimension()
-			{
-				return 2;
-			}
-			
-			@Override
-			public Double value(final CoordinateVector pos)
-			{
-				return 0.;
-			}
-		});
-		largeGrid.writeBoundaryValuesTo(pboundaryValues, (f) -> f.center().x() == 0 && f.center().y() > 4.53,
-		                                (f, sf) -> sf.hasPressureFunction(), A11, b1);
+		final MixedFunction boundaryValues =
+			new ComposedMixedFunction(VectorFunction.fromLambda(x -> CoordinateVector.fromValues(1000, 0),
+			                                                    2,
+			                                                    2));
+		largeGrid.writeBoundaryValuesTo(boundaryValues,
+		                                (f) -> f.center()
+		                                        .x() == 0,
+		                                (f, sf) -> sf.hasVelocityFunction(),
+		                                A11,
+		                                b1);
+		final MixedFunction pboundaryValues = new ComposedMixedFunction(ScalarFunction.constantFunction(0));
+		largeGrid.writeBoundaryValuesTo(pboundaryValues,
+		                                (f) -> f.center()
+		                                        .x() == 0 && f.center()
+		                                                      .y() > 4.53,
+		                                (f, sf) -> sf.hasPressureFunction(),
+		                                A11,
+		                                b1);
 		System.out.println("A11");
 		A22 = SparseMatrix.identity(m);
 		System.out.println("A22");
@@ -140,7 +122,8 @@ public class DLMStokesFlowAroundCylinder
 				return CoordinateDenseMatrix.fromValues(2, 2, 1, 0, 0, 1);
 			}
 		};
-		for (final Map.Entry<Integer, QkQkFunction> sf : largeGrid.getShapeFunctions().entrySet())
+		for (final Map.Entry<Integer, QkQkFunction> sf : largeGrid.getShapeFunctions()
+		                                                          .entrySet())
 		{
 			final VectorFunction toBeMultiplierd = new VectorFunction() //THIS NEEDS TO BE UPDATED IN
 				// EVERY ITERATION
@@ -162,7 +145,7 @@ public class DLMStokesFlowAroundCylinder
 				{
 					return sf
 						.getValue()
-						.getVelocityShapeFunction()
+						.getVelocityFunction()
 						.value(elasticTransformation.value(pos));
 				}
 				
@@ -171,20 +154,22 @@ public class DLMStokesFlowAroundCylinder
 				{
 					return sf
 						.getValue()
-						.getVelocityShapeFunction()
+						.getVelocityFunction()
 						.gradient(
 							elasticTransformation.value(pos));//.mvmul(elastictransformation
 					// .gradient oder so
 				}
 			};
-			if (sf.getValue().hasVelocityFunction())
+			if (sf.getValue()
+			      .hasVelocityFunction())
 			{
 				final DistortedVectorRightHandSideIntegral shapeFunctionOnImmersedGrid
 					= new DistortedVectorRightHandSideIntegral(toBeMultiplierd,
 					                                           DistortedVectorRightHandSideIntegral.H1);
 				final DenseVector integrals = new DenseVector(m);
 				immersedGrid.writeCellIntegralsToRhs(List.of(shapeFunctionOnImmersedGrid), integrals);
-				A13.addSmallMatrixAt(integrals.asMatrix().transpose(), sf.getKey(), 0);
+				A13.addSmallMatrixAt(integrals.asMatrix()
+				                              .transpose(), sf.getKey(), 0);
 				//if (count % 10 == 0)
 				System.out.println("A31: " + 100.0 * (count++) / n + "%");
 			}

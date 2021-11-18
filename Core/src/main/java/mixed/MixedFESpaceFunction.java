@@ -2,8 +2,8 @@ package mixed;
 
 import basic.Cell;
 import basic.Face;
-import basic.ScalarFunction;
-import basic.VectorFunction;
+import basic.ScalarFunctionOnCells;
+import basic.VectorFunctionOnCells;
 import linalg.CoordinateDenseMatrix;
 import linalg.CoordinateMatrix;
 import linalg.CoordinateVector;
@@ -85,11 +85,25 @@ public class MixedFESpaceFunction<MF extends MixedShapeFunction<CT, FT, ?, ?>, C
 	}
 	
 	@Override
-	public ScalarFunction getPressureFunction()
+	public ScalarFunctionOnCells<CT, FT> getPressureFunction()
 	{
 		final MixedFESpaceFunction<MF, CT, FT> me = this;
-		return new ScalarFunction()
+		return new ScalarFunctionOnCells<CT, FT>()
 		{
+			@Override
+			public Double valueInCell(final CoordinateVector pos, final CT cell)
+			{
+				return me.valueInCell(pos, cell)
+				         .getPressure();
+			}
+			
+			@Override
+			public CoordinateVector gradientInCell(final CoordinateVector pos, final CT cell)
+			{
+				return me.gradientInCell(pos, cell)
+				         .getPressureGradient();
+			}
+			
 			@Override
 			public int getDomainDimension()
 			{
@@ -113,11 +127,25 @@ public class MixedFESpaceFunction<MF extends MixedShapeFunction<CT, FT, ?, ?>, C
 	}
 	
 	@Override
-	public VectorFunction getVelocityFunction()
+	public VectorFunctionOnCells<CT, FT> getVelocityFunction()
 	{
 		final MixedFESpaceFunction<MF, CT, FT> me = this;
-		return new VectorFunction()
+		return new VectorFunctionOnCells<CT, FT>()
 		{
+			@Override
+			public CoordinateVector valueInCell(final CoordinateVector pos, final CT cell)
+			{
+				return me.valueInCell(pos, cell)
+				         .getVelocity();
+			}
+			
+			@Override
+			public CoordinateMatrix gradientInCell(final CoordinateVector pos, final CT cell)
+			{
+				return me.gradientInCell(pos, cell)
+				         .getVelocityGradient();
+			}
+			
 			@Override
 			public int getRangeDimension()
 			{

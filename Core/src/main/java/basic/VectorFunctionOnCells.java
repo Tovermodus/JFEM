@@ -4,6 +4,8 @@ import linalg.CoordinateMatrix;
 import linalg.CoordinateTensor;
 import linalg.CoordinateVector;
 
+import java.util.function.BiFunction;
+
 public interface VectorFunctionOnCells<CT extends Cell<CT, FT>, FT extends Face<CT, FT>>
 	extends FunctionOnCells<CT,
 	FT, CoordinateVector, CoordinateMatrix, CoordinateTensor>, VectorFunction
@@ -80,6 +82,40 @@ public interface VectorFunctionOnCells<CT extends Cell<CT, FT>, FT extends Face<
 			public VectorFunction concatenateWith(final VectorFunction f)
 			{
 				return function.concatenateWith(f);
+			}
+		};
+	}
+	
+	static <CT extends Cell<CT, FT>, FT extends Face<CT, FT>> VectorFunctionOnCells<CT, FT>
+	fromLambda(final java.util.function.Function<CoordinateVector, CoordinateVector> lambdaFunction,
+	           final BiFunction<CoordinateVector, CT, CoordinateVector> lambdaFunctionOnCells,
+	           final int domainDimension,
+	           final int rangeDimension)
+	{
+		return new VectorFunctionOnCells<CT, FT>()
+		{
+			@Override
+			public CoordinateVector valueInCell(final CoordinateVector pos, final CT cell)
+			{
+				return lambdaFunctionOnCells.apply(pos, cell);
+			}
+			
+			@Override
+			public int getRangeDimension()
+			{
+				return rangeDimension;
+			}
+			
+			@Override
+			public int getDomainDimension()
+			{
+				return domainDimension;
+			}
+			
+			@Override
+			public CoordinateVector value(final CoordinateVector pos)
+			{
+				return lambdaFunction.apply(pos);
 			}
 		};
 	}

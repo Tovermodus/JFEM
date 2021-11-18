@@ -6,7 +6,9 @@ import mixed.*;
 import tensorproduct.ContinuousTPShapeFunction;
 import tensorproduct.ContinuousTPVectorFunction;
 import tensorproduct.TPVectorCellIntegral;
+import tensorproduct.TPVectorCellIntegralOnCell;
 import tensorproduct.geometry.TPCell;
+import tensorproduct.geometry.TPFace;
 
 import java.util.List;
 import java.util.Map;
@@ -474,8 +476,8 @@ public class DLMElast
 	
 	public void generateFirstEulerianIterates(final DenseVector initialVector)
 	{
-		final MixedFunction initialVelocityFunction = new MixedFunction(initialVelocityValues());
-		final MixedFunction initialPressureFunction = new MixedFunction(initialPressureValues());
+		final MixedFunction initialVelocityFunction = new ComposedMixedFunction(initialVelocityValues());
+		final MixedFunction initialPressureFunction = new ComposedMixedFunction(initialPressureValues());
 		eulerian
 			.getShapeFunctions()
 			.forEach((key, value) -> initialVector.add(
@@ -512,12 +514,13 @@ public class DLMElast
 	                                final DenseVector rightHandSide,
 	                                final double t)
 	{
-		eulerian.writeBoundaryValuesTo(new MixedFunction(boundaryVelocityValues(t)),
-		                               f -> f.center()
-		                                     .x() == 0,
-		                               (f, sf) -> sf.hasVelocityFunction(),
-		                               currentMatrix,
-		                               rightHandSide);
+		eulerian.writeBoundaryValuesTo(
+			new ComposedMixedFunction(boundaryVelocityValues(t)),
+			f -> f.center()
+			      .x() == 0,
+			(f, sf) -> sf.hasVelocityFunction(),
+			currentMatrix,
+			rightHandSide);
 		final int firstPressure = eulerian
 			.getShapeFunctions()
 			.values()
@@ -554,22 +557,28 @@ public class DLMElast
 	
 	public void writeAfSemiImplicit(final SparseMatrix currentMatrix, final DenseVector currentIterate)
 	{
-//		final VectorFunctionOnCells<TPCell, TPFace> vel = getUp(currentIterate).getVelocityFunction();
-//		final VectorFunction semiImplicitWeight1 = VectorFunction.fromLambda((x) -> vel.value(x)
-//		                                                                               .mul(rhoF / 2), 2, 2);
-//		final VectorFunction semiImplicitWeight2 = VectorFunction.fromLambda((x) -> vel.value(x)
-//		                                                                               .mul(-rhoF / 2), 2, 2);
-//		final TPVectorCellIntegralOnCell<ContinuousTPVectorFunction> convection1 =
-//			new TPVectorCellIntegralOnCell<>(semiImplicitWeight1, TPVectorCellIntegral.GRAD_VALUE);
-//		final TPVectorCellIntegralOnCell<ContinuousTPVectorFunction> convection2 =
-//			new TPVectorCellIntegralOnCell<>(semiImplicitWeight2, TPVectorCellIntegral.VALUE_GRAD);
-//		final MixedCellIntegral<TPCell, ContinuousTPShapeFunction, ContinuousTPVectorFunction,
-//			QkQkFunction> mixedConvection1 = MixedCellIntegral.fromVelocityIntegral(convection1);
-//		final MixedCellIntegral<TPCell, ContinuousTPShapeFunction, ContinuousTPVectorFunction,
-//			QkQkFunction> mixedConvection2 = MixedCellIntegral.fromVelocityIntegral(convection2);
-//		final SparseMatrix convection = new SparseMatrix(nEulerian, nEulerian);
-//		eulerian.writeCellIntegralsToMatrix(List.of(mixedConvection1, mixedConvection2), convection);
-//		currentMatrix.addSmallMatrixAt(convection, 0, 0);
+		final VectorFunctionOnCells<TPCell, TPFace> vel = getUp(currentIterate).getVelocityFunction();
+		final VectorFunctionOnCells<TPCell, TPFace> semiImplicitWeight1 =
+			VectorFunctionOnCells.fromLambda((x) -> vel.value(x)
+			                                           .mul(rhoF / 2),
+			                                 (x, cell) -> vel.valueInCell(x, cell)
+			                                                 .mul(rhoF / 2), 2, 2);
+		final VectorFunctionOnCells<TPCell, TPFace> semiImplicitWeight2 =
+			VectorFunctionOnCells.fromLambda((x) -> vel.value(x)
+			                                           .mul(-rhoF / 2),
+			                                 (x, cell) -> vel.valueInCell(x, cell)
+			                                                 .mul(-rhoF / 2), 2, 2);
+		final TPVectorCellIntegralOnCell<ContinuousTPVectorFunction> convection1 =
+			new TPVectorCellIntegralOnCell<>(semiImplicitWeight1, TPVectorCellIntegral.GRAD_VALUE);
+		final TPVectorCellIntegralOnCell<ContinuousTPVectorFunction> convection2 =
+			new TPVectorCellIntegralOnCell<>(semiImplicitWeight2, TPVectorCellIntegral.VALUE_GRAD);
+		final MixedCellIntegral<TPCell, ContinuousTPShapeFunction, ContinuousTPVectorFunction,
+			QkQkFunction> mixedConvection1 = MixedCellIntegral.fromVelocityIntegral(convection1);
+		final MixedCellIntegral<TPCell, ContinuousTPShapeFunction, ContinuousTPVectorFunction,
+			QkQkFunction> mixedConvection2 = MixedCellIntegral.fromVelocityIntegral(convection2);
+		final SparseMatrix convection = new SparseMatrix(nEulerian, nEulerian);
+		eulerian.writeCellIntegralsToMatrix(List.of(mixedConvection1, mixedConvection2), convection);
+		currentMatrix.addSmallMatrixAt(convection, 0, 0);
 	}
 	
 	public void writeAs(final SparseMatrix constantMatrix)
@@ -614,7 +623,7 @@ public class DLMElast
 				        final DenseVector column = new DenseVector(nTransfer);
 				        lagrangian.writeCellIntegralsToRhs(List.of(transferEulerian), column,
 				                                           (K, lambd) ->
-					                                           sf.getVelocityShapeFunction()
+					                                           sf.getVelocityFunction()
 					                                             .getNodeFunctionalPoint()
 					                                             .sub(K.center())
 					                                             .euclidianNorm() < 1 + 2. / nEulerCells + lagrangian

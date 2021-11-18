@@ -92,7 +92,7 @@ public class QkQkDarcy
 			if (shapeFunction.hasVelocityFunction())
 			{
 				valList.add(shapeFunction.velocityComponentsInPoints(grid.generatePlotPoints(50),
-				                                                     shapeFunction.getVelocityShapeFunction()
+				                                                     shapeFunction.getVelocityFunction()
 				                                                                  .getComponent()));
 			}
 		}

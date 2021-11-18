@@ -131,7 +131,8 @@ public class StokesTime
 		grid.assembleCells();
 		grid.assembleFunctions(polynomialDegree);
 		final List<CoordinateVector> points = grid.generatePlotPoints(nPoints);
-		final int n = grid.getShapeFunctions().size();
+		final int n = grid.getShapeFunctions()
+		                  .size();
 		
 		final ScalarFunction indicatorFunction = new ScalarFunction()
 		{
@@ -176,11 +177,12 @@ public class StokesTime
 		DenseVector iterate = new DenseVector(n);
 		grid.writeCellIntegralsToRhs(List.of(initial), iterate);
 		
-		final SparseMatrix MAD = M.add(A).add(D);
+		final SparseMatrix MAD = M.add(A)
+		                          .add(D);
 		
 		VectorFunction bdrFunction = createBoundaryFunction(0);
 		
-		grid.writeBoundaryValuesTo(new MixedFunction(bdrFunction),
+		grid.writeBoundaryValuesTo(new ComposedMixedFunction(bdrFunction),
 		                           (f) -> TPFaceIntegral.integrateNonTensorProduct(indicatorFunction::value, f,
 		                                                                           QuadratureRule1D.Gauss5) > 0,
 		                           MAD, iterate);
@@ -216,7 +218,7 @@ public class StokesTime
 			
 			final DenseVector rhs = src.add(M.mvMul(iterate));
 			bdrFunction = createBoundaryFunction(i * dt);
-			grid.writeBoundaryValuesTo(new MixedFunction(bdrFunction),
+			grid.writeBoundaryValuesTo(new ComposedMixedFunction(bdrFunction),
 			                           (f) ->
 			                           {
 				                           return TPFaceIntegral.integrateNonTensorProduct(

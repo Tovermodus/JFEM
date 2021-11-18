@@ -27,8 +27,8 @@ public class DistortedVectorShapeFunction
 	public CoordinateVector valueOnReferenceCell(final CoordinateVector x, final DistortedCell cell)
 	{
 		return CoordinateVector
-			.getUnitVector(getRangeDimension(), getComponent())
-			.mul(getComponentFunction().valueOnReferenceCell(x, cell));
+			.getUnitVector(getRangeDimension(), getComponent(),
+			               getComponentFunction().valueOnReferenceCell(x, cell));
 	}
 	
 	@Override
