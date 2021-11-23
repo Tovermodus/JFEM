@@ -88,6 +88,35 @@ public class DistortedVectorCellIntegral
 		return ret;
 	}
 	
+	public static double integrateOnCell(final ToDoubleFunction<CoordinateVector> eval,
+	                                     final DistortedCell cell,
+	                                     final QuadratureRule1D quadratureRule)
+	{
+		double ret = 0;
+		double val;
+		final TPCell referenceCell = cell.referenceCell;
+		final CoordinateVector quadraturePoint = new CoordinateVector(cell.getDimension());
+		final double[][][] pointsWeights = new double[cell.getDimension()][2][quadratureRule.length()];
+		for (int j = 0; j < cell.getDimension(); j++)
+			pointsWeights[j] = referenceCell.getComponentCell(j)
+			                                .distributeQuadrature(quadratureRule);
+		final IntCoordinates quadraturePointSize = IntCoordinates.repeat(quadratureRule.length(),
+		                                                                 cell.getDimension());
+		for (final IntCoordinates c : quadraturePointSize.range())
+		{
+			for (int i = 0; i < c.getDimension(); i++)
+			{
+				quadraturePoint.set(pointsWeights[i][0][c.get(i)], i);
+			}
+			final CoordinateVector pointOnGrid = cell.transformFromReferenceCell(quadraturePoint);
+			val = eval.applyAsDouble(pointOnGrid);
+			for (int i = 0; i < cell.getDimension(); i++)
+				val *= pointsWeights[i][1][c.get(i)];
+			ret += val;
+		}
+		return ret;
+	}
+	
 	@Override
 	public double evaluateCellIntegral(final DistortedCell cell,
 	                                   final DistortedVectorShapeFunction shapeFunction1,
@@ -95,21 +124,37 @@ public class DistortedVectorCellIntegral
 	{
 		if (name.equals(SYM_SYM))
 		{
-			return integrateOnReferenceCell(x ->
-			                                {
-				                                final CoordinateMatrix grad1
-					                                = shapeFunction1.gradientOnReferenceCell(x,
-					                                                                         cell);
-				                                final CoordinateMatrix grad2
-					                                = shapeFunction2.gradientOnReferenceCell(x,
-					                                                                         cell);
+			return integrateOnCell(x ->
+			                       {
+				                       final CoordinateMatrix grad1
+					                       = shapeFunction1.gradientInCell(x,
+					                                                       cell);
+				                       final CoordinateMatrix grad2
+					                       = shapeFunction2.gradientInCell(x,
+					                                                       cell);
 				
-				                                return grad1
-					                                .add(grad1.transpose())
-					                                .frobeniusInner(grad2.add(
-						                                grad2.transpose())) * (Double) weight.value(
-					                                x) / 4;
-			                                }, cell, quadratureRule1D);
+				                       return grad1
+					                       .add(grad1.transpose())
+					                       .frobeniusInner(grad2.add(
+						                       grad2.transpose())) * (Double) weight.value(
+					                       x) / 4;
+			                       }, cell, quadratureRule1D);
+
+//			return integrateOnReferenceCell(x ->
+//			                                {
+//				                                final CoordinateMatrix grad1
+//					                                = shapeFunction1.gradientOnReferenceCell(x,
+//					                                                                         cell);
+//				                                final CoordinateMatrix grad2
+//					                                = shapeFunction2.gradientOnReferenceCell(x,
+//					                                                                         cell);
+//
+//				                                return grad1
+//					                                .add(grad1.transpose())
+//					                                .frobeniusInner(grad2.add(
+//						                                grad2.transpose())) * (Double) weight.value(
+//					                                x) / 4;
+//			                                }, cell, quadratureRule1D);
 		}
 		if (name.equals(TRACE_SYM))
 		{

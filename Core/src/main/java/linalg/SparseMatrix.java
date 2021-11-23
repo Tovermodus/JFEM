@@ -509,7 +509,7 @@ public class SparseMatrix
 		final ImmutableMap<IntCoordinates, Double> myValues = getCoordinateEntryList();
 		final ImmutableMap<IntCoordinates, Double> otherValues = other.getCoordinateEntryList();
 		final double absmax = absMaxElement() + other.absMaxElement();
-		if (coordinateEntryListsEqual(myValues, otherValues, absmax)) return false;
+		if (coordinateEntryListsNotEqual(myValues, otherValues, absmax)) return false;
 		if (otherValues.size() != myValues.size())
 		{
 			if (DoubleCompare.almostEqualAfterOps(0,
@@ -524,32 +524,32 @@ public class SparseMatrix
 		return otherValues.size() == myValues.size();
 	}
 	
-	public static boolean coordinateEntryListsEqual(final ImmutableMap<IntCoordinates, Double> myValues,
-	                                                final ImmutableMap<IntCoordinates, Double> otherValues,
-	                                                final double absmax)
+	public static boolean coordinateEntryListsNotEqual(final ImmutableMap<IntCoordinates, Double> values1,
+	                                                   final ImmutableMap<IntCoordinates, Double> values2,
+	                                                   final double absmax)
 	{
-		for (final Map.Entry<IntCoordinates, Double> entry : myValues.entrySet())
+		final Map<IntCoordinates, Double> vals = new HashMap<>(values1);
+		values2.forEach((coord, subtractedValue) ->
+			                vals.put(coord,
+			                         vals.getOrDefault(coord, 0.0) - subtractedValue));
+		if (vals.values()
+		        .stream()
+		        .allMatch(value -> DoubleCompare.almostEqualAfterOps(0, value, absmax,
+		                                                             values1.size() + values2.size())))
+			return false;
+		else
 		{
-			if (otherValues.containsKey(entry.getKey()))
-			{
-				if (!DoubleCompare.almostEqualAfterOps(entry.getValue(),
-				                                       otherValues.get(entry.getKey()),
-				                                       absmax * 10,
-				                                       myValues.size() + otherValues.size()))
-				{
-					System.out.println(entry.getValue() + " != " + otherValues.get(entry.getKey()) +
-						                   " difference: " + Math.abs(
-						entry.getValue() - otherValues.get(entry.getKey())) + " at " +
-						                   entry.getKey());
-					return true;
-				}
-			} else
-			{
-				System.out.println("Value at" + entry.getKey() + " was not found in second matrix");
-				return true;
-			}
+			vals.entrySet()
+			    .stream()
+			    .filter(e -> !DoubleCompare.almostEqualAfterOps(0, e.getValue(), absmax,
+			                                                    values1.size() + values2.size()))
+			    .forEach(e -> System.out.println("position: " + e.getKey()
+				                                     + " value1: " + values1.getOrDefault(e.getKey(),
+				                                                                          0.0)
+				                                     + " value2: " + values2.getOrDefault(e.getKey(),
+				                                                                          0.0)));
+			return true;
 		}
-		return false;
 	}
 	
 	@Override

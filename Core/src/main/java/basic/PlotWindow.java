@@ -32,7 +32,7 @@ public class PlotWindow
 		add(canvas, BorderLayout.CENTER);
 		pan.setLayout(new BorderLayout());
 		pan.add(slider, BorderLayout.CENTER);
-		pan.add(overlay, BorderLayout.EAST);
+		//pan.add(overlay, BorderLayout.EAST);
 		add(pan, BorderLayout.NORTH);
 		pan.setFocusable(true);
 		this.setFocusable(true);

@@ -2,8 +2,11 @@ package basic;
 
 import linalg.DenseMatrix;
 import linalg.DenseVector;
-import linalg.VectorMultiplyable;
+import linalg.Matrix;
+import linalg.MutableVector;
 import scala.Function2;
+
+import java.util.function.BiConsumer;
 
 public abstract class FullyImplicitParabolicIntegrator
 {
@@ -37,24 +40,27 @@ public abstract class FullyImplicitParabolicIntegrator
 	
 	private void timeStep()
 	{
-		final VectorMultiplyable oneDerivOp = getSingleDerivativeOperator();
-		final VectorMultiplyable zeroDerivOp = getNoDerivativeOperator();
-		final VectorMultiplyable implicitOperator
+		final Matrix oneDerivOp = getSingleDerivativeOperator();
+		final Matrix zeroDerivOp = getNoDerivativeOperator();
+		final Matrix implicitOperator
 			= oneDerivOp.mul((1. / dt))
-			            .addVm(zeroDerivOp);
+			            .add(zeroDerivOp);
 		final DenseVector rhs = getAdditionalRhs();
 		rhs.addInPlace(oneDerivOp.mvMul(currentIterate)
 		                         .mul(1.0 / (dt)));
+		boundaryApplier().accept(implicitOperator, rhs);
 		currentIterate = getSolver().apply(implicitOperator, rhs);
 	}
 	
+	protected abstract BiConsumer<Matrix, MutableVector> boundaryApplier();
+	
 	protected abstract DenseVector getAdditionalRhs();
 	
-	protected abstract VectorMultiplyable getSingleDerivativeOperator();
+	protected abstract Matrix getSingleDerivativeOperator();
 	
-	protected abstract VectorMultiplyable getNoDerivativeOperator();
+	protected abstract Matrix getNoDerivativeOperator();
 	
-	protected abstract Function2<VectorMultiplyable, DenseVector, DenseVector> getSolver();
+	protected abstract Function2<Matrix, DenseVector, DenseVector> getSolver();
 	
 	protected abstract void postIterationCallback();
 }

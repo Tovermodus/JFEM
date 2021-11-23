@@ -146,7 +146,7 @@ public class DLMSummary
 		inverseBlocks.put(new IntCoordinates(nEulerVelocities, nEulerVelocities),
 		                  SparseMatrix.identity(nEulerian - nEulerVelocities));
 		System.out.println(nLagrangian + nTransfer);
-		final BlockSparseMatrix precondInverse = new BlockSparseMatrix(inverseBlocks);
+		final BlockSparseMatrix precondInverse = new BlockSparseMatrix(inverseBlocks, precond.getShape());
 		System.out.println("created preconditioner");
 		int i;
 		for (i = 1; i < timeSteps && interruptor.isRunning(); i++)

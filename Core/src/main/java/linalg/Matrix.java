@@ -43,10 +43,26 @@ public interface Matrix
 	default SparseMatrix slice(final IntCoordinates start, final IntCoordinates end)
 	{
 		final SparseMatrix ret = new SparseMatrix(end.get(0) - start.get(0), end.get(1) - start.get(1));
-		for (final IntCoordinates c : new IntCoordinates.Range(start, end))
-		{
-			ret.set(at(c), c.sub(start));
-		}
+		if (isSparse())
+			getCoordinateEntryList().entrySet()
+			                        .stream()
+			                        .filter(e ->
+			                                {
+				                                final IntCoordinates local = e.getKey()
+				                                                              .sub(start);
+				                                final IntCoordinates localInv = end.sub(e.getKey());
+				                                return local.get(0) >= 0 && local.get(1) >= 0 && localInv.get(
+					                                0) >= 0 && localInv.get(
+					                                1) >= 0;
+			                                })
+			                        .forEach(e -> ret.add(e.getValue(),
+			                                              e.getKey()
+			                                               .sub(start)));
+		else
+			for (final IntCoordinates c : new IntCoordinates.Range(start, end))
+			{
+				ret.set(at(c), c.sub(start));
+			}
 		return ret;
 	}
 	

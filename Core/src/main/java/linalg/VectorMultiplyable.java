@@ -48,7 +48,7 @@ public interface VectorMultiplyable
 		};
 	}
 	
-	default VectorMultiplyable mul(final double scalar)
+	default VectorMultiplyable mulVm(final double scalar)
 	{
 		final VectorMultiplyable me = this;
 		return new VectorMultiplyable()

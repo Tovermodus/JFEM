@@ -10,7 +10,8 @@ import linalg.Matrix;
 import java.awt.*;
 import java.util.List;
 
-public class DistortedOverlay extends Overlay
+public class DistortedOverlay
+	extends Overlay
 {
 	private final DistortedVectorSpace space;
 	private final Matrix displacementHistory;
@@ -21,14 +22,21 @@ public class DistortedOverlay extends Overlay
 	List<Tuple2<DistortedCell, CoordinateVector>> refPoints;
 	final DistortedVectorFESpaceFunction X;
 	
-	public DistortedOverlay(final List<CoordinateVector> backGroundPoints, final DistortedVectorSpace space, final Matrix displacementHistory, final int pointsPerCell)
+	public DistortedOverlay(final List<CoordinateVector> backGroundPoints,
+	                        final DistortedVectorSpace space,
+	                        final Matrix displacementHistory,
+	                        final int pointsPerCell)
 	{
+		if (displacementHistory.getCols() != space.getShapeFunctions()
+		                                          .size())
+			throw new IllegalArgumentException("displacement history has wrong dimensions");
 		this.space = space;
 		this.displacementHistory = displacementHistory;
-		System.out.println("displacemantHist " + displacementHistory);
+		//System.out.println("displacemantHist " + displacementHistory);
 		max = ScalarPlot2D.getMaxCoordinates(backGroundPoints);
 		min = ScalarPlot2D.getMinCoordinates(backGroundPoints);
-		this.pointsPerCell = pointsPerCell * space.getCells().size();
+		this.pointsPerCell = pointsPerCell * space.getCells()
+		                                          .size();
 		X = new DistortedVectorFESpaceFunction(space.getShapeFunctions(),
 		                                       displacementHistory.getRow(0));
 		refPoints = space.generateReferencePlotPoints(this.pointsPerCell);
@@ -46,11 +54,17 @@ public class DistortedOverlay extends Overlay
 		final int time =
 			(int) (displacementHistory.getRows() * slider * 0.999) % displacementHistory.getRows();
 		if (time != prevTime)
+		{
 			X.resetCoefficients(space.getShapeFunctions(), displacementHistory.getRow(time));
+			prevTime = time;
+		}
 		int i = 0;
 		for (final Tuple2<DistortedCell, CoordinateVector> cp : refPoints)
 		{
-			ScalarPlot2D.drawSinglePointGreen(g, width, height, X.valueOnReferenceCell(cp._2, cp._1),
+			ScalarPlot2D.drawSinglePointGreen(g, width, height,
+			                                  cp._1.transformFromReferenceCell(cp._2)
+			                                       .add(X.valueOnReferenceCell(cp._2,
+			                                                                   cp._1)),
 			                                  (i++ % pointsPerCell * 3.3) % 100, 0,
 			                                  100, min, max, pixelSize, pixelSize);
 		}

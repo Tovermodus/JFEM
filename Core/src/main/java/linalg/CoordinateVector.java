@@ -7,6 +7,9 @@ public class CoordinateVector
 	extends DenseVector
 	implements Comparable<CoordinateVector>
 {
+	private static final CoordinateVector unit21 = CoordinateVector.fromValues(1, 0);
+	private static final CoordinateVector unit22 = CoordinateVector.fromValues(0, 1);
+	
 	public CoordinateVector(final Vector v)
 	{
 		super(v);
@@ -28,6 +31,12 @@ public class CoordinateVector
 	
 	public static CoordinateVector getUnitVector(final int d, final int index)
 	{
+		if (d == 2)
+		{
+			if (index == 0)
+				return unit21;
+			else return unit22;
+		}
 		final CoordinateVector ret = new CoordinateVector(d);
 		ret.set(1, index);
 		return ret;

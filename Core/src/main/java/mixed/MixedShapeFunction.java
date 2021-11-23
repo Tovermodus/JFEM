@@ -51,6 +51,21 @@ public interface MixedShapeFunction<CT extends Cell<CT, FT>, FT extends Face<CT,
 	}
 	
 	@Override
+	MixedValue valueInCell(CoordinateVector pos, CT cell);
+	
+	@Override
+	default MixedGradient gradientInCell(final CoordinateVector pos, final CT cell)
+	{
+		return ShapeFunction.super.gradientInCell(pos, cell);
+	}
+	
+	@Override
+	default MixedHessian hessianInCell(final CoordinateVector pos, final CT cell)
+	{
+		return ShapeFunction.super.hessianInCell(pos, cell);
+	}
+	
+	@Override
 	default MixedValue jumpInValue(final FT face, final CoordinateVector pos)
 	{
 		return valueInCell(pos, face.getNormalUpstreamCell())

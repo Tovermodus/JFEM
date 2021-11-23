@@ -27,7 +27,7 @@ public class DenseVector
 	public DenseVector(final Vector vect)
 	{
 		entries = new double[vect.getLength()];
-		for (int i = 0; i < vect.getLength(); i++)
+		for (int i = 0; i < entries.length; i++)
 		{
 			entries[i] = vect.at(i);
 		}
@@ -258,7 +258,7 @@ public class DenseVector
 		return ret;
 	}
 	
-	public void addSmallVectorAt(final DenseVector small, final int... coordinates)
+	public void addSmallVectorAt(final Vector small, final int... coordinates)
 	{
 		if (PerformanceArguments.getInstance().executeChecks)
 		{

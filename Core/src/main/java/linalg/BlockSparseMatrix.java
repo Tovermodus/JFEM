@@ -6,9 +6,8 @@ import basic.PerformanceArguments;
 import com.google.common.collect.ImmutableMap;
 import io.vavr.Tuple2;
 
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
@@ -59,34 +58,65 @@ public class BlockSparseMatrix
 		{
 			newBlocks.put(blockNumber.concatenate(blockStarts), getBlockMatrix(blockNumber));
 		}
-		return new BlockSparseMatrix(newBlocks);
+		return new BlockSparseMatrix(newBlocks, this.shape);
 	}
 	
 	final private ImmutableMap<IntCoordinates, SparseMatrix> blocks;
 	final private int[] blockStarts;
 	final private int[] blockEnds;
+	final IntCoordinates shape;
 	
-	public BlockSparseMatrix(final Map<IntCoordinates, SparseMatrix> blocks)
+	public BlockSparseMatrix(final Map<IntCoordinates, SparseMatrix> blocks, final int rows, final int cols)
 	{
+		this(blocks, new IntCoordinates(rows, cols));
+	}
+	
+	public BlockSparseMatrix(final Map<IntCoordinates, SparseMatrix> blocks, final IntCoordinates shape)
+	{
+		this.shape = shape;
 		this.blocks = ImmutableMap.copyOf(blocks);
-		blockStarts = blocks.keySet()
-		                    .stream()
-		                    .mapToInt(c -> c.get(0))
-		                    .distinct()
-		                    .sorted()
-		                    .toArray();
-		blockEnds = new int[blockStarts.length];
-		if (blockEnds.length - 1 >= 0) System.arraycopy(blockStarts, 1, blockEnds, 0, blockEnds.length - 1);
-		final IntCoordinates lastStart = new IntCoordinates(blockStarts[blockStarts.length - 1],
-		                                                    blockStarts[blockStarts.length - 1]);
-		blockEnds[blockEnds.length - 1] = lastStart.add(blocks.get(lastStart)
-		                                                      .getShape())
-		                                           .get(0);
+		final List<Tuple2<Integer, Integer>> blockStartSizes
+			= blocks.keySet()
+			        .stream()
+			        .flatMap((Function<IntCoordinates, Stream<Tuple2<Integer, Integer>>>) coords ->
+			        {
+				        final List<Tuple2<Integer, Integer>> startSizes = new ArrayList<>();
+				        startSizes.add(new Tuple2<>(coords.get(0),
+				                                    blocks.get(coords)
+				                                          .getRows()));
+				        startSizes.add(new Tuple2<>(coords.get(1),
+				                                    blocks.get(coords)
+				                                          .getCols()));
+				        return startSizes.stream();
+			        })
+			        .distinct()
+			        .collect(Collectors.toList());
+		checkForBadBlocks(blockStartSizes);
+		blockStarts = new int[blockStartSizes.size()];
+		blockEnds = new int[blockStartSizes.size()];
+		blockStartSizes.sort(Comparator.comparingInt(t -> t._1));
+		for (int i = 0; i < blockStartSizes.size(); i++)
+		{
+			blockStarts[i] = blockStartSizes.get(i)._1;
+			blockEnds[i] = blockStartSizes.get(i)._1 + blockStartSizes.get(i)._2;
+		}
 		blocks.forEach(this::checkIfBlockFits);
+	}
+	
+	private static void checkForBadBlocks(final List<Tuple2<Integer, Integer>> blockStartSizes)
+	{
+		final Map<Integer, Integer> startSizesMap = new TreeMap<>();
+		for (final Tuple2<Integer, Integer> tuple : blockStartSizes)
+		{
+			if (startSizesMap.containsKey(tuple._1))
+				throw new IllegalArgumentException("Blocks do not fit on grid");
+			startSizesMap.put(tuple._1, tuple._2);
+		}
 	}
 	
 	public BlockSparseMatrix(final BlockSparseMatrix s)
 	{
+		this.shape = s.getShape();
 		blockStarts = s.getBlockStarts();
 		blockEnds = s.getBlockEnds();
 		blocks = ImmutableMap.copyOf(s.getBlocks()
@@ -116,6 +146,7 @@ public class BlockSparseMatrix
 			if (s.getRows() != s.getCols())
 				throw new IllegalArgumentException("Must be square");
 		}
+		this.shape = s.getShape();
 		this.blockStarts = blockStarts;
 		blockEnds = new int[blockStarts.length];
 		if (blockEnds.length - 1 >= 0) System.arraycopy(blockStarts, 1, blockEnds, 0, blockEnds.length - 1);
@@ -132,7 +163,10 @@ public class BlockSparseMatrix
 		{
 			final IntCoordinates block = getBlock(entry.getKey()
 			                                           .asArray());
-			final IntCoordinates blockStart = block.concatenate(blockStarts);
+			final IntCoordinates blockStart;
+			if (block != null)
+				blockStart = block.concatenate(blockStarts);
+			else throw new IllegalStateException("first start is not 0");
 			if (!mutableBlocks.containsKey(blockStart))
 				mutableBlocks.put(blockStart,
 				                  new SparseMatrix(block.concatenate(blockEnds)
@@ -185,7 +219,10 @@ public class BlockSparseMatrix
 				throw new IllegalArgumentException("x coordinate out of bounds");
 		}
 		final IntCoordinates blockCoords = getBlock(coordinates);
-		final SparseMatrix block = blocks.get(blockCoords.concatenate(blockStarts));
+		final SparseMatrix block;
+		if (blockCoords != null)
+			block = blocks.get(blockCoords.concatenate(blockStarts));
+		else block = null;
 		if (block == null)
 			return 0;
 		else
@@ -196,15 +233,17 @@ public class BlockSparseMatrix
 	private IntCoordinates getBlock(final int... coordinates)
 	{
 		
-		int blockY = 0;
-		int blockX = 0;
+		int blockY = -1;
+		int blockX = -1;
 		for (int i = 0; i < blockStarts.length; i++)
 		{
-			if (coordinates[0] >= blockStarts[i])
+			if (coordinates[0] >= blockStarts[i] && blockEnds[i] > coordinates[0])
 				blockY = i;
-			if (coordinates[1] >= blockStarts[i])
+			if (coordinates[1] >= blockStarts[i] && blockEnds[i] > coordinates[1])
 				blockX = i;
 		}
+		if (blockX == -1 || blockY == -1)
+			return null;
 		return new IntCoordinates(blockY, blockX);
 	}
 	
@@ -232,7 +271,7 @@ public class BlockSparseMatrix
 		for (final Map.Entry<IntCoordinates, SparseMatrix> entry : blocks.entrySet())
 			ret.put(entry.getKey(), entry.getValue()
 			                             .mul(scalar));
-		return new BlockSparseMatrix(ret);
+		return new BlockSparseMatrix(ret, this.shape);
 	}
 	
 	@Override
@@ -261,19 +300,7 @@ public class BlockSparseMatrix
 	public IntCoordinates getShape()
 	{
 		
-		return new IntCoordinates(blockEnds[blockEnds.length - 1], blockEnds[blockEnds.length - 1]);
-	}
-	
-	@Override
-	public int getRows()
-	{
-		return blockEnds[blockEnds.length - 1];
-	}
-	
-	@Override
-	public int getCols()
-	{
-		return blockEnds[blockEnds.length - 1];
+		return shape;
 	}
 	
 	@Override
@@ -289,7 +316,7 @@ public class BlockSparseMatrix
 		final ImmutableMap<IntCoordinates, Double> myValues = getCoordinateEntryList();
 		final ImmutableMap<IntCoordinates, Double> otherValues = other.getCoordinateEntryList();
 		final double absmax = absMaxElement() + other.absMaxElement();
-		if (SparseMatrix.coordinateEntryListsEqual(myValues, otherValues, absmax)) return false;
+		if (SparseMatrix.coordinateEntryListsNotEqual(myValues, otherValues, absmax)) return false;
 		if (otherValues.size() != myValues.size())
 		{
 			if (DoubleCompare.almostEqualAfterOps(0,
@@ -314,7 +341,7 @@ public class BlockSparseMatrix
 			                                              .get(0)),
 			        entry.getValue()
 			             .transpose());
-		return new BlockSparseMatrix(ret);
+		return new BlockSparseMatrix(ret, this.shape);
 	}
 	
 	@Override
@@ -416,15 +443,15 @@ public class BlockSparseMatrix
 			.stream();
 		if (PerformanceArguments.getInstance().parallelizeThreads)
 			str = str.parallel();
-		return ImmutableMap.copyOf(str.flatMap(block_entry -> block_entry.getValue()
-		                                                                 .getCoordinateEntryList()
-		                                                                 .entrySet()
-		                                                                 .stream()
-		                                                                 .map(coordinate_entry -> new Tuple2<>(
-			                                                                 block_entry.getKey()
-			                                                                            .add(coordinate_entry
-				                                                                                 .getKey()),
-			                                                                 coordinate_entry.getValue())))
+		return ImmutableMap.copyOf(str.flatMap(block_entry ->
+			                                       block_entry.getValue()
+			                                                  .getCoordinateEntryList()
+			                                                  .entrySet()
+			                                                  .stream()
+			                                                  .map(coordinate_entry -> new Tuple2<>(
+				                                                  block_entry.getKey()
+				                                                             .add(coordinate_entry.getKey()),
+				                                                  coordinate_entry.getValue())))
 		                              .collect(new MapCollector<>()));
 	}
 }

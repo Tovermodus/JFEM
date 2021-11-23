@@ -32,14 +32,14 @@ public class BlockSparseMatrixTest
 		      .add(3, 0, 2);
 		blocks.get(new IntCoordinates(4, 0))
 		      .add(3, 1, 3);
-		return new BlockSparseMatrix(blocks);
+		return new BlockSparseMatrix(blocks, 6, 6);
 	}
 	
 	private static BlockSparseMatrix createMediumMatrix()
 	{
 		final Map<IntCoordinates, SparseMatrix> blocks = new HashMap<>();
 		blocks.put(new IntCoordinates(0, 0), new SparseMatrix(100, 100));
-		final BlockSparseMatrix m = new BlockSparseMatrix(blocks);
+		final BlockSparseMatrix m = new BlockSparseMatrix(blocks, 100, 100);
 		for (int i = 0; i < 100 * 100; i++)
 			blocks.get(new IntCoordinates(0, 0))
 			      .add(2.3 * i, i / 100, i % 100);
@@ -62,7 +62,23 @@ public class BlockSparseMatrixTest
 					if (generator.nextDouble() < 0.05)
 						s.add(generator.nextDouble() - 0.7, i, j);
 		}
-		return new BlockSparseMatrix(blocks);
+		return new BlockSparseMatrix(blocks, 300, 300);
+	}
+	
+	private static BlockSparseMatrix createLargeMatrixNotFull()
+	{
+		
+		final Map<IntCoordinates, SparseMatrix> blocks = new HashMap<>();
+		blocks.put(new IntCoordinates(20, 100), new SparseMatrix(30, 30));
+		final Random generator = new Random(3145);
+		for (final SparseMatrix s : blocks.values())
+		{
+			for (int i = 0; i < s.getRows(); i++)
+				for (int j = 0; j < s.getCols(); j++)
+					if (generator.nextDouble() < 0.05)
+						s.add(generator.nextDouble() - 0.7, i, j);
+		}
+		return new BlockSparseMatrix(blocks, 300, 300);
 	}
 	
 	private static BlockSparseMatrix createSmallMatrix2()
@@ -86,7 +102,7 @@ public class BlockSparseMatrixTest
 		      .add(8, 2, 0);
 		blocks.get(new IntCoordinates(2, 0))
 		      .add(8, 1, 1);
-		return new BlockSparseMatrix(blocks);
+		return new BlockSparseMatrix(blocks, 6, 6);
 	}
 	
 	private static BlockSparseMatrix createMediumMatrix2()
@@ -105,7 +121,7 @@ public class BlockSparseMatrixTest
 				for (int j = 0; j < s.getCols(); j++)
 					s.add(generator.nextDouble(), i, j);
 		}
-		return new BlockSparseMatrix(blocks);
+		return new BlockSparseMatrix(blocks, 100, 100);
 	}
 	
 	private static BlockSparseMatrix createLargeMatrix2()
@@ -124,7 +140,7 @@ public class BlockSparseMatrixTest
 					if (generator.nextDouble() < 0.05)
 						s.add(generator.nextDouble() * 1e7, i, j);
 		}
-		return new BlockSparseMatrix(blocks);
+		return new BlockSparseMatrix(blocks, 300, 300);
 	}
 	
 	@Test
@@ -154,6 +170,13 @@ public class BlockSparseMatrixTest
 		assertEquals(s, new BlockSparseMatrix(s, 20));
 		assertEquals(s, new BlockSparseMatrix(s, 29));
 		s = createLargeMatrix2().toSparse();
+		assertEquals(s, new BlockSparseMatrix(s, 1));
+		assertEquals(s, new BlockSparseMatrix(s, 2));
+		assertEquals(s, new BlockSparseMatrix(s, 3));
+		assertEquals(s, new BlockSparseMatrix(s, 8));
+		assertEquals(s, new BlockSparseMatrix(s, 20));
+		assertEquals(s, new BlockSparseMatrix(s, 29));
+		s = createLargeMatrixNotFull().toSparse();
 		assertEquals(s, new BlockSparseMatrix(s, 1));
 		assertEquals(s, new BlockSparseMatrix(s, 2));
 		assertEquals(s, new BlockSparseMatrix(s, 3));
@@ -196,6 +219,8 @@ public class BlockSparseMatrixTest
 	public void testAdd()
 	{
 		final BlockSparseMatrix large = createLargeMatrix();
+		final BlockSparseMatrix large2 = createLargeMatrix2();
+		final BlockSparseMatrix largeNotFull = createLargeMatrixNotFull();
 		assertEquals(createSmallMatrix().add(createSmallMatrix()),
 		             createSmallMatrix().toSparse()
 		                                .add(createSmallMatrix().toSparse()));
@@ -246,15 +271,37 @@ public class BlockSparseMatrixTest
 		             createMediumMatrix2().toSparse()
 		                                  .add(createMediumMatrix()));
 		
-		assertEquals(createLargeMatrix2().add(large),
-		             createLargeMatrix2().toSparse()
-		                                 .add(large.toSparse()));
-		assertEquals(createLargeMatrix2().add(large.toSparse()),
-		             createLargeMatrix2().toSparse()
-		                                 .add(large.toSparse()));
-		assertEquals(createLargeMatrix2().add(large),
-		             createLargeMatrix2().toSparse()
-		                                 .add(large));
+		assertEquals(large2.add(large),
+		             large2.toSparse()
+		                   .add(large.toSparse()));
+		assertEquals(large2.add(large.toSparse()),
+		             large2.toSparse()
+		                   .add(large.toSparse()));
+		assertEquals(large2.add(large),
+		             large2.toSparse()
+		                   .add(large));
+		
+		assertEquals(largeNotFull.add(large),
+		             largeNotFull.toSparse()
+		                         .add(large.toSparse()));
+		assertEquals(largeNotFull.add(large.toSparse()),
+		             largeNotFull.toSparse()
+		                         .add(large.toSparse()));
+		assertEquals(largeNotFull.add(large),
+		             largeNotFull.toSparse()
+		                         .add(large));
+	}
+	
+	@Test
+	public void testAtNotFull()
+	{
+		final BlockSparseMatrix largeNotFull = createLargeMatrixNotFull();
+		final SparseMatrix largeNotFullSparse = largeNotFull.toSparse();
+		for (final IntCoordinates c : largeNotFull.getShape()
+		                                          .range())
+		{
+			assertEquals(largeNotFull.at(c), largeNotFullSparse.at(c), 1e-15);
+		}
 	}
 	
 	@Test
@@ -280,6 +327,14 @@ public class BlockSparseMatrixTest
 		             createLargeMatrix().toSparse()
 		                                .mul(3));
 		assertEquals(createLargeMatrix().add(createLargeMatrix()), createLargeMatrix().mul(2));
+		
+		assertEquals(createLargeMatrixNotFull().mul(1), createLargeMatrixNotFull());
+		assertEquals(createLargeMatrixNotFull().mul(3.876)
+		                                       .toSparse(),
+		             createLargeMatrixNotFull().toSparse()
+		                                       .mul(3.876));
+		assertEquals(createLargeMatrixNotFull().add(createLargeMatrixNotFull()),
+		             createLargeMatrixNotFull().mul(2));
 	}
 	
 	@Test
@@ -386,6 +441,9 @@ public class BlockSparseMatrixTest
 		assertEquals(createLargeMatrix2().mvMul(large),
 		             createLargeMatrix2().toSparse()
 		                                 .mvMul(large));
+		assertEquals(createLargeMatrixNotFull().mvMul(large),
+		             createLargeMatrixNotFull().toSparse()
+		                                       .mvMul(large));
 	}
 	
 	@Test
@@ -420,6 +478,9 @@ public class BlockSparseMatrixTest
 		assertEquals(createLargeMatrix2().tvMul(large),
 		             createLargeMatrix2().toSparse()
 		                                 .tvMul(large));
+		assertEquals(createLargeMatrixNotFull().tvMul(large),
+		             createLargeMatrixNotFull().toSparse()
+		                                       .tvMul(large));
 	}
 	
 	@Test
@@ -447,6 +508,7 @@ public class BlockSparseMatrixTest
 		final BlockSparseMatrix large = createLargeMatrix();
 		final SparseMatrix largeSp = large.toSparse();
 		final BlockSparseMatrix large2 = createLargeMatrix2();
+		final BlockSparseMatrix largeNotFull = createLargeMatrix2();
 		assertEquals(large.mmMul(large),
 		             largeSp
 			             .mmMul(largeSp));
@@ -486,5 +548,15 @@ public class BlockSparseMatrixTest
 		assertEquals(large2.mmMul(large),
 		             large2.toSparse()
 		                   .mmMul(large));
+		
+		assertEquals(largeNotFull.mmMul(large),
+		             largeNotFull.toSparse()
+		                         .mmMul(largeSp));
+		assertEquals(largeNotFull.mmMul(largeSp),
+		             largeNotFull.toSparse()
+		                         .mmMul(largeSp));
+		assertEquals(largeNotFull.mmMul(large),
+		             largeNotFull.toSparse()
+		                         .mmMul(large));
 	}
 }

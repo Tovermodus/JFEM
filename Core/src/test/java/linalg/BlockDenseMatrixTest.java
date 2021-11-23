@@ -32,14 +32,14 @@ public class BlockDenseMatrixTest
 		      .add(3, 0, 2);
 		blocks.get(new IntCoordinates(4, 0))
 		      .add(3, 1, 3);
-		return new BlockDenseMatrix(blocks);
+		return new BlockDenseMatrix(blocks, 6, 6);
 	}
 	
 	private static BlockDenseMatrix createMediumMatrix()
 	{
 		final Map<IntCoordinates, DenseMatrix> blocks = new HashMap<>();
 		blocks.put(new IntCoordinates(0, 0), new DenseMatrix(100, 100));
-		final BlockDenseMatrix m = new BlockDenseMatrix(blocks);
+		final BlockDenseMatrix m = new BlockDenseMatrix(blocks, 100, 100);
 		for (int i = 0; i < 100 * 100; i++)
 			blocks.get(new IntCoordinates(0, 0))
 			      .add(2.3 * i, i / 100, i % 100);
@@ -62,7 +62,23 @@ public class BlockDenseMatrixTest
 					if (generator.nextDouble() < 0.05)
 						s.add(generator.nextDouble() - 0.7, i, j);
 		}
-		return new BlockDenseMatrix(blocks);
+		return new BlockDenseMatrix(blocks, 300, 300);
+	}
+	
+	private static BlockDenseMatrix createLargeMatrixNotFull()
+	{
+		
+		final Map<IntCoordinates, DenseMatrix> blocks = new HashMap<>();
+		blocks.put(new IntCoordinates(20, 100), new DenseMatrix(30, 30));
+		final Random generator = new Random(31415);
+		for (final DenseMatrix s : blocks.values())
+		{
+			for (int i = 0; i < s.getRows(); i++)
+				for (int j = 0; j < s.getCols(); j++)
+					if (generator.nextDouble() < 0.05)
+						s.add(generator.nextDouble() - 0.7, i, j);
+		}
+		return new BlockDenseMatrix(blocks, 300, 300);
 	}
 	
 	private static BlockDenseMatrix createSmallMatrix2()
@@ -86,7 +102,7 @@ public class BlockDenseMatrixTest
 		      .add(8, 2, 0);
 		blocks.get(new IntCoordinates(2, 0))
 		      .add(8, 1, 1);
-		return new BlockDenseMatrix(blocks);
+		return new BlockDenseMatrix(blocks, 6, 6);
 	}
 	
 	private static BlockDenseMatrix createMediumMatrix2()
@@ -105,7 +121,7 @@ public class BlockDenseMatrixTest
 				for (int j = 0; j < s.getCols(); j++)
 					s.add(generator.nextDouble(), i, j);
 		}
-		return new BlockDenseMatrix(blocks);
+		return new BlockDenseMatrix(blocks, 100, 100);
 	}
 	
 	private static BlockDenseMatrix createLargeMatrix2()
@@ -124,7 +140,7 @@ public class BlockDenseMatrixTest
 					if (generator.nextDouble() < 0.05)
 						s.add(generator.nextDouble() * 1e7, i, j);
 		}
-		return new BlockDenseMatrix(blocks);
+		return new BlockDenseMatrix(blocks, 300, 300);
 	}
 	
 	@Test
@@ -283,6 +299,18 @@ public class BlockDenseMatrixTest
 	}
 	
 	@Test
+	public void testAtNotFull()
+	{
+		final BlockDenseMatrix largeNotFull = createLargeMatrixNotFull();
+		final DenseMatrix largeNotFullSparse = largeNotFull.toDense();
+		for (final IntCoordinates c : largeNotFull.getShape()
+		                                          .range())
+		{
+			assertEquals(largeNotFull.at(c), largeNotFullSparse.at(c), 1e-15);
+		}
+	}
+	
+	@Test
 	public void testToDense()
 	{
 		final DenseMatrix small = new DenseMatrix(6, 6);
@@ -386,6 +414,9 @@ public class BlockDenseMatrixTest
 		assertEquals(createLargeMatrix2().mvMul(large),
 		             createLargeMatrix2().toDense()
 		                                 .mvMul(large));
+		assertEquals(createLargeMatrixNotFull().mvMul(large),
+		             createLargeMatrixNotFull().toDense()
+		                                       .mvMul(large));
 	}
 	
 	@Test
@@ -420,6 +451,9 @@ public class BlockDenseMatrixTest
 		assertEquals(createLargeMatrix2().tvMul(large),
 		             createLargeMatrix2().toDense()
 		                                 .tvMul(large));
+		assertEquals(createLargeMatrixNotFull().tvMul(large),
+		             createLargeMatrixNotFull().toDense()
+		                                       .tvMul(large));
 	}
 	
 	@Test
@@ -486,5 +520,8 @@ public class BlockDenseMatrixTest
 		assertEquals(large2.mmMul(large),
 		             large2.toDense()
 		                   .mmMul(large));
+		assertEquals(createLargeMatrixNotFull().mmMul(large),
+		             createLargeMatrixNotFull().toDense()
+		                                       .mmMul(large));
 	}
 }

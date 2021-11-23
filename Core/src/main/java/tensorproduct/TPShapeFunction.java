@@ -9,7 +9,6 @@ import tensorproduct.geometry.TPCell;
 import tensorproduct.geometry.TPFace;
 
 import java.util.ArrayList;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
@@ -115,11 +114,9 @@ public class TPShapeFunction
 	}
 	
 	@Override
-	public Set<TPCell> getCells()
+	public List<TPCell> getCells()
 	{
-		final Set<TPCell> ret = new HashSet<>();
-		ret.add(supportCell);
-		return ret;
+		return List.of(supportCell);
 	}
 	
 	@Override
@@ -145,20 +142,8 @@ public class TPShapeFunction
 		return globalIndex;
 	}
 	
-	public double[] fastGradientInCell(final CoordinateVector pos, final TPCell cell)
-	{
-		if (cell == null)
-			return new double[pos.getLength()];
-		if (cell.equals(supportCell))
-			return fastGradient(pos);
-		else
-			return new double[pos.getLength()];
-	}
-	
 	public double fastValue(final CoordinateVector pos)
 	{
-		if (!supportCell.isInCell(pos))
-			return 0;
 		double ret = 1;
 		for (int i = 0; i < pos.getLength(); i++)
 		{
@@ -170,39 +155,6 @@ public class TPShapeFunction
 	
 	public double[] fastGradient(final CoordinateVector pos)
 	{
-		if (!supportCell.isInCell(pos))
-			return new double[pos.getLength()];
-		final double[] ret = new double[pos.getLength()];
-		for (int i = 0; i < pos.getLength(); i++)
-		{
-			double component = 1;
-			for (int j = 0; j < pos.getLength(); j++)
-			{
-				if (i == j)
-					component *= function1Ds.get(j)
-					                        .derivative(pos.at(j));
-				else
-					component *= function1Ds.get(j)
-					                        .value(pos.at(j));
-			}
-			ret[i] = component;
-		}
-		return ret;
-	}
-	
-	public double fastValueInCell(final CoordinateVector pos)
-	{
-		double ret = 1;
-		for (int i = 0; i < pos.getLength(); i++)
-		{
-			ret *= function1Ds.get(i)
-			                  .value(pos.at(i));
-		}
-		return ret;
-	}
-	
-	public double[] fastGradientInCell(final CoordinateVector pos)
-	{
 		final double[] ret = new double[pos.getLength()];
 		for (int i = 0; i < pos.getLength(); i++)
 		{
@@ -222,13 +174,25 @@ public class TPShapeFunction
 	}
 	
 	@Override
+	public Double value(final CoordinateVector pos)
+	{
+		return fastValue(pos);
+	}
+	
+	@Override
+	public CoordinateVector gradient(final CoordinateVector pos)
+	{
+		return new CoordinateVector(fastGradient(pos));
+	}
+	
+	@Override
 	public Double valueInCell(final CoordinateVector pos, final TPCell cell)
 	{
 		if (cell == null)
 			return 0.;
 		if (cell.equals(supportCell))
 		{
-			return fastValueInCell(pos);
+			return fastValue(pos);
 		} else
 			return 0.;
 	}
@@ -240,7 +204,7 @@ public class TPShapeFunction
 			return defaultGradient();
 		if (cell.equals(supportCell))
 		{
-			return new CoordinateVector(fastGradientInCell(pos, cell));
+			return new CoordinateVector(fastGradient(pos));
 		} else
 			return defaultGradient();
 	}

@@ -1,6 +1,9 @@
 package linalg;
 
-public interface CoordinateMatrix extends Matrix
+import basic.PerformanceArguments;
+
+public interface CoordinateMatrix
+	extends Matrix
 {
 	@Override
 	CoordinateVector mvMul(final Vector vector);
@@ -39,5 +42,18 @@ public interface CoordinateMatrix extends Matrix
 				2, 1) - at(0, 0) * at(1, 2) * at(2, 1) - at(1, 0) * at(2, 2) * at(0, 1) - at(2, 0) * at(
 				0, 2) * at(1, 1);
 		throw new IllegalStateException("Dimension not allowed");
+	}
+	
+	@Override
+	default double frobeniusInner(final Matrix other)
+	{
+		if (PerformanceArguments.getInstance().executeChecks) if (!getShape().equals(other.getShape()))
+			throw new IllegalArgumentException("Incompatible sizes");
+		if (getCols() == 2 && getRows() == 2)
+			return at(0, 0) * other.at(0, 0) + at(1, 0) * other.at(1, 0) + at(0, 1) * other.at(0, 1) + at(1,
+			                                                                                              1) * other.at(
+				1,
+				1);
+		return Matrix.super.frobeniusInner(other);
 	}
 }

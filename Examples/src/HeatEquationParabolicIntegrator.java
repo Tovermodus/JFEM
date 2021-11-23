@@ -7,6 +7,7 @@ import tensorproduct.*;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.function.BiConsumer;
 
 public class HeatEquationParabolicIntegrator
 	extends FullyImplicitParabolicIntegrator
@@ -89,6 +90,14 @@ public class HeatEquationParabolicIntegrator
 	}
 	
 	@Override
+	protected BiConsumer<Matrix, MutableVector> boundaryApplier()
+	{
+		return (mat, vec) ->
+		{
+		};
+	}
+	
+	@Override
 	protected DenseVector getAdditionalRhs()
 	{
 		final DenseVector ret = new DenseVector(grid.getShapeFunctions()
@@ -98,19 +107,19 @@ public class HeatEquationParabolicIntegrator
 	}
 	
 	@Override
-	protected VectorMultiplyable getSingleDerivativeOperator()
+	protected Matrix getSingleDerivativeOperator()
 	{
 		return M;
 	}
 	
 	@Override
-	protected VectorMultiplyable getNoDerivativeOperator()
+	protected Matrix getNoDerivativeOperator()
 	{
 		return A;
 	}
 	
 	@Override
-	protected Function2<VectorMultiplyable, DenseVector, DenseVector> getSolver()
+	protected Function2<Matrix, DenseVector, DenseVector> getSolver()
 	{
 		return (A, b) -> (DenseVector) its.solveCG(A, b, 1e-6);
 	}

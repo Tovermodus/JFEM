@@ -52,6 +52,13 @@ public class CoordinateDenseMatrix
 	@Override
 	public CoordinateVector mvMul(final Vector vector)
 	{
+		if (entries.length == 2 && entries[0].length == 2)
+		{
+			final double v0 = vector.at(0);
+			final double v1 = vector.at(1);
+			return CoordinateVector.fromValues(entries[0][0] * v0 + entries[0][1] * v1,
+			                                   entries[1][0] * v0 + entries[1][1] * v1);
+		}
 		return new CoordinateVector(super.mvMul(vector));
 	}
 	

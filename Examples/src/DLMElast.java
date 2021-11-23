@@ -1,6 +1,5 @@
 import basic.*;
 import distorted.*;
-import distorted.geometry.DistortedCell;
 import linalg.*;
 import mixed.*;
 import tensorproduct.ContinuousTPShapeFunction;
@@ -34,9 +33,9 @@ public class DLMElast
 	int nEulerian;
 	int nLagrangian;
 	int nTransfer;
-	int eulerianPointsPerDimension = 40;
-	int nEulerCells = 14;
-	int nLagrangeRefines = 1;
+	int eulerianPointsPerDimension = 30;
+	int nEulerCells = 10;
+	int nLagrangeRefines = 2;
 	List<CoordinateVector> eulerianPoints;
 	private final int lagrangeDegree = 2;
 	private final int eulerDegree = 1;
@@ -50,11 +49,11 @@ public class DLMElast
 		builder.build();
 		rhoF = 1;
 		rhoS = 2;
-		lameLamb = 10;
+		lameLamb = 1;
 		lameMu = 1;
 		nu = 1;
-		dt = 0.01;
-		timeSteps = 5;
+		dt = 0.1;
+		timeSteps = 10;
 		initializeEulerian();
 		initializeLagrangian();
 		
@@ -113,25 +112,25 @@ public class DLMElast
 		final DenseMatrix rhsHistory = new DenseMatrix(timeSteps + 1, nEulerian + nLagrangian + nTransfer);
 		iterateHistory.addRow(lastIterate, 0);
 		iterateHistory.addRow(currentIterate, 1);
-		final SparseMatrix precond = new SparseMatrix(constantSystemMatrix);
-		//new DenseMatrix(precond).get
-		writeCf(precond, currentIterate);
-		final BlockSparseMatrix precondBlocks = new BlockSparseMatrix(precond, new int[]{0, nEulerian});
-		final DenseMatrix lagInverse = new BlockDenseMatrix(new DenseMatrix(precondBlocks.getBlockMatrix(1,
-		                                                                                                 1)),
-		                                                    1).getInvertedDiagonalMatrix()
-		                                                      .toDense();
-		System.out.println("laginv");
-		final DenseMatrix firstmmul = precondBlocks.getBlockMatrix(0, 1)
-		                                           .mmMul(lagInverse);
-		System.out.println("laginv");
-		final DenseMatrix secondmmul = firstmmul
-			.mmMul(precondBlocks.getBlockMatrix(1, 0));
-		System.out.println("laginv");
-		final BlockDenseMatrix schur = new BlockDenseMatrix(precondBlocks.getBlockMatrix(0, 0)
-		                                                                 .add(secondmmul),
-		                                                    4);
-		final BlockDenseMatrix schurBlockInverse = schur.getInvertedDiagonalMatrix();
+//		final SparseMatrix precond = new SparseMatrix(constantSystemMatrix);
+//		//new DenseMatrix(precond).get
+//		writeCf(precond, currentIterate);
+//		final BlockSparseMatrix precondBlocks = new BlockSparseMatrix(precond, new int[]{0, nEulerian});
+//		final DenseMatrix lagInverse = new BlockDenseMatrix(new DenseMatrix(precondBlocks.getBlockMatrix(1,
+//		                                                                                                 1)),
+//		                                                    1).getInvertedDiagonalMatrix()
+//		                                                      .toDense();
+//		System.out.println("laginv");
+//		final DenseMatrix firstmmul = precondBlocks.getBlockMatrix(0, 1)
+//		                                           .mmMul(lagInverse);
+//		System.out.println("laginv");
+//		final DenseMatrix secondmmul = firstmmul
+//			.mmMul(precondBlocks.getBlockMatrix(1, 0));
+//		System.out.println("laginv");
+//		final BlockDenseMatrix schur = new BlockDenseMatrix(precondBlocks.getBlockMatrix(0, 0)
+//		                                                                 .add(secondmmul),
+//		                                                    4);
+//		final BlockDenseMatrix schurBlockInverse = schur.getInvertedDiagonalMatrix();
 		//final DenseMatrix schurDense = schur.toDense();
 		//final DenseMatrix schurDenseInverse = schurDense.inverse();
 		//System.out.println("############");
@@ -147,58 +146,58 @@ public class DLMElast
 //		System.out.println("##########");
 //		System.out.println(schurBlockInverse.getShape() + " " + schur.getShape());
 //		System.out.println("mmul");
-		final VectorMultiplyable precondInverse = new VectorMultiplyable()
-		{
-			final IterativeSolver it = new IterativeSolver();
-			final SparseMvMul l = new SparseMvMul(precondBlocks.getBlockMatrix(0, 1));
-			final SparseMvMul inv = new SparseMvMul(lagInverse);
-			final SparseMvMul sch = new SparseMvMul(schur);
-			final SparseMvMul schInv = new SparseMvMul(schurBlockInverse);
-			final SparseMvMul r = new SparseMvMul(precondBlocks.getBlockMatrix(1, 0));
-			
-			@Override
-			public int getVectorSize()
-			{
-				return nEulerian + nLagrangian + nTransfer;
-			}
-			
-			@Override
-			public int getTVectorSize()
-			{
-				throw new UnsupportedOperationException("not implemented yet");
-			}
-			
-			@Override
-			public Vector mvMul(final Vector vector)
-			{
-				final Vector g =
-					vector.slice(0, nEulerian)
-					      .sub(l.mvMul(inv.mvMul(vector.slice(nEulerian,
-					                                          nEulerian + nLagrangian + nTransfer))));
-				
-				//it = new IterativeSolver();
-				final DenseVector eul = //new DenseVector(schurDense.mvMul(g));
-//					(DenseVector) it.solvePGMRES(sch, schInv, g,
-//					                             1e-10);
-					schInv.mvMul(g);
-				System.out.println(sch.mvMul(eul)
-				                      .sub(g)
-				                      .absMaxElement() + " subCG1");
-				final DenseVector lag = inv.mvMul(vector.slice(nEulerian,
-				                                               nEulerian + nLagrangian + nTransfer)
-				                                        .sub(r.mvMul(eul)));
-				final DenseVector ret = new DenseVector(vector.getLength());
-				ret.addSmallVectorAt(eul, 0);
-				ret.addSmallVectorAt(lag, nEulerian);
-				return ret;
-			}
-			
-			@Override
-			public Vector tvMul(final Vector vector)
-			{
-				throw new UnsupportedOperationException("not implemented yet");
-			}
-		};
+//		final VectorMultiplyable precondInverse = new VectorMultiplyable()
+//		{
+//			final IterativeSolver it = new IterativeSolver();
+//			final SparseMvMul l = new SparseMvMul(precondBlocks.getBlockMatrix(0, 1));
+//			final SparseMvMul inv = new SparseMvMul(lagInverse);
+//			final SparseMvMul sch = new SparseMvMul(schur);
+//			final SparseMvMul schInv = new SparseMvMul(schurBlockInverse);
+//			final SparseMvMul r = new SparseMvMul(precondBlocks.getBlockMatrix(1, 0));
+//
+//			@Override
+//			public int getVectorSize()
+//			{
+//				return nEulerian + nLagrangian + nTransfer;
+//			}
+//
+//			@Override
+//			public int getTVectorSize()
+//			{
+//				throw new UnsupportedOperationException("not implemented yet");
+//			}
+//
+//			@Override
+//			public Vector mvMul(final Vector vector)
+//			{
+//				final Vector g =
+//					vector.slice(0, nEulerian)
+//					      .sub(l.mvMul(inv.mvMul(vector.slice(nEulerian,
+//					                                          nEulerian + nLagrangian + nTransfer))));
+//
+//				//it = new IterativeSolver();
+//				final DenseVector eul = //new DenseVector(schurDense.mvMul(g));
+////					(DenseVector) it.solvePGMRES(sch, schInv, g,
+////					                             1e-10);
+//					schInv.mvMul(g);
+//				System.out.println(sch.mvMul(eul)
+//				                      .sub(g)
+//				                      .absMaxElement() + " subCG1");
+//				final DenseVector lag = inv.mvMul(vector.slice(nEulerian,
+//				                                               nEulerian + nLagrangian + nTransfer)
+//				                                        .sub(r.mvMul(eul)));
+//				final DenseVector ret = new DenseVector(vector.getLength());
+//				ret.addSmallVectorAt(eul, 0);
+//				ret.addSmallVectorAt(lag, nEulerian);
+//				return ret;
+//			}
+//
+//			@Override
+//			public Vector tvMul(final Vector vector)
+//			{
+//				throw new UnsupportedOperationException("not implemented yet");
+//			}
+//		};
 		System.out.println("created preconditioner");
 		int i;
 		final IterativeSolver itp = new IterativeSolver(true);
@@ -317,13 +316,13 @@ public class DLMElast
 		derivVals.putAll(getX(currentIterate.sub(lastIterate)
 		                                    .mul(1. / dt))
 			                 .valuesInPointsAtTime(eulerianPoints, (i - 1) * dt));
-		
-		final VectorFunction U_of_X = new DistortedVectorFESpaceFunction(lagrangian.getShapeFunctions(),
-		                                                                 Cf.mvMul(getEulerianfIterate(
-			                                                                 currentIterate)));
-		
-		LfXVals.putAll(U_of_X.valuesInPointsAtTime(eulerianPoints, (i - 1) * dt));
-		
+
+//		final VectorFunction U_of_X = new DistortedVectorFESpaceFunction(lagrangian.getShapeFunctions(),
+//		                                                                 Cf.mvMul(getEulerianfIterate(
+//			                                                                 currentIterate)));
+//
+//		LfXVals.putAll(U_of_X.valuesInPointsAtTime(eulerianPoints, (i - 1) * dt));
+//
 		uXvals.putAll(concatenateVelocityWithX(getUp(currentIterate), currentIterate)
 			              .valuesInPointsAtTime(eulerianPoints, (i - 1) * dt));
 	}
@@ -465,7 +464,7 @@ public class DLMElast
 	public void initializeLagrangian()
 	{
 		final CoordinateVector center = CoordinateVector.fromValues(0.5, 0.5);
-		final double radius = 0.3;
+		final double radius = 0.2;
 		lagrangian = new DistortedVectorSpace(center, radius, nLagrangeRefines);
 		lagrangian.assembleCells();
 		lagrangian.assembleFunctions(lagrangeDegree);
@@ -619,14 +618,14 @@ public class DLMElast
 				
 				        final DistortedVectorDistortedRightHandSideIntegral transferEulerian
 					        = new DistortedVectorDistortedRightHandSideIntegral(vOfX,
-					                                                            DistortedVectorDistortedRightHandSideIntegral.VALUE);
+					                                                            DistortedVectorDistortedRightHandSideIntegral.H1);
 				        final DenseVector column = new DenseVector(nTransfer);
 				        lagrangian.writeCellIntegralsToRhs(List.of(transferEulerian), column,
 				                                           (K, lambd) ->
 					                                           sf.getVelocityFunction()
 					                                             .getNodeFunctionalPoint()
 					                                             .sub(K.center())
-					                                             .euclidianNorm() < 1 + 2. / nEulerCells + lagrangian
+					                                             .euclidianNorm() < 2. / nEulerCells + lagrangian
 						                                           .getMaxDiam());
 				        Cf.addColumn(column, sfEntry.getKey());
 			        });
@@ -650,47 +649,47 @@ public class DLMElast
 	{
 		
 		final DistortedVectorFESpaceFunction X = getX(currentIterate);
-		
-		return new DistortedVectorFunction()
-		{
-			@Override
-			public CoordinateVector valueOnReferenceCell(final CoordinateVector pos,
-			                                             final DistortedCell cell)
-			{
-				return sf.getVelocityFunction()
-				         .value(X.valueOnReferenceCell(pos, cell));
-			}
-			
-			@Override
-			public CoordinateMatrix gradientOnReferenceCell(final CoordinateVector pos,
-			                                                final DistortedCell cell)
-			{
-				throw new IllegalArgumentException("askljhgd");
+		return DistortedVectorFunctionOnCells.concatenate(sf.getVelocityFunction(), X);
+//		return new DistortedVectorFunction()
+//		{
+//			@Override
+//			public CoordinateVector valueOnReferenceCell(final CoordinateVector pos,
+//			                                             final DistortedCell cell)
+//			{
+//				return sf.getVelocityFunction()
+//				         .value(X.valueOnReferenceCell(pos, cell));
+//			}
+//
+//			@Override
+//			public CoordinateMatrix gradientOnReferenceCell(final CoordinateVector pos,
+//			                                                final DistortedCell cell)
+//			{
+////				throw new IllegalArgumentException("askljhgd");
 //				return sf
 //					.getVelocityFunction()
 //					.gradient(X.valueOnReferenceCell(pos, cell))
 //					.mmMul(X.gradientOnReferenceCell(pos, cell));
-			}
-			
-			@Override
-			public int getRangeDimension()
-			{
-				return 2;
-			}
-			
-			@Override
-			public int getDomainDimension()
-			{
-				return 2;
-			}
-			
-			@Override
-			public CoordinateVector value(final CoordinateVector pos)
-			{
-				return sf.getVelocityFunction()
-				         .value(X.value(pos));
-			}
-		};
+//			}
+//
+//			@Override
+//			public int getRangeDimension()
+//			{
+//				return 2;
+//			}
+//
+//			@Override
+//			public int getDomainDimension()
+//			{
+//				return 2;
+//			}
+//
+//			@Override
+//			public CoordinateVector value(final CoordinateVector pos)
+//			{
+//				return sf.getVelocityFunction()
+//				         .value(X.value(pos));
+//			}
+//		};
 	}
 	
 	private DenseVector getLagrangianIterate(final Vector currentIterate)
@@ -718,7 +717,7 @@ public class DLMElast
 	{
 		final SparseMatrix Cs = new SparseMatrix(nTransfer, nLagrangian);
 		final DistortedVectorCellIntegral transferLagrangian
-			= new DistortedVectorCellIntegral(DistortedVectorCellIntegral.VALUE_VALUE);
+			= new DistortedVectorCellIntegral(DistortedVectorCellIntegral.H1);
 		lagrangian.writeCellIntegralsToMatrix(List.of(transferLagrangian), Cs);
 		lagrangianH1 = Cs;
 		constantMatrix.addSmallMatrixAt(Cs.mul(-1. / dt), nEulerian + nLagrangian, nEulerian);

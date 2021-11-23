@@ -3,8 +3,7 @@ package linalg;
 import basic.DoubleCompare;
 import org.junit.Test;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.*;
 
 public class SparseMatrixTest1
 {
@@ -148,6 +147,21 @@ public class SparseMatrixTest1
 			           .almostEqual(new IterativeSolver().solveCG(symmDense, largeVector, 1e-11)));
 		assertTrue(symmDense.solve(largeVector)
 		                    .almostEqual(symmDense.solveSymm(largeVector)));
+	}
+	
+	@Test
+	public void testEquals()
+	{
+		final SparseMatrix mat1 = new SparseMatrix(10, 10);
+		assertEquals(mat1, new SparseMatrix(10, 10));
+		mat1.add(1e-15, 0, 0);
+		assertEquals(mat1, new SparseMatrix(10, 10));
+		mat1.add(1e-12, 0, 0);
+		assertEquals(mat1, new SparseMatrix(10, 10));
+		assertEquals(new SparseMatrix(10, 10), mat1);
+		mat1.add(1e-9, 0, 0);
+		assertNotEquals(mat1, new SparseMatrix(10, 10));
+		assertNotEquals(new SparseMatrix(10, 10), mat1);
 	}
 	
 	@Test

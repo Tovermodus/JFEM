@@ -50,6 +50,20 @@ public class DenseMatrix
 		                                            .get(1)] = e.getValue());
 	}
 	
+	public DenseMatrix(final BlockSparseMatrix matrix)
+	{
+		entries = new double[matrix.getRows()][matrix.getCols()];
+		Stream<Map.Entry<IntCoordinates, Double>> entryStream = matrix
+			.getCoordinateEntryList()
+			.entrySet()
+			.stream();
+		if (PerformanceArguments.getInstance().parallelizeThreads) entryStream = entryStream.parallel();
+		entryStream.forEach(e -> entries[e.getKey()
+		                                  .get(0)]
+			                         [e.getKey()
+			                           .get(1)] = e.getValue());
+	}
+	
 	public DenseMatrix(final double[][] matrix)
 	{
 		entries = matrix;

@@ -58,7 +58,11 @@ public class IntCoordinates
 	{
 		final int[] concat = new int[this.getDimension()];
 		for (int i = 0; i < concat.length; i++)
+		{
+			if (get(i) < 0 || get(i) > outer.length)
+				throw new IllegalArgumentException("inner index <0 or >length");
 			concat[i] = outer[get(i)];
+		}
 		return new IntCoordinates(concat);
 	}
 	
