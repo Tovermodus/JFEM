@@ -2,10 +2,10 @@ package dlm;
 
 import basic.*;
 import com.google.common.collect.ImmutableList;
+import distorted.CircleVectorSpace;
 import distorted.DistortedVectorFESpaceFunction;
 import distorted.DistortedVectorFunctionOnCells;
 import distorted.DistortedVectorShapeFunction;
-import distorted.DistortedVectorSpace;
 import distorted.geometry.DistortedCell;
 import linalg.Vector;
 import linalg.*;
@@ -18,6 +18,7 @@ import tensorproduct.geometry.TPFace;
 
 import java.util.*;
 import java.util.function.Function;
+import java.util.function.Predicate;
 import java.util.function.ToDoubleFunction;
 
 public abstract class HyperbolicCartesianDistorted<ST extends ComposeMixedShapeFunction<TPCell, TPFace, PF, VF>,
@@ -26,7 +27,7 @@ public abstract class HyperbolicCartesianDistorted<ST extends ComposeMixedShapeF
 {
 	final public int dimension;
 	final public CartesianGridSpace<ST, MixedValue, MixedGradient, MixedHessian> backgroundSpace;
-	final public ImmutableList<DistortedVectorSpace> particleSpaces;
+	final public ImmutableList<CircleVectorSpace> particleSpaces;
 	final public BlockSparseMatrix twoDerivativeMatrix;
 	final public BlockSparseMatrix oneDerivativeMatrix;
 	final public BlockSparseMatrix zeroDerivativeMatrix;
@@ -38,7 +39,7 @@ public abstract class HyperbolicCartesianDistorted<ST extends ComposeMixedShapeF
 	public HyperbolicCartesianDistorted(final double dt,
 	                                    final int timeSteps,
 	                                    final CartesianGridSpace<ST, MixedValue, MixedGradient, MixedHessian> backgroundSpace,
-	                                    final List<DistortedVectorSpace> particleSpaces)
+	                                    final List<CircleVectorSpace> particleSpaces)
 	{
 		super(dt, timeSteps);
 		this.backgroundSpace = backgroundSpace;
@@ -53,7 +54,7 @@ public abstract class HyperbolicCartesianDistorted<ST extends ComposeMixedShapeF
 		blockStarts[2] = getnBackgroundVelocities() + getnBackgroundPressures();
 		for (int i = 3; i < 2 + 2 * particleSpaces.size(); i++)
 		{
-			final int particleId = (i - 2) / 2;
+			final int particleId = (i - 3) / 2;
 			blockStarts[i] = blockStarts[i - 1] + particleSpaces.get(particleId)
 			                                                    .getShapeFunctions()
 			                                                    .size();
@@ -67,6 +68,7 @@ public abstract class HyperbolicCartesianDistorted<ST extends ComposeMixedShapeF
 		oneDerivativeMatrix = new BlockSparseMatrix(oneDerivativeBlocks, size, size);
 		zeroDerivativeMatrix = new BlockSparseMatrix(zeroDerivativeBlocks, size, size);
 		cm = new CountMetric(getnBackgroundVelocities());
+		metricWindow.addMetric(cm);
 	}
 	
 	protected int getSystemSize()
@@ -125,7 +127,7 @@ public abstract class HyperbolicCartesianDistorted<ST extends ComposeMixedShapeF
 	                                     final Map<IntCoordinates, SparseMatrix> zeroDerivativeBlocks,
 	                                     final int particleId)
 	{
-		final DistortedVectorSpace particleSpace = particleSpaces.get(particleId);
+		final CircleVectorSpace particleSpace = particleSpaces.get(particleId);
 		final int particleBlockSize = particleSpace.getShapeFunctions()
 		                                           .size();
 		final int nBackgroundVelocities = getnBackgroundVelocities();
@@ -193,7 +195,6 @@ public abstract class HyperbolicCartesianDistorted<ST extends ComposeMixedShapeF
 		final int nRows = blockStarts[1] - blockStarts[0];
 		final SparseMatrix ret = new SparseMatrix(nRows, nCols);
 		final DistortedVectorFunctionOnCells X = getX(particleId);
-		metricWindow.addMetric(cm);
 		final int nEulerCells = (int) (Math.sqrt(backgroundSpace.getCells()
 		                                                        .size()));
 		final double diam = particleSpaces.get(particleId)
@@ -232,12 +233,13 @@ public abstract class HyperbolicCartesianDistorted<ST extends ComposeMixedShapeF
 	
 	private DistortedVectorFunctionOnCells getX(final int particleId)
 	{
-		final DistortedVectorFESpaceFunction displacement = new DistortedVectorFESpaceFunction(particleSpaces.get(
-			                                                                                               particleId)
-		                                                                                                     .getShapeFunctions(),
-		                                                                                       getParticleIterate(
-			                                                                                 currentIterate,
-			                                                                                 particleId));
+		final DistortedVectorFESpaceFunction displacement
+			= new DistortedVectorFESpaceFunction(particleSpaces.get(
+				                                                   particleId)
+			                                                   .getShapeFunctions(),
+			                                     getParticleIterate(
+				                                     currentIterate,
+				                                     particleId));
 		return new DistortedVectorFunctionOnCells()
 		{
 			@Override
@@ -247,7 +249,8 @@ public abstract class HyperbolicCartesianDistorted<ST extends ComposeMixedShapeF
 			}
 			
 			@Override
-			public CoordinateVector valueOnReferenceCell(final CoordinateVector pos, final DistortedCell cell)
+			public CoordinateVector valueOnReferenceCell(final CoordinateVector pos,
+			                                             final DistortedCell cell)
 			{
 				return cell.transformFromReferenceCell(pos)
 				           .add(displacement.valueOnReferenceCell(pos
@@ -255,7 +258,8 @@ public abstract class HyperbolicCartesianDistorted<ST extends ComposeMixedShapeF
 			}
 			
 			@Override
-			public CoordinateMatrix gradientOnReferenceCell(final CoordinateVector pos, final DistortedCell cell)
+			public CoordinateMatrix gradientOnReferenceCell(final CoordinateVector pos,
+			                                                final DistortedCell cell)
 			{
 				return CoordinateDenseMatrix.identity(2)
 				                            .add(displacement.gradientOnReferenceCell(pos
@@ -337,7 +341,7 @@ public abstract class HyperbolicCartesianDistorted<ST extends ComposeMixedShapeF
 	{
 		final VectorFunction identity = VectorFunction.fromLambda(x -> x.mul(0), dimension, dimension);
 		final DenseVector initialDisplacement
-			= new DenseVector(zeroDerivativeMatrix.getBlockSizes()[particleId + 2]);
+			= new DenseVector(zeroDerivativeMatrix.getBlockSizes()[2 * particleId + 2]);
 		particleSpaces.get(particleId)
 		              .getShapeFunctions()
 		              .forEach((key, func) -> initialDisplacement.add(func.getNodeFunctional()
@@ -405,7 +409,7 @@ public abstract class HyperbolicCartesianDistorted<ST extends ComposeMixedShapeF
 	private void addInitialParticleVelocity(final DenseVector ret, final int particleId)
 	{
 		final DenseVector initialVelocity
-			= new DenseVector(zeroDerivativeMatrix.getBlockSizes()[particleId + 2]);
+			= new DenseVector(zeroDerivativeMatrix.getBlockSizes()[2 * particleId + 2]);
 		particleSpaces.get(particleId)
 		              .getShapeFunctions()
 		              .forEach((key, func) ->
@@ -455,8 +459,9 @@ public abstract class HyperbolicCartesianDistorted<ST extends ComposeMixedShapeF
 			final DenseMatrix D = new DenseMatrix(getAllParticleMatrices(i));
 			final Matrix B = getAllBackgroundTransferMatrices(i);
 			final Matrix C = getAllBackgroundTransferTransposeMatrices(i);
-			final Matrix localMatrix = B.mmMul(D.inverse())
-			                            .mmMul(C);
+			final Matrix Dinv = D.inverse();
+			final Matrix BD = B.mmMul(Dinv);
+			final Matrix localMatrix = BD.mmMul(C);
 			ret.subInPlace(localMatrix);
 		}
 		return ret;
@@ -541,6 +546,11 @@ public abstract class HyperbolicCartesianDistorted<ST extends ComposeMixedShapeF
 	
 	abstract protected Function<CoordinateVector, CoordinateVector> velocityBoundaryValues();
 	
+	protected Predicate<TPFace> getDirichletBoundary()
+	{
+		return f -> true;
+	}
+	
 	@Override
 	protected Function2<Matrix, MutableVector, Matrix> boundaryApplier()
 	{
@@ -557,7 +567,7 @@ public abstract class HyperbolicCartesianDistorted<ST extends ComposeMixedShapeF
 				= VectorFunction.fromLambda(velocityBoundaryValues(),
 				                            2, 2);
 			backgroundSpace.writeBoundaryValuesTo(new ComposedMixedFunction(velocityBoundaryFunction),
-			                                      f -> true,
+			                                      getDirichletBoundary(),
 			                                      (f, function) -> function.hasVelocityFunction(),
 			                                      matrix,
 			                                      vec);

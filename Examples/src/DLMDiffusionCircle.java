@@ -1,8 +1,8 @@
 import basic.*;
 import com.google.common.primitives.Ints;
+import distorted.CircleSpace;
 import distorted.DistortedCellIntegral;
 import distorted.DistortedRightHandSideIntegral;
-import distorted.DistortedSpace;
 import linalg.*;
 import tensorproduct.*;
 
@@ -28,7 +28,7 @@ public class DLMDiffusionCircle
 		final ContinuousTPFESpace largeGrid = new ContinuousTPFESpace(start, end, Ints.asList(20, 20));
 		largeGrid.assembleCells();
 		largeGrid.assembleFunctions(polynomialDegree);
-		final DistortedSpace immersedGrid = new DistortedSpace(immercedCenter, immersedRadius, 3);
+		final CircleSpace immersedGrid = new CircleSpace(immercedCenter, immersedRadius, 3);
 		immersedGrid.assembleCells();
 		immersedGrid.assembleFunctions(polynomialDegree);
 		
@@ -51,8 +51,10 @@ public class DLMDiffusionCircle
 		final DistortedRightHandSideIntegral f2minfv = new DistortedRightHandSideIntegral(f2minf,
 		                                                                                  DistortedRightHandSideIntegral.VALUE);
 		
-		final int n = largeGrid.getShapeFunctions().size();
-		final int m = immersedGrid.getShapeFunctions().size();
+		final int n = largeGrid.getShapeFunctions()
+		                       .size();
+		final int m = immersedGrid.getShapeFunctions()
+		                          .size();
 		
 		final SparseMatrix A11 = new SparseMatrix(n, n);
 		final SparseMatrix A22 = new SparseMatrix(m, m);
@@ -71,13 +73,15 @@ public class DLMDiffusionCircle
 		A23.mulInPlace(-1);
 		System.out.println("A23");
 		int count = 0;
-		for (final Map.Entry<Integer, ContinuousTPShapeFunction> sf : largeGrid.getShapeFunctions().entrySet())
+		for (final Map.Entry<Integer, ContinuousTPShapeFunction> sf : largeGrid.getShapeFunctions()
+		                                                                       .entrySet())
 		{
 			final DistortedRightHandSideIntegral shapeFunctionOnImmersedGrid
 				= new DistortedRightHandSideIntegral(sf.getValue(), DistortedRightHandSideIntegral.H1);
 			final DenseVector integrals = new DenseVector(m);
 			immersedGrid.writeCellIntegralsToRhs(List.of(shapeFunctionOnImmersedGrid), integrals);
-			A13.addSmallMatrixAt(integrals.asMatrix().transpose(), sf.getKey(), 0);
+			A13.addSmallMatrixAt(integrals.asMatrix()
+			                              .transpose(), sf.getKey(), 0);
 			//if (count % 10 == 0)
 			System.out.println("A31: " + 100.0 * (count++) / n + "%");
 		}
@@ -96,7 +100,8 @@ public class DLMDiffusionCircle
 		final DirectlySolvable A11inv = A11.inverse();
 		T.addSmallMatrixInPlaceAt(A11inv, 0, 0);
 		System.out.println("T11");
-		T.addSmallMatrixInPlaceAt((A22.add(SparseMatrix.identity(m).mul(0.01))).inverse(), n, n);
+		T.addSmallMatrixInPlaceAt((A22.add(SparseMatrix.identity(m)
+		                                               .mul(0.01))).inverse(), n, n);
 		System.out.println("T22");
 		T.addSmallMatrixAt(SparseMatrix.identity(m), n + m, n + m);
 		System.out.println("T");

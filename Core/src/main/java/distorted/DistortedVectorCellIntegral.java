@@ -124,37 +124,21 @@ public class DistortedVectorCellIntegral
 	{
 		if (name.equals(SYM_SYM))
 		{
-			return integrateOnCell(x ->
-			                       {
-				                       final CoordinateMatrix grad1
-					                       = shapeFunction1.gradientInCell(x,
-					                                                       cell);
-				                       final CoordinateMatrix grad2
-					                       = shapeFunction2.gradientInCell(x,
-					                                                       cell);
+			return integrateOnReferenceCell(x ->
+			                                {
+				                                final CoordinateMatrix grad1
+					                                = shapeFunction1.gradientOnReferenceCell(x,
+					                                                                         cell);
+				                                final CoordinateMatrix grad2
+					                                = shapeFunction2.gradientOnReferenceCell(x,
+					                                                                         cell);
 				
-				                       return grad1
-					                       .add(grad1.transpose())
-					                       .frobeniusInner(grad2.add(
-						                       grad2.transpose())) * (Double) weight.value(
-					                       x) / 4;
-			                       }, cell, quadratureRule1D);
-
-//			return integrateOnReferenceCell(x ->
-//			                                {
-//				                                final CoordinateMatrix grad1
-//					                                = shapeFunction1.gradientOnReferenceCell(x,
-//					                                                                         cell);
-//				                                final CoordinateMatrix grad2
-//					                                = shapeFunction2.gradientOnReferenceCell(x,
-//					                                                                         cell);
-//
-//				                                return grad1
-//					                                .add(grad1.transpose())
-//					                                .frobeniusInner(grad2.add(
-//						                                grad2.transpose())) * (Double) weight.value(
-//					                                x) / 4;
-//			                                }, cell, quadratureRule1D);
+				                                return grad1
+					                                .add(grad1.transpose())
+					                                .frobeniusInner(grad2.add(
+						                                grad2.transpose())) * (Double) weight.value(
+					                                x) / 4;
+			                                }, cell, quadratureRule1D);
 		}
 		if (name.equals(TRACE_SYM))
 		{

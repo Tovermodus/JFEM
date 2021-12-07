@@ -7,7 +7,8 @@ import linalg.CoordinateVector;
 
 import java.awt.*;
 
-public class CircleOverlay extends Overlay
+public class CircleOverlay
+	extends Overlay
 {
 	CoordinateVector mins;
 	CoordinateVector maxs;
@@ -16,7 +17,7 @@ public class CircleOverlay extends Overlay
 	double radius;
 	CoordinateVector center;
 	
-	public CircleOverlay(final CircleGridSpace<?, ?, ?, ?> circle, final ScalarPlot2D plot)
+	public CircleOverlay(final CircleSpace circle, final ScalarPlot2D plot)
 	{
 		radius = circle.radius;
 		center = circle.center;
@@ -42,7 +43,9 @@ public class CircleOverlay extends Overlay
 		for (int i = 0; i < 3600; i++)
 		{
 			final CoordinateVector circleCoordinate = center
-				.add(CoordinateVector.getUnitVector(2, 0).mul(Math.cos(Math.PI * i / 1800)).mul(radius))
+				.add(CoordinateVector.getUnitVector(2, 0)
+				                     .mul(Math.cos(Math.PI * i / 1800))
+				                     .mul(radius))
 				.add(CoordinateVector
 					     .getUnitVector(2, 1)
 					     .mul(Math.sin(Math.PI * i / 1800))

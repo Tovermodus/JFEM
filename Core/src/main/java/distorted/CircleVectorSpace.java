@@ -12,10 +12,11 @@ import java.util.TreeSet;
 /*
 Workflow of this finite element is: first generate 1D cells, then
  */
-public class DistortedVectorSpace extends CircleGridSpace<DistortedVectorShapeFunction, CoordinateVector,
+public class CircleVectorSpace
+	extends CircleGridSpace<DistortedVectorShapeFunction, CoordinateVector,
 	CoordinateMatrix, CoordinateTensor>
 {
-	public DistortedVectorSpace(final CoordinateVector center, final double radius, final int refinements)
+	public CircleVectorSpace(final CoordinateVector center, final double radius, final int refinements)
 	{
 		super(center, radius, refinements);
 	}

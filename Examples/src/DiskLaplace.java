@@ -1,8 +1,8 @@
 import basic.ScalarFESpaceFunction;
+import distorted.CircleSpace;
 import distorted.DistortedCellIntegral;
 import distorted.DistortedRightHandSideIntegral;
 import distorted.DistortedShapeFunction;
-import distorted.DistortedSpace;
 import linalg.CoordinateVector;
 import linalg.IterativeSolver;
 import linalg.Vector;
@@ -27,7 +27,7 @@ public class DiskLaplace
 		
 		for (int i = 0; i < 5; i++)
 		{
-			final DistortedSpace circle = new DistortedSpace(new CoordinateVector(2), 1, i);
+			final CircleSpace circle = new CircleSpace(new CoordinateVector(2), 1, i);
 			
 			System.out.println("Cells done");
 			circle.assembleCells();
@@ -38,7 +38,8 @@ public class DiskLaplace
 			circle.evaluateCellIntegrals(List.of(gradGrad), List.of(source));
 			circle.evaluateFaceIntegrals(new ArrayList<>(), new ArrayList<>());
 			circle.setBoundaryValues(LaplaceReferenceSolution.scalarReferenceSolution());
-			System.out.println(circle.getShapeFunctions().size());
+			System.out.println(circle.getShapeFunctions()
+			                         .size());
 			
 			System.out.println("System Filled");
 //		final Vector solution = circle.getSystemMatrix().solve(circle.getRhs());

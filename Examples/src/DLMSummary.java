@@ -24,7 +24,7 @@ public class DLMSummary
 	final double nu;
 	final double kappa;
 	TaylorHoodSpace eulerian;
-	DistortedVectorSpace lagrangian;
+	CircleVectorSpace lagrangian;
 	SparseMatrix lagrangianBetaMass;
 	SparseMatrix eulerianAlphaMass;
 	SparseMatrix lagrangianDual;
@@ -389,7 +389,7 @@ public class DLMSummary
 	{
 		final CoordinateVector center = CoordinateVector.fromValues(0.5, 0.5);
 		final double radius = 0.2;
-		lagrangian = new DistortedVectorSpace(center, radius, nLagrangeRefines);
+		lagrangian = new CircleVectorSpace(center, radius, nLagrangeRefines);
 		lagrangian.assembleCells();
 		lagrangian.assembleFunctions(lagrangeDegree);
 		nLagrangian = lagrangian.getShapeFunctions()

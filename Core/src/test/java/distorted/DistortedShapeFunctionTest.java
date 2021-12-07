@@ -110,8 +110,10 @@ public class DistortedShapeFunctionTest
 			{
 				final CoordinateVector pos = CoordinateVector.fromValues(5 + 0.2 * (j + i),
 				                                                         5 + 0.2 * j);
-				assertTrue(getFunctionOnGrid().gradient(pos).sub(
-					sf.gradientInCell(pos, cell)).euclidianNorm() < 1e-3);
+				assertTrue(getFunctionOnGrid().gradient(pos)
+				                              .sub(
+					                              sf.gradientInCell(pos, cell))
+				                              .euclidianNorm() < 1e-3);
 			}
 	}
 	
@@ -163,14 +165,17 @@ public class DistortedShapeFunctionTest
 	{
 		for (int i = 0; i < 3; i++)
 		{
-			final DistortedSpace d = new DistortedSpace(CoordinateVector.fromValues(17, 19), 7, i);
+			final CircleSpace d = new CircleSpace(CoordinateVector.fromValues(17, 19),
+			                                      7,
+			                                      i);
 			d.assembleFunctions(1);
 			final List<CoordinateVector> functionalPoints =
 				d
 					.getShapeFunctions()
 					.values()
 					.stream()
-					.map(fun -> fun.getNodeFunctional().getPoint())
+					.map(fun -> fun.getNodeFunctional()
+					               .getPoint())
 					.collect(
 						Collectors.toList());
 			final int finalI = i;
@@ -193,14 +198,17 @@ public class DistortedShapeFunctionTest
 	{
 		for (int i = 0; i < 3; i++)
 		{
-			final DistortedSpace d = new DistortedSpace(CoordinateVector.fromValues(17, -19), 0.07, i);
+			final CircleSpace d = new CircleSpace(CoordinateVector.fromValues(17, -19),
+			                                      0.07,
+			                                      i);
 			d.assembleFunctions(2);
 			final List<CoordinateVector> functionalPoints =
 				d
 					.getShapeFunctions()
 					.values()
 					.stream()
-					.map(fun -> fun.getNodeFunctional().getPoint())
+					.map(fun -> fun.getNodeFunctional()
+					               .getPoint())
 					.collect(
 						Collectors.toList());
 			final int finalI = i;
@@ -223,14 +231,17 @@ public class DistortedShapeFunctionTest
 	{
 		for (int i = 0; i < 3; i++)
 		{
-			final DistortedSpace d = new DistortedSpace(CoordinateVector.fromValues(-17, -19), 0.7, i);
+			final CircleSpace d = new CircleSpace(CoordinateVector.fromValues(-17, -19),
+			                                      0.7,
+			                                      i);
 			d.assembleFunctions(3);
 			final List<CoordinateVector> functionalPoints =
 				d
 					.getShapeFunctions()
 					.values()
 					.stream()
-					.map(fun -> fun.getNodeFunctional().getPoint())
+					.map(fun -> fun.getNodeFunctional()
+					               .getPoint())
 					.collect(
 						Collectors.toList());
 			final int finalI = i;

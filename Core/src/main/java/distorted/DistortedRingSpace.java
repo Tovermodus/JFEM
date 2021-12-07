@@ -4,6 +4,7 @@ import distorted.geometry.DistortedCell;
 import distorted.geometry.DistortedFace;
 import linalg.CoordinateMatrix;
 import linalg.CoordinateVector;
+import org.ujmp.core.collections.RingBufferList;
 import tensorproduct.TPShapeFunction;
 
 import java.util.TreeSet;
@@ -11,11 +12,13 @@ import java.util.TreeSet;
 /*
 Workflow of this finite element is: first generate 1D cells, then
  */
-public class DistortedSpace extends CircleGridSpace<DistortedShapeFunction, Double, CoordinateVector, CoordinateMatrix>
+public class DistortedRingSpace
+	extends RingGridSpace<DistortedShapeFunction, Double, CoordinateVector, CoordinateMatrix>
 {
-	public DistortedSpace(final CoordinateVector center, final double radius, final int refinements)
+	public DistortedRingSpace(final CoordinateVector center, final double innerRadius,
+	                          final double outerRadius, final int refinements)
 	{
-		super(center, radius, refinements);
+		super(center, innerRadius, outerRadius, refinements);
 	}
 	
 	@Override

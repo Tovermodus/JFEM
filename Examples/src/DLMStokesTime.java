@@ -4,9 +4,9 @@ import basic.ScalarFunction;
 import basic.VectorFunction;
 import com.google.common.primitives.Ints;
 import distorted.CircleOverlay;
+import distorted.CircleVectorSpace;
 import distorted.DistortedVectorCellIntegral;
 import distorted.DistortedVectorRightHandSideIntegral;
-import distorted.DistortedVectorSpace;
 import linalg.*;
 import mixed.*;
 import tensorproduct.ContinuousTPShapeFunction;
@@ -41,7 +41,7 @@ public class DLMStokesTime
 		final List<CoordinateVector> points = largeGrid.generatePlotPoints(nPoints);
 		largeGrid.assembleCells();
 		largeGrid.assembleFunctions(polynomialDegree);
-		final DistortedVectorSpace immersedGrid = new DistortedVectorSpace(immercedCenter, immersedRadius, 0);
+		final CircleVectorSpace immersedGrid = new CircleVectorSpace(immercedCenter, immersedRadius, 0);
 		immersedGrid.assembleCells();
 		immersedGrid.assembleFunctions(polynomialDegree);
 		

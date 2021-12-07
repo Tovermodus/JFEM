@@ -13,7 +13,7 @@ import java.util.List;
 public class DistortedOverlay
 	extends Overlay
 {
-	private final DistortedVectorSpace space;
+	private final CircleVectorSpace space;
 	private final Matrix displacementHistory;
 	private final int pointsPerCell;
 	CoordinateVector max;
@@ -23,7 +23,7 @@ public class DistortedOverlay
 	final DistortedVectorFESpaceFunction X;
 	
 	public DistortedOverlay(final List<CoordinateVector> backGroundPoints,
-	                        final DistortedVectorSpace space,
+	                        final CircleVectorSpace space,
 	                        final Matrix displacementHistory,
 	                        final int pointsPerCell)
 	{

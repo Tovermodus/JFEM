@@ -1,8 +1,8 @@
 import basic.*;
+import distorted.CircleSpace;
 import distorted.DistortedCellIntegral;
 import distorted.DistortedRightHandSideIntegral;
 import distorted.DistortedShapeFunction;
-import distorted.DistortedSpace;
 import linalg.CoordinateVector;
 import linalg.IterativeSolver;
 import linalg.Vector;
@@ -22,7 +22,7 @@ public class CircularGrid
 		final DistortedRightHandSideIntegral source = new DistortedRightHandSideIntegral(
 			ScalarFunction.constantFunction(1),
 			DistortedRightHandSideIntegral.VALUE);
-		final DistortedSpace circle = new DistortedSpace(new CoordinateVector(2), 1, 3);
+		final CircleSpace circle = new CircleSpace(new CoordinateVector(2), 1, 3);
 		
 		System.out.println("Cells done");
 		circle.assembleCells();
@@ -32,15 +32,19 @@ public class CircularGrid
 		circle.initializeSystemMatrix();
 		System.out.println("Cells done");
 		circle.initializeRhs();
-		System.out.println(circle.getShapeFunctions().size());
+		System.out.println(circle.getShapeFunctions()
+		                         .size());
 		System.out.println("System Initialized");
 		circle.evaluateCellIntegrals(List.of(gradGrad), List.of(source));
 		System.out.println("System Initialized");
 		circle.evaluateFaceIntegrals(new ArrayList<>(), new ArrayList<>());
 		System.out.println("System Initialized");
-		circle.setBoundaryValues(ScalarFunction.constantFunction(-1), face -> face.center().at(0) < 5);
+		circle.setBoundaryValues(ScalarFunction.constantFunction(-1),
+		                         face -> face.center()
+		                                     .at(0) < 5);
 		System.out.println("System Initialized");
-		System.out.println(circle.getShapeFunctions().size());
+		System.out.println(circle.getShapeFunctions()
+		                         .size());
 		
 		System.out.println("System Filled");
 //		final Vector solution = circle.getSystemMatrix().solve(circle.getRhs());
@@ -55,28 +59,36 @@ public class CircularGrid
 		final PlotWindow p = new PlotWindow();
 //		p.addPlot(new MatrixPlot(circle.getSystemMatrix()));
 		p.addPlot(new ScalarPlot2D(solutionFunction,
-		                           circle.generatePlotPoints(plotploints * circle.getCells().size()),
+		                           circle.generatePlotPoints(plotploints * circle.getCells()
+		                                                                         .size()),
 		                           5));
 		p.addPlot(new ScalarPlot2D(solutionFunction,
-		                           circle.generatePlotPoints(plotploints * circle.getCells().size()),
+		                           circle.generatePlotPoints(plotploints * circle.getCells()
+		                                                                         .size()),
 		                           10));
 		p.addPlot(new ScalarPlot2D(solutionFunction,
-		                           circle.generatePlotPoints(plotploints * circle.getCells().size()),
+		                           circle.generatePlotPoints(plotploints * circle.getCells()
+		                                                                         .size()),
 		                           20));
 		p.addPlot(new ScalarPlot2D(solutionFunction,
-		                           circle.generatePlotPoints(plotploints * circle.getCells().size()),
+		                           circle.generatePlotPoints(plotploints * circle.getCells()
+		                                                                         .size()),
 		                           30));
 		p.addPlot(new ScalarPlot2D(solutionFunction,
-		                           circle.generatePlotPoints(plotploints * circle.getCells().size()),
+		                           circle.generatePlotPoints(plotploints * circle.getCells()
+		                                                                         .size()),
 		                           50));
 		p.addPlot(new ScalarPlot2D(solutionFunction,
-		                           circle.generatePlotPoints(plotploints * circle.getCells().size()),
+		                           circle.generatePlotPoints(plotploints * circle.getCells()
+		                                                                         .size()),
 		                           80));
 		p.addPlot(new ScalarPlot2D(solutionFunction,
-		                           circle.generatePlotPoints(plotploints * circle.getCells().size()),
+		                           circle.generatePlotPoints(plotploints * circle.getCells()
+		                                                                         .size()),
 		                           110));
 		p.addPlot(new ScalarPlot2D(solutionFunction,
-		                           circle.generatePlotPoints(plotploints * circle.getCells().size()),
+		                           circle.generatePlotPoints(plotploints * circle.getCells()
+		                                                                         .size()),
 		                           150));
 	}
 }

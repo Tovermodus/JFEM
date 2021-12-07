@@ -2,17 +2,19 @@ package distorted.geometry;
 
 import basic.DoubleCompare;
 import com.google.common.collect.HashMultimap;
+import com.google.common.collect.ImmutableCollection;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Multimap;
 import io.vavr.Tuple2;
+import kotlin.Pair;
 import linalg.CoordinateVector;
 import linalg.IntCoordinates;
-import org.jetbrains.annotations.NotNull;
 
 import java.util.*;
 import java.util.stream.Collectors;
 
 public class CircleGrid
+	implements DistortedGrid
 {
 	public final int dimension;
 	private final CoordinateVector centerPoint;
@@ -25,39 +27,12 @@ public class CircleGrid
 		this.dimension = centerPoint.getLength();
 		this.centerPoint = centerPoint;
 		this.radius = radius;
-		
-		Multimap<DistortedCell, DistortedCell> refinedCells = generateCells();
-		Collection<DistortedFace> genFaces = generateFaces(refinedCells);
-		for (int i = 0; i < refinements; i++)
-		{
-			System.out.println("refine");
-			refinedCells = refineCells(refinedCells);
-			genFaces = refineFaces(refinedCells);
-			for (final DistortedFace f : genFaces)
-			{
-				if (!f.isBoundaryFace() && f.getCells().size() != 2)
-					System.out.println(f);
-			}
-		}
-		int hash = 379;
-		cells = ImmutableSet.copyOf(refinedCells.values());
-		System.out.println(cells.size());
-		faces = ImmutableSet.copyOf(genFaces);
-		for (final DistortedCell cell : cells)
-			cell.setDone(hash++);
+		final Pair<ImmutableSet<DistortedCell>, ImmutableSet<DistortedFace>> grid = createGrid(refinements);
+		cells = grid.component1();
+		faces = grid.component2();
 	}
 	
-	private static HashSet<DistortedCell> getCellsBelongingToFace(final DistortedFace f, final Collection<DistortedCell> from)
-	{
-		final HashSet<DistortedCell> cellsBelonging = new HashSet<>();
-		for (final DistortedCell cell : from)
-		{
-			if (f.isOnCell(cell))
-				cellsBelonging.add(cell);
-		}
-		return cellsBelonging;
-	}
-	
+	@Override
 	public Multimap<DistortedCell, DistortedCell> generateCells()
 	{
 		final Multimap<DistortedCell, DistortedCell> ret = HashMultimap.create();
@@ -159,7 +134,7 @@ public class CircleGrid
 				                      .toArray(new CoordinateVector[8]));
 			final DistortedCell back =
 				new DistortedCell(List.of(outer_llb, center_llb, center_lrb, outer_lrb
-					, outer_ulb, center_ulb, center_urb, outer_urb)
+					                      , outer_ulb, center_ulb, center_urb, outer_urb)
 				                      .toArray(new CoordinateVector[8]));
 			final DistortedCell bottom =
 				new DistortedCell(List.of(outer_llf, outer_lrf, outer_lrb, outer_llb,
@@ -188,6 +163,7 @@ public class CircleGrid
 		} else throw new IllegalArgumentException("Only supports dimensions 2 and 3");
 	}
 	
+	@Override
 	public Collection<DistortedFace> generateFaces(final Multimap<DistortedCell, DistortedCell> genCells)
 	{
 		final HashSet<DistortedFace> faces = new HashSet<>();
@@ -198,6 +174,7 @@ public class CircleGrid
 		return faces;
 	}
 	
+	@Override
 	public HashSet<DistortedFace> refineFaces(final Multimap<DistortedCell, DistortedCell> refinedCells)
 	{
 		final HashSet<DistortedFace> faces = new HashSet<>();
@@ -213,8 +190,9 @@ public class CircleGrid
 		return faces;
 	}
 	
-	private void createFaces(final HashSet<DistortedFace> faces, final DistortedCell cell,
-	                         final Collection<DistortedCell> neighbouringCells)
+	@Override
+	public void createFaces(final HashSet<DistortedFace> faces, final DistortedCell cell,
+	                        final Collection<DistortedCell> neighbouringCells)
 	{
 		createFaces(faces, cell, neighbouringCells, radius, centerPoint);
 	}
@@ -231,7 +209,7 @@ public class CircleGrid
 			                                   .allMatch(norm -> DoubleCompare.almostEqual(norm,
 			                                                                               radius));
 			final DistortedFace face = new DistortedFace(vertices, isOnBoundary);
-			for (final DistortedCell c : getCellsBelongingToFace(face, neighbouringCells))
+			for (final DistortedCell c : DistortedGrid.getCellsBelongingToFace(face, neighbouringCells))
 			{
 				c.faces.add(face);
 				face.addCell(c);
@@ -240,26 +218,8 @@ public class CircleGrid
 		}
 	}
 	
-	@NotNull
-	private static List<DistortedCell> getRefinedNeighbouringCells(final Multimap<DistortedCell, DistortedCell> refinedCells,
-	                                                               final DistortedCell cell)
-	{
-		final List<DistortedCell> neighbouringCells = new ArrayList<>();
-		for (final DistortedFace f : cell.faces)
-			neighbouringCells.addAll(f.getCells());
-		final List<DistortedCell> refinedNeighbouringCells = new ArrayList<>();
-		for (final DistortedCell c : neighbouringCells)
-			refinedNeighbouringCells.addAll(refinedCells.get(c));
-		return refinedNeighbouringCells;
-	}
-	
-	CoordinateVector mean(final CoordinateVector... points)
-	{
-		return Arrays.stream(points).reduce(new CoordinateVector(dimension), CoordinateVector::add).mul(
-			1. / points.length);
-	}
-	
-	List<DistortedCell> partitionCell(final DistortedCell cell)
+	@Override
+	public List<DistortedCell> partitionCell(final DistortedCell cell)
 	{
 		final List<DistortedCell> ret = new ArrayList<>();
 		final CoordinateVector[] vertices = cell.vertices;
@@ -274,13 +234,21 @@ public class CircleGrid
 			final DistortedFace left = cell.getFaceFromVertexNumbers(3, 0);
 			CoordinateVector leftCenter = left.center();
 			if (bottom.isBoundaryFace())
-				bottomCenter = centerPoint.add(bottomCenter.sub(centerPoint).normalize().mul(radius));
+				bottomCenter = centerPoint.add(bottomCenter.sub(centerPoint)
+				                                           .normalize()
+				                                           .mul(radius));
 			if (right.isBoundaryFace())
-				rightCenter = centerPoint.add(rightCenter.sub(centerPoint).normalize().mul(radius));
+				rightCenter = centerPoint.add(rightCenter.sub(centerPoint)
+				                                         .normalize()
+				                                         .mul(radius));
 			if (top.isBoundaryFace())
-				topCenter = centerPoint.add(topCenter.sub(centerPoint).normalize().mul(radius));
+				topCenter = centerPoint.add(topCenter.sub(centerPoint)
+				                                     .normalize()
+				                                     .mul(radius));
 			if (left.isBoundaryFace())
-				leftCenter = centerPoint.add(leftCenter.sub(centerPoint).normalize().mul(radius));
+				leftCenter = centerPoint.add(leftCenter.sub(centerPoint)
+				                                       .normalize()
+				                                       .mul(radius));
 			final CoordinateVector center = mean(bottomCenter, rightCenter, topCenter, leftCenter);
 			ret.add(new DistortedCell(vertices[0], bottomCenter, center, leftCenter));
 			ret.add(new DistortedCell(bottomCenter, vertices[1], rightCenter, center));
@@ -295,6 +263,7 @@ public class CircleGrid
 		throw new IllegalStateException("Dimension Wrong");
 	}
 	
+	@Override
 	public Multimap<DistortedCell, DistortedCell> refineCells(final Multimap<DistortedCell, DistortedCell> genCells)
 	{
 		final Multimap<DistortedCell, DistortedCell> refinedCells = HashMultimap.create();
@@ -303,6 +272,7 @@ public class CircleGrid
 		return refinedCells;
 	}
 	
+	@Override
 	public List<CoordinateVector> generatePlotPoints(final int resolution)
 	{
 		final int pointsPerCell = resolution / cells.size();
@@ -329,6 +299,28 @@ public class CircleGrid
 		return ret;
 	}
 	
+	@Override
+	public List<CoordinateVector> generateIsotropicPlotPoints(final int resolution)
+	{
+		if (getDimension() != 2)
+			throw new UnsupportedOperationException("Not yetimplemented");
+		final List<CoordinateVector> ret = new ArrayList<>(resolution * resolution);
+		for (int i = 0; i < resolution; i++)
+		{
+			for (int j = 0; j < resolution; j++)
+			{
+				final double ang = 1.0 * i / resolution * Math.PI * 2;
+				final double rad = 1.0 * radius * j / resolution;
+				final CoordinateVector out =
+					CoordinateVector.fromValues(Math.cos(ang), Math.sin(ang))
+					                .mul(rad);
+				ret.add(new CoordinateVector(centerPoint.add(out)));
+			}
+		}
+		return ret;
+	}
+	
+	@Override
 	public List<Tuple2<DistortedCell, CoordinateVector>> generateReferencePlotPoints(final int resolution)
 	{
 		final int pointsPerCell = resolution / cells.size();
@@ -353,5 +345,23 @@ public class CircleGrid
 				           .collect(Collectors.toList()));
 		}
 		return ret;
+	}
+	
+	@Override
+	public ImmutableCollection<DistortedFace> getFaces()
+	{
+		return faces;
+	}
+	
+	@Override
+	public ImmutableCollection<DistortedCell> getCells()
+	{
+		return cells;
+	}
+	
+	@Override
+	public int getDimension()
+	{
+		return dimension;
 	}
 }

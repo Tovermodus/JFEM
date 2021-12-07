@@ -27,41 +27,28 @@ public class DenseMatrix
 	public DenseMatrix(final Matrix matrix)
 	{
 		entries = new double[matrix.getRows()][matrix.getCols()];
-		IntStream stream = IntStream.range(0, getRows());
-		if (PerformanceArguments.getInstance().parallelizeThreads && matrix.size() > 10000) stream =
-			stream.parallel();
-		stream.forEach(i ->
-		               {
-			               for (int j = 0; j < getCols(); j++)
-				               entries[i][j] = matrix.at(i, j);
-		               });
-	}
-	
-	public DenseMatrix(final SparseMatrix matrix)
-	{
-		entries = new double[matrix.getRows()][matrix.getCols()];
-		Stream<Map.Entry<IntCoordinates, Double>> entryStream = matrix
-			.getCoordinateEntryList()
-			.entrySet()
-			.stream();
-		if (PerformanceArguments.getInstance().parallelizeThreads) entryStream = entryStream.parallel();
-		entryStream.forEach(e -> entries[e.getKey()
-		                                  .get(0)][e.getKey()
-		                                            .get(1)] = e.getValue());
-	}
-	
-	public DenseMatrix(final BlockSparseMatrix matrix)
-	{
-		entries = new double[matrix.getRows()][matrix.getCols()];
-		Stream<Map.Entry<IntCoordinates, Double>> entryStream = matrix
-			.getCoordinateEntryList()
-			.entrySet()
-			.stream();
-		if (PerformanceArguments.getInstance().parallelizeThreads) entryStream = entryStream.parallel();
-		entryStream.forEach(e -> entries[e.getKey()
-		                                  .get(0)]
-			                         [e.getKey()
-			                           .get(1)] = e.getValue());
+		if (matrix.isSparse())
+		{
+			
+			Stream<Map.Entry<IntCoordinates, Double>> entryStream = matrix
+				.getCoordinateEntryList()
+				.entrySet()
+				.stream();
+			if (PerformanceArguments.getInstance().parallelizeThreads) entryStream = entryStream.parallel();
+			entryStream.forEach(e -> entries[e.getKey()
+			                                  .get(0)][e.getKey()
+			                                            .get(1)] = e.getValue());
+		} else
+		{
+			IntStream stream = IntStream.range(0, getRows());
+			if (PerformanceArguments.getInstance().parallelizeThreads && matrix.size() > 10000) stream =
+				stream.parallel();
+			stream.forEach(i ->
+			               {
+				               for (int j = 0; j < getCols(); j++)
+					               entries[i][j] = matrix.at(i, j);
+			               });
+		}
 	}
 	
 	public DenseMatrix(final double[][] matrix)
@@ -201,38 +188,51 @@ public class DenseMatrix
 	}
 	
 	@Override
-	public DenseMatrix add(final Tensor other)
-	{
-		if (PerformanceArguments.getInstance().executeChecks) if (!getShape().equals(other.getShape()))
-			throw new IllegalArgumentException("Incompatible sizes");
-		final DenseMatrix ret = new DenseMatrix(this);
-		for (int i = 0; i < ret.getRows(); i++)
-			for (int j = 0; j < ret.getCols(); j++)
-				ret.add(other.at(i, j), i, j);
-		return ret;
-	}
-	
-	public DenseMatrix add(final SparseMatrix other)
-	{
-		if (PerformanceArguments.getInstance().executeChecks) if (!getShape().equals(other.getShape()))
-			throw new IllegalArgumentException("Incompatible sizes");
-		final DenseMatrix ret = new DenseMatrix(this);
-		other.getCoordinateEntryList()
-		     .forEach((k, v) -> ret.add(v, k));
-		return ret;
-	}
-	
-	@Override
 	public DenseMatrix sub(final Tensor other)
 	{
 		
 		if (PerformanceArguments.getInstance().executeChecks) if (!getShape().equals(other.getShape()))
 			throw new IllegalArgumentException("Incompatible sizes");
-		final DenseMatrix ret = new DenseMatrix(this);
-		for (int i = 0; i < ret.getRows(); i++)
-			for (int j = 0; j < ret.getCols(); j++)
-				ret.add(-other.at(i, j), i, j);
-		return ret;
+		if (other instanceof Matrix && other.isSparse())
+		{
+			if (PerformanceArguments.getInstance().executeChecks) if (!getShape().equals(other.getShape()))
+				throw new IllegalArgumentException("Incompatible sizes");
+			final DenseMatrix ret = new DenseMatrix(this);
+			other.getCoordinateEntryList()
+			     .forEach((k, v) -> ret.add(-v, k));
+			return ret;
+		} else
+		{
+			final DenseMatrix ret = new DenseMatrix(this);
+			for (int i = 0; i < ret.getRows(); i++)
+				for (int j = 0; j < ret.getCols(); j++)
+					ret.add(-other.at(i, j), i, j);
+			return ret;
+		}
+	}
+	
+	@Override
+	public DenseMatrix add(final Tensor other)
+	{
+		
+		if (PerformanceArguments.getInstance().executeChecks) if (!getShape().equals(other.getShape()))
+			throw new IllegalArgumentException("Incompatible sizes");
+		if (other instanceof Matrix && other.isSparse())
+		{
+			if (PerformanceArguments.getInstance().executeChecks) if (!getShape().equals(other.getShape()))
+				throw new IllegalArgumentException("Incompatible sizes");
+			final DenseMatrix ret = new DenseMatrix(this);
+			other.getCoordinateEntryList()
+			     .forEach((k, v) -> ret.add(v, k));
+			return ret;
+		} else
+		{
+			final DenseMatrix ret = new DenseMatrix(this);
+			for (int i = 0; i < ret.getRows(); i++)
+				for (int j = 0; j < ret.getCols(); j++)
+					ret.add(other.at(i, j), i, j);
+			return ret;
+		}
 	}
 	
 	@Override
@@ -336,8 +336,7 @@ public class DenseMatrix
 		return ret;
 	}
 	
-	@Override
-	public DenseMatrix mmMul(final Matrix matrix)
+	public DenseMatrix mmMul(final DenseMatrix matrix)
 	{
 		if (PerformanceArguments.getInstance().executeChecks)
 			if (getCols() != (matrix.getRows())) throw new IllegalArgumentException("Incompatible sizes");
@@ -357,7 +356,8 @@ public class DenseMatrix
 		return ret;
 	}
 	
-	public DenseMatrix mmMul(final SparseMatrix matrix)
+	@Override
+	public DenseMatrix mmMul(final Matrix matrix)
 	{
 		if (PerformanceArguments.getInstance().executeChecks)
 			if (getCols() != (matrix.getRows())) throw new IllegalArgumentException("Incompatible sizes");
@@ -488,7 +488,7 @@ public class DenseMatrix
 	public void deleteRow(final int row)
 	{
 		if (PerformanceArguments.getInstance().executeChecks)
-			if (0 <= row && row <= getRows()) throw new UnsupportedOperationException("row out of bounds");
+			if (0 > row || row > getRows()) throw new UnsupportedOperationException("row out of bounds");
 		for (int i = 0; i < getCols(); i++)
 			entries[row][i] = 0;
 	}
@@ -497,7 +497,7 @@ public class DenseMatrix
 	public void deleteColumn(final int column)
 	{
 		
-		if (PerformanceArguments.getInstance().executeChecks) if (0 <= column && column <= getCols())
+		if (PerformanceArguments.getInstance().executeChecks) if (0 > column || column > getCols())
 			throw new UnsupportedOperationException("column out of bounds");
 		for (int i = 0; i < getRows(); i++)
 			entries[i][column] = 0;
