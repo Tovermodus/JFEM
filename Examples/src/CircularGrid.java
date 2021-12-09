@@ -56,39 +56,37 @@ public class CircularGrid
 			new ScalarFESpaceFunction<>(circle.getShapeFunctions(), solution);
 		
 		final int plotploints = 6;
-		final PlotWindow p = new PlotWindow();
-//		p.addPlot(new MatrixPlot(circle.getSystemMatrix()));
-		p.addPlot(new ScalarPlot2D(solutionFunction,
-		                           circle.generatePlotPoints(plotploints * circle.getCells()
-		                                                                         .size()),
-		                           5));
-		p.addPlot(new ScalarPlot2D(solutionFunction,
-		                           circle.generatePlotPoints(plotploints * circle.getCells()
-		                                                                         .size()),
-		                           10));
-		p.addPlot(new ScalarPlot2D(solutionFunction,
-		                           circle.generatePlotPoints(plotploints * circle.getCells()
-		                                                                         .size()),
-		                           20));
-		p.addPlot(new ScalarPlot2D(solutionFunction,
-		                           circle.generatePlotPoints(plotploints * circle.getCells()
-		                                                                         .size()),
-		                           30));
-		p.addPlot(new ScalarPlot2D(solutionFunction,
-		                           circle.generatePlotPoints(plotploints * circle.getCells()
-		                                                                         .size()),
-		                           50));
-		p.addPlot(new ScalarPlot2D(solutionFunction,
-		                           circle.generatePlotPoints(plotploints * circle.getCells()
-		                                                                         .size()),
-		                           80));
-		p.addPlot(new ScalarPlot2D(solutionFunction,
-		                           circle.generatePlotPoints(plotploints * circle.getCells()
-		                                                                         .size()),
-		                           110));
-		p.addPlot(new ScalarPlot2D(solutionFunction,
-		                           circle.generatePlotPoints(plotploints * circle.getCells()
-		                                                                         .size()),
-		                           150));
+		PlotWindow.addPlot(new ScalarPlot2D(solutionFunction,
+		                                    circle.generatePlotPoints(plotploints * circle.getCells()
+		                                                                                  .size()),
+		                                    5));
+		PlotWindow.addPlot(new ScalarPlot2D(solutionFunction,
+		                                    circle.generatePlotPoints(plotploints * circle.getCells()
+		                                                                                  .size()),
+		                                    10));
+		PlotWindow.addPlot(new ScalarPlot2D(solutionFunction,
+		                                    circle.generatePlotPoints(plotploints * circle.getCells()
+		                                                                                  .size()),
+		                                    20));
+		PlotWindow.addPlot(new ScalarPlot2D(solutionFunction,
+		                                    circle.generatePlotPoints(plotploints * circle.getCells()
+		                                                                                  .size()),
+		                                    30));
+		PlotWindow.addPlot(new ScalarPlot2D(solutionFunction,
+		                                    circle.generatePlotPoints(plotploints * circle.getCells()
+		                                                                                  .size()),
+		                                    50));
+		PlotWindow.addPlot(new ScalarPlot2D(solutionFunction,
+		                                    circle.generatePlotPoints(plotploints * circle.getCells()
+		                                                                                  .size()),
+		                                    80));
+		PlotWindow.addPlot(new ScalarPlot2D(solutionFunction,
+		                                    circle.generatePlotPoints(plotploints * circle.getCells()
+		                                                                                  .size()),
+		                                    110));
+		PlotWindow.addPlot(new ScalarPlot2D(solutionFunction,
+		                                    circle.generatePlotPoints(plotploints * circle.getCells()
+		                                                                                  .size()),
+		                                    150));
 	}
 }

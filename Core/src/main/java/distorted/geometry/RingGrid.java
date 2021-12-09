@@ -192,6 +192,17 @@ public class RingGrid
 				                                                .get(0)
 				                                                .euclidianNorm()));
 			final CoordinateVector center = mean(bottomCenter, rightCenter, topCenter, leftCenter);
+			System.out.println();
+			System.out.println("ll " + vertices[0]);
+			System.out.println("lr " + vertices[1]);
+			System.out.println("ur " + vertices[2]);
+			System.out.println("ul " + vertices[3]);
+			System.out.println("bc " + bottomCenter);
+			System.out.println("rc " + rightCenter);
+			System.out.println("tc " + topCenter);
+			System.out.println("lc " + leftCenter);
+			System.out.println("cc " + center);
+			
 			addCell(ret, vertices[0], bottomCenter, center, leftCenter);
 			addCell(ret, bottomCenter, vertices[1], rightCenter, center);
 			addCell(ret, leftCenter, center, topCenter, vertices[3]);

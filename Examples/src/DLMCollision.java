@@ -38,7 +38,7 @@ public class DLMCollision
 	public DLMCollision(final double dt,
 	                    final int timeSteps,
 	                    final CartesianGridSpace<QkQkFunction, MixedValue, MixedGradient, MixedHessian> backgroundSpace,
-	                    final List<CircleVectorSpace> particleSpaces)
+	                    final List<DistortedGridSpace<DistortedVectorShapeFunction, CoordinateVector, CoordinateMatrix, CoordinateTensor>> particleSpaces)
 	{
 		super(dt, timeSteps, backgroundSpace, particleSpaces);
 		velocityValues = new ConcurrentSkipListMap<>();
@@ -226,7 +226,6 @@ public class DLMCollision
 		particle2.assembleCells();
 		particle2.assembleFunctions(1);
 		final DLMCollision dlmElast2 = new DLMCollision(0.02, 30, backGround, List.of(particle1, particle2));
-		final PlotWindow p = new PlotWindow();
 		dlmElast2.loop();
 		final MixedPlot2DTime UpPlot = new MixedPlot2DTime(dlmElast2.pressureValues,
 		                                                   dlmElast2.velocityValues,
@@ -244,7 +243,7 @@ public class DLMCollision
 				                                                                 + particle1.getShapeFunctions()
 				                                                                            .size())),
 		                                       5));
-		p.addPlot(UpPlot);
+		PlotWindow.addPlot(UpPlot);
 		final MixedPlot2DTime UpPlot1 = new MixedPlot2DTime(dlmElast2.pressureValues,
 		                                                    dlmElast2.velocityValues,
 		                                                    30,
@@ -265,6 +264,6 @@ public class DLMCollision
 				                                                                  + particle2.getShapeFunctions()
 				                                                                             .size())),
 		                                        5));
-		p.addPlot(UpPlot1);
+		PlotWindow.addPlot(UpPlot1);
 	}
 }

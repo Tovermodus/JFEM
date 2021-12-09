@@ -200,8 +200,7 @@ public class StokesTime
 			grid.getShapeFunctions(), iterate)
 			                                                       .velocityValuesInPointsAtTime(points,
 			                                                                                     0));
-		//final PlotWindow p = new PlotWindow();
-		//p.addPlot(new MixedPlot2D(generateCurrentFunction(iterate, grid), points, nPoints));
+		//		//PlotWindow.addPlot(new MixedPlot2D(generateCurrentFunction(iterate, grid), points, nPoints));
 		for (int i = 1; i < timesteps; i++)
 		{
 			final IterativeSolver its = new IterativeSolver();
@@ -236,7 +235,7 @@ public class StokesTime
 //				               .getVelocityFunction()
 //				               .getDivergenceFunction().valuesInPointsAtTime(points, dt * i));
 		}
-//		p.addPlot(new MixedPlot2DTime(pvals, vvals, nPoints));
-//		p.addPlot(new ScalarPlot2DTime(divvals, nPoints, ""));
+//		PlotWindow.addPlot(new MixedPlot2DTime(pvals, vvals, nPoints));
+//		PlotWindow.addPlot(new ScalarPlot2DTime(divvals, nPoints, ""));
 	}
 }

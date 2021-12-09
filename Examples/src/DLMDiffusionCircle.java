@@ -120,7 +120,6 @@ public class DLMDiffusionCircle
 		final Vector largeSolut = solut.slice(new IntCoordinates(0), new IntCoordinates(n));
 		final ScalarFESpaceFunction<ContinuousTPShapeFunction> solutFun = new ScalarFESpaceFunction<>(
 			largeGrid.getShapeFunctions(), largeSolut);
-		final PlotWindow p = new PlotWindow();
-		p.addPlot(new ScalarPlot2D(solutFun, largeGrid.generatePlotPoints(70), 70));
+		PlotWindow.addPlot(new ScalarPlot2D(solutFun, largeGrid.generatePlotPoints(70), 70));
 	}
 }

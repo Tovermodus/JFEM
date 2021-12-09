@@ -28,7 +28,7 @@ public class RingVectorSpace
 	public void assembleFunctions(final int polynomialDegree)
 	{
 		shapeFunctions = new TreeSet<>();
-		for (final DistortedCell cell : grid.cells)
+		for (final DistortedCell cell : grid.getCells())
 		{
 			for (int localIndex = 0; localIndex < getDimension() * TPShapeFunction.functionsPerCell(
 				polynomialDegree,

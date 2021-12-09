@@ -49,8 +49,10 @@ public class DLMDiffusion
 		final TPRightHandSideIntegral<ContinuousTPShapeFunction> f2minfv = new TPRightHandSideIntegral<>(f2minf,
 		                                                                                                 TPRightHandSideIntegral.VALUE);
 		
-		final int n = largeGrid.getShapeFunctions().size();
-		final int m = immersedGrid.getShapeFunctions().size();
+		final int n = largeGrid.getShapeFunctions()
+		                       .size();
+		final int m = immersedGrid.getShapeFunctions()
+		                          .size();
 		
 		final SparseMatrix A11 = new SparseMatrix(n, n);
 		final SparseMatrix A22 = new SparseMatrix(m, m);
@@ -66,13 +68,15 @@ public class DLMDiffusion
 		
 		A23.mulInPlace(-1);
 		
-		for (final Map.Entry<Integer, ContinuousTPShapeFunction> sf : largeGrid.getShapeFunctions().entrySet())
+		for (final Map.Entry<Integer, ContinuousTPShapeFunction> sf : largeGrid.getShapeFunctions()
+		                                                                       .entrySet())
 		{
 			final TPRightHandSideIntegral<ContinuousTPShapeFunction> shapeFunctionOnImmersedGrid
 				= new TPRightHandSideIntegral<>(sf.getValue(), TPRightHandSideIntegral.H1);
 			final DenseVector integrals = new DenseVector(m);
 			immersedGrid.writeCellIntegralsToRhs(List.of(shapeFunctionOnImmersedGrid), integrals);
-			A13.addSmallMatrixAt(integrals.asMatrix().transpose(), sf.getKey(), 0);
+			A13.addSmallMatrixAt(integrals.asMatrix()
+			                              .transpose(), sf.getKey(), 0);
 		}
 		
 		final SparseMatrix A = new SparseMatrix(n + 2 * m, n + 2 * m);
@@ -88,7 +92,8 @@ public class DLMDiffusion
 		
 		final DirectlySolvable A11inv = A11.inverse();
 		T.addSmallMatrixInPlaceAt(A11inv, 0, 0);
-		T.addSmallMatrixInPlaceAt((A22.add(SparseMatrix.identity(m).mul(0.01))).inverse(), n, n);
+		T.addSmallMatrixInPlaceAt((A22.add(SparseMatrix.identity(m)
+		                                               .mul(0.01))).inverse(), n, n);
 		T.addSmallMatrixAt(SparseMatrix.identity(m), n + m, n + m);
 		
 		final DenseVector b1 = new DenseVector(n);
@@ -105,7 +110,6 @@ public class DLMDiffusion
 		final Vector largeSolut = solut.slice(new IntCoordinates(0), new IntCoordinates(n));
 		final ScalarFESpaceFunction<ContinuousTPShapeFunction> solutFun = new ScalarFESpaceFunction<>(
 			largeGrid.getShapeFunctions(), largeSolut);
-		final PlotWindow p = new PlotWindow();
-		p.addPlot(new ScalarPlot2D(solutFun, largeGrid.generatePlotPoints(70), 70));
+		PlotWindow.addPlot(new ScalarPlot2D(solutFun, largeGrid.generatePlotPoints(70), 70));
 	}
 }

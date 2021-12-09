@@ -36,7 +36,7 @@ public class DLM2Particles
 	public DLM2Particles(final double dt,
 	                     final int timeSteps,
 	                     final CartesianGridSpace<QkQkFunction, MixedValue, MixedGradient, MixedHessian> backgroundSpace,
-	                     final List<CircleVectorSpace> particleSpaces)
+	                     final List<DistortedGridSpace<DistortedVectorShapeFunction, CoordinateVector, CoordinateMatrix, CoordinateTensor>> particleSpaces)
 	{
 		super(dt, timeSteps, backgroundSpace, particleSpaces);
 		velocityValues = new ConcurrentSkipListMap<>();
@@ -269,7 +269,7 @@ public class DLM2Particles
 		particle3.assembleFunctions(1);
 		final DLM2Particles dlmElast2 = new DLM2Particles(0.02, 3, backGround, List.of(particle1, particle2,
 		                                                                               particle3));
-		final PlotWindow p = new PlotWindow();
+		
 		dlmElast2.loop();
 		final MixedPlot2DTime UpPlot = new MixedPlot2DTime(dlmElast2.pressureValues,
 		                                                   dlmElast2.velocityValues,
@@ -285,7 +285,7 @@ public class DLM2Particles
 		                                                                                                   .size() + particle1.getShapeFunctions()
 		                                                                                                                      .size())),
 		                                       5));
-		p.addPlot(UpPlot);
+		PlotWindow.addPlot(UpPlot);
 		final MixedPlot2DTime UpPlot1 = new MixedPlot2DTime(dlmElast2.pressureValues,
 		                                                    dlmElast2.velocityValues,
 		                                                    30,
@@ -303,7 +303,7 @@ public class DLM2Particles
 			                                                                                          + particle2.getShapeFunctions()
 			                                                                                                     .size())),
 		                                        5));
-		p.addPlot(UpPlot1);
+		PlotWindow.addPlot(UpPlot1);
 		final MixedPlot2DTime UpPlot2 = new MixedPlot2DTime(dlmElast2.pressureValues,
 		                                                    dlmElast2.velocityValues,
 		                                                    30,
@@ -324,6 +324,6 @@ public class DLM2Particles
 			                                                                                                         .size() + particle3.getShapeFunctions()
 			                                                                                                                            .size())),
 		                                        5));
-		p.addPlot(UpPlot2);
+		PlotWindow.addPlot(UpPlot2);
 	}
 }

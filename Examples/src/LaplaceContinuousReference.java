@@ -42,10 +42,9 @@ public class LaplaceContinuousReference
 		final ScalarFESpaceFunction<ContinuousTPShapeFunction> solut =
 			new ScalarFESpaceFunction<>(
 				grid.getShapeFunctions(), solution1);
-		final PlotWindow p = new PlotWindow();
-		p.addPlot(new ScalarPlot2D(solut, grid.generatePlotPoints(30), 30));
-		p.addPlot(new ScalarPlot2D(LaplaceReferenceSolution.scalarReferenceSolution(),
-		                           grid.generatePlotPoints(30),
-		                           30));
+		PlotWindow.addPlot(new ScalarPlot2D(solut, grid.generatePlotPoints(30), 30));
+		PlotWindow.addPlot(new ScalarPlot2D(LaplaceReferenceSolution.scalarReferenceSolution(),
+		                                    grid.generatePlotPoints(30),
+		                                    30));
 	}
 }

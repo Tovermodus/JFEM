@@ -114,9 +114,8 @@ public class Laplace
 					((3 + pos.x()) * (3 + pos.x()) + (1 + pos.y()) * (1 + pos.y()));
 			}
 		};
-		final PlotWindow p = new PlotWindow();
-		p.addPlot(new ScalarPlot2D(solut, grid.generatePlotPoints(20), 20));
-		p.addPlot(new ScalarPlot2D(solut, grid.generatePlotPoints(50), 50));
+		PlotWindow.addPlot(new ScalarPlot2D(solut, grid.generatePlotPoints(20), 20));
+		PlotWindow.addPlot(new ScalarPlot2D(solut, grid.generatePlotPoints(50), 50));
 		//Map<CoordinateVector, Double> vals = solut.valuesInPoints(grid.generatePlotPoints(50));
 		//Map<CoordinateVector, Double> refvals = referenceSolution.valuesInPoints(grid.generatePlotPoints(50));
 		//new PlotFrame(List.of(vals, refvals),start,end);

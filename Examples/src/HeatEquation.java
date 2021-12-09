@@ -44,13 +44,16 @@ public class HeatEquation
 			@Override
 			public Double value(final CoordinateVector pos)
 			{
-				return 1. / (1 + 1e3 * pos.sub(c).euclidianNorm() * pos.sub(c2).euclidianNorm());
+				return 1. / (1 + 1e3 * pos.sub(c)
+				                          .euclidianNorm() * pos.sub(c2)
+				                                                .euclidianNorm());
 			}
 		};
 		final TPRightHandSideIntegral<TPShapeFunction> src = new TPRightHandSideIntegral<>(sourceFun
 			, TPRightHandSideIntegral.VALUE);
 		final double dt = 0.02;
-		final int n = grid.getShapeFunctions().size();
+		final int n = grid.getShapeFunctions()
+		                  .size();
 		Vector iterate = new DenseVector(n);
 		ScalarFESpaceFunction<TPShapeFunction> u_t;
 		final SparseMatrix M = new SparseMatrix(n, n);
@@ -85,7 +88,8 @@ public class HeatEquation
 				iterate = its.solveCG(MA, rhs, 1e-10);
 			} else
 			{
-				final DenseVector rhs = source.add(M.mvMul(iterate)).sub(A.mvMul(iterate));
+				final DenseVector rhs = source.add(M.mvMul(iterate))
+				                              .sub(A.mvMul(iterate));
 				iterate = its.solveCG(M, rhs, 1e-10);
 			}
 			//System.out.println("x"+iterate);
@@ -94,7 +98,6 @@ public class HeatEquation
 				grid.getShapeFunctions(), iterate)
 				            .valuesInPointsAtTime(points, dt * i));
 		}
-		final PlotWindow p = new PlotWindow();
-		p.addPlot(new ScalarPlot2DTime(vals, 60, ""));
+		PlotWindow.addPlot(new ScalarPlot2DTime(vals, 60, ""));
 	}
 }

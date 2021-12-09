@@ -18,7 +18,16 @@ public class PlotWindow
 	final DrawThread d;
 	int currentPlot = 0;
 	
-	public PlotWindow()
+	private static PlotWindow INSTANCE;
+	
+	public static PlotWindow getInstance()
+	{
+		if (INSTANCE == null)
+			INSTANCE = new PlotWindow();
+		return INSTANCE;
+	}
+	
+	private PlotWindow()
 	{
 		
 		setSize(800, 800);
@@ -57,10 +66,10 @@ public class PlotWindow
 		         .execute(d);
 	}
 	
-	public void addPlot(final Plot plot)
+	public static void addPlot(final Plot plot)
 	{
-		if (plots.size() == 0) d.setPlot(plot);
-		plots.add(plot);
+		if (getInstance().plots.size() == 0) getInstance().d.setPlot(plot);
+		getInstance().plots.add(plot);
 	}
 	
 	@Override

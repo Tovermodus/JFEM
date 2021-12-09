@@ -23,8 +23,7 @@ public class DiskLaplace
 		final DistortedRightHandSideIntegral source = new DistortedRightHandSideIntegral(
 			LaplaceReferenceSolution.scalarRightHandSide(),
 			DistortedRightHandSideIntegral.VALUE);
-		//final PlotWindow p = new PlotWindow();
-		
+		//
 		for (int i = 0; i < 5; i++)
 		{
 			final CircleSpace circle = new CircleSpace(new CoordinateVector(2), 1, i);
@@ -50,10 +49,10 @@ public class DiskLaplace
 			
 			final ScalarFESpaceFunction<DistortedShapeFunction> solutionFunction =
 				new ScalarFESpaceFunction<>(circle.getShapeFunctions(), solution);
-//			p.addPlot(new ScalarPlot2D(solutionFunction,
+//			PlotWindow.addPlot(new ScalarPlot2D(solutionFunction,
 //			                           circle.generatePlotPoints(6 * circle.getCells().size()),
 //			                           30));
-//			p.addPlot(new ScalarPlot2D(LaplaceReferenceSolution.scalarReferenceSolution(),
+//			PlotWindow.addPlot(new ScalarPlot2D(LaplaceReferenceSolution.scalarReferenceSolution(),
 //			                           circle.generatePlotPoints(6 * circle.getCells().size()), 30));
 //			System.out.println(ConvergenceOrderEstimator.normL2Difference(solutionFunction,
 //			                                                              LaplaceReferenceSolution.scalarReferenceSolution(),

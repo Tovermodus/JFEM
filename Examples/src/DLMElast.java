@@ -246,16 +246,15 @@ public class DLMElast
 			System.out.println("solved");
 		}
 		interruptor.running = false;
-		final PlotWindow p = new PlotWindow();
-		p.addPlot(new MatrixPlot(iterateHistory, "iterateHistory"));
-		p.addPlot(new MatrixPlot(rhsHistory, "rhsHistory"));
+		PlotWindow.addPlot(new MatrixPlot(iterateHistory, "iterateHistory"));
+		PlotWindow.addPlot(new MatrixPlot(rhsHistory, "rhsHistory"));
 		final MixedPlot2DTime plot = new MixedPlot2DTime(pvals, vvals, eulerianPointsPerDimension, "VVals");
 		final MixedPlot2DTime plot2 = new MixedPlot2DTime(pvals, uXvals, eulerianPointsPerDimension, "u at X");
 		final MixedPlot2DTime plot4 = new MixedPlot2DTime(pvals, LfXVals, eulerianPointsPerDimension, "LfX");
 		final MixedPlot2DTime plot3 = new MixedPlot2DTime(pvals, derivVals, eulerianPointsPerDimension,
 		                                                  "derivative of X");
 		//System.out.println("plotttt");
-//		p.addPlot(new MixedPlot2DTime(pvals, uXvals, eulerianPointsPerDimension, "uXVals"));
+//		PlotWindow.addPlot(new MixedPlot2DTime(pvals, uXvals, eulerianPointsPerDimension, "uXVals"));
 		try
 		{
 			Thread.sleep(1000);
@@ -263,15 +262,15 @@ public class DLMElast
 		{
 			e.printStackTrace();
 		}
-//		p.addPlot(new MixedPlot2DTime(pvals, derivVals, eulerianPointsPerDimension, "derivVals"));
+//		PlotWindow.addPlot(new MixedPlot2DTime(pvals, derivVals, eulerianPointsPerDimension, "derivVals"));
 		
 		final ScalarPlot2DTime disPLacementplot = new ScalarPlot2DTime(dvals, eulerianPointsPerDimension,
 		                                                               "dVals");
-		p.addPlot(disPLacementplot);
-		p.addPlot(plot);
-		p.addPlot(plot2);
-		p.addPlot(plot4);
-		p.addPlot(plot3);
+		PlotWindow.addPlot(disPLacementplot);
+		PlotWindow.addPlot(plot);
+		PlotWindow.addPlot(plot2);
+		PlotWindow.addPlot(plot4);
+		PlotWindow.addPlot(plot3);
 		plot.addOverlay(new DistortedOverlay(eulerianPoints, lagrangian,
 		                                     iterateHistory.slice(new IntCoordinates(0, nEulerian),
 		                                                          new IntCoordinates(i,

@@ -59,11 +59,10 @@ public class ContinuousVectorLaplace
 		final VectorFESpaceFunction<ContinuousTPVectorFunction> solut =
 			new VectorFESpaceFunction<>(
 				grid.getShapeFunctions(), solution1);
-		final PlotWindow p = new PlotWindow();
-		p.addPlot(new ScalarPlot2D(solut.getComponentFunction(0), grid.generatePlotPoints(30), 30));
-		p.addPlot(new ScalarPlot2D(LaplaceReferenceSolution.vectorReferenceSolution()
-		                                                   .getComponentFunction(0),
-		                           grid.generatePlotPoints(30), 30));
+		PlotWindow.addPlot(new ScalarPlot2D(solut.getComponentFunction(0), grid.generatePlotPoints(30), 30));
+		PlotWindow.addPlot(new ScalarPlot2D(LaplaceReferenceSolution.vectorReferenceSolution()
+		                                                            .getComponentFunction(0),
+		                                    grid.generatePlotPoints(30), 30));
 		System.out.println(ConvergenceOrderEstimator.normL2VecDifference(solut,
 		                                                                 LaplaceReferenceSolution.vectorReferenceSolution(),
 		                                                                 grid.generatePlotPoints(20)));

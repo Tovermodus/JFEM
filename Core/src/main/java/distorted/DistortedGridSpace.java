@@ -15,14 +15,14 @@ import linalg.SparseMatrix;
 
 import java.util.*;
 
-public abstract class DistortedGridSpace<G extends DistortedGrid, ST extends ShapeFunction<DistortedCell,
+public abstract class DistortedGridSpace<ST extends ShapeFunction<DistortedCell,
 	DistortedFace, valueT,
 	gradientT,
 	hessianT> & Comparable<ST>, valueT, gradientT, hessianT>
 	implements AcceptsMatrixBoundaryValues<DistortedCell, DistortedFace, ST, valueT, gradientT, hessianT>,
 	Assembleable
 {
-	protected final G grid;
+	protected final DistortedGrid grid;
 	private final HashMap<DistortedCell, TreeSet<ST>> supportOnCell;
 	private final HashMap<DistortedFace, TreeSet<ST>> supportOnFace;
 	protected TreeSet<ST> shapeFunctions;
@@ -37,7 +37,7 @@ public abstract class DistortedGridSpace<G extends DistortedGrid, ST extends Sha
 		return fixedNodes;
 	}
 	
-	public DistortedGridSpace(final G grid)
+	public DistortedGridSpace(final DistortedGrid grid)
 	{
 		supportOnCell = new HashMap<>();
 		supportOnFace = new HashMap<>();

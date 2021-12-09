@@ -34,7 +34,8 @@ public class TaylorHoodStokes
 			divValue =
 			new MixedTPCellIntegral<>(ScalarFunction.constantFunction(-1),
 			                          MixedTPCellIntegral.DIV_VALUE);
-		final MixedCellIntegral<TPCell, ContinuousTPShapeFunction, ContinuousTPVectorFunction, QkQkFunction> vv =
+		final MixedCellIntegral<TPCell, ContinuousTPShapeFunction, ContinuousTPVectorFunction, QkQkFunction> vv
+			=
 			MixedCellIntegral.fromVelocityIntegral(valueValue);
 		final List<CellIntegral<TPCell, QkQkFunction>> cellIntegrals =
 			new ArrayList<>();
@@ -48,7 +49,7 @@ public class TaylorHoodStokes
 			ContinuousTPVectorFunction, QkQkFunction> rightHandSideIntegral =
 			MixedRightHandSideIntegral.fromVelocityIntegral(
 				new TPVectorRightHandSideIntegral<ContinuousTPVectorFunction>(ScalarFunction.constantFunction(
-					1)
+					                                                                            1)
 				                                                                            .makeIsotropicVectorFunction(),
 				                                                              TPVectorRightHandSideIntegral.VALUE));
 		final List<RightHandSideIntegral<TPCell, QkQkFunction>> rightHandSideIntegrals = new ArrayList<>();
@@ -101,7 +102,6 @@ public class TaylorHoodStokes
 		final MixedTPFESpaceFunction<QkQkFunction> solut =
 			new MixedTPFESpaceFunction<>(
 				grid.getShapeFunctions(), solution1);
-		final PlotWindow p = new PlotWindow();
-		p.addPlot(new MixedPlot3D(solut, grid.generatePlotPoints(20), 20));
+		PlotWindow.addPlot(new MixedPlot3D(solut, grid.generatePlotPoints(20), 20));
 	}
 }

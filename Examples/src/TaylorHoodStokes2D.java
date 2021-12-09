@@ -27,7 +27,8 @@ public class TaylorHoodStokes2D
 			divValue =
 			new MixedTPCellIntegral<>(ScalarFunction.constantFunction(-1),
 			                          MixedTPCellIntegral.DIV_VALUE);
-		final MixedCellIntegral<TPCell, ContinuousTPShapeFunction, ContinuousTPVectorFunction, QkQkFunction> vv =
+		final MixedCellIntegral<TPCell, ContinuousTPShapeFunction, ContinuousTPVectorFunction, QkQkFunction> vv
+			=
 			MixedCellIntegral.fromVelocityIntegral(gradGrad);
 		final MixedRightHandSideIntegral<TPCell, ContinuousTPShapeFunction,
 			ContinuousTPVectorFunction, QkQkFunction> rightHandSideIntegral =
@@ -35,7 +36,6 @@ public class TaylorHoodStokes2D
 				new TPVectorRightHandSideIntegral<>(StokesReferenceSolution.rightHandSide(),
 				                                    TPVectorRightHandSideIntegral.VALUE));
 		
-		final PlotWindow p = new PlotWindow();
 		final TaylorHoodSpace grid = new TaylorHoodSpace(start, end,
 		                                                 Ints.asList(5, 5));
 		grid.assembleCells();
@@ -56,7 +56,7 @@ public class TaylorHoodStokes2D
 		MixedTPFESpaceFunction<QkQkFunction> solut =
 			new MixedTPFESpaceFunction<>(
 				grid.getShapeFunctions(), solution1);
-		p.addPlot(new MixedPlot2D(solut, grid.generatePlotPoints(20), 20));
+		PlotWindow.addPlot(new MixedPlot2D(solut, grid.generatePlotPoints(20), 20));
 		final TaylorHoodSpace grid2 = new TaylorHoodSpace(start, end,
 		                                                  Ints.asList(5, 5));
 		grid2.assembleCells();
@@ -74,8 +74,8 @@ public class TaylorHoodStokes2D
 		System.out.println(rhs.sub(grid2.getRhs())
 		                      .absMaxElement());
 		
-		p.addPlot(new MatrixPlot(mat));
-		p.addPlot(new MatrixPlot(grid2.getSystemMatrix()));
+		PlotWindow.addPlot(new MatrixPlot(mat));
+		PlotWindow.addPlot(new MatrixPlot(grid2.getSystemMatrix()));
 		
 		System.out.println("solve system: " + grid2.getSystemMatrix()
 		                                           .getRows() + "×" + grid2.getSystemMatrix()
@@ -91,8 +91,8 @@ public class TaylorHoodStokes2D
 		solut =
 			new MixedTPFESpaceFunction<>(
 				grid2.getShapeFunctions(), solution1);
-		p.addPlot(new MixedPlot2D(solut, grid2.generatePlotPoints(20), 20));
-		p.addPlot(new ScalarPlot2D(solut.getVelocityFunction()
-		                                .getDivergenceFunction(), grid2.generatePlotPoints(20), 20));
+		PlotWindow.addPlot(new MixedPlot2D(solut, grid2.generatePlotPoints(20), 20));
+		PlotWindow.addPlot(new ScalarPlot2D(solut.getVelocityFunction()
+		                                         .getDivergenceFunction(), grid2.generatePlotPoints(20), 20));
 	}
 }

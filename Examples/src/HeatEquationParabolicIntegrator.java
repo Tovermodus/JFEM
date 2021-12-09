@@ -76,8 +76,7 @@ public class HeatEquationParabolicIntegrator
 	{
 		final HeatEquationParabolicIntegrator integrator = new HeatEquationParabolicIntegrator(0.02, 50);
 		integrator.loop();
-		final PlotWindow p = new PlotWindow();
-		p.addPlot(new ScalarPlot2DTime(integrator.vals, 30, "akdsjh"));
+		PlotWindow.addPlot(new ScalarPlot2DTime(integrator.vals, 30, "akdsjh"));
 	}
 	
 	@Override

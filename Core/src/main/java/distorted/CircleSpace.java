@@ -23,7 +23,7 @@ public class CircleSpace
 	public void assembleFunctions(final int polynomialDegree)
 	{
 		shapeFunctions = new TreeSet<>();
-		for (final DistortedCell cell : grid.cells)
+		for (final DistortedCell cell : grid.getCells())
 		{
 			for (int localIndex = 0; localIndex < TPShapeFunction.functionsPerCell(polynomialDegree,
 			                                                                       getDimension()); localIndex++)

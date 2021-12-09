@@ -9,7 +9,7 @@ import distorted.geometry.DistortedFace;
 import linalg.CoordinateVector;
 
 public abstract class CircleGridSpace<ST extends ShapeFunction<DistortedCell, DistortedFace, valueT, gradientT, hessianT> & Comparable<ST>, valueT, gradientT, hessianT>
-	extends DistortedGridSpace<CircleGrid, ST, valueT, gradientT, hessianT>
+	extends DistortedGridSpace<ST, valueT, gradientT, hessianT>
 	implements AcceptsMatrixBoundaryValues<DistortedCell, DistortedFace, ST, valueT, gradientT, hessianT>,
 	Assembleable
 

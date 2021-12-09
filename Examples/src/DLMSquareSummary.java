@@ -147,11 +147,10 @@ public class DLMSquareSummary
 			iterateHistory.addRow(currentIterate, i + 1);
 			System.out.println("solved");
 		}
-		final PlotWindow p = new PlotWindow();
-		p.addPlot(new MatrixPlot(iterateHistory, "iterateHistory"));
-		p.addPlot(new MatrixPlot(rhsHistory, "rhsHistory"));
+		PlotWindow.addPlot(new MatrixPlot(iterateHistory, "iterateHistory"));
+		PlotWindow.addPlot(new MatrixPlot(rhsHistory, "rhsHistory"));
 		final MixedPlot2DTime plot = new MixedPlot2DTime(pvals, vvals, eulerianPointsPerDimension, "VVals");
-		p.addPlot(new MixedPlot2DTime(pvals, uXvals, eulerianPointsPerDimension, "uXVals"));
+		PlotWindow.addPlot(new MixedPlot2DTime(pvals, uXvals, eulerianPointsPerDimension, "uXVals"));
 		try
 		{
 			Thread.sleep(1000);
@@ -159,16 +158,18 @@ public class DLMSquareSummary
 		{
 			e.printStackTrace();
 		}
-		p.addPlot(new MixedPlot2DTime(pvals, derivVals, eulerianPointsPerDimension, "derivVals"));
+		PlotWindow.addPlot(new MixedPlot2DTime(pvals, derivVals, eulerianPointsPerDimension, "derivVals"));
 		
-		p.addPlot(plot.addOverlay(new CartesianOverlay<>(eulerianPoints, lagrangian,
-		                                                 iterateHistory.slice(new IntCoordinates(0, nEulerian),
-		                                                                      new IntCoordinates(timeSteps + 1,
-		                                                                                         nEulerian + nLagrangian)),
-		                                                 10)));
+		PlotWindow.addPlot(plot.addOverlay(new CartesianOverlay<>(eulerianPoints, lagrangian,
+		                                                          iterateHistory.slice(new IntCoordinates(0,
+		                                                                                                  nEulerian),
+		                                                                               new IntCoordinates(
+			                                                                               timeSteps + 1,
+			                                                                               nEulerian + nLagrangian)),
+		                                                          10)));
 		final ScalarPlot2DTime disPLacementplot = new ScalarPlot2DTime(dvals, eulerianPointsPerDimension,
 		                                                               "dVals");
-		p.addPlot(disPLacementplot);
+		PlotWindow.addPlot(disPLacementplot);
 	}
 	
 	public static void main(final String[] args)

@@ -4,6 +4,8 @@ import basic.Overlay;
 import basic.ScalarPlot2D;
 import distorted.geometry.DistortedCell;
 import io.vavr.Tuple2;
+import linalg.CoordinateMatrix;
+import linalg.CoordinateTensor;
 import linalg.CoordinateVector;
 import linalg.Matrix;
 
@@ -13,7 +15,8 @@ import java.util.List;
 public class DistortedOverlay
 	extends Overlay
 {
-	private final CircleVectorSpace space;
+	private final DistortedGridSpace<DistortedVectorShapeFunction, CoordinateVector, CoordinateMatrix, CoordinateTensor>
+		space;
 	private final Matrix displacementHistory;
 	private final int pointsPerCell;
 	CoordinateVector max;
@@ -23,7 +26,7 @@ public class DistortedOverlay
 	final DistortedVectorFESpaceFunction X;
 	
 	public DistortedOverlay(final List<CoordinateVector> backGroundPoints,
-	                        final CircleVectorSpace space,
+	                        final DistortedGridSpace<DistortedVectorShapeFunction, CoordinateVector, CoordinateMatrix, CoordinateTensor> space,
 	                        final Matrix displacementHistory,
 	                        final int pointsPerCell)
 	{

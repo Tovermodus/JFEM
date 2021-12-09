@@ -2,7 +2,7 @@ package dlm;
 
 import basic.*;
 import com.google.common.collect.ImmutableList;
-import distorted.CircleVectorSpace;
+import distorted.DistortedGridSpace;
 import distorted.DistortedVectorFESpaceFunction;
 import distorted.DistortedVectorFunctionOnCells;
 import distorted.DistortedVectorShapeFunction;
@@ -27,7 +27,8 @@ public abstract class HyperbolicCartesianDistorted<ST extends ComposeMixedShapeF
 {
 	final public int dimension;
 	final public CartesianGridSpace<ST, MixedValue, MixedGradient, MixedHessian> backgroundSpace;
-	final public ImmutableList<CircleVectorSpace> particleSpaces;
+	final public ImmutableList<DistortedGridSpace<DistortedVectorShapeFunction, CoordinateVector, CoordinateMatrix, CoordinateTensor>>
+		particleSpaces;
 	final public BlockSparseMatrix twoDerivativeMatrix;
 	final public BlockSparseMatrix oneDerivativeMatrix;
 	final public BlockSparseMatrix zeroDerivativeMatrix;
@@ -39,7 +40,7 @@ public abstract class HyperbolicCartesianDistorted<ST extends ComposeMixedShapeF
 	public HyperbolicCartesianDistorted(final double dt,
 	                                    final int timeSteps,
 	                                    final CartesianGridSpace<ST, MixedValue, MixedGradient, MixedHessian> backgroundSpace,
-	                                    final List<CircleVectorSpace> particleSpaces)
+	                                    final List<DistortedGridSpace<DistortedVectorShapeFunction, CoordinateVector, CoordinateMatrix, CoordinateTensor>> particleSpaces)
 	{
 		super(dt, timeSteps);
 		this.backgroundSpace = backgroundSpace;
@@ -127,7 +128,8 @@ public abstract class HyperbolicCartesianDistorted<ST extends ComposeMixedShapeF
 	                                     final Map<IntCoordinates, SparseMatrix> zeroDerivativeBlocks,
 	                                     final int particleId)
 	{
-		final CircleVectorSpace particleSpace = particleSpaces.get(particleId);
+		final DistortedGridSpace<DistortedVectorShapeFunction, CoordinateVector, CoordinateMatrix, CoordinateTensor>
+			particleSpace = particleSpaces.get(particleId);
 		final int particleBlockSize = particleSpace.getShapeFunctions()
 		                                           .size();
 		final int nBackgroundVelocities = getnBackgroundVelocities();

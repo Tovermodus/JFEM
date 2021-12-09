@@ -101,10 +101,9 @@ public class QkQkMaxwell
 			new MixedTPFESpaceFunction<>(
 				grid.getShapeFunctions(), solution1);
 		
-		final PlotWindow p = new PlotWindow();
-		p.addPlot(new MixedPlot3D(solut, grid.generatePlotPoints(20), 20));
-		p.addPlot(new MixedPlot3D(MaxwellReferenceSolution.mixedReferenceSolution(),
-		                          grid.generatePlotPoints(20),
-		                          20));
+		PlotWindow.addPlot(new MixedPlot3D(solut, grid.generatePlotPoints(20), 20));
+		PlotWindow.addPlot(new MixedPlot3D(MaxwellReferenceSolution.mixedReferenceSolution(),
+		                                   grid.generatePlotPoints(20),
+		                                   20));
 	}
 }

@@ -4,7 +4,6 @@ import distorted.geometry.DistortedCell;
 import distorted.geometry.DistortedFace;
 import linalg.CoordinateMatrix;
 import linalg.CoordinateVector;
-import org.ujmp.core.collections.RingBufferList;
 import tensorproduct.TPShapeFunction;
 
 import java.util.TreeSet;
@@ -25,7 +24,7 @@ public class DistortedRingSpace
 	public void assembleFunctions(final int polynomialDegree)
 	{
 		shapeFunctions = new TreeSet<>();
-		for (final DistortedCell cell : grid.cells)
+		for (final DistortedCell cell : grid.getCells())
 		{
 			for (int localIndex = 0; localIndex < TPShapeFunction.functionsPerCell(polynomialDegree,
 			                                                                       getDimension()); localIndex++)

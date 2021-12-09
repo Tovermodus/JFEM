@@ -268,8 +268,7 @@ public class DLMStokesTime
 			                                         iterate).pressureValuesInPointsAtTime(points,
 			                                                                               i * dt)));
 		}
-		final PlotWindow p = new PlotWindow();
 		final MixedPlot2DTime plot = new MixedPlot2DTime(pvals, vvals, nPoints);
-		p.addPlot(plot.addOverlay(new CircleOverlay(immersedGrid, plot)));
+		PlotWindow.addPlot(plot.addOverlay(new CircleOverlay(immersedGrid, plot)));
 	}
 }

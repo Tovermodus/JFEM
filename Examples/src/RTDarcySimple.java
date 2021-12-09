@@ -71,8 +71,7 @@ public class RTDarcySimple
 			new MixedTPFESpaceFunction<>(
 				grid.getShapeFunctions(), solution1);
 		
-		final PlotWindow p = new PlotWindow();
-		p.addPlot(new MatrixPlot(grid.getSystemMatrix()));
-		p.addPlot(new MixedPlot2D(solut, grid.generatePlotPoints(30), 30));
+		PlotWindow.addPlot(new MatrixPlot(grid.getSystemMatrix()));
+		PlotWindow.addPlot(new MixedPlot2D(solut, grid.generatePlotPoints(30), 30));
 	}
 }

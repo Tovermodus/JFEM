@@ -236,12 +236,11 @@ public class DLMSummarySchur
 			System.out.println("solved");
 		}
 		interruptor.running = false;
-		final PlotWindow p = new PlotWindow();
-		p.addPlot(new MatrixPlot(iterateHistory, "iterateHistory"));
-		p.addPlot(new MatrixPlot(rhsHistory, "rhsHistory"));
+		PlotWindow.addPlot(new MatrixPlot(iterateHistory, "iterateHistory"));
+		PlotWindow.addPlot(new MatrixPlot(rhsHistory, "rhsHistory"));
 		final MixedPlot2DTime plot = new MixedPlot2DTime(pvals, vvals, eulerianPointsPerDimension, "VVals");
 		//System.out.println("plotttt");
-//		p.addPlot(new MixedPlot2DTime(pvals, uXvals, eulerianPointsPerDimension, "uXVals"));
+//		PlotWindow.addPlot(new MixedPlot2DTime(pvals, uXvals, eulerianPointsPerDimension, "uXVals"));
 		try
 		{
 			Thread.sleep(1000);
@@ -249,12 +248,12 @@ public class DLMSummarySchur
 		{
 			e.printStackTrace();
 		}
-//		p.addPlot(new MixedPlot2DTime(pvals, derivVals, eulerianPointsPerDimension, "derivVals"));
+//		PlotWindow.addPlot(new MixedPlot2DTime(pvals, derivVals, eulerianPointsPerDimension, "derivVals"));
 		
 		final ScalarPlot2DTime disPLacementplot = new ScalarPlot2DTime(dvals, eulerianPointsPerDimension,
 		                                                               "dVals");
-		p.addPlot(disPLacementplot);
-		p.addPlot(plot);
+		PlotWindow.addPlot(disPLacementplot);
+		PlotWindow.addPlot(plot);
 		plot.addOverlay(new DistortedOverlay(eulerianPoints, lagrangian,
 		                                     iterateHistory.slice(new IntCoordinates(0, nEulerian),
 		                                                          new IntCoordinates(i,
