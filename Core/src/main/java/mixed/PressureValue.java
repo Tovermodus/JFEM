@@ -4,22 +4,17 @@ import linalg.CoordinateVector;
 import linalg.IntCoordinates;
 import linalg.Tensor;
 
-public class PressureValue extends MixedValue
+public class PressureValue
+	extends MixedValue
 {
-	public PressureValue(double pressure)
-	{
-		super(3);
-		setPressure(pressure);
-	}
-	
-	public PressureValue(double pressure, int domainDimension)
+	public PressureValue(final double pressure, final int domainDimension)
 	{
 		super(domainDimension);
 		setPressure(pressure);
 	}
 	
 	@Override
-	public double at(int... coordinates)
+	public double at(final int... coordinates)
 	{
 		if (coordinates.length != 1)
 			throw new IllegalArgumentException("Wrong number of coordinates");
@@ -29,7 +24,7 @@ public class PressureValue extends MixedValue
 	}
 	
 	@Override
-	public void set(double value, int... coordinates)
+	public void set(final double value, final int... coordinates)
 	{
 		if (coordinates.length != 1)
 			throw new IllegalArgumentException("Wrong number of coordinates");
@@ -39,7 +34,7 @@ public class PressureValue extends MixedValue
 	}
 	
 	@Override
-	public void add(double value, int... coordinates)
+	public void add(final double value, final int... coordinates)
 	{
 		if (coordinates.length != 1)
 			throw new IllegalArgumentException("Wrong number of coordinates");
@@ -49,19 +44,20 @@ public class PressureValue extends MixedValue
 	}
 	
 	@Override
-	public MixedValue add(Tensor other)
+	public MixedValue add(final Tensor other)
 	{
 		if (other instanceof PressureValue)
-			return new PressureValue(getPressure() + ((PressureValue) other).getPressure());
+			return new PressureValue(getPressure() + ((PressureValue) other).getPressure(),
+			                         getDomainDimension());
 		if (other instanceof VelocityValue)
 		{
-			MixedValue ret = new MixedValue(((VelocityValue) other).getDomainDimension());
+			final MixedValue ret = new MixedValue(((VelocityValue) other).getDomainDimension());
 			ret.setPressure(getPressure());
 			ret.setVelocity(((VelocityValue) other).getVelocity());
 			return ret;
 		} else if (other instanceof MixedValue)
 		{
-			MixedValue ret = new MixedValue(((MixedValue) other).getDomainDimension());
+			final MixedValue ret = new MixedValue(((MixedValue) other).getDomainDimension());
 			ret.setPressure(((MixedValue) other).getPressure() + getPressure());
 			ret.setVelocity(((MixedValue) other).getVelocity());
 			return ret;
@@ -70,11 +66,11 @@ public class PressureValue extends MixedValue
 	}
 	
 	@Override
-	public PressureValue mul(double scalar)
+	public PressureValue mul(final double scalar)
 	{
-		return new PressureValue(scalar);
+		return new PressureValue(getPressure() * scalar,
+		                         getDomainDimension());
 	}
-	
 	
 	@Override
 	public CoordinateVector getVelocity()
@@ -95,13 +91,13 @@ public class PressureValue extends MixedValue
 	}
 	
 	@Override
-	public void setVelocity(CoordinateVector velocity)
+	public void setVelocity(final CoordinateVector velocity)
 	{
 		throw new IllegalStateException("Not a Velocity vector");
 	}
 	
 	@Override
-	public void addVelocity(CoordinateVector velocity)
+	public void addVelocity(final CoordinateVector velocity)
 	{
 		throw new IllegalStateException("Not a Velocity vector");
 	}

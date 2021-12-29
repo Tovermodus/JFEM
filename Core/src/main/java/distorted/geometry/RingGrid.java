@@ -172,36 +172,63 @@ public class RingGrid
 				                                           .normalize()
 				                                           .mul(bottom.getVertices()
 				                                                      .get(0)
+				                                                      .sub(centerPoint)
 				                                                      .euclidianNorm()));
 			if (right.isBoundaryFace())
+			{
 				rightCenter = centerPoint.add(rightCenter.sub(centerPoint)
 				                                         .normalize()
 				                                         .mul(right.getVertices()
 				                                                   .get(0)
+				                                                   .sub(centerPoint)
 				                                                   .euclidianNorm()));
+			}
 			if (top.isBoundaryFace())
 				topCenter = centerPoint.add(topCenter.sub(centerPoint)
 				                                     .normalize()
 				                                     .mul(top.getVertices()
 				                                             .get(0)
+				                                             .sub(centerPoint)
 				                                             .euclidianNorm()));
 			if (left.isBoundaryFace())
+			{
 				leftCenter = centerPoint.add(leftCenter.sub(centerPoint)
 				                                       .normalize()
 				                                       .mul(left.getVertices()
 				                                                .get(0)
+				                                                .sub(centerPoint)
 				                                                .euclidianNorm()));
+			}
 			final CoordinateVector center = mean(bottomCenter, rightCenter, topCenter, leftCenter);
-			System.out.println();
-			System.out.println("ll " + vertices[0]);
-			System.out.println("lr " + vertices[1]);
-			System.out.println("ur " + vertices[2]);
-			System.out.println("ul " + vertices[3]);
-			System.out.println("bc " + bottomCenter);
-			System.out.println("rc " + rightCenter);
-			System.out.println("tc " + topCenter);
-			System.out.println("lc " + leftCenter);
-			System.out.println("cc " + center);
+//			final EmptyPlot plot = new EmptyPlot();
+//			final CoordinateSystemOverlay overlay
+//				= new CoordinateSystemOverlay(CoordinateVector.fromValues(0, 0),
+//				                              CoordinateVector.fromValues(1, 1));
+//			overlay.addPoint(vertices[0], "ll");
+//			overlay.addPoint(vertices[1], "lr");
+//			overlay.addPoint(vertices[2], "ur");
+//			overlay.addPoint(vertices[3], "ul");
+//			overlay.addPoint(bottomCenter, "bc");
+//			overlay.addPoint(rightCenter, "rc");
+//			overlay.addPoint(topCenter, "tc");
+//			overlay.addPoint(leftCenter, "lc");
+//			overlay.addPoint(center, "cc");
+//			plot.addOverlay(overlay);
+//			PlotWindow.addPlot(plot);
+//			System.out.println();
+//			System.out.println("lln " + vertices[0].euclidianNorm());
+//			System.out.println("lrn " + vertices[1].euclidianNorm());
+//			System.out.println("urn " + vertices[2].euclidianNorm());
+//			System.out.println("uln " + vertices[3].euclidianNorm());
+//			System.out.println("ll " + vertices[0]);
+//			System.out.println("lr " + vertices[1]);
+//			System.out.println("ur " + vertices[2]);
+//			System.out.println("ul " + vertices[3]);
+//			System.out.println("bc " + bottomCenter);
+//			System.out.println("rc " + rightCenter);
+//			System.out.println("tc " + topCenter);
+//			System.out.println("lc " + leftCenter);
+//			System.out.println("cc " + center);
 			
 			addCell(ret, vertices[0], bottomCenter, center, leftCenter);
 			addCell(ret, bottomCenter, vertices[1], rightCenter, center);

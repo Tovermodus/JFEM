@@ -33,7 +33,7 @@ public abstract class HyperbolicCartesianDistorted<ST extends ComposeMixedShapeF
 	final public BlockSparseMatrix oneDerivativeMatrix;
 	final public BlockSparseMatrix zeroDerivativeMatrix;
 	final int[] blockStarts;
-	
+	SparseMatrix fixedBackGroundVelocityMatrix;
 	final MetricWindow metricWindow = MetricWindow.getInstance();
 	final CountMetric cm;
 	
@@ -107,16 +107,16 @@ public abstract class HyperbolicCartesianDistorted<ST extends ComposeMixedShapeF
 			                                                                        nBackgroundVelocities));
 		oneDerivativeBlocks.put(new IntCoordinates(0, 0), velocityMassMatrix);
 		final SparseMatrix mixedBackgroundMatrix = evaluateBackgroundIntegrals();
-		final SparseMatrix velocityMatrix = mixedBackgroundMatrix.slice(new IntCoordinates(0, 0),
-		                                                                new IntCoordinates(nBackgroundVelocities,
-		                                                                                   nBackgroundVelocities));
+		fixedBackGroundVelocityMatrix = mixedBackgroundMatrix.slice(new IntCoordinates(0, 0),
+		                                                            new IntCoordinates(nBackgroundVelocities,
+		                                                                               nBackgroundVelocities));
 		final SparseMatrix incompressibilityMatrix = mixedBackgroundMatrix.slice(new IntCoordinates(
 			                                                                         nBackgroundVelocities,
 			                                                                         0),
 		                                                                         new IntCoordinates(
 			                                                                         nBackgroundVelocities + nBackgroundPressures,
 			                                                                         nBackgroundVelocities));
-		zeroDerivativeBlocks.put(new IntCoordinates(0, 0), velocityMatrix);
+		zeroDerivativeBlocks.put(new IntCoordinates(0, 0), fixedBackGroundVelocityMatrix);
 		zeroDerivativeBlocks.put(new IntCoordinates(nBackgroundVelocities, 0),
 		                         incompressibilityMatrix);
 		zeroDerivativeBlocks.put(new IntCoordinates(0, nBackgroundVelocities),
@@ -160,6 +160,21 @@ public abstract class HyperbolicCartesianDistorted<ST extends ComposeMixedShapeF
 		final int n = blockStarts[2] - blockStarts[0];
 		final SparseMatrix ret = new SparseMatrix(n, n);
 		backgroundSpace.writeCellIntegralsToMatrix(getBackgroundIntegrals(), ret);
+		return ret;
+	}
+	
+	protected List<CellIntegral<TPCell, ST>> getSemiImplicitBackgroundIntegrals(final VectorFunctionOnCells<TPCell,
+		TPFace> u)
+	{
+		return new ArrayList<>();
+	}
+	
+	protected SparseMatrix evaluateSemiImplicitBackGroundIntegrals()
+	{
+		final int n = blockStarts[2] - blockStarts[0];
+		final SparseMatrix ret = new SparseMatrix(n, n);
+		backgroundSpace.writeCellIntegralsToMatrix(getSemiImplicitBackgroundIntegrals(getUp().getVelocityFunction()),
+		                                           ret);
 		return ret;
 	}
 	
@@ -233,7 +248,7 @@ public abstract class HyperbolicCartesianDistorted<ST extends ComposeMixedShapeF
 		return ret;
 	}
 	
-	private DistortedVectorFunctionOnCells getX(final int particleId)
+	public DistortedVectorFunctionOnCells getX(final int particleId)
 	{
 		final DistortedVectorFESpaceFunction displacement
 			= new DistortedVectorFESpaceFunction(particleSpaces.get(
@@ -280,6 +295,12 @@ public abstract class HyperbolicCartesianDistorted<ST extends ComposeMixedShapeF
 				throw new UnsupportedOperationException("not implemented yet");
 			}
 		};
+	}
+	
+	public MixedFunctionOnCells<TPCell, TPFace> getUp()
+	{
+		return new MixedTPFESpaceFunction<>(backgroundSpace.getShapeFunctions(),
+		                                    getBackGroundIterate(currentIterate));
 	}
 	
 	protected abstract List<CellIntegral<TPCell, ST>> getBackgroundMassIntegrals();
@@ -412,15 +433,14 @@ public abstract class HyperbolicCartesianDistorted<ST extends ComposeMixedShapeF
 	{
 		final DenseVector initialVelocity
 			= new DenseVector(zeroDerivativeMatrix.getBlockSizes()[2 * particleId + 2]);
+		final VectorFunction initialParticleVelocity = VectorFunction.fromLambda(
+			getInitialParticleVelocity(particleId), dimension, dimension);
 		particleSpaces.get(particleId)
 		              .getShapeFunctions()
 		              .forEach((key, func) ->
 			                       initialVelocity.add(func.getNodeFunctional()
-			                                               .evaluate(VectorFunction.fromLambda(
-				                                               getInitialParticleVelocity(particleId),
-				                                               dimension,
-				                                               dimension)), key));
-		ret.addSmallVectorAt(initialVelocity, zeroDerivativeMatrix.getBlockStarts()[particleId + 2]);
+			                                               .evaluate(initialParticleVelocity), key));
+		ret.addSmallVectorAt(initialVelocity, zeroDerivativeMatrix.getBlockStarts()[2 * particleId + 2]);
 	}
 	
 	@Override
@@ -438,7 +458,13 @@ public abstract class HyperbolicCartesianDistorted<ST extends ComposeMixedShapeF
 	@Override
 	protected Matrix getNoDerivativeOperator()
 	{
-		final SparseMatrix As = zeroDerivativeMatrix.getBlockMatrix(0, 0);
+		final SparseMatrix As =
+			evaluateSemiImplicitBackGroundIntegrals().slice(new IntCoordinates(0, 0),
+			                                                new IntCoordinates(getnBackgroundVelocities(),
+			                                                                   getnBackgroundVelocities()))
+			                                         .add(fixedBackGroundVelocityMatrix);
+		zeroDerivativeMatrix.getBlockMatrix(0, 0)
+		                    .overrideBy(As);
 		
 		for (int i = 0; i < particleSpaces.size(); i++)
 		{

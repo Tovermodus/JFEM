@@ -16,7 +16,7 @@ import java.util.function.Function;
 import java.util.function.Predicate;
 import java.util.function.ToDoubleFunction;
 
-public class DLMRing
+public class DLMRingPrecond
 	extends HyperbolicCartesianDistorted<QkQkFunction, ContinuousTPShapeFunction, ContinuousTPVectorFunction>
 {
 	
@@ -29,10 +29,10 @@ public class DLMRing
 	VectorMultiplyable precond;
 	private double lastPrecondTime;
 	
-	public DLMRing(final double dt,
-	               final int timeSteps,
-	               final CartesianGridSpace<QkQkFunction, MixedValue, MixedGradient, MixedHessian> backgroundSpace,
-	               final List<DistortedGridSpace<DistortedVectorShapeFunction, CoordinateVector, CoordinateMatrix, CoordinateTensor>> particleSpaces)
+	public DLMRingPrecond(final double dt,
+	                      final int timeSteps,
+	                      final CartesianGridSpace<QkQkFunction, MixedValue, MixedGradient, MixedHessian> backgroundSpace,
+	                      final List<DistortedGridSpace<DistortedVectorShapeFunction, CoordinateVector, CoordinateMatrix, CoordinateTensor>> particleSpaces)
 	{
 		super(dt, timeSteps, backgroundSpace, particleSpaces);
 		velocityValues = new ConcurrentSkipListMap<>();
@@ -65,11 +65,42 @@ public class DLMRing
 		};
 	}
 	
+	public static VectorMultiplyable calculatePrecond(final Matrix A)
+	{
+		final IntCoordinates Ashape = A.getShape();
+		return new VectorMultiplyable()
+		{
+			@Override
+			public int getVectorSize()
+			{
+				return Ashape.get(1);
+			}
+			
+			@Override
+			public int getTVectorSize()
+			{
+				return Ashape.get(0);
+			}
+			
+			@Override
+			public Vector mvMul(final Vector vector)
+			{
+				throw new UnsupportedOperationException("not implemented yet");
+			}
+			
+			@Override
+			public Vector tvMul(final Vector vector)
+			{
+				throw new UnsupportedOperationException("not implemented yet");
+			}
+		};
+	}
+	
 	public VectorMultiplyable getPrecond(final Matrix A)
 	{
 		if (precond == null || time > lastPrecondTime + dt * 20)
 		{
-			precond = new DenseMatrix(A).inverse();
+			precond = calculatePrecond(A);
 			lastPrecondTime = time;
 		}
 		return precond;
@@ -282,76 +313,73 @@ public class DLMRing
 		particle1.assembleFunctions(1);
 		particle2.assembleCells();
 		particle2.assembleFunctions(1);
-		final DLMRing dlmElast2 = new DLMRing(0.02, 1, backGround, List.of(particle0, particle1, particle2));
+		final DLMRingPrecond dlmElast2 = new DLMRingPrecond(0.02,
+		                                                    10,
+		                                                    backGround,
+		                                                    List.of(particle0, particle1, particle2));
 		dlmElast2.loop();
 		final MixedPlot2DTime UpPlot0 = new MixedPlot2DTime(dlmElast2.pressureValues,
 		                                                    dlmElast2.velocityValues,
 		                                                    30,
 		                                                    "Up1");
-		final Overlay ball1 = new DistortedOverlay(dlmElast2.plotPoints,
-		                                           particle0,
-		                                           dlmElast2.iterateHistory
-			                                           .slice(new IntCoordinates(0,
-			                                                                     backGround.getShapeFunctions()
-			                                                                               .size()),
-			                                                  new IntCoordinates(dlmElast2.iterateHistory.getRows(),
-			                                                                     backGround.getShapeFunctions()
-			                                                                               .size()
-				                                                                     + particle0.getShapeFunctions()
-				                                                                                .size())),
-		                                           5);
-		UpPlot0.addOverlay(ball1);
-		
+		UpPlot0.addOverlay(new DistortedOverlay(dlmElast2.plotPoints,
+		                                        particle0,
+		                                        dlmElast2.iterateHistory
+			                                        .slice(new IntCoordinates(0,
+			                                                                  backGround.getShapeFunctions()
+			                                                                            .size()),
+			                                               new IntCoordinates(dlmElast2.iterateHistory.getRows(),
+			                                                                  backGround.getShapeFunctions()
+			                                                                            .size()
+				                                                                  + particle0.getShapeFunctions()
+				                                                                             .size())),
+		                                        5));
 		PlotWindow.addPlot(UpPlot0);
 		final MixedPlot2DTime UpPlot = new MixedPlot2DTime(dlmElast2.pressureValues,
 		                                                   dlmElast2.velocityValues,
 		                                                   30,
 		                                                   "Up1");
-		final Overlay ball2 = new DistortedOverlay(dlmElast2.plotPoints,
-		                                           particle1,
-		                                           dlmElast2.iterateHistory
-			                                           .slice(new IntCoordinates(0,
-			                                                                     backGround.getShapeFunctions()
-			                                                                               .size()
-				                                                                     + 2 * particle0.getShapeFunctions()
-				                                                                                    .size()),
-			                                                  new IntCoordinates(dlmElast2.iterateHistory.getRows(),
-			                                                                     backGround.getShapeFunctions()
-			                                                                               .size()
-				                                                                     + 2 * particle0.getShapeFunctions()
-				                                                                                    .size()
-				                                                                     + particle1.getShapeFunctions()
-				                                                                                .size())),
-		                                           5);
-		UpPlot.addOverlay(ball2);
+		UpPlot.addOverlay(new DistortedOverlay(dlmElast2.plotPoints,
+		                                       particle1,
+		                                       dlmElast2.iterateHistory
+			                                       .slice(new IntCoordinates(0,
+			                                                                 backGround.getShapeFunctions()
+			                                                                           .size()
+				                                                                 + 2 * particle0.getShapeFunctions()
+				                                                                                .size()),
+			                                              new IntCoordinates(dlmElast2.iterateHistory.getRows(),
+			                                                                 backGround.getShapeFunctions()
+			                                                                           .size()
+				                                                                 + 2 * particle0.getShapeFunctions()
+				                                                                                .size()
+				                                                                 + particle1.getShapeFunctions()
+				                                                                            .size())),
+		                                       5));
 		PlotWindow.addPlot(UpPlot);
 		final MixedPlot2DTime UpPlot1 = new MixedPlot2DTime(dlmElast2.pressureValues,
 		                                                    dlmElast2.velocityValues,
 		                                                    30,
 		                                                    "Up2");
-		final Overlay ring = new DistortedOverlay(dlmElast2.plotPoints,
-		                                          particle2,
-		                                          dlmElast2.iterateHistory
-			                                          .slice(new IntCoordinates(0,
-			                                                                    backGround.getShapeFunctions()
-			                                                                              .size()
-				                                                                    + 2 * particle0.getShapeFunctions()
-				                                                                                   .size()
-				                                                                    + 2 * particle1.getShapeFunctions()
-				                                                                                   .size()),
-			                                                 new IntCoordinates(dlmElast2.iterateHistory.getRows(),
-			                                                                    backGround.getShapeFunctions()
-			                                                                              .size()
-				                                                                    + 2 * particle0.getShapeFunctions()
-				                                                                                   .size()
-				                                                                    + 2 * particle1.getShapeFunctions()
-				                                                                                   .size()
-				                                                                    + particle2.getShapeFunctions()
-				                                                                               .size())),
-		                                          5);
-		UpPlot1.addOverlay(ring);
-		UpPlot0.addOverlay(ring);
-		UpPlot0.addOverlay(ball2);
+		UpPlot1.addOverlay(new DistortedOverlay(dlmElast2.plotPoints,
+		                                        particle2,
+		                                        dlmElast2.iterateHistory
+			                                        .slice(new IntCoordinates(0,
+			                                                                  backGround.getShapeFunctions()
+			                                                                            .size()
+				                                                                  + 2 * particle0.getShapeFunctions()
+				                                                                                 .size()
+				                                                                  + 2 * particle1.getShapeFunctions()
+				                                                                                 .size()),
+			                                               new IntCoordinates(dlmElast2.iterateHistory.getRows(),
+			                                                                  backGround.getShapeFunctions()
+			                                                                            .size()
+				                                                                  + 2 * particle0.getShapeFunctions()
+				                                                                                 .size()
+				                                                                  + 2 * particle1.getShapeFunctions()
+				                                                                                 .size()
+				                                                                  + particle2.getShapeFunctions()
+				                                                                             .size())),
+		                                        5));
 		PlotWindow.addPlot(UpPlot1);
 	}
 }

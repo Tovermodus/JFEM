@@ -1,10 +1,16 @@
 package basic;
 
 import java.awt.*;
+import java.util.ArrayList;
 
 public abstract class Plot
 {
-	Overlay o;
+	ArrayList<Overlay> overlays;
+	
+	public Plot()
+	{
+		overlays = new ArrayList<>();
+	}
 	
 	void draw(final Graphics g, final int width, final int height, final double slider, final boolean overlay)
 	{
@@ -12,9 +18,10 @@ public abstract class Plot
 		drawValues(g, width, height - 50, slider);
 		g.setColor(Color.BLACK);
 		g.drawString(title(), 20, height - 20);
-		if (overlay && o != null)
+		if (overlay)
 		{
-			o.draw(g, width, height - 50, slider);
+			for (final Overlay o : overlays)
+				o.draw(g, width, height - 50, slider);
 		}
 	}
 	
@@ -24,7 +31,7 @@ public abstract class Plot
 	
 	public Plot addOverlay(final Overlay newOverlay)
 	{
-		o = newOverlay;
+		overlays.add(newOverlay);
 		return this;
 	}
 }

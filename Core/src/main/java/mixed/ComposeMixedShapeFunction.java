@@ -85,7 +85,7 @@ public abstract class ComposeMixedShapeFunction<CT extends Cell<CT, FT>,
 	public MixedValue valueInCell(final CoordinateVector pos, final CT cell)
 	{
 		if (hasPressureFunction())
-			return new PressureValue(getPressureFunction().valueInCell(pos, cell));
+			return new PressureValue(getPressureFunction().valueInCell(pos, cell), pos.getLength());
 		else
 			return new VelocityValue(getVelocityFunction().valueInCell(pos, cell));
 	}

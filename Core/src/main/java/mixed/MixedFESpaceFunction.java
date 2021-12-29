@@ -22,6 +22,7 @@ public class MixedFESpaceFunction<MF extends MixedShapeFunction<CT, FT, ?, ?>, C
 	private final HashMap<MF, Double> coefficients;
 	Map<MF, Double> pressureCoefficients;
 	Map<MF, Double> velocityCoefficients;
+	final int dimension;
 	
 	public MixedFESpaceFunction(final MF[] functions, final double[] coefficients)
 	{
@@ -39,6 +40,10 @@ public class MixedFESpaceFunction<MF extends MixedShapeFunction<CT, FT, ?, ?>, C
 			this.coefficients.put(functions[i], coefficients[i]);
 		}
 		initializeFunctionSets();
+		dimension = this.coefficients.keySet()
+		                             .iterator()
+		                             .next()
+		                             .getDomainDimension();
 	}
 	
 	public MixedFESpaceFunction(final Map<Integer, MF> functions, final Vector coefficients)
@@ -61,6 +66,10 @@ public class MixedFESpaceFunction<MF extends MixedShapeFunction<CT, FT, ?, ?>, C
 			this.coefficients.put(function.getValue(), coefficients.at(function.getKey()));
 		}
 		initializeFunctionSets();
+		dimension = this.coefficients.keySet()
+		                             .iterator()
+		                             .next()
+		                             .getDomainDimension();
 	}
 	
 	private void initializeFunctionSets()
@@ -78,10 +87,7 @@ public class MixedFESpaceFunction<MF extends MixedShapeFunction<CT, FT, ?, ?>, C
 	@Override
 	public int getDomainDimension()
 	{
-		return coefficients.keySet()
-		                   .iterator()
-		                   .next()
-		                   .getDomainDimension();
+		return dimension;
 	}
 	
 	@Override
@@ -201,7 +207,7 @@ public class MixedFESpaceFunction<MF extends MixedShapeFunction<CT, FT, ?, ?>, C
 				                                        .getKey()
 				                                        .value(pos)
 				                                        .getPressure() * entry.getValue())
-			                                        .sum());
+			                                        .sum(), dimension);
 		final MixedValue vf = velocityCoefficients
 			.entrySet()
 			.stream()
