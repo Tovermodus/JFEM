@@ -69,6 +69,7 @@ public class DLMRing
 	{
 		if (precond == null || time > lastPrecondTime + dt * 20)
 		{
+			PlotWindow.addPlot(new MatrixPlot(A));
 			precond = new DenseMatrix(A).inverse();
 			lastPrecondTime = time;
 		}

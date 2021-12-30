@@ -175,6 +175,14 @@ public class IntCoordinates
 		return ret;
 	}
 	
+	public int sum()
+	{
+		int ret = 0;
+		for (int i = 0; i < getDimension(); i++)
+			ret += coordinates[i];
+		return ret;
+	}
+	
 	public Range range()
 	{
 		return new Range(this);

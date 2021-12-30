@@ -140,7 +140,7 @@ public class BlockSparseMatrix
 		return blockst;
 	}
 	
-	public BlockSparseMatrix(final SparseMatrix s, final int[] blockStarts)
+	public BlockSparseMatrix(final Matrix s, final int[] blockStarts)
 	{
 		if (PerformanceArguments.getInstance().executeChecks)
 		{

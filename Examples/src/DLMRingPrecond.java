@@ -65,35 +65,16 @@ public class DLMRingPrecond
 		};
 	}
 	
-	public static VectorMultiplyable calculatePrecond(final Matrix A)
+	public VectorMultiplyable calculatePrecond(final Matrix A)
 	{
-		final IntCoordinates Ashape = A.getShape();
-		return new VectorMultiplyable()
-		{
-			@Override
-			public int getVectorSize()
-			{
-				return Ashape.get(1);
-			}
-			
-			@Override
-			public int getTVectorSize()
-			{
-				return Ashape.get(0);
-			}
-			
-			@Override
-			public Vector mvMul(final Vector vector)
-			{
-				throw new UnsupportedOperationException("not implemented yet");
-			}
-			
-			@Override
-			public Vector tvMul(final Vector vector)
-			{
-				throw new UnsupportedOperationException("not implemented yet");
-			}
-		};
+		PlotWindow.addPlot(new MatrixPlot(A));
+		final int[] blocks = new int[1 + particleSpaces.size()];
+		for (int i = 0; i < blocks.length; i++)
+			blocks[i] = blockStarts[2 * i];
+		System.out.println("copy");
+		final BlockSparseMatrix schurShape = new BlockSparseMatrix(A, blocks);
+		System.out.println("done");
+		return new DirectSchur(schurShape);
 	}
 	
 	public VectorMultiplyable getPrecond(final Matrix A)
@@ -101,6 +82,7 @@ public class DLMRingPrecond
 		if (precond == null || time > lastPrecondTime + dt * 20)
 		{
 			precond = calculatePrecond(A);
+			System.out.println("calculated");
 			lastPrecondTime = time;
 		}
 		return precond;
@@ -297,8 +279,7 @@ public class DLMRingPrecond
 		final DistortedGridSpace<DistortedVectorShapeFunction, CoordinateVector, CoordinateMatrix, CoordinateTensor>
 			particle0 =
 			new CircleVectorSpace(CoordinateVector.fromValues(0.4, 0.5),
-			                      0.05,
-			                      1);
+			                      0.05, 1);
 		final DistortedGridSpace<DistortedVectorShapeFunction, CoordinateVector, CoordinateMatrix, CoordinateTensor>
 			particle2 =
 			new RingVectorSpace(CoordinateVector.fromValues(0.5, 0.5),

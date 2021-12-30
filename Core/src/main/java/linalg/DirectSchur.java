@@ -2,7 +2,7 @@ package linalg;
 
 import scala.Function2;
 
-class DirectSchur
+public class DirectSchur
 	extends SchurSolver
 {
 	public DirectSchur(final BlockSparseMatrix blockMatrix)

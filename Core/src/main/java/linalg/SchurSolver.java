@@ -39,6 +39,12 @@ public abstract class SchurSolver
 			                                                   blockStarts[i])));
 			leftMatrices.add(blockMatrix.getBlocks()
 			                            .get(new IntCoordinates(blockStarts[i], 0)));
+			if (diagonalInverses.get(i - 1) == null)
+				throw new IllegalArgumentException("matrix does not contain necessary diagonal block");
+			if (topMatrices.get(i - 1) == null)
+				throw new IllegalArgumentException("matrix does not contain necessary top block");
+			if (leftMatrices.get(i - 1) == null)
+				throw new IllegalArgumentException("matrix does not contain necessary left block");
 		}
 		schurComplement = new DenseMatrix(IntStream.range(0, diagonalInverses.size())
 		                                           .parallel()

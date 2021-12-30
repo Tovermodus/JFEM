@@ -4,14 +4,15 @@ import basic.Plot;
 
 import java.awt.*;
 
-public class MatrixPlot extends Plot
+public class MatrixPlot
+	extends Plot
 {
 	private final Matrix m;
 	public int pixelWidth;
 	public int pixelHeight;
 	public double maxValue;
 	final double IDENTIFIED_AS_ZERO = 1e-4;
-	private String title;
+	private final String title;
 	
 	public MatrixPlot(final Matrix m)
 	{
@@ -20,7 +21,8 @@ public class MatrixPlot extends Plot
 		if (maxValue > 1e30) maxValue = 1e30;
 		this.title = "Matrix";
 	}
-	public MatrixPlot(final Matrix m,String title)
+	
+	public MatrixPlot(final Matrix m, final String title)
 	{
 		this.m = m;
 		this.maxValue = m.absMaxElement();
@@ -31,17 +33,39 @@ public class MatrixPlot extends Plot
 	@Override
 	public void drawValues(final Graphics g, final int width, final int height, final double slider)
 	{
-		pixelWidth = (width - 150) / Math.min(m.getCols(), 300) + 2;
-		pixelHeight = (height - 150) / Math.min(m.getRows(), 300) + 2;
-		final int skips = Math.max(1, m.getShape().size() / 90000);
-		int i = 0;
-		for (final IntCoordinates c : m.getShape().range())
+		if (m.isSparse())
 		{
-			if (i++ % skips == 0) drawSinglePoint(g, width, height, m.at(c), c);
+			pixelWidth = (width - 150) / m.getCols() + 2;
+			pixelHeight = (height - 150) / m.getRows() + 2;
+			g.setColor(Color.BLUE);
+			g.fillRect(74, 74, width - 148, height - 148);
+			for (final var v : m.getCoordinateEntryList()
+			                    .entrySet())
+			{
+				drawSinglePoint(g, width, height, v.getValue(), v.getKey());
+			}
+		} else
+		{
+			pixelWidth = (width - 150) / Math.min(m.getCols(), 300) + 2;
+			pixelHeight = (height - 150) / Math.min(m.getRows(), 300) + 2;
+			final int skips = Math.max(1,
+			                           m.getShape()
+			                            .size() / 90000);
+			int i = 0;
+			for (final IntCoordinates c : m.getShape()
+			                               .range())
+			{
+				
+				if (i++ % skips == 0) drawSinglePoint(g, width, height, m.at(c), c);
+			}
 		}
 	}
 	
-	public void drawSinglePoint(final Graphics g, final int width, final int height, double val, final IntCoordinates coords)
+	public void drawSinglePoint(final Graphics g,
+	                            final int width,
+	                            final int height,
+	                            double val,
+	                            final IntCoordinates coords)
 	{
 		if (Math.abs(val) > 1e30) val = 1e30;
 		double logval = 0;
@@ -64,6 +88,6 @@ public class MatrixPlot extends Plot
 	@Override
 	public String title()
 	{
-		return title+". Scale logarithmic: blue = " + IDENTIFIED_AS_ZERO + ", red = " + maxValue;
+		return title + ". Scale logarithmic: blue = " + IDENTIFIED_AS_ZERO + ", red = " + maxValue;
 	}
 }
