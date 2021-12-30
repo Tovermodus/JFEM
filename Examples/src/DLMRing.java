@@ -352,6 +352,9 @@ public class DLMRing
 		UpPlot1.addOverlay(ring);
 		UpPlot0.addOverlay(ring);
 		UpPlot0.addOverlay(ball2);
+		final Overlay coordinateSys = new CoordinateSystemOverlay(CoordinateVector.fromValues(0, 0),
+		                                                          CoordinateVector.fromValues(1, 1));
+		UpPlot0.addOverlay(coordinateSys);
 		PlotWindow.addPlot(UpPlot1);
 	}
 }

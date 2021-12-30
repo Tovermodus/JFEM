@@ -91,7 +91,7 @@ public class BlockSparseMatrix
 			        })
 			        .distinct()
 			        .collect(Collectors.toList());
-		checkForBadBlocks(blockStartSizes);
+		checkForWrongSizedBlocks(blockStartSizes);
 		blockStarts = new int[blockStartSizes.size()];
 		blockEnds = new int[blockStartSizes.size()];
 		blockStartSizes.sort(Comparator.comparingInt(t -> t._1));
@@ -103,13 +103,14 @@ public class BlockSparseMatrix
 		blocks.forEach(this::checkIfBlockFits);
 	}
 	
-	private static void checkForBadBlocks(final List<Tuple2<Integer, Integer>> blockStartSizes)
+	private static void checkForWrongSizedBlocks(final List<Tuple2<Integer, Integer>> blockStartSizes)
 	{
 		final Map<Integer, Integer> startSizesMap = new TreeMap<>();
 		for (final Tuple2<Integer, Integer> tuple : blockStartSizes)
 		{
-			if (startSizesMap.containsKey(tuple._1))
-				throw new IllegalArgumentException("Blocks do not fit on grid");
+			if (startSizesMap.getOrDefault(tuple._1, tuple._2)
+			                 .intValue() != tuple._2)
+				throw new IllegalArgumentException("Blocks do not fit on grid." + blockStartSizes);
 			startSizesMap.put(tuple._1, tuple._2);
 		}
 	}
@@ -350,12 +351,7 @@ public class BlockSparseMatrix
 		if (PerformanceArguments.getInstance().executeChecks)
 			if (getCols() != (vector.getLength()))
 				throw new IllegalArgumentException("Incompatible sizes");
-		final Map<Integer, Vector> subVectors =
-			IntStream.range(0, blockStarts.length)
-			         .parallel()
-			         .mapToObj(i -> new Tuple2<Integer, Vector>(blockStarts[i],
-			                                                    vector.slice(blockStarts[i], blockEnds[i])))
-			         .collect(new MapCollector<>());
+		final Map<Integer, DenseVector> subVectors = partitionVectorWithStart(vector, blockStarts, blockEnds);
 		final DenseVector ret = new DenseVector(vector.getLength());
 		final Map<Integer, List<DenseVector>> multipliedSubVectors =
 			blocks.entrySet()
@@ -372,18 +368,36 @@ public class BlockSparseMatrix
 		return ret;
 	}
 	
+	public static List<DenseVector> partitionVector(final Vector vector,
+	                                                final int[] blockS,
+	                                                final int[] blockE)
+	{
+		return IntStream.range(0, blockS.length)
+		                .parallel()
+		                .mapToObj(i -> new DenseVector(vector.slice(blockS[i],
+		                                                            blockE[i])))
+		                .collect(Collectors.toList());
+	}
+	
+	public static Map<Integer, DenseVector> partitionVectorWithStart(final Vector vector,
+	                                                                 final int[] blockS,
+	                                                                 final int[] blockE)
+	{
+		return IntStream.range(0, blockS.length)
+		                .parallel()
+		                .mapToObj(i -> new Tuple2<>(blockS[i],
+		                                            new DenseVector(vector.slice(blockS[i],
+		                                                                         blockE[i]))))
+		                .collect(new MapCollector<>());
+	}
+	
 	@Override
 	public Vector tvMul(final Vector vector)
 	{
 		if (PerformanceArguments.getInstance().executeChecks)
 			if (getCols() != (vector.getLength()))
 				throw new IllegalArgumentException("Incompatible sizes");
-		final Map<Integer, Vector> subVectors =
-			IntStream.range(0, blockStarts.length)
-			         .parallel()
-			         .mapToObj(i -> new Tuple2<Integer, Vector>(blockStarts[i],
-			                                                    vector.slice(blockStarts[i], blockEnds[i])))
-			         .collect(new MapCollector<>());
+		final Map<Integer, DenseVector> subVectors = partitionVectorWithStart(vector, blockStarts, blockEnds);
 		final DenseVector ret = new DenseVector(vector.getLength());
 		final Map<Integer, List<DenseVector>> multipliedSubVectors =
 			blocks.entrySet()

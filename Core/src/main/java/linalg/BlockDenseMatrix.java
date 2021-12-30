@@ -8,7 +8,6 @@ import io.vavr.Tuple2;
 import java.util.*;
 import java.util.function.Function;
 import java.util.stream.Collectors;
-import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
 public class BlockDenseMatrix
@@ -361,12 +360,8 @@ public class BlockDenseMatrix
 		if (PerformanceArguments.getInstance().executeChecks)
 			if (getCols() != (vector.getLength()))
 				throw new IllegalArgumentException("Incompatible sizes");
-		final Map<Integer, Vector> subVectors =
-			IntStream.range(0, blockStarts.length)
-			         .parallel()
-			         .mapToObj(i -> new Tuple2<Integer, Vector>(blockStarts[i],
-			                                                    vector.slice(blockStarts[i], blockEnds[i])))
-			         .collect(new MapCollector<>());
+		final Map<Integer, DenseVector> subVectors =
+			BlockSparseMatrix.partitionVectorWithStart(vector, blockStarts, blockEnds);
 		final DenseVector ret = new DenseVector(vector.getLength());
 		final Map<Integer, List<DenseVector>> multipliedSubVectors =
 			blocks.entrySet()
@@ -389,12 +384,8 @@ public class BlockDenseMatrix
 		if (PerformanceArguments.getInstance().executeChecks)
 			if (getCols() != (vector.getLength()))
 				throw new IllegalArgumentException("Incompatible sizes");
-		final Map<Integer, Vector> subVectors =
-			IntStream.range(0, blockStarts.length)
-			         .parallel()
-			         .mapToObj(i -> new Tuple2<Integer, Vector>(blockStarts[i],
-			                                                    vector.slice(blockStarts[i], blockEnds[i])))
-			         .collect(new MapCollector<>());
+		final Map<Integer, DenseVector> subVectors =
+			BlockSparseMatrix.partitionVectorWithStart(vector, blockStarts, blockEnds);
 		final DenseVector ret = new DenseVector(vector.getLength());
 		final Map<Integer, List<DenseVector>> multipliedSubVectors =
 			blocks.entrySet()
