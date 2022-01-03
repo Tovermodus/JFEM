@@ -30,13 +30,16 @@ public abstract class SchurSolver
 		blockSizes = blockMatrix.getBlockSizes();
 		for (int i = 1; i < blockStarts.length; i++)
 		{
+			System.out.println("blockd " + i);
 			diagonalInverses.add(blockMatrix.getBlocks()
 			                                .get(new IntCoordinates(blockStarts[i],
 			                                                        blockStarts[i]))
 			                                .inverse());
+			System.out.println("blockt " + i);
 			topMatrices.add(blockMatrix.getBlocks()
 			                           .get(new IntCoordinates(0,
 			                                                   blockStarts[i])));
+			System.out.println("blockl " + i);
 			leftMatrices.add(blockMatrix.getBlocks()
 			                            .get(new IntCoordinates(blockStarts[i], 0)));
 			if (diagonalInverses.get(i - 1) == null)
@@ -46,6 +49,7 @@ public abstract class SchurSolver
 			if (leftMatrices.get(i - 1) == null)
 				throw new IllegalArgumentException("matrix does not contain necessary left block");
 		}
+		System.out.println("mmul");
 		schurComplement = new DenseMatrix(IntStream.range(0, diagonalInverses.size())
 		                                           .parallel()
 		                                           .mapToObj(i -> topMatrices.get(i)
@@ -53,7 +57,9 @@ public abstract class SchurSolver
 		                                                                     .mmMul(leftMatrices.get(i)))
 		                                           .reduce(DenseMatrix::add)
 		                                           .orElseThrow());
+		System.out.println("-1");
 		schurComplement.mulInPlace(-1);
+		System.out.println("add");
 		schurComplement.addInPlace(blockMatrix.getBlockMatrix(0, 0));
 	}
 	

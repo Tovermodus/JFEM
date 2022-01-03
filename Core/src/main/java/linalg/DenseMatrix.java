@@ -166,17 +166,27 @@ public class DenseMatrix
 	@Override
 	public void addInPlace(final Tensor other)
 	{
-		for (int i = 0; i < getRows(); i++)
-			for (int j = 0; j < getCols(); j++)
-				entries[i][j] += other.at(i, j);
+		if (other instanceof Matrix && other.isSparse())
+			for (final var entry : other.getCoordinateEntryList()
+			                            .entrySet())
+				add(entry.getValue(), entry.getKey());
+		else
+			for (int i = 0; i < getRows(); i++)
+				for (int j = 0; j < getCols(); j++)
+					entries[i][j] += other.at(i, j);
 	}
 	
 	@Override
 	public void subInPlace(final Tensor other)
 	{
-		for (int i = 0; i < getRows(); i++)
-			for (int j = 0; j < getCols(); j++)
-				entries[i][j] -= other.at(i, j);
+		if (other instanceof Matrix && other.isSparse())
+			for (final var entry : other.getCoordinateEntryList()
+			                            .entrySet())
+				add(-entry.getValue(), entry.getKey());
+		else
+			for (int i = 0; i < getRows(); i++)
+				for (int j = 0; j < getCols(); j++)
+					entries[i][j] -= other.at(i, j);
 	}
 	
 	@Override
@@ -359,6 +369,8 @@ public class DenseMatrix
 	@Override
 	public DenseMatrix mmMul(final Matrix matrix)
 	{
+		if (!matrix.isSparse())
+			return mmMul(new DenseMatrix(matrix));
 		if (PerformanceArguments.getInstance().executeChecks)
 			if (getCols() != (matrix.getRows())) throw new IllegalArgumentException("Incompatible sizes");
 		final Map<Integer, Map<Integer, Double>> columns =
@@ -377,12 +389,16 @@ public class DenseMatrix
 		str.forEach(column ->
 		            {
 			            final int colIndex = column.getKey();
-			            final Map<Integer, Double> colEntries = column.getValue();
+			            final var colEntrySet = column.getValue()
+			                                          .entrySet();
 			            for (int i = 0; i < getRows(); i++)
 			            {
-				            double contraction = 0;
-				            for (final Map.Entry<Integer, Double> colEntry : colEntries.entrySet())
-					            contraction += entries[i][colEntry.getKey()] * colEntry.getValue();
+				            final int finalI = i;
+				            final double contraction = colEntrySet.stream()
+				                                                  .mapToDouble(colEntry -> entries[finalI][colEntry.getKey()] * colEntry.getValue())
+				                                                  .sum();
+//				            for (final Map.Entry<Integer, Double> colEntry : colEntrySet)
+//					            contraction += entries[i][colEntry.getKey()] * colEntry.getValue();
 				            ret.add(contraction, i, colIndex);
 			            }
 		            });

@@ -67,13 +67,13 @@ public class DLMRingPrecond
 	
 	public VectorMultiplyable calculatePrecond(final Matrix A)
 	{
-		PlotWindow.addPlot(new MatrixPlot(A));
 		final int[] blocks = new int[1 + particleSpaces.size()];
 		for (int i = 0; i < blocks.length; i++)
 			blocks[i] = blockStarts[2 * i];
 		System.out.println("copy");
 		final BlockSparseMatrix schurShape = new BlockSparseMatrix(A, blocks);
 		System.out.println("done");
+		System.out.println("Generaate Schur Solver");
 		return new DirectSchur(schurShape);
 	}
 	
@@ -255,7 +255,7 @@ public class DLMRingPrecond
 	protected Function<CoordinateVector, CoordinateVector> velocityBoundaryValues()
 	{
 		return x -> CoordinateVector.getUnitVector(2, 0)
-		                            .mul(0);
+		                            .mul(0.1);
 	}
 	
 	@Override
@@ -270,22 +270,22 @@ public class DLMRingPrecond
 	{
 		final TaylorHoodSpace backGround = new TaylorHoodSpace(CoordinateVector.fromValues(0, 0),
 		                                                       CoordinateVector.fromValues(1, 1),
-		                                                       new IntCoordinates(6, 6));
+		                                                       new IntCoordinates(20, 20));
 		final DistortedGridSpace<DistortedVectorShapeFunction, CoordinateVector, CoordinateMatrix, CoordinateTensor>
 			particle1 =
 			new CircleVectorSpace(CoordinateVector.fromValues(0.6, 0.5),
 			                      0.05,
-			                      1);
+			                      2);
 		final DistortedGridSpace<DistortedVectorShapeFunction, CoordinateVector, CoordinateMatrix, CoordinateTensor>
 			particle0 =
 			new CircleVectorSpace(CoordinateVector.fromValues(0.4, 0.5),
-			                      0.05, 1);
+			                      0.05, 2);
 		final DistortedGridSpace<DistortedVectorShapeFunction, CoordinateVector, CoordinateMatrix, CoordinateTensor>
 			particle2 =
 			new RingVectorSpace(CoordinateVector.fromValues(0.5, 0.5),
 			                    0.25,
 			                    0.255,
-			                    0);
+			                    1);
 		backGround.assembleCells();
 		backGround.assembleFunctions(1);
 		particle0.assembleCells();
