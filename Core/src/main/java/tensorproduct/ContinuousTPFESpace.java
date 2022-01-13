@@ -39,9 +39,9 @@ public class ContinuousTPFESpace
 				shapeFunction.setGlobalIndex(shapeFunctions.size());
 				shapeFunctions.add(shapeFunction);
 				for (final TPCell supportCell : shapeFunction.getCells())
-					supportOnCell.put(supportCell, shapeFunction);
+					getCellSupportMapping().put(supportCell, shapeFunction);
 				for (final TPFace supportFace : shapeFunction.getFaces())
-					supportOnFace.put(supportFace, shapeFunction);
+					getFaceSupportMapping().put(supportFace, shapeFunction);
 			}
 		if (shapeFunctions.size() != Arrays.stream(grid.cellsPerDimension.asArray())
 		                                   .map(cellsPerDimension -> cellsPerDimension * polynomialDegree + 1)

@@ -4,6 +4,7 @@ import basic.AcceptsMatrixBoundaryValues;
 import basic.Assembleable;
 import basic.ShapeFunction;
 import com.google.common.collect.HashMultimap;
+import com.google.common.collect.Multimap;
 import com.google.common.collect.Sets;
 import linalg.CoordinateVector;
 import linalg.DenseVector;
@@ -23,8 +24,8 @@ public abstract class CartesianGridSpace<ST extends ShapeFunction<TPCell, TPFace
 	implements AcceptsMatrixBoundaryValues<TPCell, TPFace, ST, valueT, gradientT, hessianT>, Assembleable
 {
 	protected final CartesianGrid grid;
-	protected final HashMultimap<TPCell, ST> supportOnCell;
-	protected final HashMultimap<TPFace, ST> supportOnFace;
+	private final HashMultimap<TPCell, ST> supportOnCell;
+	private final HashMultimap<TPFace, ST> supportOnFace;
 	protected Set<ST> shapeFunctions;
 	protected SparseMatrix systemMatrix;
 	protected DenseVector rhs;
@@ -131,5 +132,17 @@ public abstract class CartesianGridSpace<ST extends ShapeFunction<TPCell, TPFace
 	public List<CoordinateVector> generatePlotPoints(final int resolution)
 	{
 		return grid.generatePlotPoints(resolution);
+	}
+	
+	@Override
+	public Multimap<TPCell, ST> getCellSupportMapping()
+	{
+		return supportOnCell;
+	}
+	
+	@Override
+	public Multimap<TPFace, ST> getFaceSupportMapping()
+	{
+		return supportOnFace;
 	}
 }

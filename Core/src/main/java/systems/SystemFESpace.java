@@ -3,6 +3,7 @@ package systems;
 import basic.Cell;
 import basic.Face;
 import basic.MatrixFESpace;
+import com.google.common.collect.Multimap;
 import linalg.CoordinateVector;
 import linalg.MutableMatrix;
 import linalg.MutableVector;
@@ -11,8 +12,9 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 
-public class SystemFESpace<CT extends Cell<CT,FT>, FT extends Face<CT,FT>
-	> implements MatrixFESpace<CT, FT, SystemShapeFunction<CT, FT, ?>>
+public class SystemFESpace<CT extends Cell<CT, FT>, FT extends Face<CT, FT>
+	>
+	implements MatrixFESpace<CT, FT, SystemShapeFunction<CT, FT, ?>>
 {
 	@Override
 	public int getDimension()
@@ -39,19 +41,31 @@ public class SystemFESpace<CT extends Cell<CT,FT>, FT extends Face<CT,FT>
 	}
 	
 	@Override
-	public Collection<SystemShapeFunction<CT, FT, ?>> getShapeFunctionsWithSupportOnCell(CT cell)
+	public Collection<SystemShapeFunction<CT, FT, ?>> getShapeFunctionsWithSupportOnCell(final CT cell)
 	{
 		throw new UnsupportedOperationException("not implemented yet");
 	}
 	
 	@Override
-	public Collection<SystemShapeFunction<CT, FT, ?>> getShapeFunctionsWithSupportOnFace(FT face)
+	public Collection<SystemShapeFunction<CT, FT, ?>> getShapeFunctionsWithSupportOnFace(final FT face)
 	{
 		throw new UnsupportedOperationException("not implemented yet");
 	}
 	
 	@Override
-	public List<CoordinateVector> generatePlotPoints(int resolution)
+	public List<CoordinateVector> generatePlotPoints(final int resolution)
+	{
+		throw new UnsupportedOperationException("not implemented yet");
+	}
+	
+	@Override
+	public Multimap<CT, SystemShapeFunction<CT, FT, ?>> getCellSupportMapping()
+	{
+		throw new UnsupportedOperationException("not implemented yet");
+	}
+	
+	@Override
+	public Multimap<FT, SystemShapeFunction<CT, FT, ?>> getFaceSupportMapping()
 	{
 		throw new UnsupportedOperationException("not implemented yet");
 	}

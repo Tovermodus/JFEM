@@ -9,7 +9,8 @@ import tensorproduct.geometry.TPFace;
 import java.util.List;
 import java.util.TreeSet;
 
-public class TPVectorFESpace extends CartesianGridSpace<TPVectorFunction, CoordinateVector, CoordinateMatrix, CoordinateTensor>
+public class TPVectorFESpace
+	extends CartesianGridSpace<TPVectorFunction, CoordinateVector, CoordinateMatrix, CoordinateTensor>
 {
 	public TPVectorFESpace(final CoordinateVector startCoordinates, final CoordinateVector endCoordinates,
 	                       final List<Integer> cellsPerDimension)
@@ -29,9 +30,9 @@ public class TPVectorFESpace extends CartesianGridSpace<TPVectorFunction, Coordi
 				                                                            TPShapeFunction.class);
 				shapeFunction.setGlobalIndex(shapeFunctions.size());
 				shapeFunctions.add(shapeFunction);
-				supportOnCell.put(cell, shapeFunction);
+				getCellSupportMapping().put(cell, shapeFunction);
 				for (final TPFace face : cell.getFaces())
-					supportOnFace.put(face, shapeFunction);
+					getFaceSupportMapping().put(face, shapeFunction);
 			}
 		}
 	}

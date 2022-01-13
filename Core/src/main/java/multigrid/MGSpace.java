@@ -1,20 +1,18 @@
-package tensorproduct;
+package multigrid;
 
-import basic.ShapeFunction;
+import basic.*;
 import com.google.common.collect.TreeMultimap;
 import io.vavr.Tuple2;
 import linalg.*;
-import multigrid.Smoother;
-import tensorproduct.geometry.TPCell;
-import tensorproduct.geometry.TPFace;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
-import java.util.Set;
 
-public abstract class TPMultiGridSpace<CSpace extends CartesianGridSpace<ST, valueT, gradientT, hessianT>,
-	ST extends ShapeFunction<TPCell, TPFace, valueT, gradientT, hessianT> & Comparable<ST>, valueT, gradientT,
-	hessianT>
+public abstract class MGSpace<CSpace extends FESpace<CT, FT, ST> & Assembleable, CT extends Cell<CT, FT>,
+	FT extends Face<CT, FT>,
+	ST extends ShapeFunction<CT, FT, valueT, gradientT, hessianT> & Comparable<ST>, valueT, gradientT, hessianT>
+	implements MGInterface
 {
 	protected final CoordinateVector startCoordinates;
 	protected final CoordinateVector endCoordinates;
@@ -27,9 +25,9 @@ public abstract class TPMultiGridSpace<CSpace extends CartesianGridSpace<ST, val
 	public Vector finest_rhs;
 	public VectorMultiplyable finest_system;
 	
-	public TPMultiGridSpace(final CoordinateVector startCoordinates, final CoordinateVector endCoordinates,
-	                        final IntCoordinates coarseCellsPerDimension, final int refinements,
-	                        final int polynomialDegree)
+	public MGSpace(final CoordinateVector startCoordinates, final CoordinateVector endCoordinates,
+	               final IntCoordinates coarseCellsPerDimension, final int refinements,
+	               final int polynomialDegree)
 	{
 		this.startCoordinates = startCoordinates;
 		this.endCoordinates = endCoordinates;
@@ -83,12 +81,14 @@ public abstract class TPMultiGridSpace<CSpace extends CartesianGridSpace<ST, val
 			                                    {
 				                                    if (coarseCell.isInCell(fineCell.center()))
 				                                    {
-					                                    final Set<ST> coarseFunctions =
-						                                    coarse.supportOnCell.get(
-							                                    coarseCell);
-					                                    final Set<ST> fineFunctions =
-						                                    fine.supportOnCell.get(
-							                                    fineCell);
+					                                    final Collection<ST> coarseFunctions =
+						                                    coarse.getCellSupportMapping()
+						                                          .get(
+							                                          coarseCell);
+					                                    final Collection<ST> fineFunctions =
+						                                    fine.getCellSupportMapping()
+						                                        .get(
+							                                        fineCell);
 					                                    synchronized (this)
 					                                    {
 						                                    for (final ST function : coarseFunctions)
@@ -109,6 +109,7 @@ public abstract class TPMultiGridSpace<CSpace extends CartesianGridSpace<ST, val
 	
 	public abstract List<Smoother> createSmoothers();
 	
+	@Override
 	public Vector mgStep(final int level, Vector guess, final Vector rhs)
 	{
 		//System.out.println("mgstep" + level);
@@ -142,8 +143,15 @@ public abstract class TPMultiGridSpace<CSpace extends CartesianGridSpace<ST, val
 		return guess;
 	}
 	
+	@Override
 	public Vector vCycle(final Vector initialIterate, final Vector rhs)
 	{
 		return mgStep(spaces.size() - 1, initialIterate, rhs);
+	}
+	
+	@Override
+	public VectorMultiplyable getFinestSystem()
+	{
+		return finest_system;
 	}
 }

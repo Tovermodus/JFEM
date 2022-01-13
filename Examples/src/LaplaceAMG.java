@@ -4,9 +4,16 @@ import basic.ScalarFunction;
 import basic.ScalarPlot2D;
 import io.vavr.Tuple2;
 import linalg.*;
+import multigrid.AMGSpace;
+import multigrid.MGPReconditioner;
 import multigrid.RichardsonSmoother;
 import multigrid.Smoother;
-import tensorproduct.*;
+import tensorproduct.ContinuousTPFESpace;
+import tensorproduct.ContinuousTPShapeFunction;
+import tensorproduct.TPCellIntegral;
+import tensorproduct.TPRightHandSideIntegral;
+import tensorproduct.geometry.TPCell;
+import tensorproduct.geometry.TPFace;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -16,12 +23,13 @@ public class LaplaceAMG
 	public static void main(final String[] args)
 	{
 		final int refinements = 6;
-		final TPAlgebraicMultiGridSpace<ContinuousTPFESpace, ContinuousTPShapeFunction, Double, CoordinateVector, CoordinateMatrix>
-			mg = new TPAlgebraicMultiGridSpace<>(CoordinateVector.fromValues(0, 0),
-			                                     CoordinateVector.fromValues(1, 1),
-			                                     new IntCoordinates(4, 4),
-			                                     refinements,
-			                                     1)
+		final AMGSpace<ContinuousTPFESpace, TPCell, TPFace, ContinuousTPShapeFunction, Double, CoordinateVector,
+			CoordinateMatrix>
+			mg = new AMGSpace<>(CoordinateVector.fromValues(0, 0),
+			                    CoordinateVector.fromValues(1, 1),
+			                    new IntCoordinates(4, 4),
+			                    refinements,
+			                    1)
 		{
 			@Override
 			public List<ContinuousTPFESpace> createSpaces(final int refinements)
@@ -137,7 +145,7 @@ public class LaplaceAMG
 		final IterativeSolver it = new IterativeSolver();
 		it.showProgress = true;
 		solut = new DenseVector(it.solvePGMRES(mg.finest_system,
-		                                       new TPAMGPreconditioner(mg),
+		                                       new MGPReconditioner(mg),
 		                                       mg.finest_rhs,
 		                                       1e-8));
 		sol =

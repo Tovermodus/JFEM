@@ -11,7 +11,8 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.TreeSet;
 
-public class ContinuousTPFEVectorSpace extends CartesianGridSpace<ContinuousTPVectorFunction, CoordinateVector, CoordinateMatrix, CoordinateTensor>
+public class ContinuousTPFEVectorSpace
+	extends CartesianGridSpace<ContinuousTPVectorFunction, CoordinateVector, CoordinateMatrix, CoordinateTensor>
 {
 	
 	public ContinuousTPFEVectorSpace(final CoordinateVector startCoordinates, final CoordinateVector endCoordinates,
@@ -41,9 +42,9 @@ public class ContinuousTPFEVectorSpace extends CartesianGridSpace<ContinuousTPVe
 				shapeFunction.setGlobalIndex(shapeFunctions.size());
 				shapeFunctions.add(shapeFunction);
 				for (final TPCell supportCell : shapeFunction.getCells())
-					supportOnCell.put(supportCell, shapeFunction);
+					getCellSupportMapping().put(supportCell, shapeFunction);
 				for (final TPFace supportFace : shapeFunction.getFaces())
-					supportOnFace.put(supportFace, shapeFunction);
+					getFaceSupportMapping().put(supportFace, shapeFunction);
 			}
 		}
 		if (shapeFunctions.size() != getDimension() * Arrays.stream(grid.cellsPerDimension.asArray())

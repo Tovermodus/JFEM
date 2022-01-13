@@ -3,10 +3,14 @@ package examples;
 import basic.ScalarFESpaceFunction;
 import io.vavr.Tuple2;
 import linalg.*;
-import multigrid.RichardsonSmoother;
-import multigrid.Smoother;
+import multigrid.*;
 import org.junit.Test;
-import tensorproduct.*;
+import tensorproduct.ContinuousTPFESpace;
+import tensorproduct.ContinuousTPShapeFunction;
+import tensorproduct.TPCellIntegral;
+import tensorproduct.TPRightHandSideIntegral;
+import tensorproduct.geometry.TPCell;
+import tensorproduct.geometry.TPFace;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -26,12 +30,13 @@ public class LaplaceMG
 			final TPRightHandSideIntegral<ContinuousTPShapeFunction> rightHandSideIntegral =
 				new TPRightHandSideIntegral<>(LaplaceReferenceSolution.scalarRightHandSide(),
 				                              TPRightHandSideIntegral.VALUE);
-			final TPMultiGridSpace<ContinuousTPFESpace, ContinuousTPShapeFunction, Double, CoordinateVector, CoordinateMatrix>
-				mg = new TPMultiGridSpace<>(CoordinateVector.fromValues(-1, -1),
-				                            CoordinateVector.fromValues(1, 1),
-				                            new IntCoordinates(3, 3),
-				                            refinements,
-				                            1)
+			final MGSpace<ContinuousTPFESpace, TPCell, TPFace, ContinuousTPShapeFunction, Double,
+				CoordinateVector, CoordinateMatrix>
+				mg = new MGSpace<>(CoordinateVector.fromValues(-1, -1),
+				                   CoordinateVector.fromValues(1, 1),
+				                   new IntCoordinates(3, 3),
+				                   refinements,
+				                   1)
 			{
 				@Override
 				public List<ContinuousTPFESpace> createSpaces(final int refinements)
@@ -79,7 +84,7 @@ public class LaplaceMG
 				solut.add(Math.random() * 0.1, c);
 			final IterativeSolver it = new IterativeSolver(false);
 			solut = new DenseVector(it.solvePGMRES(mg.finest_system,
-			                                       new TPMGPreconditioner(mg),
+			                                       new MGPReconditioner(mg),
 			                                       mg.finest_rhs,
 			                                       1e-8));
 			
@@ -109,13 +114,14 @@ public class LaplaceMG
 			final TPRightHandSideIntegral<ContinuousTPShapeFunction> rightHandSideIntegral =
 				new TPRightHandSideIntegral<>(LaplaceReferenceSolution.scalarRightHandSide(),
 				                              TPRightHandSideIntegral.VALUE);
-			final TPAlgebraicMultiGridSpace<ContinuousTPFESpace, ContinuousTPShapeFunction, Double, CoordinateVector,
+			final AMGSpace<ContinuousTPFESpace, TPCell, TPFace, ContinuousTPShapeFunction, Double,
+				CoordinateVector,
 				CoordinateMatrix>
-				mg = new TPAlgebraicMultiGridSpace<>(CoordinateVector.fromValues(-1, -1),
-				                                     CoordinateVector.fromValues(1, 1),
-				                                     new IntCoordinates(3, 3),
-				                                     refinements,
-				                                     1)
+				mg = new AMGSpace<>(CoordinateVector.fromValues(-1, -1),
+				                    CoordinateVector.fromValues(1, 1),
+				                    new IntCoordinates(3, 3),
+				                    refinements,
+				                    1)
 			{
 				@Override
 				public List<ContinuousTPFESpace> createSpaces(final int refinements)
@@ -163,7 +169,7 @@ public class LaplaceMG
 				solut.add(Math.random() * 0.1, c);
 			final IterativeSolver it = new IterativeSolver(false);
 			solut = new DenseVector(it.solvePGMRES(mg.finest_system,
-			                                       new TPAMGPreconditioner(mg),
+			                                       new MGPReconditioner(mg),
 			                                       mg.finest_rhs,
 			                                       1e-8));
 			

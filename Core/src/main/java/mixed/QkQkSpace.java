@@ -46,9 +46,9 @@ public class QkQkSpace
 				shapeFunction.setGlobalIndex(shapeFunctions.size());
 				shapeFunctions.add(shapeFunction);
 				for (final TPCell ce : shapeFunction.getCells())
-					supportOnCell.put(ce, shapeFunction);
+					getCellSupportMapping().put(ce, shapeFunction);
 				for (final TPFace face : shapeFunction.getFaces())
-					supportOnFace.put(face, shapeFunction);
+					getFaceSupportMapping().put(face, shapeFunction);
 			}
 		}
 	}
@@ -65,9 +65,9 @@ public class QkQkSpace
 				shapeFunction.setGlobalIndex(shapeFunctions.size());
 				shapeFunctions.add(shapeFunction);
 				for (final TPCell ce : shapeFunction.getCells())
-					supportOnCell.put(ce, shapeFunction);
+					getCellSupportMapping().put(ce, shapeFunction);
 				for (final TPFace face : shapeFunction.getFaces())
-					supportOnFace.put(face, shapeFunction);
+					getFaceSupportMapping().put(face, shapeFunction);
 			}
 		}
 	}

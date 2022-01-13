@@ -36,15 +36,16 @@ public class MixedRTSpace
 		{
 			for (int i = 0; i < Math.pow(polynomialDegree + 1, getDimension()); i++)
 			{
-				final RTMixedFunction shapeFunction = new RTMixedFunction(new ContinuousTPShapeFunction(cell,
-				                                                                                        polynomialDegree,
-				                                                                                        i));
+				final RTMixedFunction shapeFunction = new RTMixedFunction(new ContinuousTPShapeFunction(
+					cell,
+					polynomialDegree,
+					i));
 				shapeFunction.setGlobalIndex(shapeFunctions.size());
 				shapeFunctions.add(shapeFunction);
 				for (final TPCell ce : shapeFunction.getCells())
-					supportOnCell.put(ce, shapeFunction);
+					getCellSupportMapping().put(ce, shapeFunction);
 				for (final TPFace face : shapeFunction.getFaces())
-					supportOnFace.put(face, shapeFunction);
+					getFaceSupportMapping().put(face, shapeFunction);
 			}
 		}
 	}
@@ -63,9 +64,9 @@ public class MixedRTSpace
 				shapeFunction.setGlobalIndex(shapeFunctions.size());
 				shapeFunctions.add(shapeFunction);
 				for (final TPCell ce : shapeFunction.getCells())
-					supportOnCell.put(ce, shapeFunction);
+					getCellSupportMapping().put(ce, shapeFunction);
 				for (final TPFace face : shapeFunction.getFaces())
-					supportOnFace.put(face, shapeFunction);
+					getFaceSupportMapping().put(face, shapeFunction);
 			}
 		}
 	}

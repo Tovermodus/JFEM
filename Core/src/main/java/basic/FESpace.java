@@ -95,4 +95,8 @@ public interface FESpace<CT extends Cell<CT, FT>, FT extends Face<CT, FT>,
 			for (final ST function2 : getShapeFunctionsWithSupportOnFace(F))
 				action.accept(function1, function2);
 	}
+	
+	Multimap<CT, ST> getCellSupportMapping();
+	
+	Multimap<FT, ST> getFaceSupportMapping();
 }

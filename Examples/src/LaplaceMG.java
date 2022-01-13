@@ -3,9 +3,16 @@ import basic.ScalarFESpaceFunction;
 import basic.ScalarPlot2D;
 import io.vavr.Tuple2;
 import linalg.*;
+import multigrid.MGPReconditioner;
+import multigrid.MGSpace;
 import multigrid.RichardsonSmoother;
 import multigrid.Smoother;
-import tensorproduct.*;
+import tensorproduct.ContinuousTPFESpace;
+import tensorproduct.ContinuousTPShapeFunction;
+import tensorproduct.TPCellIntegral;
+import tensorproduct.TPRightHandSideIntegral;
+import tensorproduct.geometry.TPCell;
+import tensorproduct.geometry.TPFace;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -20,12 +27,14 @@ public class LaplaceMG
 		final TPRightHandSideIntegral<ContinuousTPShapeFunction> rightHandSideIntegral =
 			new TPRightHandSideIntegral<>(LaplaceReferenceSolution.scalarRightHandSide(),
 			                              TPRightHandSideIntegral.VALUE);
-		final TPMultiGridSpace<ContinuousTPFESpace, ContinuousTPShapeFunction, Double, CoordinateVector, CoordinateMatrix>
-			mg = new TPMultiGridSpace<>(CoordinateVector.fromValues(-1, -1),
-			                            CoordinateVector.fromValues(1, 1),
-			                            new IntCoordinates(3, 3),
-			                            refinements,
-			                            1)
+		final MGSpace<ContinuousTPFESpace, TPCell, TPFace, ContinuousTPShapeFunction, Double,
+			CoordinateVector,
+			CoordinateMatrix>
+			mg = new MGSpace<>(CoordinateVector.fromValues(-1, -1),
+			                   CoordinateVector.fromValues(1, 1),
+			                   new IntCoordinates(3, 3),
+			                   refinements,
+			                   1)
 		{
 			@Override
 			public List<ContinuousTPFESpace> createSpaces(final int refinements)
@@ -88,7 +97,7 @@ public class LaplaceMG
 		final IterativeSolver it = new IterativeSolver();
 		it.showProgress = true;
 		solut = new DenseVector(it.solvePGMRES(mg.finest_system,
-		                                       new TPMGPreconditioner(mg),
+		                                       new MGPReconditioner(mg),
 		                                       mg.finest_rhs,
 		                                       1e-8));
 		sol =

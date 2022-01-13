@@ -1,14 +1,14 @@
-package tensorproduct;
+package multigrid;
 
 import linalg.Vector;
 import linalg.VectorMultiplyable;
 
-public class TPAMGPreconditioner
+public class MGPReconditioner
 	implements VectorMultiplyable
 {
-	final TPAlgebraicMultiGridSpace<?, ?, ?, ?, ?> mg;
+	final MGInterface mg;
 	
-	public TPAMGPreconditioner(final TPAlgebraicMultiGridSpace<?, ?, ?, ?, ?> mg)
+	public MGPReconditioner(final MGInterface mg)
 	{
 		this.mg = mg;
 	}
@@ -16,13 +16,15 @@ public class TPAMGPreconditioner
 	@Override
 	public int getVectorSize()
 	{
-		return mg.finest_system.getVectorSize();
+		return mg.getFinestSystem()
+		         .getVectorSize();
 	}
 	
 	@Override
 	public int getTVectorSize()
 	{
-		return mg.finest_system.getVectorSize();
+		return mg.getFinestSystem()
+		         .getVectorSize();
 	}
 	
 	@Override

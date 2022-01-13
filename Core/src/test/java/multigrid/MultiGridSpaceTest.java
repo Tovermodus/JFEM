@@ -1,11 +1,14 @@
-package tensorproduct;
+package multigrid;
 
 import basic.ScalarFESpaceFunction;
 import examples.ConvergenceOrderEstimator;
 import io.vavr.Tuple2;
 import linalg.*;
-import multigrid.Smoother;
 import org.junit.Test;
+import tensorproduct.ContinuousTPFESpace;
+import tensorproduct.ContinuousTPShapeFunction;
+import tensorproduct.geometry.TPCell;
+import tensorproduct.geometry.TPFace;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -13,19 +16,21 @@ import java.util.List;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
-public class TPMultiGridSpaceTest
+public class MultiGridSpaceTest
 {
 	
 	@Test
 	public void testProlongateInterpolate()
 	{
-		final TPMultiGridSpace<ContinuousTPFESpace, ContinuousTPShapeFunction, Double, CoordinateVector, CoordinateMatrix>
-			mg = new TPMultiGridSpace<>(CoordinateVector.fromValues(100.7, .2),
-			                            CoordinateVector.fromValues(1000,
-			                                                        0.21),
-			                            new IntCoordinates(4, 4),
-			                            1,
-			                            1)
+		final MGSpace<ContinuousTPFESpace, TPCell, TPFace, ContinuousTPShapeFunction, Double,
+			CoordinateVector,
+			CoordinateMatrix>
+			mg = new MGSpace<>(CoordinateVector.fromValues(100.7, .2),
+			                   CoordinateVector.fromValues(1000,
+			                                               0.21),
+			                   new IntCoordinates(4, 4),
+			                   1,
+			                   1)
 		{
 			@Override
 			public List<ContinuousTPFESpace> createSpaces(final int refinements)
@@ -72,13 +77,14 @@ public class TPMultiGridSpaceTest
 	@Test
 	public void testProlongateInterpolateAlgebraic()
 	{
-		final TPAlgebraicMultiGridSpace<ContinuousTPFESpace, ContinuousTPShapeFunction, Double, CoordinateVector, CoordinateMatrix>
-			mg = new TPAlgebraicMultiGridSpace<>(CoordinateVector.fromValues(100.7, .2),
-			                                     CoordinateVector.fromValues(1000,
-			                                                                 0.21),
-			                                     new IntCoordinates(4, 4),
-			                                     1,
-			                                     1)
+		final AMGSpace<ContinuousTPFESpace, TPCell, TPFace, ContinuousTPShapeFunction, Double, CoordinateVector,
+			CoordinateMatrix>
+			mg = new AMGSpace<>(CoordinateVector.fromValues(100.7, .2),
+			                    CoordinateVector.fromValues(1000,
+			                                                0.21),
+			                    new IntCoordinates(4, 4),
+			                    1,
+			                    1)
 		{
 			@Override
 			public List<ContinuousTPFESpace> createSpaces(final int refinements)

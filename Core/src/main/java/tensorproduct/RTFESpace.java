@@ -1,42 +1,40 @@
 package tensorproduct;
 
-import basic.VectorFunction;
 import linalg.CoordinateMatrix;
 import linalg.CoordinateTensor;
 import linalg.CoordinateVector;
-import mixed.MixedFunction;
 import tensorproduct.geometry.TPCell;
 import tensorproduct.geometry.TPFace;
 
 import java.util.List;
 import java.util.TreeSet;
 
-public class RTFESpace extends CartesianGridSpace<RTShapeFunction, CoordinateVector, CoordinateMatrix, CoordinateTensor>
+public class RTFESpace
+	extends CartesianGridSpace<RTShapeFunction, CoordinateVector, CoordinateMatrix, CoordinateTensor>
 {
-	public RTFESpace(CoordinateVector startCoordinates, CoordinateVector endCoordinates,
-	                                 List<Integer> cellsPerDimension)
+	public RTFESpace(final CoordinateVector startCoordinates, final CoordinateVector endCoordinates,
+	                 final List<Integer> cellsPerDimension)
 	{
 		super(startCoordinates, endCoordinates, cellsPerDimension);
-		
 	}
 	
-	
 	@Override
-	public void assembleFunctions(int polynomialDegree)
+	public void assembleFunctions(final int polynomialDegree)
 	{
 		
 		shapeFunctions = new TreeSet<>();
-		for (TPCell cell : getCells())
+		for (final TPCell cell : getCells())
 		{
-			for (int i = 0; i < Math.pow(polynomialDegree + 1, getDimension()-1)*(polynomialDegree+2) * getDimension(); i++)
+			for (int i = 0; i < Math.pow(polynomialDegree + 1,
+			                             getDimension() - 1) * (polynomialDegree + 2) * getDimension(); i++)
 			{
-				RTShapeFunction shapeFunction = new RTShapeFunction(cell, polynomialDegree, i);
+				final RTShapeFunction shapeFunction = new RTShapeFunction(cell, polynomialDegree, i);
 				shapeFunction.setGlobalIndex(shapeFunctions.size());
 				shapeFunctions.add(shapeFunction);
-				for (TPCell supportCell : shapeFunction.getCells())
-					supportOnCell.put(supportCell, shapeFunction);
-				for (TPFace supportFace : shapeFunction.getFaces())
-					supportOnFace.put(supportFace, shapeFunction);
+				for (final TPCell supportCell : shapeFunction.getCells())
+					getCellSupportMapping().put(supportCell, shapeFunction);
+				for (final TPFace supportFace : shapeFunction.getFaces())
+					getFaceSupportMapping().put(supportFace, shapeFunction);
 			}
 		}
 	}
@@ -71,4 +69,3 @@ public class RTFESpace extends CartesianGridSpace<RTShapeFunction, CoordinateVec
 		}
 	}*/
 }
-

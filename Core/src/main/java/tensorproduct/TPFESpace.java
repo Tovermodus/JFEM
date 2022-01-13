@@ -36,12 +36,14 @@ public class TPFESpace
 			for (int localIndex = 0; localIndex < TPShapeFunction.functionsPerCell(polynomialDegree,
 			                                                                       getDimension()); localIndex++)
 			{
-				final TPShapeFunction function = new TPShapeFunction(cell, polynomialDegree, localIndex);
+				final TPShapeFunction function = new TPShapeFunction(cell,
+				                                                     polynomialDegree,
+				                                                     localIndex);
 				function.setGlobalIndex(shapeFunctions.size());
 				shapeFunctions.add(function);
-				supportOnCell.put(cell, function);
+				getCellSupportMapping().put(cell, function);
 				for (final TPFace f : cell.getFaces())
-					supportOnFace.put(f, function);
+					getFaceSupportMapping().put(f, function);
 			}
 		}
 	}

@@ -4,7 +4,9 @@ import basic.AcceptsMatrixBoundaryValues;
 import basic.Assembleable;
 import basic.ScalarFunction;
 import basic.ShapeFunction;
+import com.google.common.collect.Multimap;
 import com.google.common.collect.Sets;
+import com.google.common.collect.TreeMultimap;
 import distorted.geometry.DistortedCell;
 import distorted.geometry.DistortedFace;
 import distorted.geometry.DistortedGrid;
@@ -23,8 +25,8 @@ public abstract class DistortedGridSpace<ST extends ShapeFunction<DistortedCell,
 	Assembleable
 {
 	protected final DistortedGrid grid;
-	private final HashMap<DistortedCell, TreeSet<ST>> supportOnCell;
-	private final HashMap<DistortedFace, TreeSet<ST>> supportOnFace;
+	private final TreeMultimap<DistortedCell, ST> supportOnCell;
+	private final TreeMultimap<DistortedFace, ST> supportOnFace;
 	protected TreeSet<ST> shapeFunctions;
 	protected SparseMatrix systemMatrix;
 	protected DenseVector rhs;
@@ -39,8 +41,8 @@ public abstract class DistortedGridSpace<ST extends ShapeFunction<DistortedCell,
 	
 	public DistortedGridSpace(final DistortedGrid grid)
 	{
-		supportOnCell = new HashMap<>();
-		supportOnFace = new HashMap<>();
+		supportOnCell = TreeMultimap.create();
+		supportOnFace = TreeMultimap.create();
 		this.grid = grid;
 		fixedNodes = Sets.newConcurrentHashSet();
 		maxDiam = getCells().stream()
@@ -56,16 +58,12 @@ public abstract class DistortedGridSpace<ST extends ShapeFunction<DistortedCell,
 	
 	protected void addFunctionToCell(final ST function, final DistortedCell cell)
 	{
-		if (!supportOnCell.containsKey(cell)) supportOnCell.put(cell, new TreeSet<>());
-		supportOnCell.get(cell)
-		             .add(function);
+		supportOnCell.put(cell, function);
 	}
 	
 	protected void addFunctionToFace(final ST function, final DistortedFace face)
 	{
-		if (!supportOnFace.containsKey(face)) supportOnFace.put(face, new TreeSet<>());
-		supportOnFace.get(face)
-		             .add(function);
+		supportOnFace.put(face, function);
 	}
 	
 	@Override
@@ -147,6 +145,18 @@ public abstract class DistortedGridSpace<ST extends ShapeFunction<DistortedCell,
 	public List<CoordinateVector> generatePlotPoints(final int resolution)
 	{
 		return grid.generatePlotPoints(resolution);
+	}
+	
+	@Override
+	public Multimap<DistortedCell, ST> getCellSupportMapping()
+	{
+		return supportOnCell;
+	}
+	
+	@Override
+	public Multimap<DistortedFace, ST> getFaceSupportMapping()
+	{
+		return supportOnFace;
 	}
 	
 	public List<CoordinateVector> generateIsotropicPoints(final int resolution)
