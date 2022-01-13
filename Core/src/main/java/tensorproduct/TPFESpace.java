@@ -2,6 +2,7 @@ package tensorproduct;
 
 import linalg.CoordinateMatrix;
 import linalg.CoordinateVector;
+import linalg.IntCoordinates;
 import tensorproduct.geometry.TPCell;
 import tensorproduct.geometry.TPFace;
 
@@ -11,26 +12,35 @@ import java.util.List;
 /*
 Workflow of this finite element is: first generate 1D cells, then
  */
-public class TPFESpace extends CartesianGridSpace<TPShapeFunction, Double, CoordinateVector, CoordinateMatrix>
+public class TPFESpace
+	extends CartesianGridSpace<TPShapeFunction, Double, CoordinateVector, CoordinateMatrix>
 {
-	public TPFESpace(CoordinateVector startCoordinates, CoordinateVector endCoordinates,
-	                 List<Integer> cellsPerDimension)
+	public TPFESpace(final CoordinateVector startCoordinates, final CoordinateVector endCoordinates,
+	                 final List<Integer> cellsPerDimension)
 	{
 		super(startCoordinates, endCoordinates, cellsPerDimension);
 	}
+	
+	public TPFESpace(final CoordinateVector startCoordinates, final CoordinateVector endCoordinates,
+	                 final IntCoordinates cellsPerDimension)
+	{
+		super(startCoordinates, endCoordinates, cellsPerDimension);
+	}
+	
 	@Override
-	public void assembleFunctions(int polynomialDegree)
+	public void assembleFunctions(final int polynomialDegree)
 	{
 		shapeFunctions = new HashSet<>();
-		for(TPCell cell: grid.cells)
+		for (final TPCell cell : grid.cells)
 		{
-			for(int localIndex = 0; localIndex < TPShapeFunction.functionsPerCell(polynomialDegree, getDimension()); localIndex++)
+			for (int localIndex = 0; localIndex < TPShapeFunction.functionsPerCell(polynomialDegree,
+			                                                                       getDimension()); localIndex++)
 			{
-				TPShapeFunction function = new TPShapeFunction(cell, polynomialDegree, localIndex);
+				final TPShapeFunction function = new TPShapeFunction(cell, polynomialDegree, localIndex);
 				function.setGlobalIndex(shapeFunctions.size());
 				shapeFunctions.add(function);
 				supportOnCell.put(cell, function);
-				for(TPFace f:cell.getFaces())
+				for (final TPFace f : cell.getFaces())
 					supportOnFace.put(f, function);
 			}
 		}

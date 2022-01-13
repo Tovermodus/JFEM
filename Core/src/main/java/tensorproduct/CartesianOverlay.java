@@ -12,7 +12,8 @@ import tensorproduct.geometry.TPFace;
 import java.awt.*;
 import java.util.List;
 
-public class CartesianOverlay<ST extends VectorShapeFunction<TPCell, TPFace>> extends Overlay
+public class CartesianOverlay<ST extends VectorShapeFunction<TPCell, TPFace>>
+	extends Overlay
 {
 	private final CartesianGridSpace<ST, ?, ?, ?> space;
 	private final Matrix displacementHistory;
@@ -26,10 +27,10 @@ public class CartesianOverlay<ST extends VectorShapeFunction<TPCell, TPFace>> ex
 	{
 		this.space = space;
 		this.displacementHistory = displacementHistory;
-		System.out.println(displacementHistory);
 		max = ScalarPlot2D.getMaxCoordinates(backGroundPoints);
 		min = ScalarPlot2D.getMinCoordinates(backGroundPoints);
-		this.pointsPerCell = pointsPerCell * space.getCells().size();
+		this.pointsPerCell = pointsPerCell * space.getCells()
+		                                          .size();
 	}
 	
 	public static String title()

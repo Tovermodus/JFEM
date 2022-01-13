@@ -1,22 +1,27 @@
 package multigrid;
 
-import basic.MatrixFESpace;
+import linalg.Vector;
+import linalg.VectorMultiplyable;
 
-public class RichardsonSmoother extends Smoother
+public class RichardsonSmoother
+	implements Smoother
 {
-//	private double omega;
-//	public RichardsonSmoother(MatrixFESpace g, String[] args)
-//	{
-//		super(g, args);
-//		this.omega = Double.parseDouble(args[0]);
-//	}
-//	@Override
-//	public DoubleTensor smooth(DoubleTensor iterate, DoubleTensor rightHandSide)
-//	{
-//		DoubleTensor residuum = rightHandSide.sub(fESpace.getSystemMatrix().mvmul(iterate));
-//		System.out.println(residuum.vectorNorm());
-//		iterate = iterate.add(residuum).mul(omega);
-//		return iterate;
-//
-//	}
+	private final double omega;
+	private final int runs;
+	
+	public RichardsonSmoother(final double omega, final int runs)
+	{
+		
+		this.omega = omega;
+		this.runs = runs;
+	}
+	
+	@Override
+	public Vector smooth(final VectorMultiplyable operator, final Vector rhs, Vector iterate)
+	{
+		for (int i = 0; i < runs; i++)
+			iterate = iterate.add(rhs.sub(operator.mvMul(iterate))
+			                         .mul(omega));
+		return iterate;
+	}
 }

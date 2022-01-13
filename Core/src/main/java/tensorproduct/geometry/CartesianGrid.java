@@ -90,7 +90,8 @@ public class CartesianGrid
 		for (int i = 0; i < dimension; i++)
 		{
 			if (i != normalDirection)
-				componentCells.add(cells1D.get(i).get(c.get(i)));
+				componentCells.add(cells1D.get(i)
+				                          .get(c.get(i)));
 		}
 		boolean boundaryFace = false;
 		double otherCoordinate = 0;
@@ -100,17 +101,23 @@ public class CartesianGrid
 			boundaryFace = true;
 		if (layer < topLayer)
 			otherCoordinate =
-				cells1D.get(normalDirection).get(layer).getStart();
+				cells1D.get(normalDirection)
+				       .get(layer)
+				       .getStart();
 		if (layer == topLayer)
 		{
 			boundaryFace = true;
-			otherCoordinate = cells1D.get(normalDirection).get(layer - 1).getEnd();
+			otherCoordinate = cells1D.get(normalDirection)
+			                         .get(layer - 1)
+			                         .getEnd();
 		}
 		return new TPFace(componentCells, normalDirection, otherCoordinate,
 		                  boundaryFace);
 	}
 	
-	private void combineFaceWithNeighbouringCells(final int normalDirection, final IntCoordinates c, final TPFace newFace)
+	private void combineFaceWithNeighbouringCells(final int normalDirection,
+	                                              final IntCoordinates c,
+	                                              final TPFace newFace)
 	{
 		final int topLayer = cellsPerDimension.get(normalDirection);
 		final int layer = c.get(normalDirection);
@@ -136,7 +143,8 @@ public class CartesianGrid
 		{
 			final List<Cell1D> componentCells = new ArrayList<>(dimension);
 			for (int i = 0; i < dimension; i++)
-				componentCells.add(cells1D.get(i).get(c.get(i)));
+				componentCells.add(cells1D.get(i)
+				                          .get(c.get(i)));
 			final TPCell newCell = new TPCell(componentCells);
 			newCell.setDone(doneCode++);
 			cellsByCoordinates.put(c, newCell);
@@ -148,20 +156,28 @@ public class CartesianGrid
 	public List<CoordinateVector> generatePlotPoints(final int resolution)
 	{
 		final IntCoordinates pointsPerDimension = IntCoordinates.repeat(resolution, dimension);
-		return pointsPerDimension.range().stream().map(c ->
-		                                               {
-			                                               final CoordinateVector coords
-				                                               = new CoordinateVector(
-				                                               dimension);
-			                                               for (int i = 0; i < dimension; i++)
-			                                               {
-				                                               coords.set(startCoordinates.at(
-					                                               i) + (endCoordinates.at(
-					                                               i) - startCoordinates.at(
-					                                               i)) / (resolution - 1) * c.get(
-					                                               i), i);
-			                                               }
-			                                               return coords;
-		                                               }).collect(Collectors.toList());
+		return pointsPerDimension.range()
+		                         .stream()
+		                         .map(c ->
+		                              {
+			                              final CoordinateVector coords
+				                              = new CoordinateVector(
+				                              dimension);
+			                              for (int i = 0; i < dimension; i++)
+			                              {
+				                              coords.set(startCoordinates.at(
+					                              i) + (endCoordinates.at(
+					                              i) - startCoordinates.at(
+					                              i)) / (resolution - 1) * c.get(
+					                              i), i);
+			                              }
+			                              return coords;
+		                              })
+		                         .collect(Collectors.toList());
+	}
+	
+	public CartesianGrid refineGrid()
+	{
+		return new CartesianGrid(startCoordinates, endCoordinates, cellsPerDimension.mul(2));
 	}
 }

@@ -1,7 +1,9 @@
 import basic.*;
 import com.google.common.base.Stopwatch;
-import com.google.common.primitives.Ints;
-import linalg.*;
+import linalg.CoordinateVector;
+import linalg.IntCoordinates;
+import linalg.IterativeSolver;
+import linalg.Vector;
 import tensorproduct.*;
 import tensorproduct.geometry.TPCell;
 import tensorproduct.geometry.TPFace;
@@ -12,72 +14,79 @@ import java.util.TreeSet;
 
 public class LaplaceContinuous
 {
-	public static void main(String[] args)
+	public static void main(final String[] args)
 	{
 		
-		PerformanceArguments.PerformanceArgumentBuilder builder =
+		final PerformanceArguments.PerformanceArgumentBuilder builder =
 			new PerformanceArguments.PerformanceArgumentBuilder();
 		builder.build();
-	
-		long startTime = System.nanoTime();
+		
+		final long startTime = System.nanoTime();
 		
 		System.out.println("output start");
-		CoordinateVector start = CoordinateVector.fromValues(-1,-1);
-		CoordinateVector end = CoordinateVector.fromValues(1,1);
-		int polynomialDegree = 3;
-		ContinuousTPFESpace grid = new ContinuousTPFESpace(start,end,
-			Ints.asList(3,3));
-		TPCellIntegral<ContinuousTPShapeFunction> gg =
+		final CoordinateVector start = CoordinateVector.fromValues(-1, -1);
+		final CoordinateVector end = CoordinateVector.fromValues(1, 1);
+		final int polynomialDegree = 3;
+		final ContinuousTPFESpace grid = new ContinuousTPFESpace(start, end,
+		                                                         new IntCoordinates(8, 8));
+		final TPCellIntegral<ContinuousTPShapeFunction> gg =
 			new TPCellIntegral<>(ScalarFunction.constantFunction(1),
-			TPCellIntegral.GRAD_GRAD);
-		double penalty = 1;
-		TPFaceIntegral<ContinuousTPShapeFunction> jj =
+			                     TPCellIntegral.GRAD_GRAD);
+		final double penalty = 1;
+		final TPFaceIntegral<ContinuousTPShapeFunction> jj =
 			new TPFaceIntegral<>(ScalarFunction.constantFunction(penalty),
-			TPFaceIntegral.BOUNDARY_VALUE);
-		ArrayList<CellIntegral<TPCell,ContinuousTPShapeFunction>> cellIntegrals =
+			                     TPFaceIntegral.BOUNDARY_VALUE);
+		final ArrayList<CellIntegral<TPCell, ContinuousTPShapeFunction>> cellIntegrals =
 			new ArrayList<>();
 		cellIntegrals.add(gg);
-		ArrayList<FaceIntegral<TPFace,ContinuousTPShapeFunction>> faceIntegrals = new ArrayList<>();
+		final ArrayList<FaceIntegral<TPFace, ContinuousTPShapeFunction>> faceIntegrals = new ArrayList<>();
 		faceIntegrals.add(jj);
-		TPRightHandSideIntegral<ContinuousTPShapeFunction> rightHandSideIntegral =
-			new TPRightHandSideIntegral<>(ScalarFunction.constantFunction(4),TPRightHandSideIntegral.VALUE);
-		ArrayList<RightHandSideIntegral<TPCell,ContinuousTPShapeFunction>> rightHandSideIntegrals = new ArrayList<>();
+		final TPRightHandSideIntegral<ContinuousTPShapeFunction> rightHandSideIntegral =
+			new TPRightHandSideIntegral<>(ScalarFunction.constantFunction(4),
+			                              TPRightHandSideIntegral.VALUE);
+		final ArrayList<RightHandSideIntegral<TPCell, ContinuousTPShapeFunction>> rightHandSideIntegrals
+			= new ArrayList<>();
 		rightHandSideIntegrals.add(rightHandSideIntegral);
-		ArrayList<BoundaryRightHandSideIntegral<TPFace,ContinuousTPShapeFunction>> boundaryFaceIntegrals = new ArrayList<>();
+		final ArrayList<BoundaryRightHandSideIntegral<TPFace, ContinuousTPShapeFunction>> boundaryFaceIntegrals
+			= new ArrayList<>();
 		grid.assembleCells();
 		grid.assembleFunctions(polynomialDegree);
 		grid.initializeSystemMatrix();
 		grid.initializeRhs();
-		grid.evaluateCellIntegrals(cellIntegrals,rightHandSideIntegrals);
-		grid.evaluateFaceIntegrals(faceIntegrals,boundaryFaceIntegrals);
+		grid.evaluateCellIntegrals(cellIntegrals, rightHandSideIntegrals);
+		grid.evaluateFaceIntegrals(faceIntegrals, boundaryFaceIntegrals);
 		//grid.getSystemMatrix().add(1,0,0);
-		System.out.println(((1.0*System.nanoTime() - startTime)/1e9));
-		System.out.println("solve system: "+grid.getSystemMatrix().getRows()+"×"+grid.getSystemMatrix().getCols());
+		System.out.println(((1.0 * System.nanoTime() - startTime) / 1e9));
+		System.out.println("solve system: " + grid.getSystemMatrix()
+		                                          .getRows() + "×" + grid.getSystemMatrix()
+		                                                                 .getCols());
 		//grid.A.makeParallelReady(12);
-		if(grid.getRhs().getLength() < 50)
+		if (grid.getRhs()
+		        .getLength() < 50)
 		{
 			System.out.println(grid.getSystemMatrix());
 			System.out.println(grid.getRhs());
 		}
-		IterativeSolver it = new IterativeSolver();
+		final IterativeSolver it = new IterativeSolver();
 		System.out.println("start stopwatch");
-		Stopwatch s = Stopwatch.createStarted();
-		Vector solution1 = it.solveCG(grid.getSystemMatrix(),grid.getRhs(),1e-3);
+		final Stopwatch s = Stopwatch.createStarted();
+		final Vector solution1 = it.solveCG(grid.getSystemMatrix(), grid.getRhs(), 1e-3);
 		System.out.println(s.elapsed());
 		//Vector solution = ((DenseMatrix)grid.getSystemMatrix()).solve(grid.getRhs());
 		System.out.println("solved");
-		System.out.println(((1.0*System.nanoTime() - startTime)/1e9));
+		System.out.println(((1.0 * System.nanoTime() - startTime) / 1e9));
 		//grid.A.print_formatted();
 		//grid.rhs.print_formatted();
-		ScalarFESpaceFunction<ContinuousTPShapeFunction> solut =
+		final ScalarFESpaceFunction<ContinuousTPShapeFunction> solut =
 			new ScalarFESpaceFunction<>(
 				grid.getShapeFunctions(), solution1);
-		Map<CoordinateVector, Double> vals = solut.valuesInPoints(grid.generatePlotPoints(50));
-		ArrayList<Map<CoordinateVector, Double>> valList = new ArrayList<>();
-		TreeSet<ContinuousTPShapeFunction> shapeFunctionTreeSet =
-			new TreeSet<>(grid.getShapeFunctions().values());
+		final Map<CoordinateVector, Double> vals = solut.valuesInPoints(grid.generatePlotPoints(50));
+		final ArrayList<Map<CoordinateVector, Double>> valList = new ArrayList<>();
+		final TreeSet<ContinuousTPShapeFunction> shapeFunctionTreeSet =
+			new TreeSet<>(grid.getShapeFunctions()
+			                  .values());
 		valList.add(solut.valuesInPoints(grid.generatePlotPoints(50)));
-		for(ContinuousTPShapeFunction sf:shapeFunctionTreeSet)
+		for (final ContinuousTPShapeFunction sf : shapeFunctionTreeSet)
 			valList.add(sf.valuesInPoints(grid.generatePlotPoints(50)));
 		new PlotFrame(valList, start, end);
 	}

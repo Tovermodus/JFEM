@@ -5,7 +5,7 @@ import scala.Function2;
 import scala.Tuple2;
 
 public class DirectSchur
-	extends SchurSolver
+	extends ExplicitSchurSolver
 {
 	Function2<DenseMatrix, Vector, Vector> inverseApplier;
 	
@@ -18,7 +18,7 @@ public class DirectSchur
 	Function2<DenseMatrix, Vector, Vector> solveSchur()
 	{
 		if (inverseApplier == null)
-			inverseApplier = new Function2<DenseMatrix, Vector, Vector>()
+			inverseApplier = new Function2<>()
 			{
 				DenseMatrix inverse;
 				

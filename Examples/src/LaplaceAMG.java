@@ -11,7 +11,7 @@ import tensorproduct.*;
 import java.util.ArrayList;
 import java.util.List;
 
-public class LaplaceMG
+public class LaplaceAMG
 {
 	public static void main(final String[] args)
 	{

@@ -188,6 +188,14 @@ public class IntCoordinates
 		return new Range(this);
 	}
 	
+	public IntCoordinates mul(final int n)
+	{
+		final int[] newCoords = coordinates.clone();
+		for (int i = 0; i < newCoords.length; i++)
+			newCoords[i] *= n;
+		return new IntCoordinates(newCoords);
+	}
+	
 	public static class Range
 		implements Iterable<IntCoordinates>, Iterator<IntCoordinates>
 	{

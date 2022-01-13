@@ -1,15 +1,16 @@
 package linalg;
 
 import basic.DoubleCompare;
-import basic.MapKeySelectCollector;
 import basic.PerformanceArguments;
-import io.vavr.Tuple2;
+import it.unimi.dsi.fastutil.doubles.DoubleArrayList;
+import it.unimi.dsi.fastutil.doubles.DoubleList;
+import it.unimi.dsi.fastutil.ints.IntArrayList;
+import it.unimi.dsi.fastutil.ints.IntList;
 
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
-import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
@@ -29,7 +30,6 @@ public class DenseMatrix
 		entries = new double[matrix.getRows()][matrix.getCols()];
 		if (matrix.isSparse())
 		{
-			
 			Stream<Map.Entry<IntCoordinates, Double>> entryStream = matrix
 				.getCoordinateEntryList()
 				.entrySet()
@@ -146,8 +146,8 @@ public class DenseMatrix
 	@Override
 	public void add(final double value, final int... coordinates)
 	{
-		if (PerformanceArguments.getInstance().executeChecks)
-			if (coordinates.length != 2) throw new IllegalArgumentException("Wrong number of coordinates");
+		//if (PerformanceArguments.getInstance().executeChecks)
+		if (coordinates.length != 2) throw new IllegalArgumentException("Wrong number of coordinates");
 		entries[coordinates[0]][coordinates[1]] += value;
 	}
 	
@@ -219,6 +219,16 @@ public class DenseMatrix
 					ret.add(-other.at(i, j), i, j);
 			return ret;
 		}
+	}
+	
+	@Override
+	public DenseMatrix slice(final IntCoordinates start, final IntCoordinates end)
+	{
+		final DenseMatrix ret = new DenseMatrix(end.sub(start));
+		for (int i = start.get(0); i < end.get(0); i++)
+			for (int j = start.get(1); j < end.get(1); j++)
+				ret.entries[i - start.get(0)][j - start.get(1)] = entries[i][j];
+		return ret;
 	}
 	
 	@Override
@@ -308,6 +318,11 @@ public class DenseMatrix
 		return (long) entries.length * entries[0].length;
 	}
 	
+	public boolean almostEqual(final SparseMatrix other)
+	{
+		return almostEqual(new DenseMatrix(other));
+	}
+	
 	@Override
 	public DenseMatrix transpose()
 	{
@@ -354,16 +369,26 @@ public class DenseMatrix
 		IntStream str = IntStream.range(0, getRows());
 		if (PerformanceArguments.getInstance().parallelizeThreads)
 			str = str.parallel();
+		final int cols = getCols();
+		final int otherCols = matrix.getCols();
 		str.forEach(i ->
 		            {
-			            for (int k = 0; k < getCols(); k++)
+			            final double[] retRow = ret.entries[i];
+			            for (int k = 0; k < cols; k++)
 			            {
 				            final double aik = at(i, k);
-				            for (int j = 0; j < matrix.getCols(); j++)
-					            ret.add(aik * matrix.at(k, j), i, j);
+				            final double[] matRow = matrix.entries[k];
+				            for (int j = 0; j < otherCols; j++)
+					            retRow[j] += aik * matRow[j];
 			            }
 		            });
 		return ret;
+	}
+	
+	private void overrideBy(final DenseMatrix other)
+	{
+		this.entries = other.entries;
+		this.ujmpmat = other.ujmpmat;
 	}
 	
 	@Override
@@ -373,36 +398,53 @@ public class DenseMatrix
 			return mmMul(new DenseMatrix(matrix));
 		if (PerformanceArguments.getInstance().executeChecks)
 			if (getCols() != (matrix.getRows())) throw new IllegalArgumentException("Incompatible sizes");
-		final Map<Integer, Map<Integer, Double>> columns =
-			matrix.getCoordinateEntryList()
-			      .entrySet()
-			      .stream()
-			      .map(e -> new Tuple2<>(e.getKey(), e.getValue()))
-			      .collect(Collectors.groupingBy(e -> e._1.get(1),
-			                                     new MapKeySelectCollector<>(key -> key.get(0))));
+		final IntList[] columnCoordinates = new IntList[matrix.getCols()];
+		final DoubleList[] columnEntries = new DoubleList[matrix.getCols()];
+		groupCoordinateEntriesByCol(matrix, columnCoordinates, columnEntries);
 		final DenseMatrix ret = new DenseMatrix(getRows(), matrix.getCols());
-		
-		Stream<Map.Entry<Integer, Map<Integer, Double>>> str = columns.entrySet()
-		                                                              .stream();
-		if (PerformanceArguments.getInstance().parallelizeThreads)
-			str = str.parallel();
-		str.forEach(column ->
-		            {
-			            final int colIndex = column.getKey();
-			            final var colEntrySet = column.getValue()
-			                                          .entrySet();
-			            for (int i = 0; i < getRows(); i++)
+		final int rows = getRows();
+		for (int i = 0; i < rows; i++)
+		{
+			final double[] row = entries[i];
+			final int finalI = i;
+			IntStream str = IntStream.range(0, matrix.getCols());
+			if (PerformanceArguments.getInstance().parallelizeThreads)
+				str = str.parallel();
+			str.forEach(columnIndex ->
 			            {
-				            final int finalI = i;
-				            final double contraction = colEntrySet.stream()
-				                                                  .mapToDouble(colEntry -> entries[finalI][colEntry.getKey()] * colEntry.getValue())
-				                                                  .sum();
-//				            for (final Map.Entry<Integer, Double> colEntry : colEntrySet)
-//					            contraction += entries[i][colEntry.getKey()] * colEntry.getValue();
-				            ret.add(contraction, i, colIndex);
-			            }
-		            });
+				            if (columnCoordinates[columnIndex] != null)
+				            {
+					            final int[] columnCoords
+						            = columnCoordinates[columnIndex].toIntArray();
+					            final double[] columnEntriees
+						            = columnEntries[columnIndex].toDoubleArray();
+					            double contraction = 0;
+					            for (int j = 0; j < columnCoords.length; j++)
+						            contraction
+							            += row[columnCoords[j]] * columnEntriees[j];
+					            ret.add(contraction, finalI, columnIndex);
+				            }
+			            });
+		}
 		return ret;
+	}
+	
+	public static void groupCoordinateEntriesByCol(final Matrix matrix,
+	                                               final IntList[] columnCoordinates,
+	                                               final DoubleList[] columnEntries)
+	{
+		matrix.getCoordinateEntryList()
+		      .forEach((intCoordinates, value) ->
+		               {
+			               final int col = intCoordinates.get(1);
+			               if (columnCoordinates[col] == null)
+			               {
+				               columnCoordinates[col] = new IntArrayList();
+				               columnEntries[col] = new DoubleArrayList();
+			               }
+			               columnCoordinates[col].add(intCoordinates.get(0));
+			               columnEntries[col].add(value);
+		               });
 	}
 	
 	@Override

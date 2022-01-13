@@ -73,6 +73,8 @@ public class SparseMvMul
 	@Override
 	public DenseVector mvMul(final Vector vector)
 	{
+		if (vector.getLength() != getVectorSize())
+			throw new IllegalArgumentException("Vector has wrong size");
 		final double[] vectorVals = vector.asArray();
 		final double[] ret = new double[rows];
 		IntStream str = IntStream.range(0, rows);
@@ -93,6 +95,8 @@ public class SparseMvMul
 	@Override
 	public DenseVector tvMul(final Vector vector)
 	{
+		if (vector.getLength() != getTVectorSize())
+			throw new IllegalArgumentException("Vector has wrong size");
 		final double[] vectorVals = vector.asArray();
 		final double[] ret = new double[cols];
 		IntStream str = IntStream.range(0, cols);

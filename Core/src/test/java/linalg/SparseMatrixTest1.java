@@ -1,7 +1,10 @@
 package linalg;
 
 import basic.DoubleCompare;
+import com.google.common.base.Stopwatch;
 import org.junit.Test;
+
+import java.util.Random;
 
 import static org.junit.Assert.*;
 
@@ -225,5 +228,39 @@ public class SparseMatrixTest1
 		assertTrue(symmDense
 			           .solveSymm(largeVector)
 			           .almostEqual(new IterativeSolver().solveCG(symmDense, largeVector, 1e-10)));
+	}
+	
+	@Test
+	public void testmmMul()
+	{
+		final int n = 2002;
+		final DenseMatrix dense = new DenseMatrix(n, n);
+		final SparseMatrix sparse = new SparseMatrix(n, n);
+		final Random generator = new Random(3145);
+		for (int i = 0; i < n; i++)
+		{
+			for (int j = 0; j < 50; j++)
+				sparse.add(generator.nextDouble(), i, generator.nextInt(n));
+			for (int j = 0; j < n; j++)
+				dense.add(generator.nextDouble(), i, j);
+		}
+		final DenseMatrix sparseToDense = new DenseMatrix(sparse);
+		final Stopwatch s = Stopwatch.createStarted();
+		DenseMatrix result = null;
+		for (int i = 0; i < 10; i++)
+		{
+			result = dense.mmMul(sparse);
+		}
+		System.out.println(s.elapsed());
+		assertEquals(result, dense.mmMul(sparseToDense));
+		System.out.println(s.elapsed());
+		result = sparseToDense.mmMul(sparse);
+		System.out.println(s.elapsed());
+		final SparseMatrix spspresult = sparse.mmMul(sparse);
+		System.out.println(s.elapsed());
+		assertEquals(spspresult, result);
+		System.out.println(s.elapsed());
+		assertEquals(spspresult, sparse.mmMul(sparseToDense));
+		System.out.println(s.elapsed());
 	}
 }

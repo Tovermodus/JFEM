@@ -40,7 +40,7 @@ public interface Matrix
 	}
 	
 	@Override
-	default SparseMatrix slice(final IntCoordinates start, final IntCoordinates end)
+	default Matrix slice(final IntCoordinates start, final IntCoordinates end)
 	{
 		final SparseMatrix ret = new SparseMatrix(end.get(0) - start.get(0), end.get(1) - start.get(1));
 		if (isSparse())

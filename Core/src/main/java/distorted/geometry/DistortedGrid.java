@@ -23,12 +23,6 @@ public interface DistortedGrid
 			System.out.println("refine");
 			refinedCells = refineCells(refinedCells);
 			genFaces = refineFaces(refinedCells);
-			for (final DistortedFace f : genFaces)
-			{
-				if (!f.isBoundaryFace() && f.getCells()
-				                            .size() != 2)
-					System.out.println(f);
-			}
 		}
 		int hash = 379;
 		final ImmutableSet<DistortedCell> cells = ImmutableSet.copyOf(refinedCells.values());

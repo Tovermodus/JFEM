@@ -16,7 +16,7 @@ import java.util.function.Function;
 import java.util.function.Predicate;
 import java.util.function.ToDoubleFunction;
 
-public class DLMRingPrecond
+public class DLMRingPrecond2
 	extends HyperbolicCartesianDistorted<QkQkFunction, ContinuousTPShapeFunction, ContinuousTPVectorFunction>
 {
 	
@@ -29,10 +29,10 @@ public class DLMRingPrecond
 	VectorMultiplyable precond;
 	private double lastPrecondTime;
 	
-	public DLMRingPrecond(final double dt,
-	                      final int timeSteps,
-	                      final CartesianGridSpace<QkQkFunction, MixedValue, MixedGradient, MixedHessian> backgroundSpace,
-	                      final List<DistortedGridSpace<DistortedVectorShapeFunction, CoordinateVector, CoordinateMatrix, CoordinateTensor>> particleSpaces)
+	public DLMRingPrecond2(final double dt,
+	                       final int timeSteps,
+	                       final CartesianGridSpace<QkQkFunction, MixedValue, MixedGradient, MixedHessian> backgroundSpace,
+	                       final List<DistortedGridSpace<DistortedVectorShapeFunction, CoordinateVector, CoordinateMatrix, CoordinateTensor>> particleSpaces)
 	{
 		super(dt, timeSteps, backgroundSpace, particleSpaces);
 		velocityValues = new ConcurrentSkipListMap<>();
@@ -54,7 +54,7 @@ public class DLMRingPrecond
 	{
 		final IterativeSolver it = new IterativeSolver();
 		it.showProgress = true;
-		it.showInterrupt = true;
+		it.showInterrupt = false;
 		return (A, b) ->
 		{
 			System.out.println(A.getClass());
@@ -65,6 +65,8 @@ public class DLMRingPrecond
 		};
 	}
 	
+	IterativeImplicitSchur ies;
+	
 	public VectorMultiplyable calculatePrecond(final Matrix A)
 	{
 		final int[] blocks = new int[1 + particleSpaces.size()];
@@ -74,12 +76,26 @@ public class DLMRingPrecond
 		final BlockSparseMatrix schurShape = new BlockSparseMatrix(A, blocks);
 		System.out.println("done");
 		System.out.println("Generaate Schur Solver");
-		return new DirectSchur(schurShape);
+		if (ies == null)
+			ies = new IterativeImplicitSchur(schurShape);
+		else
+		{
+			ies.getSchurBlock()
+			   .overrideBy(schurShape.getBlockMatrix(0, 0));
+			for (int i = 0; i < particleSpaces.size(); i++)
+			{
+				ies.getTopBlock(i)
+				   .overrideBy(schurShape.getBlockMatrix(0, i + 1));
+				ies.getLeftBlock(i)
+				   .overrideBy(schurShape.getBlockMatrix(i + 1, 0));
+			}
+		}
+		return ies;
 	}
 	
 	public VectorMultiplyable getPrecond(final Matrix A)
 	{
-		if (precond == null || time > lastPrecondTime + dt * 20)
+		//if (precond == null || time > lastPrecondTime + dt * 20)
 		{
 			precond = calculatePrecond(A);
 			System.out.println("calculated");
@@ -270,7 +286,7 @@ public class DLMRingPrecond
 	{
 		final TaylorHoodSpace backGround = new TaylorHoodSpace(CoordinateVector.fromValues(0, 0),
 		                                                       CoordinateVector.fromValues(1, 1),
-		                                                       new IntCoordinates(20, 20));
+		                                                       new IntCoordinates(10, 10));
 		final DistortedGridSpace<DistortedVectorShapeFunction, CoordinateVector, CoordinateMatrix, CoordinateTensor>
 			particle1 =
 			new CircleVectorSpace(CoordinateVector.fromValues(0.6, 0.5),
@@ -294,10 +310,10 @@ public class DLMRingPrecond
 		particle1.assembleFunctions(1);
 		particle2.assembleCells();
 		particle2.assembleFunctions(1);
-		final DLMRingPrecond dlmElast2 = new DLMRingPrecond(0.02,
-		                                                    10,
-		                                                    backGround,
-		                                                    List.of(particle0, particle1, particle2));
+		final DLMRingPrecond2 dlmElast2 = new DLMRingPrecond2(0.02,
+		                                                      10,
+		                                                      backGround,
+		                                                      List.of(particle0, particle1, particle2));
 		dlmElast2.loop();
 		final MixedPlot2DTime UpPlot0 = new MixedPlot2DTime(dlmElast2.pressureValues,
 		                                                    dlmElast2.velocityValues,

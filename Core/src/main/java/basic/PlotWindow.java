@@ -111,7 +111,6 @@ public class PlotWindow
 		if (newValue > 99) newValue = 0;
 		if (plots.size() != 0) currentPlot = currentPlot % plots.size();
 		while (currentPlot < 0) currentPlot += plots.size();
-		System.out.println(currentPlot);
 		if (plots.size() != 0) d.setPlot(plots.get(currentPlot));
 		slider.setValue(newValue);
 	}

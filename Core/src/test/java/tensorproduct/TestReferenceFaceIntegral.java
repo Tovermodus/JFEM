@@ -117,7 +117,6 @@ public class TestReferenceFaceIntegral
 		ArrayList<BoundaryRightHandSideIntegral<TPFace, TPShapeFunction>> rightHandSideIntegrals =
 			new ArrayList<>();
 		grid.assembleCells();
-		System.out.println(grid.getCells());
 		grid.assembleFunctions(polynomialDegree);
 		grid.initializeSystemMatrix();
 		grid.initializeRhs();
@@ -144,27 +143,33 @@ public class TestReferenceFaceIntegral
 	public void test2DJumpJump()
 	{
 		final CartesianGrid g = new CartesianGrid(CoordinateVector.fromValues(3, 130),
-		                                          CoordinateVector.fromValues(6, 138), new IntCoordinates(1, 2));
+		                                          CoordinateVector.fromValues(6, 138),
+		                                          new IntCoordinates(1, 2));
 		final TPFace f = g.faces.get(5);
-		assertEquals(f.getNormalUpstreamCell().center(), CoordinateVector.fromValues(4.5, 132.0));
-		assertEquals(f.getNormalDownstreamCell().center(), CoordinateVector.fromValues(4.5, 136));
+		assertEquals(f.getNormalUpstreamCell()
+		              .center(), CoordinateVector.fromValues(4.5, 132.0));
+		assertEquals(f.getNormalDownstreamCell()
+		              .center(), CoordinateVector.fromValues(4.5, 136));
 		for (int k = 0; k < 5; k++)
 			for (int i = 0; i < (k + 1) * (k + 1); i++)
 				for (int j = 0; j < (k + 1) * (k + 1); j++)
 				{
-					final TPShapeFunction f1 = new TPShapeFunction(f.getNormalDownstreamCell(), k, i);
+					final TPShapeFunction f1 = new TPShapeFunction(f.getNormalDownstreamCell(),
+					                                               k,
+					                                               i);
 					final TPShapeFunction f2 = new TPShapeFunction(f.getNormalUpstreamCell(), k, j);
 					final TPFaceIntegral<TPShapeFunction> gg = new TPFaceIntegral<>(
 						ScalarFunction.constantFunction(1),
 						TPFaceIntegral.VALUE_JUMP_VALUE_JUMP);
-					final TPFaceIntegral<TPShapeFunction> gg2 = new TPFaceIntegralViaReferenceFace<>(1,
-					                                                                                 TPFaceIntegral.VALUE_JUMP_VALUE_JUMP);
+					final TPFaceIntegral<TPShapeFunction> gg2
+						= new TPFaceIntegralViaReferenceFace<>(1,
+						                                       TPFaceIntegral.VALUE_JUMP_VALUE_JUMP);
 					assertTrue("Difference of " + Math.abs(gg.evaluateFaceIntegral(f
-						, f1,
+						           , f1,
 						                                                       f2) - gg2.evaluateFaceIntegral(
-						f,
-						f1,
-						f2)) + " for polynomial degree " + k + " and functions " + i + " and " + j,
+						           f,
+						           f1,
+						           f2)) + " for polynomial degree " + k + " and functions " + i + " and " + j,
 					           Math.abs(gg.evaluateFaceIntegral(f, f1,
 					                                            f2) - gg2.evaluateFaceIntegral(f,
 					                                                                           f1,
@@ -179,14 +184,15 @@ public class TestReferenceFaceIntegral
 					final TPFaceIntegral<TPShapeFunction> gg = new TPFaceIntegral<>(
 						ScalarFunction.constantFunction(1),
 						TPFaceIntegral.VALUE_JUMP_VALUE_JUMP);
-					final TPFaceIntegral<TPShapeFunction> gg2 = new TPFaceIntegralViaReferenceFace<>(1,
-					                                                                                 TPFaceIntegral.VALUE_JUMP_VALUE_JUMP);
+					final TPFaceIntegral<TPShapeFunction> gg2
+						= new TPFaceIntegralViaReferenceFace<>(1,
+						                                       TPFaceIntegral.VALUE_JUMP_VALUE_JUMP);
 					assertTrue("Difference of " + Math.abs(gg.evaluateFaceIntegral(f
-						, f1,
+						           , f1,
 						                                                       f2) - gg2.evaluateFaceIntegral(
-						f,
-						f1,
-						f2)) + " for polynomial degree " + k + " and functions " + i + " and " + j,
+						           f,
+						           f1,
+						           f2)) + " for polynomial degree " + k + " and functions " + i + " and " + j,
 					           Math.abs(gg.evaluateFaceIntegral(f, f1,
 					                                            f2) - gg2.evaluateFaceIntegral(f,
 					                                                                           f1,
@@ -196,19 +202,22 @@ public class TestReferenceFaceIntegral
 			for (int i = 0; i < (k + 1) * (k + 1); i++)
 				for (int j = 0; j < (k + 1) * (k + 1); j++)
 				{
-					final TPShapeFunction f1 = new TPShapeFunction(f.getNormalDownstreamCell(), k, i);
+					final TPShapeFunction f1 = new TPShapeFunction(f.getNormalDownstreamCell(),
+					                                               k,
+					                                               i);
 					final TPShapeFunction f2 = new TPShapeFunction(f.getNormalUpstreamCell(), k, j);
 					final TPFaceIntegral<TPShapeFunction> gg = new TPFaceIntegral<>(
 						ScalarFunction.constantFunction(1),
 						TPFaceIntegral.VALUE_JUMP_VALUE_JUMP);
-					final TPFaceIntegral<TPShapeFunction> gg2 = new TPFaceIntegralViaReferenceFace<>(1,
-					                                                                                 TPFaceIntegral.VALUE_JUMP_VALUE_JUMP);
+					final TPFaceIntegral<TPShapeFunction> gg2
+						= new TPFaceIntegralViaReferenceFace<>(1,
+						                                       TPFaceIntegral.VALUE_JUMP_VALUE_JUMP);
 					assertTrue("Difference of " + Math.abs(gg.evaluateFaceIntegral(f
-						, f1,
+						           , f1,
 						                                                       f2) - gg2.evaluateFaceIntegral(
-						f,
-						f1,
-						f2)) + " for polynomial degree " + k + " and functions " + i + " and " + j,
+						           f,
+						           f1,
+						           f2)) + " for polynomial degree " + k + " and functions " + i + " and " + j,
 					           Math.abs(gg.evaluateFaceIntegral(f, f1,
 					                                            f2) - gg2.evaluateFaceIntegral(f,
 					                                                                           f1,

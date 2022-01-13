@@ -2,6 +2,7 @@ package tensorproduct;
 
 import linalg.CoordinateMatrix;
 import linalg.CoordinateVector;
+import linalg.IntCoordinates;
 import tensorproduct.geometry.TPCell;
 import tensorproduct.geometry.TPFace;
 
@@ -15,6 +16,12 @@ public class ContinuousTPFESpace
 	
 	public ContinuousTPFESpace(final CoordinateVector startCoordinates, final CoordinateVector endCoordinates,
 	                           final List<Integer> cellsPerDimension)
+	{
+		super(startCoordinates, endCoordinates, cellsPerDimension);
+	}
+	
+	public ContinuousTPFESpace(final CoordinateVector startCoordinates, final CoordinateVector endCoordinates,
+	                           final IntCoordinates cellsPerDimension)
 	{
 		super(startCoordinates, endCoordinates, cellsPerDimension);
 	}

@@ -117,14 +117,14 @@ public class SchurSolverTest
 	{
 		final BlockSparseMatrix bsm = createSmallIdentity2();
 		final DenseVector b = getRhs(bsm);
-		final SchurSolver s = new DirectSchur(bsm);
+		final ExplicitSchurSolver s = new DirectSchur(bsm);
 		assertEquals(s.mvMul(b), b);
 		assertEquals(s.mvMul(b),
 		             bsm.toSparse()
 		                .solve(b));
 		final BlockSparseMatrix bsm3 = createSmallIdentity3();
 		final DenseVector b3 = getRhs(bsm3);
-		final SchurSolver s3 = new DirectSchur(bsm3);
+		final ExplicitSchurSolver s3 = new DirectSchur(bsm3);
 		assertEquals(s3.mvMul(b3), b3);
 		assertEquals(s3.mvMul(b3),
 		             bsm3.toSparse()
@@ -136,19 +136,19 @@ public class SchurSolverTest
 	{
 		final BlockSparseMatrix bsm = createSmallMatrix2();
 		final DenseVector b = getRhs(bsm);
-		final SchurSolver s = new DirectSchur(bsm);
+		final ExplicitSchurSolver s = new DirectSchur(bsm);
 		assertEquals(s.mvMul(b),
 		             bsm.toSparse()
 		                .solve(b));
 		final BlockSparseMatrix bsm3 = createSmallMatrix3();
 		final DenseVector b3 = getRhs(bsm3);
-		final SchurSolver s3 = new DirectSchur(bsm3);
+		final ExplicitSchurSolver s3 = new DirectSchur(bsm3);
 		assertEquals(s3.mvMul(b3),
 		             bsm3.toSparse()
 		                 .solve(b3));
 		final BlockSparseMatrix bsml3 = createLargeMatrix3();
 		final DenseVector bl3 = getRhs(bsml3);
-		final SchurSolver sl3 = new DirectSchur(bsml3);
+		final ExplicitSchurSolver sl3 = new DirectSchur(bsml3);
 		assertEquals(sl3.mvMul(bl3),
 		             bsml3.toSparse()
 		                  .solve(bl3));

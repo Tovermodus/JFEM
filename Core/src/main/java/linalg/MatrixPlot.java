@@ -38,7 +38,10 @@ public class MatrixPlot
 			pixelWidth = (width - 150) / m.getCols() + 2;
 			pixelHeight = (height - 150) / m.getRows() + 2;
 			g.setColor(Color.BLUE);
-			g.fillRect(74, 74, width - 148, height - 148);
+			g.fillRect(75 - pixelWidth / 2,
+			           75 - pixelHeight / 2,
+			           width - 150,
+			           height - 150);
 			for (final var v : m.getCoordinateEntryList()
 			                    .entrySet())
 			{
@@ -80,7 +83,7 @@ public class MatrixPlot
 		final int blue = 255 - red;
 		final Color c = new Color(red, green, blue);
 		final int x = (int) ((1.0 * coords.get(1) / m.getCols()) * (width - 150) + 75 - pixelWidth / 2);
-		final int y = (int) ((1.0 * coords.get(0) / m.getRows()) * (height - 150) - pixelWidth / 2) + 75;
+		final int y = (int) ((1.0 * coords.get(0) / m.getRows()) * (height - 150) - pixelHeight / 2) + 75;
 		g.setColor(c);
 		g.fillRect(x, y, pixelWidth, pixelHeight);
 	}

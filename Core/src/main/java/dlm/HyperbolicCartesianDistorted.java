@@ -61,7 +61,6 @@ public abstract class HyperbolicCartesianDistorted<ST extends ComposeMixedShapeF
 			                                                    .size();
 		}
 		blockStarts[2 * particleSpaces.size() + 2] = getSystemSize();
-		System.out.println(Arrays.toString(blockStarts));
 		addBackgroundBlocks(twoDerivativeBlocks, oneDerivativeBlocks, zeroDerivativeBlocks);
 		addAllParticleBlocks(twoDerivativeBlocks, oneDerivativeBlocks, zeroDerivativeBlocks);
 		final int size = getSystemSize();
@@ -545,7 +544,6 @@ public abstract class HyperbolicCartesianDistorted<ST extends ComposeMixedShapeF
 		final Map<IntCoordinates, SparseMatrix> blocks = new HashMap<>();
 		System.out.println(zeroDerivativeMatrix.getBlocks()
 		                                       .keySet());
-		System.out.println("aaaaa " + blockStarts[0] + " " + blockStarts[2 * particleId + 3]);
 		blocks.put(new IntCoordinates(0, particleSize), evaluateBackgroundLagrangeIntegrals(particleId));
 //		           zeroDerivativeMatrix.getBlocks()
 //		                               .get(new IntCoordinates(blockStarts[0],

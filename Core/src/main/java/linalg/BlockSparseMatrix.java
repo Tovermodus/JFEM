@@ -127,7 +127,7 @@ public class BlockSparseMatrix
 		                              .collect(new MapCollector<>()));
 	}
 	
-	public BlockSparseMatrix(final SparseMatrix s, final int nBlocksPerDir)
+	public BlockSparseMatrix(final Matrix s, final int nBlocksPerDir)
 	{
 		this(s, generateEquiDist(nBlocksPerDir, s.getRows()));
 	}
@@ -425,12 +425,12 @@ public class BlockSparseMatrix
 		return toSparse().mmMul(matrix);
 	}
 	
-	public SparseMatrix mmMul(final SparseMatrix matrix)
+	public Matrix mmMul(final SparseMatrix matrix)
 	{
 		return toSparse().mmMul(matrix);
 	}
 	
-	public SparseMatrix mmMul(final BlockSparseMatrix matrix)
+	public DenseMatrix mmMul(final BlockSparseMatrix matrix)
 	{
 		return toSparse().mmMul(matrix);
 	}

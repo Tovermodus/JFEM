@@ -148,29 +148,42 @@ public class BlockDenseMatrix
 		if (blockEnds.length - 1 >= 0) System.arraycopy(blockStarts, 1, blockEnds, 0, blockEnds.length - 1);
 		blockEnds[blockEnds.length - 1] = s.getCols();
 		final HashMap<IntCoordinates, DenseMatrix> mutableBlocks = new HashMap<>();
-		for (int i = 0; i < blockStarts.length; i++)
+		if (s.isSparse())
 		{
-			mutableBlocks.put(new IntCoordinates(blockStarts[i], blockStarts[i]),
-			                  new DenseMatrix(blockEnds[i] - blockStarts[i],
-			                                  blockEnds[i] - blockStarts[i]));
-		}
-		for (final Map.Entry<IntCoordinates, Double> entry : s.getCoordinateEntryList()
-		                                                      .entrySet())
+			for (int i = 0; i < blockStarts.length; i++)
+			{
+				mutableBlocks.put(new IntCoordinates(blockStarts[i], blockStarts[i]),
+				                  new DenseMatrix(blockEnds[i] - blockStarts[i],
+				                                  blockEnds[i] - blockStarts[i]));
+			}
+			for (final Map.Entry<IntCoordinates, Double> entry : s.getCoordinateEntryList()
+			                                                      .entrySet())
+			{
+				final IntCoordinates block = getBlock(entry.getKey()
+				                                           .asArray());
+				final IntCoordinates blockStart;
+				if (block != null)
+					blockStart = block.concatenate(blockStarts);
+				else throw new IllegalStateException("first start is not 0");
+				if (!mutableBlocks.containsKey(blockStart))
+					mutableBlocks.put(blockStart,
+					                  new DenseMatrix(block.concatenate(blockEnds)
+					                                       .sub(blockStart)));
+				mutableBlocks.get(blockStart)
+				             .add(entry.getValue(),
+				                  entry.getKey()
+				                       .sub(blockStart));
+			}
+		} else if (s instanceof DenseMatrix)
 		{
-			final IntCoordinates block = getBlock(entry.getKey()
-			                                           .asArray());
-			final IntCoordinates blockStart;
-			if (block != null)
-				blockStart = block.concatenate(blockStarts);
-			else throw new IllegalStateException("first start is not 0");
-			if (!mutableBlocks.containsKey(blockStart))
-				mutableBlocks.put(blockStart,
-				                  new DenseMatrix(block.concatenate(blockEnds)
-				                                       .sub(blockStart)));
-			mutableBlocks.get(blockStart)
-			             .add(entry.getValue(),
-			                  entry.getKey()
-			                       .sub(blockStart));
+			final DenseMatrix d = (DenseMatrix) s;
+			for (int i = 0; i < blockStarts.length; i++)
+				for (int j = 0; j < blockStarts.length; j++)
+					mutableBlocks.put(new IntCoordinates(blockStarts[i], blockStarts[j]),
+					                  d.slice(new IntCoordinates(blockStarts[i],
+					                                             blockStarts[j]),
+					                          new IntCoordinates(blockEnds[i],
+					                                             blockEnds[j])));
 		}
 		blocks = ImmutableMap.copyOf(mutableBlocks);
 	}
@@ -203,7 +216,6 @@ public class BlockDenseMatrix
 			                                                          }
 		                                                          })
 		                                                     .collect(new MapCollector<>()), this.shape);
-		System.out.println(Arrays.toString(ret.blockStarts));
 		return ret;
 	}
 	
@@ -286,9 +298,7 @@ public class BlockDenseMatrix
 	{
 		final DenseMatrix ret = new DenseMatrix(getShape().get(0), getShape().get(1));
 		blocks.forEach((key, value) ->
-			               value.getCoordinateEntryList()
-			                    .forEach((coord, val) ->
-				                             ret.add(val, coord.add(key))));
+			               ret.addSmallMatrixInPlaceAt(value, key.asArray()));
 		return ret;
 	}
 	

@@ -2,10 +2,10 @@ package basic;
 
 import io.vavr.Tuple2;
 
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.BiConsumer;
 import java.util.function.BinaryOperator;
 import java.util.function.Function;
@@ -26,7 +26,7 @@ public class MapKeySelectCollector<Kprev, Kaft, T>
 	@Override
 	public Supplier<Map<Kaft, T>> supplier()
 	{
-		return HashMap::new;
+		return ConcurrentHashMap::new;
 	}
 	
 	@Override
