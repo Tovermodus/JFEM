@@ -42,19 +42,18 @@ public class TPMultiGridSpaceTest
 			}
 			
 			@Override
-			public List<Tuple2<VectorMultiplyable, DenseVector>> createSystems()
+			public Tuple2<VectorMultiplyable, DenseVector> createSystem(final ContinuousTPFESpace space)
 			{
-				return null;
+				return new Tuple2<>(null, null);
 			}
 			
 			@Override
-			public List<VectorMultiplyable> createSmoothers()
+			public List<Smoother> createSmoothers()
 			{
 				return null;
 			}
 		};
-		final SparseMvMul prolongator = mg.prolongationMatrices.get(0);
-		final SparseMvMul restrictor = mg.restrictionMatrices.get(0);
+		final SparseMvMul prolongator = mg.prolongationOperators.get(0);
 		final DenseVector v = new DenseVector(prolongator.getVectorSize());
 		for (final IntCoordinates c : v.getShape()
 		                               .range())
@@ -65,17 +64,9 @@ public class TPMultiGridSpaceTest
 		final ScalarFESpaceFunction<ContinuousTPShapeFunction> fin =
 			new ScalarFESpaceFunction<>(mg.spaces.get(1)
 			                                     .getShapeFunctions(), prolongator.mvMul(v));
-		final ScalarFESpaceFunction<ContinuousTPShapeFunction> coafin =
-			new ScalarFESpaceFunction<>(mg.spaces.get(0)
-			                                     .getShapeFunctions(),
-			                            restrictor.mvMul(prolongator.mvMul(v)));
-		assertTrue(ConvergenceOrderEstimator.normL2Difference(coars, coafin,
-		                                                      mg.spaces.get(0)
-		                                                               .generatePlotPoints(30)) <= 1e-8);
 		assertTrue(ConvergenceOrderEstimator.normL2Difference(coars, fin,
 		                                                      mg.spaces.get(0)
 		                                                               .generatePlotPoints(30)) <= 1e-8);
-		assertEquals(restrictor.mvMul(prolongator.mvMul(v)), v);
 	}
 	
 	@Test

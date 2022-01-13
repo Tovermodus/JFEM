@@ -1,10 +1,10 @@
 package tensorproduct;
 
-import basic.DoubleCompare;
 import basic.ShapeFunction;
 import com.google.common.collect.TreeMultimap;
 import io.vavr.Tuple2;
 import linalg.*;
+import multigrid.Smoother;
 import tensorproduct.geometry.TPCell;
 import tensorproduct.geometry.TPFace;
 
@@ -20,11 +20,12 @@ public abstract class TPMultiGridSpace<CSpace extends CartesianGridSpace<ST, val
 	protected final CoordinateVector endCoordinates;
 	protected final IntCoordinates coarseCellsPerDimension;
 	public List<CSpace> spaces;
-	public List<VectorMultiplyable> smoothers;
-	public List<SparseMvMul> prolongationMatrices;
-	public List<SparseMatrix> prolongationMatrices2;
-	public List<Tuple2<VectorMultiplyable, DenseVector>> systems;
-	public List<SparseMvMul> restrictionMatrices;
+	public List<Smoother> smoothers;
+	public List<SparseMvMul> prolongationOperators;
+	public List<SparseMatrix> prolongationMatrices;
+	public List<VectorMultiplyable> systems;
+	public Vector finest_rhs;
+	public VectorMultiplyable finest_system;
 	
 	public TPMultiGridSpace(final CoordinateVector startCoordinates, final CoordinateVector endCoordinates,
 	                        final IntCoordinates coarseCellsPerDimension, final int refinements,
@@ -34,20 +35,26 @@ public abstract class TPMultiGridSpace<CSpace extends CartesianGridSpace<ST, val
 		this.endCoordinates = endCoordinates;
 		this.coarseCellsPerDimension = coarseCellsPerDimension;
 		spaces = createSpaces(refinements);
+		System.out.println("spaces");
+		systems = new ArrayList<>();
+		int k = 0;
 		for (final CSpace space : spaces)
 		{
 			space.assembleCells();
 			space.assembleFunctions(polynomialDegree);
+			final var mat_rhs = createSystem(space);
+			systems.add(mat_rhs._1);
+			finest_rhs = mat_rhs._2;
+			finest_system = mat_rhs._1;
+			System.out.println("functions, system " + k++);
 		}
-		systems = createSystems();
 		smoothers = createSmoothers();
+		System.out.println("smoothers");
+		prolongationOperators = new ArrayList<>();
 		prolongationMatrices = new ArrayList<>();
-		prolongationMatrices2 = new ArrayList<>();
 		for (int i = 0; i < spaces.size() - 1; i++)
-			prolongationMatrices.add(createProlongationMatrix(spaces.get(i), spaces.get(i + 1)));
-		restrictionMatrices = new ArrayList<>();
-		for (int i = 0; i < spaces.size() - 1; i++)
-			restrictionMatrices.add(createRestrictionMatrix(spaces.get(i), spaces.get(i + 1)));
+			prolongationOperators.add(createProlongationMatrix(spaces.get(i), spaces.get(i + 1)));
+		System.out.println("prolongation");
 	}
 	
 	SparseMvMul createProlongationMatrix(final CSpace coarse, final CSpace fine)
@@ -59,52 +66,19 @@ public abstract class TPMultiGridSpace<CSpace extends CartesianGridSpace<ST, val
 		final TreeMultimap<ST, ST> refinedFunctions = getRefinedFunctions(coarse, fine);
 		refinedFunctions.forEach((coarseFunction, fineFunction) ->
 		                         {
-			                         if (!fine.fixedNodes.contains(fineFunction.getGlobalIndex())
-				                         && !coarse.fixedNodes.contains(coarseFunction.getGlobalIndex()))
-				                         prolongationMatrix.add(fineFunction.getNodeFunctional()
-				                                                            .evaluate(coarseFunction),
-				                                                fineFunction.getGlobalIndex(),
-				                                                coarseFunction.getGlobalIndex());
-			                         else if (DoubleCompare.almostEqual(fineFunction.getNodeFunctional()
-			                                                                        .evaluate(coarseFunction),
-			                                                            1))
-				                         prolongationMatrix.add(1, fineFunction.getGlobalIndex(),
-				                                                coarseFunction.getGlobalIndex());
+			                         prolongationMatrix.add(fineFunction.getNodeFunctional()
+			                                                            .evaluate(coarseFunction),
+			                                                fineFunction.getGlobalIndex(),
+			                                                coarseFunction.getGlobalIndex());
 		                         });
-		prolongationMatrices2.add(prolongationMatrix);
+		prolongationMatrices.add(prolongationMatrix);
 		return new SparseMvMul(prolongationMatrix);
-	}
-	
-	SparseMvMul createRestrictionMatrix(final CSpace coarse, final CSpace fine)
-	{
-		final SparseMatrix restrictionMatrix = new SparseMatrix(coarse.getShapeFunctions()
-		                                                              .size(),
-		                                                        fine.getShapeFunctions()
-		                                                            .size());
-		final TreeMultimap<ST, ST> refinedFunctions = getRefinedFunctions(coarse, fine);
-		refinedFunctions.forEach((coarseFunction, fineFunction) ->
-		                         {
-			                         if (!fine.fixedNodes.contains(fineFunction.getGlobalIndex())
-				                         && !coarse.fixedNodes.contains(coarseFunction.getGlobalIndex()))
-				                         restrictionMatrix.add(coarseFunction.getNodeFunctional()
-				                                                             .evaluate(fineFunction),
-				                                               coarseFunction.getGlobalIndex(),
-				                                               fineFunction.getGlobalIndex());
-			                         else if (DoubleCompare.almostEqual(fineFunction.getNodeFunctional()
-			                                                                        .evaluate(coarseFunction),
-			                                                            1))
-				                         restrictionMatrix.add(1, coarseFunction.getGlobalIndex(),
-				                                               fineFunction.getGlobalIndex());
-		                         });
-		//PlotWindow.addPlot(new MatrixPlot(prolongationMatrix));
-		return new SparseMvMul(restrictionMatrix);
 	}
 	
 	private TreeMultimap<ST, ST> getRefinedFunctions(final CSpace coarse, final CSpace fine)
 	{
 		final TreeMultimap<ST, ST> ret = TreeMultimap.create();
 		coarse.forEachCell(coarseCell ->
-		                   {
 			                   fine.forEachCell(fineCell ->
 			                                    {
 				                                    if (coarseCell.isInCell(fineCell.center()))
@@ -125,16 +99,15 @@ public abstract class TPMultiGridSpace<CSpace extends CartesianGridSpace<ST, val
 						                                    }
 					                                    }
 				                                    }
-			                                    });
-		                   });
+			                                    }));
 		return ret;
 	}
 	
 	public abstract List<CSpace> createSpaces(int refinements);
 	
-	public abstract List<Tuple2<VectorMultiplyable, DenseVector>> createSystems();
+	public abstract Tuple2<VectorMultiplyable, DenseVector> createSystem(CSpace space);
 	
-	public abstract List<VectorMultiplyable> createSmoothers();
+	public abstract List<Smoother> createSmoothers();
 	
 	public Vector mgStep(final int level, Vector guess, final Vector rhs)
 	{
@@ -142,29 +115,29 @@ public abstract class TPMultiGridSpace<CSpace extends CartesianGridSpace<ST, val
 		//System.out.println(guess.getLength());
 		if (level == 0)
 		{
-			final Vector solution = new IterativeSolver().solveGMRES(systems.get(0)._1, rhs, 1e-9);
+			final Vector solution = new IterativeSolver().solveGMRES(systems.get(0), rhs, 1e-9);
 			return solution;
 		}
 		for (int i = 0; i < 2; i++)
 			guess = smoothers.get(level - 1)
-			                 .mvMul(guess);
+			                 .smooth(systems.get(level), rhs, guess);
 		Vector restrictedDefect =
-			prolongationMatrices.get(level - 1)
-			                    .tvMul(rhs.sub(systems.get(level)._1
-				                                   .mvMul(guess)));
+			prolongationOperators.get(level - 1)
+			                     .tvMul(rhs.sub(systems.get(level)
+			                                           .mvMul(guess)));
 		final Vector correction = mgStep(level - 1,
 		                                 new DenseVector(restrictedDefect.getLength()),
 		                                 restrictedDefect);
-		guess = guess.add(prolongationMatrices.get(level - 1)
-		                                      .mvMul(correction));
+		guess = guess.add(prolongationOperators.get(level - 1)
+		                                       .mvMul(correction));
 		restrictedDefect =
-			prolongationMatrices.get(level - 1)
-			                    .tvMul(rhs.sub(systems.get(level)._1
-				                                   .mvMul(guess)));
+			prolongationOperators.get(level - 1)
+			                     .tvMul(rhs.sub(systems.get(level)
+			                                           .mvMul(guess)));
 		
 		for (int i = 0; i < 2; i++)
 			guess = smoothers.get(level - 1)
-			                 .mvMul(guess);
+			                 .smooth(systems.get(level), rhs, guess);
 		//System.out.println("mgstep done" + level);
 		return guess;
 	}

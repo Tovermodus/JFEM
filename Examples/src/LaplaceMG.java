@@ -15,13 +15,13 @@ public class LaplaceMG
 {
 	public static void main(final String[] args)
 	{
-		final int refinements = 6;
-		final TPAlgebraicMultiGridSpace<ContinuousTPFESpace, ContinuousTPShapeFunction, Double, CoordinateVector, CoordinateMatrix>
-			mg = new TPAlgebraicMultiGridSpace<>(CoordinateVector.fromValues(0, 0),
-			                                     CoordinateVector.fromValues(1, 1),
-			                                     new IntCoordinates(4, 4),
-			                                     refinements,
-			                                     1)
+		final int refinements = 2;
+		final TPMultiGridSpace<ContinuousTPFESpace, ContinuousTPShapeFunction, Double, CoordinateVector, CoordinateMatrix>
+			mg = new TPMultiGridSpace<>(CoordinateVector.fromValues(-1, -1),
+			                            CoordinateVector.fromValues(1, 1),
+			                            new IntCoordinates(4, 4),
+			                            refinements,
+			                            1)
 		{
 			@Override
 			public List<ContinuousTPFESpace> createSpaces(final int refinements)
@@ -38,7 +38,7 @@ public class LaplaceMG
 			}
 			
 			@Override
-			public Tuple2<SparseMatrix, Vector> createFinestLevelSystem(final ContinuousTPFESpace space)
+			public Tuple2<VectorMultiplyable, DenseVector> createSystem(final ContinuousTPFESpace space)
 			{
 				final SparseMatrix s = new SparseMatrix(space.getShapeFunctions()
 				                                             .size(),
@@ -69,7 +69,7 @@ public class LaplaceMG
 				return ret;
 			}
 		};
-		DenseVector solut = new DenseVector(mg.rhs.mul(0));
+		DenseVector solut = new DenseVector(mg.finest_rhs.mul(0));
 		for (final IntCoordinates c : solut.getShape()
 		                                   .range())
 			solut.add(Math.random() * 0.1, c);
@@ -86,57 +86,13 @@ public class LaplaceMG
 		                                    mg.spaces.get(refinements)
 		                                             .generatePlotPoints(30),
 		                                    30, "initial"));
-
-//		solut = mg.systems.get(0)
-//		                  .solve(mg.restrictionOperator.get(0)
-//		                                               .mvMul(mg.restrictionOperator.get(1)
-//		                                                                            .mvMul(mg.rhs)));
-//		sol =
-//			new ScalarFESpaceFunction<>(
-//				mg.spaces.get(0)
-//				         .getShapeFunctions(), solut);
-//		PlotWindow.addPlot(new ScalarPlot2D(sol,
-//		                                    mg.spaces.get(refinements)
-//		                                             .generatePlotPoints(30),
-//		                                    30, "coarse"));
-//		solut = mg.systems.get(1)
-//		                  .solve(mg.restrictionOperator.get(1)
-//		                                               .mvMul(mg.rhs));
-//		sol =
-//			new ScalarFESpaceFunction<>(
-//				mg.spaces.get(1)
-//				         .getShapeFunctions(), solut);
-//		PlotWindow.addPlot(new ScalarPlot2D(sol,
-//		                                    mg.spaces.get(refinements)
-//		                                             .generatePlotPoints(30),
-//		                                    30, "coarse1"));
-		//solut = new DenseVector(mg.rhs.mul(0));KC
-//		final SparseMatrix A_0 = (SparseMatrix) mg.systems.get(0);
-//		final SparseMatrix A_1 = (SparseMatrix) mg.systems.get(1);
-//		final Matrix PTA_1P = mg.prolongationMatrices2.get(0)
-//		                                              .tmMul(A_1)
-//		                                              .mmMul(mg.prolongationMatrices2.get(0));
-//		System.out.println(A_0.sub(PTA_1P)
-//		                      .absMaxElement());
-//		PlotWindow.addPlot(new MatrixPlot(A_0));
-//		PlotWindow.addPlot(new MatrixPlot(PTA_1P));
-
-//		for (int i = 0; i < 10; i++)
-//		{
-//			System.out.println(solut.getLength());
-//			solut = new DenseVector(mg.vCycle(solut, mg.rhs));
-//			sol =
-//				new ScalarFESpaceFunction<>(
-//					mg.spaces.get(refinements)
-//					         .getShapeFunctions(), solut);
-//			PlotWindow.addPlot(new ScalarPlot2D(sol,
-//			                                    mg.spaces.get(refinements)
-//			                                             .generatePlotPoints(30),
-//			                                    30, "iteration" + i));
-//		}
+		
 		final IterativeSolver it = new IterativeSolver();
 		it.showProgress = true;
-		solut = new DenseVector(it.solvePGMRES(mg.matrix, new TPMGPreconditioner(mg), mg.rhs, 1e-8));
+		solut = new DenseVector(it.solvePGMRES(mg.finest_system,
+		                                       new TPMGPreconditioner(mg),
+		                                       mg.finest_rhs,
+		                                       1e-8));
 		sol =
 			new ScalarFESpaceFunction<>(
 				mg.spaces.get(refinements)
@@ -145,5 +101,6 @@ public class LaplaceMG
 		                                    mg.spaces.get(refinements)
 		                                             .generatePlotPoints(30),
 		                                    30, "iteration"));
+		System.out.println(solut.getLength());
 	}
 }

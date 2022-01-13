@@ -6,7 +6,10 @@ import com.google.common.primitives.Ints;
 import linalg.CoordinateVector;
 import linalg.IterativeSolver;
 import linalg.Vector;
-import tensorproduct.*;
+import tensorproduct.ContinuousTPFESpace;
+import tensorproduct.ContinuousTPShapeFunction;
+import tensorproduct.TPCellIntegral;
+import tensorproduct.TPRightHandSideIntegral;
 
 import java.util.List;
 
@@ -22,10 +25,10 @@ public class LaplaceContinuousReference
 		final CoordinateVector end = CoordinateVector.fromValues(1, 1);
 		
 		final TPCellIntegral<ContinuousTPShapeFunction> gg =
-			new TPCellIntegral<>(TPVectorCellIntegral.GRAD_GRAD);
+			new TPCellIntegral<>(TPCellIntegral.GRAD_GRAD);
 		final TPRightHandSideIntegral<ContinuousTPShapeFunction> rightHandSideIntegral =
 			new TPRightHandSideIntegral<>(LaplaceReferenceSolution.scalarRightHandSide(),
-			                              TPVectorRightHandSideIntegral.VALUE);
+			                              TPRightHandSideIntegral.VALUE);
 		final int polynomialDegree = 1;
 		final ContinuousTPFESpace grid = new ContinuousTPFESpace(start, end,
 		                                                         Ints.asList(3, 3));
@@ -35,8 +38,6 @@ public class LaplaceContinuousReference
 		grid.initializeRhs();
 		grid.evaluateCellIntegrals(List.of(gg), List.of(rightHandSideIntegral));
 		grid.setBoundaryValues(LaplaceReferenceSolution.scalarBoundaryValues());
-		System.out.println(grid.getSystemMatrix());
-		System.out.println(grid.getRhs());
 		final IterativeSolver it = new IterativeSolver();
 		final Vector solution1 = it.solveGMRES(grid.getSystemMatrix(), grid.getRhs(), 1e-11);
 		final ScalarFESpaceFunction<ContinuousTPShapeFunction> solut =

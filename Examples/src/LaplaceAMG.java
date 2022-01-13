@@ -136,7 +136,7 @@ public class LaplaceAMG
 //		}
 		final IterativeSolver it = new IterativeSolver();
 		it.showProgress = true;
-		solut = new DenseVector(it.solvePGMRES(mg.matrix, new TPMGPreconditioner(mg), mg.rhs, 1e-8));
+		solut = new DenseVector(it.solvePGMRES(mg.matrix, new TPAMGPreconditioner(mg), mg.rhs, 1e-8));
 		sol =
 			new ScalarFESpaceFunction<>(
 				mg.spaces.get(refinements)
