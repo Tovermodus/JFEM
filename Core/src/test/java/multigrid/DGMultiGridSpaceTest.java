@@ -5,8 +5,8 @@ import examples.ConvergenceOrderEstimator;
 import io.vavr.Tuple2;
 import linalg.*;
 import org.junit.Test;
-import tensorproduct.ContinuousTPFESpace;
-import tensorproduct.ContinuousTPShapeFunction;
+import tensorproduct.TPFESpace;
+import tensorproduct.TPShapeFunction;
 import tensorproduct.geometry.TPCell;
 import tensorproduct.geometry.TPFace;
 
@@ -16,36 +16,36 @@ import java.util.List;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
-public class MultiGridSpaceTest
+public class DGMultiGridSpaceTest
 {
 	
 	@Test
 	public void testProlongateInterpolate()
 	{
-		final MGSpace<ContinuousTPFESpace, TPCell, TPFace, ContinuousTPShapeFunction, Double,
+		final MGSpace<TPFESpace, TPCell, TPFace, TPShapeFunction, Double,
 			CoordinateVector,
 			CoordinateMatrix>
-			mg = new MGSpace<>(1,
+			mg = new MGSpace<>(2,
 			                   1)
 		{
 			@Override
-			public List<ContinuousTPFESpace> createSpaces(final int refinements)
+			public List<TPFESpace> createSpaces(final int refinements)
 			{
-				final ArrayList<ContinuousTPFESpace> ret = new ArrayList<>();
+				final ArrayList<TPFESpace> ret = new ArrayList<>();
 				int mul = 1;
 				for (int i = 0; i < refinements + 1; i++)
 				{
-					ret.add(new ContinuousTPFESpace(CoordinateVector.fromValues(100.7, .2),
-					                                CoordinateVector.fromValues(1000,
-					                                                            0.21),
-					                                new IntCoordinates(4, 4).mul(mul)));
+					ret.add(new TPFESpace(CoordinateVector.fromValues(100.7, .2),
+					                      CoordinateVector.fromValues(1000,
+					                                                  0.21),
+					                      new IntCoordinates(4, 4).mul(mul)));
 					mul *= 2;
 				}
 				return ret;
 			}
 			
 			@Override
-			public Tuple2<VectorMultiplyable, DenseVector> createSystem(final ContinuousTPFESpace space)
+			public Tuple2<VectorMultiplyable, DenseVector> createSystem(final TPFESpace space)
 			{
 				return new Tuple2<>(null, null);
 			}
@@ -61,10 +61,10 @@ public class MultiGridSpaceTest
 		for (final IntCoordinates c : v.getShape()
 		                               .range())
 			v.set(c.sum(), c);
-		final ScalarFESpaceFunction<ContinuousTPShapeFunction> coars =
+		final ScalarFESpaceFunction<TPShapeFunction> coars =
 			new ScalarFESpaceFunction<>(mg.spaces.get(0)
 			                                     .getShapeFunctions(), v);
-		final ScalarFESpaceFunction<ContinuousTPShapeFunction> fin =
+		final ScalarFESpaceFunction<TPShapeFunction> fin =
 			new ScalarFESpaceFunction<>(mg.spaces.get(1)
 			                                     .getShapeFunctions(), prolongator.mvMul(v));
 		assertTrue(ConvergenceOrderEstimator.normL2Difference(coars, fin,
@@ -75,29 +75,29 @@ public class MultiGridSpaceTest
 	@Test
 	public void testProlongateInterpolateAlgebraic()
 	{
-		final AMGSpace<ContinuousTPFESpace, TPCell, TPFace, ContinuousTPShapeFunction, Double, CoordinateVector,
+		final AMGSpace<TPFESpace, TPCell, TPFace, TPShapeFunction, Double, CoordinateVector,
 			CoordinateMatrix>
 			mg = new AMGSpace<>(1,
-			                    1)
+			                    3)
 		{
 			@Override
-			public List<ContinuousTPFESpace> createSpaces(final int refinements)
+			public List<TPFESpace> createSpaces(final int refinements)
 			{
-				final ArrayList<ContinuousTPFESpace> ret = new ArrayList<>();
+				final ArrayList<TPFESpace> ret = new ArrayList<>();
 				int mul = 1;
 				for (int i = 0; i < refinements + 1; i++)
 				{
-					ret.add(new ContinuousTPFESpace(CoordinateVector.fromValues(100.7, .2),
-					                                CoordinateVector.fromValues(1000,
-					                                                            0.21),
-					                                new IntCoordinates(4, 4).mul(mul)));
+					ret.add(new TPFESpace(CoordinateVector.fromValues(100.7, .2),
+					                      CoordinateVector.fromValues(1000,
+					                                                  0.21),
+					                      new IntCoordinates(4, 4).mul(mul)));
 					mul *= 2;
 				}
 				return ret;
 			}
 			
 			@Override
-			public Tuple2<SparseMatrix, Vector> createFinestLevelSystem(final ContinuousTPFESpace space)
+			public Tuple2<SparseMatrix, Vector> createFinestLevelSystem(final TPFESpace space)
 			{
 				return new Tuple2<>(new SparseMatrix(space.getShapeFunctions()
 				                                          .size(),
@@ -120,13 +120,13 @@ public class MultiGridSpaceTest
 		for (final IntCoordinates c : v.getShape()
 		                               .range())
 			v.set(c.sum(), c);
-		final ScalarFESpaceFunction<ContinuousTPShapeFunction> coars =
+		final ScalarFESpaceFunction<TPShapeFunction> coars =
 			new ScalarFESpaceFunction<>(mg.spaces.get(0)
 			                                     .getShapeFunctions(), v);
-		final ScalarFESpaceFunction<ContinuousTPShapeFunction> fin =
+		final ScalarFESpaceFunction<TPShapeFunction> fin =
 			new ScalarFESpaceFunction<>(mg.spaces.get(1)
 			                                     .getShapeFunctions(), prolongator.mvMul(v));
-		final ScalarFESpaceFunction<ContinuousTPShapeFunction> coafin =
+		final ScalarFESpaceFunction<TPShapeFunction> coafin =
 			new ScalarFESpaceFunction<>(mg.spaces.get(0)
 			                                     .getShapeFunctions(),
 			                            restrictor.mvMul(prolongator.mvMul(v)));

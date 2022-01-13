@@ -25,11 +25,9 @@ public class LaplaceAMG
 		final int refinements = 6;
 		final AMGSpace<ContinuousTPFESpace, TPCell, TPFace, ContinuousTPShapeFunction, Double, CoordinateVector,
 			CoordinateMatrix>
-			mg = new AMGSpace<>(CoordinateVector.fromValues(0, 0),
-			                    CoordinateVector.fromValues(1, 1),
-			                    new IntCoordinates(4, 4),
-			                    refinements,
-			                    1)
+			mg = new AMGSpace<>(
+			refinements,
+			1)
 		{
 			@Override
 			public List<ContinuousTPFESpace> createSpaces(final int refinements)
@@ -38,8 +36,9 @@ public class LaplaceAMG
 				int mul = 1;
 				for (int i = 0; i < refinements + 1; i++)
 				{
-					ret.add(new ContinuousTPFESpace(startCoordinates, endCoordinates,
-					                                coarseCellsPerDimension.mul(mul)));
+					ret.add(new ContinuousTPFESpace(CoordinateVector.fromValues(0, 0),
+					                                CoordinateVector.fromValues(1, 1),
+					                                new IntCoordinates(4, 4).mul(mul)));
 					mul *= 2;
 				}
 				return ret;

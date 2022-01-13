@@ -14,9 +14,6 @@ public abstract class MGSpace<CSpace extends FESpace<CT, FT, ST> & Assembleable,
 	ST extends ShapeFunction<CT, FT, valueT, gradientT, hessianT> & Comparable<ST>, valueT, gradientT, hessianT>
 	implements MGInterface
 {
-	protected final CoordinateVector startCoordinates;
-	protected final CoordinateVector endCoordinates;
-	protected final IntCoordinates coarseCellsPerDimension;
 	public List<CSpace> spaces;
 	public List<Smoother> smoothers;
 	public List<SparseMvMul> prolongationOperators;
@@ -25,13 +22,9 @@ public abstract class MGSpace<CSpace extends FESpace<CT, FT, ST> & Assembleable,
 	public Vector finest_rhs;
 	public VectorMultiplyable finest_system;
 	
-	public MGSpace(final CoordinateVector startCoordinates, final CoordinateVector endCoordinates,
-	               final IntCoordinates coarseCellsPerDimension, final int refinements,
+	public MGSpace(final int refinements,
 	               final int polynomialDegree)
 	{
-		this.startCoordinates = startCoordinates;
-		this.endCoordinates = endCoordinates;
-		this.coarseCellsPerDimension = coarseCellsPerDimension;
 		spaces = createSpaces(refinements);
 		System.out.println("spaces");
 		systems = new ArrayList<>();
