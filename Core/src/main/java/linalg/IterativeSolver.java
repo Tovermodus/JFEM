@@ -16,6 +16,7 @@ public class IterativeSolver
 	public boolean showInterrupt = false;
 	Vector lastSolution = null;
 	public IterativeSolverConvergenceMetric metric;
+	public int iterations = 0;
 	
 	public IterativeSolver()
 	{
@@ -36,6 +37,7 @@ public class IterativeSolver
 	
 	public Vector solveCG(final VectorMultiplyable operator, final Vector rhs, final double tol)
 	{
+		iterations = 0;
 		if (PerformanceArguments.getInstance().executeChecks)
 		{
 			final DenseVector d = new DenseVector(rhs.getLength());
@@ -79,6 +81,7 @@ public class IterativeSolver
 			{
 				System.out.println("CG residuum norm: " + residuum.euclidianNorm());
 			}
+			iterations++;
 		}
 		i.running = false;
 		ex.shutdown();
@@ -91,6 +94,7 @@ public class IterativeSolver
 	                       final Vector rhs,
 	                       final double tol)
 	{
+		iterations = 0;
 		if (PerformanceArguments.getInstance().executeChecks)
 		{
 			final DenseVector d = new DenseVector(rhs.getLength());
@@ -136,6 +140,7 @@ public class IterativeSolver
 			residuum = newResiduum;
 			z = newZ;
 			metric.publishIterate(residuum.euclidianNorm());
+			iterations++;
 			if (showProgress)
 				System.out.println("PCG residuum norm: " + residuum.euclidianNorm());
 		}
@@ -151,6 +156,7 @@ public class IterativeSolver
 	                                                         final Vector rhs,
 	                                                         final double tol)
 	{
+		iterations = 0;
 		if (PerformanceArguments.getInstance().executeChecks)
 		{
 			final DenseVector d = new DenseVector(rhs.getLength());
@@ -178,11 +184,13 @@ public class IterativeSolver
 		i.running = false;
 		ex.shutdown();
 		lastSolution = x;
+		iterations = gm.iterations;
 		return x;
 	}
 	
 	public Vector solveGMRES(final VectorMultiplyable operator, final Vector rightHandSide, final double tol)
 	{
+		iterations = 0;
 		if (PerformanceArguments.getInstance().executeChecks)
 		{
 			final DenseVector d = new DenseVector(rightHandSide.getLength());
@@ -207,6 +215,7 @@ public class IterativeSolver
 		i.running = false;
 		ex.shutdown();
 		lastSolution = x;
+		iterations = gm.iterations;
 		return x;
 	}
 	
@@ -237,6 +246,7 @@ public class IterativeSolver
 	                            final Vector startIterate,
 	                            final double tol)
 	{
+		iterations = 0;
 		if (PerformanceArguments.getInstance().executeChecks)
 		{
 			final DenseVector d = new DenseVector(rhs.getLength());
@@ -292,6 +302,7 @@ public class IterativeSolver
 			metric.publishIterate(residuum.euclidianNorm());
 			if (showProgress)
 				System.out.println("BiCGStab residuum norm: " + residuum.euclidianNorm());
+			iterations++;
 		}
 		i.running = false;
 		ex.shutdown();
@@ -305,6 +316,7 @@ public class IterativeSolver
 	                                                            final Vector startIterate,
 	                                                            final double tol)
 	{
+		iterations = 0;
 		if (PerformanceArguments.getInstance().executeChecks)
 		{
 			final DenseVector d = new DenseVector(rhs.getLength());
@@ -369,6 +381,7 @@ public class IterativeSolver
 			metric.publishIterate(residuum.euclidianNorm());
 			if (showProgress)
 				System.out.println("PBiCGStab residuum norm: " + residuum.euclidianNorm());
+			iterations++;
 		}
 		i.running = false;
 		ex.shutdown();

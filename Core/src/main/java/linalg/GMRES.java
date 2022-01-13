@@ -14,6 +14,7 @@ public class GMRES
 	final IterativeSolverConvergenceMetric metric;
 	public int MAX_RESTARTS = 200;
 	int restarts;
+	int iterations;
 	public int ITERATIONS_BEFORE_RESTART = 150;
 	
 	public GMRES(final boolean printProgress,
@@ -22,6 +23,7 @@ public class GMRES
 		this.printProgress = printProgress;
 		this.restarts = restarts;
 		this.metric = metric;
+		iterations = 0;
 	}
 	
 	public linalg.Vector solve(final VectorMultiplyable A,
@@ -144,6 +146,7 @@ public class GMRES
 			if (Math.abs(gamma.at(j + 1)) < tol || j > ITERATIONS_BEFORE_RESTART)
 				return j;
 			v.add(w.mul(1. / h.at(j + 1, j)));
+			iterations++;
 		}
 		return j;
 	}

@@ -26,8 +26,8 @@ public abstract class TPAlgebraicMultiGridSpace<CSpace extends CartesianGridSpac
 	public List<SparseMatrix> systems;
 	public List<SparseMvMul> restrictionOperator;
 	public List<SparseMatrix> restrictionMatrices;
-	public Vector rhs;
-	public SparseMatrix matrix;
+	public Vector finest_rhs;
+	public SparseMatrix finest_system;
 	
 	public TPAlgebraicMultiGridSpace(final CoordinateVector startCoordinates, final CoordinateVector endCoordinates,
 	                                 final IntCoordinates coarseCellsPerDimension, final int refinements,
@@ -47,8 +47,8 @@ public abstract class TPAlgebraicMultiGridSpace<CSpace extends CartesianGridSpac
 		final Tuple2<SparseMatrix, Vector> topLevelSystem =
 			createFinestLevelSystem(spaces.get(spaces.size() - 1));
 		System.out.println("finest system");
-		matrix = topLevelSystem._1;
-		rhs = topLevelSystem._2;
+		finest_system = topLevelSystem._1;
+		finest_rhs = topLevelSystem._2;
 		prolongationMatrices = new ArrayList<>();
 		restrictionMatrices = new ArrayList<>();
 		prolongationOperator = new ArrayList<>();
@@ -69,7 +69,7 @@ public abstract class TPAlgebraicMultiGridSpace<CSpace extends CartesianGridSpac
 	private List<SparseMatrix> createSystems()
 	{
 		final List<SparseMatrix> reversed = new ArrayList<>();
-		reversed.add(matrix);
+		reversed.add(finest_system);
 		for (int i = 1; i < spaces.size(); i++)
 		{
 			System.out.println("system " + i);
@@ -160,7 +160,7 @@ public abstract class TPAlgebraicMultiGridSpace<CSpace extends CartesianGridSpac
 		//System.out.println(guess.getLength());
 		if (level == 0)
 		{
-			final Vector solution = new IterativeSolver().solveGMRES(systems.get(0), rhs, 1e-9);
+			final Vector solution = new IterativeSolver(false).solveGMRES(systems.get(0), rhs, 1e-9);
 			return solution;
 		}
 		guess = smoothers.get(level - 1)

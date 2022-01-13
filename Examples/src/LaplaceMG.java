@@ -1,6 +1,5 @@
 import basic.PlotWindow;
 import basic.ScalarFESpaceFunction;
-import basic.ScalarFunction;
 import basic.ScalarPlot2D;
 import io.vavr.Tuple2;
 import linalg.*;
@@ -15,11 +14,16 @@ public class LaplaceMG
 {
 	public static void main(final String[] args)
 	{
-		final int refinements = 2;
+		final int refinements = 6;
+		final TPCellIntegral<ContinuousTPShapeFunction> gg =
+			new TPCellIntegral<>(TPCellIntegral.GRAD_GRAD);
+		final TPRightHandSideIntegral<ContinuousTPShapeFunction> rightHandSideIntegral =
+			new TPRightHandSideIntegral<>(LaplaceReferenceSolution.scalarRightHandSide(),
+			                              TPRightHandSideIntegral.VALUE);
 		final TPMultiGridSpace<ContinuousTPFESpace, ContinuousTPShapeFunction, Double, CoordinateVector, CoordinateMatrix>
 			mg = new TPMultiGridSpace<>(CoordinateVector.fromValues(-1, -1),
 			                            CoordinateVector.fromValues(1, 1),
-			                            new IntCoordinates(4, 4),
+			                            new IntCoordinates(3, 3),
 			                            refinements,
 			                            1)
 		{
@@ -46,14 +50,8 @@ public class LaplaceMG
 				                                             .size());
 				final DenseVector rhs = new DenseVector(space.getShapeFunctions()
 				                                             .size());
-				final TPCellIntegral<ContinuousTPShapeFunction> gg =
-					new TPCellIntegral<>(ScalarFunction.constantFunction(1),
-					                     TPCellIntegral.GRAD_GRAD);
 				space.writeCellIntegralsToMatrix(List.of(gg), s);
-				final TPRightHandSideIntegral<ContinuousTPShapeFunction> f =
-					new TPRightHandSideIntegral<>(LaplaceReferenceSolution.scalarReferenceSolution(),
-					                              TPRightHandSideIntegral.VALUE);
-				space.writeCellIntegralsToRhs(List.of(f), rhs);
+				space.writeCellIntegralsToRhs(List.of(rightHandSideIntegral), rhs);
 				space.writeBoundaryValuesTo(LaplaceReferenceSolution.scalarReferenceSolution(),
 				                            s,
 				                            rhs);

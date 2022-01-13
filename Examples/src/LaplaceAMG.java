@@ -69,7 +69,7 @@ public class LaplaceAMG
 				return ret;
 			}
 		};
-		DenseVector solut = new DenseVector(mg.rhs.mul(0));
+		DenseVector solut = new DenseVector(mg.finest_rhs.mul(0));
 		for (final IntCoordinates c : solut.getShape()
 		                                   .range())
 			solut.add(Math.random() * 0.1, c);
@@ -136,7 +136,10 @@ public class LaplaceAMG
 //		}
 		final IterativeSolver it = new IterativeSolver();
 		it.showProgress = true;
-		solut = new DenseVector(it.solvePGMRES(mg.matrix, new TPAMGPreconditioner(mg), mg.rhs, 1e-8));
+		solut = new DenseVector(it.solvePGMRES(mg.finest_system,
+		                                       new TPAMGPreconditioner(mg),
+		                                       mg.finest_rhs,
+		                                       1e-8));
 		sol =
 			new ScalarFESpaceFunction<>(
 				mg.spaces.get(refinements)

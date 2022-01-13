@@ -115,7 +115,7 @@ public abstract class TPMultiGridSpace<CSpace extends CartesianGridSpace<ST, val
 		//System.out.println(guess.getLength());
 		if (level == 0)
 		{
-			final Vector solution = new IterativeSolver().solveGMRES(systems.get(0), rhs, 1e-9);
+			final Vector solution = new IterativeSolver(false).solveGMRES(systems.get(0), rhs, 1e-9);
 			return solution;
 		}
 		for (int i = 0; i < 2; i++)

@@ -16,13 +16,13 @@ public class TPAMGPreconditioner
 	@Override
 	public int getVectorSize()
 	{
-		return mg.matrix.getVectorSize();
+		return mg.finest_system.getVectorSize();
 	}
 	
 	@Override
 	public int getTVectorSize()
 	{
-		return mg.matrix.getVectorSize();
+		return mg.finest_system.getVectorSize();
 	}
 	
 	@Override

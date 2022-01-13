@@ -3,9 +3,7 @@ import basic.PlotWindow;
 import basic.ScalarFESpaceFunction;
 import basic.ScalarPlot2D;
 import com.google.common.primitives.Ints;
-import linalg.CoordinateVector;
-import linalg.IterativeSolver;
-import linalg.Vector;
+import linalg.*;
 import tensorproduct.ContinuousTPFESpace;
 import tensorproduct.ContinuousTPShapeFunction;
 import tensorproduct.TPCellIntegral;
@@ -31,15 +29,22 @@ public class LaplaceContinuousReference
 			                              TPRightHandSideIntegral.VALUE);
 		final int polynomialDegree = 1;
 		final ContinuousTPFESpace grid = new ContinuousTPFESpace(start, end,
-		                                                         Ints.asList(3, 3));
+		                                                         Ints.asList(3 * 64, 3 * 64));
 		grid.assembleCells();
 		grid.assembleFunctions(polynomialDegree);
+		final SparseMatrix s = new SparseMatrix(grid.getShapeFunctions()
+		                                            .size(),
+		                                        grid.getShapeFunctions()
+		                                            .size());
+		final DenseVector d = new DenseVector(grid.getShapeFunctions()
+		                                          .size());
 		grid.initializeSystemMatrix();
 		grid.initializeRhs();
-		grid.evaluateCellIntegrals(List.of(gg), List.of(rightHandSideIntegral));
-		grid.setBoundaryValues(LaplaceReferenceSolution.scalarBoundaryValues());
+		grid.writeCellIntegralsToMatrix(List.of(gg), s);
+		grid.writeCellIntegralsToRhs(List.of(rightHandSideIntegral), d);
+		grid.writeBoundaryValuesTo(LaplaceReferenceSolution.scalarBoundaryValues(), s, d);
 		final IterativeSolver it = new IterativeSolver();
-		final Vector solution1 = it.solveGMRES(grid.getSystemMatrix(), grid.getRhs(), 1e-11);
+		final Vector solution1 = it.solveGMRES(s, d, 1e-11);
 		final ScalarFESpaceFunction<ContinuousTPShapeFunction> solut =
 			new ScalarFESpaceFunction<>(
 				grid.getShapeFunctions(), solution1);
