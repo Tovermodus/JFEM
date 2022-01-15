@@ -2,10 +2,8 @@ package linalg;
 
 import com.google.common.base.Stopwatch;
 import org.junit.Test;
-import org.openjdk.jmh.annotations.*;
 
 import java.util.Random;
-import java.util.concurrent.TimeUnit;
 
 import static org.junit.Assert.assertEquals;
 
@@ -147,22 +145,6 @@ public class SparseMvMulTest
 //		             new SparseMvMul(createTinySparseMatrix()).mvMul(createTinyVector()));
 //		assertEquals(createLargeSparseMatrix().mvMul(createLargeVector()),
 //		             new SparseMvMul(createLargeSparseMatrix()).mvMul(createLargeVector()));
-	}
-	
-	@State(Scope.Thread)
-	public static class MyState
-	{
-		final SparseMatrix large = createLargeSparseMatrix();
-		final SparseMvMul largemv = new SparseMvMul(createLargeSparseMatrix());
-		final DenseVector denseV = createLargeVector();
-	}
-	
-	@Benchmark
-	@BenchmarkMode(Mode.Throughput)
-	@OutputTimeUnit(TimeUnit.MILLISECONDS)
-	public static void measureName(final MyState state)
-	{
-		state.largemv.mvMul(state.denseV);
 	}
 	
 	@Test

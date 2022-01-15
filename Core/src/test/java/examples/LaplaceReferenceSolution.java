@@ -145,9 +145,7 @@ public class LaplaceReferenceSolution
 			@Override
 			public Double value(final CoordinateVector pos)
 			{
-				if (Math.abs(pos.x()) == 1 || Math.abs(pos.y()) == 1)
-					return weight * referenceSolution.value(pos);
-				return 0.;
+				return weight * referenceSolution.value(pos);
 			}
 		};
 	}

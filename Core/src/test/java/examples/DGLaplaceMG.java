@@ -5,10 +5,7 @@ import io.vavr.Tuple2;
 import linalg.*;
 import multigrid.*;
 import org.junit.Test;
-import tensorproduct.ContinuousTPFESpace;
-import tensorproduct.ContinuousTPShapeFunction;
-import tensorproduct.TPCellIntegral;
-import tensorproduct.TPRightHandSideIntegral;
+import tensorproduct.*;
 import tensorproduct.geometry.TPCell;
 import tensorproduct.geometry.TPFace;
 
@@ -17,40 +14,45 @@ import java.util.List;
 
 import static org.junit.Assert.assertTrue;
 
-public class LaplaceMG
+public class DGLaplaceMG
 {
 	@Test(timeout = 30000)
 	public void testMG()
 	{
-		
-		for (int refinements = 2; refinements < 6; refinements++)
+		for (int refinements = 1; refinements < 4; refinements++)
 		{
-			final TPCellIntegral<ContinuousTPShapeFunction> gg =
+			final double penalty = 10000;
+			final TPCellIntegral<TPShapeFunction> gg =
 				new TPCellIntegral<>(TPCellIntegral.GRAD_GRAD);
-			final TPRightHandSideIntegral<ContinuousTPShapeFunction> rightHandSideIntegral =
+			final TPFaceIntegral<TPShapeFunction> jj =
+				new TPFaceIntegral<>(penalty, TPFaceIntegral.VALUE_JUMP_VALUE_JUMP);
+			final TPRightHandSideIntegral<TPShapeFunction> rightHandSideIntegral =
 				new TPRightHandSideIntegral<>(LaplaceReferenceSolution.scalarRightHandSide(),
 				                              TPRightHandSideIntegral.VALUE);
-			final MGSpace<ContinuousTPFESpace, TPCell, TPFace, ContinuousTPShapeFunction, Double,
+			final TPBoundaryFaceIntegral<TPShapeFunction> boundaryFaceIntegral =
+				new TPBoundaryFaceIntegral<>(LaplaceReferenceSolution.scalarBoundaryValues(penalty),
+				                             TPBoundaryFaceIntegral.VALUE);
+			final MGSpace<TPFESpace, TPCell, TPFace, TPShapeFunction, Double,
 				CoordinateVector, CoordinateMatrix>
 				mg = new MGSpace<>(refinements, 1)
 			{
 				@Override
-				public List<ContinuousTPFESpace> createSpaces(final int refinements)
+				public List<TPFESpace> createSpaces(final int refinements)
 				{
-					final ArrayList<ContinuousTPFESpace> ret = new ArrayList<>();
+					final ArrayList<TPFESpace> ret = new ArrayList<>();
 					int mul = 1;
 					for (int i = 0; i < refinements + 1; i++)
 					{
-						ret.add(new ContinuousTPFESpace(CoordinateVector.fromValues(0, 0),
-						                                CoordinateVector.fromValues(1, 1),
-						                                new IntCoordinates(4, 4).mul(mul)));
+						ret.add(new TPFESpace(CoordinateVector.fromValues(0, 0),
+						                      CoordinateVector.fromValues(1, 1),
+						                      new IntCoordinates(2, 2).mul(mul)));
 						mul *= 2;
 					}
 					return ret;
 				}
 				
 				@Override
-				public Tuple2<VectorMultiplyable, DenseVector> createSystem(final ContinuousTPFESpace space)
+				public Tuple2<VectorMultiplyable, DenseVector> createSystem(final TPFESpace space)
 				{
 					final SparseMatrix s = new SparseMatrix(space.getShapeFunctions()
 					                                             .size(),
@@ -60,9 +62,8 @@ public class LaplaceMG
 					                                             .size());
 					space.writeCellIntegralsToMatrix(List.of(gg), s);
 					space.writeCellIntegralsToRhs(List.of(rightHandSideIntegral), rhs);
-					space.writeBoundaryValuesTo(LaplaceReferenceSolution.scalarReferenceSolution(),
-					                            s,
-					                            rhs);
+					space.writeFaceIntegralsToMatrix(List.of(jj), s);
+					space.writeFaceIntegralsToRhs(List.of(boundaryFaceIntegral), rhs);
 					return new Tuple2<>(s, rhs);
 				}
 				
@@ -71,7 +72,7 @@ public class LaplaceMG
 				{
 					final ArrayList<Smoother> ret = new ArrayList<>();
 					for (int i = 1; i < spaces.size(); i++)
-						ret.add(new RichardsonSmoother(0.1, 8));
+						ret.add(new RichardsonSmoother(0.0003, 30));
 					return ret;
 				}
 			};
@@ -85,56 +86,63 @@ public class LaplaceMG
 			                                       mg.finest_rhs,
 			                                       1e-8));
 			
-			final ScalarFESpaceFunction<ContinuousTPShapeFunction> sol =
+			final ScalarFESpaceFunction<TPShapeFunction> sol =
 				new ScalarFESpaceFunction<>(
 					mg.spaces.get(refinements)
 					         .getShapeFunctions(), solut);
-			assertTrue(it.iterations < 10);
 			final double norm = ConvergenceOrderEstimator
 				.normL2Difference(sol,
 				                  LaplaceReferenceSolution.scalarReferenceSolution(),
 				                  mg.spaces.get(0)
 				                           .generatePlotPoints(30));
-			assertTrue(0.2 * Math.pow(0.25, refinements) > norm);
-			System.out.println(0.2 * Math.pow(0.25, refinements) + " " + norm + " " + it.iterations);
+			assertTrue(0.05 * Math.pow(0.25, refinements) > norm);
+		}
+		try
+		{
+			Thread.sleep(10000);
+		} catch (final InterruptedException e)
+		{
+			e.printStackTrace();
 		}
 	}
 	
 	@Test(timeout = 30000)
 	public void testAMG()
 	{
-		
-		for (int refinements = 2; refinements < 5; refinements++)
+		for (int refinements = 1; refinements < 4; refinements++)
 		{
-			final TPCellIntegral<ContinuousTPShapeFunction> gg =
+			final double penalty = 10000;
+			final TPCellIntegral<TPShapeFunction> gg =
 				new TPCellIntegral<>(TPCellIntegral.GRAD_GRAD);
-			final TPRightHandSideIntegral<ContinuousTPShapeFunction> rightHandSideIntegral =
+			final TPFaceIntegral<TPShapeFunction> jj =
+				new TPFaceIntegral<>(penalty, TPFaceIntegral.VALUE_JUMP_VALUE_JUMP);
+			final TPRightHandSideIntegral<TPShapeFunction> rightHandSideIntegral =
 				new TPRightHandSideIntegral<>(LaplaceReferenceSolution.scalarRightHandSide(),
 				                              TPRightHandSideIntegral.VALUE);
-			final AMGSpace<ContinuousTPFESpace, TPCell, TPFace, ContinuousTPShapeFunction, Double,
-				CoordinateVector,
-				CoordinateMatrix>
-				mg = new AMGSpace<>(
-				refinements,
-				1)
+			final TPBoundaryFaceIntegral<TPShapeFunction> boundaryFaceIntegral =
+				new TPBoundaryFaceIntegral<>(LaplaceReferenceSolution.scalarBoundaryValues(penalty),
+				                             TPBoundaryFaceIntegral.VALUE);
+			final AMGSpace<TPFESpace, TPCell, TPFace, TPShapeFunction, Double,
+				CoordinateVector, CoordinateMatrix>
+				mg = new AMGSpace<>(refinements, 1)
 			{
 				@Override
-				public List<ContinuousTPFESpace> createSpaces(final int refinements)
+				public List<TPFESpace> createSpaces(final int refinements)
 				{
-					final ArrayList<ContinuousTPFESpace> ret = new ArrayList<>();
+					final ArrayList<TPFESpace> ret = new ArrayList<>();
 					int mul = 1;
 					for (int i = 0; i < refinements + 1; i++)
 					{
-						ret.add(new ContinuousTPFESpace(CoordinateVector.fromValues(0, 0),
-						                                CoordinateVector.fromValues(1, 1),
-						                                new IntCoordinates(4, 4).mul(mul)));
+						ret.add(new TPFESpace(CoordinateVector.fromValues(0, 0),
+						                      CoordinateVector.fromValues(1, 1),
+						                      new IntCoordinates(2, 2).mul(mul)));
 						mul *= 2;
 					}
 					return ret;
 				}
 				
 				@Override
-				public Tuple2<SparseMatrix, Vector> createFinestLevelSystem(final ContinuousTPFESpace space)
+				public Tuple2<SparseMatrix, Vector> createFinestLevelSystem(final TPFESpace space)
 				{
 					final SparseMatrix s = new SparseMatrix(space.getShapeFunctions()
 					                                             .size(),
@@ -144,9 +152,8 @@ public class LaplaceMG
 					                                             .size());
 					space.writeCellIntegralsToMatrix(List.of(gg), s);
 					space.writeCellIntegralsToRhs(List.of(rightHandSideIntegral), rhs);
-					space.writeBoundaryValuesTo(LaplaceReferenceSolution.scalarReferenceSolution(),
-					                            s,
-					                            rhs);
+					space.writeFaceIntegralsToMatrix(List.of(jj), s);
+					space.writeFaceIntegralsToRhs(List.of(boundaryFaceIntegral), rhs);
 					return new Tuple2<>(s, rhs);
 				}
 				
@@ -155,7 +162,7 @@ public class LaplaceMG
 				{
 					final ArrayList<Smoother> ret = new ArrayList<>();
 					for (int i = 1; i < spaces.size(); i++)
-						ret.add(new RichardsonSmoother(0.1, 4));
+						ret.add(new RichardsonSmoother(0.0003, 30));
 					return ret;
 				}
 			};
@@ -169,7 +176,7 @@ public class LaplaceMG
 			                                       mg.finest_rhs,
 			                                       1e-8));
 			
-			final ScalarFESpaceFunction<ContinuousTPShapeFunction> sol =
+			final ScalarFESpaceFunction<TPShapeFunction> sol =
 				new ScalarFESpaceFunction<>(
 					mg.spaces.get(refinements)
 					         .getShapeFunctions(), solut);
@@ -178,8 +185,8 @@ public class LaplaceMG
 				                  LaplaceReferenceSolution.scalarReferenceSolution(),
 				                  mg.spaces.get(0)
 				                           .generatePlotPoints(30));
-			assertTrue(0.2 * Math.pow(0.25, refinements) > norm);
-			System.out.println(0.2 * Math.pow(0.25, refinements) + " " + norm + " " + it.iterations);
+			System.out.println(it.iterations);
+			assertTrue(0.05 * Math.pow(0.25, refinements) > norm);
 		}
 	}
 }

@@ -80,8 +80,7 @@ public abstract class MGSpace<CSpace extends FESpace<CT, FT, ST> & Assembleable,
 							                                          coarseCell);
 					                                    final Collection<ST> fineFunctions =
 						                                    fine.getCellSupportMapping()
-						                                        .get(
-							                                        fineCell);
+						                                        .get(fineCell);
 					                                    synchronized (this)
 					                                    {
 						                                    for (final ST function : coarseFunctions)
@@ -112,10 +111,9 @@ public abstract class MGSpace<CSpace extends FESpace<CT, FT, ST> & Assembleable,
 			final Vector solution = new IterativeSolver(false).solveGMRES(systems.get(0), rhs, 1e-9);
 			return solution;
 		}
-		for (int i = 0; i < 2; i++)
-			guess = smoothers.get(level - 1)
-			                 .smooth(systems.get(level), rhs, guess);
-		Vector restrictedDefect =
+		guess = smoothers.get(level - 1)
+		                 .smooth(systems.get(level), rhs, guess);
+		final Vector restrictedDefect =
 			prolongationOperators.get(level - 1)
 			                     .tvMul(rhs.sub(systems.get(level)
 			                                           .mvMul(guess)));
@@ -124,15 +122,8 @@ public abstract class MGSpace<CSpace extends FESpace<CT, FT, ST> & Assembleable,
 		                                 restrictedDefect);
 		guess = guess.add(prolongationOperators.get(level - 1)
 		                                       .mvMul(correction));
-		restrictedDefect =
-			prolongationOperators.get(level - 1)
-			                     .tvMul(rhs.sub(systems.get(level)
-			                                           .mvMul(guess)));
-		
-		for (int i = 0; i < 2; i++)
-			guess = smoothers.get(level - 1)
-			                 .smooth(systems.get(level), rhs, guess);
-		//System.out.println("mgstep done" + level);
+		guess = smoothers.get(level - 1)
+		                 .smooth(systems.get(level), rhs, guess);
 		return guess;
 	}
 	
