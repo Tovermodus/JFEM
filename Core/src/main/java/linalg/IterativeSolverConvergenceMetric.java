@@ -27,7 +27,7 @@ public class IterativeSolverConvergenceMetric
 	
 	public synchronized void publishIterate(final double residual)
 	{
-		residuals.add(residual);
+		residuals.add(Math.abs(residual));
 	}
 	
 	public void publishIterateAsync(final Supplier<Double> generatingFunction)
@@ -53,10 +53,13 @@ public class IterativeSolverConvergenceMetric
 	{
 		final int size = (int) (Math.min(width, height) / drawnPoints + 3);
 		
-		final double maxResidual = residuals.stream()
-		                                    .mapToDouble(x -> x)
-		                                    .max()
-		                                    .orElse(goal * 1000);
+		double maxResidual = 0;
+		if (residuals.size() == 0)
+			maxResidual = goal * 1000;
+		else
+			for (int i = 0; i < residuals.size(); i++)
+				if (Math.abs(residuals.get(i)) > maxResidual)
+					maxResidual = residuals.get(i);
 		graphics.setColor(Color.BLACK);
 		graphics.fillRect(0, 0, width, height);
 		graphics.setColor(Color.white);

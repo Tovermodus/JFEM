@@ -3,9 +3,9 @@ import basic.ScalarFESpaceFunction;
 import basic.ScalarPlot2D;
 import io.vavr.Tuple2;
 import linalg.*;
+import multigrid.GaussSeidelSmoother;
 import multigrid.MGPReconditioner;
 import multigrid.MGSpace;
-import multigrid.RichardsonSmoother;
 import multigrid.Smoother;
 import tensorproduct.ContinuousTPFESpace;
 import tensorproduct.ContinuousTPShapeFunction;
@@ -21,7 +21,7 @@ public class LaplaceMG
 {
 	public static void main(final String[] args)
 	{
-		final int refinements = 6;
+		final int refinements = 4;
 		final TPCellIntegral<ContinuousTPShapeFunction> gg =
 			new TPCellIntegral<>(TPCellIntegral.GRAD_GRAD);
 		final TPRightHandSideIntegral<ContinuousTPShapeFunction> rightHandSideIntegral =
@@ -30,10 +30,7 @@ public class LaplaceMG
 		final MGSpace<ContinuousTPFESpace, TPCell, TPFace, ContinuousTPShapeFunction, Double,
 			CoordinateVector,
 			CoordinateMatrix>
-			mg = new MGSpace<>(CoordinateVector.fromValues(-1, -1),
-			                   CoordinateVector.fromValues(1, 1),
-			                   new IntCoordinates(3, 3),
-			                   refinements,
+			mg = new MGSpace<>(refinements,
 			                   1)
 		{
 			@Override
@@ -43,8 +40,9 @@ public class LaplaceMG
 				int mul = 1;
 				for (int i = 0; i < refinements + 1; i++)
 				{
-					ret.add(new ContinuousTPFESpace(startCoordinates, endCoordinates,
-					                                coarseCellsPerDimension.mul(mul)));
+					ret.add(new ContinuousTPFESpace(CoordinateVector.fromValues(-1, -1),
+					                                CoordinateVector.fromValues(1, 1),
+					                                new IntCoordinates(3, 3).mul(mul)));
 					mul *= 2;
 				}
 				return ret;
@@ -72,7 +70,7 @@ public class LaplaceMG
 			{
 				final ArrayList<Smoother> ret = new ArrayList<>();
 				for (int i = 1; i < spaces.size(); i++)
-					ret.add(new RichardsonSmoother(0.1, 4));
+					ret.add(new GaussSeidelSmoother(4, (SparseMatrix) systems.get(i)));
 				return ret;
 			}
 		};

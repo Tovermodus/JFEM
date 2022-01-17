@@ -156,6 +156,7 @@ public class IterativeSolver
 	                                                         final Vector rhs,
 	                                                         final double tol)
 	{
+		System.out.println("starts");
 		iterations = 0;
 		if (PerformanceArguments.getInstance().executeChecks)
 		{
@@ -176,6 +177,7 @@ public class IterativeSolver
 		if (showInterrupt)
 			ex.execute(i);
 		final Vector x;
+		System.out.println("gmr");
 		gm = new GMRES(showProgress, metric, 0);
 		if (lastSolution == null)
 			x = gm.solve(preconditioner, operator, rhs, tol, i);

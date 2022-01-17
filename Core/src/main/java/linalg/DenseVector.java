@@ -2,6 +2,7 @@ package linalg;
 
 import basic.DoubleCompare;
 import basic.PerformanceArguments;
+import org.apache.commons.math3.linear.RealVector;
 import org.ujmp.core.Matrix;
 
 import java.io.Serializable;
@@ -61,11 +62,19 @@ public class DenseVector
 		return ret;
 	}
 	
-	static DenseVector fromUJMPVector(final Matrix matrix)
+	public static DenseVector fromUJMPVector(final Matrix matrix)
 	{
 		final DenseVector ret = new DenseVector((int) (matrix.getRowCount() * matrix.getColumnCount()));
 		for (int i = 0; i < ret.getLength(); i++)
 			ret.set(matrix.getAsDouble(i, 0), i);
+		return ret;
+	}
+	
+	public static DenseVector fromRealVector(final RealVector vector)
+	{
+		final DenseVector ret = new DenseVector((int) (vector.getDimension()));
+		for (int i = 0; i < ret.getLength(); i++)
+			ret.set(vector.getEntry(i), i);
 		return ret;
 	}
 	

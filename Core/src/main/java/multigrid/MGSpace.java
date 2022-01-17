@@ -104,11 +104,12 @@ public abstract class MGSpace<CSpace extends FESpace<CT, FT, ST> & Assembleable,
 	@Override
 	public Vector mgStep(final int level, Vector guess, final Vector rhs)
 	{
-		//System.out.println("mgstep" + level);
 		//System.out.println(guess.getLength());
 		if (level == 0)
 		{
-			final Vector solution = new IterativeSolver(false).solveGMRES(systems.get(0), rhs, 1e-9);
+			if (systems.get(0) instanceof Matrix)
+				return new DenseMatrix((Matrix) systems.get(0)).solve(rhs);
+			final Vector solution = new IterativeSolver(true).solveGMRES(systems.get(0), rhs, 1e-9);
 			return solution;
 		}
 		guess = smoothers.get(level - 1)

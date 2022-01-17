@@ -6,6 +6,8 @@ import it.unimi.dsi.fastutil.doubles.DoubleArrayList;
 import it.unimi.dsi.fastutil.doubles.DoubleList;
 import it.unimi.dsi.fastutil.ints.IntArrayList;
 import it.unimi.dsi.fastutil.ints.IntList;
+import org.apache.commons.math3.linear.Array2DRowRealMatrix;
+import org.apache.commons.math3.linear.RealMatrix;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -559,5 +561,10 @@ public class DenseMatrix
 			throw new UnsupportedOperationException("column out of bounds");
 		for (int i = 0; i < getRows(); i++)
 			entries[i][column] = 0;
+	}
+	
+	public RealMatrix toApacheMatrix()
+	{
+		return new Array2DRowRealMatrix(entries);
 	}
 }
