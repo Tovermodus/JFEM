@@ -2,6 +2,7 @@ package distorted;
 
 import basic.Overlay;
 import basic.ScalarPlot2D;
+import basic.ScalarPlot3D;
 import distorted.geometry.DistortedCell;
 import io.vavr.Tuple2;
 import linalg.CoordinateMatrix;
@@ -23,7 +24,7 @@ public class DistortedOverlay
 	CoordinateVector min;
 	int prevTime = -1000;
 	List<Tuple2<DistortedCell, CoordinateVector>> refPoints;
-	final DistortedVectorFESpaceFunction X;
+	final DistortedVectorFESpaceFunction D;
 	
 	public DistortedOverlay(final List<CoordinateVector> backGroundPoints,
 	                        final DistortedGridSpace<DistortedVectorShapeFunction, CoordinateVector, CoordinateMatrix, CoordinateTensor> space,
@@ -40,7 +41,47 @@ public class DistortedOverlay
 		min = ScalarPlot2D.getMinCoordinates(backGroundPoints);
 		this.pointsPerCell = pointsPerCell * space.getCells()
 		                                          .size();
-		X = new DistortedVectorFESpaceFunction(space.getShapeFunctions(),
+		D = new DistortedVectorFESpaceFunction(space.getShapeFunctions(),
+		                                       displacementHistory.getRow(0));
+		refPoints = space.generateReferencePlotPoints(this.pointsPerCell);
+	}
+	
+	public DistortedOverlay(final ScalarPlot2D backGround,
+	                        final DistortedGridSpace<DistortedVectorShapeFunction, CoordinateVector, CoordinateMatrix, CoordinateTensor> space,
+	                        final Matrix displacementHistory,
+	                        final int pointsPerCell)
+	{
+		if (displacementHistory.getCols() != space.getShapeFunctions()
+		                                          .size())
+			throw new IllegalArgumentException("displacement history has wrong dimensions");
+		this.space = space;
+		this.displacementHistory = displacementHistory;
+		//System.out.println("displacemantHist " + displacementHistory);
+		max = backGround.max;
+		min = backGround.min;
+		this.pointsPerCell = pointsPerCell * space.getCells()
+		                                          .size();
+		D = new DistortedVectorFESpaceFunction(space.getShapeFunctions(),
+		                                       displacementHistory.getRow(0));
+		refPoints = space.generateReferencePlotPoints(this.pointsPerCell);
+	}
+	
+	public DistortedOverlay(final ScalarPlot3D backGround,
+	                        final DistortedGridSpace<DistortedVectorShapeFunction, CoordinateVector, CoordinateMatrix, CoordinateTensor> space,
+	                        final Matrix displacementHistory,
+	                        final int pointsPerCell)
+	{
+		if (displacementHistory.getCols() != space.getShapeFunctions()
+		                                          .size())
+			throw new IllegalArgumentException("displacement history has wrong dimensions");
+		this.space = space;
+		this.displacementHistory = displacementHistory;
+		//System.out.println("displacemantHist " + displacementHistory);
+		max = backGround.max;
+		min = backGround.min;
+		this.pointsPerCell = pointsPerCell * space.getCells()
+		                                          .size();
+		D = new DistortedVectorFESpaceFunction(space.getShapeFunctions(),
 		                                       displacementHistory.getRow(0));
 		refPoints = space.generateReferencePlotPoints(this.pointsPerCell);
 	}
@@ -58,7 +99,7 @@ public class DistortedOverlay
 			(int) (displacementHistory.getRows() * slider * 0.999) % displacementHistory.getRows();
 		if (time != prevTime)
 		{
-			X.resetCoefficients(space.getShapeFunctions(), displacementHistory.getRow(time));
+			D.resetCoefficients(space.getShapeFunctions(), displacementHistory.getRow(time));
 			prevTime = time;
 		}
 		int i = 0;
@@ -66,7 +107,7 @@ public class DistortedOverlay
 		{
 			ScalarPlot2D.drawSinglePointGreen(g, width, height,
 			                                  cp._1.transformFromReferenceCell(cp._2)
-			                                       .add(X.valueOnReferenceCell(cp._2,
+			                                       .add(D.valueOnReferenceCell(cp._2,
 			                                                                   cp._1)),
 			                                  (i++ % pointsPerCell * 3.3) % 100, 0,
 			                                  100, min, max, pixelSize, pixelSize);

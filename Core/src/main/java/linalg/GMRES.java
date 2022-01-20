@@ -10,7 +10,7 @@ import java.util.stream.IntStream;
 
 public class GMRES
 {
-	private final boolean printProgress;
+	public boolean printProgress;
 	final IterativeSolverConvergenceMetric metric;
 	public int MAX_RESTARTS = 200;
 	int restarts;
@@ -18,11 +18,21 @@ public class GMRES
 	public int ITERATIONS_BEFORE_RESTART = 150;
 	
 	public GMRES(final boolean printProgress,
-	             final IterativeSolverConvergenceMetric metric, final int restarts)
+	             final IterativeSolverConvergenceMetric metric)
 	{
 		this.printProgress = printProgress;
-		this.restarts = restarts;
+		this.restarts = 0;
 		this.metric = metric;
+		iterations = 0;
+	}
+	
+	public GMRES(final GMRES old)
+	{
+		this.printProgress = old.printProgress;
+		this.restarts = old.restarts + 1;
+		this.metric = old.metric;
+		this.MAX_RESTARTS = old.MAX_RESTARTS;
+		this.ITERATIONS_BEFORE_RESTART = old.ITERATIONS_BEFORE_RESTART;
 		iterations = 0;
 	}
 	

@@ -21,16 +21,20 @@ public class CartesianGrid
 	public ImmutableList<TPCell> cells;
 	public ImmutableList<TPFace> faces;
 	public final int dimension;
+	private double diam;
 	
 	private void createCells1D()
 	{
 		final ArrayList<ArrayList<Cell1D>> mutableCells1D = new ArrayList<>(3);
+		diam = 0;
 		for (int i = 0; i < dimension; i++)
 		{
 			final double end = endCoordinates.at(i);
 			final double start = startCoordinates.at(i);
 			final int count = cellsPerDimension.get(i);
 			final double width = (end - start) / count;
+			if (diam == 0 || width < diam)
+				diam = width;
 			final ArrayList<Cell1D> cellsThisDimension = new ArrayList<>(count);
 			for (int j = 0; j < count; j++)
 			{
@@ -179,5 +183,10 @@ public class CartesianGrid
 	public CartesianGrid refineGrid()
 	{
 		return new CartesianGrid(startCoordinates, endCoordinates, cellsPerDimension.mul(2));
+	}
+	
+	public double getMaxDiam()
+	{
+		return diam;
 	}
 }

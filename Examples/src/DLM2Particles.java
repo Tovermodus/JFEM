@@ -134,24 +134,24 @@ public class DLM2Particles
 //		}
 		final MixedFESpaceFunction<QkQkFunction, TPCell, TPFace> Up =
 			new MixedTPFESpaceFunction<>(backgroundSpace.getShapeFunctions(),
-			                             getBackGroundIterate(currentIterate));
-		velocityValues.putAll(Up.velocityValuesInPointsAtTime(plotPoints, time));
-		pressureValues.putAll(Up.pressureValuesInPointsAtTime(plotPoints, time));
+			                             getBackGroundIterate(getCurrentIterate()));
+		velocityValues.putAll(Up.velocityValuesInPointsAtTime(plotPoints, getTime()));
+		pressureValues.putAll(Up.pressureValuesInPointsAtTime(plotPoints, getTime()));
 		final DistortedVectorFESpaceFunction X =
 			new DistortedVectorFESpaceFunction(particleSpaces.get(0)
 			                                                 .getShapeFunctions(),
-			                                   getParticleIterate(currentIterate, 0));
-		XValues.putAll(X.valuesInPointsAtTime(plotPoints, time));
+			                                   getParticleIterate(getCurrentIterate(), 0));
+		XValues.putAll(X.valuesInPointsAtTime(plotPoints, getTime()));
 		final DistortedVectorFESpaceFunction XPrime =
 			new DistortedVectorFESpaceFunction(particleSpaces.get(0)
 			                                                 .getShapeFunctions(),
-			                                   getParticleIterate(currentIterate.sub(lastIterate)
-			                                                                    .mul(1. / dt), 0));
-		XPrimeValues.putAll(XPrime.valuesInPointsAtTime(plotPoints, time));
+			                                   getParticleIterate(getCurrentIterate().sub(getLastIterate())
+			                                                                         .mul(1. / dt), 0));
+		XPrimeValues.putAll(XPrime.valuesInPointsAtTime(plotPoints, getTime()));
 		final DistortedVectorFunctionOnCells UX =
 			DistortedVectorFunctionOnCells.concatenate(Up.getVelocityFunction(), X);
-		UXValues.putAll(UX.valuesInPointsAtTime(plotPoints, time));
-		System.out.println("ITeration at time " + time + " out of " + dt * timeSteps + " is finished");
+		UXValues.putAll(UX.valuesInPointsAtTime(plotPoints, getTime()));
+		System.out.println("ITeration at time " + getTime() + " out of " + dt * timeSteps + " is finished");
 	}
 	
 	@Override
@@ -242,7 +242,7 @@ public class DLM2Particles
 	protected Function<CoordinateVector, CoordinateVector> velocityBoundaryValues()
 	{
 		return x -> CoordinateVector.getUnitVector(2, 0)
-		                            .mul(time);
+		                            .mul(getTime());
 	}
 	
 	public static void main(final String[] args)
@@ -277,13 +277,15 @@ public class DLM2Particles
 		                                                   "Up1");
 		UpPlot.addOverlay(new DistortedOverlay(dlmElast2.plotPoints,
 		                                       particle1,
-		                                       dlmElast2.iterateHistory.slice(new IntCoordinates(0,
-		                                                                                         backGround.getShapeFunctions()
-		                                                                                                   .size()),
-		                                                                      new IntCoordinates(dlmElast2.iterateHistory.getRows(),
-		                                                                                         backGround.getShapeFunctions()
-		                                                                                                   .size() + particle1.getShapeFunctions()
-		                                                                                                                      .size())),
+		                                       dlmElast2.getIterateHistory()
+		                                                .slice(new IntCoordinates(0,
+		                                                                          backGround.getShapeFunctions()
+		                                                                                    .size()),
+		                                                       new IntCoordinates(dlmElast2.getIterateHistory()
+		                                                                                   .getRows(),
+		                                                                          backGround.getShapeFunctions()
+		                                                                                    .size() + particle1.getShapeFunctions()
+		                                                                                                       .size())),
 		                                       5));
 		PlotWindow.addPlot(UpPlot);
 		final MixedPlot2DTime UpPlot1 = new MixedPlot2DTime(dlmElast2.pressureValues,
@@ -292,16 +294,18 @@ public class DLM2Particles
 		                                                    "Up2");
 		UpPlot1.addOverlay(new DistortedOverlay(dlmElast2.plotPoints,
 		                                        particle2,
-		                                        dlmElast2.iterateHistory.slice(new IntCoordinates(0,
-		                                                                                          backGround.getShapeFunctions()
-		                                                                                                    .size() + 2 * particle1.getShapeFunctions()
-		                                                                                                                           .size()),
-		                                                                       new IntCoordinates(dlmElast2.iterateHistory.getRows(),
-		                                                                                          backGround.getShapeFunctions()
-		                                                                                                    .size() + 2 * particle1.getShapeFunctions()
-		                                                                                                                           .size()
-			                                                                                          + particle2.getShapeFunctions()
-			                                                                                                     .size())),
+		                                        dlmElast2.getIterateHistory()
+		                                                 .slice(new IntCoordinates(0,
+		                                                                           backGround.getShapeFunctions()
+		                                                                                     .size() + 2 * particle1.getShapeFunctions()
+		                                                                                                            .size()),
+		                                                        new IntCoordinates(dlmElast2.getIterateHistory()
+		                                                                                    .getRows(),
+		                                                                           backGround.getShapeFunctions()
+		                                                                                     .size() + 2 * particle1.getShapeFunctions()
+		                                                                                                            .size()
+			                                                                           + particle2.getShapeFunctions()
+			                                                                                      .size())),
 		                                        5));
 		PlotWindow.addPlot(UpPlot1);
 		final MixedPlot2DTime UpPlot2 = new MixedPlot2DTime(dlmElast2.pressureValues,
@@ -310,19 +314,21 @@ public class DLM2Particles
 		                                                    "Up3");
 		UpPlot2.addOverlay(new DistortedOverlay(dlmElast2.plotPoints,
 		                                        particle3,
-		                                        dlmElast2.iterateHistory.slice(new IntCoordinates(0,
-		                                                                                          backGround.getShapeFunctions()
-		                                                                                                    .size() + 2 * particle1.getShapeFunctions()
-		                                                                                                                           .size()
-			                                                                                          + 2 * particle2.getShapeFunctions()
-			                                                                                                         .size()),
-		                                                                       new IntCoordinates(dlmElast2.iterateHistory.getRows(),
-		                                                                                          backGround.getShapeFunctions()
-		                                                                                                    .size() + 2 * particle1.getShapeFunctions()
-		                                                                                                                           .size()
-			                                                                                          + 2 * particle2.getShapeFunctions()
-			                                                                                                         .size() + particle3.getShapeFunctions()
-			                                                                                                                            .size())),
+		                                        dlmElast2.getIterateHistory()
+		                                                 .slice(new IntCoordinates(0,
+		                                                                           backGround.getShapeFunctions()
+		                                                                                     .size() + 2 * particle1.getShapeFunctions()
+		                                                                                                            .size()
+			                                                                           + 2 * particle2.getShapeFunctions()
+			                                                                                          .size()),
+		                                                        new IntCoordinates(dlmElast2.getIterateHistory()
+		                                                                                    .getRows(),
+		                                                                           backGround.getShapeFunctions()
+		                                                                                     .size() + 2 * particle1.getShapeFunctions()
+		                                                                                                            .size()
+			                                                                           + 2 * particle2.getShapeFunctions()
+			                                                                                          .size() + particle3.getShapeFunctions()
+			                                                                                                             .size())),
 		                                        5));
 		PlotWindow.addPlot(UpPlot2);
 	}

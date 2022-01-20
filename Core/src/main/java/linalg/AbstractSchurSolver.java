@@ -25,6 +25,7 @@ public abstract class AbstractSchurSolver<T extends VectorMultiplyable>
 		blockSizes = blockMatrix.getBlockSizes();
 		for (int i = 1; i < blockStarts.length; i++)
 		{
+			System.out.println("inverting diagonal schur block " + i);
 			diagonalInverses.add(getDiagonalBlock(i - 1)
 				                     .inverse());
 			if (diagonalInverses.get(i - 1) == null)
@@ -34,6 +35,7 @@ public abstract class AbstractSchurSolver<T extends VectorMultiplyable>
 			if (getLeftBlock(i - 1) == null)
 				throw new IllegalArgumentException("matrix does not contain necessary left block");
 		}
+		System.out.println("abstract schur built");
 	}
 	
 	public SparseMatrix getDiagonalBlock(final int i)

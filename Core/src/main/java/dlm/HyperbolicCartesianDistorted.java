@@ -254,7 +254,7 @@ public abstract class HyperbolicCartesianDistorted<ST extends ComposeMixedShapeF
 				                                                   particleId)
 			                                                   .getShapeFunctions(),
 			                                     getParticleIterate(
-				                                     currentIterate,
+				                                     getCurrentIterate(),
 				                                     particleId));
 		return new DistortedVectorFunctionOnCells()
 		{
@@ -299,7 +299,7 @@ public abstract class HyperbolicCartesianDistorted<ST extends ComposeMixedShapeF
 	public MixedFunctionOnCells<TPCell, TPFace> getUp()
 	{
 		return new MixedTPFESpaceFunction<>(backgroundSpace.getShapeFunctions(),
-		                                    getBackGroundIterate(currentIterate));
+		                                    getBackGroundIterate(getCurrentIterate()));
 	}
 	
 	protected abstract List<CellIntegral<TPCell, ST>> getBackgroundMassIntegrals();
@@ -602,7 +602,7 @@ public abstract class HyperbolicCartesianDistorted<ST extends ComposeMixedShapeF
 				               .values()
 				               .stream()
 				               .filter(ComposeMixedShapeFunction::hasPressureFunction)
-				               .findFirst();
+				               .findAny();
 			firstPressure.ifPresent(st -> backgroundSpace.overWriteValue(st.getGlobalIndex(),
 			                                                             0,
 			                                                             matrix,

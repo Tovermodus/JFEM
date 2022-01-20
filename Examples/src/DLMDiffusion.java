@@ -75,26 +75,26 @@ public class DLMDiffusion
 				= new TPRightHandSideIntegral<>(sf.getValue(), TPRightHandSideIntegral.H1);
 			final DenseVector integrals = new DenseVector(m);
 			immersedGrid.writeCellIntegralsToRhs(List.of(shapeFunctionOnImmersedGrid), integrals);
-			A13.addSmallMatrixAt(integrals.asMatrix()
-			                              .transpose(), sf.getKey(), 0);
+			A13.addSmallMatrixInPlaceAt(integrals.asMatrix()
+			                                     .transpose(), sf.getKey(), 0);
 		}
 		
 		final SparseMatrix A = new SparseMatrix(n + 2 * m, n + 2 * m);
 		
 		final SparseMatrix T = new SparseMatrix(n + 2 * m, n + 2 * m);
 		
-		A.addSmallMatrixAt(A11, 0, 0);
-		A.addSmallMatrixAt(A22, n, n);
-		A.addSmallMatrixAt(A23, n, n + m);
-		A.addSmallMatrixAt(A23.transpose(), n + m, n);
-		A.addSmallMatrixAt(A13, 0, n + m);
-		A.addSmallMatrixAt(A13.transpose(), n + m, 0);
+		A.addSmallMatrixInPlaceAt(A11, 0, 0);
+		A.addSmallMatrixInPlaceAt(A22, n, n);
+		A.addSmallMatrixInPlaceAt(A23, n, n + m);
+		A.addSmallMatrixInPlaceAt(A23.transpose(), n + m, n);
+		A.addSmallMatrixInPlaceAt(A13, 0, n + m);
+		A.addSmallMatrixInPlaceAt(A13.transpose(), n + m, 0);
 		
 		final DirectlySolvable A11inv = A11.inverse();
 		T.addSmallMatrixInPlaceAt(A11inv, 0, 0);
 		T.addSmallMatrixInPlaceAt((A22.add(SparseMatrix.identity(m)
 		                                               .mul(0.01))).inverse(), n, n);
-		T.addSmallMatrixAt(SparseMatrix.identity(m), n + m, n + m);
+		T.addSmallMatrixInPlaceAt(SparseMatrix.identity(m), n + m, n + m);
 		
 		final DenseVector b1 = new DenseVector(n);
 		final DenseVector b2 = new DenseVector(m);

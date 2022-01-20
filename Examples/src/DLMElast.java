@@ -550,7 +550,7 @@ public class DLMElast
 		eulerian.writeCellIntegralsToMatrix(List.of(mass), eulerianMass);
 		ABf.mulInPlace(1. / dt);
 		eulerian.writeCellIntegralsToMatrix(List.of(symGrad, divValue), ABf);
-		constantMatrix.addSmallMatrixAt(ABf, 0, 0);
+		constantMatrix.addSmallMatrixInPlaceAt(ABf, 0, 0);
 	}
 	
 	public void writeAfSemiImplicit(final SparseMatrix currentMatrix, final DenseVector currentIterate)
@@ -576,7 +576,7 @@ public class DLMElast
 			QkQkFunction> mixedConvection2 = MixedCellIntegral.fromVelocityIntegral(convection2);
 		final SparseMatrix convection = new SparseMatrix(nEulerian, nEulerian);
 		eulerian.writeCellIntegralsToMatrix(List.of(mixedConvection1, mixedConvection2), convection);
-		currentMatrix.addSmallMatrixAt(convection, 0, 0);
+		currentMatrix.addSmallMatrixInPlaceAt(convection, 0, 0);
 	}
 	
 	public void writeAs(final SparseMatrix constantMatrix)
@@ -596,7 +596,7 @@ public class DLMElast
 //		System.out.println(As.transpose()
 //		                     .sub(As)
 //		                     .absMaxElement() + "AsAbsMax");
-		constantMatrix.addSmallMatrixAt(As, nEulerian, nEulerian);
+		constantMatrix.addSmallMatrixInPlaceAt(As, nEulerian, nEulerian);
 	}
 	
 	public void writeCf(final SparseMatrix currentMatrix, final DenseVector currentIterate)
@@ -628,8 +628,8 @@ public class DLMElast
 						                                           .getMaxDiam());
 				        Cf.addColumn(column, sfEntry.getKey());
 			        });
-		currentMatrix.addSmallMatrixAt(Cf, nEulerian + nLagrangian, 0);
-		currentMatrix.addSmallMatrixAt(Cf.transpose(), 0, nEulerian + nLagrangian);
+		currentMatrix.addSmallMatrixInPlaceAt(Cf, nEulerian + nLagrangian, 0);
+		currentMatrix.addSmallMatrixInPlaceAt(Cf.transpose(), 0, nEulerian + nLagrangian);
 	}
 	
 	private DistortedVectorFESpaceFunction getX(final DenseVector currentIterate)
@@ -719,9 +719,9 @@ public class DLMElast
 			= new DistortedVectorCellIntegral(DistortedVectorCellIntegral.H1);
 		lagrangian.writeCellIntegralsToMatrix(List.of(transferLagrangian), Cs);
 		lagrangianH1 = Cs;
-		constantMatrix.addSmallMatrixAt(Cs.mul(-1. / dt), nEulerian + nLagrangian, nEulerian);
-		constantMatrix.addSmallMatrixAt(Cs.transpose()
-		                                  .mul(-1), nEulerian, nEulerian + nLagrangian);
+		constantMatrix.addSmallMatrixInPlaceAt(Cs.mul(-1. / dt), nEulerian + nLagrangian, nEulerian);
+		constantMatrix.addSmallMatrixInPlaceAt(Cs.transpose()
+		                                         .mul(-1), nEulerian, nEulerian + nLagrangian);
 	}
 	
 	public void writeF(final DenseVector currentVector, final DenseVector currentIterate)

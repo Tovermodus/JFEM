@@ -10,7 +10,7 @@ import java.util.concurrent.Executors;
 
 public class IterativeSolver
 {
-	public GMRES gm;
+	final public GMRES gm;
 	ExecutorService ex;
 	public boolean showProgress = false;
 	public boolean showInterrupt = false;
@@ -21,6 +21,7 @@ public class IterativeSolver
 	public IterativeSolver()
 	{
 		metric = new IterativeSolverConvergenceMetric(1);
+		gm = new GMRES(showProgress, metric);
 		if (!GraphicsEnvironment.isHeadless())
 			MetricWindow.getInstance()
 			            .addMetric(metric);
@@ -29,6 +30,7 @@ public class IterativeSolver
 	public IterativeSolver(final boolean showProgress)
 	{
 		metric = new IterativeSolverConvergenceMetric(1);
+		gm = new GMRES(showProgress, metric);
 		if (showProgress)
 			if (!GraphicsEnvironment.isHeadless())
 				MetricWindow.getInstance()
@@ -156,7 +158,6 @@ public class IterativeSolver
 	                                                         final Vector rhs,
 	                                                         final double tol)
 	{
-		System.out.println("starts");
 		iterations = 0;
 		if (PerformanceArguments.getInstance().executeChecks)
 		{
@@ -177,8 +178,6 @@ public class IterativeSolver
 		if (showInterrupt)
 			ex.execute(i);
 		final Vector x;
-		System.out.println("gmr");
-		gm = new GMRES(showProgress, metric, 0);
 		if (lastSolution == null)
 			x = gm.solve(preconditioner, operator, rhs, tol, i);
 		else
@@ -209,7 +208,6 @@ public class IterativeSolver
 		if (showInterrupt)
 			ex.execute(i);
 		final Vector x;
-		gm = new GMRES(showProgress, metric, 0);
 		if (lastSolution == null)
 			x = gm.solve(operator, rightHandSide, tol, i);
 		else

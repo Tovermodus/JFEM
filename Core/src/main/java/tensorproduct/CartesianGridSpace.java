@@ -145,4 +145,9 @@ public abstract class CartesianGridSpace<ST extends ShapeFunction<TPCell, TPFace
 	{
 		return supportOnFace;
 	}
+	
+	public double getMaxDiam()
+	{
+		return grid.getMaxDiam();
+	}
 }

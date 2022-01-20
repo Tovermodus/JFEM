@@ -168,7 +168,7 @@ public class DLMStokesFlowAroundCylinder
 					                                           DistortedVectorRightHandSideIntegral.H1);
 				final DenseVector integrals = new DenseVector(m);
 				immersedGrid.writeCellIntegralsToRhs(List.of(shapeFunctionOnImmersedGrid), integrals);
-				A13.addSmallMatrixAt(integrals.asMatrix()
+				A13.addSmallMatrixInPlaceAt(integrals.asMatrix()
 				                              .transpose(), sf.getKey(), 0);
 				//if (count % 10 == 0)
 				System.out.println("A31: " + 100.0 * (count++) / n + "%");
@@ -179,23 +179,23 @@ public class DLMStokesFlowAroundCylinder
 		
 		final SparseMatrix T = new SparseMatrix(n + 2 * m, n + 2 * m);
 		
-		A.addSmallMatrixAt(A11, 0, 0);
-		A.addSmallMatrixAt(A22, n, n);
-		//A.addSmallMatrixAt(A23, n, n + m);
-		A.addSmallMatrixAt(A23.transpose(), n + m, n);
-		A.addSmallMatrixAt(A13, 0, n + m);
-		A.addSmallMatrixAt(A13.transpose(), n + m, 0);
+		A.addSmallMatrixInPlaceAt(A11, 0, 0);
+		A.addSmallMatrixInPlaceAt(A22, n, n);
+		//A.addSmallMatrixInPlaceAt(A23, n, n + m);
+		A.addSmallMatrixInPlaceAt(A23.transpose(), n + m, n);
+		A.addSmallMatrixInPlaceAt(A13, 0, n + m);
+		A.addSmallMatrixInPlaceAt(A13.transpose(), n + m, 0);
 		for (final int i : largeGrid.getFixedNodeIndices())
 			A.deleteRow(i);
 		for (final int i : immersedGrid.getFixedNodeIndices())
 			A.deleteRow(i + n);
 		System.out.println("A");
 		//final DenseMatrix A11inv = A11.inverse();
-		//T.addSmallMatrixAt(A11inv, 0, 0);
+		//T.addSmallMatrixInPlaceAt(A11inv, 0, 0);
 		System.out.println("T11");
-		//T.addSmallMatrixAt((A22.add(SparseMatrix.identity(m).mul(0.1))).inverse(), n, n);
+		//T.addSmallMatrixInPlaceAt((A22.add(SparseMatrix.identity(m).mul(0.1))).inverse(), n, n);
 		System.out.println("T22");
-		//T.addSmallMatrixAt(SparseMatrix.identity(m), n + m, n + m);
+		//T.addSmallMatrixInPlaceAt(SparseMatrix.identity(m), n + m, n + m);
 		System.out.println("T");
 		
 		final DenseVector b = new DenseVector(n + 2 * m);
@@ -211,7 +211,7 @@ public class DLMStokesFlowAroundCylinder
 		final SparseMatrix M11 = new SparseMatrix(n, n);
 		largeGrid.writeCellIntegralsToMatrix(List.of(valueValue), M11);
 		final SparseMatrix M = new SparseMatrix(n + 2 * m, n + 2 * m);
-		M.addSmallMatrixAt(M11, 0, 0);
+		M.addSmallMatrixInPlaceAt(M11, 0, 0);
 		
 		//A.mulInPlace(dt);
 		//b.mulInPlace(dt);

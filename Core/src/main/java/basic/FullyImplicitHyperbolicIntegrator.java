@@ -7,10 +7,10 @@ public abstract class FullyImplicitHyperbolicIntegrator
 {
 	final public double dt;
 	final public int timeSteps;
-	protected MutableVector currentIterate;
-	protected MutableVector lastIterate;
-	public DenseMatrix iterateHistory;
-	protected double time = 0.0;
+	private MutableVector currentIterate;
+	private MutableVector lastIterate;
+	private DenseMatrix iterateHistory;
+	private double time = 0.0;
 	
 	public FullyImplicitHyperbolicIntegrator(final double dt, final int timeSteps)
 	{
@@ -82,4 +82,24 @@ public abstract class FullyImplicitHyperbolicIntegrator
 	protected abstract Function2<Matrix, Vector, MutableVector> getSolver();
 	
 	protected abstract void postIterationCallback();
+	
+	public Vector getCurrentIterate()
+	{
+		return currentIterate;
+	}
+	
+	public Vector getLastIterate()
+	{
+		return lastIterate;
+	}
+	
+	public Matrix getIterateHistory()
+	{
+		return iterateHistory;
+	}
+	
+	public double getTime()
+	{
+		return time;
+	}
 }

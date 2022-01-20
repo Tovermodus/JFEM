@@ -2,21 +2,32 @@ import basic.*;
 import distorted.*;
 import distorted.geometry.DistortedCell;
 import dlm.HyperbolicCartesianDistorted;
+import io.vavr.Tuple2;
 import linalg.*;
 import mixed.*;
+import multigrid.MGPReconditioner;
+import multigrid.MGSpace;
+import multigrid.RichardsonSmoother;
+import multigrid.Smoother;
+import org.jetbrains.annotations.NotNull;
 import scala.Function2;
-import tensorproduct.*;
+import tensorproduct.ContinuousTPShapeFunction;
+import tensorproduct.ContinuousTPVectorFunction;
+import tensorproduct.TPVectorCellIntegral;
+import tensorproduct.TPVectorCellIntegralOnCell;
 import tensorproduct.geometry.TPCell;
 import tensorproduct.geometry.TPFace;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.concurrent.ConcurrentSkipListMap;
 import java.util.function.Function;
 import java.util.function.Predicate;
 import java.util.function.ToDoubleFunction;
 
-public class DLMRing
+public class DLMRingPrecondMG
 	extends HyperbolicCartesianDistorted<QkQkFunction, ContinuousTPShapeFunction, ContinuousTPVectorFunction>
 {
 	
@@ -29,10 +40,10 @@ public class DLMRing
 	VectorMultiplyable precond;
 	private double lastPrecondTime;
 	
-	public DLMRing(final double dt,
-	               final int timeSteps,
-	               final CartesianGridSpace<QkQkFunction, MixedValue, MixedGradient, MixedHessian> backgroundSpace,
-	               final List<DistortedGridSpace<DistortedVectorShapeFunction, CoordinateVector, CoordinateMatrix, CoordinateTensor>> particleSpaces)
+	public DLMRingPrecondMG(final double dt,
+	                        final int timeSteps,
+	                        final TaylorHoodSpace backgroundSpace,
+	                        final List<DistortedGridSpace<DistortedVectorShapeFunction, CoordinateVector, CoordinateMatrix, CoordinateTensor>> particleSpaces)
 	{
 		super(dt, timeSteps, backgroundSpace, particleSpaces);
 		velocityValues = new ConcurrentSkipListMap<>();
@@ -53,8 +64,9 @@ public class DLMRing
 	protected Function2<Matrix, Vector, MutableVector> getSolver()
 	{
 		final IterativeSolver it = new IterativeSolver();
+		it.gm.printProgress = true;
 		it.showProgress = true;
-		it.showInterrupt = true;
+		it.showInterrupt = false;
 		return (A, b) ->
 		{
 			System.out.println(A.getClass());
@@ -65,12 +77,117 @@ public class DLMRing
 		};
 	}
 	
+	PreconditionedIterativeImplicitSchur ies;
+	
+	public VectorMultiplyable calculatePrecond(final Matrix A)
+	{
+		final int[] blocks = new int[1 + particleSpaces.size()];
+		for (int i = 0; i < blocks.length; i++)
+			blocks[i] = blockStarts[2 * i];
+		System.out.println("copy");
+		final BlockSparseMatrix schurShape = new BlockSparseMatrix(A, blocks);
+		System.out.println("done");
+		System.out.println("Generaate Schur Solver");
+		if (ies == null)
+		{
+			PlotWindow.addPlot(new MatrixPlot(schurShape.getBlockMatrix(0, 0)));
+			ies = new PreconditionedIterativeImplicitSchur(schurShape, getMGPreconditioner());
+			System.out.println("ies built");
+		} else
+		{
+			ies.getSchurBlock()
+			   .overrideBy(schurShape.getBlockMatrix(0, 0));
+			PlotWindow.addPlot(new MatrixPlot(schurShape, "block"));
+			for (int i = 0; i < particleSpaces.size(); i++)
+			{
+				if (schurShape.getBlockMatrix(0, i + 1) != null)
+					ies.getTopBlock(i)
+					   .overrideBy(schurShape.getBlockMatrix(0, i + 1));
+				if (schurShape.getBlockMatrix(i + 1, 0) != null)
+					ies.getLeftBlock(i)
+					   .overrideBy(schurShape.getBlockMatrix(i + 1, 0));
+			}
+		}
+		return ies;
+	}
+	
+	private VectorMultiplyable getMGPreconditioner()
+	{
+		final var mg = new MGSpace<TaylorHoodSpace, TPCell, TPFace, QkQkFunction, MixedValue, MixedGradient,
+			MixedHessian>(backgroundRefines, backgroundDegree)
+		{
+			@Override
+			public List<TaylorHoodSpace> createSpaces(final int refinements)
+			{
+				
+				final ArrayList<TaylorHoodSpace> ret = new ArrayList<>();
+				for (int i = 0; i < refinements + 1; i++)
+				{
+					ret.add(getTaylorHoodSpace(i));
+				}
+				return ret;
+			}
+			
+			@Override
+			public Tuple2<VectorMultiplyable, DenseVector> createSystem(final TaylorHoodSpace space)
+			{
+				final SparseMatrix s = new SparseMatrix(space.getShapeFunctions()
+				                                             .size(),
+				                                        space.getShapeFunctions()
+				                                             .size());
+				space.writeCellIntegralsToMatrix(getBackgroundMassIntegrals(), s);
+				space.writeCellIntegralsToMatrix(getSemiImplicitBackgroundIntegrals(getUp().getVelocityFunction()),
+				                                 s);
+				s.mulInPlace(1. / dt);
+				final DenseVector d = new DenseVector(space.getShapeFunctions()
+				                                           .size());
+				space.writeCellIntegralsToMatrix(getBackgroundIntegrals(), s);
+				final VectorFunction velocityBoundaryFunction
+					= VectorFunction.fromLambda(velocityBoundaryValues(),
+					                            2, 2);
+				space.writeBoundaryValuesTo(new ComposedMixedFunction(velocityBoundaryFunction),
+				                            getDirichletBoundary(),
+				                            (f, function) -> function.hasVelocityFunction(),
+				                            s,
+				                            d);
+				final Optional<QkQkFunction> firstPressure =
+					space.getShapeFunctions()
+					     .values()
+					     .stream()
+					     .filter(ComposeMixedShapeFunction::hasPressureFunction)
+					     .findAny();
+				firstPressure.ifPresent(st -> space.overWriteValue(st.getGlobalIndex(),
+				                                                   0,
+				                                                   s,
+				                                                   d));
+				System.out.println(s.transpose()
+				                    .sub(s)
+				                    .absMaxElement());
+				return new Tuple2<>(s, d);
+			}
+			
+			@Override
+			public List<Smoother> createSmoothers()
+			{
+				PlotWindow.addPlot(new MatrixPlot((SparseMatrix) finest_system, "precond"));
+				final ArrayList<Smoother> ret = new ArrayList<>();
+				for (int i = 1; i < spaces.size(); i++)
+				{
+					ret.add(new RichardsonSmoother(0.2, 20));//, d.getInvertedDiagonalMatrix()));
+				}
+				return ret;
+			}
+		};
+		System.out.println("mg built");
+		return new MGPReconditioner(mg);
+	}
+	
 	public VectorMultiplyable getPrecond(final Matrix A)
 	{
-		if (precond == null || getTime() > lastPrecondTime + dt * 20)
+		//if (precond == null || time > lastPrecondTime + dt * 20)
 		{
-			PlotWindow.addPlot(new MatrixPlot(A));
-			precond = new DenseMatrix(A).inverse();
+			precond = calculatePrecond(A);
+			System.out.println("calculated");
 			lastPrecondTime = getTime();
 		}
 		return precond;
@@ -231,11 +348,11 @@ public class DLMRing
 	{
 		System.out.println("initial particle velo" + particleId);
 		if (particleId == 0)
-			return x -> CoordinateVector.fromValues(-10, 3);
+			return x -> CoordinateVector.fromValues(-1.0, .3);
 		if (particleId == 1)
-			return x -> CoordinateVector.fromValues(10, 3);
+			return x -> CoordinateVector.fromValues(1.0, .3);
 		if (particleId == 2)
-			return x -> CoordinateVector.fromValues(0, -5);
+			return x -> CoordinateVector.fromValues(0, -.5);
 		return x -> new CoordinateVector(x.getLength());
 	}
 	
@@ -243,7 +360,7 @@ public class DLMRing
 	protected Function<CoordinateVector, CoordinateVector> velocityBoundaryValues()
 	{
 		return x -> CoordinateVector.getUnitVector(2, 0)
-		                            .mul(0);
+		                            .mul(0.1);
 	}
 	
 	@Override
@@ -254,11 +371,12 @@ public class DLMRing
 		                           .y() == 1;
 	}
 	
+	private static final int backgroundRefines = 3;
+	private static final int backgroundDegree = 1;
+	
 	public static void main(final String[] args)
 	{
-		final TaylorHoodSpace backGround = new TaylorHoodSpace(CoordinateVector.fromValues(0, 0),
-		                                                       CoordinateVector.fromValues(1, 1),
-		                                                       new IntCoordinates(6, 6));
+		final TaylorHoodSpace backGround = getTaylorHoodSpace(backgroundRefines);
 		final DistortedGridSpace<DistortedVectorShapeFunction, CoordinateVector, CoordinateMatrix, CoordinateTensor>
 			particle1 =
 			new CircleVectorSpace(CoordinateVector.fromValues(0.6, 0.5),
@@ -267,8 +385,7 @@ public class DLMRing
 		final DistortedGridSpace<DistortedVectorShapeFunction, CoordinateVector, CoordinateMatrix, CoordinateTensor>
 			particle0 =
 			new CircleVectorSpace(CoordinateVector.fromValues(0.4, 0.5),
-			                      0.05,
-			                      1);
+			                      0.05, 1);
 		final DistortedGridSpace<DistortedVectorShapeFunction, CoordinateVector, CoordinateMatrix, CoordinateTensor>
 			particle2 =
 			new RingVectorSpace(CoordinateVector.fromValues(0.5, 0.5),
@@ -276,14 +393,17 @@ public class DLMRing
 			                    0.255,
 			                    0);
 		backGround.assembleCells();
-		backGround.assembleFunctions(1);
+		backGround.assembleFunctions(backgroundDegree);
 		particle0.assembleCells();
 		particle0.assembleFunctions(1);
 		particle1.assembleCells();
 		particle1.assembleFunctions(1);
 		particle2.assembleCells();
 		particle2.assembleFunctions(1);
-		final DLMRing dlmElast2 = new DLMRing(0.02, 1, backGround, List.of(particle0, particle1, particle2));
+		final DLMRingPrecondMG dlmElast2 = new DLMRingPrecondMG(0.02,
+		                                                        10,
+		                                                        backGround,
+		                                                        List.of(particle0, particle1, particle2));
 		dlmElast2.loop();
 		final MixedPlot2DTime UpPlot0 = new MixedPlot2DTime(dlmElast2.pressureValues,
 		                                                    dlmElast2.velocityValues,
@@ -360,5 +480,14 @@ public class DLMRing
 		                                                          CoordinateVector.fromValues(1, 1));
 		UpPlot0.addOverlay(coordinateSys);
 		PlotWindow.addPlot(UpPlot1);
+	}
+	
+	@NotNull
+	private static TaylorHoodSpace getTaylorHoodSpace(final int refines)
+	{
+		final int mul = (int) Math.pow(2, refines);
+		return new TaylorHoodSpace(CoordinateVector.fromValues(0, 0),
+		                           CoordinateVector.fromValues(1, 1),
+		                           new IntCoordinates(2 * mul, 2 * mul));
 	}
 }

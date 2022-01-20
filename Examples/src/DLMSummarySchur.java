@@ -521,7 +521,7 @@ public class DLMSummarySchur
 //		System.out.println(ABf.transpose()
 //		                      .sub(ABf)
 //		                      .absMaxElement() + "ABfAbsMax");
-		constantMatrix.addSmallMatrixAt(ABf, 0, 0);
+		constantMatrix.addSmallMatrixInPlaceAt(ABf, 0, 0);
 	}
 	
 	public void writeAs(final SparseMatrix constantMatrix)
@@ -537,7 +537,7 @@ public class DLMSummarySchur
 //		System.out.println(As.transpose()
 //		                     .sub(As)
 //		                     .absMaxElement() + "AsAbsMax");
-		constantMatrix.addSmallMatrixAt(As.mul(1. / dt), nEulerian, nEulerian);
+		constantMatrix.addSmallMatrixInPlaceAt(As.mul(1. / dt), nEulerian, nEulerian);
 	}
 	
 	public void writeCf(final SparseMatrix currentMatrix, final DenseVector currentIterate)
@@ -569,8 +569,8 @@ public class DLMSummarySchur
 						                                           .getMaxDiam());
 				        Cf.addColumn(column.mul(1), sfEntry.getKey());
 			        });
-		currentMatrix.addSmallMatrixAt(Cf.mul(1), nEulerian + nLagrangian, 0);
-		currentMatrix.addSmallMatrixAt(Cf.transpose()
+		currentMatrix.addSmallMatrixInPlaceAt(Cf.mul(1), nEulerian + nLagrangian, 0);
+		currentMatrix.addSmallMatrixInPlaceAt(Cf.transpose()
 		                                 .mul(1), 0, nEulerian + nLagrangian);
 	}
 	
@@ -659,8 +659,8 @@ public class DLMSummarySchur
 		                                                                                       DistortedVectorCellIntegral.H1);
 		lagrangian.writeCellIntegralsToMatrix(List.of(transferLagrangian), Cs);
 		lagrangianDual = Cs;
-		constantMatrix.addSmallMatrixAt(Cs.mul(1. / dt), nEulerian + nLagrangian, nEulerian);
-		constantMatrix.addSmallMatrixAt(Cs.transpose()
+		constantMatrix.addSmallMatrixInPlaceAt(Cs.mul(1. / dt), nEulerian + nLagrangian, nEulerian);
+		constantMatrix.addSmallMatrixInPlaceAt(Cs.transpose()
 		                                  .mul(1. / dt), nEulerian, nEulerian + nLagrangian);
 	}
 	

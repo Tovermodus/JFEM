@@ -134,24 +134,24 @@ public class DLMElastWorks
 //		}
 		final MixedFESpaceFunction<QkQkFunction, TPCell, TPFace> Up =
 			new MixedTPFESpaceFunction<>(backgroundSpace.getShapeFunctions(),
-			                             getBackGroundIterate(currentIterate));
-		velocityValues.putAll(Up.velocityValuesInPointsAtTime(plotPoints, time));
-		pressureValues.putAll(Up.pressureValuesInPointsAtTime(plotPoints, time));
+			                             getBackGroundIterate(getCurrentIterate()));
+		velocityValues.putAll(Up.velocityValuesInPointsAtTime(plotPoints, getTime()));
+		pressureValues.putAll(Up.pressureValuesInPointsAtTime(plotPoints, getTime()));
 		final DistortedVectorFESpaceFunction X =
 			new DistortedVectorFESpaceFunction(particleSpaces.get(0)
 			                                                 .getShapeFunctions(),
-			                                   getParticleIterate(currentIterate, 0));
-		XValues.putAll(X.valuesInPointsAtTime(plotPoints, time));
+			                                   getParticleIterate(getCurrentIterate(), 0));
+		XValues.putAll(X.valuesInPointsAtTime(plotPoints, getTime()));
 		final DistortedVectorFESpaceFunction XPrime =
 			new DistortedVectorFESpaceFunction(particleSpaces.get(0)
 			                                                 .getShapeFunctions(),
-			                                   getParticleIterate(currentIterate.sub(lastIterate)
-			                                                                    .mul(1. / dt), 0));
-		XPrimeValues.putAll(XPrime.valuesInPointsAtTime(plotPoints, time));
+			                                   getParticleIterate(getCurrentIterate().sub(getLastIterate())
+			                                                                         .mul(1. / dt), 0));
+		XPrimeValues.putAll(XPrime.valuesInPointsAtTime(plotPoints, getTime()));
 		final DistortedVectorFunctionOnCells UX =
 			DistortedVectorFunctionOnCells.concatenate(Up.getVelocityFunction(), X);
-		UXValues.putAll(UX.valuesInPointsAtTime(plotPoints, time));
-		System.out.println("ITeration at time " + time + " out of " + dt * timeSteps + " is finished");
+		UXValues.putAll(UX.valuesInPointsAtTime(plotPoints, getTime()));
+		System.out.println("ITeration at time " + getTime() + " out of " + dt * timeSteps + " is finished");
 	}
 	
 	@Override
@@ -242,7 +242,7 @@ public class DLMElastWorks
 	protected Function<CoordinateVector, CoordinateVector> velocityBoundaryValues()
 	{
 		return x -> CoordinateVector.getUnitVector(2, 0)
-		                            .mul(time);
+		                            .mul(getTime());
 	}
 	
 	public static void main(final String[] args)
@@ -265,16 +265,18 @@ public class DLMElastWorks
 		                                                   "Up");
 		UpPlot.addOverlay(new DistortedOverlay(dlmElast2.plotPoints,
 		                                       particle,
-		                                       dlmElast2.iterateHistory.slice(new IntCoordinates(0,
-		                                                                                         backGround.getShapeFunctions()
-		                                                                                                   .size()),
-		                                                                      new IntCoordinates(dlmElast2.iterateHistory.getRows(),
-		                                                                                         backGround.getShapeFunctions()
-		                                                                                                   .size() + particle.getShapeFunctions()
-		                                                                                                                     .size())),
+		                                       dlmElast2.getIterateHistory()
+		                                                .slice(new IntCoordinates(0,
+		                                                                          backGround.getShapeFunctions()
+		                                                                                    .size()),
+		                                                       new IntCoordinates(dlmElast2.getIterateHistory()
+		                                                                                   .getRows(),
+		                                                                          backGround.getShapeFunctions()
+		                                                                                    .size() + particle.getShapeFunctions()
+		                                                                                                      .size())),
 		                                       5));
 		PlotWindow.addPlot(UpPlot);
-		PlotWindow.addPlot(new MatrixPlot(dlmElast2.iterateHistory));
+		PlotWindow.addPlot(new MatrixPlot(dlmElast2.getIterateHistory()));
 		PlotWindow.addPlot(new MixedPlot2DTime(dlmElast2.pressureValues, dlmElast2.UXValues, 30, "UX"));
 		PlotWindow.addPlot(new MixedPlot2DTime(dlmElast2.pressureValues, dlmElast2.XPrimeValues, 30, "XPrime"));
 	}

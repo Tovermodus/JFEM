@@ -395,7 +395,7 @@ public class DLMSquareSummary
 		eulerianAlphaMass = new SparseMatrix(nEulerian, nEulerian);
 		eulerian.writeCellIntegralsToMatrix(List.of(mass, symGrad, divValue), ABf);
 		eulerian.writeCellIntegralsToMatrix(List.of(mass), eulerianAlphaMass);
-		constantMatrix.addSmallMatrixAt(ABf, 0, 0);
+		constantMatrix.addSmallMatrixInPlaceAt(ABf, 0, 0);
 	}
 	
 	public void writeAs(final SparseMatrix constantMatrix)
@@ -411,7 +411,7 @@ public class DLMSquareSummary
 		lagrangian.writeCellIntegralsToMatrix(List.of(mass, elast), As);
 		lagrangianBetaMass = new SparseMatrix(nLagrangian, nLagrangian);
 		lagrangian.writeCellIntegralsToMatrix(List.of(mass), lagrangianBetaMass);
-		constantMatrix.addSmallMatrixAt(As, nEulerian, nEulerian);
+		constantMatrix.addSmallMatrixInPlaceAt(As, nEulerian, nEulerian);
 	}
 	
 	public void writeCf(final SparseMatrix currentMatrix, final DenseVector currentIterate)
@@ -440,9 +440,9 @@ public class DLMSquareSummary
 				Cf.addColumn(column.mul(1), sfEntry.getKey());
 			}
 		}
-		currentMatrix.addSmallMatrixAt(Cf.mul(1), nEulerian + nLagrangian, 0);
-		currentMatrix.addSmallMatrixAt(Cf.transpose()
-		                                 .mul(1), 0, nEulerian + nLagrangian);
+		currentMatrix.addSmallMatrixInPlaceAt(Cf.mul(1), nEulerian + nLagrangian, 0);
+		currentMatrix.addSmallMatrixInPlaceAt(Cf.transpose()
+		                                        .mul(1), 0, nEulerian + nLagrangian);
 	}
 	
 	private VectorTPFESpaceFunction<ContinuousTPVectorFunction> getX(final DenseVector currentIterate)
@@ -538,8 +538,8 @@ public class DLMSquareSummary
 			                           TPVectorCellIntegral.H1);
 		lagrangian.writeCellIntegralsToMatrix(List.of(transferLagrangian), Cs);
 		lagrangianDual = Cs;
-		constantMatrix.addSmallMatrixAt(Cs.mul(1. / dt), nEulerian + nLagrangian, nEulerian);
-		constantMatrix.addSmallMatrixAt(Cs.transpose(), nEulerian, nEulerian + nLagrangian);
+		constantMatrix.addSmallMatrixInPlaceAt(Cs.mul(1. / dt), nEulerian + nLagrangian, nEulerian);
+		constantMatrix.addSmallMatrixInPlaceAt(Cs.transpose(), nEulerian, nEulerian + nLagrangian);
 	}
 	
 	public void writeF(final DenseVector currentVector, final DenseVector currentIterate)

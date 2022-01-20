@@ -104,7 +104,6 @@ public abstract class MGSpace<CSpace extends FESpace<CT, FT, ST> & Assembleable,
 	@Override
 	public Vector mgStep(final int level, Vector guess, final Vector rhs)
 	{
-		//System.out.println(guess.getLength());
 		if (level == 0)
 		{
 			if (systems.get(0) instanceof Matrix)

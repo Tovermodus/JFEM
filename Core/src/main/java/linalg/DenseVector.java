@@ -6,6 +6,7 @@ import org.apache.commons.math3.linear.RealVector;
 import org.ujmp.core.Matrix;
 
 import java.io.Serializable;
+import java.util.Arrays;
 import java.util.function.DoubleUnaryOperator;
 
 public class DenseVector
@@ -75,6 +76,19 @@ public class DenseVector
 		final DenseVector ret = new DenseVector((int) (vector.getDimension()));
 		for (int i = 0; i < ret.getLength(); i++)
 			ret.set(vector.getEntry(i), i);
+		return ret;
+	}
+	
+	public static DenseVector concatenate(final Vector... vectors)
+	{
+		final DenseVector ret = new DenseVector(Arrays.stream(vectors)
+		                                              .mapToInt(Vector::getLength)
+		                                              .sum());
+		int retIndex = 0;
+		for (final Vector v : vectors)
+			for (final IntCoordinates c : v.getShape()
+			                               .range())
+				ret.set(v.at(c), retIndex++);
 		return ret;
 	}
 	

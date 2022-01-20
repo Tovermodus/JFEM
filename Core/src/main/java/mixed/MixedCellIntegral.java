@@ -8,8 +8,7 @@ import java.util.Objects;
 public class MixedCellIntegral<CT extends Cell<CT, ?>,
 	PF extends ScalarShapeFunction<CT, ?>, VF extends VectorShapeFunction<CT, ?>, MF extends ComposeMixedShapeFunction<CT,
 	?, PF, VF>>
-	extends CellIntegral<CT
-	, MF>
+	extends CellIntegral<CT, MF>
 {
 	private final CellIntegral<CT, PF> pressureIntegral;
 	private final CellIntegral<CT, VF> velocityIntegral;

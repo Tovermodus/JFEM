@@ -20,11 +20,19 @@ public interface MutableMatrix
 			if (coordinates[1] + small.getCols() > getCols())
 				throw new IllegalArgumentException("small Matrix too large in x for position");
 		}
-		for (final IntCoordinates c : small.getShape()
-		                                   .range())
-		{
-			add(small.at(c), c.get(0) + coordinates[0], c.get(1) + coordinates[1]);
-		}
+		final IntCoordinates starting = new IntCoordinates(coordinates);
+		if (small.isSparse())
+			for (final var coordinateEntry : small.getCoordinateEntryList()
+			                                      .entrySet())
+			{
+				add(coordinateEntry.getValue(), starting.add(coordinateEntry.getKey()));
+			}
+		else
+			for (final IntCoordinates c : small.getShape()
+			                                   .range())
+			{
+				add(small.at(c), c.add(starting));
+			}
 	}
 	
 	default void addColumn(final Vector vector, final int column)

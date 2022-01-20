@@ -11,7 +11,7 @@ public class MatrixPlot
 	public int pixelWidth;
 	public int pixelHeight;
 	public double maxValue;
-	final double IDENTIFIED_AS_ZERO = 1e-4;
+	final double IDENTIFIED_AS_ZERO = 1e-8;
 	private final String title;
 	
 	public MatrixPlot(final Matrix m)

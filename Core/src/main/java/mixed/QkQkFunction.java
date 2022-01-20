@@ -31,6 +31,11 @@ public class QkQkFunction
 	
 	public void setGlobalIndex(final int index)
 	{
+		
+		if (hasPressureFunction())
+			getPressureFunction().setGlobalIndex(index);
+		if (hasVelocityFunction())
+			getVelocityFunction().setGlobalIndex(index);
 		globalIndex = index;
 	}
 	
