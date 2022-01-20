@@ -63,11 +63,13 @@ public class MixedTPFESpaceFunction<MF extends MixedShapeFunction<TPCell, TPFace
 	@Override
 	public MixedValue valueInCell(final CoordinateVector pos, final TPCell cell)
 	{
-		return supportOnCellFast
+		final MixedValue ret = new MixedValue(cell.getDimension());
+		supportOnCellFast
 			.get(cell.doneCode())
 			.stream()
 			.map(f -> f.valueInCell(pos, cell))
-			.reduce(new MixedValue(pos.getLength()), MixedValue::add);
+			.forEach(ret::addInPlace);
+		return ret;
 	}
 	
 	@Override

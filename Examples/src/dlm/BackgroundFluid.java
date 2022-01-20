@@ -106,7 +106,7 @@ public class BackgroundFluid
 	{
 		return x ->
 			CoordinateVector.getUnitVector(2, 0)
-			                .mul(10.0);// * (x.y() - 0.5));
+			                .mul(1.0);// * (x.y() - 0.5));
 	}
 	
 	@Override

@@ -1,9 +1,7 @@
 package dlm;
 
-import basic.CellIntegral;
-import basic.Overlay;
-import basic.RightHandSideIntegral;
-import basic.VectorFunction;
+import basic.*;
+import com.google.common.base.Stopwatch;
 import distorted.*;
 import distorted.geometry.DistortedCell;
 import io.vavr.Tuple2;
@@ -191,13 +189,22 @@ public interface Particle
 	
 	private Matrix buildLagrangeBackgroundMatrix(final Fluid f, final ParticleIterate iterate)
 	{
+		
+		final CountMetric cm = MetricWindow.getInstance()
+		                                   .setMetric("lagBackGround",
+		                                              new CountMetric(getSpace().getCells()
+		                                                                        .size()));
 		final SparseMatrix lagrangeBackgroundMatrix = new SparseMatrix(f.getVelocitySize(), getLagrangeSize());
 		final DistortedVectorFunctionOnCells X = getPosition(iterate);
 		final double particleCellDiam = getSpace().getMaxDiam();
 		final double fluidCellDiam = f.getSpace()
 		                              .getMaxDiam();
+		System.out.println("lagback");
+		final Stopwatch s = Stopwatch.createStarted();
+		
 		getSpace().forEachCell(cell ->
 		                       {
+			                       cm.increment();
 			                       f.getSpace()
 			                        .getShapeFunctions()
 			                        .values()
@@ -205,9 +212,11 @@ public interface Particle
 			                        .parallel()
 			                        .filter(ComposeMixedShapeFunction::hasVelocityFunction)
 			                        .map(ComposeMixedShapeFunction::getVelocityFunction)
-			                        .filter(backGroundFunction -> backGroundFunction.getNodeFunctionalPoint()
-			                                                                        .sub(X.value(cell.center()))
-			                                                                        .euclidianNorm() < particleCellDiam + fluidCellDiam)
+			                        .filter(backGroundFunction -> hasSupportOverlap(X,
+			                                                                        particleCellDiam,
+			                                                                        fluidCellDiam,
+			                                                                        cell,
+			                                                                        backGroundFunction))
 			                        .forEach(backgroundFunction ->
 				                                 writeBackgroundLagrangeIntegralsOnCellToMatrix(
 					                                 lagrangeBackgroundMatrix,
@@ -215,34 +224,19 @@ public interface Particle
 					                                 backgroundFunction,
 					                                 X));
 		                       });
-
-//		f.getSpace()
-//		 .getShapeFunctions()
-//		 .entrySet()
-//		 .stream()
-//		 .parallel()
-//		 .filter(e -> e.getValue()
-//		               .hasVelocityFunction())
-//		 .forEach(entry ->
-//		          {
-//			          final var backGroundFunction = entry.getValue()
-//			                                              .getVelocityFunction();
-//			          final var backgroundFunctionAtX =
-//				          DistortedVectorFunctionOnCells.concatenate(backGroundFunction
-//					          , X);
-//			          final int rowIndex = entry.getKey();
-//			          final DenseVector row = new DenseVector(getLagrangeSize());
-//			          getSpace()
-//				          .writeCellIntegralsToRhs(
-//					          getBackgroundLagrangeIntegrals(backgroundFunctionAtX),
-//					          row,
-//					          (cell, fun)
-//						          -> backGroundFunction.getNodeFunctionalPoint()
-//						                               .sub(X.value(cell.center()))
-//						                               .euclidianNorm() < particleCellDiam + fluidCellDiam);
-//			          lagrangeBackgroundMatrix.addRow(row, rowIndex);
-//		          });
+		System.out.println("lagbackDone" + s.elapsed());
 		return lagrangeBackgroundMatrix;
+	}
+	
+	private static boolean hasSupportOverlap(final DistortedVectorFunctionOnCells X,
+	                                         final double particleCellDiam,
+	                                         final double fluidCellDiam,
+	                                         final DistortedCell cell,
+	                                         final ContinuousTPVectorFunction backGroundFunction)
+	{
+		return backGroundFunction.getNodeFunctionalPoint()
+		                         .sub(X.valueOnReferenceCell(cell.referenceCell.center(), cell))
+		                         .euclidianNorm() < particleCellDiam + fluidCellDiam;
 	}
 	
 	private void writeBackgroundLagrangeIntegralsOnCellToMatrix(final SparseMatrix lagrangeBackGroundMatrix,

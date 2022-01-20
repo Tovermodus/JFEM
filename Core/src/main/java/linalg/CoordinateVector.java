@@ -42,6 +42,14 @@ public class CoordinateVector
 		return ret;
 	}
 	
+	public double dist(final CoordinateVector other)
+	{
+		double sumOfSquares = 0;
+		for (int i = 0; i < getLength(); i++)
+			sumOfSquares += Math.pow(entries[i] - other.entries[i], 2);
+		return Math.sqrt(sumOfSquares);
+	}
+	
 	public static CoordinateVector getUnitVector(final int d, final int index, final double scale)
 	{
 		final CoordinateVector ret = new CoordinateVector(d);
@@ -114,7 +122,7 @@ public class CoordinateVector
 	{
 		if (PerformanceArguments.getInstance().executeChecks)
 		{
-			if (!getShape().equals(other.getShape()))
+			if (getLength() != ((Vector) other).getLength())
 				throw new IllegalArgumentException("Vectors are of different size");
 		}
 		final CoordinateVector ret = new CoordinateVector(this);
@@ -135,12 +143,12 @@ public class CoordinateVector
 	{
 		if (PerformanceArguments.getInstance().executeChecks)
 		{
-			if (!getShape().equals(other.getShape()))
+			if (getLength() != ((Vector) other).getLength())
 				throw new IllegalArgumentException("Vectors are of different size");
 		}
-		final CoordinateVector ret = new CoordinateVector(this);
+		final CoordinateVector ret = new CoordinateVector((Vector) other);
 		for (int i = 0; i < getLength(); i++)
-			ret.entries[i] = entries[i] - ((DenseVector) other).entries[i];
+			ret.entries[i] = entries[i] - ret.entries[i];
 		return ret;
 	}
 	

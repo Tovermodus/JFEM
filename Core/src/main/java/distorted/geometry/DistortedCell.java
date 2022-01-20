@@ -282,8 +282,7 @@ public class DistortedCell
 	{
 		for (final CoordinateVector vertex : vertices)
 		{
-			final CoordinateVector sub = pos.sub(vertex);
-			final double dist = sub.euclidianNorm();
+			final double dist = pos.dist(vertex);
 			if (dist > diam)
 			{
 				return false;
@@ -493,11 +492,21 @@ public class DistortedCell
 		}
 		if (getDimension() == 2)
 		{
-			return transformationCoefficients[0]
-				.mul(pos.x() * pos.y())
-				.add(transformationCoefficients[1].mul(pos.x()))
-				.add(transformationCoefficients[2].mul(pos.y()))
-				.add(transformationCoefficients[3]);
+			final CoordinateVector c0 = new CoordinateVector(transformationCoefficients[0]);
+			c0.mulInPlace(pos.x() * pos.y());
+			final CoordinateVector c1 = new CoordinateVector(transformationCoefficients[1]);
+			c1.mulInPlace(pos.x());
+			final CoordinateVector c2 = new CoordinateVector(transformationCoefficients[2]);
+			c2.mulInPlace(pos.y());
+			c0.addInPlace(c1);
+			c0.addInPlace(c2);
+			c0.addInPlace(transformationCoefficients[3]);
+			return c0;
+//				transformationCoefficients[0]
+//				.mul(pos.x() * pos.y())
+//				.add(transformationCoefficients[1].mul(pos.x()))
+//				.add(transformationCoefficients[2].mul(pos.y()))
+//				.add(transformationCoefficients[3]);
 		}
 		if (getDimension() == 3)
 		{

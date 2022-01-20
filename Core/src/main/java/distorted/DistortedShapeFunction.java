@@ -105,9 +105,9 @@ public class DistortedShapeFunction
 	}
 	
 	@Override
-	public Set<DistortedCell> getCells()
+	public List<DistortedCell> getCells()
 	{
-		return shapeFunctionsOnCell.keySet();
+		return new ArrayList<DistortedCell>(shapeFunctionsOnCell.keySet());
 	}
 	
 	@Override

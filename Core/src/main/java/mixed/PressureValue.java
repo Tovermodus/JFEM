@@ -9,8 +9,7 @@ public class PressureValue
 {
 	public PressureValue(final double pressure, final int domainDimension)
 	{
-		super(domainDimension);
-		setPressure(pressure);
+		super(pressure, new CoordinateVector(domainDimension));
 	}
 	
 	@Override

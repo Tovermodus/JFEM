@@ -4,7 +4,8 @@ import javax.swing.*;
 import java.awt.*;
 import java.awt.event.*;
 import java.awt.image.BufferedImage;
-import java.util.concurrent.CopyOnWriteArrayList;
+import java.util.Objects;
+import java.util.concurrent.ConcurrentSkipListMap;
 import java.util.concurrent.Executors;
 
 public class MetricWindow
@@ -12,9 +13,9 @@ public class MetricWindow
 	implements KeyListener, WindowListener, ComponentListener, MouseWheelListener
 {
 	private final Canvas canvas;
-	private final CopyOnWriteArrayList<Metric> plots;
+	private final ConcurrentSkipListMap<String, Metric> metrics;
 	private final DrawThread d;
-	private int currentPlot = 0;
+	private String currentPlot = null;
 	private static MetricWindow INSTANCE;
 	
 	public static MetricWindow getInstance()
@@ -28,7 +29,7 @@ public class MetricWindow
 	{
 		canvas = new Canvas();
 		d = new DrawThread(canvas, canvas.getWidth(), canvas.getHeight());
-		plots = new CopyOnWriteArrayList<>();
+		metrics = new ConcurrentSkipListMap<>();
 		try
 		{
 			setSize(800, 800);
@@ -56,8 +57,24 @@ public class MetricWindow
 	
 	public void addMetric(final Metric plot)
 	{
-		if (plots.size() == 0) d.setMetric(plot);
-		plots.add(plot);
+		metrics.put("" + metrics.size(), plot);
+		if (metrics.size() == 1)
+		{
+			d.setMetric(plot);
+			currentPlot = metrics.firstKey();
+		}
+	}
+	
+	public <M extends Metric> M setMetric(final String name, final M plot)
+	{
+		metrics.put(name, plot);
+		if (metrics.size() == 1)
+		{
+			currentPlot = metrics.firstKey();
+		}
+		if (Objects.equals(currentPlot, name))
+			d.setMetric(plot);
+		return plot;
 	}
 	
 	@Override
@@ -89,11 +106,19 @@ public class MetricWindow
 	@Override
 	public void keyPressed(final KeyEvent e)
 	{
-		if (e.getKeyCode() == KeyEvent.VK_DOWN) currentPlot++;
-		if (e.getKeyCode() == KeyEvent.VK_UP) currentPlot--;
-		if (plots.size() != 0) currentPlot = currentPlot % plots.size();
-		while (currentPlot < 0) currentPlot += plots.size();
-		if (plots.size() != 0) d.setMetric(plots.get(currentPlot));
+		if (e.getKeyCode() == KeyEvent.VK_DOWN)
+		{
+			currentPlot = metrics.higherKey(currentPlot);
+			if (currentPlot == null)
+				currentPlot = metrics.firstKey();
+		}
+		if (e.getKeyCode() == KeyEvent.VK_UP)
+		{
+			currentPlot = metrics.lowerKey(currentPlot);
+			if (currentPlot == null)
+				currentPlot = metrics.lastKey();
+		}
+		if (metrics.size() != 0) d.setMetric(metrics.get(currentPlot));
 	}
 	
 	@Override

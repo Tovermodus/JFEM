@@ -1,5 +1,6 @@
 package dlm;
 
+import com.google.common.base.Stopwatch;
 import linalg.CoordinateVector;
 import linalg.DenseVector;
 import linalg.IntCoordinates;
@@ -33,8 +34,11 @@ public abstract class SingleGridFluid
 		final SparseMatrix flowMatrix = new SparseMatrix(getSystemSize(), getSystemSize());
 		getSpace().writeCellIntegralsToMatrix(getIntegrals(), flowMatrix);
 		final SparseMatrix semiImplicitMatrix = new SparseMatrix(getSystemSize(), getSystemSize());
+		System.out.println("semiImp");
+		final Stopwatch s = Stopwatch.createStarted();
 		getSpace().writeCellIntegralsToMatrix(getSemiImplicitIntegrals(getVelocity(iterate)),
 		                                      semiImplicitMatrix);
+		System.out.println("semiImpDone" + s.elapsed());
 		final DenseVector forceRhs = new DenseVector(getSystemSize());
 		getSpace().writeCellIntegralsToRhs(getForceIntegrals(t), forceRhs);
 		final DenseVector accelRhs = massMatrix.mvMul(iterate.current);

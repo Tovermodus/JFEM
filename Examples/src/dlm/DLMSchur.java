@@ -2,10 +2,7 @@ package dlm;
 
 import basic.PlotWindow;
 import distorted.DistortedVectorFESpaceFunction;
-import linalg.BlockSparseMatrix;
-import linalg.CoordinateVector;
-import linalg.DenseVector;
-import linalg.IntCoordinates;
+import linalg.*;
 import mixed.MixedFunctionOnCells;
 import mixed.MixedPlot2DTime;
 import tensorproduct.geometry.TPCell;
@@ -16,7 +13,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentSkipListMap;
 
-public class DLM2ParticleSystem
+public class DLMSchur
 	extends DLMSystem
 {
 	List<CoordinateVector> plotPoints;
@@ -24,10 +21,10 @@ public class DLM2ParticleSystem
 	private final Map<CoordinateVector, CoordinateVector> XPrimeValues;
 	private final Map<CoordinateVector, Double> pressureValues;
 	
-	public DLM2ParticleSystem(final double dt,
-	                          final int timeSteps,
-	                          final Fluid backGround,
-	                          final List<Particle> particles)
+	public DLMSchur(final double dt,
+	                final int timeSteps,
+	                final Fluid backGround,
+	                final List<Particle> particles)
 	{
 		super(dt, timeSteps, backGround, particles);
 		plotPoints = backGround.getSpace()
@@ -45,7 +42,7 @@ public class DLM2ParticleSystem
 		                                        new IntCoordinates(8, 8),
 		                                        1,
 		                                        0.5,
-		                                        30);
+		                                        5);
 		final List<Particle> particles = new ArrayList<>();
 		particles.add(new SolidParticle(CoordinateVector.fromValues(0.4, 0.5),
 		                                0.05,
@@ -54,7 +51,7 @@ public class DLM2ParticleSystem
 		                                CoordinateVector.fromValues(-10, 3),
 		                                1000,
 		                                1000,
-		                                5));
+		                                15));
 		particles.add(new SolidParticle(CoordinateVector.fromValues(0.6, 0.5),
 		                                0.05,
 		                                2,
@@ -62,7 +59,7 @@ public class DLM2ParticleSystem
 		                                CoordinateVector.fromValues(10, 3),
 		                                1000,
 		                                1000,
-		                                5));
+		                                15));
 		particles.add(new Membrane(CoordinateVector.fromValues(0.5, 0.5),
 		                           0.39,
 		                           0.4,
@@ -72,7 +69,7 @@ public class DLM2ParticleSystem
 		                           10,
 		                           10,
 		                           1));
-		final DLM2ParticleSystem system = new DLM2ParticleSystem(0.001, 10, fluid, particles);
+		final DLMSchur system = new DLMSchur(0.001, 50, fluid, particles);
 		system.loop();
 		system.summarize();
 	}
@@ -91,11 +88,18 @@ public class DLM2ParticleSystem
 		System.out.println(lagrangeHistory.get(0));
 	}
 	
+	IterativeImplicitSchur schur;
+	IterativeSolver it = new IterativeSolver(true);
+	
 	@Override
 	protected DenseVector solve(final BlockSparseMatrix systemMatrix, final DenseVector rhs)
 	{
-		return systemMatrix.toSparse()
-		                   .solve(rhs);
+		it.showProgress = true;
+		if (schur == null)
+			schur = new IterativeImplicitSchur(systemMatrix);
+		else
+			schur.resetOffDiagonals(systemMatrix);
+		return new DenseVector(it.solvePGMRES(systemMatrix, schur, rhs, 1e-7));
 	}
 	
 	@Override

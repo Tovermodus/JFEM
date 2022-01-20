@@ -10,7 +10,7 @@ import java.util.stream.IntStream;
 public abstract class AbstractSchurSolver<T extends VectorMultiplyable>
 	implements VectorMultiplyable
 {
-	final BlockSparseMatrix blockMatrix;
+	BlockSparseMatrix blockMatrix;
 	final ArrayList<DenseMatrix> diagonalInverses;
 	final int[] blockStarts;
 	final int[] blockEnds;
@@ -166,5 +166,10 @@ public abstract class AbstractSchurSolver<T extends VectorMultiplyable>
 	public Vector tvMul(final Vector vector)
 	{
 		throw new UnsupportedOperationException("not implemented yet");
+	}
+	
+	public void resetOffDiagonals(final BlockSparseMatrix systemMatrix)
+	{
+		this.blockMatrix = systemMatrix;
 	}
 }

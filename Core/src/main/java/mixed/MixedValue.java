@@ -77,7 +77,7 @@ public class MixedValue
 		{
 			if (!(other instanceof MixedValue))
 				throw new IllegalArgumentException("Cant add MixedValueVector to different Vector");
-			if (!getShape().equals(other.getShape()))
+			if (velocity.getLength() != ((MixedValue) other).velocity.getLength())
 				throw new IllegalArgumentException("Vectors are of different size");
 		}
 		pressure += ((MixedValue) other).pressure;
