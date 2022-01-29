@@ -425,7 +425,7 @@ public class DLMSummarySchur
 		eulerian = new TaylorHoodSpace(startCoordinates, endCoordinates, cellCounts);
 		eulerian.assembleCells();
 		eulerian.assembleFunctions(eulerDegree);
-		nEulerian = eulerian.getShapeFunctions()
+		nEulerian = eulerian.getShapeFunctionMap()
 		                    .size();
 		eulerianPoints = eulerian.generatePlotPoints(eulerianPointsPerDimension);
 	}
@@ -437,7 +437,7 @@ public class DLMSummarySchur
 		lagrangian = new CircleVectorSpace(center, radius, nLagrangeRefines);
 		lagrangian.assembleCells();
 		lagrangian.assembleFunctions(lagrangeDegree);
-		nLagrangian = lagrangian.getShapeFunctions()
+		nLagrangian = lagrangian.getShapeFunctionMap()
 		                        .size();
 		nTransfer = nLagrangian;
 	}
@@ -447,12 +447,12 @@ public class DLMSummarySchur
 		final MixedFunction initialVelocityFunction = new ComposedMixedFunction(initialVelocityValues());
 		final MixedFunction initialPressureFunction = new ComposedMixedFunction(initialPressureValues());
 		eulerian
-			.getShapeFunctions()
+			.getShapeFunctionMap()
 			.forEach((key, value) -> initialVector.add(
 				value.getNodeFunctional()
 				     .evaluate(initialVelocityFunction), key));
 		eulerian
-			.getShapeFunctions()
+			.getShapeFunctionMap()
 			.forEach((key, value) -> initialVector.add(
 				value.getNodeFunctional()
 				     .evaluate(initialPressureFunction), key));
@@ -461,17 +461,17 @@ public class DLMSummarySchur
 	public void generateFirstLagrangianIterates(final DenseVector initialVector, final DenseVector previousVector)
 	{
 		lagrangian
-			.getShapeFunctions()
+			.getShapeFunctionMap()
 			.forEach((key, value) -> initialVector.add(
 				value.getNodeFunctional()
 				     .evaluate(initialDisplacementValues()), nEulerian + key));
 		lagrangian
-			.getShapeFunctions()
+			.getShapeFunctionMap()
 			.forEach((key, value) -> previousVector.add(
 				value.getNodeFunctional()
 				     .evaluate(initialDisplacementValues()), nEulerian + key));
 		lagrangian
-			.getShapeFunctions()
+			.getShapeFunctionMap()
 			.forEach((key, value) -> previousVector.add(
 				-value.getNodeFunctional()
 				      .evaluate(initialDisplacementDerivatives()) * dt,
@@ -489,7 +489,7 @@ public class DLMSummarySchur
 		                               currentMatrix,
 		                               rightHandSide);
 		final int firstPressure = eulerian
-			.getShapeFunctions()
+			.getShapeFunctionMap()
 			.values()
 			.stream()
 			.filter(MixedFunction::hasPressureFunction)
@@ -543,7 +543,7 @@ public class DLMSummarySchur
 	public void writeCf(final SparseMatrix currentMatrix, final DenseVector currentIterate)
 	{
 		final SparseMatrix Cf = new SparseMatrix(nTransfer, nEulerian);
-		eulerian.getShapeFunctions()
+		eulerian.getShapeFunctionMap()
 		        .entrySet()
 		        .stream()
 		        .parallel()
@@ -571,18 +571,19 @@ public class DLMSummarySchur
 			        });
 		currentMatrix.addSmallMatrixInPlaceAt(Cf.mul(1), nEulerian + nLagrangian, 0);
 		currentMatrix.addSmallMatrixInPlaceAt(Cf.transpose()
-		                                 .mul(1), 0, nEulerian + nLagrangian);
+		                                        .mul(1), 0, nEulerian + nLagrangian);
 	}
 	
 	private DistortedVectorFESpaceFunction getX(final DenseVector currentIterate)
 	{
-		return new DistortedVectorFESpaceFunction(lagrangian.getShapeFunctions(),
+		return new DistortedVectorFESpaceFunction(lagrangian.getShapeFunctionMap(),
 		                                          getLagrangianIterate(currentIterate));
 	}
 	
 	private MixedTPFESpaceFunction<QkQkFunction> getUp(final DenseVector currentIterate)
 	{
-		return new MixedTPFESpaceFunction<>(eulerian.getShapeFunctions(), getEulerianfIterate(currentIterate));
+		return new MixedTPFESpaceFunction<>(eulerian.getShapeFunctionMap(),
+		                                    getEulerianfIterate(currentIterate));
 	}
 	
 	private DistortedVectorFunction concatenateVelocityWithX(final MixedFunction sf,
@@ -661,7 +662,7 @@ public class DLMSummarySchur
 		lagrangianDual = Cs;
 		constantMatrix.addSmallMatrixInPlaceAt(Cs.mul(1. / dt), nEulerian + nLagrangian, nEulerian);
 		constantMatrix.addSmallMatrixInPlaceAt(Cs.transpose()
-		                                  .mul(1. / dt), nEulerian, nEulerian + nLagrangian);
+		                                         .mul(1. / dt), nEulerian, nEulerian + nLagrangian);
 	}
 	
 	public void writeF(final DenseVector currentVector, final DenseVector currentIterate)

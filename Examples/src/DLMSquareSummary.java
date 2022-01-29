@@ -301,7 +301,7 @@ public class DLMSquareSummary
 		eulerian = new TaylorHoodSpace(startCoordinates, endCoordinates, cellCounts);
 		eulerian.assembleCells();
 		eulerian.assembleFunctions(eulerDegree);
-		nEulerian = eulerian.getShapeFunctions()
+		nEulerian = eulerian.getShapeFunctionMap()
 		                    .size();
 		eulerianPoints = eulerian.generatePlotPoints(eulerianPointsPerDimension);
 	}
@@ -315,7 +315,7 @@ public class DLMSquareSummary
 		                                           new IntCoordinates(nLagrangianCells, nLagrangianCells));
 		lagrangian.assembleCells();
 		lagrangian.assembleFunctions(lagrangeDegree);
-		nLagrangian = lagrangian.getShapeFunctions()
+		nLagrangian = lagrangian.getShapeFunctionMap()
 		                        .size();
 		nTransfer = nLagrangian;
 	}
@@ -325,12 +325,12 @@ public class DLMSquareSummary
 		final MixedFunction initialVelocityFunction = new ComposedMixedFunction(initialVelocityValues());
 		final MixedFunction initialPressureFunction = new ComposedMixedFunction(initialPressureValues());
 		eulerian
-			.getShapeFunctions()
+			.getShapeFunctionMap()
 			.forEach((key, value) -> initialVector.add(
 				value.getNodeFunctional()
 				     .evaluate(initialVelocityFunction), key));
 		eulerian
-			.getShapeFunctions()
+			.getShapeFunctionMap()
 			.forEach((key, value) -> initialVector.add(
 				value.getNodeFunctional()
 				     .evaluate(initialPressureFunction), key));
@@ -339,17 +339,17 @@ public class DLMSquareSummary
 	public void generateFirstLagrangianIterates(final DenseVector initialVector, final DenseVector previousVector)
 	{
 		lagrangian
-			.getShapeFunctions()
+			.getShapeFunctionMap()
 			.forEach((key, value) -> initialVector.add(
 				value.getNodeFunctional()
 				     .evaluate(initialDisplacementValues()), nEulerian + key));
 		lagrangian
-			.getShapeFunctions()
+			.getShapeFunctionMap()
 			.forEach((key, value) -> previousVector.add(
 				value.getNodeFunctional()
 				     .evaluate(initialDisplacementValues()), nEulerian + key));
 		lagrangian
-			.getShapeFunctions()
+			.getShapeFunctionMap()
 			.forEach((key, value) -> previousVector.add(
 				-value.getNodeFunctional()
 				      .evaluate(initialDisplacementDerivatives()) * dt,
@@ -367,7 +367,7 @@ public class DLMSquareSummary
 		                               currentMatrix,
 		                               rightHandSide);
 		final int firstPressure = eulerian
-			.getShapeFunctions()
+			.getShapeFunctionMap()
 			.values()
 			.stream()
 			.filter(MixedFunction::hasPressureFunction)
@@ -418,7 +418,7 @@ public class DLMSquareSummary
 	{
 		final SparseMatrix Cf = new SparseMatrix(nTransfer, nEulerian);
 		int i = 0;
-		for (final Map.Entry<Integer, QkQkFunction> sfEntry : eulerian.getShapeFunctions()
+		for (final Map.Entry<Integer, QkQkFunction> sfEntry : eulerian.getShapeFunctionMap()
 		                                                              .entrySet())
 		{
 			if (i++ % 40 == 0) System.out.println(100.0 * i / nEulerian);
@@ -447,13 +447,14 @@ public class DLMSquareSummary
 	
 	private VectorTPFESpaceFunction<ContinuousTPVectorFunction> getX(final DenseVector currentIterate)
 	{
-		return new VectorTPFESpaceFunction<>(lagrangian.getShapeFunctions(),
+		return new VectorTPFESpaceFunction<>(lagrangian.getShapeFunctionMap(),
 		                                     getLagrangianIterate(currentIterate));
 	}
 	
 	private MixedTPFESpaceFunction<QkQkFunction> getUp(final DenseVector currentIterate)
 	{
-		return new MixedTPFESpaceFunction<>(eulerian.getShapeFunctions(), getEulerianfIterate(currentIterate));
+		return new MixedTPFESpaceFunction<>(eulerian.getShapeFunctionMap(),
+		                                    getEulerianfIterate(currentIterate));
 	}
 	
 	private VectorFunctionOnCells<TPCell, TPFace> concatenateVelocityWithX(final MixedFunction sf,

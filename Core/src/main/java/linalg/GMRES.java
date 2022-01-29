@@ -41,6 +41,7 @@ public class GMRES
 	                           final double tol, final Interruptor interruptor)
 	{
 		
+		iterations = 0;
 		final MutableVector x = new DenseVector(b.getLength());
 		x.set(1, 0);
 		return solve(A, b, x, tol, interruptor);
@@ -53,8 +54,9 @@ public class GMRES
 	                    final Interruptor interruptor)
 	{
 		
+		iterations = 0;
 		final MutableVector x = new DenseVector(b.getLength());
-		x.set(1, 0);
+		//x.set(1, 0);
 		return solve(preconditioner, A, b, x, tol, interruptor);
 	}
 	
@@ -82,13 +84,18 @@ public class GMRES
 		final DenseVector alpha = calculateAlpha(gamma, h, j);
 		final Vector alphaV =
 			linearCombination(v, alpha);
-		if (j > ITERATIONS_BEFORE_RESTART && restarts < MAX_RESTARTS)
+		final Vector result = x.add(alphaV);
+		final double residual = A.mvMul(result)
+		                         .sub(b)
+		                         .euclidianNorm();
+		if (j > ITERATIONS_BEFORE_RESTART && restarts < MAX_RESTARTS || residual > tol)
 		{
 			restarts++;
 			if (printProgress)
-				System.out.println("GMRES restart");
+				System.out.println("GMRes Restart. with residual " + residual);
 			return solve(preconditioner, A, b, x.add(alphaV), tol, interruptor);
 		}
+		
 		return x.add(alphaV);
 	}
 	
@@ -111,11 +118,15 @@ public class GMRES
 			j--;
 		final DenseVector alpha = calculateAlpha(gamma, h, j);
 		final Vector alphaV = linearCombination(v, alpha);
-		if (j > ITERATIONS_BEFORE_RESTART && restarts < MAX_RESTARTS)
+		final Vector result = x.add(alphaV);
+		final double residual = A.mvMul(result)
+		                         .sub(b)
+		                         .euclidianNorm();
+		if (j > ITERATIONS_BEFORE_RESTART && restarts < MAX_RESTARTS || residual > tol)
 		{
 			restarts++;
 			if (printProgress)
-				System.out.println("GMRes Restart");
+				System.out.println("GMRes Restart. with residual " + residual);
 			return solve(A, b, x.add(alphaV), tol, interruptor);
 		}
 		return x.add(alphaV);
@@ -141,6 +152,7 @@ public class GMRES
 			final DenseVector orthogonalityFactors = calculateOrthogonalityFactors(v, q);
 			final Vector orthogonalPartInSubspace = linearCombination(v, orthogonalityFactors);
 			final Vector w = q.sub(orthogonalPartInSubspace);
+			//System.out.println("    w norm " + q.euclidianNorm());
 			h.addColumn(orthogonalityFactors, j);
 			h.add(w.euclidianNorm(), j + 1, j);
 			calculateGivens(c, s, h, j);
@@ -148,6 +160,7 @@ public class GMRES
 			s.set(h.at(j + 1, j) / beta, j);
 			c.set(h.at(j, j) / beta, j);
 			h.set(beta, j, j);
+			//System.out.println("s gammaprev " + s.at(j) + " " + gamma.at(j));
 			gamma.set(-s.at(j) * gamma.at(j), j + 1);
 			gamma.set(c.at(j) * gamma.at(j), j);
 			if (printProgress)
@@ -173,6 +186,8 @@ public class GMRES
 			metric.publishIterateAsync(() ->
 			                           {
 				                           final DenseVector alpha = calculateAlpha(gamma, h, j);
+				                           //System.out.println("gmres alphanorm" + alpha
+				                           // .euclidianNorm());
 				                           final Vector step = linearCombination(v, alpha);
 				                           final Vector newIt = x.add(step);
 				                           return A.mvMul(newIt)

@@ -1,10 +1,11 @@
 package linalg;
 
-import linalg.Matrix;
-
-public interface Decomposable extends Matrix
+public interface Decomposable
+	extends Matrix
 {
-	Matrix getLowerTriangleMatrix();
-	Matrix getUpperTriangleMatrix();
+	Matrix getStrictlyLowerTriangleMatrix();
+	
+	Matrix getStrictlyUpperTriangleMatrix();
+	
 	Matrix getDiagonalMatrix();
 }

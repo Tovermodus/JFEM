@@ -51,7 +51,7 @@ public class HeatEquationParabolicIntegrator
 		points = grid.generatePlotPoints(30);
 		grid.assembleCells();
 		grid.assembleFunctions(polynomialDegree);
-		final int n = grid.getShapeFunctions()
+		final int n = grid.getShapeFunctionMap()
 		                  .size();
 		final TPCellIntegral<TPShapeFunction> gg =
 			new TPCellIntegralViaReferenceCell<>(TPCellIntegral.GRAD_GRAD);
@@ -82,7 +82,7 @@ public class HeatEquationParabolicIntegrator
 	@Override
 	protected DenseVector initializeInitialIterate()
 	{
-		final DenseVector ret = new DenseVector(grid.getShapeFunctions()
+		final DenseVector ret = new DenseVector(grid.getShapeFunctionMap()
 		                                            .size());
 		vals = asFunction(ret).valuesInPointsAtTime(points, time);
 		return ret;
@@ -99,7 +99,7 @@ public class HeatEquationParabolicIntegrator
 	@Override
 	protected DenseVector getAdditionalRhs()
 	{
-		final DenseVector ret = new DenseVector(grid.getShapeFunctions()
+		final DenseVector ret = new DenseVector(grid.getShapeFunctionMap()
 		                                            .size());
 		grid.writeCellIntegralsToRhs(List.of(src), ret);
 		return ret;
@@ -131,6 +131,6 @@ public class HeatEquationParabolicIntegrator
 	
 	private ScalarFESpaceFunction<TPShapeFunction> asFunction(final DenseVector d)
 	{
-		return new ScalarFESpaceFunction<>(grid.getShapeFunctions(), d);
+		return new ScalarFESpaceFunction<>(grid.getShapeFunctionMap(), d);
 	}
 }

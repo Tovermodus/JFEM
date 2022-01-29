@@ -113,7 +113,13 @@ public abstract class DistortedGridSpace<ST extends ShapeFunction<DistortedCell,
 	}
 	
 	@Override
-	public Map<Integer, ST> getShapeFunctions()
+	public Collection<ST> getShapeFunctions()
+	{
+		return shapeFunctions;
+	}
+	
+	@Override
+	public Map<Integer, ST> getShapeFunctionMap()
 	{
 		
 		final Map<Integer, ST> functionNumbers = new TreeMap<>();

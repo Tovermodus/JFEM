@@ -38,7 +38,7 @@ public class VectorDiskLaplace
 		circle.evaluateCellIntegrals(List.of(gradGrad), List.of(source));
 		circle.evaluateFaceIntegrals(new ArrayList<>(), new ArrayList<>());
 		circle.setBoundaryValues(LaplaceReferenceSolution.vectorReferenceSolution());
-		System.out.println(circle.getShapeFunctions()
+		System.out.println(circle.getShapeFunctionMap()
 		                         .size());
 		
 		System.out.println("System Filled");
@@ -49,7 +49,7 @@ public class VectorDiskLaplace
 		                                                1e-10);
 		
 		final VectorFESpaceFunction<DistortedVectorShapeFunction> solutionFunction =
-			new VectorFESpaceFunction<>(circle.getShapeFunctions(), solution);
+			new VectorFESpaceFunction<>(circle.getShapeFunctionMap(), solution);
 		final double norm = ConvergenceOrderEstimator
 			.normL2VecDifference(solutionFunction,
 			                     LaplaceReferenceSolution.vectorReferenceSolution(),
@@ -84,7 +84,7 @@ public class VectorDiskLaplace
 		circle.evaluateCellIntegrals(List.of(gradGrad), List.of(source));
 		circle.evaluateFaceIntegrals(new ArrayList<>(), new ArrayList<>());
 		circle.setBoundaryValues(LaplaceReferenceSolution.vectorReferenceSolution());
-		System.out.println(circle.getShapeFunctions()
+		System.out.println(circle.getShapeFunctionMap()
 		                         .size());
 		
 		System.out.println("System Filled");
@@ -95,7 +95,7 @@ public class VectorDiskLaplace
 		                                                1e-10);
 		
 		final VectorFESpaceFunction<DistortedVectorShapeFunction> solutionFunction =
-			new VectorFESpaceFunction<>(circle.getShapeFunctions(), solution);
+			new VectorFESpaceFunction<>(circle.getShapeFunctionMap(), solution);
 		final double norm = ConvergenceOrderEstimator
 			.normL2VecDifference(solutionFunction,
 			                     LaplaceReferenceSolution.vectorReferenceSolution(),

@@ -79,12 +79,12 @@ public class QkQkDarcy
 		                       .mvMul(solution1));
 		final MixedTPFESpaceFunction<QkQkFunction> solut =
 			new MixedTPFESpaceFunction<>(
-				grid.getShapeFunctions(), solution1);
+				grid.getShapeFunctionMap(), solution1);
 		final ArrayList<Map<CoordinateVector, Double>> valList = new ArrayList<>();
 		valList.add(solut.pressureValuesInPoints(grid.generatePlotPoints(50)));
 		valList.add(solut.velocityComponentsInPoints(grid.generatePlotPoints(50), 0));
 		valList.add(solut.velocityComponentsInPoints(grid.generatePlotPoints(50), 1));
-		for (final ComposeMixedShapeFunction<TPCell, TPFace, ContinuousTPShapeFunction, ContinuousTPVectorFunction> shapeFunction : grid.getShapeFunctions()
+		for (final ComposeMixedShapeFunction<TPCell, TPFace, ContinuousTPShapeFunction, ContinuousTPVectorFunction> shapeFunction : grid.getShapeFunctionMap()
 		                                                                                                                                .values())
 		{
 			if (shapeFunction.hasPressureFunction())

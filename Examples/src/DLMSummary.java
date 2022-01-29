@@ -113,7 +113,7 @@ public class DLMSummary
 		//writeCf(precond, currentIterate);
 		final int blocks = nEulerCells * nEulerCells;
 		final int[] blockstarts = new int[blocks + 2];
-		final int nEulerVelocities = (int) eulerian.getShapeFunctions()
+		final int nEulerVelocities = (int) eulerian.getShapeFunctionMap()
 		                                           .values()
 		                                           .stream()
 		                                           .filter(MixedFunction::hasVelocityFunction)
@@ -379,7 +379,7 @@ public class DLMSummary
 		eulerian = new TaylorHoodSpace(startCoordinates, endCoordinates, cellCounts);
 		eulerian.assembleCells();
 		eulerian.assembleFunctions(eulerDegree);
-		nEulerian = eulerian.getShapeFunctions()
+		nEulerian = eulerian.getShapeFunctionMap()
 		                    .size();
 		eulerianPoints = eulerian.generatePlotPoints(eulerianPointsPerDimension);
 	}
@@ -391,7 +391,7 @@ public class DLMSummary
 		lagrangian = new CircleVectorSpace(center, radius, nLagrangeRefines);
 		lagrangian.assembleCells();
 		lagrangian.assembleFunctions(lagrangeDegree);
-		nLagrangian = lagrangian.getShapeFunctions()
+		nLagrangian = lagrangian.getShapeFunctionMap()
 		                        .size();
 		nTransfer = nLagrangian;
 	}
@@ -401,12 +401,12 @@ public class DLMSummary
 		final MixedFunction initialVelocityFunction = new ComposedMixedFunction(initialVelocityValues());
 		final MixedFunction initialPressureFunction = new ComposedMixedFunction(initialPressureValues());
 		eulerian
-			.getShapeFunctions()
+			.getShapeFunctionMap()
 			.forEach((key, value) -> initialVector.add(
 				value.getNodeFunctional()
 				     .evaluate(initialVelocityFunction), key));
 		eulerian
-			.getShapeFunctions()
+			.getShapeFunctionMap()
 			.forEach((key, value) -> initialVector.add(
 				value.getNodeFunctional()
 				     .evaluate(initialPressureFunction), key));
@@ -415,17 +415,17 @@ public class DLMSummary
 	public void generateFirstLagrangianIterates(final DenseVector initialVector, final DenseVector previousVector)
 	{
 		lagrangian
-			.getShapeFunctions()
+			.getShapeFunctionMap()
 			.forEach((key, value) -> initialVector.add(
 				value.getNodeFunctional()
 				     .evaluate(initialDisplacementValues()), nEulerian + key));
 		lagrangian
-			.getShapeFunctions()
+			.getShapeFunctionMap()
 			.forEach((key, value) -> previousVector.add(
 				value.getNodeFunctional()
 				     .evaluate(initialDisplacementValues()), nEulerian + key));
 		lagrangian
-			.getShapeFunctions()
+			.getShapeFunctionMap()
 			.forEach((key, value) -> previousVector.add(
 				-value.getNodeFunctional()
 				      .evaluate(initialDisplacementDerivatives()) * dt,
@@ -443,7 +443,7 @@ public class DLMSummary
 		                               currentMatrix,
 		                               rightHandSide);
 		final int firstPressure = eulerian
-			.getShapeFunctions()
+			.getShapeFunctionMap()
 			.values()
 			.stream()
 			.filter(MixedFunction::hasPressureFunction)
@@ -491,7 +491,7 @@ public class DLMSummary
 	{
 		final SparseMatrix Cf = new SparseMatrix(nTransfer, nEulerian);
 		int i = 0;
-		for (final Map.Entry<Integer, QkQkFunction> sfEntry : eulerian.getShapeFunctions()
+		for (final Map.Entry<Integer, QkQkFunction> sfEntry : eulerian.getShapeFunctionMap()
 		                                                              .entrySet())
 		{
 			if (i++ % 40 == 0) System.out.println(100.0 * i / nEulerian);
@@ -518,18 +518,19 @@ public class DLMSummary
 		}
 		currentMatrix.addSmallMatrixInPlaceAt(Cf.mul(1), nEulerian + nLagrangian, 0);
 		currentMatrix.addSmallMatrixInPlaceAt(Cf.transpose()
-		                                 .mul(1), 0, nEulerian + nLagrangian);
+		                                        .mul(1), 0, nEulerian + nLagrangian);
 	}
 	
 	private DistortedVectorFESpaceFunction getX(final DenseVector currentIterate)
 	{
-		return new DistortedVectorFESpaceFunction(lagrangian.getShapeFunctions(),
+		return new DistortedVectorFESpaceFunction(lagrangian.getShapeFunctionMap(),
 		                                          getLagrangianIterate(currentIterate));
 	}
 	
 	private MixedTPFESpaceFunction<QkQkFunction> getUp(final DenseVector currentIterate)
 	{
-		return new MixedTPFESpaceFunction<>(eulerian.getShapeFunctions(), getEulerianfIterate(currentIterate));
+		return new MixedTPFESpaceFunction<>(eulerian.getShapeFunctionMap(),
+		                                    getEulerianfIterate(currentIterate));
 	}
 	
 	private DistortedVectorFunction concatenateVelocityWithX(final MixedFunction sf,

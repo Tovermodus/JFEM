@@ -25,12 +25,12 @@ public class LaplaceSystem
 		final CoordinateVector end = CoordinateVector.fromValues(1, 1);
 		final int polynomialDegree = 2;
 		final TPFESpace grid = new TPFESpace(start, end,
-                                                     Ints.asList(10, 5));
+		                                     Ints.asList(10, 5));
 		final TPCellIntegral<TPShapeFunction> gg = new TPCellIntegral<>(ScalarFunction.constantFunction(1),
-                                                                                TPCellIntegral.GRAD_GRAD);
+		                                                                TPCellIntegral.GRAD_GRAD);
 		final double penalty = 200000;
 		final TPFaceIntegral<TPShapeFunction> jj = new TPFaceIntegralViaReferenceFace<>(penalty,
-                                                                                                TPFaceIntegral.VALUE_JUMP_VALUE_JUMP);
+		                                                                                TPFaceIntegral.VALUE_JUMP_VALUE_JUMP);
 		final ArrayList<CellIntegral<TPCell, TPShapeFunction>> cellIntegrals =
 			new ArrayList<>();
 		cellIntegrals.add(gg);
@@ -39,7 +39,8 @@ public class LaplaceSystem
 		final TPRightHandSideIntegral<TPShapeFunction> rightHandSideIntegral =
 			new TPRightHandSideIntegral<>(ScalarFunction.constantFunction(0),
 			                              TPRightHandSideIntegral.VALUE);
-		final ArrayList<RightHandSideIntegral<TPCell, TPShapeFunction>> rightHandSideIntegrals = new ArrayList<>();
+		final ArrayList<RightHandSideIntegral<TPCell, TPShapeFunction>> rightHandSideIntegrals
+			= new ArrayList<>();
 		rightHandSideIntegrals.add(rightHandSideIntegral);
 		final TPBoundaryFaceIntegral<TPShapeFunction> bound = new TPBoundaryFaceIntegral<>(new ScalarFunction()
 		{
@@ -92,7 +93,7 @@ public class LaplaceSystem
 		//grid.rhs.print_formatted();
 		final ScalarFESpaceFunction<TPShapeFunction> solut =
 			new ScalarFESpaceFunction<>(
-				grid.getShapeFunctions(), solution1);
+				grid.getShapeFunctionMap(), solution1);
 		final ScalarFunction referenceSolution = new ScalarFunction()
 		{
 			@Override

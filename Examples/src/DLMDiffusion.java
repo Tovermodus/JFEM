@@ -49,9 +49,9 @@ public class DLMDiffusion
 		final TPRightHandSideIntegral<ContinuousTPShapeFunction> f2minfv = new TPRightHandSideIntegral<>(f2minf,
 		                                                                                                 TPRightHandSideIntegral.VALUE);
 		
-		final int n = largeGrid.getShapeFunctions()
+		final int n = largeGrid.getShapeFunctionMap()
 		                       .size();
-		final int m = immersedGrid.getShapeFunctions()
+		final int m = immersedGrid.getShapeFunctionMap()
 		                          .size();
 		
 		final SparseMatrix A11 = new SparseMatrix(n, n);
@@ -68,7 +68,7 @@ public class DLMDiffusion
 		
 		A23.mulInPlace(-1);
 		
-		for (final Map.Entry<Integer, ContinuousTPShapeFunction> sf : largeGrid.getShapeFunctions()
+		for (final Map.Entry<Integer, ContinuousTPShapeFunction> sf : largeGrid.getShapeFunctionMap()
 		                                                                       .entrySet())
 		{
 			final TPRightHandSideIntegral<ContinuousTPShapeFunction> shapeFunctionOnImmersedGrid
@@ -109,7 +109,7 @@ public class DLMDiffusion
 		final Vector solut = i.solvePGMRES(A, T, b, 1e-9);//A.solve(b);
 		final Vector largeSolut = solut.slice(new IntCoordinates(0), new IntCoordinates(n));
 		final ScalarFESpaceFunction<ContinuousTPShapeFunction> solutFun = new ScalarFESpaceFunction<>(
-			largeGrid.getShapeFunctions(), largeSolut);
+			largeGrid.getShapeFunctionMap(), largeSolut);
 		PlotWindow.addPlot(new ScalarPlot2D(solutFun, largeGrid.generatePlotPoints(70), 70));
 	}
 }

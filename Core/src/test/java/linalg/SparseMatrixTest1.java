@@ -54,9 +54,9 @@ public class SparseMatrixTest1
 		assertEquals(largeSparse, largeDense);
 		final SparseMatrix largeDense4 = largeSparse.mul(0.1);
 		final SparseMatrix largeDenseRec = largeSparse
-			.getLowerTriangleMatrix()
+			.getStrictlyLowerTriangleMatrix()
 			.add(largeSparse.getDiagonalMatrix())
-			.add(largeSparse.getUpperTriangleMatrix());
+			.add(largeSparse.getStrictlyUpperTriangleMatrix());
 		assertTrue(largeDense4.isSparse());
 		assertEquals(largeSparse, largeDense);
 		

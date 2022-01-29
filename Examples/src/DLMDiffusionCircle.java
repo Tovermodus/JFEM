@@ -51,9 +51,9 @@ public class DLMDiffusionCircle
 		final DistortedRightHandSideIntegral f2minfv = new DistortedRightHandSideIntegral(f2minf,
 		                                                                                  DistortedRightHandSideIntegral.VALUE);
 		
-		final int n = largeGrid.getShapeFunctions()
+		final int n = largeGrid.getShapeFunctionMap()
 		                       .size();
-		final int m = immersedGrid.getShapeFunctions()
+		final int m = immersedGrid.getShapeFunctionMap()
 		                          .size();
 		
 		final SparseMatrix A11 = new SparseMatrix(n, n);
@@ -73,7 +73,7 @@ public class DLMDiffusionCircle
 		A23.mulInPlace(-1);
 		System.out.println("A23");
 		int count = 0;
-		for (final Map.Entry<Integer, ContinuousTPShapeFunction> sf : largeGrid.getShapeFunctions()
+		for (final Map.Entry<Integer, ContinuousTPShapeFunction> sf : largeGrid.getShapeFunctionMap()
 		                                                                       .entrySet())
 		{
 			final DistortedRightHandSideIntegral shapeFunctionOnImmersedGrid
@@ -119,7 +119,7 @@ public class DLMDiffusionCircle
 		final Vector solut = i.solvePGMRES(A, T, b, 1e-9);//A.solve(b);
 		final Vector largeSolut = solut.slice(new IntCoordinates(0), new IntCoordinates(n));
 		final ScalarFESpaceFunction<ContinuousTPShapeFunction> solutFun = new ScalarFESpaceFunction<>(
-			largeGrid.getShapeFunctions(), largeSolut);
+			largeGrid.getShapeFunctionMap(), largeSolut);
 		PlotWindow.addPlot(new ScalarPlot2D(solutFun, largeGrid.generatePlotPoints(70), 70));
 	}
 }

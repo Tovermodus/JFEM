@@ -1,6 +1,7 @@
 package linalg;
 
 import basic.PerformanceArguments;
+import io.vavr.Tuple2;
 
 import java.util.ArrayList;
 import java.util.Map;
@@ -112,5 +113,15 @@ public class SparseMvMul
 			            ret[col] = ret_component;
 		            });
 		return new DenseVector(ret, true);
+	}
+	
+	public Tuple2<int[], double[]> getRow(final int index)
+	{
+		return new Tuple2<>(sparseRowXs.get(index), sparseRowValues.get(index));
+	}
+	
+	public Tuple2<int[], double[]> getCol(final int index)
+	{
+		return new Tuple2<>(sparseColYs.get(index), sparseColValues.get(index));
 	}
 }

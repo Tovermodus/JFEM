@@ -42,7 +42,7 @@ public class CartesianOverlay<ST extends VectorShapeFunction<TPCell, TPFace>>
 	public void draw(final Graphics g, final int width, final int height, final double slider)
 	{
 		final int time = (int) (displacementHistory.getRows() * slider * 0.999) % displacementHistory.getRows();
-		final VectorFESpaceFunction<ST> X = new VectorFESpaceFunction<>(space.getShapeFunctions(),
+		final VectorFESpaceFunction<ST> X = new VectorFESpaceFunction<>(space.getShapeFunctionMap(),
 		                                                                displacementHistory.getRow(
 			                                                                time));
 		int i = 0;

@@ -59,7 +59,7 @@ public class LaplaceContinuousOrder
 			final Vector solution1 = it.solveGMRES(grid.getSystemMatrix(), grid.getRhs(), 1e-11);
 			final VectorFESpaceFunction<ContinuousTPVectorFunction> solut =
 				new VectorFESpaceFunction<>(
-					grid.getShapeFunctions(), solution1);
+					grid.getShapeFunctionMap(), solution1);
 			solutionsVec.add(new VectorFunction()
 			{
 				@Override

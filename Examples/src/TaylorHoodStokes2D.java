@@ -55,7 +55,7 @@ public class TaylorHoodStokes2D
 		
 		MixedTPFESpaceFunction<QkQkFunction> solut =
 			new MixedTPFESpaceFunction<>(
-				grid.getShapeFunctions(), solution1);
+				grid.getShapeFunctionMap(), solution1);
 		PlotWindow.addPlot(new MixedPlot2D(solut, grid.generatePlotPoints(20), 20));
 		final TaylorHoodSpace grid2 = new TaylorHoodSpace(start, end,
 		                                                  Ints.asList(5, 5));
@@ -90,7 +90,7 @@ public class TaylorHoodStokes2D
 		                        .absMaxElement());
 		solut =
 			new MixedTPFESpaceFunction<>(
-				grid2.getShapeFunctions(), solution1);
+				grid2.getShapeFunctionMap(), solution1);
 		PlotWindow.addPlot(new MixedPlot2D(solut, grid2.generatePlotPoints(20), 20));
 		PlotWindow.addPlot(new ScalarPlot2D(solut.getVelocityFunction()
 		                                         .getDivergenceFunction(), grid2.generatePlotPoints(20), 20));

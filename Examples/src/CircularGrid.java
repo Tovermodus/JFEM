@@ -32,7 +32,7 @@ public class CircularGrid
 		circle.initializeSystemMatrix();
 		System.out.println("Cells done");
 		circle.initializeRhs();
-		System.out.println(circle.getShapeFunctions()
+		System.out.println(circle.getShapeFunctionMap()
 		                         .size());
 		System.out.println("System Initialized");
 		circle.evaluateCellIntegrals(List.of(gradGrad), List.of(source));
@@ -43,7 +43,7 @@ public class CircularGrid
 		                         face -> face.center()
 		                                     .at(0) < 5);
 		System.out.println("System Initialized");
-		System.out.println(circle.getShapeFunctions()
+		System.out.println(circle.getShapeFunctionMap()
 		                         .size());
 		
 		System.out.println("System Filled");
@@ -53,7 +53,7 @@ public class CircularGrid
 		final Vector solution = iterativeSolver.solveGMRES(circle.getSystemMatrix(), circle.getRhs(), 1e-10);
 		
 		final ScalarFESpaceFunction<DistortedShapeFunction> solutionFunction =
-			new ScalarFESpaceFunction<>(circle.getShapeFunctions(), solution);
+			new ScalarFESpaceFunction<>(circle.getShapeFunctionMap(), solution);
 		
 		final int plotploints = 6;
 		PlotWindow.addPlot(new ScalarPlot2D(solutionFunction,

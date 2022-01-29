@@ -32,7 +32,8 @@ public class TaylorHoodStokesOrder
 			divValue =
 			new MixedTPCellIntegral<>(ScalarFunction.constantFunction(-1),
 			                          MixedTPCellIntegral.DIV_VALUE);
-		final MixedCellIntegral<TPCell, ContinuousTPShapeFunction, ContinuousTPVectorFunction, QkQkFunction> vv =
+		final MixedCellIntegral<TPCell, ContinuousTPShapeFunction, ContinuousTPVectorFunction, QkQkFunction> vv
+			=
 			MixedCellIntegral.fromVelocityIntegral(gradGrad);
 		final List<CellIntegral<TPCell, QkQkFunction>> cellIntegrals =
 			new ArrayList<>();
@@ -50,7 +51,8 @@ public class TaylorHoodStokesOrder
 		final List<RightHandSideIntegral<TPCell, QkQkFunction>> rightHandSideIntegrals = new ArrayList<>();
 		rightHandSideIntegrals.add(rightHandSideIntegral);
 		
-		final List<BoundaryRightHandSideIntegral<TPFace, QkQkFunction>> boundaryFaceIntegrals = new ArrayList<>();
+		final List<BoundaryRightHandSideIntegral<TPFace, QkQkFunction>> boundaryFaceIntegrals
+			= new ArrayList<>();
 		final int polynomialDegree = 3;
 		final List<ScalarFunction> solutions = new ArrayList<>();
 		final List<VectorFunction> solutionsVec = new ArrayList<>();
@@ -70,7 +72,7 @@ public class TaylorHoodStokesOrder
 			final Vector solution1 = it.solveCG(grid.getSystemMatrix(), grid.getRhs(), 1e-8);
 			final MixedTPFESpaceFunction<QkQkFunction> solut =
 				new MixedTPFESpaceFunction<>(
-					grid.getShapeFunctions(), solution1);
+					grid.getShapeFunctionMap(), solution1);
 			solutions.add(solut.getPressureFunction());
 			solutionsVec.add(solut.getVelocityFunction());
 		}

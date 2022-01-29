@@ -18,7 +18,9 @@ public interface FESpace<CT extends Cell<CT, FT>, FT extends Face<CT, FT>,
 	
 	List<CT> getCells();
 	
-	Map<Integer, ST> getShapeFunctions();
+	Map<Integer, ST> getShapeFunctionMap();
+	
+	Collection<ST> getShapeFunctions();
 	
 	List<FT> getFaces();
 	

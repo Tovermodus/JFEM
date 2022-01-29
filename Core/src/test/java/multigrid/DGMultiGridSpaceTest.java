@@ -63,10 +63,10 @@ public class DGMultiGridSpaceTest
 			v.set(c.sum(), c);
 		final ScalarFESpaceFunction<TPShapeFunction> coars =
 			new ScalarFESpaceFunction<>(mg.spaces.get(0)
-			                                     .getShapeFunctions(), v);
+			                                     .getShapeFunctionMap(), v);
 		final ScalarFESpaceFunction<TPShapeFunction> fin =
 			new ScalarFESpaceFunction<>(mg.spaces.get(1)
-			                                     .getShapeFunctions(), prolongator.mvMul(v));
+			                                     .getShapeFunctionMap(), prolongator.mvMul(v));
 		assertTrue(ConvergenceOrderEstimator.normL2Difference(coars, fin,
 		                                                      mg.spaces.get(0)
 		                                                               .generatePlotPoints(30)) <= 1e-8);
@@ -99,11 +99,11 @@ public class DGMultiGridSpaceTest
 			@Override
 			public Tuple2<SparseMatrix, Vector> createFinestLevelSystem(final TPFESpace space)
 			{
-				return new Tuple2<>(new SparseMatrix(space.getShapeFunctions()
+				return new Tuple2<>(new SparseMatrix(space.getShapeFunctionMap()
 				                                          .size(),
-				                                     space.getShapeFunctions()
+				                                     space.getShapeFunctionMap()
 				                                          .size()),
-				                    new DenseVector(space.getShapeFunctions()
+				                    new DenseVector(space.getShapeFunctionMap()
 				                                         .size()));
 			}
 			
@@ -114,7 +114,7 @@ public class DGMultiGridSpaceTest
 			}
 		};
 		System.out.println("createc");
-		final SparseMvMul prolongator = mg.prolongationOperator.get(0);
+		final SparseMvMul prolongator = mg.prolongationOperators.get(0);
 		final SparseMvMul restrictor = mg.restrictionOperator.get(0);
 		final DenseVector v = new DenseVector(prolongator.getVectorSize());
 		for (final IntCoordinates c : v.getShape()
@@ -122,13 +122,13 @@ public class DGMultiGridSpaceTest
 			v.set(c.sum(), c);
 		final ScalarFESpaceFunction<TPShapeFunction> coars =
 			new ScalarFESpaceFunction<>(mg.spaces.get(0)
-			                                     .getShapeFunctions(), v);
+			                                     .getShapeFunctionMap(), v);
 		final ScalarFESpaceFunction<TPShapeFunction> fin =
 			new ScalarFESpaceFunction<>(mg.spaces.get(1)
-			                                     .getShapeFunctions(), prolongator.mvMul(v));
+			                                     .getShapeFunctionMap(), prolongator.mvMul(v));
 		final ScalarFESpaceFunction<TPShapeFunction> coafin =
 			new ScalarFESpaceFunction<>(mg.spaces.get(0)
-			                                     .getShapeFunctions(),
+			                                     .getShapeFunctionMap(),
 			                            restrictor.mvMul(prolongator.mvMul(v)));
 		assertTrue(ConvergenceOrderEstimator.normL2Difference(coars, coafin,
 		                                                      mg.spaces.get(0)

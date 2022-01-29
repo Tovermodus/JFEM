@@ -72,7 +72,7 @@ public class DLM2ParticleSystem
 		                           10,
 		                           10,
 		                           1));
-		final DLM2ParticleSystem system = new DLM2ParticleSystem(0.001, 10, fluid, particles);
+		final DLM2ParticleSystem system = new DLM2ParticleSystem(0.001, 3, fluid, particles);
 		system.loop();
 		system.summarize();
 	}
@@ -109,7 +109,7 @@ public class DLM2ParticleSystem
 		final DistortedVectorFESpaceFunction XPrime =
 			new DistortedVectorFESpaceFunction(particles.get(0)
 			                                            .getSpace()
-			                                            .getShapeFunctions(),
+			                                            .getShapeFunctionMap(),
 			                                   particleStates.get(0).current.sub(particleStates.get(0).last)
 			                                                                .mul(1. / 0.01));
 		

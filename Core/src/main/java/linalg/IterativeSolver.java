@@ -159,6 +159,7 @@ public class IterativeSolver
 	                                                         final double tol)
 	{
 		iterations = 0;
+		gm.iterations = 0;
 		if (PerformanceArguments.getInstance().executeChecks)
 		{
 			final DenseVector d = new DenseVector(rhs.getLength());
@@ -174,6 +175,7 @@ public class IterativeSolver
 		metric.goal = tol;
 		metric.restart();
 		ex = Executors.newSingleThreadExecutor();
+		gm.printProgress = showProgress;
 		final Interruptor i = new Interruptor();
 		if (showInterrupt)
 			ex.execute(i);
@@ -192,6 +194,7 @@ public class IterativeSolver
 	public Vector solveGMRES(final VectorMultiplyable operator, final Vector rightHandSide, final double tol)
 	{
 		iterations = 0;
+		gm.iterations = 0;
 		if (PerformanceArguments.getInstance().executeChecks)
 		{
 			final DenseVector d = new DenseVector(rightHandSide.getLength());
@@ -204,6 +207,7 @@ public class IterativeSolver
 		metric.goal = tol;
 		metric.restart();
 		ex = Executors.newSingleThreadExecutor();
+		gm.printProgress = showProgress;
 		final Interruptor i = new Interruptor();
 		if (showInterrupt)
 			ex.execute(i);

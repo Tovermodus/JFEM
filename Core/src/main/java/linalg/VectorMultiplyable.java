@@ -15,6 +15,36 @@ public interface VectorMultiplyable
 	
 	Vector tvMul(Vector vector);
 	
+	static VectorMultiplyable concatenat(final VectorMultiplyable v1, final VectorMultiplyable v2)
+	{
+		return new VectorMultiplyable()
+		{
+			@Override
+			public int getVectorSize()
+			{
+				return v2.getVectorSize();
+			}
+			
+			@Override
+			public int getTVectorSize()
+			{
+				return v1.getTVectorSize();
+			}
+			
+			@Override
+			public Vector mvMul(final Vector vector)
+			{
+				return v1.mvMul(v2.mvMul(vector));
+			}
+			
+			@Override
+			public Vector tvMul(final Vector vector)
+			{
+				return v2.tvMul(v2.tvMul(vector));
+			}
+		};
+	}
+	
 	default VectorMultiplyable addVm(final VectorMultiplyable other)
 	{
 		final VectorMultiplyable me = this;

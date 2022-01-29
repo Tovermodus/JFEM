@@ -81,7 +81,7 @@ public class StokesTest
 		                       .absMaxElement());
 		final MixedTPFESpaceFunction<QkQkFunction> solut =
 			new MixedTPFESpaceFunction<>(
-				grid.getShapeFunctions(), solution1);
+				grid.getShapeFunctionMap(), solution1);
 		System.out.println(ConvergenceOrderEstimator.normL20Difference(solut.getPressureFunction(),
 		                                                               StokesReferenceSolution.pressureReferenceSolution(),
 		                                                               grid.generatePlotPoints(20)));
@@ -153,7 +153,7 @@ public class StokesTest
 		
 		final MixedTPFESpaceFunction<QkQkFunction> solut =
 			new MixedTPFESpaceFunction<>(
-				grid.getShapeFunctions(), solution1);
+				grid.getShapeFunctionMap(), solution1);
 		System.out.println(ConvergenceOrderEstimator.normL20Difference(solut.getPressureFunction(),
 		                                                               StokesReferenceSolution.pressureReferenceSolution(),
 		                                                               grid.generatePlotPoints(20)));

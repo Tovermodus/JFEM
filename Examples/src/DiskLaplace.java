@@ -37,7 +37,7 @@ public class DiskLaplace
 			circle.evaluateCellIntegrals(List.of(gradGrad), List.of(source));
 			circle.evaluateFaceIntegrals(new ArrayList<>(), new ArrayList<>());
 			circle.setBoundaryValues(LaplaceReferenceSolution.scalarReferenceSolution());
-			System.out.println(circle.getShapeFunctions()
+			System.out.println(circle.getShapeFunctionMap()
 			                         .size());
 			
 			System.out.println("System Filled");
@@ -48,7 +48,7 @@ public class DiskLaplace
 			                                                   1e-10);
 			
 			final ScalarFESpaceFunction<DistortedShapeFunction> solutionFunction =
-				new ScalarFESpaceFunction<>(circle.getShapeFunctions(), solution);
+				new ScalarFESpaceFunction<>(circle.getShapeFunctionMap(), solution);
 //			PlotWindow.addPlot(new ScalarPlot2D(solutionFunction,
 //			                           circle.generatePlotPoints(6 * circle.getCells().size()),
 //			                           30));

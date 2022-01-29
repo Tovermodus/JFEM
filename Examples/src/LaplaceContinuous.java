@@ -79,11 +79,11 @@ public class LaplaceContinuous
 		//grid.rhs.print_formatted();
 		final ScalarFESpaceFunction<ContinuousTPShapeFunction> solut =
 			new ScalarFESpaceFunction<>(
-				grid.getShapeFunctions(), solution1);
+				grid.getShapeFunctionMap(), solution1);
 		final Map<CoordinateVector, Double> vals = solut.valuesInPoints(grid.generatePlotPoints(50));
 		final ArrayList<Map<CoordinateVector, Double>> valList = new ArrayList<>();
 		final TreeSet<ContinuousTPShapeFunction> shapeFunctionTreeSet =
-			new TreeSet<>(grid.getShapeFunctions()
+			new TreeSet<>(grid.getShapeFunctionMap()
 			                  .values());
 		valList.add(solut.valuesInPoints(grid.generatePlotPoints(50)));
 		for (final ContinuousTPShapeFunction sf : shapeFunctionTreeSet)

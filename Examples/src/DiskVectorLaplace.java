@@ -38,7 +38,7 @@ public class DiskVectorLaplace
 			circle.evaluateCellIntegrals(List.of(gradGrad), List.of(source));
 			circle.evaluateFaceIntegrals(new ArrayList<>(), new ArrayList<>());
 			circle.setBoundaryValues(LaplaceReferenceSolution.vectorReferenceSolution());
-			System.out.println(circle.getShapeFunctions()
+			System.out.println(circle.getShapeFunctionMap()
 			                         .size());
 			
 			System.out.println("System Filled");
@@ -49,7 +49,7 @@ public class DiskVectorLaplace
 			                                                   1e-9);
 			
 			final VectorFESpaceFunction<DistortedVectorShapeFunction> solutionFunction =
-				new VectorFESpaceFunction<>(circle.getShapeFunctions(), solution);
+				new VectorFESpaceFunction<>(circle.getShapeFunctionMap(), solution);
 //			PlotWindow.addPlot(new ScalarPlot2D(solutionFunction,
 //			                           circle.generatePlotPoints(6 * circle.getCells().size()),
 //			                           30));

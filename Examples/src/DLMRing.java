@@ -88,12 +88,12 @@ public class DLMRing
 		pressureValues.putAll(Up.pressureValuesInPointsAtTime(plotPoints, getTime()));
 		final DistortedVectorFESpaceFunction X =
 			new DistortedVectorFESpaceFunction(particleSpaces.get(0)
-			                                                 .getShapeFunctions(),
+			                                                 .getShapeFunctionMap(),
 			                                   getParticleIterate(getCurrentIterate(), 0));
 		XValues.putAll(X.valuesInPointsAtTime(plotPoints, getTime()));
 		final DistortedVectorFESpaceFunction XPrime =
 			new DistortedVectorFESpaceFunction(particleSpaces.get(0)
-			                                                 .getShapeFunctions(),
+			                                                 .getShapeFunctionMap(),
 			                                   getParticleIterate(getCurrentIterate().sub(getLastIterate())
 			                                                                         .mul(1. / dt), 0));
 		XPrimeValues.putAll(XPrime.valuesInPointsAtTime(plotPoints, getTime()));
@@ -293,13 +293,13 @@ public class DLMRing
 		                                           particle0,
 		                                           dlmElast2.getIterateHistory()
 		                                                    .slice(new IntCoordinates(0,
-		                                                                              backGround.getShapeFunctions()
+		                                                                              backGround.getShapeFunctionMap()
 		                                                                                        .size()),
 		                                                           new IntCoordinates(dlmElast2.getIterateHistory()
 		                                                                                       .getRows(),
-		                                                                              backGround.getShapeFunctions()
+		                                                                              backGround.getShapeFunctionMap()
 		                                                                                        .size()
-			                                                                              + particle0.getShapeFunctions()
+			                                                                              + particle0.getShapeFunctionMap()
 			                                                                                         .size())),
 		                                           5);
 		UpPlot0.addOverlay(ball1);
@@ -313,17 +313,17 @@ public class DLMRing
 		                                           particle1,
 		                                           dlmElast2.getIterateHistory()
 		                                                    .slice(new IntCoordinates(0,
-		                                                                              backGround.getShapeFunctions()
+		                                                                              backGround.getShapeFunctionMap()
 		                                                                                        .size()
-			                                                                              + 2 * particle0.getShapeFunctions()
+			                                                                              + 2 * particle0.getShapeFunctionMap()
 			                                                                                             .size()),
 		                                                           new IntCoordinates(dlmElast2.getIterateHistory()
 		                                                                                       .getRows(),
-		                                                                              backGround.getShapeFunctions()
+		                                                                              backGround.getShapeFunctionMap()
 		                                                                                        .size()
-			                                                                              + 2 * particle0.getShapeFunctions()
+			                                                                              + 2 * particle0.getShapeFunctionMap()
 			                                                                                             .size()
-			                                                                              + particle1.getShapeFunctions()
+			                                                                              + particle1.getShapeFunctionMap()
 			                                                                                         .size())),
 		                                           5);
 		UpPlot.addOverlay(ball2);
@@ -336,21 +336,21 @@ public class DLMRing
 		                                          particle2,
 		                                          dlmElast2.getIterateHistory()
 		                                                   .slice(new IntCoordinates(0,
-		                                                                             backGround.getShapeFunctions()
+		                                                                             backGround.getShapeFunctionMap()
 		                                                                                       .size()
-			                                                                             + 2 * particle0.getShapeFunctions()
+			                                                                             + 2 * particle0.getShapeFunctionMap()
 			                                                                                            .size()
-			                                                                             + 2 * particle1.getShapeFunctions()
+			                                                                             + 2 * particle1.getShapeFunctionMap()
 			                                                                                            .size()),
 		                                                          new IntCoordinates(dlmElast2.getIterateHistory()
 		                                                                                      .getRows(),
-		                                                                             backGround.getShapeFunctions()
+		                                                                             backGround.getShapeFunctionMap()
 		                                                                                       .size()
-			                                                                             + 2 * particle0.getShapeFunctions()
+			                                                                             + 2 * particle0.getShapeFunctionMap()
 			                                                                                            .size()
-			                                                                             + 2 * particle1.getShapeFunctions()
+			                                                                             + 2 * particle1.getShapeFunctionMap()
 			                                                                                            .size()
-			                                                                             + particle2.getShapeFunctions()
+			                                                                             + particle2.getShapeFunctionMap()
 			                                                                                        .size())),
 		                                          5);
 		UpPlot1.addOverlay(ring);

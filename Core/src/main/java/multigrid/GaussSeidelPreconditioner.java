@@ -5,7 +5,8 @@ import linalg.SparseMatrix;
 import linalg.Vector;
 import linalg.VectorMultiplyable;
 
-public class GaussSeidelPreconditioner implements VectorMultiplyable
+public class GaussSeidelPreconditioner
+	implements VectorMultiplyable
 {
 	DenseMatrix DU;
 	DenseMatrix DL;
@@ -18,12 +19,12 @@ public class GaussSeidelPreconditioner implements VectorMultiplyable
 			new DenseMatrix(A
 				                .getDiagonalMatrix()
 				                .add(SparseMatrix.identity(A.getCols()))
-				                .add(A.getUpperTriangleMatrix())).inverse();
+				                .add(A.getStrictlyUpperTriangleMatrix())).inverse();
 		System.out.println("crerating2");
 		DL = new DenseMatrix(A
 			                     .getDiagonalMatrix()
 			                     .add(SparseMatrix.identity(A.getCols()))
-			                     .add(A.getLowerTriangleMatrix())).inverse();
+			                     .add(A.getStrictlyLowerTriangleMatrix())).inverse();
 		System.out.println("crerating3");
 		Dinv = new SparseMatrix(A.getRows(), A.getCols());
 		for (int i = 0; i < A.getRows(); i++)

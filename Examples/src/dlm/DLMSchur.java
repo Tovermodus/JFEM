@@ -69,7 +69,7 @@ public class DLMSchur
 		                           10,
 		                           10,
 		                           1));
-		final DLMSchur system = new DLMSchur(0.001, 50, fluid, particles);
+		final DLMSchur system = new DLMSchur(0.001, 10, fluid, particles);
 		system.loop();
 		system.summarize();
 	}
@@ -84,8 +84,6 @@ public class DLMSchur
 			p.addOverlay(particles.get(i)
 			                      .generateOverlay(particleHistory.get(i), p));
 		PlotWindow.addPlot(p);
-		System.out.println(particleHistory.get(0));
-		System.out.println(lagrangeHistory.get(0));
 	}
 	
 	IterativeImplicitSchur schur;
@@ -113,7 +111,7 @@ public class DLMSchur
 		final DistortedVectorFESpaceFunction XPrime =
 			new DistortedVectorFESpaceFunction(particles.get(0)
 			                                            .getSpace()
-			                                            .getShapeFunctions(),
+			                                            .getShapeFunctionMap(),
 			                                   particleStates.get(0).current.sub(particleStates.get(0).last)
 			                                                                .mul(1. / 0.01));
 		

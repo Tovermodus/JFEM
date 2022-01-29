@@ -52,11 +52,11 @@ public class LaplaceMG
 				@Override
 				public Tuple2<VectorMultiplyable, DenseVector> createSystem(final ContinuousTPFESpace space)
 				{
-					final SparseMatrix s = new SparseMatrix(space.getShapeFunctions()
+					final SparseMatrix s = new SparseMatrix(space.getShapeFunctionMap()
 					                                             .size(),
-					                                        space.getShapeFunctions()
+					                                        space.getShapeFunctionMap()
 					                                             .size());
-					final DenseVector rhs = new DenseVector(space.getShapeFunctions()
+					final DenseVector rhs = new DenseVector(space.getShapeFunctionMap()
 					                                             .size());
 					space.writeCellIntegralsToMatrix(List.of(gg), s);
 					space.writeCellIntegralsToRhs(List.of(rightHandSideIntegral), rhs);
@@ -81,14 +81,14 @@ public class LaplaceMG
 				solut.add(Math.random() * 0.1, c);
 			final IterativeSolver it = new IterativeSolver(false);
 			solut = new DenseVector(it.solvePGMRES(mg.finest_system,
-			                                       new MGPReconditioner(mg),
+			                                       new MGPReconditioner2(mg),
 			                                       mg.finest_rhs,
 			                                       1e-8));
 			
 			final ScalarFESpaceFunction<ContinuousTPShapeFunction> sol =
 				new ScalarFESpaceFunction<>(
 					mg.spaces.get(refinements)
-					         .getShapeFunctions(), solut);
+					         .getShapeFunctionMap(), solut);
 			assertTrue(it.iterations < 10);
 			final double norm = ConvergenceOrderEstimator
 				.normL2Difference(sol,
@@ -136,11 +136,11 @@ public class LaplaceMG
 				@Override
 				public Tuple2<SparseMatrix, Vector> createFinestLevelSystem(final ContinuousTPFESpace space)
 				{
-					final SparseMatrix s = new SparseMatrix(space.getShapeFunctions()
+					final SparseMatrix s = new SparseMatrix(space.getShapeFunctionMap()
 					                                             .size(),
-					                                        space.getShapeFunctions()
+					                                        space.getShapeFunctionMap()
 					                                             .size());
-					final DenseVector rhs = new DenseVector(space.getShapeFunctions()
+					final DenseVector rhs = new DenseVector(space.getShapeFunctionMap()
 					                                             .size());
 					space.writeCellIntegralsToMatrix(List.of(gg), s);
 					space.writeCellIntegralsToRhs(List.of(rightHandSideIntegral), rhs);
@@ -165,14 +165,14 @@ public class LaplaceMG
 				solut.add(Math.random() * 0.1, c);
 			final IterativeSolver it = new IterativeSolver(false);
 			solut = new DenseVector(it.solvePGMRES(mg.finest_system,
-			                                       new MGPReconditioner(mg),
+			                                       new MGPReconditioner2(mg),
 			                                       mg.finest_rhs,
 			                                       1e-8));
 			
 			final ScalarFESpaceFunction<ContinuousTPShapeFunction> sol =
 				new ScalarFESpaceFunction<>(
 					mg.spaces.get(refinements)
-					         .getShapeFunctions(), solut);
+					         .getShapeFunctionMap(), solut);
 			final double norm = ConvergenceOrderEstimator
 				.normL2Difference(sol,
 				                  LaplaceReferenceSolution.scalarReferenceSolution(),

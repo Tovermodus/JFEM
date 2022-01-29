@@ -9,5 +9,12 @@ public interface MGInterface
 	
 	Vector vCycle(final Vector initialIterate, final Vector rhs);
 	
+	default Vector fullVCycleCorrection(final Vector rhs)
+	{
+		throw new UnsupportedOperationException("not yet implemented");
+	}
+	
 	VectorMultiplyable getFinestSystem();
+	
+	Vector fullVCycleSolver(final Vector iterate);
 }

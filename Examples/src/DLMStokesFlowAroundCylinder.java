@@ -55,9 +55,9 @@ public class DLMStokesFlowAroundCylinder
 		final DistortedVectorCellIntegral lagv2 = new DistortedVectorCellIntegral(
 			DistortedVectorCellIntegral.H1);
 		
-		final int n = largeGrid.getShapeFunctions()
+		final int n = largeGrid.getShapeFunctionMap()
 		                       .size();
-		final int m = immersedGrid.getShapeFunctions()
+		final int m = immersedGrid.getShapeFunctionMap()
 		                          .size();
 		
 		final SparseMatrix A11 = new SparseMatrix(n, n);
@@ -122,7 +122,7 @@ public class DLMStokesFlowAroundCylinder
 				return CoordinateDenseMatrix.fromValues(2, 2, 1, 0, 0, 1);
 			}
 		};
-		for (final Map.Entry<Integer, QkQkFunction> sf : largeGrid.getShapeFunctions()
+		for (final Map.Entry<Integer, QkQkFunction> sf : largeGrid.getShapeFunctionMap()
 		                                                          .entrySet())
 		{
 			final VectorFunction toBeMultiplierd = new VectorFunction() //THIS NEEDS TO BE UPDATED IN
@@ -169,7 +169,7 @@ public class DLMStokesFlowAroundCylinder
 				final DenseVector integrals = new DenseVector(m);
 				immersedGrid.writeCellIntegralsToRhs(List.of(shapeFunctionOnImmersedGrid), integrals);
 				A13.addSmallMatrixInPlaceAt(integrals.asMatrix()
-				                              .transpose(), sf.getKey(), 0);
+				                                     .transpose(), sf.getKey(), 0);
 				//if (count % 10 == 0)
 				System.out.println("A31: " + 100.0 * (count++) / n + "%");
 			}
@@ -219,11 +219,11 @@ public class DLMStokesFlowAroundCylinder
 		
 		Vector iterate = new DenseVector(n + 2 * m);
 		
-		final Map<CoordinateVector, Double> pvals = (new MixedFESpaceFunction<>(largeGrid.getShapeFunctions(),
+		final Map<CoordinateVector, Double> pvals = (new MixedFESpaceFunction<>(largeGrid.getShapeFunctionMap(),
 		                                                                        iterate).pressureValuesInPointsAtTime(
 			points, 0));
 		final Map<CoordinateVector, CoordinateVector> vvals = (new MixedFESpaceFunction<>(
-			largeGrid.getShapeFunctions(), iterate).velocityValuesInPointsAtTime(points, 0));
+			largeGrid.getShapeFunctionMap(), iterate).velocityValuesInPointsAtTime(points, 0));
 		System.out.println("inverting");
 		final DirectlySolvable Ainv = A.inverse();
 		System.out.println("inverted");
@@ -232,10 +232,10 @@ public class DLMStokesFlowAroundCylinder
 			System.out.println(i);
 			final Vector rhs = b.add(M.mvMul(iterate));
 			iterate = Ainv.mvMul(rhs);
-			vvals.putAll((new MixedFESpaceFunction<>(largeGrid.getShapeFunctions(),
+			vvals.putAll((new MixedFESpaceFunction<>(largeGrid.getShapeFunctionMap(),
 			                                         iterate).velocityValuesInPointsAtTime(points,
 			                                                                               i * dt)));
-			pvals.putAll((new MixedFESpaceFunction<>(largeGrid.getShapeFunctions(),
+			pvals.putAll((new MixedFESpaceFunction<>(largeGrid.getShapeFunctionMap(),
 			                                         iterate).pressureValuesInPointsAtTime(points,
 			                                                                               i * dt)));
 		}

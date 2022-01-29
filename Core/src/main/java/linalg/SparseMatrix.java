@@ -14,7 +14,7 @@ import java.util.*;
 import java.util.stream.Collectors;
 
 public class SparseMatrix
-	implements MutableMatrix, DirectlySolvable, Decomposable, Serializable
+	implements MutableSolvable, Decomposable, Serializable
 {
 	private final int rows;
 	private final int cols;
@@ -31,7 +31,11 @@ public class SparseMatrix
 	@Override
 	public SparseMatrix slice(final IntCoordinates start, final IntCoordinates end)
 	{
-		final SparseMatrix ret = new SparseMatrix(end.get(0) - start.get(0), end.get(1) - start.get(1));
+		final int entryEstimate = (int) (2.0 * end.sub(start)
+		                                          .size() * getSparseEntryCount() / getShape().size());
+		final SparseMatrix ret = new SparseMatrix(end.get(0) - start.get(0),
+		                                          end.get(1) - start.get(1),
+		                                          entryEstimate);
 		for (int i = 0; i < sparseEntries; i++)
 		{
 			if (!(sparseXs[i] >= end.get(1)
@@ -41,6 +45,16 @@ public class SparseMatrix
 				ret.add(sparseValues[i], sparseYs[i] - start.get(0), sparseXs[i] - start.get(1));
 		}
 		return ret;
+	}
+	
+	public SparseMatrix(final int rows, final int cols, final int size)
+	{
+		this.rows = rows;
+		this.cols = cols;
+		sparseValues = new double[size];
+		sparseYs = new int[size];
+		sparseXs = new int[size];
+		this.sparseEntries = 1;
 	}
 	
 	public SparseMatrix(final int rows, final int cols)
@@ -519,7 +533,7 @@ public class SparseMatrix
 	}
 	
 	@Override
-	public SparseMatrix getLowerTriangleMatrix()
+	public SparseMatrix getStrictlyLowerTriangleMatrix()
 	{
 		final SparseMatrix mat = new SparseMatrix(getRows(), getCols());
 		for (int i = 0; i < sparseEntries; i++)
@@ -531,7 +545,7 @@ public class SparseMatrix
 	}
 	
 	@Override
-	public SparseMatrix getUpperTriangleMatrix()
+	public SparseMatrix getStrictlyUpperTriangleMatrix()
 	{
 		final SparseMatrix mat = new SparseMatrix(getRows(), getCols());
 		for (int i = 0; i < sparseEntries; i++)
@@ -610,7 +624,7 @@ public class SparseMatrix
 	@Override
 	public DenseMatrix inverse()
 	{
-		return (DenseMatrix) DirectlySolvable.super.inverse();
+		return (DenseMatrix) MutableSolvable.super.inverse();
 	}
 	
 	@Override

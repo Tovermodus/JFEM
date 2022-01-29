@@ -15,7 +15,7 @@ public class DirectSchur
 	}
 	
 	@Override
-	Function2<DenseMatrix, Vector, Vector> solveSchur()
+	protected Function2<DenseMatrix, Vector, Vector> solveSchur()
 	{
 		if (inverseApplier == null)
 			inverseApplier = new Function2<>()

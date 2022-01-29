@@ -6,6 +6,7 @@ import linalg.CoordinateVector;
 import linalg.DenseVector;
 import linalg.SparseMatrix;
 import mixed.*;
+import org.jetbrains.annotations.NotNull;
 import tensorproduct.geometry.TPCell;
 import tensorproduct.geometry.TPFace;
 
@@ -30,7 +31,7 @@ public interface Fluid
 	
 	default MixedFunctionOnCells<TPCell, TPFace> getVelocityPressure(final FluidIterate iterate)
 	{
-		return new MixedTPFESpaceFunction<>(getSpace().getShapeFunctions(),
+		return new MixedTPFESpaceFunction<>(getSpace().getShapeFunctionMap(),
 		                                    iterate.current);
 	}
 	
@@ -52,7 +53,7 @@ public interface Fluid
 	
 	default int getVelocitySize()
 	{
-		return (int) getSpace().getShapeFunctions()
+		return (int) getSpace().getShapeFunctionMap()
 		                       .values()
 		                       .stream()
 		                       .filter(ComposeMixedShapeFunction::hasVelocityFunction)
@@ -61,13 +62,13 @@ public interface Fluid
 	
 	default int getSystemSize()
 	{
-		return (int) getSpace().getShapeFunctions()
+		return (int) getSpace().getShapeFunctionMap()
 		                       .size();
 	}
 	
 	default int getPressureSize()
 	{
-		return (int) getSpace().getShapeFunctions()
+		return (int) getSpace().getShapeFunctionMap()
 		                       .values()
 		                       .stream()
 		                       .filter(ComposeMixedShapeFunction::hasPressureFunction)
@@ -80,7 +81,7 @@ public interface Fluid
 		final MixedFunction initialVelo
 			= new ComposedMixedFunction(VectorFunction.fromLambda(getInitialVelocity(),
 			                                                      2, 2));
-		getSpace().getShapeFunctions()
+		getSpace().getShapeFunctionMap()
 		          .values()
 		          .forEach(function ->
 		                   {
@@ -94,6 +95,14 @@ public interface Fluid
 	
 	default Tuple2<SparseMatrix, DenseVector> getBlockRhs(final FluidSystem fs, final double dt)
 	{
+		return getBlockRhsForSpace(getSpace(), getVelocitySize(), fs, dt);
+	}
+	
+	@NotNull
+	default Tuple2<SparseMatrix, DenseVector> getBlockRhsForSpace(final TaylorHoodSpace space,
+	                                                              final int velocitySize,
+	                                                              final FluidSystem fs, final double dt)
+	{
 		final SparseMatrix s =
 			new SparseMatrix(fs.massMatrix.mul(1. / dt)
 			                              .add(fs.flowMatrix)
@@ -102,12 +111,12 @@ public interface Fluid
 		final DenseVector d = new DenseVector(fs.forceRhs.add(fs.accelerationRhs.mul(1. / dt)));
 		final MixedFunction velocityBoundary =
 			new ComposedMixedFunction(VectorFunction.fromLambda(velocityBoundaryValues(), 2, 2));
-		getSpace().writeBoundaryValuesTo(velocityBoundary,
-		                                 getDirichletBoundary(),
-		                                 (face, fun) -> fun.hasVelocityFunction(),
-		                                 s,
-		                                 d);
-		getSpace().overWriteValue(getVelocitySize(), 0, s, d);
+		space.writeBoundaryValuesTo(velocityBoundary,
+		                            getDirichletBoundary(),
+		                            //(face, fun) -> fun.hasVelocityFunction(),
+		                            s,
+		                            d);
+		space.overWriteValue(velocitySize, 0, s, d);
 		return new Tuple2<>(s, d);
 	}
 }

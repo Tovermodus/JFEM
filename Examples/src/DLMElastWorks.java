@@ -133,18 +133,18 @@ public class DLMElastWorks
 //			precond = getPrecond();
 //		}
 		final MixedFESpaceFunction<QkQkFunction, TPCell, TPFace> Up =
-			new MixedTPFESpaceFunction<>(backgroundSpace.getShapeFunctions(),
+			new MixedTPFESpaceFunction<>(backgroundSpace.getShapeFunctionMap(),
 			                             getBackGroundIterate(getCurrentIterate()));
 		velocityValues.putAll(Up.velocityValuesInPointsAtTime(plotPoints, getTime()));
 		pressureValues.putAll(Up.pressureValuesInPointsAtTime(plotPoints, getTime()));
 		final DistortedVectorFESpaceFunction X =
 			new DistortedVectorFESpaceFunction(particleSpaces.get(0)
-			                                                 .getShapeFunctions(),
+			                                                 .getShapeFunctionMap(),
 			                                   getParticleIterate(getCurrentIterate(), 0));
 		XValues.putAll(X.valuesInPointsAtTime(plotPoints, getTime()));
 		final DistortedVectorFESpaceFunction XPrime =
 			new DistortedVectorFESpaceFunction(particleSpaces.get(0)
-			                                                 .getShapeFunctions(),
+			                                                 .getShapeFunctionMap(),
 			                                   getParticleIterate(getCurrentIterate().sub(getLastIterate())
 			                                                                         .mul(1. / dt), 0));
 		XPrimeValues.putAll(XPrime.valuesInPointsAtTime(plotPoints, getTime()));
@@ -267,12 +267,12 @@ public class DLMElastWorks
 		                                       particle,
 		                                       dlmElast2.getIterateHistory()
 		                                                .slice(new IntCoordinates(0,
-		                                                                          backGround.getShapeFunctions()
+		                                                                          backGround.getShapeFunctionMap()
 		                                                                                    .size()),
 		                                                       new IntCoordinates(dlmElast2.getIterateHistory()
 		                                                                                   .getRows(),
-		                                                                          backGround.getShapeFunctions()
-		                                                                                    .size() + particle.getShapeFunctions()
+		                                                                          backGround.getShapeFunctionMap()
+		                                                                                    .size() + particle.getShapeFunctionMap()
 		                                                                                                      .size())),
 		                                       5));
 		PlotWindow.addPlot(UpPlot);

@@ -239,11 +239,19 @@ public class MixedFESpaceFunction<MF extends MixedShapeFunction<CT, FT, ?, ?>, C
 			.entrySet()
 			.stream()
 			.parallel()
-			.map(entry -> entry.getKey()
-			                   .gradient(pos)
-			                   .getVelocityGradient()
-			                   .mul(entry.getValue()))
-			.reduce(new CoordinateDenseMatrix(getDomainDimension() + 1, getDomainDimension() + 1),
+			.map(entry ->
+			     {
+//				     System.out.println("true shape" + entry.getKey()
+//				                                            .gradient(pos)
+//				                                            .getVelocityGradient()
+//				                                            .getShape());
+//				     System.out.println("domdim" + getDomainDimension() + 1);
+				     return entry.getKey()
+				                 .gradient(pos)
+				                 .getVelocityGradient()
+				                 .mul(entry.getValue());
+			     })
+			.reduce(new CoordinateDenseMatrix(getDomainDimension(), getDomainDimension()),
 			        CoordinateDenseMatrix::add);
 		final VelocityGradient vf = new VelocityGradient(velocityGradient);
 		return pf.add(vf);

@@ -48,7 +48,7 @@ public class TPFESpaceTest
 					assertFalse(face.getCells().contains(cell));
 				}
 			}
-			for (final TPShapeFunction shapeFunction : grid.getShapeFunctions().values())
+			for (final TPShapeFunction shapeFunction : grid.getShapeFunctionMap().values())
 			{
 				if (shapeFunction.value(cell
 					                        .center()
@@ -61,7 +61,7 @@ public class TPFESpaceTest
 		for (final TPFace face : grid.getFaces())
 		{
 			
-			for (final TPShapeFunction shapeFunction : grid.getShapeFunctions().values())
+			for (final TPShapeFunction shapeFunction : grid.getShapeFunctionMap().values())
 			{
 				if (shapeFunction.value(
 					face.center().add(CoordinateVector.fromValues(Math.random() * 1e-8,
@@ -118,7 +118,7 @@ public class TPFESpaceTest
 					assertFalse(face.getCells().contains(cell));
 				}
 			}
-			for (final TPShapeFunction shapeFunction : grid.getShapeFunctions().values())
+			for (final TPShapeFunction shapeFunction : grid.getShapeFunctionMap().values())
 			{
 				if (shapeFunction.value(cell
 					                        .center()
@@ -131,7 +131,7 @@ public class TPFESpaceTest
 		for (final TPFace face : grid.getFaces())
 		{
 			
-			for (final TPShapeFunction shapeFunction : grid.getShapeFunctions().values())
+			for (final TPShapeFunction shapeFunction : grid.getShapeFunctionMap().values())
 			{
 				if (shapeFunction.value(
 					face.center().add(CoordinateVector.fromValues(Math.random() * 1e-8,

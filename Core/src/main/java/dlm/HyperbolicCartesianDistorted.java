@@ -57,7 +57,7 @@ public abstract class HyperbolicCartesianDistorted<ST extends ComposeMixedShapeF
 		{
 			final int particleId = (i - 3) / 2;
 			blockStarts[i] = blockStarts[i - 1] + particleSpaces.get(particleId)
-			                                                    .getShapeFunctions()
+			                                                    .getShapeFunctionMap()
 			                                                    .size();
 		}
 		blockStarts[2 * particleSpaces.size() + 2] = getSystemSize();
@@ -73,9 +73,9 @@ public abstract class HyperbolicCartesianDistorted<ST extends ComposeMixedShapeF
 	
 	protected int getSystemSize()
 	{
-		return backgroundSpace.getShapeFunctions()
+		return backgroundSpace.getShapeFunctionMap()
 		                      .size() + particleSpaces.stream()
-		                                              .mapToInt(sp -> sp.getShapeFunctions()
+		                                              .mapToInt(sp -> sp.getShapeFunctionMap()
 		                                                                .size())
 		                                              .sum() * 2;
 	}
@@ -129,7 +129,7 @@ public abstract class HyperbolicCartesianDistorted<ST extends ComposeMixedShapeF
 	{
 		final DistortedGridSpace<DistortedVectorShapeFunction, CoordinateVector, CoordinateMatrix, CoordinateTensor>
 			particleSpace = particleSpaces.get(particleId);
-		final int particleBlockSize = particleSpace.getShapeFunctions()
+		final int particleBlockSize = particleSpace.getShapeFunctionMap()
 		                                           .size();
 		final int nBackgroundVelocities = getnBackgroundVelocities();
 		final SparseMatrix particleMass = evaluateParticleMassIntegrals(particleId);
@@ -216,7 +216,7 @@ public abstract class HyperbolicCartesianDistorted<ST extends ComposeMixedShapeF
 		final double diam = particleSpaces.get(particleId)
 		                                  .getMaxDiam();
 		
-		backgroundSpace.getShapeFunctions()
+		backgroundSpace.getShapeFunctionMap()
 		               .entrySet()
 		               .stream()
 		               .parallel()
@@ -252,7 +252,7 @@ public abstract class HyperbolicCartesianDistorted<ST extends ComposeMixedShapeF
 		final DistortedVectorFESpaceFunction displacement
 			= new DistortedVectorFESpaceFunction(particleSpaces.get(
 				                                                   particleId)
-			                                                   .getShapeFunctions(),
+			                                                   .getShapeFunctionMap(),
 			                                     getParticleIterate(
 				                                     getCurrentIterate(),
 				                                     particleId));
@@ -298,7 +298,7 @@ public abstract class HyperbolicCartesianDistorted<ST extends ComposeMixedShapeF
 	
 	public MixedFunctionOnCells<TPCell, TPFace> getUp()
 	{
-		return new MixedTPFESpaceFunction<>(backgroundSpace.getShapeFunctions(),
+		return new MixedTPFESpaceFunction<>(backgroundSpace.getShapeFunctionMap(),
 		                                    getBackGroundIterate(getCurrentIterate()));
 	}
 	
@@ -325,7 +325,7 @@ public abstract class HyperbolicCartesianDistorted<ST extends ComposeMixedShapeF
 	
 	private int getnBackgroundPressures()
 	{
-		return (int) backgroundSpace.getShapeFunctions()
+		return (int) backgroundSpace.getShapeFunctionMap()
 		                            .values()
 		                            .stream()
 		                            .filter(MixedFunction::hasPressureFunction)
@@ -334,7 +334,7 @@ public abstract class HyperbolicCartesianDistorted<ST extends ComposeMixedShapeF
 	
 	private int getnBackgroundVelocities()
 	{
-		return (int) backgroundSpace.getShapeFunctions()
+		return (int) backgroundSpace.getShapeFunctionMap()
 		                            .values()
 		                            .stream()
 		                            .filter(MixedFunction::hasVelocityFunction)
@@ -365,7 +365,7 @@ public abstract class HyperbolicCartesianDistorted<ST extends ComposeMixedShapeF
 		final DenseVector initialDisplacement
 			= new DenseVector(zeroDerivativeMatrix.getBlockSizes()[2 * particleId + 2]);
 		particleSpaces.get(particleId)
-		              .getShapeFunctions()
+		              .getShapeFunctionMap()
 		              .forEach((key, func) -> initialDisplacement.add(func.getNodeFunctional()
 		                                                                  .evaluate(identity), key));
 		ret.addSmallVectorAt(initialDisplacement, zeroDerivativeMatrix.getBlockStarts()[particleId + 2]);
@@ -380,7 +380,7 @@ public abstract class HyperbolicCartesianDistorted<ST extends ComposeMixedShapeF
 			                                                      dimension,
 			                                                      dimension));
 		final DenseVector initialUp = new DenseVector(getnBackgroundVelocities() + getnBackgroundPressures());
-		backgroundSpace.getShapeFunctions()
+		backgroundSpace.getShapeFunctionMap()
 		               .forEach((key, value) ->
 			                        initialUp.add(value.getNodeFunctional()
 			                                           .evaluate(initialUpFunction), key));
@@ -435,7 +435,7 @@ public abstract class HyperbolicCartesianDistorted<ST extends ComposeMixedShapeF
 		final VectorFunction initialParticleVelocity = VectorFunction.fromLambda(
 			getInitialParticleVelocity(particleId), dimension, dimension);
 		particleSpaces.get(particleId)
-		              .getShapeFunctions()
+		              .getShapeFunctionMap()
 		              .forEach((key, func) ->
 			                       initialVelocity.add(func.getNodeFunctional()
 			                                               .evaluate(initialParticleVelocity), key));
@@ -598,7 +598,7 @@ public abstract class HyperbolicCartesianDistorted<ST extends ComposeMixedShapeF
 			                                      matrix,
 			                                      vec);
 			final Optional<ST> firstPressure =
-				backgroundSpace.getShapeFunctions()
+				backgroundSpace.getShapeFunctionMap()
 				               .values()
 				               .stream()
 				               .filter(ComposeMixedShapeFunction::hasPressureFunction)

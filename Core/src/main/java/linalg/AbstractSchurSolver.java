@@ -68,49 +68,7 @@ public abstract class AbstractSchurSolver<T extends VectorMultiplyable>
 	
 	protected abstract T schurMvMul();
 	
-	//	{
-//		return new VectorMultiplyable()
-//		{
-//			@Override
-//			public int getVectorSize()
-//			{
-//				return blockSizes[0];
-//			}
-//
-//			@Override
-//			public int getTVectorSize()
-//			{
-//				return blockSizes[0];
-//			}
-//
-//			@Override
-//			public Vector mvMul(final Vector vector)
-//			{
-//
-//				schurComplement = new DenseMatrix(IntStream.range(0, diagonalInverses.size())
-//				                                           .parallel()
-//				                                           .mapToObj(i -> topMatrices.get(i)
-//				                                                                     .mmMul(diagonalInverses.get(
-//					                                                                     i))
-//				                                                                     .mmMul(leftMatrices.get(
-//					                                                                     i)))
-//				                                           .reduce(DenseMatrix::add)
-//				                                           .orElseThrow());
-//				System.out.println("-1");
-//				schurComplement.mulInPlace(-1);
-//				System.out.println("add");
-//				schurComplement.addInPlace(blockMatrix.getBlockMatrix(0, 0));
-//			}
-//
-//			@Override
-//			public Vector tvMul(final Vector vector)
-//			{
-//				throw new UnsupportedOperationException("not implemented yet");
-//			}
-//		};
-//	}
-//
-	abstract Function2<T, Vector, Vector> solveSchur();
+	protected abstract Function2<T, Vector, Vector> solveSchur();
 	
 	@Override
 	public int getVectorSize()

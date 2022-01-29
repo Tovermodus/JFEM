@@ -27,12 +27,20 @@ public abstract class MGSpace<CSpace extends FESpace<CT, FT, ST> & Assembleable,
 	{
 		spaces = createSpaces(refinements);
 		System.out.println("spaces");
-		systems = new ArrayList<>();
-		int k = 0;
+		prolongationOperators = new ArrayList<>();
+		prolongationMatrices = new ArrayList<>();
 		for (final CSpace space : spaces)
 		{
 			space.assembleCells();
 			space.assembleFunctions(polynomialDegree);
+		}
+		for (int i = 0; i < spaces.size() - 1; i++)
+			prolongationOperators.add(createProlongationMatrix(spaces.get(i), spaces.get(i + 1)));
+		System.out.println("prolongation");
+		systems = new ArrayList<>();
+		int k = 0;
+		for (final CSpace space : spaces)
+		{
 			final var mat_rhs = createSystem(space);
 			systems.add(mat_rhs._1);
 			finest_rhs = mat_rhs._2;
@@ -41,18 +49,30 @@ public abstract class MGSpace<CSpace extends FESpace<CT, FT, ST> & Assembleable,
 		}
 		smoothers = createSmoothers();
 		System.out.println("smoothers");
-		prolongationOperators = new ArrayList<>();
-		prolongationMatrices = new ArrayList<>();
-		for (int i = 0; i < spaces.size() - 1; i++)
-			prolongationOperators.add(createProlongationMatrix(spaces.get(i), spaces.get(i + 1)));
-		System.out.println("prolongation");
+	}
+	
+	public Vector restrictToSize(final int newSize, Vector finest)
+	{
+		final int startLength = finest.getLength();
+		if (spaces.stream()
+		          .allMatch(s -> s.getShapeFunctionMap()
+		                          .size() != startLength))
+			throw new IllegalArgumentException("newsize not valid");
+		int l = prolongationOperators.size() - 1;
+		while (finest.getLength() != newSize)
+		{
+			finest = new DenseVector(prolongationOperators.get(l)
+			                                              .tvMul(finest));
+			l--;
+		}
+		return finest;
 	}
 	
 	SparseMvMul createProlongationMatrix(final CSpace coarse, final CSpace fine)
 	{
-		final SparseMatrix prolongationMatrix = new SparseMatrix(fine.getShapeFunctions()
+		final SparseMatrix prolongationMatrix = new SparseMatrix(fine.getShapeFunctionMap()
 		                                                             .size(),
-		                                                         coarse.getShapeFunctions()
+		                                                         coarse.getShapeFunctionMap()
 		                                                               .size());
 		final TreeMultimap<ST, ST> refinedFunctions = getRefinedFunctions(coarse, fine);
 		refinedFunctions.forEach((coarseFunction, fineFunction) ->
@@ -106,31 +126,84 @@ public abstract class MGSpace<CSpace extends FESpace<CT, FT, ST> & Assembleable,
 	{
 		if (level == 0)
 		{
+			System.out.println("    level 0 " + systems.get(0)
+			                                           .getVectorSize());
 			if (systems.get(0) instanceof Matrix)
-				return new DenseMatrix((Matrix) systems.get(0)).solve(rhs);
+			{
+				final DenseVector solve = new DenseMatrix((Matrix) systems.get(0)).solve(rhs);
+				System.out.println("    solved");
+				return solve;
+			}
 			final Vector solution = new IterativeSolver(true).solveGMRES(systems.get(0), rhs, 1e-9);
 			return solution;
 		}
+		System.out.println(" MG level " + level + " residual " + rhs.sub(systems.get(level)
+		                                                                        .mvMul(guess))
+		                                                            .absMaxElement());
 		guess = smoothers.get(level - 1)
 		                 .smooth(systems.get(level), rhs, guess);
-		final Vector restrictedDefect =
+		Vector restrictedDefect =
 			prolongationOperators.get(level - 1)
 			                     .tvMul(rhs.sub(systems.get(level)
 			                                           .mvMul(guess)));
+		System.out.println(" MG level " + level + " precorrection residual " + rhs.sub(systems.get(level)
+		                                                                                      .mvMul(guess))
+		                                                                          .absMaxElement());
+		System.out.println(restrictedDefect.absMaxElement());
 		final Vector correction = mgStep(level - 1,
 		                                 new DenseVector(restrictedDefect.getLength()),
 		                                 restrictedDefect);
 		guess = guess.add(prolongationOperators.get(level - 1)
 		                                       .mvMul(correction));
+		restrictedDefect =
+			prolongationOperators.get(level - 1)
+			                     .tvMul(rhs.sub(systems.get(level)
+			                                           .mvMul(guess)));
+		System.out.println(restrictedDefect.absMaxElement());
+		System.out.println(" MG level " + level + " correction residual " + rhs.sub(systems.get(level)
+		                                                                                   .mvMul(guess))
+		                                                                       .absMaxElement());
 		guess = smoothers.get(level - 1)
 		                 .smooth(systems.get(level), rhs, guess);
+		System.out.println(" MG level " + level + " final residual " + rhs.sub(systems.get(level)
+		                                                                              .mvMul(guess))
+		                                                                  .absMaxElement());
 		return guess;
 	}
 	
 	@Override
 	public Vector vCycle(final Vector initialIterate, final Vector rhs)
 	{
+//		try
+//		{
+//			Thread.sleep(100);
+//		} catch (final InterruptedException e)
+//		{
+//			e.printStackTrace();
+//		}
 		return mgStep(spaces.size() - 1, initialIterate, rhs);
+	}
+	
+	@Override
+	public Vector fullVCycleSolver(Vector rhs)
+	{
+		final List<Vector> rhsides = new ArrayList<>();
+		rhsides.add(rhs);
+		for (int i = prolongationOperators.size() - 1; i >= 0; i--)
+		{
+			rhs = prolongationOperators.get(i)
+			                           .tvMul(rhs);
+			rhsides.add(rhs);
+		}
+		Vector iterate = new DenseVector(systems.get(0)
+		                                        .getVectorSize());
+		for (int i = 0; i < prolongationOperators.size(); i++)
+		{
+			iterate = mgStep(i, iterate, rhsides.get(spaces.size() - i - 1));
+			iterate = prolongationOperators.get(i)
+			                               .mvMul(iterate);
+		}
+		return mgStep(spaces.size() - 1, iterate, rhsides.get(0));
 	}
 	
 	@Override

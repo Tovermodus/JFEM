@@ -6,6 +6,7 @@ import basic.ShapeFunction;
 import com.google.common.collect.HashMultimap;
 import com.google.common.collect.Multimap;
 import com.google.common.collect.Sets;
+import it.unimi.dsi.fastutil.ints.Int2ObjectOpenHashMap;
 import linalg.CoordinateVector;
 import linalg.DenseVector;
 import linalg.IntCoordinates;
@@ -14,10 +15,10 @@ import tensorproduct.geometry.CartesianGrid;
 import tensorproduct.geometry.TPCell;
 import tensorproduct.geometry.TPFace;
 
+import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.TreeMap;
 
 public abstract class CartesianGridSpace<ST extends ShapeFunction<TPCell, TPFace, valueT, gradientT, hessianT>,
 	valueT, gradientT, hessianT>
@@ -101,13 +102,19 @@ public abstract class CartesianGridSpace<ST extends ShapeFunction<TPCell, TPFace
 	}
 	
 	@Override
-	public Map<Integer, ST> getShapeFunctions()
+	public Map<Integer, ST> getShapeFunctionMap()
 	{
 		
-		final Map<Integer, ST> functionNumbers = new TreeMap<>();
+		final Map<Integer, ST> functionNumbers = new Int2ObjectOpenHashMap<>();
 		for (final ST shapeFunction : shapeFunctions)
 			functionNumbers.put(shapeFunction.getGlobalIndex(), shapeFunction);
 		return functionNumbers;
+	}
+	
+	@Override
+	public Collection<ST> getShapeFunctions()
+	{
+		return shapeFunctions;
 	}
 	
 	@Override

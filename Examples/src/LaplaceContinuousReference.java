@@ -32,11 +32,11 @@ public class LaplaceContinuousReference
 		                                                         Ints.asList(3 * 64, 3 * 64));
 		grid.assembleCells();
 		grid.assembleFunctions(polynomialDegree);
-		final SparseMatrix s = new SparseMatrix(grid.getShapeFunctions()
+		final SparseMatrix s = new SparseMatrix(grid.getShapeFunctionMap()
 		                                            .size(),
-		                                        grid.getShapeFunctions()
+		                                        grid.getShapeFunctionMap()
 		                                            .size());
-		final DenseVector d = new DenseVector(grid.getShapeFunctions()
+		final DenseVector d = new DenseVector(grid.getShapeFunctionMap()
 		                                          .size());
 		grid.initializeSystemMatrix();
 		grid.initializeRhs();
@@ -47,7 +47,7 @@ public class LaplaceContinuousReference
 		final Vector solution1 = it.solveGMRES(s, d, 1e-11);
 		final ScalarFESpaceFunction<ContinuousTPShapeFunction> solut =
 			new ScalarFESpaceFunction<>(
-				grid.getShapeFunctions(), solution1);
+				grid.getShapeFunctionMap(), solution1);
 		PlotWindow.addPlot(new ScalarPlot2D(solut, grid.generatePlotPoints(30), 30));
 		PlotWindow.addPlot(new ScalarPlot2D(LaplaceReferenceSolution.scalarReferenceSolution(),
 		                                    grid.generatePlotPoints(30),

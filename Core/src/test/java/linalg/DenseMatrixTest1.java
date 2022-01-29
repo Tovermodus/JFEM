@@ -67,9 +67,9 @@ public class DenseMatrixTest1
 		final DenseMatrix largeDense4 = largeDense.mul(0.1);
 		final DenseMatrix largeDenseRec =
 			largeDense
-				.getLowerTriangleMatrix()
+				.getStrictlyLowerTriangleMatrix()
 				.add(largeDense.getDiagonalMatrix())
-				.add(largeDense.getUpperTriangleMatrix());
+				.add(largeDense.getStrictlyUpperTriangleMatrix());
 		assertFalse(largeDense4.isSparse());
 		assertEquals(largeDense, largeDense2);
 		for (int i = 0; i < 50; i++)

@@ -12,35 +12,35 @@ import java.util.Map;
 
 public class DGRTLaplace
 {
-	public static void main(String[] args)
+	public static void main(final String[] args)
 	{
-		PerformanceArguments.PerformanceArgumentBuilder builder =
+		final PerformanceArguments.PerformanceArgumentBuilder builder =
 			new PerformanceArguments.PerformanceArgumentBuilder();
 		builder.build();
-		CoordinateVector start = CoordinateVector.fromValues(-1, -1);
-		CoordinateVector end = CoordinateVector.fromValues(1, 1);
-		int polynomialDegree = 2;
-		RTFESpace grid = new RTFESpace(start, end,
-			Ints.asList(15, 15));
-		TPVectorCellIntegral<RTShapeFunction> gg =
+		final CoordinateVector start = CoordinateVector.fromValues(-1, -1);
+		final CoordinateVector end = CoordinateVector.fromValues(1, 1);
+		final int polynomialDegree = 2;
+		final RTFESpace grid = new RTFESpace(start, end,
+		                                     Ints.asList(15, 15));
+		final TPVectorCellIntegral<RTShapeFunction> gg =
 			new TPVectorCellIntegral<>(TPVectorCellIntegral.GRAD_GRAD);
-		TPVectorFaceIntegral<RTShapeFunction> gj =
+		final TPVectorFaceIntegral<RTShapeFunction> gj =
 			new TPVectorFaceIntegral<>(ScalarFunction.constantFunction(1),
-				TPVectorFaceIntegral.GRAD_AVERAGE_VALUE_NORMALAVERAGE);
-		TPVectorFaceIntegral<RTShapeFunction> jg =
+			                           TPVectorFaceIntegral.GRAD_AVERAGE_VALUE_NORMALAVERAGE);
+		final TPVectorFaceIntegral<RTShapeFunction> jg =
 			new TPVectorFaceIntegral<>(ScalarFunction.constantFunction(1),
-				TPVectorFaceIntegral.VALUE_NORMALAVERAGE_GRAD_AVERAGE);
-		TPVectorFaceIntegral<RTShapeFunction> jj =
+			                           TPVectorFaceIntegral.VALUE_NORMALAVERAGE_GRAD_AVERAGE);
+		final TPVectorFaceIntegral<RTShapeFunction> jj =
 			new TPVectorFaceIntegral<>(ScalarFunction.constantFunction(100000),
-				TPVectorFaceIntegral.VALUE_NORMALAVERAGE_VALUE_NORMALAVERAGE);
-		ArrayList<CellIntegral<TPCell, RTShapeFunction>> cellIntegrals =
+			                           TPVectorFaceIntegral.VALUE_NORMALAVERAGE_VALUE_NORMALAVERAGE);
+		final ArrayList<CellIntegral<TPCell, RTShapeFunction>> cellIntegrals =
 			new ArrayList<>();
 		cellIntegrals.add(gg);
-		ArrayList<FaceIntegral<TPFace, RTShapeFunction>> faceIntegrals = new ArrayList<>();
+		final ArrayList<FaceIntegral<TPFace, RTShapeFunction>> faceIntegrals = new ArrayList<>();
 		//faceIntegrals.add(jj);
 		//faceIntegrals.add(gj);
 		//faceIntegrals.add(jg);
-		TPVectorRightHandSideIntegral<RTShapeFunction> rightHandSideIntegral =
+		final TPVectorRightHandSideIntegral<RTShapeFunction> rightHandSideIntegral =
 			new TPVectorRightHandSideIntegral<>(new VectorFunction()
 			{
 				@Override
@@ -48,6 +48,7 @@ public class DGRTLaplace
 				{
 					return 2;
 				}
+				
 				@Override
 				public int getDomainDimension()
 				{
@@ -55,15 +56,16 @@ public class DGRTLaplace
 				}
 				
 				@Override
-				public CoordinateVector value(CoordinateVector pos)
+				public CoordinateVector value(final CoordinateVector pos)
 				{
 					return CoordinateVector.fromValues(4, 4);
 				}
 			},
-				TPVectorRightHandSideIntegral.VALUE);
-		ArrayList<RightHandSideIntegral<TPCell, RTShapeFunction>> rightHandSideIntegrals = new ArrayList<>();
+			                                    TPVectorRightHandSideIntegral.VALUE);
+		final ArrayList<RightHandSideIntegral<TPCell, RTShapeFunction>> rightHandSideIntegrals = new ArrayList<>();
 		rightHandSideIntegrals.add(rightHandSideIntegral);
-		ArrayList<BoundaryRightHandSideIntegral< TPFace, RTShapeFunction>> boundaryFaceIntegrals = new ArrayList<>();
+		final ArrayList<BoundaryRightHandSideIntegral<TPFace, RTShapeFunction>> boundaryFaceIntegrals
+			= new ArrayList<>();
 		grid.assembleCells();
 		grid.assembleFunctions(polynomialDegree);
 		grid.initializeSystemMatrix();
@@ -79,6 +81,7 @@ public class DGRTLaplace
 			{
 				return 2;
 			}
+			
 			@Override
 			public int getDomainDimension()
 			{
@@ -86,29 +89,32 @@ public class DGRTLaplace
 			}
 			
 			@Override
-			public CoordinateVector value(CoordinateVector pos)
+			public CoordinateVector value(final CoordinateVector pos)
 			{
-				return CoordinateVector.fromValues(0,0);
+				return CoordinateVector.fromValues(0, 0);
 			}
 		});
-		System.out.println("solve system: " + grid.getSystemMatrix().getRows() + "×" + grid.getSystemMatrix().getCols());
+		System.out.println("solve system: " + grid.getSystemMatrix()
+		                                          .getRows() + "×" + grid.getSystemMatrix()
+		                                                                 .getCols());
 		//grid.A.makeParallelReady(12);
-		if (grid.getRhs().getLength() < 50)
+		if (grid.getRhs()
+		        .getLength() < 50)
 		{
 			System.out.println(grid.getSystemMatrix());
 			System.out.println(grid.getRhs());
 		}
-		IterativeSolver i = new IterativeSolver();
+		final IterativeSolver i = new IterativeSolver();
 		System.out.println("start stopwatch");
-		Vector solution1 = i.solveCG(grid.getSystemMatrix(), grid.getRhs(), 1e-3);
+		final Vector solution1 = i.solveCG(grid.getSystemMatrix(), grid.getRhs(), 1e-3);
 		//Vector solution = ((DenseMatrix)grid.getSystemMatrix()).solve(grid.getRhs());
 		System.out.println("solved");
 		//grid.A.print_formatted();
 		//grid.rhs.print_formatted();
-		VectorFESpaceFunction<RTShapeFunction> solut =
+		final VectorFESpaceFunction<RTShapeFunction> solut =
 			new VectorFESpaceFunction<>(
-				grid.getShapeFunctions(), solution1);
-		ArrayList<Map<CoordinateVector, Double>> valList = new ArrayList<>();
+				grid.getShapeFunctionMap(), solution1);
+		final ArrayList<Map<CoordinateVector, Double>> valList = new ArrayList<>();
 		valList.add(solut.componentValuesInPoints(grid.generatePlotPoints(50), 0));
 		valList.add(solut.componentValuesInPoints(grid.generatePlotPoints(50), 1));
 		new PlotFrame(valList, start, end);

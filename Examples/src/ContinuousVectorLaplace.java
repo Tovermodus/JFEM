@@ -58,7 +58,7 @@ public class ContinuousVectorLaplace
 		final Vector solution1 = it.solveGMRES(grid.getSystemMatrix(), grid.getRhs(), 1e-8);
 		final VectorFESpaceFunction<ContinuousTPVectorFunction> solut =
 			new VectorFESpaceFunction<>(
-				grid.getShapeFunctions(), solution1);
+				grid.getShapeFunctionMap(), solution1);
 		PlotWindow.addPlot(new ScalarPlot2D(solut.getComponentFunction(0), grid.generatePlotPoints(30), 30));
 		PlotWindow.addPlot(new ScalarPlot2D(LaplaceReferenceSolution.vectorReferenceSolution()
 		                                                            .getComponentFunction(0),

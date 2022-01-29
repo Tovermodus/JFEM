@@ -72,7 +72,7 @@ public class VectorLaplaceTest
 		final Vector solution1 = it.solveGMRES(grid.getSystemMatrix(), grid.getRhs(), 1e-8);
 		final VectorFESpaceFunction<TPVectorFunction> solut =
 			new VectorFESpaceFunction<>(
-				grid.getShapeFunctions(), solution1);
+				grid.getShapeFunctionMap(), solution1);
 		assertTrue("" + ConvergenceOrderEstimator.normL2VecDifference(solut,
 		                                                              LaplaceReferenceSolution.vectorReferenceSolution(),
 		                                                              grid.generatePlotPoints(20)),
@@ -125,7 +125,7 @@ public class VectorLaplaceTest
 		final Vector solution1 = it.solveGMRES(grid.getSystemMatrix(), grid.getRhs(), 1e-8);
 		final VectorFESpaceFunction<ContinuousTPVectorFunction> solut =
 			new VectorFESpaceFunction<>(
-				grid.getShapeFunctions(), solution1);
+				grid.getShapeFunctionMap(), solution1);
 		assertTrue("" + ConvergenceOrderEstimator.normL2VecDifference(solut,
 		                                                              LaplaceReferenceSolution.vectorReferenceSolution(),
 		                                                              grid.generatePlotPoints(20)),

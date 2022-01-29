@@ -30,6 +30,14 @@ public class TaylorHoodSpace
 		super(startCoordinates, endCoordinates, cellsPerDimension);
 	}
 	
+	public int getVelocitySize()
+	{
+		return (int) getShapeFunctions()
+			.stream()
+			.filter(ComposeMixedShapeFunction::hasVelocityFunction)
+			.count();
+	}
+	
 	@Override
 	public void assembleFunctions(final int polynomialDegree)
 	{

@@ -17,7 +17,7 @@ import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
 public class DenseMatrix
-	implements MutableMatrix, Decomposable, DirectlySolvable
+	implements MutableSolvable, Decomposable
 {
 	protected volatile double[][] entries;
 	private org.ujmp.core.Matrix ujmpmat = null;
@@ -450,7 +450,7 @@ public class DenseMatrix
 	}
 	
 	@Override
-	public DenseMatrix getLowerTriangleMatrix()
+	public DenseMatrix getStrictlyLowerTriangleMatrix()
 	{
 		if (PerformanceArguments.getInstance().executeChecks) if (getRows() != getCols())
 			throw new UnsupportedOperationException("cant get triangle from rectangle");
@@ -462,7 +462,7 @@ public class DenseMatrix
 	}
 	
 	@Override
-	public DenseMatrix getUpperTriangleMatrix()
+	public DenseMatrix getStrictlyUpperTriangleMatrix()
 	{
 		if (PerformanceArguments.getInstance().executeChecks) if (getRows() != getCols())
 			throw new UnsupportedOperationException("cant get triangle from rectangle");

@@ -3,6 +3,7 @@ package basic;
 import linalg.DenseVector;
 import linalg.MutableMatrix;
 import linalg.MutableVector;
+import linalg.Vector;
 
 import java.util.function.BiPredicate;
 import java.util.function.Predicate;
@@ -42,30 +43,35 @@ public interface AcceptsMatrixBoundaryValues<CT extends Cell<CT, FT>,
 		}
 	}
 	
+	default int[] getBoundaryNodes(final Predicate<FT> faces,
+	                               final BiPredicate<FT, ST> functions)
+	{
+		return getFaces().stream()
+		                 .filter(Face::isBoundaryFace)
+		                 .filter(faces)
+		                 .flatMapToInt(F -> getShapeFunctionsWithSupportOnFace(F).stream()
+		                                                                         .filter(v -> functions.test(F,
+		                                                                                                     v))
+		                                                                         .filter(v -> v.getNodeFunctional()
+		                                                                                       .usesFace(F))
+		                                                                         .mapToInt(ShapeFunction::getGlobalIndex))
+		                 .distinct()
+		                 .toArray();
+	}
+	
 	default void writeBoundaryValuesTo(final Function<valueT, gradientT, hessianT> boundaryValues,
 	                                   final Predicate<FT> faces,
 	                                   final BiPredicate<FT, ST> functions,
 	                                   final MutableMatrix A,
 	                                   final MutableVector rhs)
 	{
-		forEachBoundaryFace(F ->
-		                    {
-			                    if (faces.test(F))
-			                    {
-				                    forEachFunctionOnFace(F, (v) ->
-				                    {
-					                    if (functions.test(F, v) && v.getNodeFunctional()
-					                                                 .usesFace(F))
-					                    {
-						                    overWriteValue(v.getGlobalIndex(),
-						                                   v.getNodeFunctional()
-						                                    .evaluate(boundaryValues),
-						                                   A,
-						                                   rhs);
-					                    }
-				                    });
-			                    }
-		                    });
+		final int[] boundaryNodes = getBoundaryNodes(faces, functions);
+		for (final int node : boundaryNodes)
+			overWriteValue(node,
+			               getShapeFunctionMap().get(node)
+			                                    .getNodeFunctional()
+			                                    .evaluate(boundaryValues), A,
+			               rhs);
 	}
 	
 	default void writeBoundaryValuesTo(final Function<valueT, gradientT, hessianT> boundaryValues,
@@ -81,5 +87,53 @@ public interface AcceptsMatrixBoundaryValues<CT extends Cell<CT, FT>,
 	                                   final MutableVector rhs)
 	{
 		writeBoundaryValuesTo(boundaryValues, f -> true, (f, st) -> true, A, rhs);
+	}
+	
+	default void projectOntoBoundaryValues(final Function<valueT, gradientT, hessianT> boundaryValues,
+	                                       final Predicate<FT> faces,
+	                                       final BiPredicate<FT, ST> functions,
+	                                       final MutableVector vector)
+	{
+		final int[] boundaryNodes = getBoundaryNodes(faces, functions);
+		for (final int node : boundaryNodes)
+			vector.set(
+				getShapeFunctionMap().get(node)
+				                     .getNodeFunctional()
+				                     .evaluate(boundaryValues),
+				node);
+	}
+	
+	default void copyBoundaryValues(final Vector source, final MutableVector destination,
+	                                final Predicate<FT> faces,
+	                                final BiPredicate<FT, ST> functions)
+	{
+		
+		final int[] boundaryNodes = getBoundaryNodes(faces, functions);
+		for (final int node : boundaryNodes)
+			destination.set(source.at(node), node);
+	}
+	
+	default void copyBoundaryValues(final Vector source, final MutableVector destination,
+	                                final Predicate<FT> faces)
+	{
+		copyBoundaryValues(source, destination, faces, (f, st) -> true);
+	}
+	
+	default void copyBoundaryValues(final Vector source, final MutableVector destination)
+	{
+		copyBoundaryValues(source, destination, f -> true, (f, st) -> true);
+	}
+	
+	default void projectOntoBoundaryValues(final Function<valueT, gradientT, hessianT> boundaryValues,
+	                                       final Predicate<FT> faces,
+	                                       final MutableVector vector)
+	{
+		projectOntoBoundaryValues(boundaryValues, faces, (f, st) -> true, vector);
+	}
+	
+	default void projectOntoBoundaryValues(final Function<valueT, gradientT, hessianT> boundaryValues,
+	                                       final MutableVector vector)
+	{
+		projectOntoBoundaryValues(boundaryValues, f -> true, (f, st) -> true, vector);
 	}
 }

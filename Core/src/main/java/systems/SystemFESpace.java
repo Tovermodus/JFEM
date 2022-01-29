@@ -12,8 +12,7 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 
-public class SystemFESpace<CT extends Cell<CT, FT>, FT extends Face<CT, FT>
-	>
+public class SystemFESpace<CT extends Cell<CT, FT>, FT extends Face<CT, FT>>
 	implements MatrixFESpace<CT, FT, SystemShapeFunction<CT, FT, ?>>
 {
 	@Override
@@ -29,7 +28,13 @@ public class SystemFESpace<CT extends Cell<CT, FT>, FT extends Face<CT, FT>
 	}
 	
 	@Override
-	public Map<Integer, SystemShapeFunction<CT, FT, ?>> getShapeFunctions()
+	public Map<Integer, SystemShapeFunction<CT, FT, ?>> getShapeFunctionMap()
+	{
+		throw new UnsupportedOperationException("not implemented yet");
+	}
+	
+	@Override
+	public Collection<SystemShapeFunction<CT, FT, ?>> getShapeFunctions()
 	{
 		throw new UnsupportedOperationException("not implemented yet");
 	}

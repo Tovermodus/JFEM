@@ -44,7 +44,7 @@ public class StokesTime
 	
 	public static MixedFunction generateCurrentFunction(final Vector iterate, final TaylorHoodSpace grid)
 	{
-		return new MixedFESpaceFunction<>(grid.getShapeFunctions(), iterate);
+		return new MixedFESpaceFunction<>(grid.getShapeFunctionMap(), iterate);
 	}
 	
 	public static void main(final String[] args)
@@ -131,7 +131,7 @@ public class StokesTime
 		grid.assembleCells();
 		grid.assembleFunctions(polynomialDegree);
 		final List<CoordinateVector> points = grid.generatePlotPoints(nPoints);
-		final int n = grid.getShapeFunctions()
+		final int n = grid.getShapeFunctionMap()
 		                  .size();
 		
 		final ScalarFunction indicatorFunction = new ScalarFunction()
@@ -197,7 +197,7 @@ public class StokesTime
 				 .valuesInPointsAtTime(points, 0));
 		
 		final Map<CoordinateVector, CoordinateVector> vvals = (new MixedFESpaceFunction<>(
-			grid.getShapeFunctions(), iterate)
+			grid.getShapeFunctionMap(), iterate)
 			                                                       .velocityValuesInPointsAtTime(points,
 			                                                                                     0));
 		//		//PlotWindow.addPlot(new MixedPlot2D(generateCurrentFunction(iterate, grid), points, nPoints));

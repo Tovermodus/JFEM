@@ -39,7 +39,8 @@ public class RTDarcyOrder
 					LaplaceReferenceSolution.scalarRightHandSide(), TPRightHandSideIntegral.VALUE));
 		final List<RightHandSideIntegral<TPCell, RTMixedFunction>> rightHandSideIntegrals = new ArrayList<>();
 		rightHandSideIntegrals.add(rightHandSideIntegral);
-		final List<BoundaryRightHandSideIntegral<TPFace, RTMixedFunction>> boundaryFaceIntegrals = new ArrayList<>();
+		final List<BoundaryRightHandSideIntegral<TPFace, RTMixedFunction>> boundaryFaceIntegrals
+			= new ArrayList<>();
 		final MixedBoundaryRightHandSideIntegral<TPFace, ContinuousTPShapeFunction, RTShapeFunction,
 			RTMixedFunction> dirichlet =
 			MixedBoundaryRightHandSideIntegral.fromVelocityIntegral(
@@ -64,7 +65,7 @@ public class RTDarcyOrder
 			final Vector solution1 = it.solveGMRES(grid.getSystemMatrix(), grid.getRhs(), 1e-9);
 			final MixedTPFESpaceFunction<RTMixedFunction> solut =
 				new MixedTPFESpaceFunction<>(
-					grid.getShapeFunctions(), solution1);
+					grid.getShapeFunctionMap(), solution1);
 			solutions.add(solut.getPressureFunction());
 			solutionsVec.add(solut.getVelocityFunction());
 		}

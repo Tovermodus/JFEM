@@ -65,7 +65,7 @@ public class LaplaceTest
 		final Vector solution1 = it.solveGMRES(grid.getSystemMatrix(), grid.getRhs(), 1e-8);
 		final ScalarFESpaceFunction<TPShapeFunction> solut =
 			new ScalarFESpaceFunction<>(
-				grid.getShapeFunctions(), solution1);
+				grid.getShapeFunctionMap(), solution1);
 		assertTrue(ConvergenceOrderEstimator.normL2Difference(solut,
 		                                                      LaplaceReferenceSolution.scalarReferenceSolution(),
 		                                                      grid.generatePlotPoints(20)) < 1e-2);
@@ -113,7 +113,7 @@ public class LaplaceTest
 		final Vector solution1 = it.solveGMRES(grid.getSystemMatrix(), grid.getRhs(), 1e-8);
 		final ScalarFESpaceFunction<ContinuousTPShapeFunction> solut =
 			new ScalarFESpaceFunction<>(
-				grid.getShapeFunctions(), solution1);
+				grid.getShapeFunctionMap(), solution1);
 		assertTrue(ConvergenceOrderEstimator.normL2Difference(solut,
 		                                                      LaplaceReferenceSolution.scalarReferenceSolution(),
 		                                                      grid.generatePlotPoints(20)) < 1e-2);

@@ -84,7 +84,7 @@ public class RTDarcy
 		//grid.rhs.print_formatted();
 		final MixedTPFESpaceFunction<RTMixedFunction> solut =
 			new MixedTPFESpaceFunction<>(
-				grid.getShapeFunctions(), solution1);
+				grid.getShapeFunctionMap(), solution1);
 		final ArrayList<Map<CoordinateVector, Double>> valList = new ArrayList<>();
 		/*valList.add(solut.pressureValuesInPoints(grid.generatePlotPoints(50)));
 		valList.add(LaplaceReferenceSolution.scalarReferenceSolution().valuesInPoints(grid.generatePlotPoints(50)));

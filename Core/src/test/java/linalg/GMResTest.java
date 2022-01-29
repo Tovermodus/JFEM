@@ -13,7 +13,7 @@ public class GMResTest
 		final SparseMatrix id = SparseMatrix.identity(15);
 		final DenseVector b = DenseVector.vectorFromValues(1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15);
 		final IterativeSolver i = new IterativeSolver();
-		assertEquals(b, i.solveGMRES(id, b, 1e-12));
+		assertEquals(b, new GMRES2(1e-12).solve(id, b));
 	}
 	
 	@Test
@@ -22,7 +22,7 @@ public class GMResTest
 		final DenseMatrix symm = DenseMatrix.squareMatrixFromValues(0, 1, 2, 1, 0, 3, 2, 3, 0);
 		final DenseVector b = DenseVector.vectorFromValues(3, 4, 5);
 		final IterativeSolver i = new IterativeSolver();
-		final Vector sol = i.solveGMRES(symm, b, 1e-12);
+		final Vector sol = new GMRES2(1e-12).solve(symm, b);
 		assertEquals(b, symm.mvMul(sol));
 		assertEquals(symm.solve(b), sol);
 	}
@@ -33,7 +33,7 @@ public class GMResTest
 		final DenseMatrix nonsymm = DenseMatrix.squareMatrixFromValues(3, 1, 7, 2, 0, 3, 2, 3, 0);
 		final DenseVector b = DenseVector.vectorFromValues(3, 4, 5);
 		final IterativeSolver i = new IterativeSolver();
-		final Vector sol = i.solveGMRES(nonsymm, b, 1e-12);
+		final Vector sol = new GMRES2(1e-12).solve(nonsymm, b);
 		assertEquals(b, nonsymm.mvMul(sol));
 		assertEquals(nonsymm.solve(b), sol);
 	}
@@ -51,7 +51,9 @@ public class GMResTest
 			large.add(Math.random(), (int) (Math.random() * n), (int) (Math.random() * n));
 		}
 		final IterativeSolver i = new IterativeSolver();
-		final Vector sol = i.solveGMRES(large, b, 1e-10);
+		i.showProgress = true;
+		//i.solveGMRES(large, b, 1e-10);
+		final Vector sol = new GMRES2(1e-10).solve(large, b);
 		assertTrue(b.almostEqual(large.mvMul(sol)));
 	}
 	
@@ -61,7 +63,7 @@ public class GMResTest
 		final SparseMatrix id = SparseMatrix.identity(15);
 		final DenseVector b = DenseVector.vectorFromValues(1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15);
 		final IterativeSolver i = new IterativeSolver();
-		assertEquals(b, i.solvePGMRES(id, id, b, 1e-12));
+		assertEquals(b, new GMRES2(1e-12).solve(id, id, b));//i.solvePGMRES(id, id, b, 1e-12));
 	}
 	
 	@Test
@@ -70,7 +72,9 @@ public class GMResTest
 		final DenseMatrix symm = DenseMatrix.squareMatrixFromValues(0, 1, 2, 1, 0, 3, 2, 3, 0);
 		final DenseVector b = DenseVector.vectorFromValues(3, 4, 5);
 		final IterativeSolver i = new IterativeSolver();
-		final Vector sol = i.solvePGMRES(symm, SparseMatrix.identity(3), b, 1e-12);
+		final Vector sol = new GMRES2(1e-12).solve(symm,
+		                                           SparseMatrix.identity(3),
+		                                           b);//i.solvePGMRES(symm,SparseMatrix.identity(3), b, 1e-12);
 		assertTrue(b.almostEqual(symm.mvMul(sol)));
 	}
 	
@@ -80,7 +84,8 @@ public class GMResTest
 		final DenseMatrix nonsymm = DenseMatrix.squareMatrixFromValues(3, 1, 7, 2, 0, 3, 2, 3, 0);
 		final DenseVector b = DenseVector.vectorFromValues(3, 4, 5);
 		final IterativeSolver i = new IterativeSolver();
-		final Vector sol = i.solvePGMRES(nonsymm, SparseMatrix.identity(3), b, 1e-12);
+		final Vector sol = new GMRES2(1e-12).solve(nonsymm, SparseMatrix.identity(3), b);
+		//i.solvePGMRES(nonsymm, SparseMatrix.identity(3), b, 1e-12);
 		assertEquals(b, nonsymm.mvMul(sol));
 		assertEquals(nonsymm.solve(b), sol);
 	}
@@ -88,7 +93,7 @@ public class GMResTest
 	@Test
 	public void testPLarge()
 	{
-		final int n = 30000;
+		final int n = 10000;
 		final SparseMatrix large = new SparseMatrix(n, n);
 		final DenseVector b = new DenseVector(n);
 		for (int i = 0; i < n * 10; i++)
@@ -99,7 +104,7 @@ public class GMResTest
 		}
 		final IterativeSolver i = new IterativeSolver();
 		i.showProgress = true;
-		final Vector sol = i.solvePGMRES(large, SparseMatrix.identity(n), b, 1e-10);
+		final Vector sol = new GMRES2(1e-12).solve(large, SparseMatrix.identity(n), b);
 		assertTrue(b.almostEqual(large.mvMul(sol)));
 	}
 	
@@ -109,7 +114,10 @@ public class GMResTest
 		final DenseMatrix nonsymm = DenseMatrix.squareMatrixFromValues(3, 1, 7, 2, 4, 3, 2, 3, 7);
 		final DenseVector b = DenseVector.vectorFromValues(3, 4, 5);
 		final IterativeSolver i = new IterativeSolver();
-		final Vector sol = i.solvePGMRES(nonsymm, nonsymm.inverse(), b, 1e-12);
+		final Vector sol = new GMRES2(1e-12).solve(nonsymm, nonsymm.inverse(), b);//i.solvePGMRES
+		// (nonsymm, nonsymm
+		// .inverse(), b,
+		// 1e-12);
 		assertEquals(b, nonsymm.mvMul(sol));
 		assertEquals(nonsymm.solve(b), sol);
 	}

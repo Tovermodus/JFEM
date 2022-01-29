@@ -5,7 +5,7 @@ import dlm.HyperbolicCartesianDistorted;
 import io.vavr.Tuple2;
 import linalg.*;
 import mixed.*;
-import multigrid.MGPReconditioner;
+import multigrid.MGPReconditioner2;
 import multigrid.MGSpace;
 import multigrid.RichardsonSmoother;
 import multigrid.Smoother;
@@ -131,15 +131,15 @@ public class DLMRingPrecondMG
 			@Override
 			public Tuple2<VectorMultiplyable, DenseVector> createSystem(final TaylorHoodSpace space)
 			{
-				final SparseMatrix s = new SparseMatrix(space.getShapeFunctions()
+				final SparseMatrix s = new SparseMatrix(space.getShapeFunctionMap()
 				                                             .size(),
-				                                        space.getShapeFunctions()
+				                                        space.getShapeFunctionMap()
 				                                             .size());
 				space.writeCellIntegralsToMatrix(getBackgroundMassIntegrals(), s);
 				space.writeCellIntegralsToMatrix(getSemiImplicitBackgroundIntegrals(getUp().getVelocityFunction()),
 				                                 s);
 				s.mulInPlace(1. / dt);
-				final DenseVector d = new DenseVector(space.getShapeFunctions()
+				final DenseVector d = new DenseVector(space.getShapeFunctionMap()
 				                                           .size());
 				space.writeCellIntegralsToMatrix(getBackgroundIntegrals(), s);
 				final VectorFunction velocityBoundaryFunction
@@ -151,7 +151,7 @@ public class DLMRingPrecondMG
 				                            s,
 				                            d);
 				final Optional<QkQkFunction> firstPressure =
-					space.getShapeFunctions()
+					space.getShapeFunctionMap()
 					     .values()
 					     .stream()
 					     .filter(ComposeMixedShapeFunction::hasPressureFunction)
@@ -179,7 +179,7 @@ public class DLMRingPrecondMG
 			}
 		};
 		System.out.println("mg built");
-		return new MGPReconditioner(mg);
+		return new MGPReconditioner2(mg);
 	}
 	
 	public VectorMultiplyable getPrecond(final Matrix A)
@@ -205,12 +205,12 @@ public class DLMRingPrecondMG
 		pressureValues.putAll(Up.pressureValuesInPointsAtTime(plotPoints, getTime()));
 		final DistortedVectorFESpaceFunction X =
 			new DistortedVectorFESpaceFunction(particleSpaces.get(0)
-			                                                 .getShapeFunctions(),
+			                                                 .getShapeFunctionMap(),
 			                                   getParticleIterate(getCurrentIterate(), 0));
 		XValues.putAll(X.valuesInPointsAtTime(plotPoints, getTime()));
 		final DistortedVectorFESpaceFunction XPrime =
 			new DistortedVectorFESpaceFunction(particleSpaces.get(0)
-			                                                 .getShapeFunctions(),
+			                                                 .getShapeFunctionMap(),
 			                                   getParticleIterate(getCurrentIterate().sub(getLastIterate())
 			                                                                         .mul(1. / dt), 0));
 		XPrimeValues.putAll(XPrime.valuesInPointsAtTime(plotPoints, getTime()));
@@ -413,13 +413,13 @@ public class DLMRingPrecondMG
 		                                           particle0,
 		                                           dlmElast2.getIterateHistory()
 		                                                    .slice(new IntCoordinates(0,
-		                                                                              backGround.getShapeFunctions()
+		                                                                              backGround.getShapeFunctionMap()
 		                                                                                        .size()),
 		                                                           new IntCoordinates(dlmElast2.getIterateHistory()
 		                                                                                       .getRows(),
-		                                                                              backGround.getShapeFunctions()
+		                                                                              backGround.getShapeFunctionMap()
 		                                                                                        .size()
-			                                                                              + particle0.getShapeFunctions()
+			                                                                              + particle0.getShapeFunctionMap()
 			                                                                                         .size())),
 		                                           5);
 		UpPlot0.addOverlay(ball1);
@@ -433,17 +433,17 @@ public class DLMRingPrecondMG
 		                                           particle1,
 		                                           dlmElast2.getIterateHistory()
 		                                                    .slice(new IntCoordinates(0,
-		                                                                              backGround.getShapeFunctions()
+		                                                                              backGround.getShapeFunctionMap()
 		                                                                                        .size()
-			                                                                              + 2 * particle0.getShapeFunctions()
+			                                                                              + 2 * particle0.getShapeFunctionMap()
 			                                                                                             .size()),
 		                                                           new IntCoordinates(dlmElast2.getIterateHistory()
 		                                                                                       .getRows(),
-		                                                                              backGround.getShapeFunctions()
+		                                                                              backGround.getShapeFunctionMap()
 		                                                                                        .size()
-			                                                                              + 2 * particle0.getShapeFunctions()
+			                                                                              + 2 * particle0.getShapeFunctionMap()
 			                                                                                             .size()
-			                                                                              + particle1.getShapeFunctions()
+			                                                                              + particle1.getShapeFunctionMap()
 			                                                                                         .size())),
 		                                           5);
 		UpPlot.addOverlay(ball2);
@@ -456,21 +456,21 @@ public class DLMRingPrecondMG
 		                                          particle2,
 		                                          dlmElast2.getIterateHistory()
 		                                                   .slice(new IntCoordinates(0,
-		                                                                             backGround.getShapeFunctions()
+		                                                                             backGround.getShapeFunctionMap()
 		                                                                                       .size()
-			                                                                             + 2 * particle0.getShapeFunctions()
+			                                                                             + 2 * particle0.getShapeFunctionMap()
 			                                                                                            .size()
-			                                                                             + 2 * particle1.getShapeFunctions()
+			                                                                             + 2 * particle1.getShapeFunctionMap()
 			                                                                                            .size()),
 		                                                          new IntCoordinates(dlmElast2.getIterateHistory()
 		                                                                                      .getRows(),
-		                                                                             backGround.getShapeFunctions()
+		                                                                             backGround.getShapeFunctionMap()
 		                                                                                       .size()
-			                                                                             + 2 * particle0.getShapeFunctions()
+			                                                                             + 2 * particle0.getShapeFunctionMap()
 			                                                                                            .size()
-			                                                                             + 2 * particle1.getShapeFunctions()
+			                                                                             + 2 * particle1.getShapeFunctionMap()
 			                                                                                            .size()
-			                                                                             + particle2.getShapeFunctions()
+			                                                                             + particle2.getShapeFunctionMap()
 			                                                                                        .size())),
 		                                          5);
 		UpPlot1.addOverlay(ring);

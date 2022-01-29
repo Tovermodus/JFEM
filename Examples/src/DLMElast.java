@@ -307,7 +307,7 @@ public class DLMElast
 				                  return Map.entry(Xp.addCoordinate((i - 1) * dt), val);
 			                  })
 			             .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue)));
-		final VectorFunction X_prime = new DistortedVectorFESpaceFunction(lagrangian.getShapeFunctions(),
+		final VectorFunction X_prime = new DistortedVectorFESpaceFunction(lagrangian.getShapeFunctionMap(),
 		                                                                  getLagrangianIterate(
 			                                                                  currentIterate.sub(
 				                                                                  lastIterate))
@@ -455,7 +455,7 @@ public class DLMElast
 		eulerian = new TaylorHoodSpace(startCoordinates, endCoordinates, cellCounts);
 		eulerian.assembleCells();
 		eulerian.assembleFunctions(eulerDegree);
-		nEulerian = eulerian.getShapeFunctions()
+		nEulerian = eulerian.getShapeFunctionMap()
 		                    .size();
 		eulerianPoints = eulerian.generatePlotPoints(eulerianPointsPerDimension);
 	}
@@ -467,7 +467,7 @@ public class DLMElast
 		lagrangian = new CircleVectorSpace(center, radius, nLagrangeRefines);
 		lagrangian.assembleCells();
 		lagrangian.assembleFunctions(lagrangeDegree);
-		nLagrangian = lagrangian.getShapeFunctions()
+		nLagrangian = lagrangian.getShapeFunctionMap()
 		                        .size();
 		nTransfer = nLagrangian;
 	}
@@ -477,12 +477,12 @@ public class DLMElast
 		final MixedFunction initialVelocityFunction = new ComposedMixedFunction(initialVelocityValues());
 		final MixedFunction initialPressureFunction = new ComposedMixedFunction(initialPressureValues());
 		eulerian
-			.getShapeFunctions()
+			.getShapeFunctionMap()
 			.forEach((key, value) -> initialVector.add(
 				value.getNodeFunctional()
 				     .evaluate(initialVelocityFunction), key));
 		eulerian
-			.getShapeFunctions()
+			.getShapeFunctionMap()
 			.forEach((key, value) -> initialVector.add(
 				value.getNodeFunctional()
 				     .evaluate(initialPressureFunction), key));
@@ -491,17 +491,17 @@ public class DLMElast
 	public void generateFirstLagrangianIterates(final DenseVector initialVector, final DenseVector previousVector)
 	{
 		lagrangian
-			.getShapeFunctions()
+			.getShapeFunctionMap()
 			.forEach((key, value) -> initialVector.add(
 				value.getNodeFunctional()
 				     .evaluate(initialDisplacementValues()), nEulerian + key));
 		lagrangian
-			.getShapeFunctions()
+			.getShapeFunctionMap()
 			.forEach((key, value) -> previousVector.add(
 				value.getNodeFunctional()
 				     .evaluate(initialDisplacementValues()), nEulerian + key));
 		lagrangian
-			.getShapeFunctions()
+			.getShapeFunctionMap()
 			.forEach((key, value) -> previousVector.add(
 				-value.getNodeFunctional()
 				      .evaluate(initialDisplacementDerivatives()) * dt,
@@ -520,7 +520,7 @@ public class DLMElast
 			currentMatrix,
 			rightHandSide);
 		final int firstPressure = eulerian
-			.getShapeFunctions()
+			.getShapeFunctionMap()
 			.values()
 			.stream()
 			.filter(MixedFunction::hasPressureFunction)
@@ -602,7 +602,7 @@ public class DLMElast
 	public void writeCf(final SparseMatrix currentMatrix, final DenseVector currentIterate)
 	{
 		Cf = new SparseMatrix(nTransfer, nEulerian);
-		eulerian.getShapeFunctions()
+		eulerian.getShapeFunctionMap()
 		        .entrySet()
 		        .stream()
 		        .parallel()
@@ -634,13 +634,14 @@ public class DLMElast
 	
 	private DistortedVectorFESpaceFunction getX(final DenseVector currentIterate)
 	{
-		return new DistortedVectorFESpaceFunction(lagrangian.getShapeFunctions(),
+		return new DistortedVectorFESpaceFunction(lagrangian.getShapeFunctionMap(),
 		                                          getLagrangianIterate(currentIterate));
 	}
 	
 	private MixedTPFESpaceFunction<QkQkFunction> getUp(final DenseVector currentIterate)
 	{
-		return new MixedTPFESpaceFunction<>(eulerian.getShapeFunctions(), getEulerianfIterate(currentIterate));
+		return new MixedTPFESpaceFunction<>(eulerian.getShapeFunctionMap(),
+		                                    getEulerianfIterate(currentIterate));
 	}
 	
 	private DistortedVectorFunction concatenateVelocityWithX(final MixedFunction sf,

@@ -31,7 +31,8 @@ public class QkQkMaxwellOrder
 			divValue =
 			new MixedTPCellIntegral<>(ScalarFunction.constantFunction(-1),
 			                          MixedTPCellIntegral.DIV_VALUE);
-		final MixedCellIntegral<TPCell, ContinuousTPShapeFunction, ContinuousTPVectorFunction, QkQkFunction> vv =
+		final MixedCellIntegral<TPCell, ContinuousTPShapeFunction, ContinuousTPVectorFunction, QkQkFunction> vv
+			=
 			MixedCellIntegral.fromVelocityIntegral(valueValue);
 		final List<CellIntegral<TPCell, QkQkFunction>> cellIntegrals =
 			new ArrayList<>();
@@ -76,7 +77,7 @@ public class QkQkMaxwellOrder
 			final Vector solution1 = it.solveGMRES(grid.getSystemMatrix(), grid.getRhs(), 1e-7);
 			final MixedTPFESpaceFunction<QkQkFunction> solut =
 				new MixedTPFESpaceFunction<>(
-					grid.getShapeFunctions(), solution1);
+					grid.getShapeFunctionMap(), solution1);
 			solutions.add(solut.getPressureFunction());
 			solutionsVec.add(solut.getVelocityFunction());
 		}

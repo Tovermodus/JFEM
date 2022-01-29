@@ -17,7 +17,7 @@ public class IterativeImplicitSchur
 	}
 	
 	@Override
-	Function2<VectorMultiplyable, Vector, Vector> solveSchur()
+	protected Function2<VectorMultiplyable, Vector, Vector> solveSchur()
 	{
 		return (A, b) -> it.solvePGMRES(A, firstInverse, b, 1e-9);
 	}

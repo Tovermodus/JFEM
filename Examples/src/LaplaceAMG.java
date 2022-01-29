@@ -5,7 +5,7 @@ import basic.ScalarPlot2D;
 import io.vavr.Tuple2;
 import linalg.*;
 import multigrid.AMGSpace;
-import multigrid.MGPReconditioner;
+import multigrid.MGPReconditioner2;
 import multigrid.RichardsonSmoother;
 import multigrid.Smoother;
 import tensorproduct.ContinuousTPFESpace;
@@ -47,11 +47,11 @@ public class LaplaceAMG
 			@Override
 			public Tuple2<SparseMatrix, Vector> createFinestLevelSystem(final ContinuousTPFESpace space)
 			{
-				final SparseMatrix s = new SparseMatrix(space.getShapeFunctions()
+				final SparseMatrix s = new SparseMatrix(space.getShapeFunctionMap()
 				                                             .size(),
-				                                        space.getShapeFunctions()
+				                                        space.getShapeFunctionMap()
 				                                             .size());
-				final DenseVector rhs = new DenseVector(space.getShapeFunctions()
+				final DenseVector rhs = new DenseVector(space.getShapeFunctionMap()
 				                                             .size());
 				final TPCellIntegral<ContinuousTPShapeFunction> gg =
 					new TPCellIntegral<>(ScalarFunction.constantFunction(1),
@@ -88,7 +88,7 @@ public class LaplaceAMG
 		ScalarFESpaceFunction<ContinuousTPShapeFunction> sol =
 			new ScalarFESpaceFunction<>(
 				mg.spaces.get(refinements)
-				         .getShapeFunctions(), solut);
+				         .getShapeFunctionMap(), solut);
 		PlotWindow.addPlot(new ScalarPlot2D(sol,
 		                                    mg.spaces.get(refinements)
 		                                             .generatePlotPoints(30),
@@ -144,13 +144,13 @@ public class LaplaceAMG
 		final IterativeSolver it = new IterativeSolver();
 		it.showProgress = true;
 		solut = new DenseVector(it.solvePGMRES(mg.finest_system,
-		                                       new MGPReconditioner(mg),
+		                                       new MGPReconditioner2(mg),
 		                                       mg.finest_rhs,
 		                                       1e-8));
 		sol =
 			new ScalarFESpaceFunction<>(
 				mg.spaces.get(refinements)
-				         .getShapeFunctions(), solut);
+				         .getShapeFunctionMap(), solut);
 		PlotWindow.addPlot(new ScalarPlot2D(sol,
 		                                    mg.spaces.get(refinements)
 		                                             .generatePlotPoints(30),

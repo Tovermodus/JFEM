@@ -58,11 +58,11 @@ public class SparkIntegral
 		final JavaPairRDD<Integer, Tuple2<ContinuousTPFESpace, CircleSpace>> gridsCached
 			= grids.cache();
 		final int nCart =
-			gridsCached.mapValues(tuple -> tuple._1.getShapeFunctions()
+			gridsCached.mapValues(tuple -> tuple._1.getShapeFunctionMap()
 			                                       .size())
 			           .first()._2;
 		final int nDist =
-			gridsCached.mapValues(tuple -> tuple._2.getShapeFunctions()
+			gridsCached.mapValues(tuple -> tuple._2.getShapeFunctionMap()
 			                                       .size())
 			           .first()._2;
 		final SparseMatrix d =
@@ -92,12 +92,12 @@ public class SparkIntegral
 						           final DistortedRightHandSideIntegral integral
 							           =
 							           new DistortedRightHandSideIntegral(
-								           cGrid.getShapeFunctions()
+								           cGrid.getShapeFunctionMap()
 								                .get(i),
 								           DistortedRightHandSideIntegral.VALUE);
 						           dGrid.writeCellIntegralsToRhs(List.of(integral), vec);
 						           vectors.add(
-							           new Tuple2<>(cGrid.getShapeFunctions()
+							           new Tuple2<>(cGrid.getShapeFunctionMap()
 							                             .get(i)
 							                             .getGlobalIndex(),
 							                        vec));
@@ -118,7 +118,7 @@ public class SparkIntegral
 			                      });
 		final Tuple2<ContinuousTPFESpace, CircleSpace> spaces = generateSpaces();
 		final SparseMatrix mat = new SparseMatrix(nDist, nCart);
-		for (final ContinuousTPShapeFunction sf : spaces._1.getShapeFunctions()
+		for (final ContinuousTPShapeFunction sf : spaces._1.getShapeFunctionMap()
 		                                                   .values())
 		{
 			final DistortedRightHandSideIntegral integral

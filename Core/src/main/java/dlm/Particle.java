@@ -35,7 +35,7 @@ public interface Particle
 	
 	default DistortedVectorFunctionOnCells getDisplacement(final ParticleIterate iterate)
 	{
-		return new DistortedVectorFESpaceFunction(getSpace().getShapeFunctions(), iterate.current);
+		return new DistortedVectorFESpaceFunction(getSpace().getShapeFunctionMap(), iterate.current);
 	}
 	
 	default DistortedVectorFunctionOnCells getPosition(final ParticleIterate iterate)
@@ -97,7 +97,7 @@ public interface Particle
 		final DenseVector lastLagrange = new DenseVector(getLagrangeSize());
 		final DenseVector initialVelocity = new DenseVector(getSystemSize());
 		final VectorFunction initialVelo = VectorFunction.fromLambda(getInitialVelocity(), 2, 2);
-		getSpace().getShapeFunctions()
+		getSpace().getShapeFunctionMap()
 		          .values()
 		          .forEach(function ->
 		                   {
@@ -206,7 +206,7 @@ public interface Particle
 		                       {
 			                       cm.increment();
 			                       f.getSpace()
-			                        .getShapeFunctions()
+			                        .getShapeFunctionMap()
 			                        .values()
 			                        .stream()
 			                        .parallel()
@@ -297,13 +297,13 @@ public interface Particle
 	
 	default int getSystemSize()
 	{
-		return getSpace().getShapeFunctions()
+		return getSpace().getShapeFunctionMap()
 		                 .size();
 	}
 	
 	default int getLagrangeSize()
 	{
-		return getSpace().getShapeFunctions()
+		return getSpace().getShapeFunctionMap()
 		                 .size();
 	}
 	

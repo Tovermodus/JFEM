@@ -35,7 +35,8 @@ public class QkQkStokes
 			divValue =
 			new MixedTPCellIntegral<>(ScalarFunction.constantFunction(-1),
 			                          MixedTPCellIntegral.DIV_VALUE);
-		final MixedCellIntegral<TPCell, ContinuousTPShapeFunction, ContinuousTPVectorFunction, QkQkFunction> vv =
+		final MixedCellIntegral<TPCell, ContinuousTPShapeFunction, ContinuousTPVectorFunction, QkQkFunction> vv
+			=
 			MixedCellIntegral.fromVelocityIntegral(valueValue);
 		final List<CellIntegral<TPCell, QkQkFunction>> cellIntegrals =
 			new ArrayList<>();
@@ -99,7 +100,7 @@ public class QkQkStokes
 		//grid.rhs.print_formatted();
 		final MixedTPFESpaceFunction<QkQkFunction> solut =
 			new MixedTPFESpaceFunction<>(
-				grid.getShapeFunctions(), solution1);
+				grid.getShapeFunctionMap(), solution1);
 		final ArrayList<Map<CoordinateVector, Double>> valList = new ArrayList<>();
 //		valList.add(StokesReferenceSolution.pressureReferenceSolution().valuesInPoints(grid.generatePlotPoints(50)));
 //		valList.add(StokesReferenceSolution.velocityReferenceSolution().componentValuesInPoints(grid.generatePlotPoints(50),0));

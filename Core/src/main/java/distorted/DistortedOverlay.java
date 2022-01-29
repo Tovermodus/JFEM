@@ -31,7 +31,7 @@ public class DistortedOverlay
 	                        final Matrix displacementHistory,
 	                        final int pointsPerCell)
 	{
-		if (displacementHistory.getCols() != space.getShapeFunctions()
+		if (displacementHistory.getCols() != space.getShapeFunctionMap()
 		                                          .size())
 			throw new IllegalArgumentException("displacement history has wrong dimensions");
 		this.space = space;
@@ -41,7 +41,7 @@ public class DistortedOverlay
 		min = ScalarPlot2D.getMinCoordinates(backGroundPoints);
 		this.pointsPerCell = pointsPerCell * space.getCells()
 		                                          .size();
-		D = new DistortedVectorFESpaceFunction(space.getShapeFunctions(),
+		D = new DistortedVectorFESpaceFunction(space.getShapeFunctionMap(),
 		                                       displacementHistory.getRow(0));
 		refPoints = space.generateReferencePlotPoints(this.pointsPerCell);
 	}
@@ -51,7 +51,7 @@ public class DistortedOverlay
 	                        final Matrix displacementHistory,
 	                        final int pointsPerCell)
 	{
-		if (displacementHistory.getCols() != space.getShapeFunctions()
+		if (displacementHistory.getCols() != space.getShapeFunctionMap()
 		                                          .size())
 			throw new IllegalArgumentException("displacement history has wrong dimensions");
 		this.space = space;
@@ -61,7 +61,7 @@ public class DistortedOverlay
 		min = backGround.min;
 		this.pointsPerCell = pointsPerCell * space.getCells()
 		                                          .size();
-		D = new DistortedVectorFESpaceFunction(space.getShapeFunctions(),
+		D = new DistortedVectorFESpaceFunction(space.getShapeFunctionMap(),
 		                                       displacementHistory.getRow(0));
 		refPoints = space.generateReferencePlotPoints(this.pointsPerCell);
 	}
@@ -71,7 +71,7 @@ public class DistortedOverlay
 	                        final Matrix displacementHistory,
 	                        final int pointsPerCell)
 	{
-		if (displacementHistory.getCols() != space.getShapeFunctions()
+		if (displacementHistory.getCols() != space.getShapeFunctionMap()
 		                                          .size())
 			throw new IllegalArgumentException("displacement history has wrong dimensions");
 		this.space = space;
@@ -81,7 +81,7 @@ public class DistortedOverlay
 		min = backGround.min;
 		this.pointsPerCell = pointsPerCell * space.getCells()
 		                                          .size();
-		D = new DistortedVectorFESpaceFunction(space.getShapeFunctions(),
+		D = new DistortedVectorFESpaceFunction(space.getShapeFunctionMap(),
 		                                       displacementHistory.getRow(0));
 		refPoints = space.generateReferencePlotPoints(this.pointsPerCell);
 	}
@@ -99,7 +99,7 @@ public class DistortedOverlay
 			(int) (displacementHistory.getRows() * slider * 0.999) % displacementHistory.getRows();
 		if (time != prevTime)
 		{
-			D.resetCoefficients(space.getShapeFunctions(), displacementHistory.getRow(time));
+			D.resetCoefficients(space.getShapeFunctionMap(), displacementHistory.getRow(time));
 			prevTime = time;
 		}
 		int i = 0;

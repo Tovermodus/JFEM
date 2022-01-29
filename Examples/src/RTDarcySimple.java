@@ -69,7 +69,7 @@ public class RTDarcySimple
 		final Vector solution1 = i.solveGMRES(grid.getSystemMatrix(), grid.getRhs(), 1e-10);
 		final MixedTPFESpaceFunction<RTMixedFunction> solut =
 			new MixedTPFESpaceFunction<>(
-				grid.getShapeFunctions(), solution1);
+				grid.getShapeFunctionMap(), solution1);
 		
 		PlotWindow.addPlot(new MatrixPlot(grid.getSystemMatrix()));
 		PlotWindow.addPlot(new MixedPlot2D(solut, grid.generatePlotPoints(30), 30));

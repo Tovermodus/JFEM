@@ -72,7 +72,7 @@ public class DarcyTest
 		System.out.println("solved");
 		final MixedTPFESpaceFunction<RTMixedFunction> solut =
 			new MixedTPFESpaceFunction<>(
-				grid.getShapeFunctions(), solution1);
+				grid.getShapeFunctionMap(), solution1);
 //		PlotWindow p = new PlotWindow();
 //		p.addPlot(new MixedPlot2D(solut, grid.generatePlotPoints(20),20));
 //		p.addPlot(new ScalarPlot2D(LaplaceReferenceSolution.scalarReferenceSolution(), grid.generatePlotPoints(20),20));

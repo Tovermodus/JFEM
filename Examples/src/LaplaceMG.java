@@ -1,11 +1,11 @@
 import basic.PlotWindow;
 import basic.ScalarFESpaceFunction;
+import basic.ScalarFunction;
 import basic.ScalarPlot2D;
 import io.vavr.Tuple2;
 import linalg.*;
-import multigrid.GaussSeidelSmoother;
-import multigrid.MGPReconditioner;
-import multigrid.MGSpace;
+import multigrid.MGPreconditionerSpace;
+import multigrid.RichardsonSmoother;
 import multigrid.Smoother;
 import tensorproduct.ContinuousTPFESpace;
 import tensorproduct.ContinuousTPShapeFunction;
@@ -21,17 +21,18 @@ public class LaplaceMG
 {
 	public static void main(final String[] args)
 	{
-		final int refinements = 4;
+		
+		final int refinements = 1;
 		final TPCellIntegral<ContinuousTPShapeFunction> gg =
 			new TPCellIntegral<>(TPCellIntegral.GRAD_GRAD);
 		final TPRightHandSideIntegral<ContinuousTPShapeFunction> rightHandSideIntegral =
 			new TPRightHandSideIntegral<>(LaplaceReferenceSolution.scalarRightHandSide(),
 			                              TPRightHandSideIntegral.VALUE);
-		final MGSpace<ContinuousTPFESpace, TPCell, TPFace, ContinuousTPShapeFunction, Double,
+		final MGPreconditionerSpace<ContinuousTPFESpace, TPCell, TPFace, ContinuousTPShapeFunction, Double,
 			CoordinateVector,
 			CoordinateMatrix>
-			mg = new MGSpace<>(refinements,
-			                   1)
+			mg = new MGPreconditionerSpace<>(refinements,
+			                                 1)
 		{
 			@Override
 			public List<ContinuousTPFESpace> createSpaces(final int refinements)
@@ -51,11 +52,11 @@ public class LaplaceMG
 			@Override
 			public Tuple2<VectorMultiplyable, DenseVector> createSystem(final ContinuousTPFESpace space)
 			{
-				final SparseMatrix s = new SparseMatrix(space.getShapeFunctions()
+				final SparseMatrix s = new SparseMatrix(space.getShapeFunctionMap()
 				                                             .size(),
-				                                        space.getShapeFunctions()
+				                                        space.getShapeFunctionMap()
 				                                             .size());
-				final DenseVector rhs = new DenseVector(space.getShapeFunctions()
+				final DenseVector rhs = new DenseVector(space.getShapeFunctionMap()
 				                                             .size());
 				space.writeCellIntegralsToMatrix(List.of(gg), s);
 				space.writeCellIntegralsToRhs(List.of(rightHandSideIntegral), rhs);
@@ -70,10 +71,23 @@ public class LaplaceMG
 			{
 				final ArrayList<Smoother> ret = new ArrayList<>();
 				for (int i = 1; i < spaces.size(); i++)
-					ret.add(new GaussSeidelSmoother(4, (SparseMatrix) systems.get(i)));
+					ret.add(new RichardsonSmoother(0.1, 5));
 				return ret;
 			}
+			
+			@Override
+			public void applyCorrectBoundaryConditions(final ContinuousTPFESpace space, final MutableVector vector)
+			{
+				throw new UnsupportedOperationException("not implemented yet");
+			}
+			
+			@Override
+			public void applyZeroBoundaryConditions(final ContinuousTPFESpace space, final MutableVector vector)
+			{
+				space.projectOntoBoundaryValues(ScalarFunction.constantFunction(0), vector);
+			}
 		};
+		mg.verbose = false;
 		DenseVector solut = new DenseVector(mg.finest_rhs.mul(0));
 		for (final IntCoordinates c : solut.getShape()
 		                                   .range())
@@ -86,7 +100,7 @@ public class LaplaceMG
 		ScalarFESpaceFunction<ContinuousTPShapeFunction> sol =
 			new ScalarFESpaceFunction<>(
 				mg.spaces.get(refinements)
-				         .getShapeFunctions(), solut);
+				         .getShapeFunctionMap(), solut);
 		PlotWindow.addPlot(new ScalarPlot2D(sol,
 		                                    mg.spaces.get(refinements)
 		                                             .generatePlotPoints(30),
@@ -94,14 +108,25 @@ public class LaplaceMG
 		
 		final IterativeSolver it = new IterativeSolver();
 		it.showProgress = true;
-		solut = new DenseVector(it.solvePGMRES(mg.finest_system,
-		                                       new MGPReconditioner(mg),
-		                                       mg.finest_rhs,
-		                                       1e-8));
+		solut =
+			new DenseVector(new GMRES2(1e-8).solve(mg.finest_system, mg,
+			                                       mg.finest_rhs));
+		final DenseVector solut2 = new
+			DenseVector(it.solvePGMRES(mg.finest_system, mg,
+			                           mg.finest_rhs,
+			                           1e-8));
+		System.out.println("sss" + solut2.sub(solut)
+		                                 .absMaxElement());
+		System.out.println(mg.finest_system.mvMul(solut)
+		                                   .sub(mg.finest_rhs)
+		                                   .absMaxElement());
+		System.out.println(mg.finest_system.mvMul(solut2)
+		                                   .sub(mg.finest_rhs)
+		                                   .absMaxElement());
 		sol =
 			new ScalarFESpaceFunction<>(
 				mg.spaces.get(refinements)
-				         .getShapeFunctions(), solut);
+				         .getShapeFunctionMap(), solut);
 		PlotWindow.addPlot(new ScalarPlot2D(sol,
 		                                    mg.spaces.get(refinements)
 		                                             .generatePlotPoints(30),

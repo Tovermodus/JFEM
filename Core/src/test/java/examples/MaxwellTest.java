@@ -77,7 +77,7 @@ public class MaxwellTest
 		System.out.println("solved");
 		final MixedTPFESpaceFunction<QkQkFunction> solut =
 			new MixedTPFESpaceFunction<>(
-				grid.getShapeFunctions(), solution1);
+				grid.getShapeFunctionMap(), solution1);
 		assertTrue(ConvergenceOrderEstimator.normL2Difference(solut.getPressureFunction(),
 		                                                      MaxwellReferenceSolution.pressureReferenceSolution(),
 		                                                      grid.generatePlotPoints(20)) < 2e-1);

@@ -12,24 +12,19 @@ public class PreconditionedIterativeImplicitSchur
 	                                            final VectorMultiplyable preconditioner)
 	{
 		super(blockMatrix);
-		this.preconditioner = //preconditioner;
-			new BlockDenseMatrix(blockMatrix.getBlockMatrix(0, 0),
-			                     blockMatrix.getBlockSizes()[0] / 100)
-				.getInvertedDiagonalMatrix();
+		this.preconditioner = preconditioner;
 		it.gm.MAX_RESTARTS = 0;
+		it.showProgress = true;
 		System.out.println("inverting first" + blockMatrix.getBlockSizes()[0]);
 	}
 	
 	@Override
-	Function2<VectorMultiplyable, Vector, Vector> solveSchur()
+	protected Function2<VectorMultiplyable, Vector, Vector> solveSchur()
 	{
 		return (A, b) ->
 		{
-//			Vector iterate = new DenseVector(b);
-//			for (int i = 0; i < 40; i++)
-//				iterate = preconditioner.mvMul(iterate);
-//			return iterate;
-			return it.solvePGMRES(A, preconditioner, b, 1e-10);
+			System.out.println(A.getVectorSize());
+			return it.solvePGMRES(A, preconditioner, b, 1e-9);
 		};
 	}
 }

@@ -98,7 +98,7 @@ public class Laplace
 		//grid.rhs.print_formatted();
 		final ScalarFESpaceFunction<TPShapeFunction> solut =
 			new ScalarFESpaceFunction<>(
-				grid.getShapeFunctions(), solution1);
+				grid.getShapeFunctionMap(), solution1);
 		final ScalarFunction referenceSolution = new ScalarFunction()
 		{
 			@Override

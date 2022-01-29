@@ -89,18 +89,18 @@ public class DLMCollision
 //			precond = getPrecond();
 //		}
 		final MixedFESpaceFunction<QkQkFunction, TPCell, TPFace> Up =
-			new MixedTPFESpaceFunction<>(backgroundSpace.getShapeFunctions(),
+			new MixedTPFESpaceFunction<>(backgroundSpace.getShapeFunctionMap(),
 			                             getBackGroundIterate(getCurrentIterate()));
 		velocityValues.putAll(Up.velocityValuesInPointsAtTime(plotPoints, getTime()));
 		pressureValues.putAll(Up.pressureValuesInPointsAtTime(plotPoints, getTime()));
 		final DistortedVectorFESpaceFunction X =
 			new DistortedVectorFESpaceFunction(particleSpaces.get(0)
-			                                                 .getShapeFunctions(),
+			                                                 .getShapeFunctionMap(),
 			                                   getParticleIterate(getCurrentIterate(), 0));
 		XValues.putAll(X.valuesInPointsAtTime(plotPoints, getTime()));
 		final DistortedVectorFESpaceFunction XPrime =
 			new DistortedVectorFESpaceFunction(particleSpaces.get(0)
-			                                                 .getShapeFunctions(),
+			                                                 .getShapeFunctionMap(),
 			                                   getParticleIterate(getCurrentIterate().sub(getLastIterate())
 			                                                                         .mul(1. / dt), 0));
 		XPrimeValues.putAll(XPrime.valuesInPointsAtTime(plotPoints, getTime()));
@@ -235,13 +235,13 @@ public class DLMCollision
 		                                       particle1,
 		                                       dlmElast2.getIterateHistory()
 		                                                .slice(new IntCoordinates(0,
-		                                                                          backGround.getShapeFunctions()
+		                                                                          backGround.getShapeFunctionMap()
 		                                                                                    .size()),
 		                                                       new IntCoordinates(dlmElast2.getIterateHistory()
 		                                                                                   .getRows(),
-		                                                                          backGround.getShapeFunctions()
+		                                                                          backGround.getShapeFunctionMap()
 		                                                                                    .size()
-			                                                                          + particle1.getShapeFunctions()
+			                                                                          + particle1.getShapeFunctionMap()
 			                                                                                     .size())),
 		                                       5));
 		PlotWindow.addPlot(UpPlot);
@@ -253,17 +253,17 @@ public class DLMCollision
 		                                        particle2,
 		                                        dlmElast2.getIterateHistory()
 		                                                 .slice(new IntCoordinates(0,
-		                                                                           backGround.getShapeFunctions()
+		                                                                           backGround.getShapeFunctionMap()
 		                                                                                     .size()
-			                                                                           + 2 * particle1.getShapeFunctions()
+			                                                                           + 2 * particle1.getShapeFunctionMap()
 			                                                                                          .size()),
 		                                                        new IntCoordinates(dlmElast2.getIterateHistory()
 		                                                                                    .getRows(),
-		                                                                           backGround.getShapeFunctions()
+		                                                                           backGround.getShapeFunctionMap()
 		                                                                                     .size()
-			                                                                           + 2 * particle1.getShapeFunctions()
+			                                                                           + 2 * particle1.getShapeFunctionMap()
 			                                                                                          .size()
-			                                                                           + particle2.getShapeFunctions()
+			                                                                           + particle2.getShapeFunctionMap()
 			                                                                                      .size())),
 		                                        5));
 		PlotWindow.addPlot(UpPlot1);

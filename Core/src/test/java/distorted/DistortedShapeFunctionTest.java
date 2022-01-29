@@ -171,7 +171,7 @@ public class DistortedShapeFunctionTest
 			d.assembleFunctions(1);
 			final List<CoordinateVector> functionalPoints =
 				d
-					.getShapeFunctions()
+					.getShapeFunctionMap()
 					.values()
 					.stream()
 					.map(fun -> fun.getNodeFunctional()
@@ -204,7 +204,7 @@ public class DistortedShapeFunctionTest
 			d.assembleFunctions(2);
 			final List<CoordinateVector> functionalPoints =
 				d
-					.getShapeFunctions()
+					.getShapeFunctionMap()
 					.values()
 					.stream()
 					.map(fun -> fun.getNodeFunctional()
@@ -237,7 +237,7 @@ public class DistortedShapeFunctionTest
 			d.assembleFunctions(3);
 			final List<CoordinateVector> functionalPoints =
 				d
-					.getShapeFunctions()
+					.getShapeFunctionMap()
 					.values()
 					.stream()
 					.map(fun -> fun.getNodeFunctional()
