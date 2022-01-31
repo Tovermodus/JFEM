@@ -149,7 +149,11 @@ public class DLMColon
 			                                                 ((BackgroundFluidMG) backGround).space);
 		else
 			schur.resetOffDiagonals(systemMatrix);
-		return new DenseVector(it.solvePGMRES(systemMatrix, schur, rhs, 1e-7));
+		final DenseVector n = new DenseVector(schur.mvMul(rhs));
+		System.out.println("iterationres  " + systemMatrix.mvMul(n)
+		                                                  .sub(rhs)
+		                                                  .euclidianNorm());
+		return n;//new DenseVector(it.solvePGMRES(systemMatrix, schur, rhs, 1e-7));
 	}
 	
 	@Override

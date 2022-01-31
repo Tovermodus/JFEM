@@ -38,6 +38,11 @@ public abstract class AbstractSchurSolver<T extends VectorMultiplyable>
 		System.out.println("abstract schur built");
 	}
 	
+	public int getBlockSize()
+	{
+		return diagonalInverses.size() + 1;
+	}
+	
 	public SparseMatrix getDiagonalBlock(final int i)
 	{
 		return blockMatrix.getBlocks()

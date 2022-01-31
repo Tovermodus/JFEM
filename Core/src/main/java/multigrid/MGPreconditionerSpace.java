@@ -24,6 +24,7 @@ public abstract class MGPreconditionerSpace<CSpace extends AcceptsMatrixBoundary
 	public Vector finest_rhs;
 	public VectorMultiplyable finest_system;
 	public boolean verbose = false;
+	public int cycles = 3;
 	
 	public MGPreconditionerSpace(final int refinements,
 	                             final int polynomialDegree)
@@ -287,9 +288,8 @@ public abstract class MGPreconditionerSpace<CSpace extends AcceptsMatrixBoundary
 		System.out.println("MG after FullVCycle " + finest_system.mvMul(initial.add(iterate))
 		                                                         .sub(vector)
 		                                                         .euclidianNorm() + " FROM " + defect.euclidianNorm());
-		iterate = vCycle(iterate, defect);
-		iterate = vCycle(iterate, defect);
-		iterate = vCycle(iterate, defect);
+		for (int i = 0; i < cycles; i++)
+			iterate = vCycle(iterate, defect);
 		
 		System.out.println("MG after Second VCycle " + finest_system.mvMul(initial.add(iterate))
 		                                                            .sub(vector)

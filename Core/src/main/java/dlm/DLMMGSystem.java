@@ -87,7 +87,7 @@ public abstract class DLMMGSystem
 			         .collect(Collectors.toList());
 		
 		int offset = 0;
-		final var fluidBlockRhs = backGround.getBlockRhs(fluidSystem, dt);
+		final var fluidBlockRhs = backGround.getBlockRhs(fluidSystem, dt, time);
 		blocks.put(new IntCoordinates(0, 0), fluidBlockRhs._1);
 		rhs.addSmallVectorAt(fluidBlockRhs._2, 0);
 		offset += fluidBlockRhs._1.getCols();

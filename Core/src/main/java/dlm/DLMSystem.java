@@ -87,7 +87,7 @@ public abstract class DLMSystem
 			         .collect(Collectors.toList());
 		
 		int offset = 0;
-		final var fluidBlockRhs = backGround.getBlockRhs(fluidSystem, dt);
+		final var fluidBlockRhs = backGround.getBlockRhs(fluidSystem, dt, time);
 		blocks.put(new IntCoordinates(0, 0), fluidBlockRhs._1);
 		rhs.addSmallVectorAt(fluidBlockRhs._2, 0);
 		offset += fluidBlockRhs._1.getCols();
@@ -96,6 +96,7 @@ public abstract class DLMSystem
 			offset = addParticleBlocks(blocks, rhs, particleSystems, offset, i);
 		}
 		final BlockSparseMatrix systemMatrix = new BlockSparseMatrix(blocks, rhs.getLength(), rhs.getLength());
+		
 		final DenseVector solution = solve(systemMatrix, rhs);
 		final FluidIterate ret = new FluidIterate(solution.slice(0, backGround.getSystemSize()));
 		offset = backGround.getSystemSize();

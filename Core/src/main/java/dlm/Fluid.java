@@ -47,7 +47,7 @@ public interface Fluid
 	
 	Function<CoordinateVector, CoordinateVector> getInitialVelocity();
 	
-	Function<CoordinateVector, CoordinateVector> velocityBoundaryValues();
+	Function<CoordinateVector, CoordinateVector> velocityBoundaryValues(double t);
 	
 	Predicate<TPFace> getDirichletBoundary();
 	
@@ -93,15 +93,15 @@ public interface Fluid
 	
 	FluidSystem buildSystem(final double t, final FluidIterate iterate);
 	
-	default Tuple2<SparseMatrix, DenseVector> getBlockRhs(final FluidSystem fs, final double dt)
+	default Tuple2<SparseMatrix, DenseVector> getBlockRhs(final FluidSystem fs, final double dt, final double t)
 	{
-		return getBlockRhsForSpace(getSpace(), getVelocitySize(), fs, dt);
+		return getBlockRhsForSpace(getSpace(), getVelocitySize(), fs, dt, t);
 	}
 	
 	@NotNull
 	default Tuple2<SparseMatrix, DenseVector> getBlockRhsForSpace(final TaylorHoodSpace space,
 	                                                              final int velocitySize,
-	                                                              final FluidSystem fs, final double dt)
+	                                                              final FluidSystem fs, final double dt, final double t)
 	{
 		final SparseMatrix s =
 			new SparseMatrix(fs.massMatrix.mul(1. / dt)
@@ -110,7 +110,7 @@ public interface Fluid
 		
 		final DenseVector d = new DenseVector(fs.forceRhs.add(fs.accelerationRhs.mul(1. / dt)));
 		final MixedFunction velocityBoundary =
-			new ComposedMixedFunction(VectorFunction.fromLambda(velocityBoundaryValues(), 2, 2));
+			new ComposedMixedFunction(VectorFunction.fromLambda(velocityBoundaryValues(t), 2, 2));
 		space.writeBoundaryValuesTo(velocityBoundary,
 		                            getDirichletBoundary(),
 		                            //(face, fun) -> fun.hasVelocityFunction(),

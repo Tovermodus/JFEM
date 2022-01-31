@@ -104,7 +104,7 @@ public class BackgroundFluidMG
 	}
 	
 	@Override
-	public Function<CoordinateVector, CoordinateVector> velocityBoundaryValues()
+	public Function<CoordinateVector, CoordinateVector> velocityBoundaryValues(final double t)
 	{
 		return x ->
 		{

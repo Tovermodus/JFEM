@@ -102,7 +102,7 @@ public class BackgroundFluid
 	}
 	
 	@Override
-	public Function<CoordinateVector, CoordinateVector> velocityBoundaryValues()
+	public Function<CoordinateVector, CoordinateVector> velocityBoundaryValues(final double t)
 	{
 		return x ->
 			CoordinateVector.getUnitVector(2, 0)

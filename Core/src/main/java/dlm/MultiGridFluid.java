@@ -28,6 +28,8 @@ public abstract class MultiGridFluid
 	private final int refinements;
 	private final int polynomialDegree;
 	private final double dt;
+	public double smootherOmega = 1;
+	public int smootherRuns = 7;
 	
 	public MultiGridFluid(final CoordinateVector startCoordinates, final CoordinateVector endCoordinates,
 	                      final IntCoordinates coarsestCells, final int refinements, final int polynomialDegree,
@@ -44,7 +46,7 @@ public abstract class MultiGridFluid
 		                     coarsestCells,
 		                     refinements,
 		                     polynomialDegree,
-		                     dt, null);
+		                     dt, 0, null);
 	}
 	
 	@NotNull
@@ -54,7 +56,7 @@ public abstract class MultiGridFluid
 		final IntCoordinates coarsestCells,
 		final int refinements,
 		final int polynomialDegree,
-		final double dt, final FluidIterate iterate)
+		final double dt, final double t, final FluidIterate iterate)
 	{
 		final MGPreconditionerSpace<TaylorHoodSpace, TPCell, TPFace, QkQkFunction, MixedValue, MixedGradient, MixedHessian>
 			mg = new MGPreconditionerSpace<>(refinements, polynomialDegree)
@@ -99,10 +101,10 @@ public abstract class MultiGridFluid
 				                                     .stream()
 				                                     .filter(ComposeMixedShapeFunction::hasVelocityFunction)
 				                                     .count();
-				final var blockRhs = getBlockRhsForSpace(space, firstPRessure, fs, dt);
+				final var blockRhs = getBlockRhsForSpace(space, firstPRessure, fs, dt, t);
 				final SparseMatrix s = new SparseMatrix(blockRhs._1);
 				space.writeBoundaryValuesTo(new ComposedMixedFunction(VectorFunction.fromLambda(
-					                            velocityBoundaryValues(),
+					                            velocityBoundaryValues(t),
 					                            2,
 					                            2)), s,
 				                            new DenseVector(n));
@@ -119,17 +121,8 @@ public abstract class MultiGridFluid
 				final List<Smoother> ret = new ArrayList<>();
 				for (int i = 1; i < refinements + 1; i++)
 				{
-//					ret.add(new UzawaStokesSmoother2(5,
-//					                                 0.5,
-//					                                 (int) spaces.get(i)
-//					                                             .getShapeFunctionMap()
-//					                                             .values()
-//					                                             .stream()
-//					                                             .filter(ComposeMixedShapeFunction::hasVelocityFunction)
-//					                                             .count()));
-					//ret.add(new RichardsonSmoother(0.05, 4));
-					ret.add(new BSSmoother2(6,
-					                        1,
+					ret.add(new BSSmoother2(smootherRuns,
+					                        smootherOmega,
 					                        spaces.get(i)
 					                              .getVelocitySize()));
 				}
@@ -190,7 +183,7 @@ public abstract class MultiGridFluid
 		                     coarsestCells,
 		                     refinements,
 		                     polynomialDegree,
-		                     dt, iterate);
+		                     dt, t, iterate);
 		return ret;
 	}
 	
