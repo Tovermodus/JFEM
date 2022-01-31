@@ -157,8 +157,6 @@ public abstract class MGPreconditionerSpace<CSpace extends AcceptsMatrixBoundary
 	
 	public abstract List<Smoother> createSmoothers();
 	
-	public abstract void applyCorrectBoundaryConditions(CSpace space, MutableVector vector);
-	
 	public abstract void applyZeroBoundaryConditions(CSpace space, MutableVector vector);
 	
 	public Vector mgStep(final int level, Vector guess, final Vector rhs)

@@ -94,12 +94,6 @@ public class StokesMGBS2
 			}
 			
 			@Override
-			public void applyCorrectBoundaryConditions(final TaylorHoodSpace space,
-			                                           final MutableVector vector)
-			{
-			}
-			
-			@Override
 			public void applyZeroBoundaryConditions(final TaylorHoodSpace space, final MutableVector vector)
 			{
 				space.projectOntoBoundaryValues(

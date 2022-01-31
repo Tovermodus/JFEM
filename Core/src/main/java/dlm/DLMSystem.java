@@ -103,8 +103,8 @@ public abstract class DLMSystem
 		}
 		final BlockSparseMatrix systemMatrix = new BlockSparseMatrix(blocks, rhs.getLength(), rhs.getLength());
 		
-		final DenseVector solution = solver.solve(systemMatrix, rhs, fluidState, particleStates, fluidSystem,
-		                                          particleSystems);
+		final Vector solution = solver.solve(systemMatrix, rhs, fluidState, particleStates, fluidSystem,
+		                                     particleSystems, dt, time);
 		final FluidIterate ret = new FluidIterate(solution.slice(0, backGround.getSystemSize()));
 		offset = backGround.getSystemSize();
 		final List<ParticleIterate> iterates = new ArrayList<>();

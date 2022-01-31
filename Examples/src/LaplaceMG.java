@@ -76,13 +76,8 @@ public class LaplaceMG
 			}
 			
 			@Override
-			public void applyCorrectBoundaryConditions(final ContinuousTPFESpace space, final MutableVector vector)
-			{
-				throw new UnsupportedOperationException("not implemented yet");
-			}
-			
-			@Override
-			public void applyZeroBoundaryConditions(final ContinuousTPFESpace space, final MutableVector vector)
+			public void applyZeroBoundaryConditions(final ContinuousTPFESpace space,
+			                                        final MutableVector vector)
 			{
 				space.projectOntoBoundaryValues(ScalarFunction.constantFunction(0), vector);
 			}

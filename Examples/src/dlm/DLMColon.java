@@ -144,8 +144,8 @@ public class DLMColon
 		it.showProgress = true;
 		it.gm.ITERATIONS_BEFORE_RESTART = 5;
 		if (schur == null)
-			schur = new PreconditionedIterativeImplicitSchur(systemMatrix,
-			                                                 ((BackgroundFluidMG) backGround).space);
+			schur = new PreconditionedIterativeImplicitSchur(systemMatrix, null);
+			//((BackgroundFluidMG) backGround).space);
 		else
 			schur.resetOffDiagonals(systemMatrix);
 		final DenseVector n = new DenseVector(schur.mvMul(rhs));

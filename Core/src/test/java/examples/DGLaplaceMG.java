@@ -168,13 +168,6 @@ public class DGLaplaceMG
 				}
 				
 				@Override
-				public void applyCorrectBoundaryConditions(final TPFESpace tpfeSpace,
-				                                           final MutableVector vector)
-				{
-					throw new UnsupportedOperationException("not implemented yet");
-				}
-				
-				@Override
 				public void applyZeroBoundaryConditions(final TPFESpace tpfeSpace,
 				                                        final MutableVector vector)
 				{

@@ -1,9 +1,6 @@
 package dlm;
 
-import linalg.BlockSparseMatrix;
-import linalg.DenseVector;
-import linalg.IterativeImplicitSchur;
-import linalg.IterativeSolver;
+import linalg.*;
 
 import java.util.List;
 
@@ -14,12 +11,12 @@ public class DLMImplicitSchurSolver
 	IterativeSolver it = new IterativeSolver(true);
 	
 	@Override
-	protected DenseVector solve(final BlockSparseMatrix systemMatrix,
-	                            final DenseVector rhs,
-	                            final FluidIterate fluidState,
-	                            final List<ParticleIterate> particleStates,
-	                            final FluidSystem fluidSystem,
-	                            final List<ParticleSystem> particleSystems)
+	protected Vector solve(final BlockSparseMatrix systemMatrix,
+	                       final DenseVector rhs,
+	                       final FluidIterate fluidState,
+	                       final List<ParticleIterate> particleStates,
+	                       final FluidSystem fluidSystem,
+	                       final List<ParticleSystem> particleSystems, final double dt, final double t)
 	{
 		
 		it.showProgress = true;

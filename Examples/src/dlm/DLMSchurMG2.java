@@ -2,7 +2,8 @@ package dlm;
 
 import basic.PerformanceArguments;
 import basic.PlotWindow;
-import linalg.*;
+import linalg.CoordinateVector;
+import linalg.IntCoordinates;
 import mixed.MixedFunctionOnCells;
 import mixed.MixedPlot2DTime;
 import tensorproduct.geometry.TPCell;
@@ -22,10 +23,10 @@ public class DLMSchurMG2
 	
 	public DLMSchurMG2(final double dt,
 	                   final int timeSteps,
-	                   final Fluid backGround,
+	                   final MultiGridFluid backGround,
 	                   final List<Particle> particles)
 	{
-		super(dt, timeSteps, backGround, particles, null);
+		super(dt, timeSteps, backGround, particles, new DLMFluidMGSolver(backGround));
 		plotPoints = backGround.getSpace()
 		                       .generatePlotPoints(30);
 		velocityValues = new ConcurrentSkipListMap<>();
@@ -40,14 +41,14 @@ public class DLMSchurMG2
 		final var builder = new PerformanceArguments.PerformanceArgumentBuilder();
 		builder.GMResData = PerformanceArguments.GMRESResidual;
 		builder.build();
-		final Fluid fluid = new BackgroundFluidMG(CoordinateVector.fromValues(0, 0),
-		                                          CoordinateVector.fromValues(1, 1),
-		                                          new IntCoordinates(4, 4),
-		                                          1,
-		                                          1,
-		                                          dt,
-		                                          0.5,
-		                                          5);
+		final MultiGridFluid fluid = new BackgroundFluidMG(CoordinateVector.fromValues(0, 0),
+		                                                   CoordinateVector.fromValues(1, 1),
+		                                                   new IntCoordinates(4, 4),
+		                                                   1,
+		                                                   1,
+		                                                   dt,
+		                                                   0.5,
+		                                                   5);
 		final List<Particle> particles = new ArrayList<>();
 		particles.add(new SolidParticle(CoordinateVector.fromValues(0.4, 0.5),
 		                                0.05,
@@ -89,22 +90,6 @@ public class DLMSchurMG2
 			p.addOverlay(particles.get(i)
 			                      .generateOverlay(particleHistory.get(i), p));
 		PlotWindow.addPlot(p);
-	}
-	
-	PreconditionedIterativeImplicitSchur schur;
-	IterativeSolver it = new IterativeSolver(true);
-	
-	protected DenseVector solve(final BlockSparseMatrix systemMatrix, final DenseVector rhs)
-	{
-		System.out.println(backGround);
-		it.showProgress = true;
-		it.gm.ITERATIONS_BEFORE_RESTART = 5;
-		if (schur == null)
-			schur = new PreconditionedIterativeImplicitSchur(systemMatrix,
-			                                                 ((BackgroundFluidMG) backGround).space);
-		else
-			schur.resetOffDiagonals(systemMatrix);
-		return new DenseVector(it.solvePGMRES(systemMatrix, schur, rhs, 1e-7));
 	}
 	
 	@Override

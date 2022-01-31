@@ -77,14 +77,6 @@ public class LaplaceMG2
 			}
 			
 			@Override
-			public void applyCorrectBoundaryConditions(final ContinuousTPFESpace space,
-			                                           final MutableVector vector)
-			{
-				space.projectOntoBoundaryValues(LaplaceReferenceSolution.scalarReferenceSolution(),
-				                                vector);
-			}
-			
-			@Override
 			public void applyZeroBoundaryConditions(final ContinuousTPFESpace space,
 			                                        final MutableVector vector)
 			{

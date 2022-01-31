@@ -36,7 +36,7 @@ public class BackgroundFluidMG
 	                         final double density,
 	                         final double renold)
 	{
-		super(startCoordinates, endCoordinates, cells, refinements, polynomialDegree, dt);
+		super(startCoordinates, endCoordinates, cells, refinements, polynomialDegree);
 		this.density = density;
 		this.reynold = renold;
 	}
