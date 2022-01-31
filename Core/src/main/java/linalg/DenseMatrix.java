@@ -340,11 +340,12 @@ public class DenseMatrix
 	{
 		if (PerformanceArguments.getInstance().executeChecks)
 			if (getCols() != (vector.getLength())) throw new IllegalArgumentException("Incompatible sizes");
+		final int cols = getCols();
 		final DenseVector ret = new DenseVector(getRows());
 		for (int i = 0; i < getRows(); i++)
 		{
 			double ret_i = 0;
-			for (int k = 0; k < getCols(); k++)
+			for (int k = 0; k < cols; k++)
 				ret_i += at(i, k) * vector.at(k);
 			ret.add(ret_i, i);
 		}

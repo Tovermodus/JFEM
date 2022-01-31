@@ -288,6 +288,8 @@ public abstract class MGPreconditionerSpace<CSpace extends AcceptsMatrixBoundary
 		                                                         .sub(vector)
 		                                                         .euclidianNorm() + " FROM " + defect.euclidianNorm());
 		iterate = vCycle(iterate, defect);
+		iterate = vCycle(iterate, defect);
+		iterate = vCycle(iterate, defect);
 		
 		System.out.println("MG after Second VCycle " + finest_system.mvMul(initial.add(iterate))
 		                                                            .sub(vector)

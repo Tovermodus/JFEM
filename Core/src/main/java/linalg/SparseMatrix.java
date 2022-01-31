@@ -4,13 +4,15 @@ import basic.DoubleCompare;
 import basic.MapKeySelectCollector;
 import basic.PerformanceArguments;
 import com.google.common.base.Stopwatch;
-import com.google.common.collect.ImmutableMap;
 import io.vavr.Tuple2;
 import it.unimi.dsi.fastutil.doubles.DoubleList;
 import it.unimi.dsi.fastutil.ints.IntList;
 
 import java.io.Serializable;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 public class SparseMatrix
@@ -43,6 +45,37 @@ public class SparseMatrix
 				      || sparseYs[i] >= end.get(0)
 				      || sparseYs[i] < start.get(0)))
 				ret.add(sparseValues[i], sparseYs[i] - start.get(0), sparseXs[i] - start.get(1));
+		}
+		return ret;
+	}
+	
+	public SparseMatrix[] partition(final IntCoordinates center)
+	{
+		final SparseMatrix[] ret = new SparseMatrix[4];
+		final int partitionCol = center.get(0);
+		final int partitionRow = center.get(1);
+		ret[0] = new SparseMatrix(partitionCol, partitionRow, sparseEntries);
+		ret[1] = new SparseMatrix(partitionCol, cols - partitionRow, sparseEntries);
+		ret[2] = new SparseMatrix(rows - partitionCol, partitionRow, sparseEntries);
+		ret[3] = new SparseMatrix(rows - partitionCol, cols - partitionRow, sparseEntries);
+		for (int i = 0; i < sparseEntries; i++)
+		{
+			if (sparseYs[i] < partitionCol)
+			{
+				if (sparseXs[i] < partitionRow)
+					ret[0].add(sparseValues[i], sparseYs[i], sparseXs[i]);
+				else
+					ret[1].add(sparseValues[i], sparseYs[i], sparseXs[i] - partitionRow);
+			} else
+			{
+				
+				if (sparseXs[i] < partitionRow)
+					ret[2].add(sparseValues[i], sparseYs[i] - partitionCol, sparseXs[i]);
+				else
+					ret[3].add(sparseValues[i],
+					           sparseYs[i] - partitionCol,
+					           sparseXs[i] - partitionRow);
+			}
 		}
 		return ret;
 	}
@@ -156,8 +189,7 @@ public class SparseMatrix
 	
 	private synchronized void resizeSparse()
 	{
-		final TreeMap<IntCoordinates, Double> sparseEntriesMap = new TreeMap<>(getCoordinateEntryList());
-		resetFromEntries(sparseEntriesMap);
+		resetFromEntries(getCoordinateEntryList());
 	}
 	
 	public void overrideBy(final SparseMatrix o)
@@ -256,6 +288,18 @@ public class SparseMatrix
 	}
 	
 	@Override
+	public int getRows()
+	{
+		return rows;
+	}
+	
+	@Override
+	public int getCols()
+	{
+		return cols;
+	}
+	
+	@Override
 	public DenseVector getColumn(final int col)
 	{
 		if (PerformanceArguments.getInstance().executeChecks)
@@ -335,9 +379,18 @@ public class SparseMatrix
 	}
 	
 	@Override
-	public ImmutableMap<IntCoordinates, Double> getCoordinateEntryList()
+	public void forEachElement(final ElementOperation op)
 	{
-		final Map<IntCoordinates, Double> list = new HashMap<>(sparseEntries / 4);
+		for (int i = 0; i < sparseEntries; i++)
+		{
+			op.operation(sparseYs[i], sparseXs[i], sparseValues[i]);
+		}
+	}
+	
+	@Override
+	public Map<IntCoordinates, Double> getCoordinateEntryList()
+	{
+		final Map<IntCoordinates, Double> list = new HashMap<>(sparseEntries);
 		for (int i = 0; i < sparseEntries; i++)
 		{
 			final IntCoordinates coordinates = new IntCoordinates(sparseYs[i], sparseXs[i]);
@@ -349,7 +402,7 @@ public class SparseMatrix
 			list.put(coordinates, value);
 		}
 		
-		return ImmutableMap.copyOf(list);
+		return list;
 	}
 	
 	@Override
@@ -576,8 +629,8 @@ public class SparseMatrix
 			                                              .absMaxElement(),
 			                                         absmax,
 			                                         this.size());
-		final ImmutableMap<IntCoordinates, Double> myValues = getCoordinateEntryList();
-		final ImmutableMap<IntCoordinates, Double> otherValues = other.getCoordinateEntryList();
+		final Map<IntCoordinates, Double> myValues = getCoordinateEntryList();
+		final Map<IntCoordinates, Double> otherValues = other.getCoordinateEntryList();
 		if (coordinateEntryListsNotEqual(myValues, otherValues, absmax)) return false;
 		if (otherValues.size() != myValues.size())
 		{
@@ -593,8 +646,8 @@ public class SparseMatrix
 		return otherValues.size() == myValues.size();
 	}
 	
-	public static boolean coordinateEntryListsNotEqual(final ImmutableMap<IntCoordinates, Double> values1,
-	                                                   final ImmutableMap<IntCoordinates, Double> values2,
+	public static boolean coordinateEntryListsNotEqual(final Map<IntCoordinates, Double> values1,
+	                                                   final Map<IntCoordinates, Double> values2,
 	                                                   final double absmax)
 	{
 		final Map<IntCoordinates, Double> vals = new HashMap<>(values1);
@@ -644,7 +697,7 @@ public class SparseMatrix
 	@Override
 	public SparseMatrix getDiagonalMatrix()
 	{
-		final SparseMatrix mat = new SparseMatrix(getRows(), getCols());
+		final SparseMatrix mat = new SparseMatrix(getRows(), getCols(), getRows());
 		for (int i = 0; i < sparseEntries; i++)
 		{
 			if (sparseYs[i] == sparseXs[i])

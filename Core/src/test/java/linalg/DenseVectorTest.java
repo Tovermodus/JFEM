@@ -1,9 +1,9 @@
 package linalg;
 
 import basic.DoubleCompare;
-import com.google.common.collect.ImmutableMap;
 import org.junit.Test;
 
+import java.util.Map;
 import java.util.stream.IntStream;
 
 import static org.junit.Assert.assertEquals;
@@ -31,10 +31,10 @@ public class DenseVectorTest
 		assertEquals(vector.getLength(), n);
 		assertEquals(vector.getOrder(), 1);
 		assertEquals(vector.getShape(), new IntCoordinates(n));
-		final ImmutableMap<IntCoordinates, Double> entries = vector.getCoordinateEntryList();
+		final Map<IntCoordinates, Double> entries = vector.getCoordinateEntryList();
 		for (int i = 1; i < n; i++)
 		{
-			assertTrue(DoubleCompare.almostEqual(entries.get(new IntCoordinates(i)).doubleValue(), i));
+			assertTrue(DoubleCompare.almostEqual(entries.get(new IntCoordinates(i)), i));
 		}
 		assertEquals(vector.size(), n);
 		assertEquals(vector, vector2);
@@ -46,12 +46,20 @@ public class DenseVectorTest
 		final DenseVector vector = createVector();
 		for (int i = 0; i < n; i++)
 			assertTrue(DoubleCompare.almostEqual(vector.at(i), i));
-		IntStream.range(0, n).parallel().forEach(i -> vector.add(7.7, i));
+		IntStream.range(0, n)
+		         .parallel()
+		         .forEach(i -> vector.add(7.7, i));
 		for (int i = 0; i < n; i++)
 			assertTrue(DoubleCompare.almostEqual(vector.at(i), 7.7 + i));
-		assertTrue(IntStream.range(0, n).parallel().allMatch(i -> vector.at(i) == 7.7 + i));
-		IntStream.range(0, n).parallel().forEach(i -> vector.add(-7.7, i));
-		assertTrue(IntStream.range(0, n).parallel().allMatch(i -> Math.abs(vector.at(i) - i) < n * 1e-15));
+		assertTrue(IntStream.range(0, n)
+		                    .parallel()
+		                    .allMatch(i -> vector.at(i) == 7.7 + i));
+		IntStream.range(0, n)
+		         .parallel()
+		         .forEach(i -> vector.add(-7.7, i));
+		assertTrue(IntStream.range(0, n)
+		                    .parallel()
+		                    .allMatch(i -> Math.abs(vector.at(i) - i) < n * 1e-15));
 	}
 	
 	@Test
@@ -62,7 +70,9 @@ public class DenseVectorTest
 			assertTrue(DoubleCompare.almostEqual(vector.at(i), i));
 		final DenseVector v2 = createVector();
 		v2.addInPlace(vector);
-		IntStream.range(0, n).parallel().forEach(i -> vector.set(vector.at(i) * 2, i));
+		IntStream.range(0, n)
+		         .parallel()
+		         .forEach(i -> vector.set(vector.at(i) * 2, i));
 		assertTrue(vector.almostEqual(v2));
 		assertEquals(vector, v2);
 	}
@@ -75,7 +85,9 @@ public class DenseVectorTest
 			assertTrue(DoubleCompare.almostEqual(vector.at(i), i));
 		final DenseVector v2 = createVector();
 		v2.mulInPlace(17);
-		IntStream.range(0, n).parallel().forEach(i -> vector.set(vector.at(i) * 17, i));
+		IntStream.range(0, n)
+		         .parallel()
+		         .forEach(i -> vector.set(vector.at(i) * 17, i));
 		assertTrue(vector.almostEqual(v2));
 		assertEquals(vector, v2);
 	}
@@ -87,7 +99,9 @@ public class DenseVectorTest
 		for (int i = 0; i < n; i++)
 			assertTrue(DoubleCompare.almostEqual(vector.at(i), i));
 		final DenseVector v2 = createVector();
-		IntStream.range(0, n).parallel().forEach(i -> vector.set(vector.at(i) * 2, i));
+		IntStream.range(0, n)
+		         .parallel()
+		         .forEach(i -> vector.set(vector.at(i) * 2, i));
 		assertTrue(vector.almostEqual(v2.add(v2)));
 		assertEquals(vector, v2.add(v2));
 	}
@@ -99,7 +113,9 @@ public class DenseVectorTest
 		for (int i = 0; i < n; i++)
 			assertTrue(DoubleCompare.almostEqual(vector.at(i), i));
 		final DenseVector v2 = vector.mul(17);
-		IntStream.range(0, n).parallel().forEach(i -> vector.set(vector.at(i) * 17, i));
+		IntStream.range(0, n)
+		         .parallel()
+		         .forEach(i -> vector.set(vector.at(i) * 17, i));
 		assertTrue(vector.almostEqual(v2));
 		assertEquals(vector, v2);
 	}
@@ -113,7 +129,8 @@ public class DenseVectorTest
 		                                                            2 * 8, 3 * 8, 2 * 8, 2 * 9, 3 * 9, 2 * 9);
 		assertEquals(comp, yv.outer(xv));
 		assertTrue(comp.almostEqual(yv.outer(xv)));
-		assertTrue(comp.almostEqual(xv.outer(yv).transpose()));
+		assertTrue(comp.almostEqual(xv.outer(yv)
+		                              .transpose()));
 	}
 	
 	@Test
@@ -121,7 +138,9 @@ public class DenseVectorTest
 	{
 		final DenseVector vector = createVector();
 		final double val = vector.inner(vector.mul(0.0002));
-		final double valcomp = IntStream.range(0, n).mapToDouble((i) -> i * i * 0.0002).sum();
+		final double valcomp = IntStream.range(0, n)
+		                                .mapToDouble((i) -> i * i * 0.0002)
+		                                .sum();
 		assertTrue(Math.abs(val - valcomp) < 1e-15 * n * n);
 	}
 	

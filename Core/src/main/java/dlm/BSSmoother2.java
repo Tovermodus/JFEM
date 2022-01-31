@@ -34,15 +34,20 @@ public class BSSmoother2
 		Vector p = iterate.slice(vel_size, tot_size);
 		final Vector f = rhs.slice(0, vel_size);
 		final Vector g = rhs.slice(vel_size, tot_size);
-		final SparseMatrix B = ((SparseMatrix) Operator).slice(new IntCoordinates(vel_size, 0),
-		                                                       new IntCoordinates(tot_size, vel_size));
-		final SparseMatrix BT = ((SparseMatrix) Operator).slice(new IntCoordinates(0, vel_size),
-		                                                        new IntCoordinates(vel_size, tot_size));
-		final SparseMatrix A = ((SparseMatrix) Operator).slice(new IntCoordinates(0, 0),
-		                                                       new IntCoordinates(vel_size, vel_size));
-		final SparseMatrix C = ((SparseMatrix) Operator).slice(
-			new IntCoordinates(vel_size, vel_size),
-			new IntCoordinates(tot_size, tot_size));
+		final SparseMatrix[] blocks = ((SparseMatrix) Operator).partition(new IntCoordinates(vel_size, vel_size));
+		final SparseMatrix B = blocks[2];
+		final SparseMatrix BT = blocks[1];
+		final SparseMatrix A = blocks[0];
+		final SparseMatrix C = blocks[3];
+//		final SparseMatrix B = ((SparseMatrix) Operator).slice(new IntCoordinates(vel_size, 0),
+//		                                                       new IntCoordinates(tot_size, vel_size));
+//		final SparseMatrix BT = ((SparseMatrix) Operator).slice(new IntCoordinates(0, vel_size),
+//		                                                        new IntCoordinates(vel_size, tot_size));
+//		final SparseMatrix A = ((SparseMatrix) Operator).slice(new IntCoordinates(0, 0),
+//		                                                       new IntCoordinates(vel_size, vel_size));
+//		final SparseMatrix C = ((SparseMatrix) Operator).slice(
+//			new IntCoordinates(vel_size, vel_size),
+//			new IntCoordinates(tot_size, tot_size));
 		if (verbose)
 			System.out.println("    init");
 		if (twoGs == null)

@@ -13,21 +13,21 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentSkipListMap;
 
-public class DLMSchurMG2
+public class DLMColon
 	extends DLMSystem
 {
 	List<CoordinateVector> plotPoints;
 	private final Map<CoordinateVector, CoordinateVector> velocityValues;
 	private final Map<CoordinateVector, Double> pressureValues;
 	
-	public DLMSchurMG2(final double dt,
-	                   final int timeSteps,
-	                   final Fluid backGround,
-	                   final List<Particle> particles)
+	public DLMColon(final double dt,
+	                final int timeSteps,
+	                final Fluid backGround,
+	                final List<Particle> particles)
 	{
 		super(dt, timeSteps, backGround, particles);
 		plotPoints = backGround.getSpace()
-		                       .generatePlotPoints(30);
+		                       .generatePlotPoints(61);
 		velocityValues = new ConcurrentSkipListMap<>();
 		pressureValues = new ConcurrentSkipListMap<>();
 		System.out.println("Simulating up to time " + timeSteps * dt);
@@ -41,40 +41,84 @@ public class DLMSchurMG2
 		builder.GMResData = PerformanceArguments.GMRESResidual;
 		builder.build();
 		final Fluid fluid = new BackgroundFluidMG(CoordinateVector.fromValues(0, 0),
-		                                          CoordinateVector.fromValues(1, 1),
+		                                          CoordinateVector.fromValues(2, 1),
 		                                          new IntCoordinates(4, 4),
 		                                          1,
-		                                          1,
+		                                          3,
 		                                          dt,
 		                                          0.5,
 		                                          5);
 		final List<Particle> particles = new ArrayList<>();
-		particles.add(new SolidParticle(CoordinateVector.fromValues(0.4, 0.5),
+		particles.add(new SolidParticle(CoordinateVector.fromValues(0.5, 0.65),
 		                                0.05,
 		                                2,
 		                                1,
-		                                CoordinateVector.fromValues(10, 3),
+		                                CoordinateVector.fromValues(0, 0),
 		                                1000,
 		                                1000,
 		                                15));
-		particles.add(new SolidParticle(CoordinateVector.fromValues(0.6, 0.5),
+		particles.add(new SolidParticle(CoordinateVector.fromValues(0.65, 0.5),
 		                                0.05,
 		                                2,
 		                                1,
-		                                CoordinateVector.fromValues(-10, 3),
+		                                CoordinateVector.fromValues(0, 0),
+		                                1000,
+		                                1000,
+		                                15));
+		particles.add(new SolidParticle(CoordinateVector.fromValues(0.5, 0.35),
+		                                0.05,
+		                                2,
+		                                1,
+		                                CoordinateVector.fromValues(0, 0),
+		                                1000,
+		                                1000,
+		                                15));
+		particles.add(new SolidParticle(CoordinateVector.fromValues(0.35, 0.5),
+		                                0.05,
+		                                2,
+		                                1,
+		                                CoordinateVector.fromValues(0, 0),
 		                                1000,
 		                                1000,
 		                                15));
 		particles.add(new Membrane(CoordinateVector.fromValues(0.5, 0.5),
-		                           0.39,
-		                           0.4,
+		                           0.24,
+		                           0.25,
 		                           0,
 		                           1,
 		                           new CoordinateVector(2),
 		                           10,
 		                           10,
 		                           1));
-		final DLMSchurMG2 system = new DLMSchurMG2(dt, 10, fluid, particles);
+		particles.add(new FixedSolidParticle(CoordinateVector.fromValues(0.25, 0.25),
+		                                     0.05,
+		                                     2,
+		                                     1,
+		                                     10000,
+		                                     10000,
+		                                     15));
+		particles.add(new FixedSolidParticle(CoordinateVector.fromValues(0.25, 0.75),
+		                                     0.05,
+		                                     2,
+		                                     1,
+		                                     10000,
+		                                     10000,
+		                                     15));
+		particles.add(new FixedSolidParticle(CoordinateVector.fromValues(0.75, 0.25),
+		                                     0.05,
+		                                     2,
+		                                     1,
+		                                     10000,
+		                                     10000,
+		                                     15));
+		particles.add(new FixedSolidParticle(CoordinateVector.fromValues(0.75, 0.75),
+		                                     0.05,
+		                                     2,
+		                                     1,
+		                                     10000,
+		                                     10000,
+		                                     15));
+		final DLMColon system = new DLMColon(dt, 20, fluid, particles);
 		system.loop();
 		system.summarize();
 	}
@@ -83,7 +127,7 @@ public class DLMSchurMG2
 	{
 		final MixedPlot2DTime p = new MixedPlot2DTime(pressureValues,
 		                                              velocityValues,
-		                                              30,
+		                                              61,
 		                                              "velocity and pressure");
 		for (int i = 0; i < particles.size(); i++)
 			p.addOverlay(particles.get(i)

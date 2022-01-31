@@ -128,8 +128,8 @@ public abstract class MultiGridFluid
 //					                                             .filter(ComposeMixedShapeFunction::hasVelocityFunction)
 //					                                             .count()));
 					//ret.add(new RichardsonSmoother(0.05, 4));
-					ret.add(new BSSmoother2(3,
-					                        0.5,
+					ret.add(new BSSmoother2(6,
+					                        1,
 					                        spaces.get(i)
 					                              .getVelocitySize()));
 				}

@@ -35,7 +35,7 @@ public interface Tensor
 		return getShape().getDimension();
 	}
 	
-	default ImmutableMap<IntCoordinates, Double> getCoordinateEntryList()
+	default Map<IntCoordinates, Double> getCoordinateEntryList()
 	{
 		final Map<IntCoordinates, Double> ret = new HashMap<>();
 		for (final IntCoordinates c : getShape().range())

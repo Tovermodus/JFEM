@@ -23,8 +23,10 @@ public class PreconditionedIterativeImplicitSchur
 	{
 		return (A, b) ->
 		{
+			it.gm.ITERATIONS_BEFORE_RESTART = 50;
 			System.out.println(A.getVectorSize());
-			return it.solvePGMRES(A, preconditioner, b, 1e-9);
+			return it.solvePGMRES(A, preconditioner, b, 1e-10);
+			//new GMRES2(1e-10, true).solve(A, preconditioner, b);
 		};
 	}
 }

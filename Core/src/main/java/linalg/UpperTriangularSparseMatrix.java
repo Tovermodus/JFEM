@@ -1,12 +1,6 @@
 package linalg;
 
-import basic.PerformanceArguments;
-import it.unimi.dsi.fastutil.ints.Int2DoubleMap;
-import it.unimi.dsi.fastutil.ints.Int2DoubleRBTreeMap;
-
 import java.util.List;
-import java.util.Map;
-import java.util.stream.Stream;
 
 public class UpperTriangularSparseMatrix
 	implements MutableMatrix, DirectlySolvable
@@ -43,18 +37,19 @@ public class UpperTriangularSparseMatrix
 	{
 		if (matrix.getCols() != matrix.getRows())
 			throw new IllegalArgumentException("must be square");
-		underlying = new SparseMatrix(matrix.getShape());
+		underlying = new SparseMatrix(matrix.getRows(), matrix.getCols(), matrix.getSparseEntryCount());
 		if (matrix.isSparse())
 		{
-			Stream<Map.Entry<IntCoordinates, Double>> entryStream = matrix
-				.getCoordinateEntryList()
-				.entrySet()
-				.stream();
-			if (PerformanceArguments.getInstance().parallelizeThreads) entryStream = entryStream.parallel();
-			entryStream.filter(e -> e.getKey()
-			                         .get(0) <= e.getKey()
-			                                     .get(1))
-			           .forEach(e -> underlying.add(e.getValue(), e.getKey()));
+			final SparseMatrix.ElementOperation op = new SparseMatrix.ElementOperation()
+			{
+				@Override
+				void operation(final int column, final int row, final double value)
+				{
+					if (column <= row)
+						underlying.add(value, column, row);
+				}
+			};
+			matrix.forEachElement(op);
 		} else
 			throw new IllegalArgumentException("Use Triangular Dense Matrix");
 	}
@@ -195,21 +190,25 @@ public class UpperTriangularSparseMatrix
 		for (int i = rhs.getLength() - 1; i >= 0; i--)
 		{
 			final var row = mvm.getRow(i);
-			int[] indices = row._1;
-			double[] vals = row._2;
-			final Int2DoubleMap rowMap = new Int2DoubleRBTreeMap(indices, vals);
-			indices = rowMap.keySet()
-			                .toIntArray();
-			vals = rowMap.values()
-			             .toDoubleArray();
-			assert indices[0] == i;
-			final double diag = vals[0];
+			final int[] indices = row._1;
+			final double[] vals = row._2;
+			double diag = 0;
+			int diagIndex = -1;
+			for (int j = 0; j < indices.length; j++)
+				if (indices[j] == i)
+				{
+					diag = vals[j];
+					diagIndex = j;
+					break;
+				}
 			if (diag == 0)
 				throw new IllegalStateException("Singular Matrix");
 			sol.set(rhs.at(i) / diag, i);
 			
-			for (int j = 1; j < indices.length; j++)
+			for (int j = 0; j < indices.length; j++)
 			{
+				if (j == diagIndex)
+					continue;
 				sol.add(-sol.at(indices[j]) / diag * vals[j], i);
 			}
 		}

@@ -314,8 +314,8 @@ public class BlockSparseMatrix
 		}
 		if (!other.isSparse())
 			return other.almostEqual(this);
-		final ImmutableMap<IntCoordinates, Double> myValues = getCoordinateEntryList();
-		final ImmutableMap<IntCoordinates, Double> otherValues = other.getCoordinateEntryList();
+		final Map<IntCoordinates, Double> myValues = getCoordinateEntryList();
+		final Map<IntCoordinates, Double> otherValues = other.getCoordinateEntryList();
 		final double absmax = absMaxElement() + other.absMaxElement();
 		if (SparseMatrix.coordinateEntryListsNotEqual(myValues, otherValues, absmax)) return false;
 		if (otherValues.size() != myValues.size())

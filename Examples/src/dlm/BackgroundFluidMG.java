@@ -107,14 +107,23 @@ public class BackgroundFluidMG
 	public Function<CoordinateVector, CoordinateVector> velocityBoundaryValues()
 	{
 		return x ->
-			CoordinateVector.getUnitVector(2, 0)
-			                .mul(0.0);// * (x.y() - 0.5));
+		{
+			if (x.x() == 0)
+				return CoordinateVector.fromValues(1, 0);
+			else
+				return CoordinateVector.fromValues(Math.max(0,
+				                                            2 - Math.pow(x.dist(CoordinateVector.fromValues(
+					                                            0,
+					                                            0.5)), 2) * 4), 0);
+		};
 	}
 	
 	@Override
 	public Predicate<TPFace> getDirichletBoundary()
 	{
-		return f -> true;//face -> face.center()
-		//     .x() == 0;
+		return face -> face.center()
+		                   .x() == 0 || face.center()
+		                                    .y() == 0 || face.center()
+		                                                     .y() == 1;
 	}
 }

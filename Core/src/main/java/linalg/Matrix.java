@@ -99,6 +99,17 @@ public interface Matrix
 		return getShape().get(1);
 	}
 	
+	abstract class ElementOperation
+	{
+		abstract void operation(int column, int row, double value);
+	}
+	
+	default void forEachElement(final ElementOperation op)
+	{
+		getCoordinateEntryList().forEach((key, value) -> op.operation(key.get(0),
+		                                                              key.get(1), value));
+	}
+	
 	@Override
 	List<Vector> unfoldDimension(int dimension);
 	
