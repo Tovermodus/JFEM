@@ -14,18 +14,24 @@ public abstract class DLMSystem
 {
 	private final double dt;
 	private final int timeSteps;
-	Fluid backGround;
-	List<Particle> particles;
+	final Fluid backGround;
+	final List<Particle> particles;
+	final DLMSolver solver;
 	DenseMatrix fluidHistory;
 	List<DenseMatrix> particleHistory;
 	List<DenseMatrix> lagrangeHistory;
 	
-	public DLMSystem(final double dt, final int timeSteps, final Fluid backGround, final List<Particle> particles)
+	public DLMSystem(final double dt,
+	                 final int timeSteps,
+	                 final Fluid backGround,
+	                 final List<Particle> particles,
+	                 final DLMSolver solver)
 	{
 		this.backGround = backGround;
 		this.particles = particles;
 		this.dt = dt;
 		this.timeSteps = timeSteps;
+		this.solver = solver;
 	}
 	
 	public void loop()
@@ -79,7 +85,7 @@ public abstract class DLMSystem
 			new DenseVector(backGround.getSystemSize() + particles.stream()
 			                                                      .mapToInt(p -> p.getSystemSize() + p.getLagrangeSize())
 			                                                      .sum());
-		final FluidSystem fluidSystem = backGround.buildSystem(time, fluidState);
+		final FluidSystem fluidSystem = backGround.buildSystem(time, fluidState, particles);
 		final List<ParticleSystem> particleSystems =
 			IntStream.range(0, particles.size())
 			         .mapToObj(i -> particles.get(i)
@@ -97,7 +103,8 @@ public abstract class DLMSystem
 		}
 		final BlockSparseMatrix systemMatrix = new BlockSparseMatrix(blocks, rhs.getLength(), rhs.getLength());
 		
-		final DenseVector solution = solve(systemMatrix, rhs);
+		final DenseVector solution = solver.solve(systemMatrix, rhs, fluidState, particleStates, fluidSystem,
+		                                          particleSystems);
 		final FluidIterate ret = new FluidIterate(solution.slice(0, backGround.getSystemSize()));
 		offset = backGround.getSystemSize();
 		final List<ParticleIterate> iterates = new ArrayList<>();
@@ -143,8 +150,6 @@ public abstract class DLMSystem
 		offset += particleBlockRhs._1.getCols();
 		return offset;
 	}
-	
-	protected abstract DenseVector solve(BlockSparseMatrix systemMatrix, DenseVector rhs);
 	
 	protected abstract void postIterationCallback(final FluidIterate fluidState,
 	                                              final List<ParticleIterate> particleStates,

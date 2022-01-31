@@ -25,7 +25,7 @@ public class DLMColon
 	                final Fluid backGround,
 	                final List<Particle> particles)
 	{
-		super(dt, timeSteps, backGround, particles);
+		super(dt, timeSteps, backGround, particles, null);
 		plotPoints = backGround.getSpace()
 		                       .generatePlotPoints(61);
 		velocityValues = new ConcurrentSkipListMap<>();
@@ -138,7 +138,6 @@ public class DLMColon
 	PreconditionedIterativeImplicitSchur schur;
 	IterativeSolver it = new IterativeSolver(true);
 	
-	@Override
 	protected DenseVector solve(final BlockSparseMatrix systemMatrix, final DenseVector rhs)
 	{
 		System.out.println(backGround);

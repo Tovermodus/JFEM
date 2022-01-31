@@ -7,6 +7,8 @@ import linalg.IntCoordinates;
 import linalg.SparseMatrix;
 import mixed.TaylorHoodSpace;
 
+import java.util.List;
+
 public abstract class SingleGridFluid
 	implements Fluid
 {
@@ -27,7 +29,7 @@ public abstract class SingleGridFluid
 	}
 	
 	@Override
-	public FluidSystem buildSystem(final double t, final FluidIterate iterate)
+	public FluidSystem buildSystem(final double t, final FluidIterate iterate, final List<Particle> particles)
 	{
 		final SparseMatrix massMatrix = new SparseMatrix(getSystemSize(), getSystemSize());
 		getSpace().writeCellIntegralsToMatrix(getMassIntegrals(), massMatrix);

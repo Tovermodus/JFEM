@@ -2,7 +2,8 @@ package dlm;
 
 import basic.PlotWindow;
 import distorted.DistortedVectorFESpaceFunction;
-import linalg.*;
+import linalg.CoordinateVector;
+import linalg.IntCoordinates;
 import mixed.MixedFunctionOnCells;
 import mixed.MixedPlot2DTime;
 import tensorproduct.geometry.TPCell;
@@ -26,7 +27,7 @@ public class DLMSchur
 	                final Fluid backGround,
 	                final List<Particle> particles)
 	{
-		super(dt, timeSteps, backGround, particles);
+		super(dt, timeSteps, backGround, particles, new DLMImplicitSchurSolver());
 		plotPoints = backGround.getSpace()
 		                       .generatePlotPoints(30);
 		velocityValues = new ConcurrentSkipListMap<>();
@@ -84,20 +85,6 @@ public class DLMSchur
 			p.addOverlay(particles.get(i)
 			                      .generateOverlay(particleHistory.get(i), p));
 		PlotWindow.addPlot(p);
-	}
-	
-	IterativeImplicitSchur schur;
-	IterativeSolver it = new IterativeSolver(true);
-	
-	@Override
-	protected DenseVector solve(final BlockSparseMatrix systemMatrix, final DenseVector rhs)
-	{
-		it.showProgress = true;
-		if (schur == null)
-			schur = new IterativeImplicitSchur(systemMatrix);
-		else
-			schur.resetOffDiagonals(systemMatrix);
-		return new DenseVector(it.solvePGMRES(systemMatrix, schur, rhs, 1e-7));
 	}
 	
 	@Override

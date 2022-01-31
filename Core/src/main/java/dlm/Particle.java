@@ -8,6 +8,7 @@ import io.vavr.Tuple2;
 import linalg.*;
 import mixed.ComposeMixedShapeFunction;
 import mixed.MixedPlot2DTime;
+import mixed.TaylorHoodSpace;
 import org.jetbrains.annotations.NotNull;
 import tensorproduct.ContinuousTPVectorFunction;
 
@@ -116,7 +117,7 @@ public interface Particle
 		final Matrix elasticityMatrix = buildElasticityMatrix();
 		final Matrix semiImplicitMatrix = buildSemiImplicitMatrix(iterate);
 		final Matrix lagrangeMatrix = buildLagrangeMatrix();
-		final Matrix lagrangeBackgroundMatrix = buildLagrangeBackgroundMatrix(f, iterate);
+		final Matrix lagrangeBackgroundMatrix = buildLagrangeBackgroundMatrix(f.getSpace(), iterate);
 		final Vector forceRhs = buildForceRhs(t);
 		final Vector accelerationRhs = buildAccelerationRhs(iterate, massMatrix);
 		final Vector lagrangeRhs = buildLagrangeRhs(iterate, lagrangeMatrix);
@@ -156,6 +157,17 @@ public interface Particle
 		return s;
 	}
 	
+	default SparseMatrix getSchurContribution(final ParticleSystem ps, final double dt)
+	{
+		final DenseMatrix displacementInverse =
+			new SparseMatrix(
+				ps.massMatrix.mul(1. / (dt * dt))
+				             .add(ps.elasticityMatrix.mul(1))
+				             .add(ps.semiImplicitMatrix.mul(1))).inverse();
+		return new SparseMatrix(ps.lagrangeBackgroundMatrix.mmMul(displacementInverse)
+		                                                   .mtMul(ps.lagrangeBackgroundMatrix));
+	}
+	
 	default SparseMatrix getLagrangeBackgroundBlockTranspose(final ParticleSystem ps,
 	                                                         final Fluid f,
 	                                                         final double dt)
@@ -187,42 +199,43 @@ public interface Particle
 			                        .sub(iterate.last));
 	}
 	
-	private Matrix buildLagrangeBackgroundMatrix(final Fluid f, final ParticleIterate iterate)
+	default Matrix buildLagrangeBackgroundMatrix(final TaylorHoodSpace fluidSpace, final ParticleIterate iterate)
 	{
 		
 		final CountMetric cm = MetricWindow.getInstance()
 		                                   .setMetric("lagBackGround",
 		                                              new CountMetric(getSpace().getCells()
 		                                                                        .size()));
-		final SparseMatrix lagrangeBackgroundMatrix = new SparseMatrix(f.getVelocitySize(), getLagrangeSize());
+		final SparseMatrix lagrangeBackgroundMatrix = new SparseMatrix(fluidSpace.getVelocitySize(),
+		                                                               getLagrangeSize());
 		final DistortedVectorFunctionOnCells X = getPosition(iterate);
 		final double particleCellDiam = getSpace().getMaxDiam();
-		final double fluidCellDiam = f.getSpace()
-		                              .getMaxDiam();
+		final double fluidCellDiam = fluidSpace
+			.getMaxDiam();
 		System.out.println("lagback");
 		final Stopwatch s = Stopwatch.createStarted();
 		
 		getSpace().forEachCell(cell ->
 		                       {
 			                       cm.increment();
-			                       f.getSpace()
-			                        .getShapeFunctionMap()
-			                        .values()
-			                        .stream()
-			                        .parallel()
-			                        .filter(ComposeMixedShapeFunction::hasVelocityFunction)
-			                        .map(ComposeMixedShapeFunction::getVelocityFunction)
-			                        .filter(backGroundFunction -> hasSupportOverlap(X,
-			                                                                        particleCellDiam,
-			                                                                        fluidCellDiam,
-			                                                                        cell,
-			                                                                        backGroundFunction))
-			                        .forEach(backgroundFunction ->
-				                                 writeBackgroundLagrangeIntegralsOnCellToMatrix(
-					                                 lagrangeBackgroundMatrix,
-					                                 cell,
-					                                 backgroundFunction,
-					                                 X));
+			                       fluidSpace
+				                       .getShapeFunctionMap()
+				                       .values()
+				                       .stream()
+				                       .parallel()
+				                       .filter(ComposeMixedShapeFunction::hasVelocityFunction)
+				                       .map(ComposeMixedShapeFunction::getVelocityFunction)
+				                       .filter(backGroundFunction -> hasSupportOverlap(X,
+				                                                                       particleCellDiam,
+				                                                                       fluidCellDiam,
+				                                                                       cell,
+				                                                                       backGroundFunction))
+				                       .forEach(backgroundFunction ->
+					                                writeBackgroundLagrangeIntegralsOnCellToMatrix(
+						                                lagrangeBackgroundMatrix,
+						                                cell,
+						                                backgroundFunction,
+						                                X));
 		                       });
 		System.out.println("lagbackDone" + s.elapsed());
 		return lagrangeBackgroundMatrix;

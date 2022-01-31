@@ -91,7 +91,7 @@ public interface Fluid
 		return new FluidIterate(initial);
 	}
 	
-	FluidSystem buildSystem(final double t, final FluidIterate iterate);
+	FluidSystem buildSystem(final double t, final FluidIterate iterate, List<Particle> particles);
 	
 	default Tuple2<SparseMatrix, DenseVector> getBlockRhs(final FluidSystem fs, final double dt, final double t)
 	{
@@ -101,7 +101,9 @@ public interface Fluid
 	@NotNull
 	default Tuple2<SparseMatrix, DenseVector> getBlockRhsForSpace(final TaylorHoodSpace space,
 	                                                              final int velocitySize,
-	                                                              final FluidSystem fs, final double dt, final double t)
+	                                                              final FluidSystem fs,
+	                                                              final double dt,
+	                                                              final double t)
 	{
 		final SparseMatrix s =
 			new SparseMatrix(fs.massMatrix.mul(1. / dt)

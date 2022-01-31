@@ -175,7 +175,7 @@ public abstract class MultiGridFluid
 	}
 	
 	@Override
-	public FluidSystem buildSystem(final double t, final FluidIterate iterate)
+	public FluidSystem buildSystem(final double t, final FluidIterate iterate, final List<Particle> particles)
 	{
 		final FluidSystem ret = getFluidSystemForSpace(getSpace(), getVelocity(iterate), t, iterate.current);
 		space = create_space(startCoordinates,

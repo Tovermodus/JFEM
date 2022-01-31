@@ -2,9 +2,7 @@ package dlm;
 
 import basic.PlotWindow;
 import distorted.DistortedVectorFESpaceFunction;
-import linalg.BlockSparseMatrix;
 import linalg.CoordinateVector;
-import linalg.DenseVector;
 import linalg.IntCoordinates;
 import mixed.MixedFunctionOnCells;
 import mixed.MixedPlot2DTime;
@@ -29,7 +27,7 @@ public class DLM2ParticleSystem
 	                          final Fluid backGround,
 	                          final List<Particle> particles)
 	{
-		super(dt, timeSteps, backGround, particles);
+		super(dt, timeSteps, backGround, particles, new DLMDirectSolver());
 		plotPoints = backGround.getSpace()
 		                       .generatePlotPoints(30);
 		velocityValues = new ConcurrentSkipListMap<>();
@@ -89,13 +87,6 @@ public class DLM2ParticleSystem
 		PlotWindow.addPlot(p);
 		System.out.println(particleHistory.get(0));
 		System.out.println(lagrangeHistory.get(0));
-	}
-	
-	@Override
-	protected DenseVector solve(final BlockSparseMatrix systemMatrix, final DenseVector rhs)
-	{
-		return systemMatrix.toSparse()
-		                   .solve(rhs);
 	}
 	
 	@Override
