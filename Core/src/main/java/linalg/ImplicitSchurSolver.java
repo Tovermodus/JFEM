@@ -15,7 +15,7 @@ public abstract class ImplicitSchurSolver
 	}
 	
 	@Override
-	protected VectorMultiplyable schurMvMul()
+	public VectorMultiplyable schurMvMul()
 	{
 		return new VectorMultiplyable()
 		{

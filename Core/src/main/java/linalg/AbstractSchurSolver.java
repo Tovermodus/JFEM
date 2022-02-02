@@ -71,7 +71,7 @@ public abstract class AbstractSchurSolver<T extends VectorMultiplyable>
 		return blockMatrix.getBlockMatrix(0, 0);
 	}
 	
-	protected abstract T schurMvMul();
+	public abstract T schurMvMul();
 	
 	protected abstract Function2<T, Vector, Vector> solveSchur();
 	

@@ -534,8 +534,73 @@ public class SparseMatrix
 //		return ret;
 //	}
 	
+	static SparseMatrix BABTMul(final DenseMatrix A, final SparseMatrix B)
+	{
+		final SparseMatrix ret = new SparseMatrix(B.getRows(), B.getRows());
+		for (int i = 0; i < B.sparseEntries; i++)
+		{
+			final int x = B.sparseXs[i];
+			final int y = B.sparseYs[i];
+			final double val = B.sparseValues[i];
+			for (int j = 0; j < B.sparseEntries; j++)
+			{
+				final int y2 = B.sparseXs[i];
+				final int x2 = B.sparseYs[i];
+				final double val2 = B.sparseValues[i];
+				ret.add(val * val2 * A.at(x, y2), y, x2);
+			}
+		}
+		return ret;
+	}
+	
 	public SparseMatrix mmMul(final SparseMatrix matrix)
 	{
+		if (PerformanceArguments.getInstance().executeChecks)
+			if (getCols() != (matrix.getRows())) throw new IllegalArgumentException("Incompatible sizes");
+		
+		final Stopwatch s = Stopwatch.createStarted();
+		final IntList[] columnCoordinates = new IntList[matrix.getCols()];
+		final DoubleList[] columnEntries = new DoubleList[matrix.getCols()];
+		DenseMatrix.groupCoordinateEntriesByCol(matrix, columnCoordinates, columnEntries);
+		final SparseMatrix ret = new SparseMatrix(getRows(), matrix.getCols());
+		final Map<Integer, Map<Integer, Double>> rowMaps =
+			getCoordinateEntryList()
+				.entrySet()
+				.stream()
+				.map(e -> new Tuple2<>(e.getKey(), e.getValue()))
+				.collect(Collectors.groupingBy(e -> e._1.get(0),
+				                               new MapKeySelectCollector<>(key -> key.get(1))));
+		rowMaps.keySet()
+		       .stream()
+		       .parallel()
+		       .forEach(i ->
+		                {
+			                final double[] row = new double[getCols()];
+			                rowMaps.get(i)
+			                       .forEach((col, val) -> row[col] = val);
+			                for (int columnIndex = 0; columnIndex < matrix.getCols(); columnIndex++)
+			                {
+				                if (columnCoordinates[columnIndex] != null)
+				                {
+					                final int[] columnCoords
+						                = columnCoordinates[columnIndex].toIntArray();
+					                final double[] columnEntriees
+						                = columnEntries[columnIndex].toDoubleArray();
+					                double contraction = 0;
+					                for (int j = 0; j < columnCoords.length; j++)
+						                contraction
+							                += row[columnCoords[j]] * columnEntriees[j];
+					                ret.add(contraction, i,
+					                        columnIndex);
+				                }
+			                }
+		                });
+		return ret;
+	}
+	
+	public SparseMatrix mtMul(final SparseMatrix mat)
+	{
+		final SparseMatrix matrix = mat.transpose();
 		if (PerformanceArguments.getInstance().executeChecks)
 			if (getCols() != (matrix.getRows())) throw new IllegalArgumentException("Incompatible sizes");
 		

@@ -101,7 +101,7 @@ public interface Matrix
 	
 	abstract class ElementOperation
 	{
-		abstract void operation(int column, int row, double value);
+		public abstract void operation(int column, int row, double value);
 	}
 	
 	default void forEachElement(final ElementOperation op)

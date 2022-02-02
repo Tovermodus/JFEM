@@ -14,19 +14,19 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentSkipListMap;
 
-public class DLMColon
+public class DLMColon2
 	extends DLMSystem
 {
 	List<CoordinateVector> plotPoints;
 	private final Map<CoordinateVector, CoordinateVector> velocityValues;
 	private final Map<CoordinateVector, Double> pressureValues;
 	
-	public DLMColon(final double dt,
-	                final int timeSteps,
-	                final MultiGridFluid backGround,
-	                final List<Particle> particles)
+	public DLMColon2(final double dt,
+	                 final int timeSteps,
+	                 final MultiGridFluid backGround,
+	                 final List<Particle> particles)
 	{
-		super(dt, timeSteps, backGround, particles, new DLMFluidMGSolver(backGround));
+		super(dt, timeSteps, backGround, particles, new DLMLagrangeAMGSolver(backGround, particles));
 		plotPoints = backGround.getSpace()
 		                       .generatePlotPoints(61);
 		velocityValues = new ConcurrentSkipListMap<>();
@@ -34,7 +34,7 @@ public class DLMColon
 		System.out.println("Simulating up to time " + timeSteps * dt);
 	}
 	
-	static double dt = 0.002;
+	static double dt = 0.005;
 	
 	public static void main(final String[] args)
 	{
@@ -45,7 +45,7 @@ public class DLMColon
 		                                                   CoordinateVector.fromValues(2, 1),
 		                                                   new IntCoordinates(4, 4),
 		                                                   1,
-		                                                   1,
+		                                                   4,
 		                                                   dt,
 		                                                   0.5,
 		                                                   5);
@@ -119,7 +119,7 @@ public class DLMColon
 		                                     10000,
 		                                     10000,
 		                                     15));
-		final DLMColon system = new DLMColon(dt, 10, fluid, particles);
+		final DLMColon2 system = new DLMColon2(dt, 20, fluid, particles);
 		system.loop();
 		system.summarize();
 	}

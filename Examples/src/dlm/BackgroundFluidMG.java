@@ -70,9 +70,9 @@ public class BackgroundFluidMG
 	{
 		final VectorFunctionOnCells<TPCell, TPFace> semiImplicitWeight1 =
 			VectorFunctionOnCells.fromLambda((x) -> velocity.value(x)
-			                                                .mul(1 / 2),
+			                                                .mul(1. / 2),
 			                                 (x, cell) -> velocity.valueInCell(x, cell)
-			                                                      .mul(1 / 2), 2, 2);
+			                                                      .mul(1. / 2), 2, 2);
 		final VectorFunctionOnCells<TPCell, TPFace> semiImplicitWeight2 =
 			VectorFunctionOnCells.fromLambda((x) -> velocity.value(x)
 			                                                .mul(-1. / 2),
@@ -121,9 +121,10 @@ public class BackgroundFluidMG
 	@Override
 	public Predicate<TPFace> getDirichletBoundary()
 	{
-		return face -> face.center()
-		                   .x() == 0 || face.center()
-		                                    .y() == 0 || face.center()
-		                                                     .y() == 1;
+		return face ->// true;
+			face.center()
+			    .x() == 0 || face.center()
+			                     .y() == 0 || face.center()
+			                                      .y() == 1;
 	}
 }

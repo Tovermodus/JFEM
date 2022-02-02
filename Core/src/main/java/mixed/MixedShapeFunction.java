@@ -37,6 +37,7 @@ public interface MixedShapeFunction<CT extends Cell<CT, FT>, FT extends Face<CT,
 	@Override
 	default MixedValue value(final CoordinateVector pos)
 	{
+		
 		for (final CT cell : getCells())
 			if (cell.isInCell(pos)) return valueInCell(pos, cell);
 		return defaultValue();

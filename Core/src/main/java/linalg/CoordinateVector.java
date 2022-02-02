@@ -9,6 +9,7 @@ public class CoordinateVector
 {
 	private static final CoordinateVector unit21 = CoordinateVector.fromValues(1, 0);
 	private static final CoordinateVector unit22 = CoordinateVector.fromValues(0, 1);
+	private static final CoordinateVector zero = CoordinateVector.fromValues(0, 0);
 	
 	public CoordinateVector(final Vector v)
 	{
@@ -55,6 +56,13 @@ public class CoordinateVector
 		final CoordinateVector ret = new CoordinateVector(d);
 		ret.set(scale, index);
 		return ret;
+	}
+	
+	public static CoordinateVector getZero(final int d)
+	{
+		if (d == 2)
+			return zero;
+		return new CoordinateVector(d);
 	}
 	
 	public static CoordinateVector fromValues(final double... values)

@@ -34,7 +34,8 @@ public class BSSmoother2
 		Vector p = iterate.slice(vel_size, tot_size);
 		final Vector f = rhs.slice(0, vel_size);
 		final Vector g = rhs.slice(vel_size, tot_size);
-		final SparseMatrix[] blocks = ((SparseMatrix) Operator).partition(new IntCoordinates(vel_size, vel_size));
+		final SparseMatrix[] blocks = ((SparseMatrix) Operator).partition(new IntCoordinates(vel_size,
+		                                                                                     vel_size));
 		final SparseMatrix B = blocks[2];
 		final SparseMatrix BT = blocks[1];
 		final SparseMatrix A = blocks[0];
@@ -51,37 +52,37 @@ public class BSSmoother2
 		if (verbose)
 			System.out.println("    init");
 		if (twoGs == null)
-			twoGs = new BlockDenseMatrix(A, A.getRows() / 100).getInvertedDiagonalMatrix();//A.inverse();
-		new VectorMultiplyable()
-		{
-			final UpperTriangularSparseMatrix U = new UpperTriangularSparseMatrix(A);
-			final LowerTriangularSparseMatrix L = new LowerTriangularSparseMatrix(A);
-			final SparseMatrix D = A.getDiagonalMatrix();
-			
-			@Override
-			public int getVectorSize()
-			{
-				return A.getVectorSize();
-			}
-			
-			@Override
-			public int getTVectorSize()
-			{
-				return A.getVectorSize();
-			}
-			
-			@Override
-			public Vector mvMul(final Vector vector)
-			{
-				return L.solve(D.mvMul(U.solve(vector)));
-			}
-			
-			@Override
-			public Vector tvMul(final Vector vector)
-			{
-				throw new UnsupportedOperationException("not implemented yet");
-			}
-		};
+			twoGs = //new BlockDenseMatrix(A, A.getRows() / 100).getInvertedDiagonalMatrix();//A.inverse();
+				new VectorMultiplyable()
+				{
+					final UpperTriangularSparseMatrix U = new UpperTriangularSparseMatrix(A);
+					final LowerTriangularSparseMatrix L = new LowerTriangularSparseMatrix(A);
+					final SparseMatrix D = A.getDiagonalMatrix();
+					
+					@Override
+					public int getVectorSize()
+					{
+						return A.getVectorSize();
+					}
+					
+					@Override
+					public int getTVectorSize()
+					{
+						return A.getVectorSize();
+					}
+					
+					@Override
+					public Vector mvMul(final Vector vector)
+					{
+						return L.solve(D.mvMul(U.solve(vector)));
+					}
+					
+					@Override
+					public Vector tvMul(final Vector vector)
+					{
+						throw new UnsupportedOperationException("not implemented yet");
+					}
+				};
 		
 		final VectorMultiplyable Minv = twoGs;
 		if (Sinv == null)

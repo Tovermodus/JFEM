@@ -6,7 +6,7 @@ public class PreconditionedIterativeImplicitSchur
 	extends ImplicitSchurSolver
 {
 	final IterativeSolver it = new IterativeSolver();
-	final VectorMultiplyable preconditioner;
+	public VectorMultiplyable preconditioner;
 	
 	public PreconditionedIterativeImplicitSchur(final BlockSparseMatrix blockMatrix,
 	                                            final VectorMultiplyable preconditioner)
@@ -15,7 +15,6 @@ public class PreconditionedIterativeImplicitSchur
 		this.preconditioner = preconditioner;
 		it.gm.MAX_RESTARTS = 0;
 		it.showProgress = true;
-		System.out.println("inverting first" + blockMatrix.getBlockSizes()[0]);
 	}
 	
 	@Override
@@ -23,10 +22,12 @@ public class PreconditionedIterativeImplicitSchur
 	{
 		return (A, b) ->
 		{
-			it.gm.ITERATIONS_BEFORE_RESTART = 50;
+			it.gm.ITERATIONS_BEFORE_RESTART = 15;
 			System.out.println(A.getVectorSize());
+//			System.out.println(((AMGPreconditionerSpace) preconditioner).finest_system.mvMul(b)
+//			                                                                          .sub(A.mvMul(b))
+//			                                                                          .absMaxElement());
 			return it.solvePGMRES(A, preconditioner, b, 1e-10);
-			//new GMRES2(1e-10, true).solve(A, preconditioner, b);
 		};
 	}
 }

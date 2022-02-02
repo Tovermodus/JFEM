@@ -179,6 +179,7 @@ public class LaplaceMG
 				                  mg.spaces.get(0)
 				                           .generatePlotPoints(30));
 			assertTrue(0.2 * Math.pow(0.25, refinements) > norm);
+			System.out.println();
 			System.out.println(0.2 * Math.pow(0.25, refinements) + " " + norm + " " + it.iterations);
 		}
 	}

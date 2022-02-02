@@ -87,7 +87,7 @@ public abstract class ComposeMixedShapeFunction<CT extends Cell<CT, FT>,
 		if (hasPressureFunction())
 			return new PressureValue(getPressureFunction().valueInCell(pos, cell), pos.getLength());
 		else
-			return new VelocityValue(getVelocityFunction().valueInCell(pos, cell));
+			return VelocityValue.wrap(getVelocityFunction().valueInCell(pos, cell));
 	}
 	
 	@Override

@@ -9,7 +9,7 @@ public class PressureValue
 {
 	public PressureValue(final double pressure, final int domainDimension)
 	{
-		super(pressure, new CoordinateVector(domainDimension));
+		super(pressure, CoordinateVector.getZero(domainDimension));
 	}
 	
 	@Override

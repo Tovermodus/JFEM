@@ -25,8 +25,13 @@ public abstract class ExplicitSchurSolver
 		schurComplement.addInPlace(getSchurBlock());
 	}
 	
+	public DenseMatrix getSchurComplement()
+	{
+		return schurComplement;
+	}
+	
 	@Override
-	protected DenseMatrix schurMvMul()
+	public DenseMatrix schurMvMul()
 	{
 		return schurComplement;
 	}

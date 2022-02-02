@@ -78,8 +78,18 @@ public class MatrixPlot
 		if (maxValue > IDENTIFIED_AS_ZERO) maxlog = Math.log(maxValue) - minlog;
 		//System.out.println(Math.log(Math.abs(val))+" "+logval+ " " + minlog + " " + maxlog + " " + Math.log
 		// (maxValue));
-		final int red = (int) (logval / maxlog * 255);
-		final int green = 0;
+		
+		final int red;
+		final int green;
+		if (val >= 0)
+		{
+			red = (int) (logval / maxlog * 255);
+			green = 0;
+		} else
+		{
+			green = (int) (logval / maxlog * 255);
+			red = 0;
+		}
 		final int blue = 255 - red;
 		final Color c = new Color(red, green, blue);
 		final int x = (int) ((1.0 * coords.get(1) / m.getCols()) * (width - 150) + 75 - pixelWidth / 2);
@@ -91,6 +101,7 @@ public class MatrixPlot
 	@Override
 	public String title()
 	{
-		return title + ". Scale logarithmic: blue = " + IDENTIFIED_AS_ZERO + ", red = " + maxValue;
+		return title + ". Scale logarithmic: blue = " + IDENTIFIED_AS_ZERO + ", red = " + maxValue + ", green " +
+			"= " + -maxValue;
 	}
 }

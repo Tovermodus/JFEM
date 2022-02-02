@@ -5,6 +5,7 @@ import com.google.common.base.Stopwatch;
 import distorted.*;
 import distorted.geometry.DistortedCell;
 import io.vavr.Tuple2;
+import it.unimi.dsi.fastutil.ints.Int2DoubleMap;
 import linalg.*;
 import mixed.ComposeMixedShapeFunction;
 import mixed.MixedPlot2DTime;
@@ -89,8 +90,6 @@ public interface Particle
 	
 	Function<CoordinateVector, CoordinateVector> getInitialVelocity();
 	
-	void applyBoundaryValues(SparseMatrix displacementMatrix, DenseVector displacementRhs);
-	
 	default ParticleIterate buildInitialIterate(final double dt)
 	{
 		final DenseVector initialDisplacement = new DenseVector(getSystemSize());
@@ -137,7 +136,6 @@ public interface Particle
 			new DenseVector(ps.forceRhs.mul(1)
 			                           .add(ps.accelerationRhs.mul(1. / (dt * dt))));
 		
-		applyBoundaryValues(displacementMatrix, displacementRhs);
 		final SparseMatrix s = new SparseMatrix(getSystemSize() + getLagrangeSize(),
 		                                        getSystemSize() + getLagrangeSize());
 		s.addSmallMatrixInPlaceAt(displacementMatrix, 0, 0);
@@ -150,32 +148,19 @@ public interface Particle
 		return new Tuple2<>(s, d);
 	}
 	
-	default SparseMatrix getLagrangeBackgroundBlock(final ParticleSystem ps, final Fluid f, final double dt)
+	default SparseMatrix getLagrangeBackgroundBlock(final ParticleSystem ps, final Fluid f,
+	                                                final double dt)
 	{
 		final SparseMatrix s = new SparseMatrix(f.getSystemSize(), getSystemSize() + getLagrangeSize());
 		s.addSmallMatrixInPlaceAt(ps.lagrangeBackgroundMatrix.mul(1), 0, getSystemSize());
 		return s;
 	}
 	
-	default SparseMatrix getSchurContribution(final ParticleSystem ps, final double dt)
-	{
-		final DenseMatrix displacementInverse =
-			new SparseMatrix(
-				ps.massMatrix.mul(1. / (dt * dt))
-				             .add(ps.elasticityMatrix.mul(1))
-				             .add(ps.semiImplicitMatrix.mul(1))).inverse();
-		return new SparseMatrix(ps.lagrangeBackgroundMatrix.mmMul(displacementInverse)
-		                                                   .mtMul(ps.lagrangeBackgroundMatrix));
-	}
-	
 	default SparseMatrix getLagrangeBackgroundBlockTranspose(final ParticleSystem ps,
 	                                                         final Fluid f,
 	                                                         final double dt)
 	{
-		final SparseMatrix s = new SparseMatrix(getSystemSize() + getLagrangeSize(), f.getSystemSize());
-		s.addSmallMatrixInPlaceAt(ps.lagrangeBackgroundMatrix.transpose()
-		                                                     .mul(1), getSystemSize(), 0);
-		return s;
+		return getLagrangeBackgroundBlock(ps, f, dt).transpose();
 	}
 	
 	private static Vector buildLagrangeRhs(final ParticleIterate iterate,
@@ -327,4 +312,6 @@ public interface Particle
 		                            particleHistory,
 		                            5);
 	}
+	
+	Int2DoubleMap getDirichletNodeValues(double t);
 }

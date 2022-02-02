@@ -5,7 +5,7 @@ import dlm.BSSmoother2;
 import io.vavr.Tuple2;
 import linalg.*;
 import mixed.*;
-import multigrid.MGPreconditionerSpace;
+import multigrid.AMGPreconditionerSpace;
 import multigrid.Smoother;
 import tensorproduct.ContinuousTPShapeFunction;
 import tensorproduct.ContinuousTPVectorFunction;
@@ -17,7 +17,7 @@ import tensorproduct.geometry.TPFace;
 import java.util.ArrayList;
 import java.util.List;
 
-public class StokesMGBS2
+public class StokesAMGBS2
 {
 	public static void main(final String[] args)
 	{
@@ -37,10 +37,10 @@ public class StokesMGBS2
 			MixedRightHandSideIntegral.fromVelocityIntegral(
 				new TPVectorRightHandSideIntegral<>(StokesReferenceSolution.rightHandSide(),
 				                                    TPVectorRightHandSideIntegral.VALUE));
-		final MGPreconditionerSpace<TaylorHoodSpace, TPCell, TPFace, QkQkFunction,
+		final AMGPreconditionerSpace<TaylorHoodSpace, TPCell, TPFace, QkQkFunction,
 			MixedValue, MixedGradient, MixedHessian>
-			mg = new MGPreconditionerSpace<>(refinements,
-			                                 1)
+			mg = new AMGPreconditionerSpace<>(refinements,
+			                                  1)
 		{
 			@Override
 			public List<TaylorHoodSpace> createSpaces(final int refinements)
@@ -60,7 +60,7 @@ public class StokesMGBS2
 			}
 			
 			@Override
-			public Tuple2<VectorMultiplyable, DenseVector> createSystem(final TaylorHoodSpace space)
+			public Tuple2<SparseMatrix, DenseVector> createSystem(final TaylorHoodSpace space)
 			{
 				final SparseMatrix s = new SparseMatrix(space.getShapeFunctionMap()
 				                                             .size(),
@@ -85,7 +85,7 @@ public class StokesMGBS2
 				final ArrayList<Smoother> ret = new ArrayList<>();
 				for (int i = 1; i < spaces.size(); i++)
 				{
-					ret.add(new BSSmoother2(7,
+					ret.add(new BSSmoother2(3,
 					                        1,
 					                        spaces.get(i)
 					                              .getVelocitySize()));//, d.getInvertedDiagonalMatrix()));
@@ -103,13 +103,14 @@ public class StokesMGBS2
 				vector.set(0, space.getVelocitySize());
 			}
 		};
-		mg.verbose = false;
+		mg.verbose = true;
 		
 		PlotWindow.addPlot(new ScalarPlot2D(LaplaceReferenceSolution.scalarReferenceSolution(),
 		                                    mg.spaces.get(refinements)
 		                                             .generatePlotPoints(
 			                                             30),
 		                                    30, "reference"));
+		
 		final IterativeSolver it = new IterativeSolver(true);
 		it.showProgress = true;
 		final Vector solution = it.solvePGMRES(mg.finest_system,

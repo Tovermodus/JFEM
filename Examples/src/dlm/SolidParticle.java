@@ -4,7 +4,11 @@ import basic.CellIntegral;
 import basic.RightHandSideIntegral;
 import distorted.*;
 import distorted.geometry.DistortedCell;
-import linalg.*;
+import it.unimi.dsi.fastutil.ints.Int2DoubleArrayMap;
+import it.unimi.dsi.fastutil.ints.Int2DoubleMap;
+import linalg.CoordinateMatrix;
+import linalg.CoordinateTensor;
+import linalg.CoordinateVector;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -98,7 +102,8 @@ public class SolidParticle
 	}
 	
 	@Override
-	public void applyBoundaryValues(final SparseMatrix displacementMatrix, final DenseVector displacementRhs)
+	public Int2DoubleMap getDirichletNodeValues(final double t)
 	{
+		return new Int2DoubleArrayMap();
 	}
 }

@@ -68,7 +68,7 @@ public class DLMSchurMG2
 		                                15));
 		particles.add(new Membrane(CoordinateVector.fromValues(0.5, 0.5),
 		                           0.39,
-		                           0.4,
+		                           0.44,
 		                           0,
 		                           1,
 		                           new CoordinateVector(2),

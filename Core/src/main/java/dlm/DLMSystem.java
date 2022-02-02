@@ -1,6 +1,8 @@
 package dlm;
 
 import io.vavr.Tuple2;
+import it.unimi.dsi.fastutil.ints.Int2DoubleArrayMap;
+import it.unimi.dsi.fastutil.ints.Int2DoubleMap;
 import linalg.*;
 
 import java.util.ArrayList;
@@ -93,7 +95,7 @@ public abstract class DLMSystem
 			         .collect(Collectors.toList());
 		
 		int offset = 0;
-		final var fluidBlockRhs = backGround.getBlockRhs(fluidSystem, dt, time);
+		final var fluidBlockRhs = Fluid.getBlockRhs(fluidSystem, dt);
 		blocks.put(new IntCoordinates(0, 0), fluidBlockRhs._1);
 		rhs.addSmallVectorAt(fluidBlockRhs._2, 0);
 		offset += fluidBlockRhs._1.getCols();
@@ -102,8 +104,8 @@ public abstract class DLMSystem
 			offset = addParticleBlocks(blocks, rhs, particleSystems, offset, i);
 		}
 		final BlockSparseMatrix systemMatrix = new BlockSparseMatrix(blocks, rhs.getLength(), rhs.getLength());
-		
-		final Vector solution = solver.solve(systemMatrix, rhs, fluidState, particleStates, fluidSystem,
+		final Tuple2<BlockSparseMatrix, DenseVector> system = applyBoundaryValues(systemMatrix, rhs, time);
+		final Vector solution = solver.solve(system._1, system._2, fluidState, particleStates, fluidSystem,
 		                                     particleSystems, dt, time);
 		final FluidIterate ret = new FluidIterate(solution.slice(0, backGround.getSystemSize()));
 		offset = backGround.getSystemSize();
@@ -127,6 +129,43 @@ public abstract class DLMSystem
 			                                               .getLagrangeSize();
 		}
 		return new Tuple2<>(ret, iterates);
+	}
+	
+	protected Tuple2<BlockSparseMatrix, DenseVector> applyBoundaryValues(final BlockSparseMatrix systemMatrix,
+	                                                                     final DenseVector rhs, final double t)
+	{
+		final SparseMatrix ret = systemMatrix.toSparse();
+		final DenseVector retRhs = new DenseVector(rhs);
+		final Int2DoubleMap nodeValues = new Int2DoubleArrayMap();
+		final Int2DoubleMap fluidDirichletNodeValues = backGround.getDirichletNodeValues(t);
+		nodeValues.putAll(fluidDirichletNodeValues);
+		for (int i = 0; i < particles.size(); i++)
+		{
+			final Int2DoubleMap particleDirichletNodeValues = particles.get(i)
+			                                                           .getDirichletNodeValues(t);
+			final int finalI = i;
+			final int particleSpaceSize = particles.get(i)
+			                                       .getSystemSize();
+			particleDirichletNodeValues.forEach((node, val) ->
+				                                    nodeValues.put(node + systemMatrix.getBlockStarts()[finalI + 1],
+				                                                   val.doubleValue()));
+			particleDirichletNodeValues.forEach((node, val) ->
+				                                    nodeValues.put(node + particleSpaceSize + systemMatrix.getBlockStarts()[finalI + 1],
+				                                                   val.doubleValue()));
+		}
+		nodeValues.forEach((node, val) ->
+		                   {
+			                   final DenseVector column = ret.getColumn(node);
+			                   for (int i = 0; i < column.getLength(); i++)
+			                   {
+				                   retRhs.add(-column.at(i) * val, i);
+			                   }
+			                   ret.deleteColumn(node);
+			                   ret.deleteRow(node);
+			                   ret.set(1, node, node);
+			                   retRhs.set(val, node);
+		                   });
+		return new Tuple2<>(new BlockSparseMatrix(ret, systemMatrix.getBlockStarts()), retRhs);
 	}
 	
 	private int addParticleBlocks(final Map<IntCoordinates, SparseMatrix> blocks,

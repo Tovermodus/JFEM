@@ -2,6 +2,7 @@ package dlm;
 
 import basic.VectorFunctionOnCells;
 import com.google.common.base.Stopwatch;
+import it.unimi.dsi.fastutil.ints.Int2DoubleMap;
 import linalg.*;
 import mixed.TaylorHoodSpace;
 import org.jetbrains.annotations.NotNull;
@@ -44,13 +45,13 @@ public abstract class MultiGridFluid
 	@Override
 	public FluidSystem buildSystem(final double t, final FluidIterate iterate, final List<Particle> particles)
 	{
-		final FluidSystem ret = getFluidSystemForSpace(getSpace(), getVelocity(iterate), t, iterate.current);
-		return ret;
+		return getFluidSystemForSpace(getSpace(), getVelocity(iterate), t, iterate.current);
 	}
 	
 	@NotNull
-	FluidSystem getFluidSystemForSpace(final TaylorHoodSpace space, final VectorFunctionOnCells<TPCell,
-		TPFace> velocity, final double t,
+	FluidSystem getFluidSystemForSpace(final TaylorHoodSpace space,
+	                                   final VectorFunctionOnCells<TPCell, TPFace> velocity,
+	                                   final double t,
 	                                   final Vector currentIterate)
 	{
 		final int n = space.getShapeFunctionMap()

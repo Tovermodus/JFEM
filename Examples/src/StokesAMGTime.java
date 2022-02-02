@@ -3,7 +3,7 @@ import dlm.BSSmoother2;
 import io.vavr.Tuple2;
 import linalg.*;
 import mixed.*;
-import multigrid.MGPreconditionerSpace;
+import multigrid.AMGPreconditionerSpace;
 import multigrid.Smoother;
 import org.jetbrains.annotations.NotNull;
 import tensorproduct.*;
@@ -14,9 +14,9 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
-public class StokesMGTime
+public class StokesAMGTime
 {
-	private static MGPreconditionerSpace<TaylorHoodSpace, TPCell, TPFace, QkQkFunction, MixedValue, MixedGradient
+	private static AMGPreconditionerSpace<TaylorHoodSpace, TPCell, TPFace, QkQkFunction, MixedValue, MixedGradient
 		, MixedHessian> getMG(final Vector currentIterate, final double dt, final double time)
 	{
 		final double reynolds = 5;
@@ -34,7 +34,7 @@ public class StokesMGTime
 			MixedCellIntegral.fromVelocityIntegral(new TPVectorCellIntegral<>(
 				ScalarFunction.constantFunction(1),
 				TPVectorCellIntegral.VALUE_VALUE));
-		return new MGPreconditionerSpace<>(1, 1)
+		return new AMGPreconditionerSpace<>(1, 1)
 		{
 			
 			@Override
@@ -56,7 +56,7 @@ public class StokesMGTime
 			}
 			
 			@Override
-			public Tuple2<VectorMultiplyable, DenseVector> createSystem(final TaylorHoodSpace space)
+			public Tuple2<SparseMatrix, DenseVector> createSystem(final TaylorHoodSpace space)
 			{
 				final int n = space.getShapeFunctionMap()
 				                   .size();
@@ -202,7 +202,7 @@ public class StokesMGTime
 		final int timesteps = 30;
 		final int nPoints = 83;
 		
-		MGPreconditionerSpace<TaylorHoodSpace, TPCell, TPFace, QkQkFunction, MixedValue, MixedGradient
+		AMGPreconditionerSpace<TaylorHoodSpace, TPCell, TPFace, QkQkFunction, MixedValue, MixedGradient
 			, MixedHessian> mg = getMG(null, dt, 0);
 		
 		Vector iterate = getInitialIterate(mg.getFinestSpace());

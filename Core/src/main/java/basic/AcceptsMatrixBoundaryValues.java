@@ -94,10 +94,10 @@ public interface AcceptsMatrixBoundaryValues<CT extends Cell<CT, FT>,
 	                                       final BiPredicate<FT, ST> functions,
 	                                       final MutableVector vector)
 	{
+		var shapeFunctionMap = getShapeFunctionMap();
 		final int[] boundaryNodes = getBoundaryNodes(faces, functions);
 		for (final int node : boundaryNodes)
-			vector.set(
-				getShapeFunctionMap().get(node)
+			vector.set(shapeFunctionMap.get(node)
 				                     .getNodeFunctional()
 				                     .evaluate(boundaryValues),
 				node);

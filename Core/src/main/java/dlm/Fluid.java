@@ -2,11 +2,12 @@ package dlm;
 
 import basic.*;
 import io.vavr.Tuple2;
+import it.unimi.dsi.fastutil.ints.Int2DoubleArrayMap;
+import it.unimi.dsi.fastutil.ints.Int2DoubleMap;
 import linalg.CoordinateVector;
 import linalg.DenseVector;
 import linalg.SparseMatrix;
 import mixed.*;
-import org.jetbrains.annotations.NotNull;
 import tensorproduct.geometry.TPCell;
 import tensorproduct.geometry.TPFace;
 
@@ -51,28 +52,10 @@ public interface Fluid
 	
 	Predicate<TPFace> getDirichletBoundary();
 	
-	default int getVelocitySize()
-	{
-		return (int) getSpace().getShapeFunctionMap()
-		                       .values()
-		                       .stream()
-		                       .filter(ComposeMixedShapeFunction::hasVelocityFunction)
-		                       .count();
-	}
-	
 	default int getSystemSize()
 	{
-		return (int) getSpace().getShapeFunctionMap()
+		return (int) getSpace().getShapeFunctions()
 		                       .size();
-	}
-	
-	default int getPressureSize()
-	{
-		return (int) getSpace().getShapeFunctionMap()
-		                       .values()
-		                       .stream()
-		                       .filter(ComposeMixedShapeFunction::hasPressureFunction)
-		                       .count();
 	}
 	
 	default FluidIterate buildInitialIterate()
@@ -93,17 +76,7 @@ public interface Fluid
 	
 	FluidSystem buildSystem(final double t, final FluidIterate iterate, List<Particle> particles);
 	
-	default Tuple2<SparseMatrix, DenseVector> getBlockRhs(final FluidSystem fs, final double dt, final double t)
-	{
-		return getBlockRhsForSpace(getSpace(), getVelocitySize(), fs, dt, t);
-	}
-	
-	@NotNull
-	default Tuple2<SparseMatrix, DenseVector> getBlockRhsForSpace(final TaylorHoodSpace space,
-	                                                              final int velocitySize,
-	                                                              final FluidSystem fs,
-	                                                              final double dt,
-	                                                              final double t)
+	static Tuple2<SparseMatrix, DenseVector> getBlockRhs(final FluidSystem fs, final double dt)
 	{
 		final SparseMatrix s =
 			new SparseMatrix(fs.massMatrix.mul(1. / dt)
@@ -111,14 +84,30 @@ public interface Fluid
 			                              .add(fs.semiImplicitMatrix));
 		
 		final DenseVector d = new DenseVector(fs.forceRhs.add(fs.accelerationRhs.mul(1. / dt)));
-		final MixedFunction velocityBoundary =
-			new ComposedMixedFunction(VectorFunction.fromLambda(velocityBoundaryValues(t), 2, 2));
-		space.writeBoundaryValuesTo(velocityBoundary,
-		                            getDirichletBoundary(),
-		                            //(face, fun) -> fun.hasVelocityFunction(),
-		                            s,
-		                            d);
-		space.overWriteValue(velocitySize, 0, s, d);
 		return new Tuple2<>(s, d);
+	}
+	
+	default Int2DoubleMap getDirichletNodeValues(final double t)
+	{
+		return getDirichletNodeValuesForSpace(getSpace(), t);
+	}
+	
+	default Int2DoubleMap getDirichletNodeValuesForSpace(final TaylorHoodSpace space, final double t)
+	{
+		final var shapeFunctionMap = space.getShapeFunctionMap();
+		final ComposedMixedFunction cmf =
+			new ComposedMixedFunction(VectorFunction.fromLambda(velocityBoundaryValues(t), 2, 2));
+		final Int2DoubleMap ret = new Int2DoubleArrayMap();
+		final int[] nodes = space.getBoundaryNodes(getDirichletBoundary(),
+		                                           (tpFace, qkQkFunction) -> qkQkFunction.hasVelocityFunction());
+		for (final int node : nodes)
+		{
+			ret.put(node,
+			        shapeFunctionMap.get(node)
+			                        .getNodeFunctional()
+			                        .evaluate(cmf));
+		}
+		ret.put(space.getVelocitySize(), 0);
+		return ret;
 	}
 }

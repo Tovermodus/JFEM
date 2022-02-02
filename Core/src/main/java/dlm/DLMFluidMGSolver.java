@@ -1,9 +1,9 @@
 package dlm;
 
 import basic.ScalarFunction;
-import basic.VectorFunction;
 import basic.VectorFunctionOnCells;
 import io.vavr.Tuple2;
+import it.unimi.dsi.fastutil.ints.Int2DoubleMap;
 import linalg.*;
 import mixed.*;
 import multigrid.MGPreconditionerSpace;
@@ -19,7 +19,7 @@ public class DLMFluidMGSolver
 	extends DLMSolver
 {
 	public double smootherOmega = 1;
-	public int smootherRuns = 7;
+	public int smootherRuns = 3;
 	
 	PreconditionedIterativeImplicitSchur schur;
 	MultiGridFluid fluid;
@@ -31,7 +31,9 @@ public class DLMFluidMGSolver
 	
 	@NotNull
 	private MGPreconditionerSpace<TaylorHoodSpace, TPCell, TPFace, QkQkFunction, MixedValue, MixedGradient, MixedHessian> create_space(
-		final MultiGridFluid fluid, final double dt, final double t, final FluidIterate iterate)
+		final double dt,
+		final double t,
+		final FluidIterate iterate)
 	{
 		final MGPreconditionerSpace<TaylorHoodSpace, TPCell, TPFace, QkQkFunction, MixedValue, MixedGradient, MixedHessian>
 			mg = new MGPreconditionerSpace<>(fluid.refinements, fluid.polynomialDegree)
@@ -47,8 +49,6 @@ public class DLMFluidMGSolver
 					                                                     fluid.coarsestCells.mul((int) Math.pow(
 						                                                     2,
 						                                                     i)));
-					subSpace.assembleCells();
-					subSpace.assembleFunctions(fluid.polynomialDegree);
 					ret.add(subSpace);
 				}
 				return ret;
@@ -68,32 +68,26 @@ public class DLMFluidMGSolver
 				{
 					restrictedIterate = new DenseVector(n);
 				}
-				velocity = new MixedTPFESpaceFunction<QkQkFunction>(space.getShapeFunctionMap(),
-				                                                    restrictedIterate).getVelocityFunction();
+				velocity = new MixedTPFESpaceFunction<>(space.getShapeFunctionMap(),
+				                                        restrictedIterate).getVelocityFunction();
 				final FluidSystem fs = fluid.getFluidSystemForSpace(space, velocity, 0,
 				                                                    restrictedIterate);
-				final int firstPRessure = (int) space.getShapeFunctionMap()
-				                                     .values()
-				                                     .stream()
-				                                     .filter(ComposeMixedShapeFunction::hasVelocityFunction)
-				                                     .count();
-				final var blockRhs = fluid.getBlockRhsForSpace(space, firstPRessure, fs, dt, t);
+				final var blockRhs = Fluid.getBlockRhs(fs, dt);
 				final SparseMatrix s = new SparseMatrix(blockRhs._1);
-				space.writeBoundaryValuesTo(new ComposedMixedFunction(VectorFunction.fromLambda(
-					                            fluid.velocityBoundaryValues(t),
-					                            2,
-					                            2)), s,
-				                            new DenseVector(n));
-				space.overWriteValue(firstPRessure, 0, s, new DenseVector(n));
-				System.out.println("diffffference" + s.sub(blockRhs._1)
-				                                      .absMaxElement());
-				return new Tuple2<>(blockRhs._1, blockRhs._2);
+				final Int2DoubleMap nodeValues = fluid.getDirichletNodeValuesForSpace(space, t);
+				nodeValues.forEach((node, val) ->
+				                   {
+					                   s.deleteColumn(node);
+					                   s.deleteRow(node);
+					                   s.set(1, node, node);
+				                   });
+				return new Tuple2<>(s, new DenseVector(n));
 			}
 			
 			@Override
 			public List<Smoother> createSmoothers()
 			{
-				verbose = false;
+				verbose = true;
 				final List<Smoother> ret = new ArrayList<>();
 				for (int i = 1; i < fluid.refinements + 1; i++)
 				{
@@ -111,6 +105,8 @@ public class DLMFluidMGSolver
 				space.projectOntoBoundaryValues(new ComposedMixedFunction(ScalarFunction.constantFunction(
 					                                                                        0)
 				                                                                        .makeIsotropicVectorFunction()),
+				                                fluid.getDirichletBoundary(),
+				                                (f, fun) -> fun.hasVelocityFunction(),
 				                                vector);
 				vector.set(0, space.getVelocitySize());
 			}
@@ -148,7 +144,7 @@ public class DLMFluidMGSolver
 		
 		if (schur == null)
 			schur = new PreconditionedIterativeImplicitSchur(systemMatrix,
-			                                                 create_space(fluid, dt, t, fluidState));
+			                                                 create_space(dt, t, fluidState));
 		else
 			schur.resetOffDiagonals(systemMatrix);
 		return schur.mvMul(rhs);

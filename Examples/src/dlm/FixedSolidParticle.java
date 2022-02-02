@@ -5,7 +5,11 @@ import basic.LagrangeNodeFunctional;
 import basic.RightHandSideIntegral;
 import distorted.*;
 import distorted.geometry.DistortedCell;
-import linalg.*;
+import it.unimi.dsi.fastutil.ints.Int2DoubleArrayMap;
+import it.unimi.dsi.fastutil.ints.Int2DoubleMap;
+import linalg.CoordinateMatrix;
+import linalg.CoordinateTensor;
+import linalg.CoordinateVector;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -96,15 +100,18 @@ public class FixedSolidParticle
 	}
 	
 	@Override
-	public void applyBoundaryValues(final SparseMatrix displacementMatrix, final DenseVector displacementRhs)
+	public Int2DoubleMap getDirichletNodeValues(final double t)
 	{
+		final Int2DoubleMap ret = new Int2DoubleArrayMap();
 		for (final DistortedVectorShapeFunction sf : space.getShapeFunctions())
 		{
 			final CoordinateVector functionalPoint = ((LagrangeNodeFunctional) sf.getNodeFunctional()
 			                                                                     .getComponentNodeFunctional()).getPoint();
 			if (functionalPoint.dist(space.center) < space.radius / 3)
-				space.overWriteValue(sf.getGlobalIndex(), 0, displacementMatrix, displacementRhs);
+			{
+				ret.put(sf.getGlobalIndex(), 0);
+			}
 		}
-		;
+		return ret;
 	}
 }

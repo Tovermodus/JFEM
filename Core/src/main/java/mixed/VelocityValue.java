@@ -11,9 +11,19 @@ public class VelocityValue
 		super(0, new CoordinateVector(velocity));
 	}
 	
+	private VelocityValue(final CoordinateVector velocity, final boolean wrap)
+	{
+		super(0, velocity);
+	}
+	
 	public VelocityValue(final int domainDimension)
 	{
 		super(domainDimension);
+	}
+	
+	public static VelocityValue wrap(final CoordinateVector c)
+	{
+		return new VelocityValue(c, true);
 	}
 	
 	@Override

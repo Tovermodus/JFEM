@@ -43,7 +43,7 @@ public class UpperTriangularSparseMatrix
 			final SparseMatrix.ElementOperation op = new SparseMatrix.ElementOperation()
 			{
 				@Override
-				void operation(final int column, final int row, final double value)
+				public void operation(final int column, final int row, final double value)
 				{
 					if (column <= row)
 						underlying.add(value, column, row);
