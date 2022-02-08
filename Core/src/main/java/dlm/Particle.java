@@ -129,9 +129,9 @@ public interface Particle
 	{
 		final SparseMatrix displacementMatrix =
 			new SparseMatrix(
-				ps.massMatrix.mul(1. / (dt * dt))
-				             .add(ps.elasticityMatrix.mul(1))
-				             .add(ps.semiImplicitMatrix.mul(1)));
+				ps.massMatrix.mul(1. / (dt))
+				             .add(ps.elasticityMatrix.mul(dt))
+				             .add(ps.semiImplicitMatrix.mul(dt)));
 		final DenseVector displacementRhs =
 			new DenseVector(ps.forceRhs.mul(1)
 			                           .add(ps.accelerationRhs.mul(1. / (dt * dt))));
@@ -141,7 +141,7 @@ public interface Particle
 		s.addSmallMatrixInPlaceAt(displacementMatrix, 0, 0);
 		s.addSmallMatrixInPlaceAt(ps.lagrangeMatrix.mul(1), 0, getSystemSize());
 		s.addSmallMatrixInPlaceAt(ps.lagrangeMatrix.transpose()
-		                                           .mul(1. / dt), getSystemSize(), 0);
+		                                           .mul(1.), getSystemSize(), 0);
 		final DenseVector d = new DenseVector(getSystemSize() + getLagrangeSize());
 		d.addSmallVectorAt(displacementRhs, 0);
 		d.addSmallVectorAt(ps.lagrangeRhs.mul(1. / dt), getSystemSize());

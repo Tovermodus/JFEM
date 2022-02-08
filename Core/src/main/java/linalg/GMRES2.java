@@ -65,7 +65,7 @@ public class GMRES2
 		iterate = initial;
 		Vector residual = b.sub(A.mvMul(iterate));
 		Vector Mres = M.mvMul(residual);
-		final VectorMultiplyable MA = VectorMultiplyable.concatenat(M, A);
+		final VectorMultiplyable MA = VectorMultiplyable.concatenate(M, A);
 		final Arnoldi a = new Arnoldi(Mres, MA);
 		while (residual.euclidianNorm() > tol)
 		{

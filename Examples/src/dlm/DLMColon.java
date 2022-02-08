@@ -26,9 +26,9 @@ public class DLMColon
 	                final MultiGridFluid backGround,
 	                final List<Particle> particles)
 	{
-		super(dt, timeSteps, backGround, particles, new DLMFluidMGSolver(backGround));
+		super(dt, timeSteps, backGround, particles, new DLMFluidMGSolver2(backGround));
 		plotPoints = backGround.getSpace()
-		                       .generatePlotPoints(61);
+		                       .generatePlotPoints(41);
 		velocityValues = new ConcurrentSkipListMap<>();
 		pressureValues = new ConcurrentSkipListMap<>();
 		System.out.println("Simulating up to time " + timeSteps * dt);
@@ -45,7 +45,7 @@ public class DLMColon
 		                                                   CoordinateVector.fromValues(2, 1),
 		                                                   new IntCoordinates(4, 4),
 		                                                   1,
-		                                                   1,
+		                                                   3,
 		                                                   dt,
 		                                                   0.5,
 		                                                   5);

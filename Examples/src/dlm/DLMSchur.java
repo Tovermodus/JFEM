@@ -21,6 +21,7 @@ public class DLMSchur
 	private final Map<CoordinateVector, CoordinateVector> velocityValues;
 	private final Map<CoordinateVector, CoordinateVector> XPrimeValues;
 	private final Map<CoordinateVector, Double> pressureValues;
+	static final double dt = 0.001;
 	
 	public DLMSchur(final double dt,
 	                final int timeSteps,
@@ -70,7 +71,7 @@ public class DLMSchur
 		                           10,
 		                           10,
 		                           1));
-		final DLMSchur system = new DLMSchur(0.001, 10, fluid, particles);
+		final DLMSchur system = new DLMSchur(dt, 10, fluid, particles);
 		system.loop();
 		system.summarize();
 	}
@@ -100,7 +101,7 @@ public class DLMSchur
 			                                            .getSpace()
 			                                            .getShapeFunctionMap(),
 			                                   particleStates.get(0).current.sub(particleStates.get(0).last)
-			                                                                .mul(1. / 0.01));
+			                                                                .mul(1. / dt));
 		
 		XPrimeValues.putAll(XPrime.valuesInPointsAtTime(plotPoints, time));
 		velocityValues.putAll(velocityPressure.velocityValuesInPointsAtTime(plotPoints, time));

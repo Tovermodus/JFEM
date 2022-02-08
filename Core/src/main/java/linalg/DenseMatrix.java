@@ -9,6 +9,7 @@ import it.unimi.dsi.fastutil.ints.IntList;
 import org.apache.commons.math3.linear.Array2DRowRealMatrix;
 import org.apache.commons.math3.linear.RealMatrix;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -17,10 +18,10 @@ import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
 public class DenseMatrix
-	implements MutableSolvable, Decomposable
+	implements MutableSolvable, Decomposable, Serializable
 {
 	protected volatile double[][] entries;
-	private org.ujmp.core.Matrix ujmpmat = null;
+	private transient org.ujmp.core.Matrix ujmpmat = null;
 	
 	public DenseMatrix(final int i, final int j)
 	{

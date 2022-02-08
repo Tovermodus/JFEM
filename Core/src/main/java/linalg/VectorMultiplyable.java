@@ -15,8 +15,9 @@ public interface VectorMultiplyable
 	
 	Vector tvMul(Vector vector);
 	
-	static VectorMultiplyable concatenat(final VectorMultiplyable v1, final VectorMultiplyable v2)
+	static VectorMultiplyable concatenate(final VectorMultiplyable v1, final VectorMultiplyable v2)
 	{
+		assert v1.getVectorSize() == v2.getTVectorSize();
 		return new VectorMultiplyable()
 		{
 			@Override
@@ -40,13 +41,46 @@ public interface VectorMultiplyable
 			@Override
 			public Vector tvMul(final Vector vector)
 			{
-				return v2.tvMul(v2.tvMul(vector));
+				return v2.tvMul(v1.tvMul(vector));
+			}
+		};
+	}
+	
+	static VectorMultiplyable concatenateTranspose(final VectorMultiplyable v1, final VectorMultiplyable v2)
+	{
+		assert v1.getVectorSize() == v2.getVectorSize();
+		return new VectorMultiplyable()
+		{
+			@Override
+			public int getVectorSize()
+			{
+				return v2.getTVectorSize();
+			}
+			
+			@Override
+			public int getTVectorSize()
+			{
+				return v1.getTVectorSize();
+			}
+			
+			@Override
+			public Vector mvMul(final Vector vector)
+			{
+				return v1.mvMul(v2.tvMul(vector));
+			}
+			
+			@Override
+			public Vector tvMul(final Vector vector)
+			{
+				return v2.mvMul(v1.tvMul(vector));
 			}
 		};
 	}
 	
 	default VectorMultiplyable addVm(final VectorMultiplyable other)
 	{
+		assert other.getTVectorSize() == getTVectorSize();
+		assert other.getVectorSize() == getVectorSize();
 		final VectorMultiplyable me = this;
 		return new VectorMultiplyable()
 		{
@@ -156,14 +190,17 @@ public interface VectorMultiplyable
 		}
 		DenseVector d;
 		d = new DenseVector(getVectorSize());
+		for (int i = 0; i < d.size(); i++)
+			d.set(Math.random(), i);
 		int component = 0;
-		d.set(1, component++);
+		d.add(1, component++);
 		while (this.mvMul(d)
 		           .absMaxElement() < PerformanceArguments.getInstance().doubleTolerance * getVectorSize())
 		{
 			d = new DenseVector(getVectorSize());
 			d.set(1, component++);
 		}
+		d = d.mul(1. / d.euclidianNorm());
 		Vector b = d;
 		Vector Ab;
 		double old_lamb = 7.0;
@@ -176,5 +213,39 @@ public interface VectorMultiplyable
 			b = Ab.mul(1. / Ab.euclidianNorm());
 		}
 		return new_lamb;
+	}
+	
+	default double powerIterationNonSymmetric()
+	{
+		if (PerformanceArguments.getInstance().executeChecks)
+		{
+			if (getVectorSize() != getTVectorSize())
+				throw new IllegalStateException("Object is not square");
+		}
+		DenseVector d;
+		d = new DenseVector(getVectorSize());
+		for (int i = 0; i < d.size(); i++)
+			d.set(Math.random(), i);
+		int component = 0;
+		d.add(1, component++);
+		while (this.mvMul(d)
+		           .absMaxElement() < PerformanceArguments.getInstance().doubleTolerance * getVectorSize())
+		{
+			d = new DenseVector(getVectorSize());
+			d.set(1, component++);
+		}
+		d = d.mul(1. / d.euclidianNorm());
+		Vector b = d;
+		Vector Ab;
+		double old_lamb = 7.0;
+		double new_lamb = 6.0;
+		while (!DoubleCompare.almostEqualAfterOps(old_lamb / new_lamb, 1, this.getVectorSize()))
+		{
+			old_lamb = new_lamb;
+			Ab = this.tvMul(this.mvMul(b));
+			new_lamb = b.inner(Ab) / Math.pow(b.euclidianNorm(), 2);
+			b = Ab.mul(1. / Ab.euclidianNorm());
+		}
+		return Math.sqrt(new_lamb);
 	}
 }

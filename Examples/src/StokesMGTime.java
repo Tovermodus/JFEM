@@ -1,5 +1,5 @@
 import basic.*;
-import dlm.BSSmoother2;
+import dlm.BSSmoother3;
 import io.vavr.Tuple2;
 import linalg.*;
 import mixed.*;
@@ -34,7 +34,7 @@ public class StokesMGTime
 			MixedCellIntegral.fromVelocityIntegral(new TPVectorCellIntegral<>(
 				ScalarFunction.constantFunction(1),
 				TPVectorCellIntegral.VALUE_VALUE));
-		return new MGPreconditionerSpace<>(1, 1)
+		return new MGPreconditionerSpace<>(3, 1)
 		{
 			
 			@Override
@@ -95,8 +95,7 @@ public class StokesMGTime
 				final ArrayList<Smoother> ret = new ArrayList<>();
 				for (int i = 1; i < spaces.size(); i++)
 				{
-					ret.add(new BSSmoother2(7,
-					                        0.3,
+					ret.add(new BSSmoother3(3, 2, 1,
 					                        spaces.get(i)
 					                              .getVelocitySize()));//, d.getInvertedDiagonalMatrix()));
 				}

@@ -383,7 +383,8 @@ public class SparseMatrix
 	{
 		for (int i = 0; i < sparseEntries; i++)
 		{
-			op.operation(sparseYs[i], sparseXs[i], sparseValues[i]);
+			if (sparseValues[i] != 0)
+				op.operation(sparseYs[i], sparseXs[i], sparseValues[i]);
 		}
 	}
 	

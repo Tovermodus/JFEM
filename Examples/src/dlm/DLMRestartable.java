@@ -10,23 +10,24 @@ import tensorproduct.geometry.TPCell;
 import tensorproduct.geometry.TPFace;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentSkipListMap;
 
-public class DLMColon2
-	extends DLMSystem
+public class DLMRestartable
+	extends DLMPracticalSystem
 {
 	List<CoordinateVector> plotPoints;
-	private final Map<CoordinateVector, CoordinateVector> velocityValues;
-	private final Map<CoordinateVector, Double> pressureValues;
+	private Map<CoordinateVector, CoordinateVector> velocityValues;
+	private Map<CoordinateVector, Double> pressureValues;
 	
-	public DLMColon2(final double dt,
-	                 final int timeSteps,
-	                 final MultiGridFluid backGround,
-	                 final List<Particle> particles)
+	public DLMRestartable(final double dt,
+	                      final int timeSteps,
+	                      final MultiGridFluid backGround,
+	                      final List<Particle> particles, final String name)
 	{
-		super(dt, timeSteps, backGround, particles, new DLMFluidMGSolver2(backGround));
+		super(dt, timeSteps, backGround, particles, new DLMFluidMGSolver2(backGround), name);
 		plotPoints = backGround.getSpace()
 		                       .generatePlotPoints(61);
 		velocityValues = new ConcurrentSkipListMap<>();
@@ -50,16 +51,16 @@ public class DLMColon2
 		                                                   0.5,
 		                                                   5);
 		final List<Particle> particles = new ArrayList<>();
-		particles.add(new SolidBrickParticle(CoordinateVector.fromValues(0.5, 0.5),
+		particles.add(new SolidBrickParticle(CoordinateVector.fromValues(0.6, 0.45),
 		                                     0.1,
-		                                     0.55,
+		                                     0.45,
 		                                     0,
 		                                     1,
 		                                     CoordinateVector.fromValues(0, 0),
 		                                     10000,
 		                                     10000,
 		                                     15));
-		particles.add(new SolidParticle(CoordinateVector.fromValues(0.65, 0.5),
+		particles.add(new SolidParticle(CoordinateVector.fromValues(0.75, 0.6),
 		                                0.05,
 		                                2,
 		                                1,
@@ -67,7 +68,7 @@ public class DLMColon2
 		                                1000,
 		                                1000,
 		                                15));
-		particles.add(new SolidParticle(CoordinateVector.fromValues(0.35, 0.5),
+		particles.add(new SolidParticle(CoordinateVector.fromValues(0.4, 0.5),
 		                                0.05,
 		                                2,
 		                                1,
@@ -75,58 +76,48 @@ public class DLMColon2
 		                                1000,
 		                                1000,
 		                                15));
-		particles.add(new Membrane(CoordinateVector.fromValues(0.5, 0.5),
+		particles.add(new Membrane(CoordinateVector.fromValues(0.6, 0.5),
 		                           0.34,
 		                           0.35,
 		                           0,
 		                           1,
 		                           new CoordinateVector(2),
-		                           10,
-		                           10,
+		                           100,
+		                           100,
 		                           1));
-		particles.add(new FixedSolidParticle(CoordinateVector.fromValues(0.15, 0.25),
+		particles.add(new FixedSolidParticle(CoordinateVector.fromValues(0.1, 0.25),
 		                                     0.05,
 		                                     2,
 		                                     1,
 		                                     10000,
 		                                     10000,
 		                                     15));
-		particles.add(new FixedSolidParticle(CoordinateVector.fromValues(0.15, 0.75),
+		particles.add(new FixedSolidParticle(CoordinateVector.fromValues(0.1, 0.75),
 		                                     0.05,
 		                                     2,
 		                                     1,
 		                                     10000,
 		                                     10000,
 		                                     15));
-		particles.add(new FixedSolidParticle(CoordinateVector.fromValues(0.85, 0.25),
+		particles.add(new FixedSolidParticle(CoordinateVector.fromValues(1.1, 0.25),
 		                                     0.05,
 		                                     2,
 		                                     1,
 		                                     10000,
 		                                     10000,
 		                                     15));
-		particles.add(new FixedSolidParticle(CoordinateVector.fromValues(0.85, 0.75),
+		particles.add(new FixedSolidParticle(CoordinateVector.fromValues(1.1, 0.75),
 		                                     0.05,
 		                                     2,
 		                                     1,
 		                                     10000,
 		                                     10000,
 		                                     15));
-		final DLMColon2 system = new DLMColon2(dt, 40, fluid, particles);
-		system.loop();
-		system.summarize();
-	}
-	
-	private void summarize()
-	{
-		final MixedPlot2DTime p = new MixedPlot2DTime(pressureValues,
-		                                              velocityValues,
-		                                              61,
-		                                              "velocity and pressure");
-		for (int i = 0; i < particles.size(); i++)
-			p.addOverlay(particles.get(i)
-			                      .generateOverlay(particleHistory.get(i), p));
-		PlotWindow.addPlot(p);
+		final DLMRestartable system = new DLMRestartable(dt,
+		                                                 400,
+		                                                 fluid,
+		                                                 particles,
+		                                                 "coarse" + fluid.refinements);
 	}
 	
 	@Override
@@ -134,11 +125,44 @@ public class DLMColon2
 	                                     final List<ParticleIterate> particleStates,
 	                                     final double time)
 	{
-		final MixedFunctionOnCells<TPCell, TPFace> velocityPressure
-			= backGround.getVelocityPressure(fluidState);
-		velocityValues.putAll(velocityPressure.velocityValuesInPointsAtTime(plotPoints, time));
-		velocityValues.putAll(velocityPressure.velocityValuesInPointsAtTime(plotPoints, time));
-		pressureValues.putAll(velocityPressure.pressureValuesInPointsAtTime(plotPoints, time));
+//		final MixedFunctionOnCells<TPCell, TPFace> velocityPressure
+//			= backGround.getVelocityPressure(fluidState);
+//		velocityValues.putAll(velocityPressure.velocityValuesInPointsAtTime(plotPoints, time));
+//		velocityValues.putAll(velocityPressure.velocityValuesInPointsAtTime(plotPoints, time));
+//		pressureValues.putAll(velocityPressure.pressureValuesInPointsAtTime(plotPoints, time));
 		System.out.println("ITeration at time " + time + " is finished");
+	}
+	
+	@Override
+	protected void show(final FluidIterate fluidState,
+	                    final List<ParticleIterate> particleStates,
+	                    final int iteration)
+	{
+		velocityValues = new HashMap<>();
+		pressureValues = new HashMap<>();
+		for (int i = 0; i < iteration + 1; i++)
+		{
+			
+			final MixedFunctionOnCells<TPCell, TPFace> velocityPressure
+				= backGround.getVelocityPressure(new FluidIterate(fluidHistory.getRow(i)));
+			velocityValues.putAll(velocityPressure.velocityValuesInPointsAtTime(plotPoints, i * dt));
+			pressureValues.putAll(velocityPressure.pressureValuesInPointsAtTime(plotPoints, i * dt));
+			System.out.println("plot at time " + i * dt + " is finished");
+		}
+		final MixedPlot2DTime p = new MixedPlot2DTime(pressureValues,
+		                                              velocityValues,
+		                                              61,
+		                                              "velocity and pressure");
+		for (int i = 0; i < particles.size(); i++)
+			p.addOverlay(
+				particles.get(i)
+				         .generateOverlay(
+					         particleHistory.get(i)
+					                        .slice(new IntCoordinates(0, 0),
+					                               new IntCoordinates(iteration + 1,
+					                                                  particles.get(i)
+					                                                           .getSystemSize())),
+					         p));
+		PlotWindow.addPlot(p);
 	}
 }

@@ -1,5 +1,5 @@
 import basic.*;
-import dlm.BSSmoother2;
+import dlm.BSSmoother3;
 import io.vavr.Tuple2;
 import linalg.*;
 import mixed.*;
@@ -19,7 +19,7 @@ public class StokesAMGTime
 	private static AMGPreconditionerSpace<TaylorHoodSpace, TPCell, TPFace, QkQkFunction, MixedValue, MixedGradient
 		, MixedHessian> getMG(final Vector currentIterate, final double dt, final double time)
 	{
-		final double reynolds = 5;
+		final double reynolds = 1;
 		final MixedCellIntegral<TPCell, ContinuousTPShapeFunction, ContinuousTPVectorFunction, QkQkFunction>
 			divValue =
 			new MixedTPCellIntegral<>(ScalarFunction.constantFunction(1),
@@ -34,7 +34,7 @@ public class StokesAMGTime
 			MixedCellIntegral.fromVelocityIntegral(new TPVectorCellIntegral<>(
 				ScalarFunction.constantFunction(1),
 				TPVectorCellIntegral.VALUE_VALUE));
-		return new AMGPreconditionerSpace<>(1, 1)
+		return new AMGPreconditionerSpace<>(2, 1)
 		{
 			
 			@Override
@@ -95,8 +95,7 @@ public class StokesAMGTime
 				final ArrayList<Smoother> ret = new ArrayList<>();
 				for (int i = 1; i < spaces.size(); i++)
 				{
-					ret.add(new BSSmoother2(7,
-					                        0.3,
+					ret.add(new BSSmoother3(2, 2, 1,
 					                        spaces.get(i)
 					                              .getVelocitySize()));//, d.getInvertedDiagonalMatrix()));
 				}
@@ -276,9 +275,9 @@ public class StokesAMGTime
 	{
 		final VectorFunctionOnCells<TPCell, TPFace> semiImplicitWeight1 =
 			VectorFunctionOnCells.fromLambda((x) -> velocity.value(x)
-			                                                .mul(1 / 2),
+			                                                .mul(1. / 2),
 			                                 (x, cell) -> velocity.valueInCell(x, cell)
-			                                                      .mul(1 / 2), 2, 2);
+			                                                      .mul(1. / 2), 2, 2);
 		final VectorFunctionOnCells<TPCell, TPFace> semiImplicitWeight2 =
 			VectorFunctionOnCells.fromLambda((x) -> velocity.value(x)
 			                                                .mul(-1. / 2),

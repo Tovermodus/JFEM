@@ -25,7 +25,7 @@ public class BSSmoother2
 	public Vector smooth(final VectorMultiplyable Operator,
 	                     final Vector rhs,
 	                     final Vector iterate,
-	                     final boolean verbose)
+	                     final boolean verbose, final String prefix)
 	{
 		//return iterate;
 		final int vel_size = vSize;
@@ -50,7 +50,7 @@ public class BSSmoother2
 //			new IntCoordinates(vel_size, vel_size),
 //			new IntCoordinates(tot_size, tot_size));
 		if (verbose)
-			System.out.println("    init");
+			System.out.println(prefix + "init");
 		if (twoGs == null)
 			twoGs = //new BlockDenseMatrix(A, A.getRows() / 100).getInvertedDiagonalMatrix();//A.inverse();
 				new VectorMultiplyable()
@@ -90,6 +90,11 @@ public class BSSmoother2
 			final Matrix ADiag =
 				new SparseMatrix(new BlockDenseMatrix(A,
 				                                      A.getRows() / 100).getInvertedDiagonalMatrix());
+			final double maxEig = VectorMultiplyable.concatenate(ADiag, A)
+			                                        .powerIterationNonSymmetric();
+			final double omega = -Math.max(1, maxEig * 1.5);
+			System.out.println("Max Eig estimate " + maxEig + " omega " + omega);
+			ADiag.mul(1. / omega);
 			Sinv = new VectorMultiplyable()
 			{
 				final SparseMatrix S = C.add(B.mmMul(ADiag)//.mmMul(A.inverse())
@@ -127,30 +132,31 @@ public class BSSmoother2
 		{
 			u = u.add(Minv.mvMul(f.sub(A.mvMul(u))
 			                      .sub(B.tvMul(p))));
+//			u = u.add(Minv.mvMul(f.sub(A.mvMul(u))
+//			                      .sub(B.tvMul(p))));
 			final Vector newp = Sinv.mvMul(B.mvMul(u)
 			                                .sub(C.mvMul(p))
 			                                .sub(g))
-			                        .mul(omega)
 			                        .add(p);
 			u = u.sub(Minv.mvMul(B.tvMul(newp.sub(p))));
 			p = newp;
 			if (verbose)
 			{
 				
-				System.out.println("    " + A.mvMul(u)
+				System.out.println(prefix + A.mvMul(u)
 				                             .add(BT.mvMul(p))
 				                             .sub(f)
 				                             .euclidianNorm());
-				System.out.println("    " + B.mvMul(u)
+				System.out.println(prefix + B.mvMul(u)
 				                             .add(C.mvMul(p))
 				                             .euclidianNorm());
-				System.out.println("    " + g.euclidianNorm());
-				System.out.println("    " + Operator.mvMul(DenseVector.concatenate(u, p))
+				System.out.println(prefix + g.euclidianNorm());
+				System.out.println(prefix + Operator.mvMul(DenseVector.concatenate(u, p))
 				                                    .sub(rhs)
 				                                    .euclidianNorm());
 			}
 			if (verbose)
-				System.out.println("    iter " + i);
+				System.out.println(prefix + "iter " + i);
 		}
 		return DenseVector.concatenate(u, p);
 	}

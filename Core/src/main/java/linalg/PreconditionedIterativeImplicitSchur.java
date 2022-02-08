@@ -22,12 +22,12 @@ public class PreconditionedIterativeImplicitSchur
 	{
 		return (A, b) ->
 		{
-			it.gm.ITERATIONS_BEFORE_RESTART = 15;
+			it.gm.ITERATIONS_BEFORE_RESTART = 30;
 			System.out.println(A.getVectorSize());
 //			System.out.println(((AMGPreconditionerSpace) preconditioner).finest_system.mvMul(b)
 //			                                                                          .sub(A.mvMul(b))
 //			                                                                          .absMaxElement());
-			return it.solvePGMRES(A, preconditioner, b, 1e-10);
+			return it.solvePGMRES(A, preconditioner, b, 1e-7);
 		};
 	}
 }

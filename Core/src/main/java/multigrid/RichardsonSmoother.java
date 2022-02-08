@@ -27,17 +27,18 @@ public class RichardsonSmoother
 	}
 	
 	@Override
-	public Vector smooth(final VectorMultiplyable operator, final Vector rhs, Vector iterate, final boolean verbose)
+	public Vector smooth(final VectorMultiplyable operator, final Vector rhs, Vector iterate,
+	                     final boolean verbose, final String prefix)
 	{
 		for (int i = 0; i < runs; i++)
 		{
 			Vector residual = rhs.sub(operator.mvMul(iterate));
 			if (verbose)
-				System.out.println("               " + residual.euclidianNorm());
+				System.out.println(prefix + residual.euclidianNorm());
 			if (residual.euclidianNorm() < 1e-10)
 			{
 				if (verbose)
-					System.out.println("               is smooth");
+					System.out.println(prefix + "is smooth");
 				break;
 			}
 			if (preconditioner != null)

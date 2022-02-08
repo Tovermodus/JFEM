@@ -1,14 +1,16 @@
 package dlm;
 
-import basic.PlotWindow;
 import basic.VectorFunctionOnCells;
 import io.vavr.Tuple2;
 import it.unimi.dsi.fastutil.ints.Int2DoubleMap;
 import linalg.*;
 import mixed.*;
 import multigrid.AMGPreconditionerSpace;
+import multigrid.ForwardBackwardGaussSeidelSmoother;
 import multigrid.Smoother;
 import org.jetbrains.annotations.NotNull;
+import tensorproduct.ContinuousTPFEVectorSpace;
+import tensorproduct.ContinuousTPVectorFunction;
 import tensorproduct.geometry.TPCell;
 import tensorproduct.geometry.TPFace;
 
@@ -20,10 +22,7 @@ import java.util.stream.IntStream;
 public class DLMLagrangeAMGSolver
 	extends DLMSolver
 {
-	public double smootherOmega = 1;
-	public int smootherRuns = 7;
-	
-	PreconditionedIterativeImplicitSchur schur;
+	RichardsonSchur schur;
 	MultiGridFluid fluid;
 	final List<Particle> particles;
 	
@@ -34,12 +33,11 @@ public class DLMLagrangeAMGSolver
 	}
 	
 	@NotNull
-	private AMGPreconditionerSpace<TaylorHoodSpace, TPCell, TPFace, QkQkFunction, MixedValue, MixedGradient,
-		MixedHessian> create_space(
+	private DLMAMG create_space(
 		final List<ParticleIterate> particleStates, final double dt, final double t,
 		final FluidIterate iterate)
 	{
-		return new AMGPreconditionerSpace<>(fluid.refinements, fluid.polynomialDegree)
+		return new DLMAMG(fluid.refinements, fluid.polynomialDegree)
 		{
 			@Override
 			public List<TaylorHoodSpace> createSpaces(final int refinements)
@@ -124,62 +122,10 @@ public class DLMLagrangeAMGSolver
 				final List<Smoother> ret = new ArrayList<>();
 				for (int i = 1; i < fluid.refinements + 1; i++)
 				{
-					ret.add(new BSSmoother2(smootherRuns,
-					                        smootherOmega,
+					ret.add(new BSSmoother4(1, 1, this,
 					                        spaces.get(i)
 					                              .getVelocitySize()));
-					final Int2DoubleMap nodeValues =
-						fluid.getDirichletNodeValuesForSpace(spaces.get(i), t);
-					final int finalI = i;
-					nodeValues.forEach((node, val) ->
-					                   {
-						                   systems.get(finalI)
-						                          .deleteColumn(node);
-						                   systems.get(finalI)
-						                          .deleteRow(node);
-						                   systems.get(finalI)
-						                          .set(1, node, node);
-					                   });
 				}
-				final DenseVector v1 = new DenseVector(systems.get(0)
-				                                              .getVectorSize());
-				final DenseVector v2 = new DenseVector(systems.get(0)
-				                                              .getVectorSize());
-				int j = 6;
-				for (final IntCoordinates c : v1.getShape()
-				                                .range())
-				{
-					v1.set(j++, c);
-					v2.set(1, c);
-				}
-				final SparseMatrix P = prolongationMatrices.get(0);
-				final SparseMatrix PAP = new SparseMatrix(P.tmMul((SparseMatrix) systems.get(1))
-				                                           .mmMul(P));
-				final SparseMatrix s0 = new SparseMatrix(systems.get(0));
-				final Int2DoubleMap nodeValues = fluid.getDirichletNodeValuesForSpace(spaces.get(0), t);
-				nodeValues.forEach((node, val) ->
-				                   {
-					                   PAP.deleteColumn(node);
-					                   PAP.deleteRow(node);
-					                   PAP.set(1, node, node);
-					                   s0.deleteColumn(node);
-					                   s0.deleteRow(node);
-					                   s0.set(1, node, node);
-				                   });
-				applyZeroBoundaryConditions(spaces.get(0), v1);
-				applyZeroBoundaryConditions(spaces.get(0), v2);
-				System.out.println(Math.abs(PAP.mvMul(v1)
-				                               .inner(v2) - s0
-					.mvMul(v1)
-					.inner(v2)) + "   PAPPPP");
-				
-				PlotWindow.addPlot(new MatrixPlot(PAP,
-				                                  "pap"));
-				PlotWindow.addPlot(new MatrixPlot(((SparseMatrix) s0),
-				                                  "s0"));
-				PlotWindow.addPlot(new MatrixPlot((PAP).sub((SparseMatrix) s0),
-				                                  "diff"));
-				
 				verbose = true;
 				return ret;
 			}
@@ -188,10 +134,104 @@ public class DLMLagrangeAMGSolver
 			public void applyZeroBoundaryConditions(final TaylorHoodSpace space, final MutableVector vector)
 			{
 				final Int2DoubleMap nodeValues = fluid.getDirichletNodeValuesForSpace(space, t);
-				nodeValues.forEach((node, val) ->
-				                   {
-					                   vector.set(0, node);
-				                   });
+				nodeValues.forEach((node, val) -> vector.set(0, node));
+			}
+			
+			@Override
+			public AMGPreconditionerSpace<ContinuousTPFEVectorSpace, TPCell, TPFace, ContinuousTPVectorFunction,
+				CoordinateVector, CoordinateMatrix, CoordinateTensor> getVelocityAMG()
+			{
+				final var me = this;
+				return new AMGPreconditionerSpace<>(DLMLagrangeAMGSolver.this.fluid.refinements,
+				                                    DLMLagrangeAMGSolver.this.fluid.polynomialDegree + 1)
+				{
+					@Override
+					public List<ContinuousTPFEVectorSpace> createSpaces(final int refinements)
+					{
+						final List<ContinuousTPFEVectorSpace> ret = new ArrayList<>();
+						for (int i = 0; i < refinements + 1; i++)
+						{
+							final ContinuousTPFEVectorSpace subSpace
+								= new ContinuousTPFEVectorSpace(fluid.startCoordinates,
+								                                fluid.endCoordinates,
+								                                fluid.coarsestCells.mul(
+									                                (int) Math.pow(
+										                                2,
+										                                i)));
+							subSpace.assembleCells();
+							subSpace.assembleFunctions(fluid.polynomialDegree + 1);
+							ret.add(subSpace);
+						}
+						return ret;
+					}
+					
+					@Override
+					protected @NotNull SparseMatrix buildProlongationMatrix(
+						final ContinuousTPFEVectorSpace coarse,
+						final ContinuousTPFEVectorSpace fine)
+					{
+						return me.prolongationMatrices
+							.get(me.getLevelFromVelocitySize(coarse.getShapeFunctions()
+							                                       .size()))
+							.slice(new IntCoordinates(0, 0),
+							       new IntCoordinates(fine.getShapeFunctions()
+							                              .size(),
+							                          coarse.getShapeFunctions()
+							                                .size()));
+					}
+					
+					@Override
+					public Tuple2<SparseMatrix, DenseVector> createSystem(final ContinuousTPFEVectorSpace continuousTPFEVectorSpace)
+					{
+						return new Tuple2<>(((SparseMatrix) me.getFinestSystem())
+							                    .slice(new IntCoordinates(0, 0),
+							                           new IntCoordinates(
+								                           continuousTPFEVectorSpace.getShapeFunctions()
+								                                                    .size(),
+								                           continuousTPFEVectorSpace.getShapeFunctions()
+								                                                    .size()
+							                           )),
+						                    new DenseVector(continuousTPFEVectorSpace.getShapeFunctions()
+						                                                             .size()));
+					}
+					
+					@Override
+					public List<Smoother> createSmoothers()
+					{
+						final List<Smoother> ret = new ArrayList<>();
+						for (int i = 1; i < fluid.refinements + 1; i++)
+						{
+							ret.add(new ForwardBackwardGaussSeidelSmoother(20,
+							                                               systems.get(i)));
+						}
+						return ret;
+					}
+					
+					@Override
+					public void applyZeroBoundaryConditions(final ContinuousTPFEVectorSpace continuousTPFEVectorSpace,
+					                                        final MutableVector vector)
+					{
+						final int level = me.getLevelFromVelocitySize(vector.getLength());
+						
+						final Int2DoubleMap nodeValues =
+							fluid.getDirichletNodeValuesForSpace(me.spaces.get(level),
+							                                     t);
+						nodeValues.forEach((node, val) ->
+						                   {
+							                   if (node < vector.getLength())
+								                   vector.set(0, node);
+						                   });
+					}
+				};
+			}
+			
+			private int getLevelFromVelocitySize(final int velocitySize)
+			{
+				for (int i = 0; i < spaces.size(); i++)
+					if (spaces.get(i)
+					          .getVelocitySize() == velocitySize)
+						return i;
+				throw new IllegalArgumentException("velocitySize not valid");
 			}
 		};
 	}
@@ -206,25 +246,26 @@ public class DLMLagrangeAMGSolver
 	{
 		
 		if (schur == null)
-			schur = new PreconditionedIterativeImplicitSchur(systemMatrix,
-			                                                 null);
+			schur = new RichardsonSchur(systemMatrix,
+			                            null);
 		else
 			schur.resetOffDiagonals(systemMatrix);
 		final AMGPreconditionerSpace<?, ?, ?, ?, ?, ?, ?> mg = create_space(particleStates, dt, t, fluidState);
-		final DenseVector d = new DenseVector(mg.getVectorSize());
-		for (int i = 0; i < d.getLength(); i++)
-			d.set(Math.random(), i);
-//		final ExplicitSchurSolver sss = new DirectSchur(systemMatrix);
-//		PlotWindow.addPlot(new MatrixPlot(sss.getSchurComplement(), "true"));
-//		PlotWindow.addPlot(new MatrixPlot(new DenseMatrix((SparseMatrix) mg.finest_system), "mg"));
-//		PlotWindow.addPlot(new MatrixPlot(((SparseMatrix) mg.finest_system).sub(new SparseMatrix(sss.getSchurComplement())),
-//		                                  "diff"));
-//
-		System.out.println(schur.schurMvMul()
-		                        .mvMul(d)
-		                        .sub(mg.finest_system.mvMul(d))
-		                        .absMaxElement() + "  diffffaskdjfh");
 		schur.preconditioner = mg;
 		return schur.mvMul(rhs);
+	}
+	
+	abstract class DLMAMG
+		extends AMGPreconditionerSpace<TaylorHoodSpace, TPCell, TPFace, QkQkFunction, MixedValue, MixedGradient,
+		MixedHessian>
+	{
+		
+		public DLMAMG(final int refinements, final int polynomialDegree)
+		{
+			super(refinements, polynomialDegree);
+		}
+		
+		abstract public AMGPreconditionerSpace<ContinuousTPFEVectorSpace, TPCell, TPFace, ContinuousTPVectorFunction,
+			CoordinateVector, CoordinateMatrix, CoordinateTensor> getVelocityAMG();
 	}
 }

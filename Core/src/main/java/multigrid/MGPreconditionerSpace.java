@@ -183,7 +183,7 @@ public abstract class MGPreconditionerSpace<CSpace extends AcceptsMatrixBoundary
 			                                                                          .mvMul(guess))
 			                                                              .euclidianNorm());
 		guess = smoothers.get(level - 1)
-		                 .smooth(systems.get(level), rhs, guess, verbose);
+		                 .smooth(systems.get(level), rhs, guess, verbose, "    ");
 		Vector restrictedDefect =
 			prolongationOperators.get(level - 1)
 			                     .tvMul(rhs.sub(systems.get(level)
@@ -213,7 +213,7 @@ public abstract class MGPreconditionerSpace<CSpace extends AcceptsMatrixBoundary
 			                                                                                     .mvMul(guess))
 			                                                                         .euclidianNorm());
 		guess = smoothers.get(level - 1)
-		                 .smooth(systems.get(level), rhs, guess, verbose);
+		                 .smooth(systems.get(level), rhs, guess, verbose, "    ");
 		if (verbose)
 			System.out.println("   MG level " + level + " final residual " + rhs.sub(systems.get(level)
 			                                                                                .mvMul(guess))

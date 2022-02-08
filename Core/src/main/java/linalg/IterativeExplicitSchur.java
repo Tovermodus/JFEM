@@ -17,7 +17,7 @@ public class IterativeExplicitSchur
 	}
 	
 	@Override
-	protected Function2<DenseMatrix, Vector, Vector> solveSchur()
+	protected Function2<SparseMatrix, Vector, Vector> solveSchur()
 	{
 		return (A, b) -> it.solvePGMRES(A, firstInverse, b, 1e-9);
 	}

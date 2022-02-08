@@ -4,6 +4,7 @@ import basic.*;
 import com.google.common.collect.TreeMultimap;
 import io.vavr.Tuple2;
 import linalg.*;
+import org.jetbrains.annotations.NotNull;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -54,6 +55,7 @@ public abstract class AMGPreconditionerSpace<CSpace extends AcceptsMatrixBoundar
 	{
 		final List<SparseMatrix> reversed = new ArrayList<>();
 		reversed.add(finest_system);
+		//PlotWindow.addPlot(new MatrixPlot(finest_system, "finsys"));
 		for (int i = 1; i < spaces.size(); i++)
 		{
 			System.out.println("system " + i);
@@ -63,6 +65,10 @@ public abstract class AMGPreconditionerSpace<CSpace extends AcceptsMatrixBoundar
 				                                     .tmMul(reversed.get(i - 1))
 				                                     .mmMul(prolongationMatrices.get(systemIndex)));
 			reversed.add(coarser);
+			//PlotWindow.addPlot(new MatrixPlot(coarser, "sys " + i + " tem"));
+			PlotWindow.addPlot(new MatrixPlot(prolongationMatrices.get(i - 1),
+			                                  "prol " + i + " tem " + prolongationMatrices.get(i - 1)
+			                                                                              .getCols()));
 		}
 		final List<SparseMatrix> ret = new ArrayList<>();
 		for (int i = spaces.size() - 1; i >= 0; i--)
@@ -89,18 +95,7 @@ public abstract class AMGPreconditionerSpace<CSpace extends AcceptsMatrixBoundar
 	
 	VectorMultiplyable createProlongationMatrix(final CSpace coarse, final CSpace fine)
 	{
-		final SparseMatrix prolongationMatrix = new SparseMatrix(fine.getShapeFunctionMap()
-		                                                             .size(),
-		                                                         coarse.getShapeFunctionMap()
-		                                                               .size());
-		final TreeMultimap<ST, ST> refinedFunctions = getRefinedFunctions(coarse, fine);
-		refinedFunctions.forEach((coarseFunction, fineFunction) ->
-		                         {
-			                         prolongationMatrix.add(fineFunction.getNodeFunctional()
-			                                                            .evaluate(coarseFunction),
-			                                                fineFunction.getGlobalIndex(),
-			                                                coarseFunction.getGlobalIndex());
-		                         });
+		final SparseMatrix prolongationMatrix = buildProlongationMatrix(coarse, fine);
 		prolongationMatrices.add(prolongationMatrix);
 		final SparseMvMul prolong = new SparseMvMul(prolongationMatrix);
 		
@@ -137,6 +132,24 @@ public abstract class AMGPreconditionerSpace<CSpace extends AcceptsMatrixBoundar
 		};
 	}
 	
+	@NotNull
+	protected SparseMatrix buildProlongationMatrix(final CSpace coarse, final CSpace fine)
+	{
+		final SparseMatrix prolongationMatrix = new SparseMatrix(fine.getShapeFunctions()
+		                                                             .size(),
+		                                                         coarse.getShapeFunctions()
+		                                                               .size());
+		final TreeMultimap<ST, ST> refinedFunctions = getRefinedFunctions(coarse, fine);
+		refinedFunctions.forEach((coarseFunction, fineFunction) ->
+		                         {
+			                         prolongationMatrix.add(fineFunction.getNodeFunctional()
+			                                                            .evaluate(coarseFunction),
+			                                                fineFunction.getGlobalIndex(),
+			                                                coarseFunction.getGlobalIndex());
+		                         });
+		return prolongationMatrix;
+	}
+	
 	private TreeMultimap<ST, ST> getRefinedFunctions(final CSpace coarse, final CSpace fine)
 	{
 		final TreeMultimap<ST, ST> ret = TreeMultimap.create();
@@ -147,8 +160,7 @@ public abstract class AMGPreconditionerSpace<CSpace extends AcceptsMatrixBoundar
 				                                    {
 					                                    final Collection<ST> coarseFunctions =
 						                                    coarse.getCellSupportMapping()
-						                                          .get(
-							                                          coarseCell);
+						                                          .get(coarseCell);
 					                                    final Collection<ST> fineFunctions =
 						                                    fine.getCellSupportMapping()
 						                                        .get(fineCell);
@@ -176,7 +188,7 @@ public abstract class AMGPreconditionerSpace<CSpace extends AcceptsMatrixBoundar
 	
 	public Vector mgStep(final int level, Vector guess, final Vector rhs)
 	{
-		final String prefSpaces = "   ." .repeat(spaces.size() - level);
+		final String prefSpaces = "   .".repeat(spaces.size() - level);
 		if (level == 0)
 		{
 			if (verbose)
@@ -199,11 +211,11 @@ public abstract class AMGPreconditionerSpace<CSpace extends AcceptsMatrixBoundar
 			                                                                                    .mvMul(guess))
 			                                                                        .euclidianNorm());
 		guess = smoothers.get(level - 1)
-		                 .smooth(systems.get(level), rhs, guess, true);
+		                 .smooth(systems.get(level), rhs, guess, verbose, prefSpaces);
 		Vector restrictedDefect =
-			prolongationOperators.get(level - 1)
-			                     .tvMul(rhs.sub(systems.get(level)
-			                                           .mvMul(guess)));
+			prolongationMatrices.get(level - 1)
+			                    .tvMul(rhs.sub(systems.get(level)
+			                                          .mvMul(guess)));
 		//restrictedDefect = applyCoarseBoundaryConditions(spaces.get(level - 1), restrictedDefect);
 		if (verbose)
 			System.out.println(prefSpaces + "MG level " + level + " precorrection residual " + rhs.sub(
@@ -216,13 +228,13 @@ public abstract class AMGPreconditionerSpace<CSpace extends AcceptsMatrixBoundar
 		final Vector correction = mgStep(level - 1,
 		                                 new DenseVector(restrictedDefect.getLength()),
 		                                 restrictedDefect).mul(1);
-		guess = guess.add(prolongationOperators.get(level - 1)
-		                                       .mvMul(correction));
+		guess = guess.add(prolongationMatrices.get(level - 1)
+		                                      .mvMul(correction));
 		if (verbose)
 			restrictedDefect =
-				prolongationOperators.get(level - 1)
-				                     .tvMul(rhs.sub(systems.get(level)
-				                                           .mvMul(guess)));
+				prolongationMatrices.get(level - 1)
+				                    .tvMul(rhs.sub(systems.get(level)
+				                                          .mvMul(guess)));
 		if (verbose)
 			System.out.println(prefSpaces + "postcorrection defect " + restrictedDefect.euclidianNorm());
 		if (verbose)
@@ -231,7 +243,7 @@ public abstract class AMGPreconditionerSpace<CSpace extends AcceptsMatrixBoundar
 			                                                                                               .mvMul(guess))
 			                                                                                   .euclidianNorm());
 		guess = smoothers.get(level - 1)
-		                 .smooth(systems.get(level), rhs, guess, true);
+		                 .smooth(systems.get(level), rhs, guess, verbose, prefSpaces);
 		if (verbose)
 			System.out.println(prefSpaces + "MG level " + level + " final residual " + rhs.sub(systems.get(
 				                                                                                          level)
@@ -240,19 +252,33 @@ public abstract class AMGPreconditionerSpace<CSpace extends AcceptsMatrixBoundar
 		return guess;
 	}
 	
+	public int levelFromSize(final int size)
+	{
+		int level = systems.size() - 1;
+		while (systems.get(level)
+		              .getCols() != size)
+		{
+			level--;
+			if (level < 0)
+				throw new IllegalArgumentException("defect has wrong shape");
+		}
+		return level;
+	}
+	
 	public Vector vCycle(final Vector initialIterate, final Vector rhs)
 	{
-		if (initialIterate.size() != rhs.size() || initialIterate.size() != getFinestSystem().getVectorSize())
+		if (initialIterate.size() != rhs.size())
 			throw new IllegalArgumentException("wrong size");
-		return mgStep(spaces.size() - 1, initialIterate, rhs);
+		return mgStep(levelFromSize(initialIterate.getLength()), initialIterate, rhs);
 	}
 	
 	public Vector fullVCycleCorrection(final Vector defect)
 	{
+		final int level = levelFromSize(defect.getLength());
 		Vector d = new DenseVector(defect);
 		final List<Vector> rhsides = new ArrayList<>();
 		rhsides.add(d);
-		for (int i = prolongationOperators.size() - 1; i >= 0; i--)
+		for (int i = level - 1; i >= 0; i--)
 		{
 			d = prolongationOperators.get(i)
 			                         .tvMul(d);
@@ -260,11 +286,9 @@ public abstract class AMGPreconditionerSpace<CSpace extends AcceptsMatrixBoundar
 		}
 		MutableVector iterate = new DenseVector(systems.get(0)
 		                                               .getVectorSize());
-		for (int i = 0; i < systems.size(); i++)
+		for (int i = 0; i < level; i++)
 		{
-			//applyZeroBoundaryConditions(spaces.get(i), iterate);
-			iterate = new DenseVector(mgStep(i, iterate, rhsides.get(spaces.size() - i - 1)));
-			//applyZeroBoundaryConditions(spaces.get(i), iterate);
+			iterate = new DenseVector(mgStep(i, iterate, rhsides.get(rhsides.size() - i - 1)));
 			if (i < prolongationOperators.size())
 				iterate = prolongationMatrices.get(i)
 				                              .mvMul(iterate);
@@ -297,20 +321,26 @@ public abstract class AMGPreconditionerSpace<CSpace extends AcceptsMatrixBoundar
 	@Override
 	public Vector mvMul(final Vector vector)
 	{
-		final MutableVector initial = new DenseVector(vector);
-		final Vector defect = vector.sub(finest_system.mvMul(initial));
-		System.out.println();
+		final int level = levelFromSize(vector.getLength());
+		final MutableVector vectorWith0Boundary = new DenseVector(vector);
+		applyZeroBoundaryConditions(spaces.get(level), vectorWith0Boundary);
+		final Vector initial = vector.sub(vectorWith0Boundary);
+		final Vector defect = vector.sub(systems.get(level)
+		                                        .mvMul(initial));
 		Vector iterate = fullVCycleCorrection(defect);
-		
-		System.out.println("MG after FullVCycle " + finest_system.mvMul(initial.add(iterate))
-		                                                         .sub(vector)
-		                                                         .euclidianNorm() + " FROM " + defect.euclidianNorm());
+		if (verbose)
+			System.out.println("MG after FullVCycle " + systems.get(level)
+			                                                   .mvMul(initial.add(iterate))
+			                                                   .sub(vector)
+			                                                   .euclidianNorm() + " FROM " + defect.euclidianNorm());
 		for (int i = 0; i < cycles; i++)
 			iterate = vCycle(iterate, defect);
 		
-		System.out.println("MG after Second VCycle " + finest_system.mvMul(initial.add(iterate))
-		                                                            .sub(vector)
-		                                                            .euclidianNorm() + " FROM " + defect.euclidianNorm());
+		if (verbose)
+			System.out.println("MG after Second VCycle " + systems.get(level)
+			                                                      .mvMul(initial.add(iterate))
+			                                                      .sub(vector)
+			                                                      .euclidianNorm() + " FROM " + defect.euclidianNorm());
 		return initial.add(iterate);
 	}
 	

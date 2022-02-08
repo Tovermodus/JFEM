@@ -116,13 +116,15 @@ public abstract class DLMSystem
 				= new ParticleIterate(particleStates.get(i),
 				                      solution.slice(offset,
 				                                     offset + particles.get(i)
-				                                                       .getSystemSize()),
+				                                                       .getSystemSize())
+				                              .mul(dt),
 				                      solution.slice(offset + particles.get(i)
 				                                                       .getSystemSize(),
 				                                     offset + particles.get(i)
 				                                                       .getSystemSize()
 					                                     + particles.get(i)
 					                                                .getLagrangeSize()));
+			System.out.println("scaleparticle " + it.current.absMaxElement());
 			iterates.add(it);
 			offset += particles.get(i)
 			                   .getSystemSize() + particles.get(i)

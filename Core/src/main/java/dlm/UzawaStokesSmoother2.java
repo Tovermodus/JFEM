@@ -2,6 +2,7 @@ package dlm;
 //GASPAR, NOTAY, OOSTERLEE 2014
 
 import linalg.*;
+import multigrid.ForwardBackwardGaussSeidelSmoother;
 import multigrid.Smoother;
 
 public class UzawaStokesSmoother2
@@ -24,7 +25,7 @@ public class UzawaStokesSmoother2
 	public Vector smooth(final VectorMultiplyable Operator,
 	                     final Vector rhs,
 	                     final Vector iterate,
-	                     final boolean verbose)
+	                     final boolean verbose, final String prefix)
 	{
 		
 		//return iterate;
@@ -42,39 +43,10 @@ public class UzawaStokesSmoother2
 			new IntCoordinates(vel_size, vel_size),
 			new IntCoordinates(tot_size, tot_size));
 		if (verbose)
-			System.out.println("    init");
+			System.out.println(prefix + "init");
 		if (twoGs == null)
-			twoGs = new VectorMultiplyable()
-			{
-				final UpperTriangularSparseMatrix U = new UpperTriangularSparseMatrix(A);
-				final LowerTriangularSparseMatrix L = new LowerTriangularSparseMatrix(A);
-				final SparseMatrix D = A.getDiagonalMatrix();
-				
-				@Override
-				public int getVectorSize()
-				{
-					return A.getVectorSize();
-				}
-				
-				@Override
-				public int getTVectorSize()
-				{
-					return A.getVectorSize();
-				}
-				
-				@Override
-				public Vector mvMul(final Vector vector)
-				{
-					return L.solve(D.mvMul(U.solve(vector)));
-				}
-				
-				@Override
-				public Vector tvMul(final Vector vector)
-				{
-					throw new UnsupportedOperationException("not implemented yet");
-				}
-			};
-		final VectorMultiplyable Minv = A.inverse();//twoGs;
+			twoGs = new ForwardBackwardGaussSeidelSmoother(5, A).asPreconditioner(A);
+		final VectorMultiplyable Minv = twoGs;
 		for (int i = 0; i < runs; i++)
 		{
 			u = u.add(Minv.mvMul(f.sub(A.mvMul(u))
@@ -86,19 +58,19 @@ public class UzawaStokesSmoother2
 			     .add(p);
 			if (verbose)
 			{
-				System.out.println("    1 " + A.mvMul(u)
-				                               .add(B.tvMul(p))
-				                               .sub(f)
-				                               .euclidianNorm());
-				System.out.println("    2 " + B.mvMul(u)
-				                               .add(C.mvMul(p))
-				                               .euclidianNorm());
-				System.out.println("    3 " + Operator.mvMul(DenseVector.concatenate(u, p))
-				                                      .sub(rhs)
-				                                      .euclidianNorm());
+				System.out.println(prefix + "1 " + A.mvMul(u)
+				                                    .add(B.tvMul(p))
+				                                    .sub(f)
+				                                    .euclidianNorm());
+				System.out.println(prefix + "2 " + B.mvMul(u)
+				                                    .add(C.mvMul(p))
+				                                    .euclidianNorm());
+				System.out.println(prefix + "3 " + Operator.mvMul(DenseVector.concatenate(u, p))
+				                                           .sub(rhs)
+				                                           .euclidianNorm());
 			}
 			if (verbose)
-				System.out.println("    iter " + i);
+				System.out.println(prefix + "iter " + i);
 		}
 		return DenseVector.concatenate(u, p);
 	}

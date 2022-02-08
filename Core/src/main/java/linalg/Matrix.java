@@ -153,15 +153,23 @@ public interface Matrix
 		return mmMul(matrix.transpose());
 	}
 	
-	default SparseMatrix diag()
+	default DenseVector diag()
 	{
 		if (PerformanceArguments.getInstance().executeChecks)
 			if (getRows() != getCols()) throw new IllegalArgumentException("Only for aquare matrices");
-		final SparseMatrix ret = new SparseMatrix(getRows(), getCols());
-		for (int i = 0; i < getRows(); i++)
+		final DenseVector ret = new DenseVector(getRows());
+		if (isSparse())
 		{
-			ret.add(at(i, i), i, i);
-		}
+			getCoordinateEntryList().forEach((k, v) ->
+			                                 {
+				                                 if (k.get(0) == k.get(1))
+					                                 ret.add(v, k.get(0));
+			                                 });
+		} else
+			for (int i = 0; i < getRows(); i++)
+			{
+				ret.add(at(i, i), i);
+			}
 		return ret;
 	}
 	
