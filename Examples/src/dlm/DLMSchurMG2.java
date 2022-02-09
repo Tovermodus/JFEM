@@ -45,7 +45,7 @@ public class DLMSchurMG2
 		                                                   CoordinateVector.fromValues(1, 1),
 		                                                   new IntCoordinates(4, 4),
 		                                                   1,
-		                                                   1,
+		                                                   2,
 		                                                   dt,
 		                                                   0.5,
 		                                                   5);

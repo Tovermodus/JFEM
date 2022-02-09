@@ -26,7 +26,7 @@ public class DLMColon
 	                final MultiGridFluid backGround,
 	                final List<Particle> particles)
 	{
-		super(dt, timeSteps, backGround, particles, new DLMFluidMGSolver2(backGround));
+		super(dt, timeSteps, backGround, particles, new DLMFluidMGSolver(backGround));
 		plotPoints = backGround.getSpace()
 		                       .generatePlotPoints(41);
 		velocityValues = new ConcurrentSkipListMap<>();

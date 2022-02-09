@@ -21,7 +21,7 @@ public class StokesMGBS2
 {
 	public static void main(final String[] args)
 	{
-		final int refinements = 3;
+		final int refinements = 2;
 		final TPVectorCellIntegral<ContinuousTPVectorFunction> gradGrad =
 			new TPVectorCellIntegral<>(ScalarFunction.constantFunction(StokesReferenceSolution.reynolds),
 			                           TPVectorCellIntegral.GRAD_GRAD);

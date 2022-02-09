@@ -17,7 +17,8 @@ public interface VectorMultiplyable
 	
 	static VectorMultiplyable concatenate(final VectorMultiplyable v1, final VectorMultiplyable v2)
 	{
-		assert v1.getVectorSize() == v2.getTVectorSize();
+		if (v1.getVectorSize() != v2.getTVectorSize())
+			throw new IllegalArgumentException("Sizes dont match" + v1.getVectorSize() + "!=" + v2.getTVectorSize());
 		return new VectorMultiplyable()
 		{
 			@Override
@@ -48,7 +49,8 @@ public interface VectorMultiplyable
 	
 	static VectorMultiplyable concatenateTranspose(final VectorMultiplyable v1, final VectorMultiplyable v2)
 	{
-		assert v1.getVectorSize() == v2.getVectorSize();
+		if (v1.getVectorSize() != v2.getVectorSize())
+			throw new IllegalArgumentException("Sizes dont match" + v1.getVectorSize() + "!=" + v2.getVectorSize());
 		return new VectorMultiplyable()
 		{
 			@Override
@@ -77,8 +79,44 @@ public interface VectorMultiplyable
 		};
 	}
 	
+	static VectorMultiplyable transposeConcatenate(final VectorMultiplyable v1, final VectorMultiplyable v2)
+	{
+		if (v1.getTVectorSize() != v2.getTVectorSize())
+			throw new IllegalArgumentException("Sizes dont match");
+		return new VectorMultiplyable()
+		{
+			@Override
+			public int getVectorSize()
+			{
+				return v2.getVectorSize();
+			}
+			
+			@Override
+			public int getTVectorSize()
+			{
+				return v1.getVectorSize();
+			}
+			
+			@Override
+			public Vector mvMul(final Vector vector)
+			{
+				return v1.tvMul(v2.mvMul(vector));
+			}
+			
+			@Override
+			public Vector tvMul(final Vector vector)
+			{
+				return v2.tvMul(v1.mvMul(vector));
+			}
+		};
+	}
+	
 	default VectorMultiplyable addVm(final VectorMultiplyable other)
 	{
+		if (other.getVectorSize() != getVectorSize())
+			throw new IllegalArgumentException("Sizes dont match");
+		if (getTVectorSize() != other.getTVectorSize())
+			throw new IllegalArgumentException("Sizes dont match");
 		assert other.getTVectorSize() == getTVectorSize();
 		assert other.getVectorSize() == getVectorSize();
 		final VectorMultiplyable me = this;

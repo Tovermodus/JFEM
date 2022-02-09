@@ -2,23 +2,38 @@ package dlm;
 //GASPAR, NOTAY, OOSTERLEE 2014
 
 import linalg.*;
+import mixed.*;
 import multigrid.ForwardBackwardGaussSeidelSmoother;
+import multigrid.MGPreconditionerSpace;
+import multigrid.RichardsonSmoother;
 import multigrid.Smoother;
+import tensorproduct.geometry.TPCell;
+import tensorproduct.geometry.TPFace;
 
 public class UzawaStokesSmoother3
 	implements Smoother
 {
 	final double omega;
 	final int runs;
+	private final MGPreconditionerSpace<TaylorHoodSpace, TPCell, TPFace, QkQkFunction, MixedValue, MixedGradient, MixedHessian>
+		mg;
 	final int vSize;
 	SparseMatrix A;
 	SparseMatrix B;
 	SparseMatrix C;
-	VectorMultiplyable twoGs = null;
+	VectorMultiplyable S;
+	VectorMultiplyable Ainv = null;
+	VectorMultiplyable Sinner;
 	VectorMultiplyable Sinv;
+	SparseMatrix matrixS;
+	RichardsonSmoother Ssmooth;
 	
-	public UzawaStokesSmoother3(final int runs, final double omega, final int vSize)
+	public UzawaStokesSmoother3(final int runs,
+	                            final double omega,
+	                            final MGPreconditionerSpace<TaylorHoodSpace, TPCell, TPFace, QkQkFunction, MixedValue, MixedGradient, MixedHessian> mg,
+	                            final int vSize)
 	{
+		this.mg = mg;
 		this.vSize = vSize;
 		this.omega = omega;
 		this.runs = runs;
@@ -40,7 +55,7 @@ public class UzawaStokesSmoother3
 		final Vector g = rhs.slice(vel_size, tot_size);
 		if (verbose)
 			System.out.println(prefix + "init");
-		if (twoGs == null)
+		if (Ainv == null)
 		{
 			B = ((SparseMatrix) Operator).slice(new IntCoordinates(vel_size, 0),
 			                                    new IntCoordinates(tot_size, vel_size));
@@ -59,23 +74,19 @@ public class UzawaStokesSmoother3
 			}
 			alphaDInv =
 				new SparseMatrix(new BlockDenseMatrix(A,
-				                                      A.getCols() / 2).getInvertedDiagonalMatrix());
+				                                      A.getCols() / 4).getInvertedDiagonalMatrix());
 			final double eigA = VectorMultiplyable.concatenate(alphaDInv, A)
 			                                      .powerIterationNonSymmetric();
 			System.out.println("AEIG" + eigA);
-			final SparseMatrix S = C.add(B.mmMul(alphaDInv)
-			                              .mtMul(B)
-			                              .mul(eigA));
-			final SparseMatrix ADiag = A.mmMul(alphaDInv);
-			Sinv = new ForwardBackwardGaussSeidelSmoother(50, S).asPreconditioner(S);
-			final VectorMultiplyable ADgs = new ForwardBackwardGaussSeidelSmoother(400,
-			                                                                       ADiag).asPreconditioner(
-				ADiag);
-			final VectorMultiplyable Ags = new ForwardBackwardGaussSeidelSmoother(600,
-			                                                                      A).asPreconditioner(
-				A);
-			final SparseMatrix finalAlphaDInv = alphaDInv;
-			twoGs = new VectorMultiplyable()
+			
+			final SparseMatrix Apadded = new SparseMatrix(((SparseMatrix) Operator).getShape());
+			Apadded.addSmallMatrixInPlaceAt(A, 0, 0);
+			Apadded.addSmallMatrixInPlaceAt(SparseMatrix.identity(C.getCols()), vel_size, vel_size);
+			final var Aamg
+				= mg.AMGFromMatrix(Apadded,
+				                   (l, m) ->
+					                   new ForwardBackwardGaussSeidelSmoother(50, m));
+			Ainv = new VectorMultiplyable()
 			{
 				@Override
 				public int getVectorSize()
@@ -92,8 +103,18 @@ public class UzawaStokesSmoother3
 				@Override
 				public Vector mvMul(final Vector vector)
 				{
-					final Vector y = ADgs.mvMul(vector);
-					return finalAlphaDInv.mvMul(y);
+					final DenseVector padded = new DenseVector(Operator.getVectorSize());
+					padded.addSmallVectorAt(vector, 0);
+					Vector defect = padded;
+					Vector sol = Aamg.mvMul(defect);
+					defect = padded.sub(Apadded.mvMul(sol));
+					//System.out.println(prefix + " SGSAAMG  " + defect.euclidianNorm());
+					sol = sol.add(Aamg.mvMul(defect));
+					sol = sol.slice(0, vel_size);
+//					System.out.println(prefix + " SGSAAMG--  " + A.mvMul(sol)
+//					                                              .sub(vector)
+//					                                              .euclidianNorm());
+					return sol;
 				}
 				
 				@Override
@@ -102,30 +123,98 @@ public class UzawaStokesSmoother3
 					throw new UnsupportedOperationException("not implemented yet");
 				}
 			};
-//				VectorMultiplyable
-//				.concatenate(A.getDiagonalMatrix(),
-//				             new ForwardBackwardGaussSeidelSmoother(100,
-//				                                                    ADiag).asPreconditioner(ADiag));
+			Sinner = C.addVm(VectorMultiplyable.concatenate(B,
+			                                                VectorMultiplyable.concatenateTranspose(
+				                                                Ainv, B)));
+			final SparseMatrix padding = new SparseMatrix(C.getCols(), Operator.getVectorSize());
+			padding.addSmallMatrixInPlaceAt(SparseMatrix.identity(C.getCols()), 0,
+			                                Operator.getVectorSize() - C.getCols());
+			final SparseMatrix Scomplement = new SparseMatrix(((SparseMatrix) Operator).getShape());
+			Scomplement.addSmallMatrixInPlaceAt(SparseMatrix.identity(A.getCols()), 0, 0);
+			S = VectorMultiplyable.transposeConcatenate(padding,
+			                                            VectorMultiplyable.concatenate(Sinner, padding))
+			                      .addVm(Scomplement);
+			
+			matrixS = new SparseMatrix(
+				//	padding.tmMul(
+				C.add(B.mmMul(alphaDInv.mul(eigA))
+				       .mtMul(B))
+				//                                        .mmMul(padding)
+			);
+			//	                                  .add(Scomplement));
+			final Smoother Sgs =
+				new ForwardBackwardGaussSeidelSmoother(2, matrixS);
+			final VectorMultiplyable Samg = mg.AMGFromVectorMultipliable(S,
+			                                                             SparseMatrix.identity(mg.systems.get(
+				                                                                                     0)
+			                                                                                             .getVectorSize()),
+			                                                             (l, m) ->
+			                                                             {
+				                                                             if (l == mg.maxLevel())
+					                                                             return Sgs;
+				                                                             return new RichardsonSmoother(
+					                                                             1,
+					                                                             0);
+			                                                             },
+			                                                             true);
+			
+			Sinv = new VectorMultiplyable()
+			{
+				@Override
+				public int getVectorSize()
+				{
+					return S.getVectorSize();
+				}
+				
+				@Override
+				public int getTVectorSize()
+				{
+					return S.getTVectorSize();
+				}
+				
+				@Override
+				public Vector mvMul(final Vector vector)
+				{
+					
+					final DenseVector padded = new DenseVector(Operator.getVectorSize());
+					padded.addSmallVectorAt(vector, vel_size);
+					return Samg.mvMul(padded)
+					           .slice(vel_size, tot_size);
+				}
+				
+				@Override
+				public Vector tvMul(final Vector vector)
+				{
+					throw new UnsupportedOperationException("not implemented yet");
+				}
+			};
+			Ssmooth = new RichardsonSmoother(1, 3,
+			                                 new ForwardBackwardGaussSeidelSmoother(30,
+			                                                                        matrixS).asPreconditioner(
+				                                 matrixS));
 		}
-		final VectorMultiplyable Minv = twoGs;
 		for (int i = 0; i < runs; i++)
 		{
-			final Vector min = Minv.mvMul(f.sub(A.mvMul(u))
+			final Vector min = Ainv.mvMul(f.sub(A.mvMul(u))
 			                               .sub(B.tvMul(p)));
-			System.out.println(prefix + " MINRES " + A.mvMul(min)
-			                                          .sub(f.sub(A.mvMul(u))
-			                                                .sub(B.tvMul(p)))
-			                                          .euclidianNorm());
-			u = u.add(min
-				          .mul(1));
-			final Vector newp = Sinv.mvMul(B.mvMul(u)
-			                                .sub(C.mvMul(p))
-			                                .sub(g))
-			                        .add(p);
-			u = u.sub(Minv.mvMul(B.tvMul(newp.sub(p))));
-//			final Vector p = p.add(g.sub(B.mvMul(u))
-//			                           .sub(C.mvMul(p))
-//			                           .mul(1));
+			System.out.println(prefix + " AMINRES " + A.mvMul(min)
+			                                           .sub(f.sub(A.mvMul(u))
+			                                                 .sub(B.tvMul(p)))
+			                                           .euclidianNorm());
+			u = u.add(min.mul(1));
+			final Vector newp = p.add(Ssmooth.smooth(Sinner, B.mvMul(u)
+			                                                  .sub(C.mvMul(p))
+			                                                  .sub(g), p.mul(0), true, "RICHH "));
+//				Sinv.mvMul(B.mvMul(u)
+//			                                .sub(C.mvMul(p))
+//			                                .sub(g));
+			System.out.println(prefix + " SMINRES " + Sinner.mvMul(newp.sub(p))
+			                                                .sub(B.mvMul(u)
+			                                                      .sub(C.mvMul(p))
+			                                                      .sub(g))
+			                                                .euclidianNorm());
+			u = u.sub(Ainv.mvMul(B.tvMul(newp.sub(p))));
+			//p = p.add(newp);
 			p = newp;
 			if (verbose)
 			{

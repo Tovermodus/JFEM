@@ -469,7 +469,7 @@ public class SparseMatrix
 	public DenseVector mvMul(final Vector vector)
 	{
 		if (PerformanceArguments.getInstance().executeChecks)
-			if (getCols() != (vector.getLength()))
+			if (getCols() != (vector.getLength()) || vector.getLength() != getVectorSize())
 				throw new IllegalArgumentException("Incompatible sizes");
 		final DenseVector ret = new DenseVector(getRows());
 		for (int i = 0; i < sparseEntries; i++)
@@ -481,7 +481,7 @@ public class SparseMatrix
 	public DenseVector tvMul(final Vector vector)
 	{
 		if (PerformanceArguments.getInstance().executeChecks)
-			if (getRows() != (vector.getLength()))
+			if (getRows() != (vector.getLength()) || vector.getLength() != getTVectorSize())
 				throw new IllegalArgumentException("Incompatible sizes");
 		final DenseVector ret = new DenseVector(getCols());
 		for (int i = 0; i < sparseEntries; i++)
@@ -557,7 +557,8 @@ public class SparseMatrix
 	public SparseMatrix mmMul(final SparseMatrix matrix)
 	{
 		if (PerformanceArguments.getInstance().executeChecks)
-			if (getCols() != (matrix.getRows())) throw new IllegalArgumentException("Incompatible sizes");
+			if (getCols() != (matrix.getRows()) && getVectorSize() != matrix.getTVectorSize())
+				throw new IllegalArgumentException("Incompatible sizes");
 		
 		final Stopwatch s = Stopwatch.createStarted();
 		final IntList[] columnCoordinates = new IntList[matrix.getCols()];
@@ -603,7 +604,8 @@ public class SparseMatrix
 	{
 		final SparseMatrix matrix = mat.transpose();
 		if (PerformanceArguments.getInstance().executeChecks)
-			if (getCols() != (matrix.getRows())) throw new IllegalArgumentException("Incompatible sizes");
+			if (getCols() != (matrix.getRows()) && getVectorSize() != matrix.getTVectorSize())
+				throw new IllegalArgumentException("Incompatible sizes");
 		
 		final Stopwatch s = Stopwatch.createStarted();
 		final IntList[] columnCoordinates = new IntList[matrix.getCols()];

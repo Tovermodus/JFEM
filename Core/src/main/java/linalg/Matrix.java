@@ -10,7 +10,7 @@ public interface Matrix
 	@Override
 	default int getTVectorSize()
 	{
-		return getCols();
+		return getRows();
 	}
 	
 	@Override
@@ -28,7 +28,7 @@ public interface Matrix
 	@Override
 	default int getVectorSize()
 	{
-		return getRows();
+		return getCols();
 	}
 	
 	@Override

@@ -5,6 +5,7 @@ import scala.Function2;
 public class IterativePreconditionedExplicitSchur
 	extends ExplicitSchurSolver
 {
+	GMRES2 gm = new GMRES2(1e-6, true);
 	final IterativeSolver it = new IterativeSolver();
 	public VectorMultiplyable preconditioner = null;
 	
@@ -22,7 +23,7 @@ public class IterativePreconditionedExplicitSchur
 			if (preconditioner == null)
 				return it.solveGMRES(A, b, 1e-9);
 			else
-				return it.solvePGMRES(A, preconditioner, b, 1e-6);
+				return it.solvePCG(A, preconditioner, b, 1e-6);
 		};
 	}
 }

@@ -153,8 +153,9 @@ public class DLMFluidMGSolver2
 		}
 		final MGPreconditionerSpace<TaylorHoodSpace, TPCell, TPFace, QkQkFunction, MixedValue, MixedGradient, MixedHessian>
 			mg = create_space(dt, t, fluidState);
-		final Smoother Sgs = new UzawaStokesSmoother3(10,
-		                                              1,
+		mg.cycles = 8;
+		final Smoother Sgs = new UzawaStokesSmoother3(3,
+		                                              1, mg,
 		                                              mg.getFinestSpace()
 		                                                .getVelocitySize());
 		mg.verbose = false;
@@ -176,7 +177,7 @@ public class DLMFluidMGSolver2
 			public Vector mvMul(final Vector vector)
 			{
 				DenseVector rhs = new DenseVector(vector);
-				Vector mgSol = vector.mul(0);
+				Vector mgSol = vector.mul(1);
 				Vector force = new DenseVector(vector);
 				for (int j = 0; j < 1; j++)
 				{

@@ -189,30 +189,35 @@ public class UpperTriangularSparseMatrix
 			mvm = new SparseMvMul(underlying);
 		for (int i = rhs.getLength() - 1; i >= 0; i--)
 		{
-			final var row = mvm.getRow(i);
-			final int[] indices = row._1;
-			final double[] vals = row._2;
-			double diag = 0;
-			int diagIndex = -1;
-			for (int j = 0; j < indices.length; j++)
-				if (indices[j] == i)
-				{
-					diag = vals[j];
-					diagIndex = j;
-					break;
-				}
-			if (diag == 0)
-				throw new IllegalStateException("Singular Matrix");
-			sol.set(rhs.at(i) / diag, i);
-			
-			for (int j = 0; j < indices.length; j++)
-			{
-				if (j == diagIndex)
-					continue;
-				sol.add(-sol.at(indices[j]) / diag * vals[j], i);
-			}
+			forwardsubstituteRow(rhs, sol, i);
 		}
 		return sol;
+	}
+	
+	private void forwardsubstituteRow(final Vector rhs, final DenseVector sol, final int i)
+	{
+		final var row = mvm.getRow(i);
+		final int[] indices = row._1;
+		final double[] vals = row._2;
+		double diag = 0;
+		int diagIndex = -1;
+		for (int j = 0; j < indices.length; j++)
+			if (indices[j] == i)
+			{
+				diag = vals[j];
+				diagIndex = j;
+				break;
+			}
+		if (diag == 0)
+			throw new IllegalStateException("Singular Matrix");
+		sol.set(rhs.at(i) / diag, i);
+		
+		for (int j = 0; j < indices.length; j++)
+		{
+			if (j == diagIndex)
+				continue;
+			sol.add(-sol.at(indices[j]) / diag * vals[j], i);
+		}
 	}
 	
 	@Override
