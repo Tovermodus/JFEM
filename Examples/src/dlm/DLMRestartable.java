@@ -44,7 +44,7 @@ public class DLMRestartable
 		builder.build();
 		final MultiGridFluid fluid = new BackgroundFluidMG(CoordinateVector.fromValues(0, 0),
 		                                                   CoordinateVector.fromValues(2, 1),
-		                                                   new IntCoordinates(4, 4),
+		                                                   new IntCoordinates(8, 4),
 		                                                   1,
 		                                                   3,
 		                                                   dt,
@@ -54,11 +54,11 @@ public class DLMRestartable
 		particles.add(new SolidBrickParticle(CoordinateVector.fromValues(0.6, 0.45),
 		                                     0.1,
 		                                     0.45,
-		                                     0,
+		                                     1,
 		                                     1,
 		                                     CoordinateVector.fromValues(0, 0),
-		                                     10000,
-		                                     10000,
+		                                     1000,
+		                                     1000,
 		                                     15));
 		particles.add(new SolidParticle(CoordinateVector.fromValues(0.75, 0.6),
 		                                0.05,
@@ -79,20 +79,20 @@ public class DLMRestartable
 		particles.add(new Membrane(CoordinateVector.fromValues(0.6, 0.5),
 		                           0.34,
 		                           0.35,
-		                           0,
+		                           1,
 		                           1,
 		                           new CoordinateVector(2),
-		                           100,
-		                           100,
-		                           1));
-		particles.add(new FixedSolidParticle(CoordinateVector.fromValues(0.1, 0.25),
+		                           1000,
+		                           1000,
+		                           15));
+		particles.add(new FixedSolidParticle(CoordinateVector.fromValues(0.15, 0.25),
 		                                     0.05,
 		                                     2,
 		                                     1,
 		                                     10000,
 		                                     10000,
 		                                     15));
-		particles.add(new FixedSolidParticle(CoordinateVector.fromValues(0.1, 0.75),
+		particles.add(new FixedSolidParticle(CoordinateVector.fromValues(0.15, 0.75),
 		                                     0.05,
 		                                     2,
 		                                     1,
@@ -117,7 +117,7 @@ public class DLMRestartable
 		                                                 400,
 		                                                 fluid,
 		                                                 particles,
-		                                                 "coarse" + fluid.refinements);
+		                                                 "finermembrane" + fluid.refinements);
 	}
 	
 	@Override

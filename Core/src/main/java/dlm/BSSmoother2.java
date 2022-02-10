@@ -34,6 +34,9 @@ public class BSSmoother2
 		Vector p = iterate.slice(vel_size, tot_size);
 		final Vector f = rhs.slice(0, vel_size);
 		final Vector g = rhs.slice(vel_size, tot_size);
+		final SparseMatrix O = (SparseMatrix) Operator;
+		System.out.println("SYSMMMM" + O.sub(O.transpose())
+		                                .absMaxElement());
 		final SparseMatrix[] blocks = ((SparseMatrix) Operator).partition(new IntCoordinates(vel_size,
 		                                                                                     vel_size));
 		final SparseMatrix B = blocks[2];
@@ -52,23 +55,76 @@ public class BSSmoother2
 		if (verbose)
 			System.out.println(prefix + "init");
 		if (twoGs == null)
-			twoGs = //new BlockDenseMatrix(A, A.getRows() / 100).getInvertedDiagonalMatrix();//A.inverse();
-				new VectorMultiplyable()
+			
+			if (Sinv == null)
+			{
+				final SparseMatrix ADiag =
+					new SparseMatrix(new BlockDenseMatrix(A, A.getRows() / 100)
+						                 .getInvertedDiagonalMatrix());
+				
+				twoGs =
+					//new BlockDenseMatrix(A, A.getRows() / 100).getInvertedDiagonalMatrix();//A.inverse();
+					new VectorMultiplyable()
+					{
+						final SparseMatrix AdA = A.add(A.transpose())
+						                          .mul(1. / 2)
+						                          .mmMul(ADiag);
+						final UpperTriangularSparseMatrix U = new UpperTriangularSparseMatrix(
+							AdA);
+						final LowerTriangularSparseMatrix L = new LowerTriangularSparseMatrix(
+							AdA);
+						final SparseMatrix D = AdA.getDiagonalMatrix();
+						
+						@Override
+						public int getVectorSize()
+						{
+							return A.getVectorSize();
+						}
+						
+						@Override
+						public int getTVectorSize()
+						{
+							return A.getVectorSize();
+						}
+						
+						@Override
+						public Vector mvMul(final Vector vector)
+						{
+							final Vector y = L.solve(D.mvMul(U.solve(vector)));
+							return ADiag.mvMul(y);
+						}
+						
+						@Override
+						public Vector tvMul(final Vector vector)
+						{
+							throw new UnsupportedOperationException("not implemented yet");
+						}
+					};
+				final double maxEig = VectorMultiplyable.concatenate(ADiag, A)
+				                                        .powerIterationNonSymmetric();
+				final double omega = -Math.max(1, maxEig * 1.5);
+				System.out.println(A.sub(A.transpose())
+				                    .absMaxElement());
+				System.out.println("Max Eig estimate " + maxEig + " omega " + omega);
+				ADiag.mul(1. / omega);
+				Sinv = new VectorMultiplyable()
 				{
-					final UpperTriangularSparseMatrix U = new UpperTriangularSparseMatrix(A);
-					final LowerTriangularSparseMatrix L = new LowerTriangularSparseMatrix(A);
-					final SparseMatrix D = A.getDiagonalMatrix();
+					final SparseMatrix S = C.add(B.mmMul(ADiag)//.mmMul(A.inverse())
+					                              .mtMul(B));
+					final UpperTriangularSparseMatrix U = new UpperTriangularSparseMatrix(S);
+					final LowerTriangularSparseMatrix L = new LowerTriangularSparseMatrix(S);
+					final SparseMatrix D = S.getDiagonalMatrix();
 					
 					@Override
 					public int getVectorSize()
 					{
-						return A.getVectorSize();
+						return S.getVectorSize();
 					}
 					
 					@Override
 					public int getTVectorSize()
 					{
-						return A.getVectorSize();
+						return S.getTVectorSize();
 					}
 					
 					@Override
@@ -83,51 +139,8 @@ public class BSSmoother2
 						throw new UnsupportedOperationException("not implemented yet");
 					}
 				};
-		
+			}
 		final VectorMultiplyable Minv = twoGs;
-		if (Sinv == null)
-		{
-			final Matrix ADiag =
-				new SparseMatrix(new BlockDenseMatrix(A,
-				                                      A.getRows() / 100).getInvertedDiagonalMatrix());
-			final double maxEig = VectorMultiplyable.concatenate(ADiag, A)
-			                                        .powerIterationNonSymmetric();
-			final double omega = -Math.max(1, maxEig * 1.5);
-			System.out.println("Max Eig estimate " + maxEig + " omega " + omega);
-			ADiag.mul(1. / omega);
-			Sinv = new VectorMultiplyable()
-			{
-				final SparseMatrix S = C.add(B.mmMul(ADiag)//.mmMul(A.inverse())
-				                              .mtMul(B));
-				final UpperTriangularSparseMatrix U = new UpperTriangularSparseMatrix(S);
-				final LowerTriangularSparseMatrix L = new LowerTriangularSparseMatrix(S);
-				final SparseMatrix D = S.getDiagonalMatrix();
-				
-				@Override
-				public int getVectorSize()
-				{
-					return S.getVectorSize();
-				}
-				
-				@Override
-				public int getTVectorSize()
-				{
-					return S.getTVectorSize();
-				}
-				
-				@Override
-				public Vector mvMul(final Vector vector)
-				{
-					return L.solve(D.mvMul(U.solve(vector)));
-				}
-				
-				@Override
-				public Vector tvMul(final Vector vector)
-				{
-					throw new UnsupportedOperationException("not implemented yet");
-				}
-			};
-		}
 		for (int i = 0; i < runs; i++)
 		{
 			u = u.add(Minv.mvMul(f.sub(A.mvMul(u))

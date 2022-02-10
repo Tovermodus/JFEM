@@ -142,7 +142,8 @@ public interface Matrix
 	default Matrix tmMul(final Matrix matrix)
 	{
 		if (PerformanceArguments.getInstance().executeChecks)
-			if (getRows() != (matrix.getRows())) throw new IllegalArgumentException("Incompatible sizes");
+			if (getRows() != (matrix.getRows()))
+				throw new IllegalArgumentException("Incompatible sizes" + getShape() + "not compatible with" + matrix.getShape());
 		return transpose().mmMul(matrix);
 	}
 	

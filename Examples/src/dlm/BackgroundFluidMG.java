@@ -70,14 +70,14 @@ public class BackgroundFluidMG
 	{
 		final VectorFunctionOnCells<TPCell, TPFace> semiImplicitWeight1 =
 			VectorFunctionOnCells.fromLambda((x) -> velocity.value(x)
-			                                                .mul(1. / 2),
+			                                                .mul(density / 2),
 			                                 (x, cell) -> velocity.valueInCell(x, cell)
-			                                                      .mul(1. / 2), 2, 2);
+			                                                      .mul(density / 2), 2, 2);
 		final VectorFunctionOnCells<TPCell, TPFace> semiImplicitWeight2 =
 			VectorFunctionOnCells.fromLambda((x) -> velocity.value(x)
-			                                                .mul(-1. / 2),
+			                                                .mul(-density / 2),
 			                                 (x, cell) -> velocity.valueInCell(x, cell)
-			                                                      .mul(-1. / 2), 2, 2);
+			                                                      .mul(-density / 2), 2, 2);
 		final TPVectorCellIntegralOnCell<ContinuousTPVectorFunction> convection1 =
 			new TPVectorCellIntegralOnCell<>(semiImplicitWeight1, TPVectorCellIntegral.GRAD_VALUE);
 		final TPVectorCellIntegralOnCell<ContinuousTPVectorFunction> convection2 =
@@ -114,7 +114,8 @@ public class BackgroundFluidMG
 				return CoordinateVector.fromValues(Math.max(0,
 				                                            2 - Math.pow(x.dist(CoordinateVector.fromValues(
 					                                            0,
-					                                            0.5)), 2) * 4), 0);
+					                                            0.5)), 2) * 4), 0)
+				                       .mul(0.2);
 		};
 	}
 	

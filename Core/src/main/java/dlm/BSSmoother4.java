@@ -62,12 +62,12 @@ public class BSSmoother4
 			final SparseMatrix S = C.add(B.mmMul(Smid)
 			                              .mtMul(B))
 			                        .mul(10);
-			final VectorMultiplyable Svec = C.addVm(VectorMultiplyable.concatenate(B,
-			                                                                       VectorMultiplyable.concatenateTranspose(
-				                                                                       Ainv,
+			final VectorMultiplyable Svec = C.addVm(VectorMultiplyable.transposeConcatenate(B,
+			                                                                                VectorMultiplyable.concatenate(
+				                                                                                Ainv,
 //				                                                                       Ags.asPreconditioner(
 //					                                                                       A),
-				                                                                       B)));
+				                                                                                B)));
 			final Smoother Sgs = new ForwardBackwardGaussSeidelSmoother(5, S);
 			Sinv =
 				new VectorMultiplyable()

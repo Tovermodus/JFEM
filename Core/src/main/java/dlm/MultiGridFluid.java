@@ -2,7 +2,6 @@ package dlm;
 
 import basic.VectorFunctionOnCells;
 import com.google.common.base.Stopwatch;
-import it.unimi.dsi.fastutil.ints.Int2DoubleMap;
 import linalg.*;
 import mixed.TaylorHoodSpace;
 import org.jetbrains.annotations.NotNull;
@@ -66,6 +65,8 @@ public abstract class MultiGridFluid
 		space.writeCellIntegralsToMatrix(getSemiImplicitIntegrals(velocity),
 		                                 semiImplicitMatrix);
 		System.out.println("semiImpDone" + s.elapsed());
+		System.out.println("semiimp" + semiImplicitMatrix.sub(semiImplicitMatrix.transpose())
+		                                                 .absMaxElement() + " " + semiImplicitMatrix.absMaxElement());
 		final DenseVector forceRhs = new DenseVector(n);
 		space.writeCellIntegralsToRhs(getForceIntegrals(t), forceRhs);
 		final DenseVector accelRhs = massMatrix.mvMul(currentIterate);

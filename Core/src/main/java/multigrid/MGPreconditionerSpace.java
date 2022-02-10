@@ -46,6 +46,8 @@ public abstract class MGPreconditionerSpace<CSpace extends AcceptsMatrixBoundary
 		{
 			final var mat_rhs = createSystem(space);
 			systems.add(mat_rhs._1);
+			System.out.println("mg" + ((SparseMatrix) mat_rhs._1).sub(((SparseMatrix) mat_rhs._1).transpose())
+			                                                     .absMaxElement());
 			finest_rhs = mat_rhs._2;
 			finest_system = mat_rhs._1;
 			System.out.println("functions, system " + k++);
@@ -137,6 +139,12 @@ public abstract class MGPreconditionerSpace<CSpace extends AcceptsMatrixBoundary
 	@Override
 	public VectorMultiplyable getSystem(final int level)
 	{
+		if (systems.get(level) instanceof Matrix)
+		{
+			System.out.println(((Matrix) systems.get(level)).sub((Tensor) systems.get(level)
+			                                                                     .transpose())
+			                                                .absMaxElement() + " getSystemSymm" + level);
+		}
 		return systems.get(level);
 	}
 	

@@ -234,7 +234,7 @@ public interface Particle
 	{
 		return backGroundFunction.getNodeFunctionalPoint()
 		                         .sub(X.valueOnReferenceCell(cell.referenceCell.center(), cell))
-		                         .euclidianNorm() < particleCellDiam + fluidCellDiam;
+		                         .euclidianNorm() < 2 * (particleCellDiam + fluidCellDiam);
 	}
 	
 	private void writeBackgroundLagrangeIntegralsOnCellToMatrix(final SparseMatrix lagrangeBackGroundMatrix,

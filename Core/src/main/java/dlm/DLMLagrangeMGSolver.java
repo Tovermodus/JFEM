@@ -1,6 +1,5 @@
 package dlm;
 
-import basic.PlotWindow;
 import basic.VectorFunctionOnCells;
 import io.vavr.Tuple2;
 import it.unimi.dsi.fastutil.ints.Int2DoubleMap;
@@ -78,6 +77,8 @@ public class DLMLagrangeMGSolver
 				final FluidSystem fs = fluid.getFluidSystemForSpace(space, velocity, 0,
 				                                                    restrictedIterate);
 				final var blockRhs = Fluid.getBlockRhs(fs, dt);
+				System.out.println("symmetry " + blockRhs._1.sub(blockRhs._1.transpose())
+				                                            .absMaxElement());
 				final SparseMatrix s = new SparseMatrix(blockRhs._1);
 				final List<Matrix> schurContributions =
 					IntStream.range(0, particles.size())
@@ -105,8 +106,11 @@ public class DLMLagrangeMGSolver
 					         .collect(
 						         Collectors.toList());
 				for (final Matrix m : schurContributions)
+				{
 					s.addInPlace(m);
-				
+					System.out.println("symmetry " + s.sub(s.transpose())
+					                                  .absMaxElement());
+				}
 				final Int2DoubleMap nodeValues = fluid.getDirichletNodeValuesForSpace(space, t);
 				nodeValues.forEach((node, val) ->
 				                   {
@@ -114,6 +118,8 @@ public class DLMLagrangeMGSolver
 					                   s.deleteRow(node);
 					                   s.set(1, node, node);
 				                   });
+				System.out.println("symmetry " + s.sub(s.transpose())
+				                                  .absMaxElement());
 				return new Tuple2<>(s, new DenseVector(n));
 			}
 			
@@ -124,50 +130,10 @@ public class DLMLagrangeMGSolver
 				final List<Smoother> ret = new ArrayList<>();
 				for (int i = 1; i < fluid.refinements + 1; i++)
 				{
-					ret.add(new BSSmoother2(smootherRuns,
-					                        smootherOmega,
+					ret.add(new BSSmoother2(smootherRuns, smootherOmega,
 					                        spaces.get(i)
 					                              .getVelocitySize()));
 				}
-				final DenseVector v1 = new DenseVector(systems.get(0)
-				                                              .getVectorSize());
-				final DenseVector v2 = new DenseVector(systems.get(0)
-				                                              .getVectorSize());
-				int j = 6;
-				for (final IntCoordinates c : v1.getShape()
-				                                .range())
-				{
-					v1.set(j++, c);
-					v2.set(1, c);
-				}
-				final SparseMatrix P = prolongationMatrices.get(0);
-				final SparseMatrix PAP = new SparseMatrix(P.tmMul((SparseMatrix) systems.get(1))
-				                                           .mmMul(P));
-				final SparseMatrix s0 = new SparseMatrix((SparseMatrix) systems.get(0));
-				final Int2DoubleMap nodeValues = fluid.getDirichletNodeValuesForSpace(spaces.get(0), t);
-				nodeValues.forEach((node, val) ->
-				                   {
-					                   PAP.deleteColumn(node);
-					                   PAP.deleteRow(node);
-					                   PAP.set(1, node, node);
-					                   s0.deleteColumn(node);
-					                   s0.deleteRow(node);
-					                   s0.set(1, node, node);
-				                   });
-				applyZeroBoundaryConditions(spaces.get(0), v1);
-				applyZeroBoundaryConditions(spaces.get(0), v2);
-				System.out.println(Math.abs(PAP.mvMul(v1)
-				                               .inner(v2) - s0
-					.mvMul(v1)
-					.inner(v2)) + "   PAPPPP");
-				
-				PlotWindow.addPlot(new MatrixPlot(PAP,
-				                                  "pap"));
-				PlotWindow.addPlot(new MatrixPlot(((SparseMatrix) s0),
-				                                  "s0"));
-				PlotWindow.addPlot(new MatrixPlot((PAP).sub((SparseMatrix) s0),
-				                                  "diff"));
-				
 				verbose = true;
 				return ret;
 			}
@@ -177,9 +143,7 @@ public class DLMLagrangeMGSolver
 			{
 				final Int2DoubleMap nodeValues = fluid.getDirichletNodeValuesForSpace(space, t);
 				nodeValues.forEach((node, val) ->
-				                   {
-					                   vector.set(0, node);
-				                   });
+					                   vector.set(0, node));
 			}
 		};
 	}
@@ -199,19 +163,6 @@ public class DLMLagrangeMGSolver
 		else
 			schur.resetOffDiagonals(systemMatrix);
 		final MGPreconditionerSpace<?, ?, ?, ?, ?, ?, ?> mg = create_space(particleStates, dt, t, fluidState);
-		final DenseVector d = new DenseVector(mg.getVectorSize());
-		for (int i = 0; i < d.getLength(); i++)
-			d.set(Math.random(), i);
-//		final ExplicitSchurSolver sss = new DirectSchur(systemMatrix);
-//		PlotWindow.addPlot(new MatrixPlot(sss.getSchurComplement(), "true"));
-//		PlotWindow.addPlot(new MatrixPlot(new DenseMatrix((SparseMatrix) mg.finest_system), "mg"));
-//		PlotWindow.addPlot(new MatrixPlot(((SparseMatrix) mg.finest_system).sub(new SparseMatrix(sss.getSchurComplement())),
-//		                                  "diff"));
-//
-		System.out.println(schur.schurMvMul()
-		                        .mvMul(d)
-		                        .sub(mg.finest_system.mvMul(d))
-		                        .absMaxElement() + "  diffffaskdjfh");
 		schur.preconditioner = mg;
 		return schur.mvMul(rhs);
 	}

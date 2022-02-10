@@ -19,7 +19,7 @@ public class StokesMGTime
 	private static MGPreconditionerSpace<TaylorHoodSpace, TPCell, TPFace, QkQkFunction, MixedValue, MixedGradient
 		, MixedHessian> getMG(final Vector currentIterate, final double dt, final double time)
 	{
-		final double reynolds = 5;
+		final double reynolds = 100;
 		final MixedCellIntegral<TPCell, ContinuousTPShapeFunction, ContinuousTPVectorFunction, QkQkFunction>
 			divValue =
 			new MixedTPCellIntegral<>(ScalarFunction.constantFunction(1),
@@ -34,7 +34,7 @@ public class StokesMGTime
 			MixedCellIntegral.fromVelocityIntegral(new TPVectorCellIntegral<>(
 				ScalarFunction.constantFunction(1),
 				TPVectorCellIntegral.VALUE_VALUE));
-		return new MGPreconditionerSpace<>(3, 1)
+		return new MGPreconditionerSpace<>(2, 1)
 		{
 			
 			@Override
@@ -47,8 +47,8 @@ public class StokesMGTime
 				{
 					final TaylorHoodSpace s = new TaylorHoodSpace(CoordinateVector.fromValues(0, 0),
 					                                              CoordinateVector.fromValues(1, 1),
-					                                              new IntCoordinates(4,
-					                                                                 4).mul(mul));
+					                                              new IntCoordinates(6,
+					                                                                 6).mul(mul));
 					ret.add(s);
 					mul *= 2;
 				}
@@ -66,9 +66,11 @@ public class StokesMGTime
 				final SparseMatrix flow = new SparseMatrix(n, n);
 				final List<CellIntegral<TPCell, QkQkFunction>> flowIntegrals = new ArrayList<>();
 				if (currentIterate != null)
+				{
 					flowIntegrals.addAll(getConvectionIntegrals(generateCurrentFunction(
 						restrictToSize(n, currentIterate),
 						space).getVelocityFunction()));
+				}
 				flowIntegrals.add(gradGrad);
 				flowIntegrals.add(divValue);
 				space.writeCellIntegralsToMatrix(flowIntegrals, flow);
@@ -95,7 +97,7 @@ public class StokesMGTime
 				final ArrayList<Smoother> ret = new ArrayList<>();
 				for (int i = 1; i < spaces.size(); i++)
 				{
-					ret.add(new BSSmoother3(3, 2, 1,
+					ret.add(new BSSmoother3(3, 1, 1,
 					                        spaces.get(i)
 					                              .getVelocitySize()));//, d.getInvertedDiagonalMatrix()));
 				}
@@ -135,7 +137,7 @@ public class StokesMGTime
 			public CoordinateVector value(final CoordinateVector pos)
 			{
 				if (Math.abs(pos.x()) <= 1e-10 || Math.abs(pos.x() - 1) <= 1e-10)
-					return CoordinateVector.fromValues(t * 15, t * 40);
+					return CoordinateVector.fromValues(t * 15, t * 45);
 				///if(Math.abs(pos.x()-1) <= 1e-1)
 				//	return CoordinateVector.fromValues(1,1).mul(Math.sin(t)*Math.sin(t)*10*(0.25-
 				//	(0.5-pos.y())*(0.5-pos.y())));
@@ -197,9 +199,9 @@ public class StokesMGTime
 		final PerformanceArguments.PerformanceArgumentBuilder builder =
 			new PerformanceArguments.PerformanceArgumentBuilder();
 		builder.build();
-		final double dt = 0.1;
-		final int timesteps = 30;
-		final int nPoints = 83;
+		final double dt = 0.002;
+		final int timesteps = 200;
+		final int nPoints = 31;
 		
 		MGPreconditionerSpace<TaylorHoodSpace, TPCell, TPFace, QkQkFunction, MixedValue, MixedGradient
 			, MixedHessian> mg = getMG(null, dt, 0);
@@ -224,7 +226,10 @@ public class StokesMGTime
 		{
 			its.showProgress = true;
 			mg = getMG(iterate, dt, i * dt);
-			iterate = its.solvePGMRES(mg.getFinestSystem(), mg, mg.finest_rhs, 1e-7);
+			iterate = its.solvePGMRES(mg.getFinestSystem(), mg, mg.finest_rhs, 1e-4);
+			if (its.iterations > 30)
+				break;
+			
 			System.out.println("Time " + i * dt + " out of " + timesteps * dt + " done");
 			pvals.putAll(generateCurrentFunction(iterate, mg.getFinestSpace())
 				             .pressureValuesInPointsAtTime(points, dt * i));
@@ -273,14 +278,16 @@ public class StokesMGTime
 	public static List<CellIntegral<TPCell, QkQkFunction>> getConvectionIntegrals(final VectorFunctionOnCells<TPCell,
 		TPFace> velocity)
 	{
+		
 		final VectorFunctionOnCells<TPCell, TPFace> semiImplicitWeight1 =
 			VectorFunctionOnCells.fromLambda((x) -> velocity.value(x)
-			                                                .mul(1 / 2),
-			                                 (x, cell) -> velocity.valueInCell(x, cell)
-			                                                      .mul(1 / 2), 2, 2);
+			                                                .mul(-1. / 2),
+			                                 (x, cell) ->
+				                                 velocity.valueInCell(x, cell)
+				                                         .mul(1. / 2), 2, 2);
 		final VectorFunctionOnCells<TPCell, TPFace> semiImplicitWeight2 =
 			VectorFunctionOnCells.fromLambda((x) -> velocity.value(x)
-			                                                .mul(-1. / 2),
+			                                                .mul(1. / 2),
 			                                 (x, cell) -> velocity.valueInCell(x, cell)
 			                                                      .mul(-1. / 2), 2, 2);
 		final TPVectorCellIntegralOnCell<ContinuousTPVectorFunction> convection1 =
