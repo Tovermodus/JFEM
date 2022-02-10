@@ -29,7 +29,7 @@ public class DLMRestartable
 	{
 		super(dt, timeSteps, backGround, particles, new DLMLagrangeMGSolver(backGround, particles), name);
 		plotPoints = backGround.getSpace()
-		                       .generatePlotPoints(61);
+		                       .generatePlotPoints(41);
 		velocityValues = new ConcurrentSkipListMap<>();
 		pressureValues = new ConcurrentSkipListMap<>();
 		System.out.println("Simulating up to time " + timeSteps * dt);
@@ -46,7 +46,7 @@ public class DLMRestartable
 		                                                   CoordinateVector.fromValues(2, 1),
 		                                                   new IntCoordinates(8, 4),
 		                                                   1,
-		                                                   3,
+		                                                   2,
 		                                                   dt,
 		                                                   0.5,
 		                                                   5);

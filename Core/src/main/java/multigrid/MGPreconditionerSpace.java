@@ -139,12 +139,6 @@ public abstract class MGPreconditionerSpace<CSpace extends AcceptsMatrixBoundary
 	@Override
 	public VectorMultiplyable getSystem(final int level)
 	{
-		if (systems.get(level) instanceof Matrix)
-		{
-			System.out.println(((Matrix) systems.get(level)).sub((Tensor) systems.get(level)
-			                                                                     .transpose())
-			                                                .absMaxElement() + " getSystemSymm" + level);
-		}
 		return systems.get(level);
 	}
 	
