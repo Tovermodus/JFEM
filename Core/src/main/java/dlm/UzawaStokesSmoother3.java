@@ -85,7 +85,7 @@ public class UzawaStokesSmoother3
 			final var Aamg
 				= mg.AMGFromMatrix(Apadded,
 				                   (l, m) ->
-					                   new ForwardBackwardGaussSeidelSmoother(50, m));
+					                   new ForwardBackwardGaussSeidelSmoother(50, m), false, 3);
 			Ainv = new VectorMultiplyable()
 			{
 				@Override

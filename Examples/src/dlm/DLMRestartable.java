@@ -27,7 +27,7 @@ public class DLMRestartable
 	                      final MultiGridFluid backGround,
 	                      final List<Particle> particles, final String name)
 	{
-		super(dt, timeSteps, backGround, particles, new DLMLagrangeMGSolver(backGround, particles), name);
+		super(dt, timeSteps, backGround, particles, new DLMHybridMGSolver(backGround, particles), name);
 		plotPoints = backGround.getSpace()
 		                       .generatePlotPoints(41);
 		velocityValues = new ConcurrentSkipListMap<>();
@@ -40,84 +40,83 @@ public class DLMRestartable
 	public static void main(final String[] args)
 	{
 		final var builder = new PerformanceArguments.PerformanceArgumentBuilder();
-		builder.GMResData = PerformanceArguments.GMRESResidual;
 		builder.build();
 		final MultiGridFluid fluid = new BackgroundFluidMG(CoordinateVector.fromValues(0, 0),
 		                                                   CoordinateVector.fromValues(2, 1),
 		                                                   new IntCoordinates(8, 4),
 		                                                   1,
-		                                                   2,
+		                                                   1,
 		                                                   dt,
-		                                                   0.5,
+		                                                   0.01,
 		                                                   5);
 		final List<Particle> particles = new ArrayList<>();
 		particles.add(new SolidBrickParticle(CoordinateVector.fromValues(0.6, 0.45),
 		                                     0.1,
 		                                     0.45,
-		                                     1,
+		                                     2,
 		                                     1,
 		                                     CoordinateVector.fromValues(0, 0),
-		                                     1000,
-		                                     1000,
+		                                     100,
+		                                     100,
 		                                     15));
 		particles.add(new SolidParticle(CoordinateVector.fromValues(0.75, 0.6),
 		                                0.05,
 		                                2,
 		                                1,
 		                                CoordinateVector.fromValues(0, 0),
-		                                1000,
-		                                1000,
+		                                100,
+		                                100,
 		                                15));
 		particles.add(new SolidParticle(CoordinateVector.fromValues(0.4, 0.5),
 		                                0.05,
 		                                2,
 		                                1,
 		                                CoordinateVector.fromValues(0, 0),
-		                                1000,
-		                                1000,
+		                                100,
+		                                100,
 		                                15));
 		particles.add(new Membrane(CoordinateVector.fromValues(0.6, 0.5),
 		                           0.34,
 		                           0.35,
-		                           1,
+		                           0,
 		                           1,
 		                           new CoordinateVector(2),
-		                           1000,
-		                           1000,
+		                           10,
+		                           10,
 		                           15));
 		particles.add(new FixedSolidParticle(CoordinateVector.fromValues(0.15, 0.25),
 		                                     0.05,
 		                                     2,
 		                                     1,
-		                                     10000,
-		                                     10000,
+		                                     100,
+		                                     100,
 		                                     15));
 		particles.add(new FixedSolidParticle(CoordinateVector.fromValues(0.15, 0.75),
 		                                     0.05,
 		                                     2,
 		                                     1,
-		                                     10000,
-		                                     10000,
+		                                     100,
+		                                     100,
 		                                     15));
 		particles.add(new FixedSolidParticle(CoordinateVector.fromValues(1.1, 0.25),
 		                                     0.05,
 		                                     2,
 		                                     1,
-		                                     10000,
-		                                     10000,
+		                                     100,
+		                                     1000,
 		                                     15));
 		particles.add(new FixedSolidParticle(CoordinateVector.fromValues(1.1, 0.75),
 		                                     0.05,
 		                                     2,
 		                                     1,
-		                                     10000,
-		                                     10000,
+		                                     100,
+		                                     100,
 		                                     15));
 		final DLMRestartable system = new DLMRestartable(dt,
 		                                                 400,
 		                                                 fluid,
 		                                                 particles,
-		                                                 "finermembrane" + fluid.refinements);
+		                                                 "splittingcoarse" + fluid.refinements);
 	}
 	
 	@Override
@@ -125,11 +124,6 @@ public class DLMRestartable
 	                                     final List<ParticleIterate> particleStates,
 	                                     final double time)
 	{
-//		final MixedFunctionOnCells<TPCell, TPFace> velocityPressure
-//			= backGround.getVelocityPressure(fluidState);
-//		velocityValues.putAll(velocityPressure.velocityValuesInPointsAtTime(plotPoints, time));
-//		velocityValues.putAll(velocityPressure.velocityValuesInPointsAtTime(plotPoints, time));
-//		pressureValues.putAll(velocityPressure.pressureValuesInPointsAtTime(plotPoints, time));
 		System.out.println("ITeration at time " + time + " is finished");
 	}
 	
@@ -151,7 +145,7 @@ public class DLMRestartable
 		}
 		final MixedPlot2DTime p = new MixedPlot2DTime(pressureValues,
 		                                              velocityValues,
-		                                              61,
+		                                              41,
 		                                              "velocity and pressure");
 		for (int i = 0; i < particles.size(); i++)
 			p.addOverlay(

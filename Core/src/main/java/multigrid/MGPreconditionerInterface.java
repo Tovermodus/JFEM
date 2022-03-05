@@ -30,6 +30,19 @@ public interface MGPreconditionerInterface<CSpace extends AcceptsMatrixBoundaryV
 	
 	boolean isVerbose();
 	
+	default int levelFromSize(final int size)
+	{
+		int level = maxLevel();
+		while (getSystem(level)
+			.getVectorSize() != size)
+		{
+			level--;
+			if (level < 0)
+				throw new IllegalArgumentException("defect has wrong shape");
+		}
+		return level;
+	}
+	
 	default Vector restrictToSize(final int newSize, Vector finest)
 	{
 		int l = maxLevel() - 1;
@@ -73,9 +86,34 @@ public interface MGPreconditionerInterface<CSpace extends AcceptsMatrixBoundaryV
 		return ret;
 	}
 	
+	default void presmoothcallback(final int level, final Vector guess, final Vector rhs)
+	{
+	
+	}
+	
+	default void postmoothcallback(final int level, final Vector guess, final Vector rhs)
+	{
+	
+	}
+	
+	default void correctioncallback(final int level, final Vector correction, final Vector rhs)
+	{
+	
+	}
+	
+	default void precorrectioncallback(final int level, final Vector guess, final Vector rhs)
+	{
+	
+	}
+	
+	default void postcorrectioncallback(final int level, final Vector guess, final Vector rhs)
+	{
+	
+	}
+	
 	void applyZeroBoundaryConditions(CSpace space, MutableVector vector);
 	
-	default Vector mgStep(final int level, Vector guess, final Vector rhs)
+	default Vector mgStepV(final int level, Vector guess, final Vector rhs)
 	{
 		final String prefSpaces = "   .".repeat(maxLevel() - level + 1);
 		if (level == 0)
@@ -91,16 +129,21 @@ public interface MGPreconditionerInterface<CSpace extends AcceptsMatrixBoundaryV
 			{
 				solution = new IterativeSolver(true).solveGMRES(getSystem(0), rhs, 1e-9);
 			}
+			postmoothcallback(level, solution, rhs);
 			if (isVerbose())
-				System.out.println(prefSpaces + " solved" + solution.euclidianNorm());
+				System.out.println(prefSpaces + " solved " + getSystem(0).mvMul(solution)
+				                                                         .sub(rhs)
+				                                                         .euclidianNorm());
 			return solution;
 		}
 		if (isVerbose())
 			System.out.println(prefSpaces + " MG level " + level + " residual " + rhs.sub(getSystem(level)
 				                                                                              .mvMul(guess))
 			                                                                         .euclidianNorm());
+		presmoothcallback(level, guess, rhs);
 		guess = getSmoother(level)
 			.smooth(getSystem(level), rhs, guess, isVerbose(), prefSpaces);
+		precorrectioncallback(level, guess, rhs);
 		Vector restrictedDefect =
 			getProlongationOperator(level - 1)
 				.tvMul(rhs.sub(getSystem(level)
@@ -113,11 +156,14 @@ public interface MGPreconditionerInterface<CSpace extends AcceptsMatrixBoundaryV
 			                                                                                       .euclidianNorm());
 		if (isVerbose())
 			System.out.println(prefSpaces + " precorrection defect " + restrictedDefect.euclidianNorm());
-		final Vector correction = mgStep(level - 1,
-		                                 new DenseVector(restrictedDefect.getLength()),
-		                                 restrictedDefect).mul(1);
-		guess = guess.add(getProlongationOperator(level - 1)
-			                  .mvMul(correction));
+		final Vector correction = mgStepV(level - 1,
+		                                  new DenseVector(restrictedDefect.getLength()),
+		                                  restrictedDefect);
+		final Vector prolongedCorrection = getProlongationOperator(level - 1)
+			.mvMul(correction);
+		correctioncallback(level, prolongedCorrection, rhs);
+		guess = guess.add(prolongedCorrection);
+		postcorrectioncallback(level, guess, rhs);
 		if (isVerbose())
 			restrictedDefect =
 				getProlongationOperator(level - 1)
@@ -133,6 +179,100 @@ public interface MGPreconditionerInterface<CSpace extends AcceptsMatrixBoundaryV
 		}
 		guess = getSmoother(level)
 			.smooth(getSystem(level), rhs, guess, isVerbose(), prefSpaces);
+		postmoothcallback(level, guess, rhs);
+		if (isVerbose())
+			System.out.println(prefSpaces + " MG level " + level + " final residual " + rhs.sub(getSystem(
+				                                                                               level)
+				                                                                                    .mvMul(guess))
+			                                                                               .euclidianNorm());
+		return guess;
+	}
+	
+	default Vector mgStepW(final int level, Vector guess, final Vector rhs)
+	{
+		final String prefSpaces = "   .".repeat(maxLevel() - level + 1);
+		if (level == 0)
+		{
+			if (isVerbose())
+				System.out.println(prefSpaces + " level 0 " + getSystem(0)
+					.getVectorSize());
+			final Vector solution;
+			if (getSystem(0) instanceof Matrix)
+			{
+				solution = new DenseMatrix((Matrix) getSystem(0)).solve(rhs);
+			} else
+			{
+				solution = new IterativeSolver(true).solveGMRES(getSystem(0), rhs, 1e-9);
+			}
+			postmoothcallback(level, solution, rhs);
+			if (isVerbose())
+				System.out.println(prefSpaces + " solved" + solution.euclidianNorm());
+			return solution;
+		}
+		if (isVerbose())
+			System.out.println(prefSpaces + " MG level " + level + " residual " + rhs.sub(getSystem(level)
+				                                                                              .mvMul(guess))
+			                                                                         .euclidianNorm());
+		presmoothcallback(level, guess, rhs);
+		guess = getSmoother(level)
+			.smooth(getSystem(level), rhs, guess, isVerbose(), prefSpaces);
+		precorrectioncallback(level, guess, rhs);
+		Vector restrictedDefect =
+			getProlongationOperator(level - 1)
+				.tvMul(rhs.sub(getSystem(level)
+					               .mvMul(guess)));
+		//restrictedDefect = applyCoarseBoundaryConditions(spaces.get(level - 1), restrictedDefect);
+		if (isVerbose())
+			System.out.println(prefSpaces + " MG level " + level + " precorrection residual " + rhs.sub(
+				                                                                                       getSystem(level)
+					                                                                                       .mvMul(guess))
+			                                                                                       .euclidianNorm());
+		if (isVerbose())
+			System.out.println(prefSpaces + " precorrection defect " + restrictedDefect.euclidianNorm());
+		Vector correction = mgStepV(level - 1,
+		                            new DenseVector(restrictedDefect.getLength()),
+		                            restrictedDefect).mul(1);
+		Vector prolongedCorrection = getProlongationOperator(level - 1)
+			.mvMul(correction);
+		correctioncallback(level, prolongedCorrection, rhs);
+		guess = guess.add(prolongedCorrection);
+		postcorrectioncallback(level, guess, rhs);
+		restrictedDefect =
+			getProlongationOperator(level - 1)
+				.tvMul(rhs.sub(getSystem(level)
+					               .mvMul(guess)));
+		//restrictedDefect = applyCoarseBoundaryConditions(spaces.get(level - 1), restrictedDefect);
+		if (isVerbose())
+			System.out.println(prefSpaces + " MG level " + level + " intercorrection residual " + rhs.sub(
+				                                                                                         getSystem(level)
+					                                                                                         .mvMul(guess))
+			                                                                                         .euclidianNorm());
+		if (isVerbose())
+			System.out.println(prefSpaces + " intercorrection defect " + restrictedDefect.euclidianNorm());
+		correction = mgStepV(level - 1,
+		                     new DenseVector(restrictedDefect.getLength()),
+		                     restrictedDefect).mul(1);
+		prolongedCorrection = getProlongationOperator(level - 1)
+			.mvMul(correction);
+		correctioncallback(level, prolongedCorrection, rhs);
+		guess = guess.add(prolongedCorrection);
+		postcorrectioncallback(level, guess, rhs);
+		if (isVerbose())
+			restrictedDefect =
+				getProlongationOperator(level - 1)
+					.tvMul(rhs.sub(getSystem(level)
+						               .mvMul(guess)));
+		if (isVerbose())
+		{
+			System.out.println(prefSpaces + " postcorrection defect " + restrictedDefect.euclidianNorm());
+			System.out.println(prefSpaces + " MG level " + level + " correction residual " + rhs.sub(
+				                                                                                    getSystem(level)
+					                                                                                    .mvMul(guess))
+			                                                                                    .euclidianNorm());
+		}
+		guess = getSmoother(level)
+			.smooth(getSystem(level), rhs, guess, isVerbose(), prefSpaces);
+		postmoothcallback(level, guess, rhs);
 		if (isVerbose())
 			System.out.println(prefSpaces + " MG level " + level + " final residual " + rhs.sub(getSystem(
 				                                                                               level)
@@ -145,7 +285,14 @@ public interface MGPreconditionerInterface<CSpace extends AcceptsMatrixBoundaryV
 	{
 		if (initialIterate.size() != rhs.size() || initialIterate.size() != getFinestSystem().getVectorSize())
 			throw new IllegalArgumentException("wrong size");
-		return mgStep(maxLevel(), initialIterate, rhs);
+		return mgStepV(maxLevel(), initialIterate, rhs);
+	}
+	
+	default Vector wCycle(final Vector initialIterate, final Vector rhs)
+	{
+		if (initialIterate.size() != rhs.size() || initialIterate.size() != getFinestSystem().getVectorSize())
+			throw new IllegalArgumentException("wrong size");
+		return mgStepW(maxLevel(), initialIterate, rhs);
 	}
 	
 	default Vector fullVCycleCorrection(final Vector defect)
@@ -163,7 +310,7 @@ public interface MGPreconditionerInterface<CSpace extends AcceptsMatrixBoundaryV
 			                                        .getVectorSize());
 		for (int i = 0; i < maxLevel(); i++)
 		{
-			iterate = new DenseVector(mgStep(i, iterate, rhsides.get(maxLevel() - i)));
+			iterate = new DenseVector(mgStepV(i, iterate, rhsides.get(maxLevel() - i)));
 			iterate = getProlongationMatrix(i).mvMul(iterate);
 		}
 		return iterate;
@@ -221,26 +368,32 @@ public interface MGPreconditionerInterface<CSpace extends AcceptsMatrixBoundaryV
 	}
 	
 	default MGPreconditionerInterface<CSpace, CT, FT, ST, valueT, gradientT, hessianT> AMGFromMatrix(final SparseMatrix mat,
-	                                                                                                 final BiFunction<Integer, SparseMatrix, Smoother> levelToSmoother)
+	                                                                                                 final BiFunction<Integer, SparseMatrix, Smoother> levelToSmoother,
+	                                                                                                 final boolean isVerbose,
+	                                                                                                 final int cycles)
 	{
 		final var me = this;
-		
+		final int level = me.levelFromSize(mat.getVectorSize());
+		if (mat.getRows() != me.getSystem(level)
+		                       .getVectorSize() || mat.getCols() != me.getSystem(level)
+		                                                              .getTVectorSize())
+			throw new IllegalArgumentException("Matrix needs to be of same shape as finest system");
 		final List<SparseMatrix> reversedListOfSystems = new ArrayList<>();
 		reversedListOfSystems.add(mat);
 		//PlotWindow.addPlot(new MatrixPlot(finest_system, "finsys"));
-		for (int i = 1; i <= maxLevel(); i++)
+		for (int i = 1; i <= level; i++)
 		{
 			final SparseMatrix coarser =
-				new SparseMatrix(getProlongationMatrix(maxLevel() - i)
+				new SparseMatrix(getProlongationMatrix(level - i)
 					                 .tmMul(reversedListOfSystems.get(i - 1))
-					                 .mmMul(getProlongationMatrix(maxLevel() - i)));
+					                 .mmMul(getProlongationMatrix(level - i)));
 			reversedListOfSystems.add(coarser);
 		}
 		final List<SparseMatrix> AMGSystems = new ArrayList<>();
-		for (int i = maxLevel(); i >= 0; i--)
+		for (int i = level; i >= 0; i--)
 			AMGSystems.add(reversedListOfSystems.get(i));
 		final List<Smoother> smoothers = new ArrayList<>();
-		for (int l = 1; l <= maxLevel(); l++)
+		for (int l = 1; l <= level; l++)
 			smoothers.add(levelToSmoother.apply(l, AMGSystems.get(l)));
 		
 		return new MGPreconditionerInterface<CSpace, CT, FT, ST, valueT, gradientT, hessianT>()
@@ -278,13 +431,13 @@ public interface MGPreconditionerInterface<CSpace extends AcceptsMatrixBoundaryV
 			@Override
 			public int maxLevel()
 			{
-				return me.maxLevel();
+				return level;
 			}
 			
 			@Override
 			public boolean isVerbose()
 			{
-				return false;
+				return isVerbose;
 			}
 			
 			@Override
@@ -295,7 +448,7 @@ public interface MGPreconditionerInterface<CSpace extends AcceptsMatrixBoundaryV
 			@Override
 			public int getCycles()
 			{
-				return 3;
+				return cycles;
 			}
 		};
 	}

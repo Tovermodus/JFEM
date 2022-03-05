@@ -8,6 +8,7 @@ import io.vavr.Tuple2;
 
 import java.util.*;
 import java.util.function.Function;
+import java.util.function.Predicate;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
@@ -127,6 +128,16 @@ public class BlockSparseMatrix
 		                              .collect(new MapCollector<>()));
 	}
 	
+	public BlockSparseMatrix(final BlockSparseMatrix s, final Predicate<IntCoordinates> blockFilter)
+	{
+		this(s.getBlocks()
+		      .entrySet()
+		      .stream()
+		      .filter(e -> blockFilter.test(e.getKey()))
+		      .map(e -> new Tuple2<>(e.getKey(), e.getValue()))
+		      .collect(new MapCollector<>()), s.shape);
+	}
+	
 	public BlockSparseMatrix(final Matrix s, final int nBlocksPerDir)
 	{
 		this(s, generateEquiDist(nBlocksPerDir, s.getRows()));
@@ -178,6 +189,35 @@ public class BlockSparseMatrix
 			                       .sub(blockStart));
 		}
 		blocks = ImmutableMap.copyOf(mutableBlocks);
+	}
+	
+	public BlockDenseMatrix getInvertedDiagonalMatrix()
+	{
+		Stream<Map.Entry<IntCoordinates, SparseMatrix>> str = blocks.entrySet()
+		                                                            .stream();
+		if (PerformanceArguments.getInstance().parallelizeThreads)
+			str = str.parallel();
+		final BlockDenseMatrix ret
+			= new BlockDenseMatrix(str.filter(e -> e.getKey()
+			                                        .get(0) == e.getKey()
+			                                                    .get(1))
+			                          .map(e ->
+			                               {
+				                               try
+				                               {
+					                               return new Tuple2<>(e.getKey(),
+					                                                   e.getValue()
+					                                                    .inverse());
+				                               } catch (final Exception exc)
+				                               {
+					                               return new Tuple2<>(e.getKey(),
+					                                                   DenseMatrix.identity(
+						                                                   e.getValue()
+						                                                    .getCols()));
+				                               }
+			                               })
+			                          .collect(new MapCollector<>()), this.shape);
+		return ret;
 	}
 	
 	private void checkIfBlockFits(final IntCoordinates k, final SparseMatrix v)

@@ -69,9 +69,6 @@ public interface Smoother
 				final Vector initial = rhsToInitial.apply(vector);
 				final Vector defect = vector.sub(op.mvMul(initial));
 				final Vector sol = smooth(op, defect, vector.mul(0));
-				System.out.println("r" + op.mvMul(initial.add(sol))
-				                           .sub(vector)
-				                           .euclidianNorm());
 				return initial.add(sol);
 			}
 			

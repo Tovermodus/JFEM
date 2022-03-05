@@ -68,8 +68,13 @@ public class PlotWindow
 	
 	public static void addPlot(final Plot plot)
 	{
-		if (getInstance().plots.size() == 0) getInstance().d.setPlot(plot);
-		getInstance().plots.add(plot);
+		getInstance().addPlotPrivate(plot);
+	}
+	
+	private void addPlotPrivate(final Plot plot)
+	{
+		if (plots.size() == 0) d.setPlot(plot);
+		plots.add(plot);
 	}
 	
 	@Override
@@ -107,6 +112,16 @@ public class PlotWindow
 		if (e.getKeyCode() == KeyEvent.VK_S) d.isChecked = !d.isChecked;
 		if (e.getKeyCode() == KeyEvent.VK_RIGHT) newValue++;
 		if (e.getKeyCode() == KeyEvent.VK_LEFT) newValue--;
+		if (e.getKeyCode() == KeyEvent.VK_C)
+		{
+			final PlotWindow p = new PlotWindow();
+			p.addPlotPrivate(d.currentPlot);
+		}
+		if (e.getKeyCode() == KeyEvent.VK_K)
+		{
+			setVisible(false);
+			d.running = false;
+		}
 		if (newValue < 0) newValue = 99;
 		if (newValue > 99) newValue = 0;
 		if (plots.size() != 0) currentPlot = currentPlot % plots.size();

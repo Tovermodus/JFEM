@@ -1,5 +1,7 @@
 package linalg;
 
+import multigrid.BlockGaussseidelSmoother;
+import multigrid.GaussSeidelSmoother;
 import org.junit.Test;
 
 import java.util.HashMap;
@@ -114,13 +116,18 @@ public class BlockSparseMatrixTest
 		blocks.put(new IntCoordinates(75, 75), new SparseMatrix(25, 25));
 		blocks.put(new IntCoordinates(0, 50), new SparseMatrix(50, 25));
 		blocks.put(new IntCoordinates(75, 50), new SparseMatrix(25, 25));
+		blocks.put(new IntCoordinates(0, 75), new SparseMatrix(50, 25));
 		final Random generator = new Random(3141);
-		for (final SparseMatrix s : blocks.values())
-		{
-			for (int i = 0; i < s.getRows(); i++)
-				for (int j = 0; j < s.getCols(); j++)
-					s.add(generator.nextDouble(), i, j);
-		}
+		blocks.forEach((intCoordinates, s) ->
+		               {
+			               for (int i = 0; i < s.getRows(); i++)
+				               for (int j = 0; j < s.getCols(); j++)
+				               {
+					               if (i == j && intCoordinates.get(0) == intCoordinates.get(1))
+						               s.add(generator.nextDouble() * 100, i, i);
+					               s.add(generator.nextDouble(), i, j);
+				               }
+		               });
 		return new BlockSparseMatrix(blocks, 100, 100);
 	}
 	
@@ -444,6 +451,54 @@ public class BlockSparseMatrixTest
 		assertEquals(createLargeMatrixNotFull().mvMul(large),
 		             createLargeMatrixNotFull().toSparse()
 		                                       .mvMul(large));
+	}
+	
+	@Test
+	public void testBlockGaussSeidel()
+	{
+		final BlockSparseMatrix rand = createMediumMatrix2();
+		final BlockSparseMatrix m1 = new BlockSparseMatrix(rand.add(rand.transpose()), rand.getBlockStarts());
+		final BlockSparseMatrix m2 = new BlockSparseMatrix(rand.add(rand.transpose()), 28);
+		final BlockSparseMatrix m3 = new BlockSparseMatrix(rand.add(rand.transpose()), 100);
+		final DenseVector medium = m2.getRow(3);
+		final BlockGaussseidelSmoother gs1 = new BlockGaussseidelSmoother(m1, 1);
+		final BlockGaussseidelSmoother gs2 = new BlockGaussseidelSmoother(m2, 3);
+		final BlockGaussseidelSmoother gs3 = new BlockGaussseidelSmoother(m3, 2);
+		final GaussSeidelSmoother gss3 = new GaussSeidelSmoother(2, m3.toSparse());
+		DenseVector iterate1 = new DenseVector(100);
+		DenseVector iterate2 = new DenseVector(100);
+		DenseVector iterate32 = new DenseVector(100);
+		DenseVector iterate3 = new DenseVector(100);
+		int iterations = 0;
+		while (m1.mvMul(iterate1)
+		         .sub(medium)
+		         .euclidianNorm() > 1e-8)
+		{
+			iterate1 = new DenseVector(gs1.smooth(m1, medium, iterate1));
+			iterations++;
+		}
+		assertTrue(iterations < 100);
+		iterations = 0;
+		while (m2.mvMul(iterate2)
+		         .sub(medium)
+		         .euclidianNorm() > 1e-8)
+		{
+			iterate2 = new DenseVector(gs2.smooth(m2, medium, iterate2));
+			iterations++;
+		}
+		assertTrue(iterations < 100);
+		iterations = 0;
+		while (m3.mvMul(iterate3)
+		         .sub(medium)
+		         .euclidianNorm() > 1e-8)
+		{
+			iterate32 = new DenseVector(gss3.smooth(m3, medium, iterate32));
+			iterate3 = new DenseVector(gs3.smooth(m3, medium, iterate3));
+			assertTrue(iterate32.sub(iterate3)
+			                    .euclidianNorm() < 1e-10);
+			iterations++;
+		}
+		assertTrue(iterations < 100);
 	}
 	
 	@Test

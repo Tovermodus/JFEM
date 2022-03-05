@@ -70,6 +70,8 @@ public abstract class MGPreconditionerSpace<CSpace extends AcceptsMatrixBoundary
 			                                                fineFunction.getGlobalIndex(),
 			                                                coarseFunction.getGlobalIndex());
 		                         });
+		//System.out.println(prolongationMatrix.mul(64));
+		//PlotWindow.addPlot(new MatrixPlot(prolongationMatrix));
 		prolongationMatrices.add(prolongationMatrix);
 		final SparseMvMul prolong = new SparseMvMul(prolongationMatrix);
 		
@@ -91,8 +93,8 @@ public abstract class MGPreconditionerSpace<CSpace extends AcceptsMatrixBoundary
 			public Vector mvMul(final Vector vector)
 			{
 				MutableVector v = new DenseVector(vector);
-				applyZeroBoundaryConditions(coarse, v);
 				v = prolongationMatrix.mvMul(v);
+				applyZeroBoundaryConditions(fine, v);
 				return v;
 			}
 			
@@ -158,5 +160,25 @@ public abstract class MGPreconditionerSpace<CSpace extends AcceptsMatrixBoundary
 	public int getCycles()
 	{
 		return cycles;
+	}
+	
+	Vector mvMulW(final Vector vector)
+	{
+		final MutableVector initial = new DenseVector(vector.getLength());
+		getFinestSpace().copyBoundaryValues(vector, initial);
+		final Vector defect = vector.sub(getFinestSystem().mvMul(initial));
+		Vector iterate = fullVCycleCorrection(defect);
+		if (isVerbose())
+			System.out.println("MG after FullVCycle " + getFinestSystem().mvMul(initial.add(iterate))
+			                                                             .sub(vector)
+			                                                             .euclidianNorm() + " FROM " + defect.euclidianNorm());
+		for (int i = 0; i < getCycles(); i++)
+			iterate = wCycle(iterate, defect);
+		
+		if (isVerbose())
+			System.out.println("MG after Second VCycle " + getFinestSystem().mvMul(initial.add(iterate))
+			                                                                .sub(vector)
+			                                                                .euclidianNorm() + " FROM " + defect.euclidianNorm());
+		return initial.add(iterate);
 	}
 }

@@ -32,7 +32,7 @@ public class LaplaceMG
 			CoordinateVector,
 			CoordinateMatrix>
 			mg = new MGPreconditionerSpace<>(refinements,
-			                                 1)
+			                                 2)
 		{
 			@Override
 			public List<ContinuousTPFESpace> createSpaces(final int refinements)
@@ -43,7 +43,7 @@ public class LaplaceMG
 				{
 					ret.add(new ContinuousTPFESpace(CoordinateVector.fromValues(-1, -1),
 					                                CoordinateVector.fromValues(1, 1),
-					                                new IntCoordinates(3, 3).mul(mul)));
+					                                new IntCoordinates(2, 2).mul(mul)));
 					mul *= 2;
 				}
 				return ret;

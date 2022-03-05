@@ -1,5 +1,6 @@
 package linalg;
 
+import basic.MetricWindow;
 import scala.Function2;
 
 public class RichardsonSchur
@@ -19,6 +20,9 @@ public class RichardsonSchur
 	{
 		return (A, b) ->
 		{
+			final IterativeSolverConvergenceMetric it = new IterativeSolverConvergenceMetric(1e-7);
+			MetricWindow.getInstance()
+			            .setMetric("schurrich", it);
 			Vector iterate = b.mul(0);
 			Vector residual = b.sub(A.mvMul(iterate));
 			while (residual.euclidianNorm() > 1e-7)
@@ -27,6 +31,7 @@ public class RichardsonSchur
 				residual = b.sub(A.mvMul(iterate));
 				System.out.println();
 				System.out.println();
+				it.publishIterate(residual.euclidianNorm());
 				System.out.println("SCHURRES     " + residual.euclidianNorm());
 				System.out.println();
 				System.out.println();

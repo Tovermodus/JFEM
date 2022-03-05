@@ -3,6 +3,7 @@ package linalg;
 import basic.Plot;
 
 import java.awt.*;
+import java.util.TreeMap;
 
 public class MatrixPlot
 	extends Plot
@@ -42,8 +43,9 @@ public class MatrixPlot
 			           75 - pixelHeight / 2,
 			           width - 150,
 			           height - 150);
-			for (final var v : m.getCoordinateEntryList()
-			                    .entrySet())
+			final TreeMap<IntCoordinates, Double> sortedEntries = new TreeMap<>(m.getCoordinateEntryList());
+			for (final var v : sortedEntries
+				.entrySet())
 			{
 				drawSinglePoint(g, width, height, v.getValue(), v.getKey());
 			}
@@ -90,7 +92,7 @@ public class MatrixPlot
 			green = (int) (logval / maxlog * 255);
 			red = 0;
 		}
-		final int blue = 255 - red;
+		final int blue = 255 - red - green;
 		final Color c = new Color(red, green, blue);
 		final int x = (int) ((1.0 * coords.get(1) / m.getCols()) * (width - 150) + 75 - pixelWidth / 2);
 		final int y = (int) ((1.0 * coords.get(0) / m.getRows()) * (height - 150) - pixelHeight / 2) + 75;

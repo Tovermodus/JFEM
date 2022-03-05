@@ -30,6 +30,7 @@ public class RichardsonSmoother
 	public Vector smooth(final VectorMultiplyable operator, final Vector rhs, Vector iterate,
 	                     final boolean verbose, final String prefix)
 	{
+		
 		for (int i = 0; i < runs; i++)
 		{
 			Vector residual = rhs.sub(operator.mvMul(iterate));
