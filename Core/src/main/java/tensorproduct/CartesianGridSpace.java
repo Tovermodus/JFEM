@@ -24,7 +24,7 @@ public abstract class CartesianGridSpace<ST extends ShapeFunction<TPCell, TPFace
 	valueT, gradientT, hessianT>
 	implements AcceptsMatrixBoundaryValues<TPCell, TPFace, ST, valueT, gradientT, hessianT>, Assembleable
 {
-	protected final CartesianGrid grid;
+	public final CartesianGrid grid;
 	private final HashMultimap<TPCell, ST> supportOnCell;
 	private final HashMultimap<TPFace, ST> supportOnFace;
 	protected Set<ST> shapeFunctions;
