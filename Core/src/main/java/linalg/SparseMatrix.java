@@ -535,25 +535,6 @@ public class SparseMatrix
 //		return ret;
 //	}
 	
-	static SparseMatrix BABTMul(final DenseMatrix A, final SparseMatrix B)
-	{
-		final SparseMatrix ret = new SparseMatrix(B.getRows(), B.getRows());
-		for (int i = 0; i < B.sparseEntries; i++)
-		{
-			final int x = B.sparseXs[i];
-			final int y = B.sparseYs[i];
-			final double val = B.sparseValues[i];
-			for (int j = 0; j < B.sparseEntries; j++)
-			{
-				final int y2 = B.sparseXs[i];
-				final int x2 = B.sparseYs[i];
-				final double val2 = B.sparseValues[i];
-				ret.add(val * val2 * A.at(x, y2), y, x2);
-			}
-		}
-		return ret;
-	}
-	
 	public SparseMatrix mmMul(final SparseMatrix matrix)
 	{
 		if (PerformanceArguments.getInstance().executeChecks)

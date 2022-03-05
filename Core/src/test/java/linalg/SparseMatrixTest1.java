@@ -263,29 +263,4 @@ public class SparseMatrixTest1
 		assertEquals(spspresult, sparse.mmMul(sparseToDense));
 		System.out.println(s.elapsed());
 	}
-	
-	@Test
-	public void testABATMul()
-	{
-		final int n = 100;
-		final DenseMatrix dense = new DenseMatrix(n, n);
-		final SparseMatrix sparse = new SparseMatrix(n, n);
-		final Random generator = new Random(3145);
-		for (int i = 0; i < n; i++)
-		{
-			for (int j = 0; j < 50; j++)
-				sparse.add(generator.nextDouble(), i, generator.nextInt(n));
-			for (int j = 0; j < n; j++)
-				dense.add(generator.nextDouble(), i, j);
-		}
-		final DenseMatrix sparseToDense = new DenseMatrix(sparse);
-		Stopwatch s = Stopwatch.createStarted();
-		final Matrix s1 = sparse.mmMul(dense)
-		                        .mtMul(sparse);
-		System.out.println(s.elapsed());
-		s = Stopwatch.createStarted();
-		final SparseMatrix s2 = SparseMatrix.BABTMul(dense, sparse);
-		System.out.println(s.elapsed());
-		assertEquals(s1, s2);
-	}
 }
