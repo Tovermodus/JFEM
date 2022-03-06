@@ -71,7 +71,7 @@ public class MaxwellTest
 			                       .getRows() + "×" + grid.getSystemMatrix()
 			                                              .getCols());
 		final IterativeSolver i = new IterativeSolver(false);
-		i.showProgress = true;
+		i.showProgress = false;
 		final Vector solution1 = i.solveGMRES(new BlockSparseMatrix(grid.getSystemMatrix(), 5), grid.getRhs(),
 		                                      1e-6);
 		System.out.println("solved");

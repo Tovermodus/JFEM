@@ -41,7 +41,7 @@ public class CartesianUpFrontSchwarz<ST extends ShapeFunction<TPCell, TPFace, ?,
 			final HashSet<TPCell> patch = new HashSet<>();
 			for (int i = -overlap; i < cellsPerPartition.get(0) + overlap; i++)
 			{
-				for (int j = -overlap; j < cellsPerPartition.get(0) + overlap; j++)
+				for (int j = -overlap; j < cellsPerPartition.get(1) + overlap; j++)
 				{
 					final IntCoordinates cellCoords =
 						new IntCoordinates(partition.get(0) * cellsPerPartition.get(0) + i,

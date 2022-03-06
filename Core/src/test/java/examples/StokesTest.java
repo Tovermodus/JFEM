@@ -143,7 +143,7 @@ public class StokesTest
 			                                              .getCols());
 		grid.setVelocityBoundaryValues(StokesReferenceSolution.vectorBoundaryValues());
 		final IterativeSolver i = new IterativeSolver();
-		i.showProgress = true;
+		i.showProgress = false;
 		final Vector solution1 = i.solveGMRES(grid.getSystemMatrix(), grid.getRhs(), 1e-10);
 		System.out.println("solved");
 		System.out.println(grid.getSystemMatrix()

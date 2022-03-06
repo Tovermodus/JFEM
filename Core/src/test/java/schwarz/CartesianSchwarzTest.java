@@ -58,7 +58,7 @@ public class CartesianSchwarzTest
 	@Test
 	public void testPatches2()
 	{
-		final IntCoordinates cells = new IntCoordinates(44, 99);
+		final IntCoordinates cells = new IntCoordinates(24, 27);
 		final TaylorHoodSpace space = new TaylorHoodSpace(CoordinateVector.fromValues(0, 0),
 		                                                  CoordinateVector.fromValues(1, 1),
 		                                                  cells);
