@@ -8,17 +8,27 @@ import org.jetbrains.annotations.NotNull;
 public class MultiplicativeSubspaceCorrection<OT extends VectorMultiplyable>
 	implements SubspaceCorrection<OT>
 {
-	private final double omega;
-	
-	public MultiplicativeSubspaceCorrection(final double omega)
-	{
-		this.omega = omega;
-	}
-	
 	@Override
 	public Vector solve(final AbstractSchwarz<?, ?, OT> schwarz, final Vector globalRhs)
 	{
-		throw new UnsupportedOperationException("not implemented yet");
+		Vector iterate = schwarz.getGlobalVector(0, schwarz.solveLocalSystem(0,
+		                                                                     schwarz.getLocalVector(0,
+		                                                                                            globalRhs)));
+		for (int i = 1; i < schwarz.getPatchCount(); i++)
+		{
+			
+			final Vector globalResidual = globalRhs.sub(schwarz.getGlobalOperator()
+			                                                   .mvMul(iterate));
+			final Vector localRes = schwarz.getLocalVector(i,
+			                                               globalResidual);
+			final Vector localSol = schwarz.solveLocalSystem(i,
+			                                                 localRes);
+			final Vector globalSolComponent
+				= schwarz.getGlobalVector(i,
+				                          localSol);
+			iterate = iterate.add(globalSolComponent);
+		}
+		return iterate;
 	}
 	
 	@Override
@@ -39,7 +49,7 @@ public class MultiplicativeSubspaceCorrection<OT extends VectorMultiplyable>
 			final Vector globalSolComponent
 				= schwarz.getGlobalVector(i,
 				                          localSol);
-			iterate = iterate.add(globalSolComponent.mul(omega));
+			iterate = iterate.add(globalSolComponent);
 		}
 		return iterate;
 	}

@@ -1,8 +1,8 @@
 import basic.*;
 import linalg.*;
-import schwarz.AdditiveSubspaceCorrection;
 import schwarz.CGSolver;
 import schwarz.CartesianUpFrontSchwarz;
+import schwarz.MultiplicativeSubspaceCorrection;
 import tensorproduct.*;
 import tensorproduct.geometry.TPCell;
 
@@ -55,7 +55,7 @@ public class LaplaceSchwarz
 			                              grid,
 			                              new IntCoordinates(4, 4),
 			                              3,
-			                              new AdditiveSubspaceCorrection<>(1, grid),
+			                              new MultiplicativeSubspaceCorrection<>(),
 			                              new CGSolver(1e-10));
 		Vector iterate = d.mul(0);
 //		for (int i = 0; i < 100; i++)
@@ -68,7 +68,7 @@ public class LaplaceSchwarz
 //		}
 		final IterativeSolver it = new IterativeSolver();
 		it.showProgress = true;
-		iterate = it.solvePCG(s, schwarz, d, 1e-7);
+		iterate = it.solvePGMRES(s, schwarz, d, 1e-7);
 		
 		System.out.println(it.iterations);
 		
