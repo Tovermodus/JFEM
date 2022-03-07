@@ -7,30 +7,69 @@ import linalg.VectorMultiplyable;
 
 import java.util.Collection;
 
-public interface AbstractSchwarz<CT extends Cell<CT, FT>, FT extends Face<CT, FT>, OT extends VectorMultiplyable>
+public abstract class AbstractSchwarz<CT extends Cell<CT, FT>, FT extends Face<CT, FT>, OT extends VectorMultiplyable>
+	implements VectorMultiplyable
 {
+	final private SubspaceCorrection<OT> subspaceCorrection;
+	final private SystemSolver<OT> solver;
 	
-	Collection<CT> getCellPatch(int patch);
+	protected AbstractSchwarz(final SubspaceCorrection<OT> subspaceCorrection, final SystemSolver<OT> solver)
+	{
+		this.subspaceCorrection = subspaceCorrection;
+		this.solver = solver;
+	}
 	
-	OT getGlobalOperator();
+	public abstract Collection<CT> getCellPatch(int patch);
 	
-	OT getRestrictionOperator(int patch);
+	public abstract OT getGlobalOperator();
 	
-	OT getLocalOperator(int patch);
+	public abstract OT getRestrictionOperator(int patch);
 	
-	default Vector getLocalVector(final int patch, final Vector globalVector)
+	public abstract OT getLocalOperator(int patch);
+	
+	public Vector getLocalVector(final int patch, final Vector globalVector)
 	{
 		return getRestrictionOperator(patch).mvMul(globalVector);
 	}
 	
-	default Vector getGlobalVector(final int patch, final Vector globalVector)
+	public Vector getGlobalVector(final int patch, final Vector globalVector)
 	{
 		return getRestrictionOperator(patch).tvMul(globalVector);
 	}
 	
-	int getPatchCount();
+	public abstract int getPatchCount();
 	
-	SubspaceCorrection<OT> getSubspaceCorrection();
+	public SubspaceCorrection<OT> getSubspaceCorrection()
+	{
+		return subspaceCorrection;
+	}
 	
-	Vector solveLocalSystem(int patch, Vector localVector);
+	public Vector solveLocalSystem(final int patch, final Vector localVector)
+	{
+		return solver.solve(getLocalOperator(patch), localVector);
+	}
+	
+	@Override
+	public int getVectorSize()
+	{
+		return getGlobalOperator().getVectorSize();
+	}
+	
+	@Override
+	public int getTVectorSize()
+	{
+		return getGlobalOperator().getTVectorSize();
+	}
+	
+	@Override
+	public Vector mvMul(final Vector vector)
+	{
+		return getSubspaceCorrection().solve(this, vector);
+	}
+	
+	@Override
+	public Vector tvMul(final Vector vector)
+	{
+		throw new IllegalArgumentException("Not implemented");
+	}
 }

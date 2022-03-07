@@ -9,14 +9,16 @@ import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
 public abstract class UpFrontSchwarz<CT extends Cell<CT, FT>, FT extends Face<CT, FT>>
-	implements MatrixSchwarz<CT, FT>
+	extends AbstractSchwarz<CT, FT, Matrix>
 {
-	List<Matrix> restrictionOperators;
+	List<RestrictionMatrix> restrictionOperators;
 	List<Matrix> localOperators;
 	Matrix globalMatrix;
 	
-	public UpFrontSchwarz(final Matrix globalMatrix)
+	public UpFrontSchwarz(final Matrix globalMatrix, final SubspaceCorrection<Matrix> subspaceCorrection,
+	                      final SystemSolver<Matrix> solver)
 	{
+		super(subspaceCorrection, solver);
 		this.globalMatrix = globalMatrix;
 	}
 	
@@ -30,14 +32,13 @@ public abstract class UpFrontSchwarz<CT extends Cell<CT, FT>, FT extends Face<CT
 				         Collectors.toList());
 		localOperators =
 			IntStream.range(0, getPatchCount())
-			         .parallel()
-			         .mapToObj(i -> restrictionOperators.get(i)
-			                                            .mmMul(globalMatrix)
-			                                            .mtMul(restrictionOperators.get(i)))
+			         .mapToObj(i ->
+				                   restrictionOperators.get(i)
+				                                       .selectFrom(globalMatrix))
 			         .collect(Collectors.toList());
 	}
 	
-	public abstract Matrix buildRestrictionMatrix(int patch);
+	public abstract RestrictionMatrix buildRestrictionMatrix(int patch);
 	
 	@Override
 	public Matrix getGlobalOperator()

@@ -3,7 +3,6 @@ package schwarz;
 import basic.ShapeFunction;
 import linalg.IntCoordinates;
 import linalg.Matrix;
-import linalg.SparseMatrix;
 import tensorproduct.CartesianGridSpace;
 import tensorproduct.geometry.TPCell;
 import tensorproduct.geometry.TPFace;
@@ -21,9 +20,10 @@ public class CartesianUpFrontSchwarz<ST extends ShapeFunction<TPCell, TPFace, ?,
 	                               final CartesianGridSpace<ST, ?, ?, ?> space,
 	                               final IntCoordinates partitions,
 	                               final int overlap,
-	                               final SubspaceCorrection<Matrix> subspaceCorrection)
+	                               final SubspaceCorrection<Matrix> subspaceCorrection,
+	                               final SystemSolver<Matrix> solver)
 	{
-		super(globalMatrix);
+		super(globalMatrix, subspaceCorrection, solver);
 		this.space = space;
 		if (space.getDimension() != 2)
 			throw new IllegalArgumentException("Only in 2D");
@@ -77,16 +77,16 @@ public class CartesianUpFrontSchwarz<ST extends ShapeFunction<TPCell, TPFace, ?,
 	}
 	
 	@Override
-	public Matrix buildRestrictionMatrix(final int patch)
+	public RestrictionMatrix buildRestrictionMatrix(final int patch)
 	{
 		final Collection<TPCell> patchCells = getCellPatch(patch);
 		final Set<ST> functions = new HashSet<>();
 		for (final TPCell c : patchCells)
 			functions.addAll(space.getCellSupportMapping()
 			                      .get(c));
-		final SparseMatrix s = new SparseMatrix(functions.size(),
-		                                        space.getShapeFunctions()
-		                                             .size());
+		final RestrictionMatrix s = new RestrictionMatrix(functions.size(),
+		                                                  space.getShapeFunctions()
+		                                                       .size());
 		int i = 0;
 		for (final ST f : functions)
 		{

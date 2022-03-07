@@ -18,12 +18,12 @@ import java.util.stream.Collectors;
 public class SparseMatrix
 	implements MutableSolvable, Decomposable, Serializable
 {
-	private final int rows;
-	private final int cols;
-	volatile double[] sparseValues;
-	volatile int[] sparseXs;
-	volatile int[] sparseYs;
-	volatile int sparseEntries;
+	protected final int rows;
+	protected final int cols;
+	volatile protected double[] sparseValues;
+	volatile protected int[] sparseXs;
+	volatile protected int[] sparseYs;
+	volatile protected int sparseEntries;
 	
 	public SparseMatrix(final IntCoordinates rowCols)
 	{
