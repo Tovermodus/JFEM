@@ -55,6 +55,7 @@ public class CartesianUpFrontSchwarz<ST extends ShapeFunction<TPCell, TPFace, ?,
 			}
 			cellPatches.add(patch);
 		}
+		System.out.println("partitioned");
 		build();
 	}
 	

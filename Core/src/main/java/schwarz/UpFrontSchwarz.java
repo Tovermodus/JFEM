@@ -30,12 +30,14 @@ public abstract class UpFrontSchwarz<CT extends Cell<CT, FT>, FT extends Face<CT
 			         .mapToObj(this::buildRestrictionMatrix)
 			         .collect(
 				         Collectors.toList());
+		System.out.println("restrictions");
 		localOperators =
 			IntStream.range(0, getPatchCount())
 			         .mapToObj(i ->
 				                   restrictionOperators.get(i)
 				                                       .selectFrom(globalMatrix))
 			         .collect(Collectors.toList());
+		System.out.println("locals");
 	}
 	
 	public abstract RestrictionMatrix buildRestrictionMatrix(int patch);

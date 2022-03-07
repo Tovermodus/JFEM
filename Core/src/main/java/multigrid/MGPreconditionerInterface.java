@@ -470,12 +470,6 @@ public interface MGPreconditionerInterface<CSpace extends AcceptsMatrixBoundaryV
 		//PlotWindow.addPlot(new MatrixPlot(finest_system, "finsys"));
 		for (int i = 1; i < maxLevel(); i++)
 		{
-			System.out.println(getProlongationMatrix(maxLevel() - i).getTVectorSize() +
-				                   " " + getProlongationMatrix(maxLevel() - i).getVectorSize());
-			System.out.println(reversedListOfSystems.get(i - 1)
-			                                        .getTVectorSize() +
-				                   " " + reversedListOfSystems.get(i - 1)
-				                                              .getVectorSize());
 			final VectorMultiplyable coarser =
 				VectorMultiplyable.transposeConcatenate(getProlongationMatrix(maxLevel() - i),
 				                                        VectorMultiplyable.concatenate(
