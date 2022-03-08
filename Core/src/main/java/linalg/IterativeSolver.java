@@ -18,10 +18,19 @@ public class IterativeSolver
 	public IterativeSolverConvergenceMetric metric;
 	public int iterations = 0;
 	
+	public IterativeSolver(final String metricName)
+	{
+		metric = new IterativeSolverConvergenceMetric(1);
+		gm = new GMRES(true, metric);
+		if (!GraphicsEnvironment.isHeadless())
+			MetricWindow.getInstance()
+			            .setMetric(metricName, metric);
+	}
+	
 	public IterativeSolver()
 	{
 		metric = new IterativeSolverConvergenceMetric(1);
-		gm = new GMRES(showProgress, metric);
+		gm = new GMRES(true, metric);
 		if (!GraphicsEnvironment.isHeadless())
 			MetricWindow.getInstance()
 			            .addMetric(metric);

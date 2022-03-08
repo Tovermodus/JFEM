@@ -15,8 +15,9 @@ public class GMResSolver
 	}
 	
 	@Override
-	public Vector solve(final Matrix system, final Vector rhs)
+	public Vector solve(final Matrix system, final Vector rhs, final int patch)
 	{
+		System.out.println(system.getShape());
 		final IterativeSolver it = new IterativeSolver(true);
 		return it.solveGMRES(system, rhs, tol);
 	}

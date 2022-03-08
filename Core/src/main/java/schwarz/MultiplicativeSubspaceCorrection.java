@@ -3,11 +3,24 @@ package schwarz;
 import linalg.DenseVector;
 import linalg.Vector;
 import linalg.VectorMultiplyable;
+import mixed.TaylorHoodSpace;
 import org.jetbrains.annotations.NotNull;
 
 public class MultiplicativeSubspaceCorrection<OT extends VectorMultiplyable>
 	implements SubspaceCorrection<OT>
 {
+	TaylorHoodSpace space;
+	
+	public MultiplicativeSubspaceCorrection()
+	{
+	
+	}
+	
+	public MultiplicativeSubspaceCorrection(final TaylorHoodSpace space)
+	{
+		this.space = space;
+	}
+	
 	@Override
 	public Vector solve(final AbstractSchwarz<?, ?, OT> schwarz, final Vector globalRhs)
 	{
@@ -37,6 +50,8 @@ public class MultiplicativeSubspaceCorrection<OT extends VectorMultiplyable>
 	                    @NotNull final Vector globalRhs)
 	{
 		Vector iterate = new DenseVector(globalIterate);
+		final var points = space.generatePlotPoints((int) Math.sqrt(space.getShapeFunctions()
+		                                                                 .size()) / 2);
 		for (int i = 0; i < schwarz.getPatchCount(); i++)
 		{
 			final Vector globalResidual = globalRhs.sub(schwarz.getGlobalOperator()
@@ -49,6 +64,15 @@ public class MultiplicativeSubspaceCorrection<OT extends VectorMultiplyable>
 			final Vector globalSolComponent
 				= schwarz.getGlobalVector(i,
 				                          localSol);
+//			if (i % 4 == 0)
+//			{
+//			final MixedTPFESpaceFunction<QkQkFunction> fun =
+//				new MixedTPFESpaceFunction<>(space.getShapeFunctionMap(), iterate);
+//			PlotWindow.addPlotShow(new MixedPlot2D(fun,
+//			                                       points,
+//			                                       (int) Math.sqrt(space.getShapeFunctions()
+//			                                                            .size()) / 2));
+//			}
 			iterate = iterate.add(globalSolComponent);
 		}
 		return iterate;

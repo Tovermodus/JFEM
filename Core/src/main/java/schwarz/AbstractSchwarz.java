@@ -5,8 +5,6 @@ import basic.Face;
 import linalg.Vector;
 import linalg.VectorMultiplyable;
 
-import java.util.Collection;
-
 public abstract class AbstractSchwarz<CT extends Cell<CT, FT>, FT extends Face<CT, FT>, OT extends VectorMultiplyable>
 	implements VectorMultiplyable
 {
@@ -18,8 +16,6 @@ public abstract class AbstractSchwarz<CT extends Cell<CT, FT>, FT extends Face<C
 		this.subspaceCorrection = subspaceCorrection;
 		this.solver = solver;
 	}
-	
-	public abstract Collection<CT> getCellPatch(int patch);
 	
 	public abstract OT getGlobalOperator();
 	
@@ -46,7 +42,7 @@ public abstract class AbstractSchwarz<CT extends Cell<CT, FT>, FT extends Face<C
 	
 	public Vector solveLocalSystem(final int patch, final Vector localVector)
 	{
-		return solver.solve(getLocalOperator(patch), localVector);
+		return solver.solve(getLocalOperator(patch), localVector, patch);
 	}
 	
 	@Override

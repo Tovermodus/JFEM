@@ -15,7 +15,7 @@ public class CGSolver
 	}
 	
 	@Override
-	public Vector solve(final Matrix system, final Vector rhs)
+	public Vector solve(final Matrix system, final Vector rhs, final int patch)
 	{
 		final IterativeSolver it = new IterativeSolver(true);
 		return it.solveCG(system, rhs, tol);

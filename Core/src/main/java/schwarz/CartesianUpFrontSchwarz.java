@@ -59,7 +59,6 @@ public class CartesianUpFrontSchwarz<ST extends ShapeFunction<TPCell, TPFace, ?,
 		build();
 	}
 	
-	@Override
 	public Collection<TPCell> getCellPatch(final int patch)
 	{
 		return cellPatches.get(patch);
@@ -81,7 +80,7 @@ public class CartesianUpFrontSchwarz<ST extends ShapeFunction<TPCell, TPFace, ?,
 	public RestrictionMatrix buildRestrictionMatrix(final int patch)
 	{
 		final Collection<TPCell> patchCells = getCellPatch(patch);
-		final Set<ST> functions = new HashSet<>();
+		final Set<ST> functions = new TreeSet<ST>(Comparator.comparingInt(st -> st.getGlobalIndex()));
 		for (final TPCell c : patchCells)
 			functions.addAll(space.getCellSupportMapping()
 			                      .get(c));

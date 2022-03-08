@@ -71,6 +71,12 @@ public class PlotWindow
 		getInstance().addPlotPrivate(plot);
 	}
 	
+	public static void addPlotShow(final Plot plot)
+	{
+		getInstance().addPlotPrivate(plot);
+		getInstance().d.setPlot(plot);
+	}
+	
 	private void addPlotPrivate(final Plot plot)
 	{
 		if (plots.size() == 0) d.setPlot(plot);

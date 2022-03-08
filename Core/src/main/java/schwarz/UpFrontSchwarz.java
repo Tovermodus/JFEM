@@ -33,6 +33,7 @@ public abstract class UpFrontSchwarz<CT extends Cell<CT, FT>, FT extends Face<CT
 		System.out.println("restrictions");
 		localOperators =
 			IntStream.range(0, getPatchCount())
+			         .parallel()
 			         .mapToObj(i ->
 				                   restrictionOperators.get(i)
 				                                       .selectFrom(globalMatrix))

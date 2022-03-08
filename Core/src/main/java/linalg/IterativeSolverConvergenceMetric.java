@@ -129,7 +129,7 @@ public class IterativeSolverConvergenceMetric
 	{
 		final int nIterates = residuals.size();
 		if (nIterates == 0)
-			return goal;
+			return 1;
 		if (point == drawnPoints - 1)
 			return residuals.get(nIterates - 1);
 		final double val = 100;
