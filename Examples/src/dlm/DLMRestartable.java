@@ -45,7 +45,7 @@ public class DLMRestartable
 		                                                   CoordinateVector.fromValues(2, 1),
 		                                                   new IntCoordinates(8, 4),
 		                                                   1,
-		                                                   1,
+		                                                   3,
 		                                                   dt,
 		                                                   0.01,
 		                                                   5);

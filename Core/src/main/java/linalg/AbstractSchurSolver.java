@@ -1,8 +1,9 @@
 package linalg;
 
+import it.unimi.dsi.fastutil.ints.Int2ObjectArrayMap;
+import it.unimi.dsi.fastutil.ints.Int2ObjectMap;
 import scala.Function2;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
@@ -11,7 +12,7 @@ public abstract class AbstractSchurSolver<T extends VectorMultiplyable>
 	implements VectorMultiplyable
 {
 	BlockSparseMatrix blockMatrix;
-	final ArrayList<DenseMatrix> diagonalInverses;
+	final Int2ObjectMap<DenseMatrix> diagonalInverses;
 	final int[] blockStarts;
 	final int[] blockEnds;
 	final int[] blockSizes;
@@ -19,22 +20,30 @@ public abstract class AbstractSchurSolver<T extends VectorMultiplyable>
 	public AbstractSchurSolver(final BlockSparseMatrix blockMatrix)
 	{
 		this.blockMatrix = blockMatrix;
-		diagonalInverses = new ArrayList<>();
+		diagonalInverses = new Int2ObjectArrayMap<>();
 		blockStarts = blockMatrix.getBlockStarts();
 		blockEnds = blockMatrix.getBlockEnds();
 		blockSizes = blockMatrix.getBlockSizes();
-		for (int i = 1; i < blockStarts.length; i++)
-		{
-			System.out.println("inverting diagonal schur block " + i);
-			diagonalInverses.add(getDiagonalBlock(i - 1)
-				                     .inverse());
-			if (diagonalInverses.get(i - 1) == null)
-				throw new IllegalArgumentException("matrix does not contain necessary diagonal block");
-			if (getTopBlock(i - 1) == null)
-				throw new IllegalArgumentException("matrix does not contain necessary top block");
-			if (getLeftBlock(i - 1) == null)
-				throw new IllegalArgumentException("matrix does not contain necessary left block");
-		}
+		IntStream.range(1, blockStarts.length)
+		         .parallel()
+		         .forEach(i ->
+		                  {
+			                  System.out.println("inverting diagonal schur block " + i);
+			                  final DenseMatrix inv = getDiagonalBlock(i - 1).inverse();
+			                  synchronized (this)
+			                  {
+				                  diagonalInverses.put(i - 1, inv);
+				                  if (diagonalInverses.get(i - 1) == null)
+					                  throw new IllegalArgumentException(
+						                  "matrix does not contain necessary diagonal block");
+				                  if (getTopBlock(i - 1) == null)
+					                  throw new IllegalArgumentException(
+						                  "matrix does not contain necessary top block");
+				                  if (getLeftBlock(i - 1) == null)
+					                  throw new IllegalArgumentException(
+						                  "matrix does not contain necessary left block");
+			                  }
+		                  });
 		System.out.println("abstract schur built");
 	}
 	

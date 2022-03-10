@@ -50,8 +50,6 @@ public class MultiplicativeSubspaceCorrection<OT extends VectorMultiplyable>
 	                    @NotNull final Vector globalRhs)
 	{
 		Vector iterate = new DenseVector(globalIterate);
-		final var points = space.generatePlotPoints((int) Math.sqrt(space.getShapeFunctions()
-		                                                                 .size()) / 2);
 		for (int i = 0; i < schwarz.getPatchCount(); i++)
 		{
 			final Vector globalResidual = globalRhs.sub(schwarz.getGlobalOperator()

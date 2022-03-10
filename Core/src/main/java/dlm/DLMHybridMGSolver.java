@@ -8,6 +8,9 @@ import mixed.*;
 import multigrid.MGPreconditionerSpace;
 import multigrid.Smoother;
 import org.jetbrains.annotations.NotNull;
+import schwarz.ColoredCartesianSchwarz;
+import schwarz.DirectSolver;
+import schwarz.SchwarzSmoother;
 import tensorproduct.geometry.TPCell;
 import tensorproduct.geometry.TPFace;
 
@@ -22,7 +25,7 @@ public class DLMHybridMGSolver
 	public double smootherOmega = 1;
 	public int smootherRuns = 1;
 	
-	RichardsonSchur schur;
+	PreconditionedIterativeImplicitSchur schur;
 	MultiGridFluid fluid;
 	final List<Particle> particles;
 	
@@ -260,7 +263,19 @@ public class DLMHybridMGSolver
 //					ret.add(new RichardsonSmoother(0.1,
 //					                               10,
 //					                               pin));
-					ret.add(new SIMPLEAMG(3, 0.02, getSpace(i).getVelocitySize(), this));
+					
+					final IntCoordinates partitions =
+						new IntCoordinates((int) (fluid.coarsestCells.get(0) * Math.pow(2,
+						                                                                i - 2)),
+						                   (int) (fluid.coarsestCells.get(1) * Math.pow(2,
+						                                                                i - 2)));
+					System.out.println(partitions);
+					final ColoredCartesianSchwarz<QkQkFunction> schwarz
+						= new ColoredCartesianSchwarz<>((SparseMatrix) getSystem(i),
+						                                getSpace(i),
+						                                partitions, 3,
+						                                new DirectSolver());
+					ret.add(new SchwarzSmoother(3, schwarz));
 				}
 				verbose = true;
 				return ret;
@@ -285,8 +300,8 @@ public class DLMHybridMGSolver
 	                       final List<ParticleSystem> particleSystems, final double dt, final double t)
 	{
 		if (schur == null)
-			schur = new RichardsonSchur(systemMatrix,
-			                            null);
+			schur = new PreconditionedIterativeImplicitSchur(systemMatrix,
+			                                                 null);
 		else
 			schur.resetOffDiagonals(systemMatrix);
 		final MGPreconditionerSpace<TaylorHoodSpace, TPCell, TPFace, QkQkFunction, MixedValue, MixedGradient,

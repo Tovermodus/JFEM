@@ -6,9 +6,8 @@ import linalg.*;
 import mixed.*;
 import multigrid.MGPreconditionerSpace;
 import multigrid.Smoother;
-import schwarz.CartesianUpFrontSchwarz;
+import schwarz.ColoredCartesianSchwarz;
 import schwarz.DirectSolver;
-import schwarz.MultiplicativeSubspaceCorrection;
 import schwarz.SchwarzSmoother;
 import tensorproduct.ContinuousTPShapeFunction;
 import tensorproduct.ContinuousTPVectorFunction;
@@ -24,7 +23,7 @@ public class StokesMGSchwarz
 {
 	public static void main(final String[] args)
 	{
-		final int refinements = 3;
+		final int refinements = 4;
 		final TPVectorCellIntegral<ContinuousTPVectorFunction> gradGrad =
 			new TPVectorCellIntegral<>(ScalarFunction.constantFunction(StokesReferenceSolution.reynolds),
 			                           TPVectorCellIntegral.GRAD_GRAD);
@@ -138,20 +137,24 @@ public class StokesMGSchwarz
 				for (int i = 1; i < spaces.size(); i++)
 				{
 					final IntCoordinates partitions
-						= new IntCoordinates(2, 2).mul(Math.max(1, (int) Math.pow(2, i)));
+						= new IntCoordinates(2, 2).mul(Math.max(1, (int) Math.pow(2, i - 1)));
 					System.out.println(partitions);
 //					final VankaSchwarz schwarz =
 //						new VankaSchwarz((SparseMatrix) getSystem(i),
 //						                 getSpace(i),
 //						                 new MultiplicativeSubspaceCorrection<>(getSpace(i)),
 //						                 new DirectSolver());
-					
-					final CartesianUpFrontSchwarz<QkQkFunction> schwarz
-						= new CartesianUpFrontSchwarz<>((SparseMatrix) getSystem(i),
+
+//					final CartesianUpFrontSchwarz<QkQkFunction> schwarz
+//						= new CartesianUpFrontSchwarz<>((SparseMatrix) getSystem(i),
+//						                                getSpace(i),
+//						                                partitions, 2,
+//						                                new MultiplicativeSubspaceCorrection<>(),
+//						                                new DirectSolver());
+					final ColoredCartesianSchwarz<QkQkFunction> schwarz
+						= new ColoredCartesianSchwarz<>((SparseMatrix) getSystem(i),
 						                                getSpace(i),
 						                                partitions, 2,
-						                                new MultiplicativeSubspaceCorrection<>(
-							                                getSpace(i)),
 						                                new DirectSolver());
 					ret.add(new SchwarzSmoother(2, schwarz));
 				}
@@ -188,12 +191,17 @@ public class StokesMGSchwarz
 //			                 mg.getFinestSpace(),
 //			                 new MultiplicativeSubspaceCorrection<>(mg.getFinestSpace()),
 //			                 new DirectSolver());
-		final CartesianUpFrontSchwarz<QkQkFunction> schwarz
-			= new CartesianUpFrontSchwarz<>((SparseMatrix) mg.getFinestSystem(),
-			                                mg.getFinestSpace(),
-			                                new IntCoordinates(8, 8), 1,
-			                                new MultiplicativeSubspaceCorrection<>(mg.getFinestSpace()),
-			                                new DirectSolver());
+//		final ColoredCartesianSchwarz<QkQkFunction> schwarz
+//			= new ColoredCartesianSchwarz<>((SparseMatrix) mg.getFinestSystem(),
+//			                                mg.getFinestSpace(),
+//			                                new IntCoordinates(8, 8), 2,
+//			                                new DirectSolver());
+//		final CartesianUpFrontSchwarz<QkQkFunction> schwarz
+//			= new CartesianUpFrontSchwarz<>((SparseMatrix) mg.getFinestSystem(),
+//			                                mg.getFinestSpace(),
+//			                                new IntCoordinates(8, 8), 2,
+//			                                new MultiplicativeSubspaceCorrection<>(),
+//			                                new DirectSolver());
 		final Vector iterate = new DenseVector(mg.finest_rhs.getLength());
 		final double initialres = mg.getFinestSystem()
 		                            .mvMul(iterate)

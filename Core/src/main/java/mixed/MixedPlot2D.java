@@ -1,7 +1,6 @@
 package mixed;
 
-import basic.ScalarFunction;
-import basic.ScalarPlot2D;
+import basic.*;
 import linalg.CoordinateVector;
 
 import java.awt.*;
@@ -12,22 +11,17 @@ import java.util.OptionalDouble;
 public class MixedPlot2D
 	extends ScalarPlot2D
 {
-	final Map<CoordinateVector, CoordinateVector> velocities;
+	Map<CoordinateVector, CoordinateVector> velocities;
 	double maxV;
 	
-	public MixedPlot2D(final MixedFunction function, final List<CoordinateVector> points, final int pointsPerDimension)
+	public MixedPlot2D(final MixedFunction function,
+	                   final List<CoordinateVector> points,
+	                   final int pointsPerDimension)
 	{
 		super(function.hasPressureFunction() ? function.getPressureFunction() :
 		      ScalarFunction.constantFunction(0), points,
 		      pointsPerDimension);
-		if (function.hasVelocityFunction())
-			velocities = function.getVelocityFunction()
-			                     .valuesInPoints(points);
-		else
-			velocities =
-				ScalarFunction.constantFunction(0)
-				              .makeIsotropicVectorFunction()
-				              .valuesInPoints(points);
+		saveVelocities(function, points);
 		final OptionalDouble maxVelocity =
 			velocities.values()
 			          .stream()
@@ -37,11 +31,42 @@ public class MixedPlot2D
 		maxV = maxVelocity.orElse(1);
 	}
 	
-	public MixedPlot2D(final MixedFunction function, final List<CoordinateVector> points, final int pointsPerDimension, final String title)
+	public <CT extends Cell<CT, FT>, FT extends Face<CT, FT>> MixedPlot2D(final MixedFunctionOnCells<CT, FT> function,
+	                                                                      final FESpace<CT, FT, ?> space, final int points)
+	{
+		super(function.hasPressureFunction() ? function.getPressureFunction() :
+		      ScalarFunction.constantFunction(0), space.generatePlotPoints(points),
+		      points);
+		saveVelocities(function, space, points);
+		final OptionalDouble maxVelocity =
+			velocities.values()
+			          .stream()
+			          .parallel()
+			          .mapToDouble(CoordinateVector::euclidianNorm)
+			          .max();
+		maxV = maxVelocity.orElse(1);
+	}
+	
+	public MixedPlot2D(final MixedFunction function,
+	                   final List<CoordinateVector> points,
+	                   final int pointsPerDimension,
+	                   final String title)
 	{
 		super(function.hasPressureFunction() ? function.getPressureFunction() :
 		      ScalarFunction.constantFunction(0), points,
 		      pointsPerDimension, title);
+		saveVelocities(function, points);
+		final OptionalDouble maxVelocity =
+			velocities.values()
+			          .stream()
+			          .parallel()
+			          .mapToDouble(CoordinateVector::euclidianNorm)
+			          .max();
+		maxV = maxVelocity.orElse(1);
+	}
+	
+	public void saveVelocities(final MixedFunction function, final List<CoordinateVector> points)
+	{
 		if (function.hasVelocityFunction())
 			velocities = function.getVelocityFunction()
 			                     .valuesInPoints(points);
@@ -50,13 +75,21 @@ public class MixedPlot2D
 				ScalarFunction.constantFunction(0)
 				              .makeIsotropicVectorFunction()
 				              .valuesInPoints(points);
-		final OptionalDouble maxVelocity =
-			velocities.values()
-			          .stream()
-			          .parallel()
-			          .mapToDouble(CoordinateVector::euclidianNorm)
-			          .max();
-		maxV = maxVelocity.orElse(1);
+	}
+	
+	public <CT extends Cell<CT, FT>, FT extends Face<CT, FT>> void saveVelocities(final MixedFunctionOnCells<CT, FT> function,
+	                                                                              final FESpace<CT, FT, ?> space,
+	                                                                              final int points)
+	{
+		final var poi = space.generatePlotPoints(points);
+		if (function.hasVelocityFunction())
+			velocities = function.getVelocityFunction()
+			                     .valuesInPointsOnCells(poi, space.getCells());
+		else
+			velocities =
+				ScalarFunction.constantFunction(0)
+				              .makeIsotropicVectorFunction()
+				              .valuesInPoints(poi);
 	}
 	
 	@Override
