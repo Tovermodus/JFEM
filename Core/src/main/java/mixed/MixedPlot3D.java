@@ -9,17 +9,21 @@ import java.util.List;
 import java.util.Map;
 import java.util.OptionalDouble;
 
-public class MixedPlot3D extends ScalarPlot3D
+public class MixedPlot3D
+	extends ScalarPlot3D
 {
 	final Map<CoordinateVector, CoordinateVector> velocities;
 	double maxV;
 	double origMaxVal;
 	
-	public MixedPlot3D(final MixedFunction function, final List<CoordinateVector> points, final int pointsPerDimension)
+	public MixedPlot3D(final MixedFunction function,
+	                   final List<CoordinateVector> points,
+	                   final int pointsPerDimension)
 	{
 		super(function.hasPressureFunction() ? function.getPressureFunction() :
 		      ScalarFunction.constantFunction(0), points, pointsPerDimension);
-		if (function.hasVelocityFunction()) velocities = function.getVelocityFunction().valuesInPoints(points);
+		if (function.hasVelocityFunction()) velocities = function.getVelocityFunction()
+		                                                         .valuesInPoints(points);
 		else velocities = ScalarFunction
 			.constantFunction(0)
 			.makeIsotropicVectorFunction()
@@ -35,7 +39,10 @@ public class MixedPlot3D extends ScalarPlot3D
 		maxValue = maxValue + (maxValue - minValue) * 3;
 	}
 	
-	public MixedPlot3D(final Map<CoordinateVector, Double> pressures, final Map<CoordinateVector, CoordinateVector> velocities, final int pointsPerDimension, final String title)
+	public MixedPlot3D(final Map<CoordinateVector, Double> pressures,
+	                   final Map<CoordinateVector, CoordinateVector> velocities,
+	                   final int pointsPerDimension,
+	                   final String title)
 	{
 		super(pressures, pointsPerDimension, title);
 		this.velocities = velocities;
@@ -58,8 +65,10 @@ public class MixedPlot3D extends ScalarPlot3D
 			final int y = (int) (height - ((c.y() - min.y()) / (max.y() - min.y()) * (height - 150) + 75));
 			g.setColor(Color.BLACK);
 			g.fillOval(x - 2, y - 2, 4, 4);
-			final int vx = (int) (velocities.get(c).x() / (maxV) * pixelWidth);
-			final int vy = (int) (velocities.get(c).y() / (maxV) * pixelHeight);
+			final int vx = (int) (velocities.get(c)
+			                                .x() / (maxV) * pixelWidth * 3);
+			final int vy = (int) (velocities.get(c)
+			                                .y() / (maxV) * pixelHeight * 3);
 			g.drawLine(x, y, x + vx, y - vy);
 		}
 	}

@@ -22,32 +22,34 @@ import java.util.stream.IntStream;
 public class DLMHybridMGSolver
 	extends DLMSolver
 {
-	public double smootherOmega = 1;
-	public int smootherRuns = 1;
-	
+	public final int smootherRuns;
+	final int overlap;
 	PreconditionedIterativeImplicitSchur schur;
 	MultiGridFluid fluid;
 	final List<Particle> particles;
 	
-	public DLMHybridMGSolver(final MultiGridFluid f, final List<Particle> particles)
+	public DLMHybridMGSolver(final int smootherRuns,
+	                         final int overlap,
+	                         final MultiGridFluid f,
+	                         final List<Particle> particles)
 	{
+		this.smootherRuns = smootherRuns;
+		this.overlap = overlap;
 		fluid = f;
 		this.particles = particles;
 	}
 	
 	private void addSchurAMG(final MGPreconditionerSpace<TaylorHoodSpace, TPCell, TPFace, QkQkFunction, MixedValue, MixedGradient,
-		MixedHessian> mg, final List<ParticleIterate> particleStates)
+		MixedHessian> mg,
+	                         final List<ParticleIterate> particleStates,
+	                         final List<ParticleSystem> particleSystems)
 	{
 		SparseMatrix finerSchurContribution = new SparseMatrix(mg.finest_system.getVectorSize(),
 		                                                       mg.finest_system.getTVectorSize());
 		final List<Matrix> schurContributions =
 			IntStream.range(0, particles.size())
 			         .parallel()
-			         .mapToObj(i -> new Tuple2<>(i,
-			                                     particles.get(i)
-			                                              .buildLagrangeBackgroundMatrix(
-				                                              mg.getFinestSpace(),
-				                                              particleStates.get(i))))
+			         .mapToObj(i -> new Tuple2<>(i, particleSystems.get(i).lagrangeBackgroundMatrix))
 			         .map(e ->
 			              {
 				              final SparseMatrix block =
@@ -102,63 +104,10 @@ public class DLMHybridMGSolver
 	private MGPreconditionerSpace<TaylorHoodSpace, TPCell, TPFace, QkQkFunction, MixedValue, MixedGradient,
 		MixedHessian> create_space(
 		final List<ParticleIterate> particleStates, final double dt, final double t,
-		final FluidIterate iterate)
+		final FluidIterate iterate, final List<ParticleSystem> particleSystems)
 	{
 		return new MGPreconditionerSpace<>(fluid.refinements, fluid.polynomialDegree)
 		{
-//			@Override
-//			public void presmoothcallback(final int level, final Vector guess, final Vector rhs)
-//			{
-//				if (level == 1)
-//				{
-//					final Vector sol = ((SparseMatrix) getFinestSystem()).solve(rhs);
-//					final MixedTPFESpaceFunction<QkQkFunction> solutionFunction =
-//						new MixedTPFESpaceFunction<>(getFinestSpace().getShapeFunctionMap(),
-//						                             sol);
-//					PlotWindow.addPlot(new MixedPlot2D(solutionFunction,
-//					                                   getFinestSpace().generatePlotPoints(50),
-//					                                   50, "solution"));
-//					final MixedTPFESpaceFunction<QkQkFunction> guessFUnction =
-//						new MixedTPFESpaceFunction<>(getFinestSpace().getShapeFunctionMap(),
-//						                             guess);
-//					PlotWindow.addPlot(new MixedPlot2D(guessFUnction,
-//					                                   getFinestSpace().generatePlotPoints(50),
-//					                                   50, "presmoot"));
-//				}
-//			}
-//
-//			@Override
-//			public void postmoothcallback(final int level, final Vector guess, final Vector rhs)
-//			{
-//				final MixedTPFESpaceFunction<QkQkFunction> guessFUnction =
-//					new MixedTPFESpaceFunction<>(getFinestSpace().getShapeFunctionMap(),
-//					                             guess);
-//				PlotWindow.addPlot(new MixedPlot2D(guessFUnction,
-//				                                   getFinestSpace().generatePlotPoints(50),
-//				                                   50, "postsmooth"));
-//			}
-//
-//			@Override
-//			public void precorrectioncallback(final int level, final Vector guess, final Vector rhs)
-//			{
-//				final MixedTPFESpaceFunction<QkQkFunction> guessFUnction =
-//					new MixedTPFESpaceFunction<>(getFinestSpace().getShapeFunctionMap(),
-//					                             guess);
-//				PlotWindow.addPlot(new MixedPlot2D(guessFUnction,
-//				                                   getFinestSpace().generatePlotPoints(50),
-//				                                   50, "precorrect"));
-//			}
-//
-//			@Override
-//			public void postcorrectioncallback(final int level, final Vector guess, final Vector rhs)
-//			{
-//				final MixedTPFESpaceFunction<QkQkFunction> guessFUnction =
-//					new MixedTPFESpaceFunction<>(getFinestSpace().getShapeFunctionMap(),
-//					                             guess);
-//				PlotWindow.addPlot(new MixedPlot2D(guessFUnction,
-//				                                   getFinestSpace().generatePlotPoints(50),
-//				                                   50, "postcorrect"));
-//			}
 			
 			@Override
 			public List<TaylorHoodSpace> createSpaces(final int refinements)
@@ -207,63 +156,11 @@ public class DLMHybridMGSolver
 			public List<Smoother> createSmoothers()
 			{
 				
-				addSchurAMG(this, particleStates);
+				addSchurAMG(this, particleStates, particleSystems);
 				fixBoundaryNodes(this, t);
 				final List<Smoother> ret = new ArrayList<>();
 				for (int i = 1; i < fluid.refinements + 1; i++)
 				{
-//					final int vel_size = getSpace(i).getVelocitySize();
-//					final int tot_size = getSpace(i).getShapeFunctions()
-//					                                .size();
-//					final SparseMatrix[] blocks =
-//						((SparseMatrix) getSystem(i)).partition(new IntCoordinates(
-//							vel_size,
-//							vel_size));
-//					final SparseMatrix B = blocks[2];
-//					final SparseMatrix A = blocks[0];
-//					final Map<IntCoordinates, SparseMatrix> blockMap = new HashMap<>();
-//					blockMap.put(new IntCoordinates(0, 0), //A);
-//					             SparseMatrix.identity(vel_size)
-//					                         .mul(1000));
-////                                                     A.getDiagonalMatrix()
-////                                                      .mul(200));
-//					blockMap.put(new IntCoordinates(0, vel_size),
-//					             B.transpose());
-//					blockMap.put(new IntCoordinates(vel_size, 0),
-//					             B);
-//					final BlockSparseMatrix p = new BlockSparseMatrix(blockMap,
-//					                                                  tot_size,
-//					                                                  tot_size);
-//					final SparseMatrix prec = p.toSparse();
-//					final Int2DoubleMap nodeValues =
-//						fluid.getDirichletNodeValuesForSpace(getSpace(i), t);
-//					nodeValues.forEach((node, val) ->
-//					                   {
-//						                   prec.deleteColumn(node);
-//						                   prec.deleteRow(node);
-//						                   prec.set(1, node, node);
-//					                   });
-//					final int firstPressure =
-//						getSpace(i).getVelocitySize();
-//					getSpace(i).overWriteValue(firstPressure, 0, prec,
-//					                           new DenseVector(prec.getRows()));
-//					final DenseMatrix pin = prec.inverse();
-//					final SparseMatrix alphaIB = prec.sub((SparseMatrix) getSystem(i));
-//					final Matrix pinAlphaIB = pin.mmMul(alphaIB);
-//					PlotWindow.addPlot(new MatrixPlot(pinAlphaIB));
-//					PlotWindow.addPlot(new MatrixPlot(pinAlphaIB.slice(new IntCoordinates(
-//						                                                   0,
-//						                                                   0)
-//						, new IntCoordinates(vel_size, vel_size))));
-////					System.out.println("MAX EIG errit" + pinAlphaIB.slice(new IntCoordinates(
-////						                                                      0,
-////						                                                      0)
-////						                                               , new IntCoordinates(vel_size, vel_size))
-////					                                               .powerIterationNonSymmetric());
-//					ret.add(new RichardsonSmoother(0.1,
-//					                               10,
-//					                               pin));
-					
 					final IntCoordinates partitions =
 						new IntCoordinates((int) (fluid.coarsestCells.get(0) * Math.pow(2,
 						                                                                i - 2)),
@@ -273,7 +170,7 @@ public class DLMHybridMGSolver
 					final ColoredCartesianSchwarz<QkQkFunction> schwarz
 						= new ColoredCartesianSchwarz<>((SparseMatrix) getSystem(i),
 						                                getSpace(i),
-						                                partitions, 3,
+						                                partitions, overlap,
 						                                new DirectSolver());
 					ret.add(new SchwarzSmoother(3, schwarz));
 				}
@@ -305,7 +202,7 @@ public class DLMHybridMGSolver
 		else
 			schur.resetOffDiagonals(systemMatrix);
 		final MGPreconditionerSpace<TaylorHoodSpace, TPCell, TPFace, QkQkFunction, MixedValue, MixedGradient,
-			MixedHessian> mg = create_space(particleStates, dt, t, fluidState);
+			MixedHessian> mg = create_space(particleStates, dt, t, fluidState, particleSystems);
 		schur.preconditioner = mg;
 		return schur.mvMul(rhs);
 	}

@@ -47,12 +47,24 @@ public abstract class MultiGridFluid
 		return getFluidSystemForSpace(getSpace(), getVelocity(iterate), t, iterate.current);
 	}
 	
+	double lastT;
+	FluidSystem lastSystem;
+	
 	@NotNull
 	FluidSystem getFluidSystemForSpace(final TaylorHoodSpace space,
 	                                   final VectorFunctionOnCells<TPCell, TPFace> velocity,
 	                                   final double t,
 	                                   final Vector currentIterate)
 	{
+		if (t == lastT)
+		{
+			if (space.getShapeFunctions()
+			         .size() == this.space.getShapeFunctions()
+			                              .size())
+			{
+				return lastSystem;
+			}
+		}
 		final int n = space.getShapeFunctionMap()
 		                   .size();
 		final SparseMatrix massMatrix = new SparseMatrix(n, n);
@@ -70,6 +82,11 @@ public abstract class MultiGridFluid
 		final DenseVector forceRhs = new DenseVector(n);
 		space.writeCellIntegralsToRhs(getForceIntegrals(t), forceRhs);
 		final DenseVector accelRhs = massMatrix.mvMul(currentIterate);
-		return new FluidSystem(massMatrix, flowMatrix, semiImplicitMatrix, forceRhs, accelRhs);
+		final FluidSystem ret = new FluidSystem(massMatrix, flowMatrix, semiImplicitMatrix, forceRhs, accelRhs);
+		if (space.getShapeFunctions()
+		         .size() == this.space.getShapeFunctions()
+		                              .size())
+			lastSystem = ret;
+		return ret;
 	}
 }

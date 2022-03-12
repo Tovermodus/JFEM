@@ -21,7 +21,13 @@ public class DirectSolver
 	public Vector solve(final Matrix system, final Vector rhs, final int patch)
 	{
 		if (!inverses.containsKey(patch))
-			inverses.put(patch, new DenseMatrix(system).inverse());
+		{
+			final DenseMatrix inv = new DenseMatrix(system).inverse();
+			synchronized (this)
+			{
+				inverses.put(patch, inv);
+			}
+		}
 		return inverses.get(patch)
 		               .mvMul(rhs);
 	}

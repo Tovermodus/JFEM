@@ -32,7 +32,8 @@ public class MixedPlot2D
 	}
 	
 	public <CT extends Cell<CT, FT>, FT extends Face<CT, FT>> MixedPlot2D(final MixedFunctionOnCells<CT, FT> function,
-	                                                                      final FESpace<CT, FT, ?> space, final int points)
+	                                                                      final FESpace<CT, FT, ?> space,
+	                                                                      final int points)
 	{
 		super(function.hasPressureFunction() ? function.getPressureFunction() :
 		      ScalarFunction.constantFunction(0), space.generatePlotPoints(points),
@@ -105,9 +106,9 @@ public class MixedPlot2D
 			g.setColor(Color.BLACK);
 			g.fillOval(x - 2, y - 2, 4, 4);
 			final int vx = (int) (entry.getValue()
-			                           .x() / (maxV) * pixelWidth);
+			                           .x() / (maxV) * pixelWidth * 3);
 			final int vy = (int) (entry.getValue()
-			                           .y() / (maxV) * pixelHeight);
+			                           .y() / (maxV) * pixelHeight * 3);
 			g.drawLine(x, y, x + vx, y - vy);
 		}
 	}

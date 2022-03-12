@@ -3,13 +3,14 @@ package basic;
 import linalg.CoordinateVector;
 
 import java.awt.*;
-import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
 import java.util.function.ToDoubleFunction;
+import java.util.stream.Collectors;
 
-public class ScalarPlot3D extends Plot
+public class ScalarPlot3D
+	extends Plot
 {
 	final public Map<CoordinateVector, Double> values;
 	final public int pointsPerDimension;
@@ -22,24 +23,39 @@ public class ScalarPlot3D extends Plot
 	public int pixelHeight;
 	public double z;
 	
-	public ScalarPlot3D(final ScalarFunction function, final List<CoordinateVector> points, final int pointsPerDimension)
+	public ScalarPlot3D(final ScalarFunction function,
+	                    final List<CoordinateVector> points,
+	                    final int pointsPerDimension)
 	{
 		this(function.valuesInPoints(points), pointsPerDimension, "Unnamed");
 	}
 	
-	public ScalarPlot3D(final ScalarFunction function, final List<CoordinateVector> points, final int pointsPerDimension, final String title)
+	public ScalarPlot3D(final ScalarFunction function,
+	                    final List<CoordinateVector> points,
+	                    final int pointsPerDimension,
+	                    final String title)
 	{
 		this(function.valuesInPoints(points), pointsPerDimension, title);
 	}
 	
-	public ScalarPlot3D(final Map<CoordinateVector, Double> values, final int pointsPerDimension, final String title)
+	public ScalarPlot3D(final Map<CoordinateVector, Double> values,
+	                    final int pointsPerDimension,
+	                    final String title)
 	{
 		for (final CoordinateVector c : values.keySet())
 			if (c.getLength() != 3) throw new IllegalArgumentException("Not 3D");
 		this.values = values;
 		this.pointsPerDimension = pointsPerDimension;
-		maxValue = values.values().stream().parallel().max(Double::compare).orElse(0.0);
-		minValue = values.values().stream().parallel().min(Double::compare).orElse(0.0);
+		maxValue = values.values()
+		                 .stream()
+		                 .parallel()
+		                 .max(Double::compare)
+		                 .orElse(0.0);
+		minValue = values.values()
+		                 .stream()
+		                 .parallel()
+		                 .min(Double::compare)
+		                 .orElse(0.0);
 		max = ScalarPlot2D.getMaxCoordinates(values.keySet());
 		min = ScalarPlot2D.getMinCoordinates(values.keySet());
 		this.title = title;
@@ -49,7 +65,13 @@ public class ScalarPlot3D extends Plot
 	{
 		final double currentZ = min.z() + slider * (max.z() - min.z());
 		z = currentZ;
-		List<CoordinateVector> drawnVectors = new ArrayList<>(values.keySet());
+		final double zTol = (max.z() - min.z()) / 100;
+		List<CoordinateVector> drawnVectors =
+			values.keySet()
+			      .stream()
+			      .parallel()
+			      .filter(c -> Math.abs(c.z() - currentZ) <= zTol)
+			      .collect(Collectors.toList());
 		
 		final ToDoubleFunction<CoordinateVector> sortFunction = value -> -Math.abs(value.z() - currentZ);
 		final Comparator<CoordinateVector> comparator = Comparator
@@ -60,7 +82,7 @@ public class ScalarPlot3D extends Plot
 		final double multipleToSecureNoWhitespace = 1;
 		drawnVectors = drawnVectors.subList(Math.max(0,
 		                                             drawnVectors.size() - (int) (multipleToSecureNoWhitespace * pointsPerDimension * pointsPerDimension)),
-		                                    drawnVectors.size() - 1);
+		                                    Math.max(0, drawnVectors.size() - 1));
 		return drawnVectors;
 	}
 	

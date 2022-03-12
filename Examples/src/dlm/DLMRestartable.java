@@ -27,7 +27,7 @@ public class DLMRestartable
 	                      final MultiGridFluid backGround,
 	                      final List<Particle> particles, final String name)
 	{
-		super(dt, timeSteps, backGround, particles, new DLMHybridMGSolver(backGround, particles), name);
+		super(dt, timeSteps, backGround, particles, new DLMHybridMGSolver(3, 3, backGround, particles), name);
 		plotPoints = backGround.getSpace()
 		                       .generatePlotPoints(41);
 		velocityValues = new ConcurrentSkipListMap<>();
@@ -78,25 +78,25 @@ public class DLMRestartable
 		particles.add(new Membrane(CoordinateVector.fromValues(0.6, 0.5),
 		                           0.34,
 		                           0.35,
-		                           0,
+		                           1,
 		                           1,
 		                           new CoordinateVector(2),
-		                           10,
-		                           10,
+		                           100,
+		                           100,
 		                           15));
 		particles.add(new FixedSolidParticle(CoordinateVector.fromValues(0.15, 0.25),
 		                                     0.05,
 		                                     2,
 		                                     1,
-		                                     100,
-		                                     100,
+		                                     1000,
+		                                     1000,
 		                                     15));
 		particles.add(new FixedSolidParticle(CoordinateVector.fromValues(0.15, 0.75),
 		                                     0.05,
 		                                     2,
 		                                     1,
-		                                     100,
-		                                     100,
+		                                     1000,
+		                                     1000,
 		                                     15));
 		particles.add(new FixedSolidParticle(CoordinateVector.fromValues(1.1, 0.25),
 		                                     0.05,
@@ -109,14 +109,14 @@ public class DLMRestartable
 		                                     0.05,
 		                                     2,
 		                                     1,
-		                                     100,
-		                                     100,
+		                                     1000,
+		                                     1000,
 		                                     15));
 		final DLMRestartable system = new DLMRestartable(dt,
 		                                                 400,
 		                                                 fluid,
 		                                                 particles,
-		                                                 "splittingcoarse" + fluid.refinements);
+		                                                 "tough" + fluid.refinements);
 	}
 	
 	@Override

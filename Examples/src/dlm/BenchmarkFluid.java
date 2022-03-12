@@ -21,31 +21,31 @@ import java.util.List;
 import java.util.function.Function;
 import java.util.function.Predicate;
 
-public class BackgroundFluidMG
+public class BenchmarkFluid
 	extends MultiGridFluid
 {
 	private final double density;
-	private final double reynold;
+	private final double viscosity;
 	
-	public BackgroundFluidMG(final CoordinateVector startCoordinates,
-	                         final CoordinateVector endCoordinates,
-	                         final IntCoordinates cells,
-	                         final int polynomialDegree,
-	                         final int refinements,
-	                         final double dt,
-	                         final double density,
-	                         final double renold)
+	public BenchmarkFluid(final CoordinateVector startCoordinates,
+	                      final CoordinateVector endCoordinates,
+	                      final IntCoordinates cells,
+	                      final int polynomialDegree,
+	                      final int refinements,
+	                      final double dt,
+	                      final double density,
+	                      final double viscosity)
 	{
 		super(startCoordinates, endCoordinates, cells, refinements, polynomialDegree);
 		this.density = density;
-		this.reynold = renold;
+		this.viscosity = viscosity;
 	}
 	
 	@Override
 	public List<CellIntegral<TPCell, QkQkFunction>> getIntegrals()
 	{
 		final TPVectorCellIntegral<ContinuousTPVectorFunction> symGrad =
-			new TPVectorCellIntegral<>(1. / reynold, TPVectorCellIntegral.SYM_GRAD);
+			new TPVectorCellIntegral<>(density * viscosity * 2, TPVectorCellIntegral.SYM_GRAD);
 		final MixedCellIntegral<TPCell, ContinuousTPShapeFunction, ContinuousTPVectorFunction, QkQkFunction>
 			symGradMixed = MixedTPCellIntegral.fromVelocityIntegral(symGrad);
 		final MixedCellIntegral<TPCell, ContinuousTPShapeFunction, ContinuousTPVectorFunction, QkQkFunction>
@@ -106,16 +106,14 @@ public class BackgroundFluidMG
 	@Override
 	public Function<CoordinateVector, CoordinateVector> velocityBoundaryValues(final double t)
 	{
+		final double um = 5;
 		return x ->
 		{
 			if (x.x() == 0)
-				return CoordinateVector.fromValues(1, 0);
+				return CoordinateVector.fromValues(4 * um * x.y() * (endCoordinates.y() - x.y()) / (endCoordinates.y() * endCoordinates.y()),
+				                                   0);
 			else
-				return CoordinateVector.fromValues(Math.max(0,
-				                                            2 - Math.pow(x.dist(CoordinateVector.fromValues(
-					                                            0,
-					                                            0.5)), 2) * 4), 0)
-				                       .mul(0.2);
+				return CoordinateVector.fromValues(0, 0);
 		};
 	}
 	
