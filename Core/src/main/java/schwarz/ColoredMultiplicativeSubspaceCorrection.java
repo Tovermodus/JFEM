@@ -66,7 +66,6 @@ public class ColoredMultiplicativeSubspaceCorrection<OT extends VectorMultiplyab
 	                    @NotNull final Vector globalIterate,
 	                    @NotNull final Vector globalRhs)
 	{
-		System.out.println("APPLY");
 		Vector iterate = new DenseVector(globalIterate);
 		for (int i = 0; i < colorSets.size(); i++)
 		{
@@ -96,7 +95,7 @@ public class ColoredMultiplicativeSubspaceCorrection<OT extends VectorMultiplyab
 				                .collect(Collectors.toList());
 			for (final Vector v : globalSolComponents)
 			{
-				iterate = iterate.add(v);
+				iterate = iterate.add(v.mul(0.2));
 //				final MixedTPFESpaceFunction<QkQkFunction> fun =
 //					new MixedTPFESpaceFunction<>(space.getShapeFunctionMap(), iterate);
 //				PlotWindow.addPlotShow(new MixedPlot2D(fun,

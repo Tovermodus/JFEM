@@ -27,7 +27,7 @@ public class DLMBenchmark
 	                    final MultiGridFluid backGround,
 	                    final List<Particle> particles, final String name)
 	{
-		super(dt, timeSteps, backGround, particles, new DLMHybridMGSolver(3, 1, backGround, particles), name);
+		super(dt, timeSteps, backGround, particles, new DLMHybridMGSolver(3, 3, backGround, particles), name);
 		plotPoints = backGround.getSpace()
 		                       .generatePlotPoints(41);
 		velocityValues = new ConcurrentSkipListMap<>();
@@ -54,9 +54,9 @@ public class DLMBenchmark
 		                                     0.05,
 		                                     2,
 		                                     1,
-		                                     1000,
-		                                     1000,
-		                                     15));
+		                                     10000,
+		                                     10000,
+		                                     150));
 		final DLMBenchmark system = new DLMBenchmark(dt,
 		                                             2000,
 		                                             fluid,
@@ -80,10 +80,19 @@ public class DLMBenchmark
 		velocityValues = new HashMap<>();
 		pressureValues = new HashMap<>();
 		final int len = iteration + 1;
-		final int[] indices = new int[100];
-		for (int i = 0; i < 100; i++)
-			indices[i] = (int) (len / 99.0 * i);
-		for (int j = 0; j < 100; j++)
+		final int[] indices;
+		if (iteration > 100)
+		{
+			indices = new int[100];
+			for (int i = 0; i < 100; i++)
+				indices[i] = (int) (len / 99.0 * i);
+		} else
+		{
+			indices = new int[iteration];
+			for (int i = 0; i < iteration; i++)
+				indices[i] = i;
+		}
+		for (int j = 0; j < indices.length; j++)
 		{
 			final int i = indices[j];
 			final MixedFunctionOnCells<TPCell, TPFace> velocityPressure

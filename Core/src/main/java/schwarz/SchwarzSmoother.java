@@ -24,18 +24,20 @@ public class SchwarzSmoother
 	                     final boolean verbose,
 	                     final String prefix)
 	{
-		System.out.println(prefix + " " + schwarz.getGlobalOperator()
-		                                         .mvMul(iterate)
-		                                         .sub(rhs)
-		                                         .euclidianNorm());
+		if (verbose)
+			System.out.println(prefix + " " + schwarz.getGlobalOperator()
+			                                         .mvMul(iterate)
+			                                         .sub(rhs)
+			                                         .euclidianNorm());
 		for (int i = 0; i < runs; i++)
 		{
 			iterate = schwarz.getSubspaceCorrection()
 			                 .apply(schwarz, iterate, rhs);
-			System.out.println(prefix + " iter " + i + " " + schwarz.getGlobalOperator()
-			                                                        .mvMul(iterate)
-			                                                        .sub(rhs)
-			                                                        .euclidianNorm());
+			if (verbose)
+				System.out.println(prefix + " iter " + i + " " + schwarz.getGlobalOperator()
+				                                                        .mvMul(iterate)
+				                                                        .sub(rhs)
+				                                                        .euclidianNorm());
 		}
 		return iterate;
 	}

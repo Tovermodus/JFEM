@@ -22,7 +22,7 @@ public class PreconditionedIterativeImplicitSchur
 	{
 		return (A, b) ->
 		{
-			it.gm.ITERATIONS_BEFORE_RESTART = 20;
+			it.gm.ITERATIONS_BEFORE_RESTART = 40;
 			System.out.println(A.getVectorSize());
 //			System.out.println(((AMGPreconditionerSpace) preconditioner).finest_system.mvMul(b)
 //			                                                                          .sub(A.mvMul(b))

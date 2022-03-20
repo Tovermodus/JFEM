@@ -3,6 +3,7 @@ package basic;
 import linalg.CoordinateVector;
 
 import java.awt.*;
+import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
@@ -64,14 +65,21 @@ public class ScalarPlot3D
 	public List<CoordinateVector> getClosestPoints(final double slider)
 	{
 		final double currentZ = min.z() + slider * (max.z() - min.z());
+		final double multipleToSecureNoWhitespace = 1;
 		z = currentZ;
-		final double zTol = (max.z() - min.z()) / 100;
-		List<CoordinateVector> drawnVectors =
-			values.keySet()
-			      .stream()
-			      .parallel()
-			      .filter(c -> Math.abs(c.z() - currentZ) <= zTol)
-			      .collect(Collectors.toList());
+		double zTol = (max.z() - min.z()) / 100;
+		List<CoordinateVector> drawnVectors = new ArrayList<>();
+		while (drawnVectors.size() < (multipleToSecureNoWhitespace * pointsPerDimension * pointsPerDimension))
+		{
+			final double finalZTol = zTol;
+			drawnVectors =
+				values.keySet()
+				      .stream()
+				      .parallel()
+				      .filter(c -> Math.abs(c.z() - currentZ) <= finalZTol)
+				      .collect(Collectors.toList());
+			zTol *= 2;
+		}
 		
 		final ToDoubleFunction<CoordinateVector> sortFunction = value -> -Math.abs(value.z() - currentZ);
 		final Comparator<CoordinateVector> comparator = Comparator
@@ -79,7 +87,6 @@ public class ScalarPlot3D
 			.thenComparing(CoordinateVector::x)
 			.thenComparing(CoordinateVector::y);
 		drawnVectors.sort(comparator);
-		final double multipleToSecureNoWhitespace = 1;
 		drawnVectors = drawnVectors.subList(Math.max(0,
 		                                             drawnVectors.size() - (int) (multipleToSecureNoWhitespace * pointsPerDimension * pointsPerDimension)),
 		                                    Math.max(0, drawnVectors.size() - 1));

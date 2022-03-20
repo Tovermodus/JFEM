@@ -78,12 +78,6 @@ public interface Fluid
 	
 	static Tuple2<SparseMatrix, DenseVector> getBlockRhs(final FluidSystem fs, final double dt)
 	{
-		System.out.println("massm symm " + fs.massMatrix.sub(fs.massMatrix.transpose())
-		                                                .absMaxElement());
-		System.out.println("flowm symm " + fs.flowMatrix.sub(fs.flowMatrix.transpose())
-		                                                .absMaxElement());
-		System.out.println("semiimp symm " + fs.semiImplicitMatrix.sub(fs.semiImplicitMatrix.transpose())
-		                                                          .absMaxElement());
 		final SparseMatrix s =
 			new SparseMatrix(fs.massMatrix.mul(1. / dt)
 			                              .add(fs.flowMatrix)
@@ -113,7 +107,7 @@ public interface Fluid
 			                        .getNodeFunctional()
 			                        .evaluate(cmf));
 		}
-		ret.put(space.getVelocitySize(), 0);
+		ret.put(shapeFunctionMap.size() - 1, 0);
 		return ret;
 	}
 }

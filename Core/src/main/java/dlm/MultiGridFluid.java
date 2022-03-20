@@ -41,14 +41,17 @@ public abstract class MultiGridFluid
 		return space;
 	}
 	
+	FluidSystem finestFliudSystem;
+	
 	@Override
 	public FluidSystem buildSystem(final double t, final FluidIterate iterate, final List<Particle> particles)
 	{
-		return getFluidSystemForSpace(getSpace(), getVelocity(iterate), t, iterate.current);
+		finestFliudSystem = getFluidSystemForSpace(getSpace(),
+		                                           getVelocity(iterate),
+		                                           t,
+		                                           iterate.current);
+		return finestFliudSystem;
 	}
-	
-	double lastT;
-	FluidSystem lastSystem;
 	
 	@NotNull
 	FluidSystem getFluidSystemForSpace(final TaylorHoodSpace space,
@@ -56,15 +59,6 @@ public abstract class MultiGridFluid
 	                                   final double t,
 	                                   final Vector currentIterate)
 	{
-		if (t == lastT)
-		{
-			if (space.getShapeFunctions()
-			         .size() == this.space.getShapeFunctions()
-			                              .size())
-			{
-				return lastSystem;
-			}
-		}
 		final int n = space.getShapeFunctionMap()
 		                   .size();
 		final SparseMatrix massMatrix = new SparseMatrix(n, n);
@@ -77,16 +71,10 @@ public abstract class MultiGridFluid
 		space.writeCellIntegralsToMatrix(getSemiImplicitIntegrals(velocity),
 		                                 semiImplicitMatrix);
 		System.out.println("semiImpDone" + s.elapsed());
-		System.out.println("semiimp" + semiImplicitMatrix.sub(semiImplicitMatrix.transpose())
-		                                                 .absMaxElement() + " " + semiImplicitMatrix.absMaxElement());
 		final DenseVector forceRhs = new DenseVector(n);
 		space.writeCellIntegralsToRhs(getForceIntegrals(t), forceRhs);
 		final DenseVector accelRhs = massMatrix.mvMul(currentIterate);
 		final FluidSystem ret = new FluidSystem(massMatrix, flowMatrix, semiImplicitMatrix, forceRhs, accelRhs);
-		if (space.getShapeFunctions()
-		         .size() == this.space.getShapeFunctions()
-		                              .size())
-			lastSystem = ret;
 		return ret;
 	}
 }

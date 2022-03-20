@@ -133,21 +133,20 @@ public class DLMHybridMGSolver
 				final int n = space.getShapeFunctionMap()
 				                   .size();
 				final VectorFunctionOnCells<TPCell, TPFace> velocity;
-				final Vector restrictedIterate;
-				if (iterate != null)
-				{
-					restrictedIterate = restrictToSize(n, iterate.current);
-				} else
-				{
-					restrictedIterate = new DenseVector(n);
-				}
-				velocity = new MixedTPFESpaceFunction<>(space.getShapeFunctionMap(),
-				                                        restrictedIterate).getVelocityFunction();
-				final FluidSystem fs = fluid.getFluidSystemForSpace(space, velocity, 0,
-				                                                    restrictedIterate);
+				Vector current = iterate.current;
+				if (current == null)
+					current = new DenseVector(getFinestSpace().getShapeFunctions()
+					                                          .size());
+				velocity = new MixedTPFESpaceFunction<>(getFinestSpace().getShapeFunctionMap(),
+				                                        current).getVelocityFunction();
+				
+				final FluidSystem fs;
+				if (space == getFinestSpace())
+					fs = fluid.finestFliudSystem;
+				else
+					fs = fluid.getFluidSystemForSpace(space, velocity, 0,
+					                                  new DenseVector(n));
 				final var blockRhs = Fluid.getBlockRhs(fs, dt);
-				System.out.println("symmetry " + blockRhs._1.sub(blockRhs._1.transpose())
-				                                            .absMaxElement());
 				final SparseMatrix s = new SparseMatrix(blockRhs._1);
 				return new Tuple2<>(s, new DenseVector(n));
 			}
@@ -197,13 +196,27 @@ public class DLMHybridMGSolver
 	                       final List<ParticleSystem> particleSystems, final double dt, final double t)
 	{
 		if (schur == null)
-			schur = new PreconditionedIterativeImplicitSchur(systemMatrix,
-			                                                 null);
+			schur = new PreconditionedIterativeImplicitSchur(systemMatrix, null);
 		else
 			schur.resetOffDiagonals(systemMatrix);
 		final MGPreconditionerSpace<TaylorHoodSpace, TPCell, TPFace, QkQkFunction, MixedValue, MixedGradient,
 			MixedHessian> mg = create_space(particleStates, dt, t, fluidState, particleSystems);
+		mg.cycles = 2;
 		schur.preconditioner = mg;
+		final DirectSchur ds = new DirectSchur(systemMatrix);
+		System.out.println("Schur max eigenvalue " + ds.getSchurComplement()
+		                                               .powerIterationNonSymmetric());
+		
+		System.out.println("Fluid max eigenvalue " + ds.getSchurBlock()
+		                                               .powerIterationNonSymmetric());
+		
+		System.out.println("Schur min eigenvalue " + 1. / ds.getSchurComplement()
+		                                                    .inverse()
+		                                                    .powerIterationNonSymmetric());
+		
+		System.out.println("Fluid min eigenvalue " + 1. / schur.getSchurBlock()
+		                                                       .inverse()
+		                                                       .powerIterationNonSymmetric());
 		return schur.mvMul(rhs);
 	}
 }
