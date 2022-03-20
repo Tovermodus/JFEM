@@ -27,16 +27,18 @@ public class DLMHybridMGSolver
 	PreconditionedIterativeImplicitSchur schur;
 	MultiGridFluid fluid;
 	final List<Particle> particles;
+	final double omega;
 	
 	public DLMHybridMGSolver(final int smootherRuns,
 	                         final int overlap,
 	                         final MultiGridFluid f,
-	                         final List<Particle> particles)
+	                         final List<Particle> particles, final double omega)
 	{
 		this.smootherRuns = smootherRuns;
 		this.overlap = overlap;
 		fluid = f;
 		this.particles = particles;
+		this.omega = omega;
 	}
 	
 	private void addSchurAMG(final MGPreconditionerSpace<TaylorHoodSpace, TPCell, TPFace, QkQkFunction, MixedValue, MixedGradient,
@@ -170,7 +172,7 @@ public class DLMHybridMGSolver
 						= new ColoredCartesianSchwarz<>((SparseMatrix) getSystem(i),
 						                                getSpace(i),
 						                                partitions, overlap,
-						                                new DirectSolver());
+						                                new DirectSolver(), omega);
 					ret.add(new SchwarzSmoother(3, schwarz));
 				}
 				verbose = true;

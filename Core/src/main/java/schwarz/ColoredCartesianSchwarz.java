@@ -24,9 +24,10 @@ public class ColoredCartesianSchwarz<ST extends ShapeFunction<TPCell, TPFace, ?,
 	                               final CartesianGridSpace<ST, ?, ?, ?> space,
 	                               final IntCoordinates partitions,
 	                               final int overlap,
-	                               final SystemSolver<Matrix> solver)
+	                               final SystemSolver<Matrix> solver, final double omega)
 	{
-		super(globalMatrix, new ColoredMultiplicativeSubspaceCorrection<>((TaylorHoodSpace) space), solver);
+		super(globalMatrix, new ColoredMultiplicativeSubspaceCorrection<>((TaylorHoodSpace) space, omega),
+		      solver);
 		this.space = space;
 		this.partitions = partitions;
 		this.overlap = overlap;

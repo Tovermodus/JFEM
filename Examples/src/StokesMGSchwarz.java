@@ -155,7 +155,7 @@ public class StokesMGSchwarz
 						= new ColoredCartesianSchwarz<>((SparseMatrix) getSystem(i),
 						                                getSpace(i),
 						                                partitions, 2,
-						                                new DirectSolver());
+						                                new DirectSolver(), 1);
 					ret.add(new SchwarzSmoother(2, schwarz));
 				}
 				return ret;

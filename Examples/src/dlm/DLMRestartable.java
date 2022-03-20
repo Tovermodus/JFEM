@@ -27,7 +27,12 @@ public class DLMRestartable
 	                      final MultiGridFluid backGround,
 	                      final List<Particle> particles, final String name)
 	{
-		super(dt, timeSteps, backGround, particles, new DLMHybridMGSolver(3, 3, backGround, particles), name);
+		super(dt,
+		      timeSteps,
+		      backGround,
+		      particles,
+		      new DLMHybridMGSolver(3, 3, backGround, particles, 1),
+		      name);
 		plotPoints = backGround.getSpace()
 		                       .generatePlotPoints(41);
 		velocityValues = new ConcurrentSkipListMap<>();

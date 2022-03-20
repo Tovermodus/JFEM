@@ -15,10 +15,12 @@ public class ColoredMultiplicativeSubspaceCorrection<OT extends VectorMultiplyab
 {
 	List<IntSet> colorSets;
 	TaylorHoodSpace space;
+	final double omega;
 	
-	public ColoredMultiplicativeSubspaceCorrection(final TaylorHoodSpace space)
+	public ColoredMultiplicativeSubspaceCorrection(final TaylorHoodSpace space, final double omega)
 	{
 		this.space = space;
+		this.omega = omega;
 	}
 	
 	public void setColors(final List<IntSet> colorSets)
@@ -56,7 +58,7 @@ public class ColoredMultiplicativeSubspaceCorrection<OT extends VectorMultiplyab
 				                     })
 				                .collect(Collectors.toList());
 			for (final Vector v : globalSolComponents)
-				iterate = iterate.add(v);
+				iterate = iterate.add(v.mul(omega));
 		}
 		return iterate;
 	}
@@ -95,7 +97,7 @@ public class ColoredMultiplicativeSubspaceCorrection<OT extends VectorMultiplyab
 				                .collect(Collectors.toList());
 			for (final Vector v : globalSolComponents)
 			{
-				iterate = iterate.add(v.mul(0.2));
+				iterate = iterate.add(v.mul(omega));
 //				final MixedTPFESpaceFunction<QkQkFunction> fun =
 //					new MixedTPFESpaceFunction<>(space.getShapeFunctionMap(), iterate);
 //				PlotWindow.addPlotShow(new MixedPlot2D(fun,
