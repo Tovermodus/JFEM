@@ -3,7 +3,6 @@ package schwarz;
 import linalg.DenseVector;
 import linalg.Vector;
 import linalg.VectorMultiplyable;
-import tensorproduct.ContinuousTPFESpace;
 
 import java.util.List;
 import java.util.stream.Collectors;
@@ -13,12 +12,10 @@ public class AdditiveSubspaceCorrection<OT extends VectorMultiplyable>
 	implements SubspaceCorrection<OT>
 {
 	private final double omega;
-	private final ContinuousTPFESpace space;
 	
-	public AdditiveSubspaceCorrection(final double omega, final ContinuousTPFESpace space)
+	public AdditiveSubspaceCorrection(final double omega)
 	{
 		this.omega = omega;
-		this.space = space;
 	}
 	
 	@Override

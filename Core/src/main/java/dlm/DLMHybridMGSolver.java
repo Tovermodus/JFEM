@@ -1,5 +1,6 @@
 package dlm;
 
+import basic.PlotWindow;
 import basic.VectorFunctionOnCells;
 import io.vavr.Tuple2;
 import it.unimi.dsi.fastutil.ints.Int2DoubleMap;
@@ -8,9 +9,10 @@ import mixed.*;
 import multigrid.MGPreconditionerSpace;
 import multigrid.Smoother;
 import org.jetbrains.annotations.NotNull;
-import schwarz.ColoredCartesianSchwarz;
 import schwarz.DirectSolver;
+import schwarz.MultiplicativeSubspaceCorrection;
 import schwarz.SchwarzSmoother;
+import schwarz.VankaSchwarz;
 import tensorproduct.geometry.TPCell;
 import tensorproduct.geometry.TPFace;
 
@@ -24,7 +26,7 @@ public class DLMHybridMGSolver
 {
 	public final int smootherRuns;
 	final int overlap;
-	PreconditionedIterativeImplicitSchur schur;
+	MultigridFixedpointSchur schur;
 	MultiGridFluid fluid;
 	final List<Particle> particles;
 	final double omega;
@@ -110,6 +112,50 @@ public class DLMHybridMGSolver
 	{
 		return new MGPreconditionerSpace<>(fluid.refinements, fluid.polynomialDegree)
 		{
+			@Override
+			public void postmoothcallback(final int level, final Vector guess, final Vector rhs)
+			{
+				if (level == 0)
+				{
+					final var function =
+						new MixedTPFESpaceFunction<>(getSpace(level).getShapeFunctionMap(),
+						                             guess);
+					PlotWindow.addPlot(new MixedPlot2D(function,
+					                                   getSpace(level).generatePlotPoints(40), 40
+						, "coarse correction"));
+				}
+			}
+			
+			@Override
+			public void precorrectioncallback(final int level, final Vector guess, final Vector rhs)
+			{
+				if (level == 1)
+				{
+					final Vector realCorrect =
+						((SparseMatrix) getSystem(level)).solve(
+							rhs.sub(getSystem(level).mvMul(guess)));
+					final var function =
+						new MixedTPFESpaceFunction<>(getSpace(level).getShapeFunctionMap(),
+						                             realCorrect);
+					PlotWindow.addPlot(new MixedPlot2D(function,
+					                                   getSpace(level).generatePlotPoints(40), 40
+						, "real pre correction"));
+				}
+			}
+			
+			@Override
+			public void correctioncallback(final int level, final Vector correction, final Vector rhs)
+			{
+				if (level == 1)
+				{
+					final var function =
+						new MixedTPFESpaceFunction<>(getSpace(level).getShapeFunctionMap(),
+						                             correction);
+					PlotWindow.addPlot(new MixedPlot2D(function,
+					                                   getSpace(level).generatePlotPoints(40), 40
+						, "actual correction"));
+				}
+			}
 			
 			@Override
 			public List<TaylorHoodSpace> createSpaces(final int refinements)
@@ -148,7 +194,7 @@ public class DLMHybridMGSolver
 				else
 					fs = fluid.getFluidSystemForSpace(space, velocity, 0,
 					                                  new DenseVector(n));
-				final var blockRhs = Fluid.getBlockRhs(fs, dt);
+				final var blockRhs = Fluid.assembleBlockRhs(fs, dt);
 				final SparseMatrix s = new SparseMatrix(blockRhs._1);
 				return new Tuple2<>(s, new DenseVector(n));
 			}
@@ -168,12 +214,23 @@ public class DLMHybridMGSolver
 						                   (int) (fluid.coarsestCells.get(1) * Math.pow(2,
 						                                                                i - 2)));
 					System.out.println(partitions);
-					final ColoredCartesianSchwarz<QkQkFunction> schwarz
-						= new ColoredCartesianSchwarz<>((SparseMatrix) getSystem(i),
-						                                getSpace(i),
-						                                partitions, overlap,
-						                                new DirectSolver(), omega);
-					ret.add(new SchwarzSmoother(3, schwarz));
+
+//					final ColoredCartesianSchwarz<QkQkFunction> schwarz
+//						= new ColoredCartesianSchwarz<>((SparseMatrix) getSystem(i),
+//						                                getSpace(i),
+//						                                partitions, overlap,
+//						                                new DirectSolver(), omega);
+//					final CartesianUpFrontSchwarz<QkQkFunction> schwarz
+//						= new CartesianUpFrontSchwarz<>((SparseMatrix) getSystem(i),
+//						                                getSpace(i),
+//						                                partitions, overlap,
+//						                                new AdditiveSubspaceCorrection<>(0.1),
+//						                                new DirectSolver());
+					final VankaSchwarz schwarz = new VankaSchwarz((SparseMatrix) getSystem(i),
+					                                              getSpace(i),
+					                                              new MultiplicativeSubspaceCorrection<>(),
+					                                              new DirectSolver());
+					ret.add(new SchwarzSmoother(smootherRuns, schwarz));
 				}
 				verbose = true;
 				return ret;
@@ -198,27 +255,28 @@ public class DLMHybridMGSolver
 	                       final List<ParticleSystem> particleSystems, final double dt, final double t)
 	{
 		if (schur == null)
-			schur = new PreconditionedIterativeImplicitSchur(systemMatrix, null);
+			schur = new MultigridFixedpointSchur(systemMatrix, null);//PreconditionedIterativeImplicitSchur
+			// (systemMatrix, null);
 		else
 			schur.resetOffDiagonals(systemMatrix);
 		final MGPreconditionerSpace<TaylorHoodSpace, TPCell, TPFace, QkQkFunction, MixedValue, MixedGradient,
 			MixedHessian> mg = create_space(particleStates, dt, t, fluidState, particleSystems);
 		mg.cycles = 2;
-		schur.preconditioner = mg;
-		final DirectSchur ds = new DirectSchur(systemMatrix);
-		System.out.println("Schur max eigenvalue " + ds.getSchurComplement()
-		                                               .powerIterationNonSymmetric());
-		
-		System.out.println("Fluid max eigenvalue " + ds.getSchurBlock()
-		                                               .powerIterationNonSymmetric());
-		
-		System.out.println("Schur min eigenvalue " + 1. / ds.getSchurComplement()
-		                                                    .inverse()
-		                                                    .powerIterationNonSymmetric());
-		
-		System.out.println("Fluid min eigenvalue " + 1. / schur.getSchurBlock()
-		                                                       .inverse()
-		                                                       .powerIterationNonSymmetric());
+		schur.mg = mg;
+//		final DirectSchur ds = new DirectSchur(systemMatrix);
+//		System.out.println("Schur max eigenvalue " + ds.getSchurComplement()
+//		                                               .powerIterationNonSymmetric());
+//
+//		System.out.println("Fluid max eigenvalue " + ds.getSchurBlock()
+//		                                               .powerIterationNonSymmetric());
+//
+//		System.out.println("Schur min eigenvalue " + 1. / ds.getSchurComplement()
+//		                                                    .inverse()
+//		                                                    .powerIterationNonSymmetric());
+//
+//		System.out.println("Fluid min eigenvalue " + 1. / schur.getSchurBlock()
+//		                                                       .inverse()
+//		                                                       .powerIterationNonSymmetric());
 		return schur.mvMul(rhs);
 	}
 }

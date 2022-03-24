@@ -45,7 +45,7 @@ public class BenchmarkFluid
 	public List<CellIntegral<TPCell, QkQkFunction>> getIntegrals()
 	{
 		final TPVectorCellIntegral<ContinuousTPVectorFunction> symGrad =
-			new TPVectorCellIntegral<>(density * viscosity * 2, TPVectorCellIntegral.SYM_GRAD);
+			new TPVectorCellIntegral<>(density * viscosity, TPVectorCellIntegral.GRAD_GRAD);
 		final MixedCellIntegral<TPCell, ContinuousTPShapeFunction, ContinuousTPVectorFunction, QkQkFunction>
 			symGradMixed = MixedTPCellIntegral.fromVelocityIntegral(symGrad);
 		final MixedCellIntegral<TPCell, ContinuousTPShapeFunction, ContinuousTPVectorFunction, QkQkFunction>
@@ -70,23 +70,23 @@ public class BenchmarkFluid
 	{
 		final VectorFunctionOnCells<TPCell, TPFace> semiImplicitWeight1 =
 			VectorFunctionOnCells.fromLambda((x) -> velocity.value(x)
-			                                                .mul(density / 2),
+			                                                .mul(density),
 			                                 (x, cell) -> velocity.valueInCell(x, cell)
-			                                                      .mul(density / 2), 2, 2);
-		final VectorFunctionOnCells<TPCell, TPFace> semiImplicitWeight2 =
-			VectorFunctionOnCells.fromLambda((x) -> velocity.value(x)
-			                                                .mul(-density / 2),
-			                                 (x, cell) -> velocity.valueInCell(x, cell)
-			                                                      .mul(-density / 2), 2, 2);
+			                                                      .mul(density), 2, 2);
+//		final VectorFunctionOnCells<TPCell, TPFace> semiImplicitWeight2 =
+//			VectorFunctionOnCells.fromLambda((x) -> velocity.value(x)
+//			                                                .mul(-density / 2),
+//			                                 (x, cell) -> velocity.valueInCell(x, cell)
+//			                                                      .mul(-density / 2), 2, 2);
 		final TPVectorCellIntegralOnCell<ContinuousTPVectorFunction> convection1 =
 			new TPVectorCellIntegralOnCell<>(semiImplicitWeight1, TPVectorCellIntegral.GRAD_VALUE);
-		final TPVectorCellIntegralOnCell<ContinuousTPVectorFunction> convection2 =
-			new TPVectorCellIntegralOnCell<>(semiImplicitWeight2, TPVectorCellIntegral.VALUE_GRAD);
+//		final TPVectorCellIntegralOnCell<ContinuousTPVectorFunction> convection2 =
+//			new TPVectorCellIntegralOnCell<>(semiImplicitWeight2, TPVectorCellIntegral.VALUE_GRAD);
 		final MixedCellIntegral<TPCell, ContinuousTPShapeFunction, ContinuousTPVectorFunction,
 			QkQkFunction> mixedConvection1 = MixedCellIntegral.fromVelocityIntegral(convection1);
-		final MixedCellIntegral<TPCell, ContinuousTPShapeFunction, ContinuousTPVectorFunction,
-			QkQkFunction> mixedConvection2 = MixedCellIntegral.fromVelocityIntegral(convection2);
-		return List.of(mixedConvection1, mixedConvection2);
+//		final MixedCellIntegral<TPCell, ContinuousTPShapeFunction, ContinuousTPVectorFunction,
+//			QkQkFunction> mixedConvection2 = MixedCellIntegral.fromVelocityIntegral(convection2);
+		return List.of(mixedConvection1);//, mixedConvection2);
 	}
 	
 	@Override
@@ -106,11 +106,12 @@ public class BenchmarkFluid
 	@Override
 	public Function<CoordinateVector, CoordinateVector> velocityBoundaryValues(final double t)
 	{
-		final double um = 5;
+		final double um = 1.5;
+		final double charachteristicFunctionT = Math.min(5 * t, 1);
 		return x ->
 		{
 			if (x.x() == 0)
-				return CoordinateVector.fromValues(4 * um * x.y() * (endCoordinates.y() - x.y()) / (endCoordinates.y() * endCoordinates.y()),
+				return CoordinateVector.fromValues(charachteristicFunctionT * 4 * um * x.y() * (endCoordinates.y() - x.y()) / (endCoordinates.y() * endCoordinates.y()),
 				                                   0);
 			else
 				return CoordinateVector.fromValues(0, 0);

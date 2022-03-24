@@ -76,7 +76,7 @@ public class DLMLagrangeMGSolver
 				                                        restrictedIterate).getVelocityFunction();
 				final FluidSystem fs = fluid.getFluidSystemForSpace(space, velocity, 0,
 				                                                    restrictedIterate);
-				final var blockRhs = Fluid.getBlockRhs(fs, dt);
+				final var blockRhs = Fluid.assembleBlockRhs(fs, dt);
 				System.out.println("symmetry " + blockRhs._1.sub(blockRhs._1.transpose())
 				                                            .absMaxElement());
 				final SparseMatrix s = new SparseMatrix(blockRhs._1);

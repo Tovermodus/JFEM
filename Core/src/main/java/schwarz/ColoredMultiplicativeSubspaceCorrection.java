@@ -45,8 +45,8 @@ public class ColoredMultiplicativeSubspaceCorrection<OT extends VectorMultiplyab
 				                .parallel()
 				                .map(j ->
 				                     {
-					                     if (j == 0)
-						                     return globalResidual.mul(0);
+//					                     if (j == 0)
+//						                     return globalResidual.mul(0);
 					                     final Vector localRes = schwarz.getLocalVector(j,
 					                                                                    globalResidual);
 					                     final Vector localSol = schwarz.solveLocalSystem(j,

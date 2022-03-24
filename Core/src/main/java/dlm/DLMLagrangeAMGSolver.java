@@ -75,7 +75,7 @@ public class DLMLagrangeAMGSolver
 				                                        restrictedIterate).getVelocityFunction();
 				final FluidSystem fs = fluid.getFluidSystemForSpace(space, velocity, 0,
 				                                                    restrictedIterate);
-				final var blockRhs = Fluid.getBlockRhs(fs, dt);
+				final var blockRhs = Fluid.assembleBlockRhs(fs, dt);
 				final SparseMatrix s = new SparseMatrix(blockRhs._1);
 				final List<Matrix> schurContributions =
 					IntStream.range(0, particles.size())

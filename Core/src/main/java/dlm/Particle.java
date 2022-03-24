@@ -110,13 +110,15 @@ public interface Particle
 	}
 	
 	default ParticleSystem buildSystem(final Fluid f,
-	                                   final double t, final ParticleIterate iterate)
+	                                   final double t,
+	                                   final ParticleIterate iterate,
+	                                   final ParticleIterate guess)
 	{
 		final Matrix massMatrix = buildMassMatrix();
 		final Matrix elasticityMatrix = buildElasticityMatrix();
-		final Matrix semiImplicitMatrix = buildSemiImplicitMatrix(iterate);
+		final Matrix semiImplicitMatrix = buildSemiImplicitMatrix(guess);
 		final Matrix lagrangeMatrix = buildLagrangeMatrix();
-		final Matrix lagrangeBackgroundMatrix = buildLagrangeBackgroundMatrix(f.getSpace(), iterate);
+		final Matrix lagrangeBackgroundMatrix = buildLagrangeBackgroundMatrix(f.getSpace(), guess);
 		final Vector forceRhs = buildForceRhs(t);
 		final Vector accelerationRhs = buildAccelerationRhs(iterate, massMatrix);
 		final Vector lagrangeRhs = buildLagrangeRhs(iterate, lagrangeMatrix);

@@ -16,7 +16,7 @@ import java.util.Map;
 import java.util.concurrent.ConcurrentSkipListMap;
 
 public class DLMBenchmark
-	extends DLMPracticalSystem
+	extends DLMImplicitSystem
 {
 	List<CoordinateVector> plotPoints;
 	private Map<CoordinateVector, CoordinateVector> velocityValues;
@@ -27,7 +27,7 @@ public class DLMBenchmark
 	                    final MultiGridFluid backGround,
 	                    final List<Particle> particles, final String name)
 	{
-		super(dt, timeSteps, backGround, particles, new DLMHybridMGSolver(3, 3, backGround, particles, 0.2),
+		super(dt, timeSteps, backGround, particles, new DLMHybridMGSolver(3, 2, backGround, particles, 1),
 		      name);
 		plotPoints = backGround.getSpace()
 		                       .generatePlotPoints(41);
@@ -36,22 +36,22 @@ public class DLMBenchmark
 		System.out.println("Simulating up to time " + timeSteps * dt);
 	}
 	
-	static double dt = 0.001;
+	static double dt = 0.05;
 	
 	public static void main(final String[] args)
 	{
 		final var builder = new PerformanceArguments.PerformanceArgumentBuilder();
 		builder.build();
 		final MultiGridFluid fluid = new BenchmarkFluid(CoordinateVector.fromValues(0, 0),
-		                                                CoordinateVector.fromValues(1.5, 0.41),
+		                                                CoordinateVector.fromValues(2.2, 0.41),
 		                                                new IntCoordinates(16, 4),
 		                                                1,
-		                                                2,
+		                                                1,
 		                                                dt,
 		                                                1,
 		                                                1e-3);
 		final List<Particle> particles = new ArrayList<>();
-		particles.add(new FixedSolidParticle(CoordinateVector.fromValues(0.15, 0.2),
+		particles.add(new FixedSolidParticle(CoordinateVector.fromValues(0.2, 0.2),
 		                                     0.05,
 		                                     2,
 		                                     1,
@@ -62,21 +62,21 @@ public class DLMBenchmark
 		                                             2000,
 		                                             fluid,
 		                                             particles,
-		                                             "benchhigherreyn" + fluid.refinements);
+		                                             "benchlong" + fluid.refinements);
 	}
 	
 	@Override
-	protected void postIterationCallback(final FluidIterate fluidState,
-	                                     final List<ParticleIterate> particleStates,
-	                                     final double time)
+	public void postIterationCallback(final FluidIterate fluidState,
+	                                  final List<ParticleIterate> particleStates,
+	                                  final double time)
 	{
 		System.out.println("ITeration at time " + time + " is finished");
 	}
 	
 	@Override
-	protected void show(final FluidIterate fluidState,
-	                    final List<ParticleIterate> particleStates,
-	                    final int iteration)
+	public void show(final FluidIterate fluidState,
+	                 final List<ParticleIterate> particleStates,
+	                 final int iteration)
 	{
 		velocityValues = new HashMap<>();
 		pressureValues = new HashMap<>();

@@ -16,7 +16,7 @@ import java.util.Map;
 import java.util.concurrent.ConcurrentSkipListMap;
 
 public class DLMRestartable
-	extends DLMPracticalSystem
+	extends DLMSystemFrame
 {
 	List<CoordinateVector> plotPoints;
 	private Map<CoordinateVector, CoordinateVector> velocityValues;
@@ -125,17 +125,17 @@ public class DLMRestartable
 	}
 	
 	@Override
-	protected void postIterationCallback(final FluidIterate fluidState,
-	                                     final List<ParticleIterate> particleStates,
-	                                     final double time)
+	public void postIterationCallback(final FluidIterate fluidState,
+	                                  final List<ParticleIterate> particleStates,
+	                                  final double time)
 	{
 		System.out.println("ITeration at time " + time + " is finished");
 	}
 	
 	@Override
-	protected void show(final FluidIterate fluidState,
-	                    final List<ParticleIterate> particleStates,
-	                    final int iteration)
+	public void show(final FluidIterate fluidState,
+	                 final List<ParticleIterate> particleStates,
+	                 final int iteration)
 	{
 		velocityValues = new HashMap<>();
 		pressureValues = new HashMap<>();

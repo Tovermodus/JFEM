@@ -52,7 +52,7 @@ public class CartesianSchwarzTest
 			                                space,
 			                                partitions,
 			                                overlap,
-			                                new AdditiveSubspaceCorrection<>(1, null), new DirectSolver());
+			                                new AdditiveSubspaceCorrection<>(1), new DirectSolver());
 		assertEquals(schwarz.cellPatches.size(), partitions.size());
 		assertEquals(schwarz.getPatchCount(), partitions.size());
 		final Set<TPCell> allCells = new HashSet<>();
@@ -90,7 +90,7 @@ public class CartesianSchwarzTest
 			                                space,
 			                                partitions,
 			                                overlap,
-			                                new AdditiveSubspaceCorrection<>(1, null), new DirectSolver());
+			                                new AdditiveSubspaceCorrection<>(1), new DirectSolver());
 		assertEquals(schwarz.cellPatches.size(), partitions.size());
 		assertEquals(schwarz.getPatchCount(), partitions.size());
 		final Set<TPCell> allCells = new HashSet<>();
@@ -128,7 +128,7 @@ public class CartesianSchwarzTest
 			                                space,
 			                                partitions,
 			                                overlap,
-			                                new AdditiveSubspaceCorrection<>(1, null), new DirectSolver());
+			                                new AdditiveSubspaceCorrection<>(1), new DirectSolver());
 		DenseVector v = new DenseVector(space.getShapeFunctions()
 		                                     .size());
 		for (int i = 0; i < space.getShapeFunctions()
@@ -160,7 +160,7 @@ public class CartesianSchwarzTest
 			                                space,
 			                                partitions,
 			                                overlap,
-			                                new AdditiveSubspaceCorrection<>(1, null), new DirectSolver());
+			                                new AdditiveSubspaceCorrection<>(1), new DirectSolver());
 		for (int i = 0; i < schwarz.getPatchCount(); i++)
 		{
 			final Matrix R = schwarz.getRestrictionOperator(i);

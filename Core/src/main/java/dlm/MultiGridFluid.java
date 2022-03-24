@@ -44,10 +44,13 @@ public abstract class MultiGridFluid
 	FluidSystem finestFliudSystem;
 	
 	@Override
-	public FluidSystem buildSystem(final double t, final FluidIterate iterate, final List<Particle> particles)
+	public FluidSystem buildSystem(final double t,
+	                               final FluidIterate iterate,
+	                               final FluidIterate fluidGuess,
+	                               final List<Particle> particles)
 	{
 		finestFliudSystem = getFluidSystemForSpace(getSpace(),
-		                                           getVelocity(iterate),
+		                                           getVelocity(fluidGuess),
 		                                           t,
 		                                           iterate.current);
 		return finestFliudSystem;

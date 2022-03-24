@@ -71,7 +71,7 @@ public class DLMDiagonal
 				                                        restrictedIterate).getVelocityFunction();
 				final FluidSystem fs = fluid.getFluidSystemForSpace(space, velocity, 0,
 				                                                    restrictedIterate);
-				final var blockRhs = Fluid.getBlockRhs(fs, dt);
+				final var blockRhs = Fluid.assembleBlockRhs(fs, dt);
 				final SparseMatrix s = new SparseMatrix(blockRhs._1);
 				final Int2DoubleMap nodeValues = fluid.getDirichletNodeValuesForSpace(space, t);
 				nodeValues.forEach((node, val) ->
@@ -219,8 +219,11 @@ public class DLMDiagonal
 //				                         .euclidianNorm() + " " + vector.euclidianNorm());
 //				System.out.println();
 //				return ret;
-				final Vector ret = new BlockGaussseidelSmoother(systemMatrix, 3).smooth(systemMatrix, vector,
-				                                                                        vector, true, "GS ");
+				final Vector ret = new BlockGaussseidelSmoother(systemMatrix, 3).smooth(systemMatrix,
+				                                                                        vector,
+				                                                                        vector,
+				                                                                        true,
+				                                                                        "GS ");
 				System.out.println(systemMatrix.mvMul(ret)
 				                               .sub(vector)
 				                               .euclidianNorm());

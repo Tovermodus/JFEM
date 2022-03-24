@@ -1,24 +1,22 @@
 package dlm;
 
 import io.vavr.Tuple2;
-import it.unimi.dsi.fastutil.ints.Int2DoubleArrayMap;
-import it.unimi.dsi.fastutil.ints.Int2DoubleMap;
-import linalg.*;
+import linalg.DenseMatrix;
+import linalg.DenseVector;
 
 import javax.swing.*;
 import java.awt.*;
 import java.io.*;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.concurrent.Executors;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
-public abstract class DLMPracticalSystem
+public abstract class DLMSystemFrame
 	extends JFrame
+	implements DLMSystemInterface
 {
 	private final double dt;
 	private final int timeSteps;
@@ -38,11 +36,11 @@ public abstract class DLMPracticalSystem
 	final JButton stoprun;
 	final String name;
 	
-	public DLMPracticalSystem(final double dt,
-	                          final int timeSteps,
-	                          final Fluid backGround,
-	                          final List<Particle> particles,
-	                          final DLMSolver solver, final String name)
+	public DLMSystemFrame(final double dt,
+	                      final int timeSteps,
+	                      final Fluid backGround,
+	                      final List<Particle> particles,
+	                      final DLMSolver solver, final String name)
 	{
 		super("DLMActions");
 		this.backGround = backGround;
@@ -303,124 +301,36 @@ public abstract class DLMPracticalSystem
 		return new Tuple2<>(fluidIterate, particleIterates);
 	}
 	
-	private Tuple2<FluidIterate, List<ParticleIterate>> timeStep(final FluidIterate fluidState,
-	                                                             final List<ParticleIterate> particleStates,
-	                                                             final double time)
+	@Override
+	public List<Particle> getParticles()
 	{
-		final Map<IntCoordinates, SparseMatrix> blocks = new HashMap<>();
-		final DenseVector rhs =
-			new DenseVector(backGround.getSystemSize() + particles.stream()
-			                                                      .mapToInt(p -> p.getSystemSize() + p.getLagrangeSize())
-			                                                      .sum());
-		final FluidSystem fluidSystem = backGround.buildSystem(time, fluidState, particles);
-		final List<ParticleSystem> particleSystems =
-			IntStream.range(0, particles.size())
-			         .mapToObj(i -> particles.get(i)
-			                                 .buildSystem(backGround, time, particleStates.get(i)))
-			         .collect(Collectors.toList());
-		
-		int offset = 0;
-		final var fluidBlockRhs = Fluid.getBlockRhs(fluidSystem, dt);
-		blocks.put(new IntCoordinates(0, 0), fluidBlockRhs._1);
-		rhs.addSmallVectorAt(fluidBlockRhs._2, 0);
-		offset += fluidBlockRhs._1.getCols();
-		for (int i = 0; i < particles.size(); i++)
-		{
-			offset = addParticleBlocks(blocks, rhs, particleSystems, offset, i);
-		}
-		final BlockSparseMatrix systemMatrix = new BlockSparseMatrix(blocks, rhs.getLength(), rhs.getLength());
-		final Tuple2<BlockSparseMatrix, DenseVector> system = applyBoundaryValues(systemMatrix, rhs, time);
-		final Vector solution = solver.solve(system._1, system._2, fluidState, particleStates, fluidSystem,
-		                                     particleSystems, dt, time);
-		final FluidIterate ret = new FluidIterate(solution.slice(0, backGround.getSystemSize()));
-		offset = backGround.getSystemSize();
-		final List<ParticleIterate> iterates = new ArrayList<>();
-		for (int i = 0; i < particles.size(); i++)
-		{
-			final ParticleIterate it
-				= new ParticleIterate(particleStates.get(i),
-				                      solution.slice(offset,
-				                                     offset + particles.get(i)
-				                                                       .getSystemSize())
-				                              .mul(dt),
-				                      solution.slice(offset + particles.get(i)
-				                                                       .getSystemSize(),
-				                                     offset + particles.get(i)
-				                                                       .getSystemSize()
-					                                     + particles.get(i)
-					                                                .getLagrangeSize()));
-			iterates.add(it);
-			offset += particles.get(i)
-			                   .getSystemSize() + particles.get(i)
-			                                               .getLagrangeSize();
-		}
-		return new Tuple2<>(ret, iterates);
+		return particles;
 	}
 	
-	protected Tuple2<BlockSparseMatrix, DenseVector> applyBoundaryValues(final BlockSparseMatrix systemMatrix,
-	                                                                     final DenseVector rhs, final double t)
+	@Override
+	public Fluid getFluid()
 	{
-		final SparseMatrix ret = systemMatrix.toSparse();
-		final DenseVector retRhs = new DenseVector(rhs);
-		final Int2DoubleMap nodeValues = new Int2DoubleArrayMap();
-		final Int2DoubleMap fluidDirichletNodeValues = backGround.getDirichletNodeValues(t);
-		nodeValues.putAll(fluidDirichletNodeValues);
-		for (int i = 0; i < particles.size(); i++)
-		{
-			final Int2DoubleMap particleDirichletNodeValues = particles.get(i)
-			                                                           .getDirichletNodeValues(t);
-			final int finalI = i;
-			final int particleSpaceSize = particles.get(i)
-			                                       .getSystemSize();
-			particleDirichletNodeValues.forEach((node, val) ->
-				                                    nodeValues.put(node + systemMatrix.getBlockStarts()[finalI + 1],
-				                                                   val.doubleValue()));
-			particleDirichletNodeValues.forEach((node, val) ->
-				                                    nodeValues.put(node + particleSpaceSize + systemMatrix.getBlockStarts()[finalI + 1],
-				                                                   val.doubleValue()));
-		}
-		nodeValues.forEach((node, val) ->
-		                   {
-			                   final DenseVector column = ret.getColumn(node);
-			                   for (int i = 0; i < column.getLength(); i++)
-			                   {
-				                   retRhs.add(-column.at(i) * val, i);
-			                   }
-			                   ret.deleteColumn(node);
-			                   ret.deleteRow(node);
-			                   ret.set(1, node, node);
-			                   retRhs.set(val, node);
-		                   });
-		return new Tuple2<>(new BlockSparseMatrix(ret, systemMatrix.getBlockStarts()), retRhs);
+		return backGround;
 	}
 	
-	private int addParticleBlocks(final Map<IntCoordinates, SparseMatrix> blocks,
-	                              final DenseVector rhs,
-	                              final List<ParticleSystem> particleSystems,
-	                              int offset,
-	                              final int i)
+	@Override
+	public DLMSolver getSolver()
 	{
-		final var particleBlockRhs = particles.get(i)
-		                                      .getBlockRhs(particleSystems.get(i), dt);
-		blocks.put(new IntCoordinates(offset, offset), particleBlockRhs._1);
-		rhs.addSmallVectorAt(particleBlockRhs._2, offset);
-		final var particleBackgroundLagrangeBlock =
-			particles.get(i)
-			         .getLagrangeBackgroundBlock(particleSystems.get(i), backGround, dt);
-		blocks.put(new IntCoordinates(0, offset), particleBackgroundLagrangeBlock);
-		final var particleBackgroundLagrangeBlockTranspose =
-			particles.get(i)
-			         .getLagrangeBackgroundBlockTranspose(particleSystems.get(i), backGround, dt);
-		blocks.put(new IntCoordinates(offset, 0), particleBackgroundLagrangeBlockTranspose);
-		offset += particleBlockRhs._1.getCols();
-		return offset;
+		return solver;
 	}
 	
-	protected abstract void postIterationCallback(final FluidIterate fluidState,
-	                                              final List<ParticleIterate> particleStates,
-	                                              final double time);
+	@Override
+	public double getDT()
+	{
+		return dt;
+	}
 	
-	protected abstract void show(final FluidIterate fluidState,
-	                             final List<ParticleIterate> particleStates,
-	                             int iteration);
+	@Override
+	abstract public void postIterationCallback(final FluidIterate fluidState,
+	                                           final List<ParticleIterate> particleStates,
+	                                           final double time);
+	
+	@Override
+	abstract public void show(final FluidIterate fluidState, final List<ParticleIterate> particleStates,
+	                          final int iteration);
 }

@@ -74,7 +74,7 @@ public class DLMFluidMGSolver2
 				                                        restrictedIterate).getVelocityFunction();
 				final FluidSystem fs = fluid.getFluidSystemForSpace(space, velocity, 0,
 				                                                    restrictedIterate);
-				final var blockRhs = Fluid.getBlockRhs(fs, dt);
+				final var blockRhs = Fluid.assembleBlockRhs(fs, dt);
 				final SparseMatrix s = new SparseMatrix(blockRhs._1);
 				final Int2DoubleMap nodeValues = fluid.getDirichletNodeValuesForSpace(space, t);
 				nodeValues.forEach((node, val) ->

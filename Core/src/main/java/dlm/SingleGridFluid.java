@@ -29,7 +29,10 @@ public abstract class SingleGridFluid
 	}
 	
 	@Override
-	public FluidSystem buildSystem(final double t, final FluidIterate iterate, final List<Particle> particles)
+	public FluidSystem buildSystem(final double t,
+	                               final FluidIterate iterate,
+	                               final FluidIterate fluidGuess,
+	                               final List<Particle> particles)
 	{
 		final SparseMatrix massMatrix = new SparseMatrix(getSystemSize(), getSystemSize());
 		getSpace().writeCellIntegralsToMatrix(getMassIntegrals(), massMatrix);
@@ -38,7 +41,7 @@ public abstract class SingleGridFluid
 		final SparseMatrix semiImplicitMatrix = new SparseMatrix(getSystemSize(), getSystemSize());
 		System.out.println("semiImp");
 		final Stopwatch s = Stopwatch.createStarted();
-		getSpace().writeCellIntegralsToMatrix(getSemiImplicitIntegrals(getVelocity(iterate)),
+		getSpace().writeCellIntegralsToMatrix(getSemiImplicitIntegrals(getVelocity(fluidGuess)),
 		                                      semiImplicitMatrix);
 		System.out.println("semiImpDone" + s.elapsed());
 		final DenseVector forceRhs = new DenseVector(getSystemSize());

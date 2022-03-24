@@ -27,7 +27,7 @@ public class PreconditionedIterativeImplicitSchur
 //			System.out.println(((AMGPreconditionerSpace) preconditioner).finest_system.mvMul(b)
 //			                                                                          .sub(A.mvMul(b))
 //			                                                                          .absMaxElement());
-			return it.solvePGMRES(A, preconditioner, b, 1e-7);
+			return it.solvePGMRES(A, preconditioner, b, 1e-9);
 		};
 	}
 }

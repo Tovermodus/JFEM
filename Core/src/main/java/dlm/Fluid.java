@@ -74,9 +74,12 @@ public interface Fluid
 		return new FluidIterate(initial);
 	}
 	
-	FluidSystem buildSystem(final double t, final FluidIterate iterate, List<Particle> particles);
+	FluidSystem buildSystem(final double t,
+	                        final FluidIterate iterate,
+	                        FluidIterate fluidGuess,
+	                        List<Particle> particles);
 	
-	static Tuple2<SparseMatrix, DenseVector> getBlockRhs(final FluidSystem fs, final double dt)
+	static Tuple2<SparseMatrix, DenseVector> assembleBlockRhs(final FluidSystem fs, final double dt)
 	{
 		final SparseMatrix s =
 			new SparseMatrix(fs.massMatrix.mul(1. / dt)

@@ -113,6 +113,16 @@ public interface MGPreconditionerInterface<CSpace extends AcceptsMatrixBoundaryV
 	
 	void applyZeroBoundaryConditions(CSpace space, MutableVector vector);
 	
+	default void applyBoundaryConditions(final CSpace space, final MutableVector vector,
+	                                     final Vector boundaryConditionRhs)
+	{
+		applyZeroBoundaryConditions(space, vector);
+		final DenseVector nonBoundaryRhs = new DenseVector(boundaryConditionRhs);
+		applyZeroBoundaryConditions(space, nonBoundaryRhs);
+		final Vector onlyBoundaryRhs = boundaryConditionRhs.sub(nonBoundaryRhs);
+		vector.addInPlace(onlyBoundaryRhs);
+	}
+	
 	default Vector mgStepV(final int level, Vector guess, final Vector rhs)
 	{
 		final String prefSpaces = "   .".repeat(maxLevel() - level + 1);

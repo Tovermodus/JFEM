@@ -87,15 +87,16 @@ public abstract class DLMSystem
 			new DenseVector(backGround.getSystemSize() + particles.stream()
 			                                                      .mapToInt(p -> p.getSystemSize() + p.getLagrangeSize())
 			                                                      .sum());
-		final FluidSystem fluidSystem = backGround.buildSystem(time, fluidState, particles);
+		final FluidSystem fluidSystem = backGround.buildSystem(time, fluidState, fluidState, particles);
 		final List<ParticleSystem> particleSystems =
 			IntStream.range(0, particles.size())
 			         .mapToObj(i -> particles.get(i)
-			                                 .buildSystem(backGround, time, particleStates.get(i)))
+			                                 .buildSystem(backGround, time, particleStates.get(i),
+			                                              particleStates.get(i)))
 			         .collect(Collectors.toList());
 		
 		int offset = 0;
-		final var fluidBlockRhs = Fluid.getBlockRhs(fluidSystem, dt);
+		final var fluidBlockRhs = Fluid.assembleBlockRhs(fluidSystem, dt);
 		blocks.put(new IntCoordinates(0, 0), fluidBlockRhs._1);
 		rhs.addSmallVectorAt(fluidBlockRhs._2, 0);
 		offset += fluidBlockRhs._1.getCols();

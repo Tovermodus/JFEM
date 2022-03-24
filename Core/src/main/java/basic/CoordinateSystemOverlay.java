@@ -1,6 +1,7 @@
 package basic;
 
 import io.vavr.Tuple2;
+import io.vavr.Tuple4;
 import linalg.CoordinateVector;
 
 import java.awt.*;
@@ -11,7 +12,7 @@ public class CoordinateSystemOverlay
 {
 	private final CoordinateVector startCoordinates;
 	private final CoordinateVector endCoordinates;
-	private final CopyOnWriteArrayList<Tuple2<CoordinateVector, String>> points;
+	private final CopyOnWriteArrayList<Tuple4<CoordinateVector, String, Integer, Color>> points;
 	
 	public CoordinateSystemOverlay(final CoordinateVector startCoordinates, final CoordinateVector endCoordinates)
 	{
@@ -20,9 +21,9 @@ public class CoordinateSystemOverlay
 		points = new CopyOnWriteArrayList<>();
 	}
 	
-	public void addPoint(final CoordinateVector newPoint, final String title)
+	public void addPoint(final CoordinateVector newPoint, final String title, final int size, final Color color)
 	{
-		points.add(new Tuple2<>(newPoint, title));
+		points.add(new Tuple4<>(newPoint, title, size, color));
 	}
 	
 	@Override
@@ -45,21 +46,21 @@ public class CoordinateSystemOverlay
 		                                                        1);
 		g.drawLine(min._1, min._2, max._1, min._2);
 		g.drawLine(min._1, min._2, min._1, max._2);
-		for (final Tuple2<CoordinateVector, String> point : points)
+		for (final Tuple4<CoordinateVector, String, Integer, Color> point : points)
 		{
-			drawPoint(g, width, height, point._1, point._2, true);
+			drawPoint(g, width, height, point._1, point._2, true, point._3, point._4);
 		}
-		drawPoint(g, width, height, startCoordinates, String.format("%4.1e", startCoordinates.x()), false);
-		drawPoint(g, width, height, startCoordinates, String.format("%4.1e", startCoordinates.y()), true);
-		drawPoint(g, width, height, endCoordinates, String.format("%4.1e", endCoordinates.x()), false);
-		drawPoint(g, width, height, endCoordinates, String.format("%4.1e", endCoordinates.y()), true);
-		g.drawString(String.format("%4.1e", endCoordinates.x()), max._1 - 12, min._2 + 19);
-		g.drawString(String.format("%4.1e", endCoordinates.y()), min._1 - 52, max._2 - 1);
+//		drawPoint(g, width, height, startCoordinates, String.format("%4.1e", startCoordinates.x()), false);
+//		drawPoint(g, width, height, startCoordinates, String.format("%4.1e", startCoordinates.y()), true);
+//		drawPoint(g, width, height, endCoordinates, String.format("%4.1e", endCoordinates.x()), false);
+//		drawPoint(g, width, height, endCoordinates, String.format("%4.1e", endCoordinates.y()), true);
+//		g.drawString(String.format("%4.1e", endCoordinates.x()), max._1 - 12, min._2 + 19);
+//		g.drawString(String.format("%4.1e", endCoordinates.y()), min._1 - 52, max._2 - 1);
 	}
 	
 	private void drawPoint(final Graphics g, final int width, final int height, final CoordinateVector point,
 	                       final String title,
-	                       final boolean labelLeft)
+	                       final boolean labelLeft, final int size, final Color c)
 	{
 		
 		final Tuple2<Integer, Integer> pointOnGrid = ScalarPlot2D.getXY(point,
@@ -69,8 +70,8 @@ public class CoordinateSystemOverlay
 		                                                                height,
 		                                                                4,
 		                                                                4);
-		g.setColor(Color.RED);
-		g.fillOval(pointOnGrid._1, pointOnGrid._2, 4, 4);
+		g.setColor(c);
+		g.fillOval(pointOnGrid._1 - size / 2, pointOnGrid._2 - size / 2, size, size);
 		g.setColor(Color.BLACK);
 		if (labelLeft)
 		{
