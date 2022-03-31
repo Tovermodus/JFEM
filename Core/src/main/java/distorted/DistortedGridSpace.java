@@ -142,7 +142,7 @@ public abstract class DistortedGridSpace<ST extends ShapeFunction<DistortedCell,
 	@Override
 	public Set<ST> getShapeFunctionsWithSupportOnCell(final DistortedCell cell)
 	{
-		return supportOnCell.get(cell);
+		return supportOnCell.get(cell.doneCode());
 	}
 	
 	@Override

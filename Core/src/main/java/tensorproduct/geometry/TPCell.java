@@ -41,8 +41,8 @@ public class TPCell
 	{
 		if (unitHyperCubes == null)
 		{
-			unitHyperCubes = new TPCell[3];
-			for (int d = 0; d < 3; d++)
+			unitHyperCubes = new TPCell[4];
+			for (int d = 0; d < 4; d++)
 			{
 				final List<Cell1D> cells = new ArrayList<>(d);
 				for (int i = 0; i < d; i++)
