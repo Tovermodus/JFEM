@@ -66,12 +66,11 @@ public interface MGPreconditionerInterface<CSpace extends AcceptsMatrixBoundaryV
 				                                    if (coarseCell.isInCell(fineCell.center()))
 				                                    {
 					                                    final Collection<ST> coarseFunctions =
-						                                    coarse.getCellSupportMapping()
-						                                          .get(
-							                                          coarseCell);
+						                                    coarse.getShapeFunctionsWithSupportOnCell(
+							                                    coarseCell);
 					                                    final Collection<ST> fineFunctions =
-						                                    fine.getCellSupportMapping()
-						                                        .get(fineCell);
+						                                    fine.getShapeFunctionsWithSupportOnCell(
+							                                    fineCell);
 					                                    synchronized (this)
 					                                    {
 						                                    for (final ST function : coarseFunctions)

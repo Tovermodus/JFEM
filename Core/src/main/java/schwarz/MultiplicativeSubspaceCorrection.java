@@ -1,8 +1,12 @@
 package schwarz;
 
+import basic.PlotWindow;
 import linalg.DenseVector;
 import linalg.Vector;
 import linalg.VectorMultiplyable;
+import mixed.MixedPlot2D;
+import mixed.MixedTPFESpaceFunction;
+import mixed.QkQkFunction;
 import mixed.TaylorHoodSpace;
 import org.jetbrains.annotations.NotNull;
 
@@ -62,15 +66,14 @@ public class MultiplicativeSubspaceCorrection<OT extends VectorMultiplyable>
 			final Vector globalSolComponent
 				= schwarz.getGlobalVector(i,
 				                          localSol);
-//			if (i % 4 == 0)
-//			{
-//			final MixedTPFESpaceFunction<QkQkFunction> fun =
-//				new MixedTPFESpaceFunction<>(space.getShapeFunctionMap(), iterate);
-//			PlotWindow.addPlotShow(new MixedPlot2D(fun,
-//			                                       points,
-//			                                       (int) Math.sqrt(space.getShapeFunctions()
-//			                                                            .size()) / 2));
-//			}
+			if (i % 1 == 1 && localRes.euclidianNorm() > 1e-2)
+			{
+				final MixedTPFESpaceFunction<QkQkFunction> fun =
+					new MixedTPFESpaceFunction<>(space.getShapeFunctionMap(), iterate);
+				PlotWindow.addPlotShow(new MixedPlot2D(fun,
+				                                       space.generatePlotPoints(20),
+				                                       20));
+			}
 			iterate = iterate.add(globalSolComponent);
 		}
 		return iterate;

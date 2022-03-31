@@ -1,5 +1,6 @@
 package basic;
 
+import java.util.Collection;
 import java.util.Set;
 import java.util.function.BiConsumer;
 import java.util.function.BiPredicate;
@@ -74,9 +75,10 @@ public interface AcceptsBoundaryValues<CT extends Cell<CT, FT>,
 	@Override
 	default void forEachFunctionCombinationOnCell(final CT K, final BiConsumer<ST, ST> action)
 	{
-		for (final ST function1 : getShapeFunctionsWithSupportOnCell(K))
+		final Collection<ST> functionsOnCell = getShapeFunctionsWithSupportOnCell(K);
+		for (final ST function1 : functionsOnCell)
 		{
-			for (final ST function2 : getShapeFunctionsWithSupportOnCell(K))
+			for (final ST function2 : functionsOnCell)
 			{
 				if (getFixedNodeIndices().contains(function2.getGlobalIndex()))
 					continue;

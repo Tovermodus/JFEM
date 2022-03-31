@@ -41,6 +41,7 @@ public class ContinuousTPShapeFunction
 		cells.add(supportCell);
 		cellFunctionMapping.put(supportCell.doneCode(), supportCellFunctions);
 		checkIfPointOnFace(functionalPoint, supportCell);
+		cells.forEach(c -> faces.addAll(c.getFaces()));
 	}
 	
 	public ContinuousTPShapeFunction(final TPCell supportCell,
@@ -57,6 +58,7 @@ public class ContinuousTPShapeFunction
 		cellFunctionMapping.put(supportCell.doneCode(), supportCellFunctions);
 		cells.add(supportCell);
 		checkIfPointOnFace(functionalPoint, supportCell);
+		cells.forEach(c -> faces.addAll(c.getFaces()));
 	}
 	
 	private static int[] decomposeIndex(final int dimension, final int polynomialDegree, int localIndex)
@@ -153,7 +155,7 @@ public class ContinuousTPShapeFunction
 	{
 		double ret = 1;
 		if (cell == null)
-			return ret;
+			return 0;
 		final List<? extends Function1D> function1Ds;
 		if (cellFunctionMapping.containsKey(cell.doneCode()))
 		{

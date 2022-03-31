@@ -98,7 +98,5 @@ public interface FESpace<CT extends Cell<CT, FT>, FT extends Face<CT, FT>,
 				action.accept(function1, function2);
 	}
 	
-	Multimap<CT, ST> getCellSupportMapping();
-	
 	Multimap<FT, ST> getFaceSupportMapping();
 }

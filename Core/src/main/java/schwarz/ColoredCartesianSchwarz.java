@@ -134,8 +134,7 @@ public class ColoredCartesianSchwarz<ST extends ShapeFunction<TPCell, TPFace, ?,
 		final Collection<TPCell> patchCells = getCellPatch(patch);
 		final Set<ST> functions = new TreeSet<ST>(Comparator.comparingInt(st -> st.getGlobalIndex()));
 		for (final TPCell c : patchCells)
-			functions.addAll(space.getCellSupportMapping()
-			                      .get(c));
+			functions.addAll(space.getShapeFunctionsWithSupportOnCell(c));
 		final RestrictionMatrix s = new RestrictionMatrix(functions.size(),
 		                                                  space.getShapeFunctions()
 		                                                       .size());

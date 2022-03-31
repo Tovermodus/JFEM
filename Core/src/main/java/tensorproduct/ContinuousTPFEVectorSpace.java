@@ -42,7 +42,7 @@ public class ContinuousTPFEVectorSpace
 				shapeFunction.setGlobalIndex(shapeFunctions.size());
 				shapeFunctions.add(shapeFunction);
 				for (final TPCell supportCell : shapeFunction.getCells())
-					getCellSupportMapping().put(supportCell, shapeFunction);
+					addFunctionToCell(shapeFunction, supportCell);
 				for (final TPFace supportFace : shapeFunction.getFaces())
 					getFaceSupportMapping().put(supportFace, shapeFunction);
 			}

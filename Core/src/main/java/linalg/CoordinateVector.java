@@ -30,6 +30,11 @@ public class CoordinateVector
 		super(vector);
 	}
 	
+	public CoordinateVector(final double[] vector, final boolean wrap)
+	{
+		super(vector, wrap);
+	}
+	
 	public static CoordinateVector getUnitVector(final int d, final int index)
 	{
 		if (d == 2)

@@ -8,7 +8,6 @@ import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
 import linalg.CoordinateComparator;
 import linalg.CoordinateDenseMatrix;
-import linalg.CoordinateMatrix;
 import linalg.CoordinateVector;
 import org.jetbrains.annotations.NotNull;
 
@@ -24,20 +23,34 @@ public class TPCell
 	Set<TPFace> faces;
 	boolean refined;
 	private int doneCode;
+	public double[] size;
 	
 	TPCell(final List<Cell1D> cell1Ds)
 	{
 		this.cell1Ds = ImmutableList.copyOf(cell1Ds);
 		this.faces = new HashSet<>(2 * getDimension());
 		this.refined = false;
+		size = cell1Ds.stream()
+		              .mapToDouble(Cell1D::length)
+		              .toArray();
 	}
+	
+	static TPCell[] unitHyperCubes;
 	
 	public static TPCell unitHyperCube(final int dimension)
 	{
-		final List<Cell1D> cells = new ArrayList<>(dimension);
-		for (int i = 0; i < dimension; i++)
-			cells.add(new Cell1D(0, 1));
-		return new TPCell(cells);
+		if (unitHyperCubes == null)
+		{
+			unitHyperCubes = new TPCell[3];
+			for (int d = 0; d < 3; d++)
+			{
+				final List<Cell1D> cells = new ArrayList<>(d);
+				for (int i = 0; i < d; i++)
+					cells.add(new Cell1D(0, 1));
+				unitHyperCubes[d] = new TPCell(cells);
+			}
+		}
+		return unitHyperCubes[dimension];
 	}
 	
 	@Override
@@ -206,7 +219,7 @@ public class TPCell
 	}
 	
 	@Override
-	public CoordinateMatrix transformationGradientFromReferenceCell(final CoordinateVector pos)
+	public CoordinateDenseMatrix transformationGradientFromReferenceCell(final CoordinateVector pos)
 	{
 		final CoordinateDenseMatrix ret = new CoordinateDenseMatrix(getDimension(), getDimension());
 		for (int i = 0; i < getDimension(); i++)
@@ -219,7 +232,7 @@ public class TPCell
 	}
 	
 	@Override
-	public CoordinateMatrix transformationGradientToReferenceCell(final CoordinateVector pos)
+	public CoordinateDenseMatrix transformationGradientToReferenceCell(final CoordinateVector pos)
 	{
 		final CoordinateDenseMatrix ret = new CoordinateDenseMatrix(getDimension(), getDimension());
 		for (int i = 0; i < getDimension(); i++)

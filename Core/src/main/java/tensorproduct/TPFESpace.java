@@ -41,7 +41,7 @@ public class TPFESpace
 				                                                     localIndex);
 				function.setGlobalIndex(shapeFunctions.size());
 				shapeFunctions.add(function);
-				getCellSupportMapping().put(cell, function);
+				addFunctionToCell(function, cell);
 				for (final TPFace f : cell.getFaces())
 					getFaceSupportMapping().put(f, function);
 			}

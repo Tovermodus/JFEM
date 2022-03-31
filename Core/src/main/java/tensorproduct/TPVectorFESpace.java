@@ -30,7 +30,7 @@ public class TPVectorFESpace
 				                                                            TPShapeFunction.class);
 				shapeFunction.setGlobalIndex(shapeFunctions.size());
 				shapeFunctions.add(shapeFunction);
-				getCellSupportMapping().put(cell, shapeFunction);
+				addFunctionToCell(shapeFunction, cell);
 				for (final TPFace face : cell.getFaces())
 					getFaceSupportMapping().put(face, shapeFunction);
 			}

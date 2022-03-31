@@ -11,6 +11,8 @@ import distorted.geometry.DistortedCell;
 import distorted.geometry.DistortedFace;
 import distorted.geometry.DistortedGrid;
 import io.vavr.Tuple2;
+import it.unimi.dsi.fastutil.ints.Int2ObjectArrayMap;
+import it.unimi.dsi.fastutil.ints.Int2ObjectMap;
 import linalg.CoordinateVector;
 import linalg.DenseVector;
 import linalg.SparseMatrix;
@@ -25,7 +27,7 @@ public abstract class DistortedGridSpace<ST extends ShapeFunction<DistortedCell,
 	Assembleable
 {
 	protected final DistortedGrid grid;
-	private final TreeMultimap<DistortedCell, ST> supportOnCell;
+	protected final Int2ObjectMap<TreeSet<ST>> supportOnCell;
 	private final TreeMultimap<DistortedFace, ST> supportOnFace;
 	protected TreeSet<ST> shapeFunctions;
 	protected SparseMatrix systemMatrix;
@@ -41,7 +43,7 @@ public abstract class DistortedGridSpace<ST extends ShapeFunction<DistortedCell,
 	
 	public DistortedGridSpace(final DistortedGrid grid)
 	{
-		supportOnCell = TreeMultimap.create();
+		supportOnCell = new Int2ObjectArrayMap<>();
 		supportOnFace = TreeMultimap.create();
 		this.grid = grid;
 		fixedNodes = Sets.newConcurrentHashSet();
@@ -58,7 +60,9 @@ public abstract class DistortedGridSpace<ST extends ShapeFunction<DistortedCell,
 	
 	protected void addFunctionToCell(final ST function, final DistortedCell cell)
 	{
-		supportOnCell.put(cell, function);
+		supportOnCell.putIfAbsent(cell.doneCode(), new TreeSet<>());
+		supportOnCell.get(cell.doneCode())
+		             .add(function);
 	}
 	
 	protected void addFunctionToFace(final ST function, final DistortedFace face)
@@ -151,12 +155,6 @@ public abstract class DistortedGridSpace<ST extends ShapeFunction<DistortedCell,
 	public List<CoordinateVector> generatePlotPoints(final int resolution)
 	{
 		return grid.generatePlotPoints(resolution);
-	}
-	
-	@Override
-	public Multimap<DistortedCell, ST> getCellSupportMapping()
-	{
-		return supportOnCell;
 	}
 	
 	@Override

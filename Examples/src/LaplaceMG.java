@@ -7,8 +7,8 @@ import linalg.*;
 import multigrid.MGPreconditionerSpace;
 import multigrid.RichardsonSmoother;
 import multigrid.Smoother;
-import tensorproduct.ContinuousTPFESpace;
-import tensorproduct.ContinuousTPShapeFunction;
+import tensorproduct.CTPFESpace;
+import tensorproduct.CTPShapeFunction;
 import tensorproduct.TPCellIntegral;
 import tensorproduct.TPRightHandSideIntegral;
 import tensorproduct.geometry.TPCell;
@@ -23,34 +23,34 @@ public class LaplaceMG
 	{
 		
 		final int refinements = 1;
-		final TPCellIntegral<ContinuousTPShapeFunction> gg =
+		final TPCellIntegral<CTPShapeFunction> gg =
 			new TPCellIntegral<>(TPCellIntegral.GRAD_GRAD);
-		final TPRightHandSideIntegral<ContinuousTPShapeFunction> rightHandSideIntegral =
+		final TPRightHandSideIntegral<CTPShapeFunction> rightHandSideIntegral =
 			new TPRightHandSideIntegral<>(LaplaceReferenceSolution.scalarRightHandSide(),
 			                              TPRightHandSideIntegral.VALUE);
-		final MGPreconditionerSpace<ContinuousTPFESpace, TPCell, TPFace, ContinuousTPShapeFunction, Double,
+		final MGPreconditionerSpace<CTPFESpace, TPCell, TPFace, CTPShapeFunction, Double,
 			CoordinateVector,
 			CoordinateMatrix>
 			mg = new MGPreconditionerSpace<>(refinements,
 			                                 2)
 		{
 			@Override
-			public List<ContinuousTPFESpace> createSpaces(final int refinements)
+			public List<CTPFESpace> createSpaces(final int refinements)
 			{
-				final ArrayList<ContinuousTPFESpace> ret = new ArrayList<>();
+				final ArrayList<CTPFESpace> ret = new ArrayList<>();
 				int mul = 1;
 				for (int i = 0; i < refinements + 1; i++)
 				{
-					ret.add(new ContinuousTPFESpace(CoordinateVector.fromValues(-1, -1),
-					                                CoordinateVector.fromValues(1, 1),
-					                                new IntCoordinates(2, 2).mul(mul)));
+					ret.add(new CTPFESpace(CoordinateVector.fromValues(-1, -1),
+					                       CoordinateVector.fromValues(1, 1),
+					                       new IntCoordinates(2, 2).mul(mul)));
 					mul *= 2;
 				}
 				return ret;
 			}
 			
 			@Override
-			public Tuple2<VectorMultiplyable, DenseVector> createSystem(final ContinuousTPFESpace space)
+			public Tuple2<VectorMultiplyable, DenseVector> createSystem(final CTPFESpace space)
 			{
 				final SparseMatrix s = new SparseMatrix(space.getShapeFunctionMap()
 				                                             .size(),
@@ -76,7 +76,7 @@ public class LaplaceMG
 			}
 			
 			@Override
-			public void applyZeroBoundaryConditions(final ContinuousTPFESpace space,
+			public void applyZeroBoundaryConditions(final CTPFESpace space,
 			                                        final MutableVector vector)
 			{
 				space.projectOntoBoundaryValues(ScalarFunction.constantFunction(0), vector);
@@ -92,7 +92,7 @@ public class LaplaceMG
 		                                             .generatePlotPoints(
 			                                             30),
 		                                    30, "reference"));
-		ScalarFESpaceFunction<ContinuousTPShapeFunction> sol =
+		ScalarFESpaceFunction<CTPShapeFunction> sol =
 			new ScalarFESpaceFunction<>(
 				mg.spaces.get(refinements)
 				         .getShapeFunctionMap(), solut);

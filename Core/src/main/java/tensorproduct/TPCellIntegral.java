@@ -115,8 +115,8 @@ public class TPCellIntegral<ST extends ScalarShapeFunction<TPCell, TPFace>>
 		if (name.equals(GRAD_GRAD))
 		{
 			return integrateNonTensorProduct(x -> shapeFunction1
-				                                 .gradient(x)
-				                                 .inner(shapeFunction2.gradient(x))
+				                                 .gradientInCell(x, cell)
+				                                 .inner(shapeFunction2.gradientInCell(x, cell))
 				                                 * (Double) weight.value(x),
 			                                 cell,
 			                                 quadratureRule1D);

@@ -5,7 +5,8 @@ import linalg.CoordinateVector;
 
 import java.util.List;
 
-public interface Cell<CT extends Cell<CT, FT>, FT extends Face<CT, FT>> extends Comparable<CT>
+public interface Cell<CT extends Cell<CT, FT>, FT extends Face<CT, FT>>
+	extends Comparable<CT>
 {
 	int getDimension();
 	
@@ -43,4 +44,6 @@ public interface Cell<CT extends Cell<CT, FT>, FT extends Face<CT, FT>> extends 
 	{
 		throw new UnsupportedOperationException();
 	}
+	
+	CoordinateVector transformToReferenceCell(CoordinateVector pos);
 }

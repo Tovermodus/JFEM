@@ -6,6 +6,8 @@ import basic.ShapeFunction;
 import com.google.common.collect.HashMultimap;
 import com.google.common.collect.Multimap;
 import com.google.common.collect.Sets;
+import it.unimi.dsi.fastutil.ints.Int2ObjectArrayMap;
+import it.unimi.dsi.fastutil.ints.Int2ObjectMap;
 import it.unimi.dsi.fastutil.ints.Int2ObjectOpenHashMap;
 import linalg.CoordinateVector;
 import linalg.DenseVector;
@@ -15,17 +17,14 @@ import tensorproduct.geometry.CartesianGrid;
 import tensorproduct.geometry.TPCell;
 import tensorproduct.geometry.TPFace;
 
-import java.util.Collection;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 
 public abstract class CartesianGridSpace<ST extends ShapeFunction<TPCell, TPFace, valueT, gradientT, hessianT>,
 	valueT, gradientT, hessianT>
 	implements AcceptsMatrixBoundaryValues<TPCell, TPFace, ST, valueT, gradientT, hessianT>, Assembleable
 {
 	public final CartesianGrid grid;
-	private final HashMultimap<TPCell, ST> supportOnCell;
+	private final Int2ObjectMap<HashSet<ST>> supportOnCell;
 	private final HashMultimap<TPFace, ST> supportOnFace;
 	protected Set<ST> shapeFunctions;
 	protected SparseMatrix systemMatrix;
@@ -50,7 +49,7 @@ public abstract class CartesianGridSpace<ST extends ShapeFunction<TPCell, TPFace
 		if (startCoordinates.getLength() != endCoordinates.getLength() ||
 			startCoordinates.getLength() != cellsPerDimension.getDimension())
 			throw new IllegalArgumentException();
-		supportOnCell = HashMultimap.create();
+		supportOnCell = new Int2ObjectArrayMap<>();
 		supportOnFace = HashMultimap.create();
 		grid = new CartesianGrid(startCoordinates, endCoordinates, cellsPerDimension);
 		fixedNodes = Sets.newConcurrentHashSet();
@@ -126,7 +125,14 @@ public abstract class CartesianGridSpace<ST extends ShapeFunction<TPCell, TPFace
 	@Override
 	public Set<ST> getShapeFunctionsWithSupportOnCell(final TPCell cell)
 	{
-		return supportOnCell.get(cell);
+		return supportOnCell.get(cell.doneCode());
+	}
+	
+	protected void addFunctionToCell(final ST function, final TPCell cell)
+	{
+		supportOnCell.putIfAbsent(cell.doneCode(), new HashSet<>());
+		supportOnCell.get(cell.doneCode())
+		             .add(function);
 	}
 	
 	@Override
@@ -139,12 +145,6 @@ public abstract class CartesianGridSpace<ST extends ShapeFunction<TPCell, TPFace
 	public List<CoordinateVector> generatePlotPoints(final int resolution)
 	{
 		return grid.generatePlotPoints(resolution);
-	}
-	
-	@Override
-	public Multimap<TPCell, ST> getCellSupportMapping()
-	{
-		return supportOnCell;
 	}
 	
 	@Override

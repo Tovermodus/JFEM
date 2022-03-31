@@ -26,11 +26,13 @@ public class ScalarRTFESpace
 			                             getDimension() - 1) * (polynomialDegree + 2); i++)
 			{
 				final RTComponentFunction shapeFunction = new RTComponentFunction(cell,
-				                                                                  polynomialDegree, i, 0);
+				                                                                  polynomialDegree,
+				                                                                  i,
+				                                                                  0);
 				shapeFunction.setGlobalIndex(shapeFunctions.size());
 				shapeFunctions.add(shapeFunction);
 				for (final TPCell supportCell : shapeFunction.getCells())
-					getCellSupportMapping().put(supportCell, shapeFunction);
+					addFunctionToCell(shapeFunction, supportCell);
 				for (final TPFace supportFace : shapeFunction.getFaces())
 					getFaceSupportMapping().put(supportFace, shapeFunction);
 			}

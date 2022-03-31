@@ -2,7 +2,6 @@ package tensorproduct;
 
 import basic.ScalarFunction;
 import basic.VectorFunction;
-import com.google.common.base.Stopwatch;
 import linalg.CoordinateVector;
 import linalg.IntCoordinates;
 import org.junit.Test;
@@ -14,7 +13,7 @@ import java.util.List;
 
 import static org.junit.Assert.assertTrue;
 
-public class IntegralTest
+public class ContinuousIntegralTest
 {
 	
 	@Test
@@ -44,10 +43,10 @@ public class IntegralTest
 		                                          CoordinateVector.fromValues(1, 3.1),
 		                                          new IntCoordinates(1, 1));
 		final TPCell cell = g.cells.get(0);
-		final List<TPShapeFunction> shapeFunctions = new ArrayList<>();
+		final List<ContinuousTPShapeFunction> shapeFunctions = new ArrayList<>();
 		for (int i = 0; i < Math.pow(polynomialDegree + 1, 2); i++)
 		{
-			shapeFunctions.add(new TPShapeFunction(cell, polynomialDegree, i));
+			shapeFunctions.add(new ContinuousTPShapeFunction(cell, polynomialDegree, i));
 		}
 		final ScalarFunction weight = new ScalarFunction()
 		{
@@ -83,18 +82,22 @@ public class IntegralTest
 				return CoordinateVector.fromValues(2 - pos.x() + pos.y() * 0.1, pos.x() * pos.y());
 			}
 		};
-		final TPCellIntegral<TPShapeFunction> gg = new TPCellIntegral<>(TPCellIntegral.GRAD_GRAD,
-		                                                                QuadratureRule1D.Gauss2);
-		final TPCellIntegral<TPShapeFunction> ggw = new TPCellIntegral<>(weight, TPCellIntegral.GRAD_GRAD,
-		                                                                 QuadratureRule1D.Gauss2);
-		final TPCellIntegral<TPShapeFunction> vg = new TPCellIntegral<>(vweight, TPCellIntegral.VALUE_GRAD,
-		                                                                QuadratureRule1D.Gauss2);
-		final TPCellIntegral<TPShapeFunction> gv = new TPCellIntegral<>(vweight, TPCellIntegral.GRAD_VALUE,
-		                                                                QuadratureRule1D.Gauss2);
-		final TPCellIntegral<TPShapeFunction> vv = new TPCellIntegral<>(TPCellIntegral.VALUE_VALUE,
-		                                                                QuadratureRule1D.Gauss2);
-		final TPCellIntegral<TPShapeFunction> vvw = new TPCellIntegral<>(weight, TPCellIntegral.VALUE_VALUE,
-		                                                                 QuadratureRule1D.Gauss2);
+		final TPCellIntegral<ContinuousTPShapeFunction> gg = new TPCellIntegral<>(TPCellIntegral.GRAD_GRAD,
+		                                                                          QuadratureRule1D.Gauss2);
+		final TPCellIntegral<ContinuousTPShapeFunction> ggw = new TPCellIntegral<>(weight,
+		                                                                           TPCellIntegral.GRAD_GRAD,
+		                                                                           QuadratureRule1D.Gauss2);
+		final TPCellIntegral<ContinuousTPShapeFunction> vg = new TPCellIntegral<>(vweight,
+		                                                                          TPCellIntegral.VALUE_GRAD,
+		                                                                          QuadratureRule1D.Gauss2);
+		final TPCellIntegral<ContinuousTPShapeFunction> gv = new TPCellIntegral<>(vweight,
+		                                                                          TPCellIntegral.GRAD_VALUE,
+		                                                                          QuadratureRule1D.Gauss2);
+		final TPCellIntegral<ContinuousTPShapeFunction> vv = new TPCellIntegral<>(TPCellIntegral.VALUE_VALUE,
+		                                                                          QuadratureRule1D.Gauss2);
+		final TPCellIntegral<ContinuousTPShapeFunction> vvw = new TPCellIntegral<>(weight,
+		                                                                           TPCellIntegral.VALUE_VALUE,
+		                                                                           QuadratureRule1D.Gauss2);
 		int k = 0;
 		for (int i = 0; i < shapeFunctions.size(); i++)
 		{
@@ -124,7 +127,7 @@ public class IntegralTest
 	}
 	
 	@Test
-	public void testTPCellIntegralDeg1G3()
+	public void CtestTPCellIntegralDeg1G2()
 	{
 		final int polynomialDegree = 1;
 		final double[] testValuesgg = new double[]{
@@ -150,10 +153,10 @@ public class IntegralTest
 		                                          CoordinateVector.fromValues(1, 3.1),
 		                                          new IntCoordinates(1, 1));
 		final TPCell cell = g.cells.get(0);
-		final List<TPShapeFunction> shapeFunctions = new ArrayList<>();
+		final List<CTPShapeFunction> shapeFunctions = new ArrayList<>();
 		for (int i = 0; i < Math.pow(polynomialDegree + 1, 2); i++)
 		{
-			shapeFunctions.add(new TPShapeFunction(cell, polynomialDegree, i));
+			shapeFunctions.add(new CTPShapeFunction(cell, polynomialDegree, i));
 		}
 		final ScalarFunction weight = new ScalarFunction()
 		{
@@ -189,48 +192,47 @@ public class IntegralTest
 				return CoordinateVector.fromValues(2 - pos.x() + pos.y() * 0.1, pos.x() * pos.y());
 			}
 		};
-		final TPCellIntegral<TPShapeFunction> gg = new TPCellIntegral<>(TPCellIntegral.GRAD_GRAD,
-		                                                                QuadratureRule1D.Gauss3);
-		final TPCellIntegral<TPShapeFunction> ggw = new TPCellIntegral<>(weight, TPCellIntegral.GRAD_GRAD,
-		                                                                 QuadratureRule1D.Gauss3);
-		final TPCellIntegral<TPShapeFunction> vg = new TPCellIntegral<>(vweight, TPCellIntegral.VALUE_GRAD,
-		                                                                QuadratureRule1D.Gauss3);
-		final TPCellIntegral<TPShapeFunction> gv = new TPCellIntegral<>(vweight, TPCellIntegral.GRAD_VALUE,
-		                                                                QuadratureRule1D.Gauss3);
-		final TPCellIntegral<TPShapeFunction> vv = new TPCellIntegral<>(TPCellIntegral.VALUE_VALUE,
-		                                                                QuadratureRule1D.Gauss3);
-		final TPCellIntegral<TPShapeFunction> vvw = new TPCellIntegral<>(weight, TPCellIntegral.VALUE_VALUE,
-		                                                                 QuadratureRule1D.Gauss3);
-		final Stopwatch s = Stopwatch.createStarted();
-		for (int repeats = 0; repeats < 10; repeats++)
+		final TPCellIntegral<CTPShapeFunction> gg = new TPCellIntegral<>(TPCellIntegral.GRAD_GRAD,
+		                                                                 QuadratureRule1D.Gauss2);
+		final TPCellIntegral<CTPShapeFunction> ggw = new TPCellIntegral<>(weight,
+		                                                                  TPCellIntegral.GRAD_GRAD,
+		                                                                  QuadratureRule1D.Gauss2);
+		final TPCellIntegral<CTPShapeFunction> vg = new TPCellIntegral<>(vweight,
+		                                                                 TPCellIntegral.VALUE_GRAD,
+		                                                                 QuadratureRule1D.Gauss2);
+		final TPCellIntegral<CTPShapeFunction> gv = new TPCellIntegral<>(vweight,
+		                                                                 TPCellIntegral.GRAD_VALUE,
+		                                                                 QuadratureRule1D.Gauss2);
+		final TPCellIntegral<CTPShapeFunction> vv = new TPCellIntegral<>(TPCellIntegral.VALUE_VALUE,
+		                                                                 QuadratureRule1D.Gauss2);
+		final TPCellIntegral<CTPShapeFunction> vvw = new TPCellIntegral<>(weight,
+		                                                                  TPCellIntegral.VALUE_VALUE,
+		                                                                  QuadratureRule1D.Gauss2);
+		int k = 0;
+		for (int i = 0; i < shapeFunctions.size(); i++)
 		{
-			int k = 0;
-			for (int i = 0; i < shapeFunctions.size(); i++)
+			for (int j = 0; j < shapeFunctions.size(); j++)
 			{
-				for (int j = 0; j < shapeFunctions.size(); j++)
-				{
-					
-					assertTrue(Math.abs(gg.evaluateCellIntegral(cell, shapeFunctions.get(i),
-					                                            shapeFunctions.get(
-						                                            j)) - testValuesgg[k]) <= 1e-2);
-					assertTrue(Math.abs(ggw.evaluateCellIntegral(cell, shapeFunctions.get(i),
-					                                             shapeFunctions.get(
-						                                             j)) - testValuesggw[k]) <= 1e-2);
-					assertTrue(Math.abs(vg.evaluateCellIntegral(cell, shapeFunctions.get(i),
-					                                            shapeFunctions.get(
-						                                            j)) - testValuesvg[k]) <= 1e-2);
-					assertTrue(Math.abs(gv.evaluateCellIntegral(cell, shapeFunctions.get(i),
-					                                            shapeFunctions.get(
-						                                            j)) - testValuesgv[k]) <= 1e-2);
-					assertTrue(Math.abs(vv.evaluateCellIntegral(cell, shapeFunctions.get(i),
-					                                            shapeFunctions.get(
-						                                            j)) - testValuesvv[k]) <= 1e-2);
-					assertTrue(Math.abs(vvw.evaluateCellIntegral(cell, shapeFunctions.get(i),
-					                                             shapeFunctions.get(
-						                                             j)) - testValuesvvw[k++]) <= 1e-2);
-				}
+				
+				assertTrue(Math.abs(gg.evaluateCellIntegral(cell, shapeFunctions.get(i),
+				                                            shapeFunctions.get(
+					                                            j)) - testValuesgg[k]) <= 1e-2);
+				assertTrue(Math.abs(ggw.evaluateCellIntegral(cell, shapeFunctions.get(i),
+				                                             shapeFunctions.get(
+					                                             j)) - testValuesggw[k]) <= 1e-2);
+				assertTrue(Math.abs(vg.evaluateCellIntegral(cell, shapeFunctions.get(i),
+				                                            shapeFunctions.get(
+					                                            j)) - testValuesvg[k]) <= 1e-2);
+				assertTrue(Math.abs(gv.evaluateCellIntegral(cell, shapeFunctions.get(i),
+				                                            shapeFunctions.get(
+					                                            j)) - testValuesgv[k]) <= 1e-2);
+				assertTrue(Math.abs(vv.evaluateCellIntegral(cell, shapeFunctions.get(i),
+				                                            shapeFunctions.get(
+					                                            j)) - testValuesvv[k]) <= 1e-2);
+				assertTrue(Math.abs(vvw.evaluateCellIntegral(cell, shapeFunctions.get(i),
+				                                             shapeFunctions.get(
+					                                             j)) - testValuesvvw[k++]) <= 1e-2);
 			}
 		}
-		System.out.println(s.elapsed());
 	}
 }
