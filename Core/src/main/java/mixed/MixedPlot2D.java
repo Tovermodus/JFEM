@@ -106,9 +106,9 @@ public class MixedPlot2D
 			g.setColor(Color.BLACK);
 			g.fillOval(x - 2, y - 2, 4, 4);
 			final int vx = (int) (entry.getValue()
-			                           .x() / (maxV) * pixelWidth * 3);
+			                           .x() / (maxV) * pixelWidth * 6);
 			final int vy = (int) (entry.getValue()
-			                           .y() / (maxV) * pixelHeight * 3);
+			                           .y() / (maxV) * pixelHeight * 6);
 			g.drawLine(x, y, x + vx, y - vy);
 		}
 	}

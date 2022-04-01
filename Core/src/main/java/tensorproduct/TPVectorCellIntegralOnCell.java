@@ -114,6 +114,7 @@ public class TPVectorCellIntegralOnCell<ST extends VectorShapeFunction<TPCell, T
 			return TPCellIntegral.integrateNonTensorProduct(x ->
 				                                                shapeFunction1
 					                                                .gradientInCell(x, cell)
+					                                                .transpose()
 					                                                .mvMul(shapeFunction2.valueInCell(
 						                                                x,
 						                                                cell))

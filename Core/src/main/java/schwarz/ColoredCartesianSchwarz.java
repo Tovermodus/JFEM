@@ -57,7 +57,8 @@ public class ColoredCartesianSchwarz<ST extends ShapeFunction<TPCell, TPFace, ?,
 						new IntCoordinates(partition.get(0) * cellsPerPartition.get(0) + i,
 						                   partition.get(1) * cellsPerPartition.get(1) + j);
 					if (cellCoords.get(0) >= 0 && cellCoords.get(1) >= 0
-						&& cellCoords.compareTo(underlyingCells) < 0)
+						&& cellCoords.get(0) < underlyingCells.get(0)
+						&& cellCoords.get(1) < underlyingCells.get(1))
 					{
 						patch.add(space.grid.cellsByCoordinates.get(cellCoords));
 					}
@@ -67,7 +68,15 @@ public class ColoredCartesianSchwarz<ST extends ShapeFunction<TPCell, TPFace, ?,
 		}
 		System.out.println("partitioned");
 		((ColoredMultiplicativeSubspaceCorrection<Matrix>) getSubspaceCorrection()).setColors(getColors());
-		build();
+		buildRestrictions();
+		if (globalMatrix != null)
+			build(globalMatrix);
+	}
+	
+	public void build(final Matrix globalMatrix)
+	{
+		this.globalMatrix = globalMatrix;
+		buildLocalOperators();
 	}
 	
 	private List<IntSet> getColors()

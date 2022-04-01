@@ -1,20 +1,19 @@
 import basic.ScalarFunction;
 import basic.VectorFunction;
-import linalg.CoordinateMatrix;
 import linalg.CoordinateVector;
-import linalg.DenseMatrix;
+import mixed.ComposedMixedFunction;
+import mixed.MixedFunction;
 
 public class Kovasznay
 {
-	static double reynolds = 5;
-	static double C = 2*1.70751; // integral over p
-	private static double lambda()
+	public static double lamb(final double reyn)
 	{
-		return reynolds/2-Math.sqrt(reynolds*reynolds/4+4*Math.PI*Math.PI);
+		return reyn / 2 - Math.sqrt(reyn * reyn / 4 + 4 * Math.PI * Math.PI);
 	}
-	//Kovasznay flow
-	public static VectorFunction rightHandSide()
+	
+	public static VectorFunction rightHandSide(final double reyn, final double nu)
 	{
+		final double l = lamb(reyn);
 		return new VectorFunction()
 		{
 			@Override
@@ -22,6 +21,7 @@ public class Kovasznay
 			{
 				return 2;
 			}
+			
 			@Override
 			public int getDomainDimension()
 			{
@@ -29,37 +29,77 @@ public class Kovasznay
 			}
 			
 			@Override
-			public CoordinateVector value(CoordinateVector pos)
+			public CoordinateVector value(final CoordinateVector pos)
 			{
+				final double elx = Math.exp(l * pos.x());
+				final double pi = Math.PI;
+				final double e2lx = Math.exp(2 * l * pos.x());
+				final double spy = Math.sin(2 * Math.PI * pos.y());
+				final double cpy = Math.cos(2 * Math.PI * pos.y());
+				final double xComp = -nu * (-l * l * elx * cpy + 4 * elx * pi * pi * cpy)
+					- (1 - elx * cpy) * l * elx * cpy
+					+ l * elx * elx * spy * spy
+					- l * e2lx;
+				final double yComp = -nu * (l * l * l * elx * spy / (2 * pi) - 2 * l * elx * pi * spy)
+					+ (1 - elx * cpy) * l * l * elx * spy / (2 * pi)
+					+ l * l * elx * elx * spy * cpy / (2 * pi);
+				return CoordinateVector.fromValues(xComp, yComp);
+			}
+		};
+	}
+	
+	public static ScalarFunction pressureReferenceSolution(final double reyn)
+	{
+		final double l = lamb(reyn);
+		return new ScalarFunction()
+		{
+			@Override
+			public int getDomainDimension()
+			{
+				return 2;
+			}
+			
+			@Override
+			public Double value(final CoordinateVector pos)
+			{
+				return -Math.exp(2 * l * pos.x()) / 2;
+			}
+		};
+	}
+	
+	public static VectorFunction velocityReferenceSolution(final double reyn)
+	{
+		final double l = lamb(reyn);
+		return new VectorFunction()
+		{
+			@Override
+			public int getRangeDimension()
+			{
+				return 2;
+			}
+			
+			@Override
+			public int getDomainDimension()
+			{
+				return 2;
+			}
+			
+			@Override
+			public CoordinateVector value(final CoordinateVector pos)
+			{
+				final double elx = Math.exp(l * pos.x());
+				final double spy = Math.sin(2 * Math.PI * pos.y());
+				final double cpy = Math.cos(2 * Math.PI * pos.y());
 				return CoordinateVector.fromValues(
-					1./reynolds*(4*Math.PI*Math.PI-lambda()*lambda())*Math.exp(lambda()*pos.x())*Math.cos(2*Math.PI*pos.y())
-					+ lambda()*Math.exp(2*lambda()*pos.x()),
-					
-					1./reynolds*lambda()/(2*Math.PI)*(4*Math.PI*Math.PI-lambda()*lambda())*Math.exp(lambda()*pos.x())*Math.sin(2*Math.PI*pos.y())
-				);
+					1 - elx * cpy,
+					l / (2 * Math.PI) * elx * spy);
 			}
 		};
 	}
-	public static ScalarFunction pressureReferenceSolution()
+	
+	public static VectorFunction vectorBoundaryValues(final double reyn)
 	{
-		return new ScalarFunction()
-		{
-			@Override
-			public int getDomainDimension()
-			{
-				return 2;
-			}
-			
-			@Override
-			public Double value(CoordinateVector pos)
-			{
-				return 0.5*Math.exp(2*lambda()*pos.x())-C;
-			}
-			
-		};
-	}
-	public static VectorFunction velocityReferenceSolution()
-	{
+		final VectorFunction referenceSolution = velocityReferenceSolution(reyn);
 		return new VectorFunction()
 		{
 			@Override
@@ -67,6 +107,7 @@ public class Kovasznay
 			{
 				return 2;
 			}
+			
 			@Override
 			public int getDomainDimension()
 			{
@@ -74,57 +115,17 @@ public class Kovasznay
 			}
 			
 			@Override
-			public CoordinateVector value(CoordinateVector pos)
+			public CoordinateVector value(final CoordinateVector pos)
 			{
-				return CoordinateVector.fromValues(1-Math.exp(lambda()* pos.x())*Math.sin(2*Math.PI* pos.x()),
-					lambda()/(2*Math.PI)*Math.exp(lambda()* pos.x())*Math.sin(2*Math.PI*pos.y()));
-			}
-			
-		};
-	}
-	public static ScalarFunction pressureBoundaryValues()
-	{
-		ScalarFunction referenceSolution = pressureReferenceSolution();
-		return new ScalarFunction()
-		{
-			@Override
-			public int getDomainDimension()
-			{
-				return 2;
-			}
-			
-			@Override
-			public Double value(CoordinateVector pos)
-			{
-				if(pos.x() == -0.5|| pos.x() == 1.5 || pos.y() == -0.5 || pos.y() == 1.5)
-					return referenceSolution.value(pos);
-				return 0.;
-			}
-		};
-	}
-	public static VectorFunction vectorBoundaryValues()
-	{
-		VectorFunction referenceSolution = velocityReferenceSolution();
-		return new VectorFunction()
-		{
-			@Override
-			public int getRangeDimension()
-			{
-				return 2;
-			}
-			@Override
-			public int getDomainDimension()
-			{
-				return 2;
-			}
-			
-			@Override
-			public CoordinateVector value(CoordinateVector pos)
-			{
-				if(pos.x() == -0.5|| pos.x() == 1.5 || pos.y() == -0.5 || pos.y() == 1.5)
+				if (pos.x() == -0.5 || pos.x() == 1.5 || pos.y() == 0 || pos.y() == 2)
 					return referenceSolution.value(pos);
 				return pos.mul(0);
 			}
 		};
+	}
+	
+	public static MixedFunction mixedReferenceSolution(final double reyn)
+	{
+		return new ComposedMixedFunction(pressureReferenceSolution(reyn), velocityReferenceSolution(reyn));
 	}
 }

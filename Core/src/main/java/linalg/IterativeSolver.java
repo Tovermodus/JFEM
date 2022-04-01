@@ -33,7 +33,7 @@ public class IterativeSolver
 		gm = new GMRES(true, metric);
 		if (!GraphicsEnvironment.isHeadless())
 			MetricWindow.getInstance()
-			            .addMetric(metric);
+			            .setMetric("itsolver ", metric);
 	}
 	
 	public IterativeSolver(final boolean showProgress)
@@ -41,9 +41,8 @@ public class IterativeSolver
 		metric = new IterativeSolverConvergenceMetric(1);
 		gm = new GMRES(showProgress, metric);
 		if (showProgress)
-			if (!GraphicsEnvironment.isHeadless())
-				MetricWindow.getInstance()
-				            .addMetric(metric);
+			MetricWindow.getInstance()
+			            .setMetric("itsolver ", metric);
 	}
 	
 	public Vector solveCG(final VectorMultiplyable operator, final Vector rhs, final double tol)

@@ -3,8 +3,6 @@ package mixed;
 import basic.ScalarFunction;
 import basic.ScalarPlot2D;
 import linalg.CoordinateVector;
-import tensorproduct.geometry.TPCell;
-import tensorproduct.geometry.TPFace;
 
 import java.awt.*;
 import java.util.List;
@@ -35,7 +33,7 @@ public class VelocityMagnitudePlot2D
 		maxV = maxVelocity.orElse(1);
 	}
 	
-	public VelocityMagnitudePlot2D(final MixedFunctionOnCells<TPCell, TPFace> function, final List<CoordinateVector> points,
+	public VelocityMagnitudePlot2D(final MixedFunction function, final List<CoordinateVector> points,
 	                               final int pointsPerDimension, final String title)
 	{
 		super(ScalarFunction.fromLambda(x -> function.value(x)

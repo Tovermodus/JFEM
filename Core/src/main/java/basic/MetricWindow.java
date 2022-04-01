@@ -15,7 +15,7 @@ public class MetricWindow
 	private final Canvas canvas;
 	private final ConcurrentSkipListMap<String, Metric> metrics;
 	private final DrawThread d;
-	private String currentPlot = null;
+	private volatile String currentPlot = null;
 	private static MetricWindow INSTANCE;
 	
 	public static MetricWindow getInstance()
@@ -210,7 +210,7 @@ public class MetricWindow
 				draw();
 				try
 				{
-					Thread.sleep(10);
+					Thread.sleep(30);
 				} catch (final InterruptedException e)
 				{
 					e.printStackTrace();
@@ -238,6 +238,12 @@ public class MetricWindow
 					                 width,
 					                 height,
 					                 isChecked);
+				final Graphics g = content.getGraphics();
+				g.setColor(Color.GREEN);
+				String s = getInstance().currentPlot;
+				if (s == null)
+					s = "";
+				g.drawString(s, width - 100, 100);
 				canvas.getGraphics()
 				      .drawImage(content, 0, 0, null);
 			} catch (final Exception e)

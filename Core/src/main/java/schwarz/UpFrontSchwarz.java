@@ -24,13 +24,12 @@ public abstract class UpFrontSchwarz<CT extends Cell<CT, FT>, FT extends Face<CT
 	
 	public void build()
 	{
-		restrictionOperators =
-			IntStream.range(0, getPatchCount())
-			         .parallel()
-			         .mapToObj(this::buildRestrictionMatrix)
-			         .collect(
-				         Collectors.toList());
-		System.out.println("restrictions");
+		buildRestrictions();
+		buildLocalOperators();
+	}
+	
+	protected void buildLocalOperators()
+	{
 		localOperators =
 			IntStream.range(0, getPatchCount())
 			         .parallel()
@@ -39,6 +38,16 @@ public abstract class UpFrontSchwarz<CT extends Cell<CT, FT>, FT extends Face<CT
 				                                       .selectFrom(globalMatrix))
 			         .collect(Collectors.toList());
 		System.out.println("locals");
+	}
+	
+	protected void buildRestrictions()
+	{
+		restrictionOperators =
+			IntStream.range(0, getPatchCount())
+			         .parallel()
+			         .mapToObj(this::buildRestrictionMatrix)
+			         .collect(Collectors.toList());
+		System.out.println("restrictions");
 	}
 	
 	public abstract RestrictionMatrix buildRestrictionMatrix(int patch);

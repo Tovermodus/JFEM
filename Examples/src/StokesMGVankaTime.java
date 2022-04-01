@@ -6,9 +6,8 @@ import mixed.*;
 import multigrid.MGPreconditionerSpace;
 import multigrid.Smoother;
 import org.jetbrains.annotations.NotNull;
-import schwarz.CartesianUpFrontSchwarz;
+import schwarz.ColoredCartesianSchwarz;
 import schwarz.DirectSolver;
-import schwarz.MultiplicativeSubspaceCorrection;
 import schwarz.SchwarzSmoother;
 import tensorproduct.*;
 import tensorproduct.geometry.TPCell;
@@ -89,7 +88,7 @@ public class StokesMGVankaTime
 			@Override
 			public List<TaylorHoodSpace> createSpaces(final int refinements)
 			{
-				verbose = true;
+				verbose = false;
 				final ArrayList<TaylorHoodSpace> ret = new ArrayList<>();
 				int mul = 1;
 				for (int i = 0; i < refinements + 1; i++)
@@ -118,12 +117,12 @@ public class StokesMGVankaTime
 				mass.mulInPlace(1. / dt);
 				final SparseMatrix flow = new SparseMatrix(n, n);
 				final List<CellIntegral<TPCell, QkQkFunction>> flowIntegrals = new ArrayList<>();
-				if (guess != null)
-				{
-					flowIntegrals.addAll(
-						getConvectionIntegrals(generateCurrentFunction(guess, getFinestSpace())
-							                       .getVelocityFunction()));
-				}
+//				if (guess != null)
+//				{
+//					flowIntegrals.addAll(
+//						getConvectionIntegrals(generateCurrentFunction(guess, getFinestSpace())
+//							                       .getVelocityFunction()));
+//				}
 				flowIntegrals.add(gradGrad);
 				flowIntegrals.add(divValue);
 				space.writeCellIntegralsToMatrix(flowIntegrals, flow);
@@ -137,8 +136,7 @@ public class StokesMGVankaTime
 				final DenseVector d = src.add(fromLast);
 				
 				space.writeBoundaryValuesTo(new ComposedMixedFunction(getBoundaryFunction(time)),
-				                            f -> f.center()
-				                                  .x() < 0.9,
+				                            f -> true,
 				                            (f, sf) -> sf.hasVelocityFunction(),
 				                            s,
 				                            d);
@@ -180,8 +178,8 @@ public class StokesMGVankaTime
 //					s.set(0, fixedP, i);
 //				}
 				//d.set(0, fixedP);
-//				sizeToFixedP.put(n, fixedP);
-//				space.overWriteValue(fixedP, 0, s, d);
+				sizeToFixedP.put(n, fixedP);
+				space.overWriteValue(fixedP, 0, s, d);
 				return new Tuple2<>(s, d);
 			}
 			
@@ -192,7 +190,7 @@ public class StokesMGVankaTime
 				for (int i = 1; i < spaces.size(); i++)
 				{
 					final IntCoordinates partitions
-						= new IntCoordinates(2, 2).mul(Math.max(1, (int) Math.pow(2, i)));
+						= new IntCoordinates(4, 4).mul(Math.max(1, (int) Math.pow(2, i)));
 					System.out.println(partitions);
 //					final VankaSchwarz schwarz =
 //						new VankaSchwarz((SparseMatrix) getSystem(i),
@@ -200,13 +198,11 @@ public class StokesMGVankaTime
 //						                 new MultiplicativeSubspaceCorrection<>(getSpace(i)),
 //						                 new DirectSolver());
 					
-					final CartesianUpFrontSchwarz<QkQkFunction> schwarz
-						= new CartesianUpFrontSchwarz<>((SparseMatrix) getSystem(i),
+					final ColoredCartesianSchwarz<QkQkFunction> schwarz
+						= new ColoredCartesianSchwarz<>((SparseMatrix) getSystem(i),
 						                                getSpace(i),
 						                                partitions, 1,
-						                                new MultiplicativeSubspaceCorrection<>(
-							                                getSpace(i)),
-						                                new DirectSolver());
+						                                new DirectSolver(), 1);
 					ret.add(new SchwarzSmoother(2, schwarz));
 				}
 				return ret;
@@ -218,11 +214,10 @@ public class StokesMGVankaTime
 				space.projectOntoBoundaryValues(new ComposedMixedFunction(ScalarFunction.constantFunction(
 					                                                                        0)
 				                                                                        .makeIsotropicVectorFunction()),
-				                                f -> f.center()
-				                                      .x() < 0.9,
+				                                f -> true,
 				                                (f, sf) -> sf.hasVelocityFunction(),
 				                                vector);
-//				vector.set(0, sizeToFixedP.get(vector.getLength()));
+				vector.set(0, sizeToFixedP.get(vector.getLength()));
 				//vector.set(0, sizeToFixedP.get(vector.getLength()));//, space.getVelocitySize());
 			}
 		};
@@ -250,13 +245,8 @@ public class StokesMGVankaTime
 			{
 				if (Math.abs(pos.x() * pos.y() * (1 - pos.x()) * (1 - pos.y())) > 1e-8)
 					return CoordinateVector.fromValues(100);
-				if (Math.abs(pos.x()) <= 4e-1)
-					return CoordinateVector.fromValues(50 * pos.x() * (1e-3 - pos.x()),
-					                                   -10 * (pos.y() - 0.5) * (1 + pos.x()))
-					                       .mul(0.2);// * (pos.x() - 1e-1) * (pos.x() - 9e-1));
-				///if(Math.abs(pos.x()-1) <= 1e-1)
-				//	return CoordinateVector.fromValues(1,1).mul(Math.sin(t)*Math.sin(t)*10*(0.25-
-				//	(0.5-pos.y())*(0.5-pos.y())));
+				if (Math.abs(pos.y() - 1) < 1e-5)
+					return CoordinateVector.getUnitVector(2, 0);
 				return new CoordinateVector(2);
 			}
 		};
@@ -315,7 +305,7 @@ public class StokesMGVankaTime
 		final PerformanceArguments.PerformanceArgumentBuilder builder =
 			new PerformanceArguments.PerformanceArgumentBuilder();
 		builder.build();
-		final double dt = 0.005;
+		final double dt = 1;
 		final int timesteps = 400;
 		final int nPoints = 61;
 		
@@ -326,7 +316,7 @@ public class StokesMGVankaTime
 		
 		final List<CoordinateVector> points = mg.getFinestSpace()
 		                                        .generatePlotPoints(nPoints);
-		
+		final IterativeSolver it = new IterativeSolver(true);
 		for (int i = 1; i <= timesteps; i++)
 		{
 			DenseVector guess = new DenseVector(iterate);
@@ -334,6 +324,9 @@ public class StokesMGVankaTime
 //				new IterativeSolverConvergenceMetric(guess.euclidianNorm() * 1e-5);
 //			MetricWindow.getInstance()
 //			            .setMetric("nlin", nm);
+			final IterativeSolverConvergenceMetric cm = new IterativeSolverConvergenceMetric(1e-10);
+			MetricWindow.getInstance()
+			            .setMetric("nonlinear", cm);
 			for (int nLinIter = 0; nLinIter < 20; nLinIter++)
 			{
 				mg = getMG(iterate, guess, dt, i * dt);
@@ -342,37 +335,39 @@ public class StokesMGVankaTime
 				final Vector defect = b.sub(mg.getFinestSystem()
 				                              .mvMul(guess));
 				System.out.println("NLIN DEFECT " + defect.euclidianNorm());
-				final IterativeSolverConvergenceMetric cm = new IterativeSolverConvergenceMetric
-					(1e-8);
-				MetricWindow.getInstance()
-				            .setMetric("mg", cm);
 				Vector correct = new DenseVector(guess.getLength());
 				final double initialres = mg.getFinestSystem()
 				                            .mvMul(correct)
 				                            .sub(defect)
 				                            .euclidianNorm();
-				double res = initialres;
-				int it;
-//				correct = ((SparseMatrix) mg.finest_system).solve(defect);
-				for (it = 0; it < 100 && res > 1e-8; it++)
-				
-				{
-					cm.publishIterate(res);
-					correct = mg.vCycle(correct, defect);
-					res = mg.finest_system.mvMul(correct)
-					                      .sub(defect)
-					                      .euclidianNorm();
-					System.out.println("NLIN ITER " + nLinIter + " " + res / initialres + " after " +
-						                   "iterations " + it);
-				}
-				if (it > 90)
-				{
-					i = 2 * timesteps + 1;
-					break;
-				}
+				final double res = initialres;
+//				int it;
+////				correct = ((SparseMatrix) mg.finest_system).solve(defect);
+//				for (it = 0; it < 100 && res > 1e-8; it++)
+//
+//				{
+//					cm.publishIterate(res);
+//					correct = mg.vCycle(correct, defect);
+//					res = mg.finest_system.mvMul(correct)
+//					                      .sub(defect)
+//					                      .euclidianNorm();
+//					System.out.println("NLIN ITER " + nLinIter + " " + res / initialres + " after " +
+//						                   "iterations " + it);
+//					System.out.println("lin norm " + mg.finest_system.mvMul(correct)
+//					                                                 .sub(defect)
+//					                                                 .euclidianNorm());
+//				}
+//				if (it > 90)
+//				{
+//					i = 2 * timesteps + 1;
+//					break;
+//				}
+				correct = it.solvePGMRES(mg.getFinestSystem(), mg, defect, 1e-8);
+				cm.publishIterate(correct.euclidianNorm());
+				System.out.println("GUESS ITERATE" + nLinIter);
+				System.out.println(defect.euclidianNorm());
 				System.out.println("NONLINEARN CORRECTION " + correct.euclidianNorm() + " " + guess.euclidianNorm() + " " + iterate.euclidianNorm());
-				guess = guess.add(correct
-					                  .mul(1));
+				guess = guess.add(correct);
 				if (correct.euclidianNorm() < 1e-5 * iterate.euclidianNorm() || correct.euclidianNorm() < 1e-8)
 					break;
 			}
@@ -417,7 +412,6 @@ public class StokesMGVankaTime
 			new TPVectorRightHandSideIntegral<>(
 				new VectorFunction()
 				{
-					
 					@Override
 					public int getRangeDimension()
 					{
@@ -433,8 +427,7 @@ public class StokesMGVankaTime
 					@Override
 					public CoordinateVector value(final CoordinateVector pos)
 					{
-						return CoordinateVector.fromValues(0,
-						                                   0 * 5 * Math.sin((pos.x() - time) * 10));
+						return CoordinateVector.fromValues(0, 0);
 					}
 				},
 				TPVectorRightHandSideIntegral.VALUE));
@@ -443,7 +436,6 @@ public class StokesMGVankaTime
 	public static List<CellIntegral<TPCell, QkQkFunction>> getConvectionIntegrals(final VectorFunctionOnCells<TPCell,
 		TPFace> velocity)
 	{
-		
 		final VectorFunctionOnCells<TPCell, TPFace> semiImplicitWeight1 =
 			VectorFunctionOnCells.fromLambda(velocity::value,
 			                                 velocity::valueInCell, 2, 2);

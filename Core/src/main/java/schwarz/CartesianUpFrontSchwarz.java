@@ -47,9 +47,11 @@ public class CartesianUpFrontSchwarz<ST extends ShapeFunction<TPCell, TPFace, ?,
 						new IntCoordinates(partition.get(0) * cellsPerPartition.get(0) + i,
 						                   partition.get(1) * cellsPerPartition.get(1) + j);
 					if (cellCoords.get(0) >= 0 && cellCoords.get(1) >= 0
-						&& cellCoords.compareTo(underlyingCells) < 0)
+						&& cellCoords.get(0) < underlyingCells.get(0) && cellCoords.get(1) < underlyingCells.get(
+						1))
 					{
-						patch.add(space.grid.cellsByCoordinates.get(cellCoords));
+						final TPCell cell = space.grid.cellsByCoordinates.get(cellCoords);
+						patch.add(cell);
 					}
 				}
 			}
@@ -82,7 +84,9 @@ public class CartesianUpFrontSchwarz<ST extends ShapeFunction<TPCell, TPFace, ?,
 		final Collection<TPCell> patchCells = getCellPatch(patch);
 		final Set<ST> functions = new TreeSet<ST>(Comparator.comparingInt(st -> st.getGlobalIndex()));
 		for (final TPCell c : patchCells)
+		{
 			functions.addAll(space.getShapeFunctionsWithSupportOnCell(c));
+		}
 		final RestrictionMatrix s = new RestrictionMatrix(functions.size(),
 		                                                  space.getShapeFunctions()
 		                                                       .size());
