@@ -1,9 +1,9 @@
 package dlm;
 
 import basic.MetricWindow;
+import io.vavr.Function2;
 import linalg.*;
 import multigrid.MGInterface;
-import scala.Function2;
 
 public class MGSchur
 	extends ImplicitSchurSolver

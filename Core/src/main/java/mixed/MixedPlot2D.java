@@ -105,10 +105,11 @@ public class MixedPlot2D
 			                                     .y() - min.y()) / (max.y() - min.y()) * (height - 150) + 75));
 			g.setColor(Color.BLACK);
 			g.fillOval(x - 2, y - 2, 4, 4);
-			final int vx = (int) (entry.getValue()
-			                           .x() / (maxV) * pixelWidth * 6);
-			final int vy = (int) (entry.getValue()
-			                           .y() / (maxV) * pixelHeight * 6);
+			final CoordinateVector dir = entry.getValue()
+			                                  .mul(1. / entry.getValue()
+			                                                 .euclidianNorm());
+			final int vx = (int) (dir.x() * pixelWidth);
+			final int vy = (int) (dir.y() * pixelHeight);
 			g.drawLine(x, y, x + vx, y - vy);
 		}
 	}

@@ -1,8 +1,6 @@
 package linalg;
 
-import scala.Function1;
-import scala.Function2;
-import scala.Tuple2;
+import io.vavr.Function2;
 
 public class DirectSchur
 	extends ExplicitSchurSolver
@@ -28,18 +26,6 @@ public class DirectSchur
 					if (inverse == null)
 						inverse = v1.inverse();
 					return inverse.mvMul(v2);
-				}
-				
-				@Override
-				public Function1<SparseMatrix, Function1<Vector, Vector>> curried()
-				{
-					return Function2.super.curried();
-				}
-				
-				@Override
-				public Function1<Tuple2<SparseMatrix, Vector>, Vector> tupled()
-				{
-					return Function2.super.tupled();
 				}
 			};
 		return inverseApplier;

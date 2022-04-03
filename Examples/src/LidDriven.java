@@ -15,15 +15,14 @@ import java.awt.*;
 import java.util.List;
 import java.util.*;
 
-public class NavierStokesStat
+public class LidDriven
 {
-	static double reyn = 1000;
-	static ColoredCartesianSchwarz<QkQkFunction>[] schwarz;
+	static ColoredCartesianSchwarz<QkQkFunction> schwarz[];
 	
 	private static MGPreconditionerSpace<TaylorHoodSpace, TPCell, TPFace, QkQkFunction, MixedValue, MixedGradient
 		, MixedHessian> getMG(final Vector guess)
 	{
-		final double nu = 1;
+		final double reyn = 100;
 		final MixedCellIntegral<TPCell, ContinuousTPShapeFunction, ContinuousTPVectorFunction, QkQkFunction>
 			divValue =
 			new MixedTPCellIntegral<>(ScalarFunction.constantFunction(1),
@@ -31,55 +30,10 @@ public class NavierStokesStat
 		final MixedCellIntegral<TPCell, ContinuousTPShapeFunction, ContinuousTPVectorFunction, QkQkFunction>
 			gradGrad =
 			MixedCellIntegral.fromVelocityIntegral(new TPVectorCellIntegral<>(
-				ScalarFunction.constantFunction(nu),
+				ScalarFunction.constantFunction(1. / reyn),
 				TPVectorCellIntegral.GRAD_GRAD));
-		return new MGPreconditionerSpace<>(2, 1)
+		return new MGPreconditionerSpace<>(1, 1)
 		{
-
-//			@Override
-//			public void postmoothcallback(final int level, final Vector guess, final Vector rhs)
-//			{
-//				if (level == 0)
-//				{
-//					final var function =
-//						new MixedTPFESpaceFunction<>(getSpace(level).getShapeFunctionMap(),
-//						                             guess);
-//					PlotWindow.addPlot(new MixedPlot2D(function,
-//					                                   getSpace(level).generatePlotPoints(40), 40
-//						, "coarse correction"));
-//				}
-//			}
-//
-//			@Override
-//			public void precorrectioncallback(final int level, final Vector guess, final Vector rhs)
-//			{
-//				if (level == 1)
-//				{
-//					final Vector realCorrect =
-//						((SparseMatrix) getSystem(level)).solve(
-//							rhs.sub(getSystem(level).mvMul(guess)));
-//					final var function =
-//						new MixedTPFESpaceFunction<>(getSpace(level).getShapeFunctionMap(),
-//						                             realCorrect);
-//					PlotWindow.addPlot(new MixedPlot2D(function,
-//					                                   getSpace(level).generatePlotPoints(40), 40
-//						, "real pre correction"));
-//				}
-//			}
-//
-//			@Override
-//			public void correctioncallback(final int level, final Vector correction, final Vector rhs)
-//			{
-//				if (level == 1)
-//				{
-//					final var function =
-//						new MixedTPFESpaceFunction<>(getSpace(level).getShapeFunctionMap(),
-//						                             correction);
-//					PlotWindow.addPlot(new MixedPlot2D(function,
-//					                                   getSpace(level).generatePlotPoints(40), 40
-//						, "actual correction"));
-//				}
-//			}
 			
 			@Override
 			public List<TaylorHoodSpace> createSpaces(final int refinements)
@@ -89,10 +43,10 @@ public class NavierStokesStat
 				int mul = 1;
 				for (int i = 0; i < refinements + 1; i++)
 				{
-					final TaylorHoodSpace s = new TaylorHoodSpace(CoordinateVector.fromValues(-0.5,
+					final TaylorHoodSpace s = new TaylorHoodSpace(CoordinateVector.fromValues(0,
 					                                                                          0),
-					                                              CoordinateVector.fromValues(1.5,
-					                                                                          2),
+					                                              CoordinateVector.fromValues(1,
+					                                                                          1),
 					                                              new IntCoordinates(8,
 					                                                                 8).mul(mul));
 					ret.add(s);
@@ -122,10 +76,9 @@ public class NavierStokesStat
 				flowIntegrals.add(divValue);
 				space.writeCellIntegralsToMatrix(flowIntegrals, flow);
 				final DenseVector src = new DenseVector(n);
-				space.writeCellIntegralsToRhs(List.of(getSourceIntegral(reyn, nu)), src);
+				space.writeCellIntegralsToRhs(List.of(getSourceIntegral()), src);
 				
-				space.writeBoundaryValuesTo(new ComposedMixedFunction(Kovasznay.vectorBoundaryValues(
-					                            reyn)),
+				space.writeBoundaryValuesTo(getBoundaryFunction(),
 				                            f -> true,
 				                            (f, sf) -> sf.hasVelocityFunction(),
 				                            flow,
@@ -181,16 +134,30 @@ public class NavierStokesStat
 				for (int i = 1; i < spaces.size(); i++)
 				{
 					final IntCoordinates partitions
-						= new IntCoordinates(4, 4).mul(Math.max(1, (int) Math.pow(2, i)));
+						= new IntCoordinates(8, 8).mul(Math.max(1, (int) Math.pow(2, i)));
 					System.out.println(partitions);
+//					final VankaSchwarz schwarz =
+//						new VankaSchwarz((SparseMatrix) getSystem(i),
+//						                 getSpace(i),
+//						                 new MultiplicativeSubspaceCorrection<>(getSpace(i)),
+//						                 new DirectSolver());
+
+//					if (schwarz[i] == null)
+//						schwarz[i] = new ColoredCartesianSchwarz<>(null,
+//						                                           getSpace(i),
+//						                                           partitions, 2,
+//						                                           new DirectSolver(), 1);
+//					schwarz[i].build((SparseMatrix) getSystem(i));
+					
 					final CartesianUpFrontSchwarz<QkQkFunction> schwarz =
 						new CartesianUpFrontSchwarz<>((SparseMatrix) getSystem(i),
 						                              getSpace(i),
 						                              partitions,
 						                              1,
-						                              new MultiplicativeSubspaceCorrection<>(),
+						                              new MultiplicativeSubspaceCorrection<>(
+							                              getSpace(i)),
 						                              new DirectSolver());
-					ret.add(new SchwarzSmoother(5, schwarz));
+					ret.add(new SchwarzSmoother(6, schwarz));
 				}
 				return ret;
 			}
@@ -208,6 +175,32 @@ public class NavierStokesStat
 				//vector.set(0, sizeToFixedP.get(vector.getLength()));//, space.getVelocitySize());
 			}
 		};
+	}
+	
+	private static MixedFunction getBoundaryFunction()
+	{
+		return new ComposedMixedFunction(new VectorFunction()
+		{
+			@Override
+			public int getRangeDimension()
+			{
+				return 2;
+			}
+			
+			@Override
+			public int getDomainDimension()
+			{
+				return 2;
+			}
+			
+			@Override
+			public CoordinateVector value(final CoordinateVector pos)
+			{
+				if (pos.y() == 1)
+					return CoordinateVector.fromValues(1, 0);
+				return new CoordinateVector(2);
+			}
+		});
 	}
 	
 	public static MixedFunctionOnCells<TPCell, TPFace> generateCurrentFunction(final Vector iterate,
@@ -241,13 +234,9 @@ public class NavierStokesStat
 			MetricWindow.getInstance()
 			            .setMetric("itsolver", cm2);
 			mg = getMG(guess);
-			final DenseMatrix d = new DenseMatrix((SparseMatrix) mg.finest_system);
-			System.out.println("copied" + d.getShape());
-			
-			System.out.println("SIZE " + mg.finest_system.getVectorSize());
 			if (guess == null)
-				guess = new DenseVector(mg.fullVCycleCorrection(mg.finest_rhs));
-			mg.applyBoundaryConditions(mg.getFinestSpace(), guess, mg.finest_rhs);
+				guess = new DenseVector(mg.finest_rhs.getLength());
+			//mg.applyBoundaryConditions(mg.getFinestSpace(), guess, mg.finest_rhs);
 			final Vector b = mg.finest_rhs;
 			final Vector defect = b.sub(mg.getFinestSystem()
 			                              .mvMul(guess));
@@ -264,7 +253,7 @@ public class NavierStokesStat
 			
 			{
 				cm2.publishIterate(res);
-				correct = new DenseVector(mg.vCycle(correct, defect));
+				correct = mg.vCycle(correct, defect);
 				res = mg.finest_system.mvMul(correct)
 				                      .sub(defect)
 				                      .euclidianNorm();
@@ -314,7 +303,7 @@ public class NavierStokesStat
 		}
 		p.addOverlay(o);
 		PlotWindow.addPlotShow(p);
-		PlotWindow.addPlot(new VelocityMagnitudePlot2D(Kovasznay.mixedReferenceSolution(reyn),
+		PlotWindow.addPlot(new VelocityMagnitudePlot2D(Kovasznay.mixedReferenceSolution(100),
 		                                               mg.getFinestSpace()
 		                                                 .generatePlotPoints(80)
 			, 80, "true"));
@@ -324,7 +313,7 @@ public class NavierStokesStat
 			,
 			                           80,
 			                           "fem"));
-		PlotWindow.addPlot(new MixedPlot2D(Kovasznay.mixedReferenceSolution(reyn),
+		PlotWindow.addPlot(new MixedPlot2D(Kovasznay.mixedReferenceSolution(100),
 		                                   mg.getFinestSpace()
 		                                     .generatePlotPoints(80)
 			, 80, "true"));
@@ -332,18 +321,19 @@ public class NavierStokesStat
 			ConvergenceOrderEstimator.normL2VecDifference(
 				generateCurrentFunction(guess, mg.getFinestSpace())
 					.getVelocityFunction(),
-				Kovasznay.velocityReferenceSolution(reyn),
+				Kovasznay.velocityReferenceSolution(100),
 				mg.getFinestSpace()
 				  .generatePlotPoints(80)));
 	}
 	
 	@NotNull
 	private static MixedRightHandSideIntegral<TPCell, ContinuousTPShapeFunction, ContinuousTPVectorFunction,
-		QkQkFunction> getSourceIntegral(final double reyn, final double nu)
+		QkQkFunction> getSourceIntegral()
 	{
 		return MixedRightHandSideIntegral.fromVelocityIntegral(
 			new TPVectorRightHandSideIntegral<>(
-				Kovasznay.rightHandSide(reyn, nu),
+				ScalarFunction.constantFunction(0)
+				              .makeIsotropicVectorFunction(),
 				TPVectorRightHandSideIntegral.VALUE));
 	}
 	

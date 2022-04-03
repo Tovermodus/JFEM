@@ -1,8 +1,8 @@
 package linalg;
 
 import basic.MetricWindow;
+import io.vavr.Function2;
 import multigrid.MGPreconditionerInterface;
-import scala.Function2;
 
 public class MultigridFixedpointSchur
 	extends ImplicitSchurSolver

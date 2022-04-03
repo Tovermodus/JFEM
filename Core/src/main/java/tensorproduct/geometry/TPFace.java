@@ -4,10 +4,6 @@ import basic.DoubleCompare;
 import basic.FaceWithReferenceFace;
 import basic.PerformanceArguments;
 import basic.VectorFunction;
-import com.esotericsoftware.kryo.Kryo;
-import com.esotericsoftware.kryo.Serializer;
-import com.esotericsoftware.kryo.io.Input;
-import com.esotericsoftware.kryo.io.Output;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Multimap;
@@ -17,7 +13,8 @@ import org.jetbrains.annotations.NotNull;
 
 import java.util.*;
 
-public class TPFace extends Serializer<TPFace> implements FaceWithReferenceFace<TPCell, TPFace>, Comparable<TPFace>
+public class TPFace
+	implements FaceWithReferenceFace<TPCell, TPFace>, Comparable<TPFace>
 {
 	public final double otherCoordinate;
 	public final int flatDimension;
@@ -26,7 +23,10 @@ public class TPFace extends Serializer<TPFace> implements FaceWithReferenceFace<
 	private final transient VectorFunction normal;
 	final Set<TPCell> cells;
 	
-	TPFace(final List<Cell1D> cell1Ds, final int flatDimension, final double otherCoordinate, final boolean isBoundaryFace)
+	TPFace(final List<Cell1D> cell1Ds,
+	       final int flatDimension,
+	       final double otherCoordinate,
+	       final boolean isBoundaryFace)
 	{
 		this.otherCoordinate = otherCoordinate;
 		this.flatDimension = flatDimension;
@@ -66,8 +66,14 @@ public class TPFace extends Serializer<TPFace> implements FaceWithReferenceFace<
 		for (int i = 0; i < dimension; i++)
 		{
 			final int finalI = i;
-			final double min = Arrays.stream(vertices).mapToDouble(v -> v.at(finalI)).min().getAsDouble();
-			final double max = Arrays.stream(vertices).mapToDouble(v -> v.at(finalI)).max().getAsDouble();
+			final double min = Arrays.stream(vertices)
+			                         .mapToDouble(v -> v.at(finalI))
+			                         .min()
+			                         .getAsDouble();
+			final double max = Arrays.stream(vertices)
+			                         .mapToDouble(v -> v.at(finalI))
+			                         .max()
+			                         .getAsDouble();
 			if (DoubleCompare.almostEqual(min, max))
 			{
 				flatDimension = i;
@@ -123,12 +129,14 @@ public class TPFace extends Serializer<TPFace> implements FaceWithReferenceFace<
 	
 	public boolean isNormalDownstream(final CoordinateVector pos)
 	{
-		return getNormal().value(center()).inner(pos.sub(center())) > 0;
+		return getNormal().value(center())
+		                  .inner(pos.sub(center())) > 0;
 	}
 	
 	public TPCell getUpStreamCell(final CoordinateVector direction)
 	{
-		if (normal.value(center()).inner(direction) > 0)
+		if (normal.value(center())
+		          .inner(direction) > 0)
 			return getNormalUpstreamCell();
 		else
 			return getNormalDownstreamCell();
@@ -136,7 +144,8 @@ public class TPFace extends Serializer<TPFace> implements FaceWithReferenceFace<
 	
 	public TPCell getDownStreamCell(final CoordinateVector direction)
 	{
-		if (normal.value(center()).inner(direction) < 0)
+		if (normal.value(center())
+		          .inner(direction) < 0)
 			return getNormalUpstreamCell();
 		else
 			return getNormalDownstreamCell();
@@ -147,7 +156,8 @@ public class TPFace extends Serializer<TPFace> implements FaceWithReferenceFace<
 	{
 		for (final TPCell cell : cells)
 		{
-			if (cell.center().at(flatDimension) > otherCoordinate)
+			if (cell.center()
+			        .at(flatDimension) > otherCoordinate)
 			{
 				return cell;
 			}
@@ -160,7 +170,8 @@ public class TPFace extends Serializer<TPFace> implements FaceWithReferenceFace<
 	{
 		for (final TPCell cell : cells)
 		{
-			if (cell.center().at(flatDimension) < otherCoordinate)
+			if (cell.center()
+			        .at(flatDimension) < otherCoordinate)
 			{
 				return cell;
 			}
@@ -178,7 +189,8 @@ public class TPFace extends Serializer<TPFace> implements FaceWithReferenceFace<
 			if (d == flatDimension)
 				ret.set(otherCoordinate, d);
 			else
-				ret.set(cell1Ds.get(subd++).center(), d);
+				ret.set(cell1Ds.get(subd++)
+				               .center(), d);
 		}
 		return ret;
 	}
@@ -195,7 +207,8 @@ public class TPFace extends Serializer<TPFace> implements FaceWithReferenceFace<
 					return false;
 			} else
 			{
-				if (!cell1Ds.get(subd++).isInCell(pos.at(d)))
+				if (!cell1Ds.get(subd++)
+				            .isInCell(pos.at(d)))
 					return false;
 			}
 		}
@@ -219,7 +232,9 @@ public class TPFace extends Serializer<TPFace> implements FaceWithReferenceFace<
 				ret = ret.concat(otherCoordinate + "");
 			else
 				ret = ret.concat(
-					"[" + cell1Ds.get(subd).getStart() + ", " + cell1Ds.get(subd++).getEnd() +
+					"[" + cell1Ds.get(subd)
+					             .getStart() + ", " + cell1Ds.get(subd++)
+					                                         .getEnd() +
 						"]");
 			if (d < cell1Ds.size())
 				ret = ret.concat("x");
@@ -256,7 +271,9 @@ public class TPFace extends Serializer<TPFace> implements FaceWithReferenceFace<
 			return 1;
 		if (o.getNormalUpstreamCell() != null && getNormalUpstreamCell() == null)
 			return -1;
-		return CoordinateComparator.comp(center().getEntries(), o.center().getEntries());
+		return CoordinateComparator.comp(center().getEntries(),
+		                                 o.center()
+		                                  .getEntries());
 	}
 	
 	@Override
@@ -265,9 +282,12 @@ public class TPFace extends Serializer<TPFace> implements FaceWithReferenceFace<
 		int ret = 0;
 		for (int i = 0; i < cell1Ds.size(); i++)
 		{
-			ret += Math.pow(7, 3 * i) * DoubleCompare.doubleHash(cell1Ds.get(i).center());
-			ret += Math.pow(7, 3 * i + 1) * DoubleCompare.doubleHash(cell1Ds.get(i).getStart());
-			ret += Math.pow(7, 3 * i + 2) * DoubleCompare.doubleHash(cell1Ds.get(i).getEnd());
+			ret += Math.pow(7, 3 * i) * DoubleCompare.doubleHash(cell1Ds.get(i)
+			                                                            .center());
+			ret += Math.pow(7, 3 * i + 1) * DoubleCompare.doubleHash(cell1Ds.get(i)
+			                                                                .getStart());
+			ret += Math.pow(7, 3 * i + 2) * DoubleCompare.doubleHash(cell1Ds.get(i)
+			                                                                .getEnd());
 		}
 		ret -= 141 * DoubleCompare.doubleHash(otherCoordinate);
 		ret *= (flatDimension + 19);
@@ -321,17 +341,5 @@ public class TPFace extends Serializer<TPFace> implements FaceWithReferenceFace<
 		if (getNormalUpstreamCell() != null)
 			refFace.cells.add(upstreamCell);
 		return refFace;
-	}
-	
-	@Override
-	public void write(final Kryo kryo, final Output output, final TPFace tpFace)
-	{
-		throw new UnsupportedOperationException("not implemented yet");
-	}
-	
-	@Override
-	public TPFace read(final Kryo kryo, final Input input, final Class<TPFace> aClass)
-	{
-		throw new UnsupportedOperationException("not implemented yet");
 	}
 }

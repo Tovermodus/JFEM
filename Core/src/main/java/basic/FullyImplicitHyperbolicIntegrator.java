@@ -1,7 +1,7 @@
 package basic;
 
+import io.vavr.Function2;
 import linalg.*;
-import scala.Function2;
 
 public abstract class FullyImplicitHyperbolicIntegrator
 {

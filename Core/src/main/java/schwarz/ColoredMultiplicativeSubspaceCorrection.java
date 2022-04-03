@@ -71,40 +71,53 @@ public class ColoredMultiplicativeSubspaceCorrection<OT extends VectorMultiplyab
 		Vector iterate = new DenseVector(globalIterate);
 		for (int i = 0; i < colorSets.size(); i++)
 		{
-			final Vector globalResidual = globalRhs.sub(schwarz.getGlobalOperator()
-			                                                   .mvMul(iterate));
-			final IntSet coloredPatches = colorSets.get(i);
-			final List<Vector> globalSolComponents
-				= coloredPatches.stream()
-				                .parallel()
-				                .map(j ->
-				                     {
-					                     final Vector localRes
-						                     = schwarz.getLocalVector(
-						                     j,
-						                     globalResidual);
-					                     final Vector localSol
-						                     = schwarz.solveLocalSystem(
-						                     j,
-						                     localRes);
-					                     final Vector
-						                     globalSolComponent
-						                     = schwarz.getGlobalVector(
-						                     j,
-						                     localSol);
-					                     return globalSolComponent;
-				                     })
-				                .collect(Collectors.toList());
-			for (final Vector v : globalSolComponents)
-			{
-				iterate = iterate.add(v.mul(omega));
+			iterate = colorSetUpgrade((AbstractSchwarz<?, ?, OT>) schwarz, globalRhs, iterate, i);
+		}
+		for (int i = colorSets.size() - 1; i >= 0; i--)
+		{
+			iterate = colorSetUpgrade((AbstractSchwarz<?, ?, OT>) schwarz, globalRhs, iterate, i);
+		}
+		return iterate;
+	}
+	
+	private Vector colorSetUpgrade(final AbstractSchwarz<?, ?, OT> schwarz,
+	                               @NotNull final Vector globalRhs,
+	                               Vector iterate,
+	                               final int i)
+	{
+		final Vector globalResidual = globalRhs.sub(schwarz.getGlobalOperator()
+		                                                   .mvMul(iterate));
+		final IntSet coloredPatches = colorSets.get(i);
+		final List<Vector> globalSolComponents
+			= coloredPatches.stream()
+			                .parallel()
+			                .map(j ->
+			                     {
+				                     final Vector localRes
+					                     = schwarz.getLocalVector(
+					                     j,
+					                     globalResidual);
+				                     final Vector localSol
+					                     = schwarz.solveLocalSystem(
+					                     j,
+					                     localRes);
+				                     final Vector
+					                     globalSolComponent
+					                     = schwarz.getGlobalVector(
+					                     j,
+					                     localSol);
+				                     return globalSolComponent;
+			                     })
+			                .collect(Collectors.toList());
+		for (final Vector v : globalSolComponents)
+		{
+			iterate = iterate.add(v.mul(omega));
 //				final MixedTPFESpaceFunction<QkQkFunction> fun =
 //					new MixedTPFESpaceFunction<>(space.getShapeFunctionMap(), iterate);
 //				PlotWindow.addPlotShow(new MixedPlot2D(fun,
 //				                                       space,
 //				                                       (int) Math.sqrt(space.getShapeFunctions()
 //				                                                            .size()) / 2));
-			}
 		}
 		return iterate;
 	}

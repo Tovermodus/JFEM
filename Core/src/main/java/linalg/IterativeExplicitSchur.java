@@ -1,6 +1,6 @@
 package linalg;
 
-import scala.Function2;
+import io.vavr.Function2;
 
 public class IterativeExplicitSchur
 	extends ExplicitSchurSolver

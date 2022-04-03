@@ -1,10 +1,10 @@
 package basic;
 
+import io.vavr.Function2;
 import linalg.DenseMatrix;
 import linalg.DenseVector;
 import linalg.Matrix;
 import linalg.MutableVector;
-import scala.Function2;
 
 import java.util.function.BiConsumer;
 

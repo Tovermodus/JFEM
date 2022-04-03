@@ -1,7 +1,7 @@
 package linalg;
 
 import basic.MetricWindow;
-import scala.Function2;
+import io.vavr.Function2;
 
 public class RichardsonExplicitSchur
 	extends ExplicitSchurSolver

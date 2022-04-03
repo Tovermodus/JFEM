@@ -1,8 +1,8 @@
 package linalg;
 
+import io.vavr.Function2;
 import it.unimi.dsi.fastutil.ints.Int2ObjectArrayMap;
 import it.unimi.dsi.fastutil.ints.Int2ObjectMap;
-import scala.Function2;
 
 import java.util.List;
 import java.util.stream.Collectors;

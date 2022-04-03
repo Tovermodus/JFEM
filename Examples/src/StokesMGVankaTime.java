@@ -6,9 +6,10 @@ import mixed.*;
 import multigrid.MGPreconditionerSpace;
 import multigrid.Smoother;
 import org.jetbrains.annotations.NotNull;
-import schwarz.ColoredCartesianSchwarz;
 import schwarz.DirectSolver;
+import schwarz.MultiplicativeSubspaceCorrection;
 import schwarz.SchwarzSmoother;
+import schwarz.VankaSchwarz;
 import tensorproduct.*;
 import tensorproduct.geometry.TPCell;
 import tensorproduct.geometry.TPFace;
@@ -88,7 +89,7 @@ public class StokesMGVankaTime
 			@Override
 			public List<TaylorHoodSpace> createSpaces(final int refinements)
 			{
-				verbose = false;
+				verbose = true;
 				final ArrayList<TaylorHoodSpace> ret = new ArrayList<>();
 				int mul = 1;
 				for (int i = 0; i < refinements + 1; i++)
@@ -117,12 +118,12 @@ public class StokesMGVankaTime
 				mass.mulInPlace(1. / dt);
 				final SparseMatrix flow = new SparseMatrix(n, n);
 				final List<CellIntegral<TPCell, QkQkFunction>> flowIntegrals = new ArrayList<>();
-//				if (guess != null)
-//				{
-//					flowIntegrals.addAll(
-//						getConvectionIntegrals(generateCurrentFunction(guess, getFinestSpace())
-//							                       .getVelocityFunction()));
-//				}
+				if (guess != null)
+				{
+					flowIntegrals.addAll(
+						getConvectionIntegrals(generateCurrentFunction(guess, getFinestSpace())
+							                       .getVelocityFunction()));
+				}
 				flowIntegrals.add(gradGrad);
 				flowIntegrals.add(divValue);
 				space.writeCellIntegralsToMatrix(flowIntegrals, flow);
@@ -192,18 +193,18 @@ public class StokesMGVankaTime
 					final IntCoordinates partitions
 						= new IntCoordinates(4, 4).mul(Math.max(1, (int) Math.pow(2, i)));
 					System.out.println(partitions);
-//					final VankaSchwarz schwarz =
-//						new VankaSchwarz((SparseMatrix) getSystem(i),
-//						                 getSpace(i),
-//						                 new MultiplicativeSubspaceCorrection<>(getSpace(i)),
-//						                 new DirectSolver());
-					
-					final ColoredCartesianSchwarz<QkQkFunction> schwarz
-						= new ColoredCartesianSchwarz<>((SparseMatrix) getSystem(i),
-						                                getSpace(i),
-						                                partitions, 1,
-						                                new DirectSolver(), 1);
-					ret.add(new SchwarzSmoother(2, schwarz));
+					final VankaSchwarz schwarz =
+						new VankaSchwarz((SparseMatrix) getSystem(i),
+						                 getSpace(i),
+						                 new MultiplicativeSubspaceCorrection<>(getSpace(i)),
+						                 new DirectSolver());
+
+//					final ColoredCartesianSchwarz<QkQkFunction> schwarz
+//						= new ColoredCartesianSchwarz<>((SparseMatrix) getSystem(i),
+//						                                getSpace(i),
+//						                                partitions, 1,
+//						                                new DirectSolver(), 1);
+					ret.add(new SchwarzSmoother(4, schwarz));
 				}
 				return ret;
 			}
@@ -305,7 +306,7 @@ public class StokesMGVankaTime
 		final PerformanceArguments.PerformanceArgumentBuilder builder =
 			new PerformanceArguments.PerformanceArgumentBuilder();
 		builder.build();
-		final double dt = 1;
+		final double dt = 0.1;
 		final int timesteps = 400;
 		final int nPoints = 61;
 		
@@ -316,7 +317,7 @@ public class StokesMGVankaTime
 		
 		final List<CoordinateVector> points = mg.getFinestSpace()
 		                                        .generatePlotPoints(nPoints);
-		final IterativeSolver it = new IterativeSolver(true);
+		//final IterativeSolver it = new IterativeSolver(true);
 		for (int i = 1; i <= timesteps; i++)
 		{
 			DenseVector guess = new DenseVector(iterate);
@@ -340,29 +341,29 @@ public class StokesMGVankaTime
 				                            .mvMul(correct)
 				                            .sub(defect)
 				                            .euclidianNorm();
-				final double res = initialres;
-//				int it;
-////				correct = ((SparseMatrix) mg.finest_system).solve(defect);
-//				for (it = 0; it < 100 && res > 1e-8; it++)
-//
-//				{
-//					cm.publishIterate(res);
-//					correct = mg.vCycle(correct, defect);
-//					res = mg.finest_system.mvMul(correct)
-//					                      .sub(defect)
-//					                      .euclidianNorm();
-//					System.out.println("NLIN ITER " + nLinIter + " " + res / initialres + " after " +
-//						                   "iterations " + it);
-//					System.out.println("lin norm " + mg.finest_system.mvMul(correct)
-//					                                                 .sub(defect)
-//					                                                 .euclidianNorm());
-//				}
-//				if (it > 90)
-//				{
-//					i = 2 * timesteps + 1;
-//					break;
-//				}
-				correct = it.solvePGMRES(mg.getFinestSystem(), mg, defect, 1e-8);
+				double res = initialres;
+				int it;
+//				correct = ((SparseMatrix) mg.finest_system).solve(defect);
+				for (it = 0; it < 100 && res > 1e-8; it++)
+				
+				{
+					cm.publishIterate(res);
+					correct = mg.vCycle(correct, defect);
+					res = mg.finest_system.mvMul(correct)
+					                      .sub(defect)
+					                      .euclidianNorm();
+					System.out.println("NLIN ITER " + nLinIter + " " + res / initialres + " after " +
+						                   "iterations " + it);
+					System.out.println("lin norm " + mg.finest_system.mvMul(correct)
+					                                                 .sub(defect)
+					                                                 .euclidianNorm());
+				}
+				if (it > 90)
+				{
+					i = 2 * timesteps + 1;
+					break;
+				}
+//				correct = it.solvePGMRES(mg.getFinestSystem(), mg, defect, 1e-8);
 				cm.publishIterate(correct.euclidianNorm());
 				System.out.println("GUESS ITERATE" + nLinIter);
 				System.out.println(defect.euclidianNorm());

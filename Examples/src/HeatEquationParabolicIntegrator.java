@@ -1,7 +1,7 @@
 import basic.*;
 import com.google.common.primitives.Ints;
+import io.vavr.Function2;
 import linalg.*;
-import scala.Function2;
 import tensorproduct.*;
 
 import java.util.HashMap;
