@@ -41,10 +41,8 @@ public class CartesianSchwarzTest
 		                                                  cells);
 		space.assembleCells();
 		space.assembleFunctions(1);
-		final SparseMatrix s = new SparseMatrix(space.getShapeFunctions()
-		                                             .size(),
-		                                        space.getShapeFunctions()
-		                                             .size());
+		final SparseMatrix s = SparseMatrix.identity(space.getShapeFunctions()
+		                                                  .size());
 		final IntCoordinates partitions = new IntCoordinates(2, 3);
 		final int overlap = 0;
 		final CartesianUpFrontSchwarz<QkQkFunction> schwarz
@@ -79,10 +77,8 @@ public class CartesianSchwarzTest
 		                                                  cells);
 		space.assembleCells();
 		space.assembleFunctions(1);
-		final SparseMatrix s = new SparseMatrix(space.getShapeFunctions()
-		                                             .size(),
-		                                        space.getShapeFunctions()
-		                                             .size());
+		final SparseMatrix s = SparseMatrix.identity(space.getShapeFunctions()
+		                                                  .size());
 		final IntCoordinates partitions = new IntCoordinates(4, 9);
 		final int overlap = 0;
 		final CartesianUpFrontSchwarz<QkQkFunction> schwarz
@@ -117,10 +113,8 @@ public class CartesianSchwarzTest
 		                                                  cells);
 		space.assembleCells();
 		space.assembleFunctions(1);
-		final SparseMatrix s = new SparseMatrix(space.getShapeFunctions()
-		                                             .size(),
-		                                        space.getShapeFunctions()
-		                                             .size());
+		final SparseMatrix s = SparseMatrix.identity(space.getShapeFunctions()
+		                                                  .size());
 		final IntCoordinates partitions = new IntCoordinates(2, 3);
 		final int overlap = 0;
 		final CartesianUpFrontSchwarz<QkQkFunction> schwarz

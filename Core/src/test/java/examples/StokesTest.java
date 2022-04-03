@@ -157,6 +157,9 @@ public class StokesTest
 		System.out.println(ConvergenceOrderEstimator.normL20Difference(solut.getPressureFunction(),
 		                                                               StokesReferenceSolution.pressureReferenceSolution(),
 		                                                               grid.generatePlotPoints(20)));
+		System.out.println(ConvergenceOrderEstimator.normL2VecDifference(solut.getVelocityFunction(),
+		                                                                 StokesReferenceSolution.velocityReferenceSolution(),
+		                                                                 grid.generatePlotPoints(20)));
 		assertTrue(ConvergenceOrderEstimator.normL20Difference(solut.getPressureFunction(),
 		                                                       StokesReferenceSolution.pressureReferenceSolution(),
 		                                                       grid.generatePlotPoints(20)) < 2e-1);
