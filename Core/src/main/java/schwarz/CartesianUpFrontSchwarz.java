@@ -60,7 +60,6 @@ public class CartesianUpFrontSchwarz<ST extends ShapeFunction<TPCell, TPFace, ?,
 							final TPCell cell
 								= space.grid.cellsByCoordinates.get(cellCoords);
 							patch.add(cell);
-							System.out.println(cellCoords);
 						}
 					}
 				}
@@ -89,20 +88,16 @@ public class CartesianUpFrontSchwarz<ST extends ShapeFunction<TPCell, TPFace, ?,
 							final TPCell cell
 								= space.grid.cellsByCoordinates.get(cellCoords);
 							patch.add(cell);
-							System.out.println(cellCoords);
 						}
 					}
 				}
 				cellPatches.add(patch);
-				System.out.println();
-				System.out.println();
-				System.out.println();
 			}
 		}
 		System.out.println("partitioned");
 		build();
+		
 		IntStream.range(0, getPatchCount())
-		         .parallel()
 		         .forEach(i ->
 		                  {
 			                  final Vector v = new DenseVector(globalMatrix.getVectorSize());

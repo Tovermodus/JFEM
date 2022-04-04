@@ -263,4 +263,59 @@ public class SparseMatrixTest1
 		assertEquals(spspresult, sparse.mmMul(sparseToDense));
 		System.out.println(s.elapsed());
 	}
+	
+	public static SparseMatrix createLargeSparseMatrix(final int n)
+	{
+		
+		final Random generator = new Random(1627896);
+		final SparseMatrix ret = new SparseMatrix(n, n);
+		for (final IntCoordinates c : ret.getShape()
+		                                 .range())
+		{
+			if (c.get(0) == c.get(1))
+				ret.add(100, c);
+			if (generator.nextDouble() < 0.05)
+				ret.add(generator.nextDouble() - 0.4, c);
+		}
+		return ret;
+	}
+	
+	public static DenseVector createRhs(final Matrix m)
+	{
+		
+		final Random generator = new Random(323781645);
+		final DenseVector ret = new DenseVector(m.getVectorSize());
+		for (final IntCoordinates c : ret.getShape()
+		                                 .range())
+		{
+			ret.add(generator.nextDouble() - 0.4, c);
+		}
+		return ret;
+	}
+	
+	@Test
+	public void testLLarge()
+	{
+		SparseMatrix s = createLargeSparseMatrix(2000);
+		final DenseVector b = createRhs(s);
+		System.out.println("created");
+		Stopwatch st = Stopwatch.createStarted();
+		final Vector x1 = s.solve(b);
+		System.out.println(st.elapsed());
+		st = Stopwatch.createStarted();
+		final Vector x2 = new DenseVector(s
+			                                  .getSparseSolver()
+			                                  .solve(b.entries), true);
+		System.out.println(st.elapsed());
+		assertEquals(x1, x2);
+		s = createLargeSparseMatrix(2000);
+		st = Stopwatch.createStarted();
+		final DenseMatrix d1 = s.inverse();
+		System.out.println(st.elapsed());
+		st = Stopwatch.createStarted();
+		final DenseMatrix d2 = new DenseMatrix(s.getSparseSolver()
+		                                        .inverse());
+		System.out.println(st.elapsed());
+		assertEquals(d1, d2);
+	}
 }

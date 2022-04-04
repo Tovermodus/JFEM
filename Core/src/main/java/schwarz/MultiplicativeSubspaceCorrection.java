@@ -70,16 +70,41 @@ public class MultiplicativeSubspaceCorrection<OT extends VectorMultiplyable>
 	                            Vector iterate,
 	                            final int i)
 	{
+//		System.out.println();
+//		System.out.println();
+//		System.out.println();
 		final Vector globalResidual = globalRhs.sub(schwarz.getGlobalOperator()
 		                                                   .mvMul(iterate));
+//		System.out.println(globalResidual.euclidianNorm());
 		//System.out.println("SUB " + globalResidual.euclidianNorm());
 		final Vector localRes = schwarz.getLocalVector(i,
 		                                               globalResidual.mul(1));
+//		System.out.println("res");
+//		System.out.println(localRes.getLength());
+//		System.out.println(globalResidual.getLength());
+//		System.out.println(localRes.sub(globalResidual)
+//		                           .euclidianNorm());
 		final Vector localSol = schwarz.solveLocalSystem(i,
 		                                                 localRes);
 		final Vector globalSolComponent
 			= schwarz.getGlobalVector(i,
 			                          localSol);
+//		System.out.println("sol");
+//		System.out.println(localSol.sub(globalSolComponent)
+//		                           .euclidianNorm());
+//		System.out.println("acc");
+//		System.out.println(schwarz.getLocalOperator(i)
+//		                          .mvMul(localSol)
+//		                          .sub(localRes)
+//		                          .euclidianNorm());
+//		System.out.println(schwarz.getGlobalOperator()
+//		                          .mvMul(globalSolComponent)
+//		                          .sub(globalResidual)
+//		                          .euclidianNorm());
+//		System.out.println("add");
+//		System.out.println(globalRhs.sub(schwarz.getGlobalOperator()
+//		                                        .mvMul(iterate.add(globalSolComponent)))
+//		                            .euclidianNorm());
 		if (i % 1 == 1 && localRes.euclidianNorm() > 1e-2)
 		{
 			final MixedTPFESpaceFunction<QkQkFunction> fun =
@@ -89,8 +114,7 @@ public class MultiplicativeSubspaceCorrection<OT extends VectorMultiplyable>
 			                                       space.generatePlotPoints(32),
 			                                       32));
 		}
-		iterate = iterate.add(globalSolComponent)
-		                 .mul(1);
+		iterate = iterate.add(globalSolComponent);
 		return iterate;
 	}
 }

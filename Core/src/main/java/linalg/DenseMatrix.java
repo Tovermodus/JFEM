@@ -337,17 +337,19 @@ public class DenseMatrix
 	}
 	
 	@Override
-	public DenseVector mvMul(final Vector vector)
+	public DenseVector mvMul(final Vector v)
 	{
 		if (PerformanceArguments.getInstance().executeChecks)
-			if (getCols() != (vector.getLength())) throw new IllegalArgumentException("Incompatible sizes");
+			if (getCols() != (v.getLength())) throw new IllegalArgumentException("Incompatible sizes");
 		final int cols = getCols();
 		final DenseVector ret = new DenseVector(getRows());
+		final DenseVector vector = new DenseVector(v);
 		for (int i = 0; i < getRows(); i++)
 		{
 			double ret_i = 0;
+			final double[] row = entries[i];
 			for (int k = 0; k < cols; k++)
-				ret_i += at(i, k) * vector.at(k);
+				ret_i += row[k] * vector.entries[k];
 			ret.add(ret_i, i);
 		}
 		return ret;

@@ -37,6 +37,15 @@ public abstract class UpFrontSchwarz<CT extends Cell<CT, FT>, FT extends Face<CT
 				                   restrictionOperators.get(i)
 				                                       .selectFrom(globalMatrix))
 			         .collect(Collectors.toList());
+//		System.out.println(restrictionOperators.get(0)
+//		                                       .sub(SparseMatrix.identity(globalMatrix.getVectorSize()))
+//		                                       .absMaxElement());
+//		System.out.println(localOperators.get(0)
+//		                                 .sub(globalMatrix)
+//		                                 .absMaxElement());
+//		System.out.println(localOperators.get(0)
+//		                                 .slice(new IntCoordinates(0, 0), new IntCoordinates(20, 20)));
+//		System.out.println(globalMatrix.slice(new IntCoordinates(0, 0), new IntCoordinates(20, 20)));
 		System.out.println("locals");
 	}
 	

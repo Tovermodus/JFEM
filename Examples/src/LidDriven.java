@@ -6,7 +6,10 @@ import mixed.*;
 import multigrid.MGPreconditionerSpace;
 import multigrid.Smoother;
 import org.jetbrains.annotations.NotNull;
-import schwarz.*;
+import schwarz.CartesianUpFrontSchwarz;
+import schwarz.DirectSolver;
+import schwarz.MultiplicativeSubspaceCorrection;
+import schwarz.SchwarzSmoother;
 import tensorproduct.*;
 import tensorproduct.geometry.TPCell;
 import tensorproduct.geometry.TPFace;
@@ -17,7 +20,6 @@ import java.util.*;
 
 public class LidDriven
 {
-	static ColoredCartesianSchwarz<QkQkFunction> schwarz[];
 	
 	private static MGPreconditionerSpace<TaylorHoodSpace, TPCell, TPFace, QkQkFunction, MixedValue, MixedGradient
 		, MixedHessian> getMG(final Vector guess)
@@ -83,6 +85,27 @@ public class LidDriven
 				                            (f, sf) -> sf.hasVelocityFunction(),
 				                            flow,
 				                            src);
+				final int fixedP = getFixedP(space);
+				
+				final DenseVector cons = new DenseVector(n);
+				for (int i = space.getVelocitySize(); i < flow.getCols(); i++)
+					cons.set(1, i);
+//				final MixedTPFESpaceFunction<QkQkFunction> constantFunction
+//					= new MixedTPFESpaceFunction<>(
+//					space.getShapeFunctionMap(),
+//					cons);
+//				PlotWindow.addPlot(new MixedPlot2D(constantFunction,
+//				                                   space.generatePlotPoints(30),
+//				                                   30));
+				System.out.println("COOOOOOOOOOOOOOOONNSSSS " + flow.mvMul(cons)
+				                                                    .euclidianNorm());
+				space.overWriteValue(fixedP, 0, flow, src);
+				sizeToFixedP.put(n, fixedP);
+				return new Tuple2<>(flow, src);
+			}
+			
+			private int getFixedP(final TaylorHoodSpace space)
+			{
 				int fixedP = 0;
 				final CoordinateVector c =
 					space.grid.startCoordinates.add(space.grid.endCoordinates)
@@ -99,32 +122,7 @@ public class LidDriven
 				                                              .dist(c)))
 				              .orElseThrow()
 				              .getKey();
-				
-				final DenseVector cons = new DenseVector(n);
-				for (int i = space.getVelocitySize(); i < flow.getCols(); i++)
-					cons.set(1, i);
-				final MixedTPFESpaceFunction<QkQkFunction> constantFunction
-					= new MixedTPFESpaceFunction<>(
-					space.getShapeFunctionMap(),
-					cons);
-//				PlotWindow.addPlot(new MixedPlot2D(constantFunction,
-//				                                   space.generatePlotPoints(30),
-//				                                   30));
-				System.out.println("COOOOOOOOOOOOOOOONNSSSS " + flow.mvMul(cons)
-				                                                    .euclidianNorm());
-//				for (int i = space.getVelocitySize(); i < s.getCols(); i++)
-//				{
-//					s.set(0, i, fixedP);
-//					s.set(0, fixedP, i);
-//				}
-				//d.set(0, fixedP);
-				sizeToFixedP.put(n, fixedP);
-				flow.deleteRow(fixedP);
-				flow.add(1, fixedP, fixedP);
-				src.set(0, fixedP);
-				//flow.add(1, space.getVelocitySize(), space.getVelocitySize());
-//				space.overWriteValue(fixedP, 0, flow, src);
-				return new Tuple2<>(flow, src);
+				return space.getVelocitySize();//fixedP;
 			}
 			
 			@Override
@@ -134,21 +132,8 @@ public class LidDriven
 				for (int i = 1; i < spaces.size(); i++)
 				{
 					final IntCoordinates partitions
-						= new IntCoordinates(8, 8).mul(Math.max(1, (int) Math.pow(2, i)));
+						= new IntCoordinates(1, 1).mul(Math.max(1, (int) Math.pow(2, i)));
 					System.out.println(partitions);
-//					final VankaSchwarz schwarz =
-//						new VankaSchwarz((SparseMatrix) getSystem(i),
-//						                 getSpace(i),
-//						                 new MultiplicativeSubspaceCorrection<>(getSpace(i)),
-//						                 new DirectSolver());
-
-//					if (schwarz[i] == null)
-//						schwarz[i] = new ColoredCartesianSchwarz<>(null,
-//						                                           getSpace(i),
-//						                                           partitions, 2,
-//						                                           new DirectSolver(), 1);
-//					schwarz[i].build((SparseMatrix) getSystem(i));
-					
 					final CartesianUpFrontSchwarz<QkQkFunction> schwarz =
 						new CartesianUpFrontSchwarz<>((SparseMatrix) getSystem(i),
 						                              getSpace(i),
@@ -157,7 +142,7 @@ public class LidDriven
 						                              new MultiplicativeSubspaceCorrection<>(
 							                              getSpace(i)),
 						                              new DirectSolver());
-					ret.add(new SchwarzSmoother(6, schwarz));
+					ret.add(new SchwarzSmoother(3, schwarz));
 				}
 				return ret;
 			}
@@ -171,8 +156,8 @@ public class LidDriven
 				                                f -> true,
 				                                (f, sf) -> sf.hasVelocityFunction(),
 				                                vector);
-				vector.set(0, sizeToFixedP.get(vector.getLength()));
-				//vector.set(0, sizeToFixedP.get(vector.getLength()));//, space.getVelocitySize());
+				if (sizeToFixedP.containsKey(vector.getLength()))
+					vector.set(0, sizeToFixedP.get(vector.getLength()));
 			}
 		};
 	}
@@ -217,15 +202,9 @@ public class LidDriven
 		builder.build();
 		final int nPoints = 80;
 		DenseVector guess = null;
-		schwarz = new ColoredCartesianSchwarz[5];
-//			final IterativeSolverConvergenceMetric nm =
-//				new IterativeSolverConvergenceMetric(guess.euclidianNorm() * 1e-5);
-//			MetricWindow.getInstance()
-//			            .setMetric("nlin", nm);
 		final IterativeSolverConvergenceMetric cm = new IterativeSolverConvergenceMetric(1e-10);
 		MetricWindow.getInstance()
 		            .setMetric("nonlinear", cm);
-		//final IterativeSolver it = new IterativeSolver(true);
 		MGPreconditionerSpace<TaylorHoodSpace, TPCell, TPFace, QkQkFunction, MixedValue, MixedGradient,
 			MixedHessian> mg = null;
 		for (int nLinIter = 0; nLinIter < 20; nLinIter++)
@@ -234,9 +213,13 @@ public class LidDriven
 			MetricWindow.getInstance()
 			            .setMetric("itsolver", cm2);
 			mg = getMG(guess);
+			final DenseMatrix d = new DenseMatrix((SparseMatrix) mg.finest_system);
+			System.out.println("copied" + d.getShape());
+			
+			System.out.println("SIZE " + mg.finest_system.getVectorSize());
 			if (guess == null)
-				guess = new DenseVector(mg.finest_rhs.getLength());
-			//mg.applyBoundaryConditions(mg.getFinestSpace(), guess, mg.finest_rhs);
+				guess = new DenseVector(mg.fullVCycleCorrection(mg.finest_rhs));
+			mg.applyBoundaryConditions(mg.getFinestSpace(), guess, mg.finest_rhs);
 			final Vector b = mg.finest_rhs;
 			final Vector defect = b.sub(mg.getFinestSystem()
 			                              .mvMul(guess));
@@ -248,12 +231,19 @@ public class LidDriven
 			                            .euclidianNorm();
 			double res = initialres;
 			int iter;
-//				correct = ((SparseMatrix) mg.finest_system).solve(defect);
+			//correct = ((SparseMatrix) mg.finest_system).solveNative(defect);
+			if (mg.finest_system.getVectorSize() < 2000)
+				if (((SparseMatrix) mg.finest_system).inverseNative()
+				                                     .absMaxElement() > 1e10)
+					throw new IllegalStateException("System is not invertivle");
+			System.out.println(defect.sub(mg.getFinestSystem()
+			                                .mvMul(correct))
+			                         .euclidianNorm());
 			for (iter = 0; iter < 100 && res > 1e-8; iter++)
 			
 			{
 				cm2.publishIterate(res);
-				correct = mg.vCycle(correct, defect);
+				correct = new DenseVector(mg.vCycle(correct, defect));
 				res = mg.finest_system.mvMul(correct)
 				                      .sub(defect)
 				                      .euclidianNorm();
@@ -267,7 +257,7 @@ public class LidDriven
 			{
 				break;
 			}
-			//correct = it.solvePGMRES(mg.getFinestSystem(), mg, defect, 1e-8);
+			//correct = new IterativeSolver(true).solvePGMRES(mg.getFinestSystem(), mg, defect, 1e-8);
 			cm.publishIterate(correct.euclidianNorm());
 			System.out.println("GUESS ITERATE" + nLinIter);
 			System.out.println(defect.euclidianNorm());
@@ -303,27 +293,12 @@ public class LidDriven
 		}
 		p.addOverlay(o);
 		PlotWindow.addPlotShow(p);
-		PlotWindow.addPlot(new VelocityMagnitudePlot2D(Kovasznay.mixedReferenceSolution(100),
-		                                               mg.getFinestSpace()
-		                                                 .generatePlotPoints(80)
-			, 80, "true"));
 		PlotWindow.addPlot(new MixedPlot2D(generateCurrentFunction(guess, mg.getFinestSpace()),
 		                                   mg.getFinestSpace()
 		                                     .generatePlotPoints(80)
 			,
 			                           80,
 			                           "fem"));
-		PlotWindow.addPlot(new MixedPlot2D(Kovasznay.mixedReferenceSolution(100),
-		                                   mg.getFinestSpace()
-		                                     .generatePlotPoints(80)
-			, 80, "true"));
-		System.out.println(
-			ConvergenceOrderEstimator.normL2VecDifference(
-				generateCurrentFunction(guess, mg.getFinestSpace())
-					.getVelocityFunction(),
-				Kovasznay.velocityReferenceSolution(100),
-				mg.getFinestSpace()
-				  .generatePlotPoints(80)));
 	}
 	
 	@NotNull

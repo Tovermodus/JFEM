@@ -2,6 +2,7 @@ package schwarz;
 
 import linalg.DenseMatrix;
 import linalg.Matrix;
+import linalg.SparseMatrix;
 import linalg.Vector;
 
 import java.util.HashMap;
@@ -22,7 +23,12 @@ public class DirectSolver
 	{
 		if (!inverses.containsKey(patch))
 		{
-			final DenseMatrix inv = new DenseMatrix(system).inverse();
+			final SparseMatrix s;
+			if (system instanceof SparseMatrix)
+				s = (SparseMatrix) system;
+			else
+				s = new SparseMatrix(system);
+			final DenseMatrix inv = s.inverseNative();
 			synchronized (this)
 			{
 				inverses.put(patch, inv);

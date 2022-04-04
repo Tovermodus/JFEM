@@ -181,13 +181,13 @@ public class NavierStokesStat
 				for (int i = 1; i < spaces.size(); i++)
 				{
 					final IntCoordinates partitions
-						= new IntCoordinates(4, 4).mul(Math.max(1, (int) Math.pow(2, i)));
+						= new IntCoordinates(2, 2).mul(Math.max(1, (int) Math.pow(2, i)));
 					System.out.println(partitions);
 					final CartesianUpFrontSchwarz<QkQkFunction> schwarz =
 						new CartesianUpFrontSchwarz<>((SparseMatrix) getSystem(i),
 						                              getSpace(i),
 						                              partitions,
-						                              1,
+						                              3,
 						                              new MultiplicativeSubspaceCorrection<>(),
 						                              new DirectSolver());
 					ret.add(new SchwarzSmoother(5, schwarz));

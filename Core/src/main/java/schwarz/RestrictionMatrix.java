@@ -37,7 +37,7 @@ public class RestrictionMatrix
 			                     final int newY = selectedIndices.get(coord.get(0));
 			                     final int newX = selectedIndices.get(coord.get(1));
 			                     if (newX != -1 && newY != -1)
-				                     ret.add(entry.getValue(), newX, newY);
+				                     ret.add(entry.getValue(), newY, newX);
 		                     });
 		return ret;
 	}

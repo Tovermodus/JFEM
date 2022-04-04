@@ -4,6 +4,7 @@ import basic.DoubleCompare;
 import basic.MapKeySelectCollector;
 import basic.PerformanceArguments;
 import com.google.common.base.Stopwatch;
+import com.simonschmidt.SparseSolver;
 import io.vavr.Tuple2;
 import it.unimi.dsi.fastutil.doubles.DoubleList;
 import it.unimi.dsi.fastutil.ints.IntList;
@@ -141,6 +142,11 @@ public class SparseMatrix
 	public DenseVector solve(final Vector rhs)
 	{
 		return new DenseMatrix(this).solve(rhs);
+	}
+	
+	public DenseVector solveNative(final Vector rhs)
+	{
+		return new DenseVector(getSparseSolver().solve(new DenseVector(rhs).entries));
 	}
 	
 	@Override
@@ -376,6 +382,11 @@ public class SparseMatrix
 		other.getCoordinateEntryList()
 		     .forEach((k, v) -> ret.add(-v, k));
 		return ret;
+	}
+	
+	public SparseSolver getSparseSolver()
+	{
+		return new SparseSolver(sparseXs, sparseYs, sparseValues, sparseEntries, rows, cols);
 	}
 	
 	@Override
@@ -727,6 +738,11 @@ public class SparseMatrix
 	public DenseMatrix inverse()
 	{
 		return (DenseMatrix) MutableSolvable.super.inverse();
+	}
+	
+	public DenseMatrix inverseNative()
+	{
+		return new DenseMatrix(getSparseSolver().inverse());
 	}
 	
 	@Override
