@@ -2,13 +2,18 @@ package dlm;
 
 import basic.PerformanceArguments;
 import basic.PlotWindow;
+import basic.StatLogger;
+import distorted.DistortedOverlay;
 import linalg.CoordinateVector;
+import linalg.DenseMatrix;
 import linalg.IntCoordinates;
-import mixed.MixedFunctionOnCells;
-import mixed.MixedPlot2DTime;
+import mixed.*;
 import tensorproduct.geometry.TPCell;
 import tensorproduct.geometry.TPFace;
 
+import java.io.BufferedWriter;
+import java.io.FileWriter;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -16,7 +21,7 @@ import java.util.Map;
 import java.util.concurrent.ConcurrentSkipListMap;
 
 public class DLMBenchmark
-	extends DLMImplicitSystem
+	extends DLMSystemFrame
 {
 	List<CoordinateVector> plotPoints;
 	private Map<CoordinateVector, CoordinateVector> velocityValues;
@@ -36,24 +41,25 @@ public class DLMBenchmark
 		System.out.println("Simulating up to time " + timeSteps * dt);
 	}
 	
-	static double dt = 0.05;
+	static double dt = 0.002;
 	
 	public static void main(final String[] args)
 	{
+		StatLogger.clear();
 		final var builder = new PerformanceArguments.PerformanceArgumentBuilder();
 		builder.build();
 		final MultiGridFluid fluid = new BenchmarkFluid(CoordinateVector.fromValues(0, 0),
 		                                                CoordinateVector.fromValues(2.2, 0.41),
 		                                                new IntCoordinates(16, 4),
 		                                                1,
-		                                                1,
+		                                                2,
 		                                                dt,
 		                                                1,
 		                                                1e-3);
 		final List<Particle> particles = new ArrayList<>();
 		particles.add(new FixedSolidParticle(CoordinateVector.fromValues(0.2, 0.2),
 		                                     0.05,
-		                                     2,
+		                                     3,
 		                                     1,
 		                                     10000,
 		                                     10000,
@@ -62,7 +68,7 @@ public class DLMBenchmark
 		                                             2000,
 		                                             fluid,
 		                                             particles,
-		                                             "benchlong" + fluid.refinements);
+		                                             "benchfiner_" + fluid.refinements);
 	}
 	
 	@Override
@@ -71,6 +77,60 @@ public class DLMBenchmark
 	                                  final double time)
 	{
 		System.out.println("ITeration at time " + time + " is finished");
+		final var points = backGround.getSpace()
+		                             .generatePlotPoints(100);
+		final var velos = new MixedTPFESpaceFunction<QkQkFunction>(backGround.getSpace()
+		                                                                     .getShapeFunctionMap(),
+		                                                           fluidState.current).getVelocityFunction()
+		                                                                              .valuesInPoints(points);
+		final var ps = new MixedTPFESpaceFunction<QkQkFunction>(backGround.getSpace()
+		                                                                  .getShapeFunctionMap(),
+		                                                        fluidState.current).getPressureFunction()
+		                                                                           .valuesInPoints(points);
+		
+		final BufferedWriter writer;
+		try
+		{
+			writer = new BufferedWriter(new FileWriter("../dlm/data " + String.format("%8.4e", time)));
+			for (final var p : points)
+			{
+				final CoordinateVector vel = velos.get(p);
+				final double pr = ps.get(p);
+				final String str
+					= String.format("%6.3e", p.x())
+					+ "," + String.format("%6.3e", p.y())
+					+ "," + String.format("%6.3e", vel.x())
+					+ "," + String.format("%6.3e", vel.y())
+					+ "," + String.format("%6.3e", pr) + "\n";
+				writer.write(str);
+			}
+			writer.close();
+		} catch (final IOException e)
+		{
+			e.printStackTrace();
+		}
+		final VelocityMagnitudePlot2D p =
+			new VelocityMagnitudePlot2D(new MixedTPFESpaceFunction<>(backGround.getSpace()
+			                                                                   .getShapeFunctionMap(),
+			                                                         fluidState.current),
+			                            backGround.getSpace()
+			                                      .generatePlotPoints(61),
+			                            61,
+			                            "velocity and pressure" + time);
+		for (int i = 0; i < particles.size(); i++)
+		{
+			final DenseMatrix particleHist = new DenseMatrix(1,
+			                                                 particles.get(i)
+			                                                          .getSystemSize());
+			particleHist.addRow(particleStates.get(i).current, 0);
+			final DistortedOverlay d = new DistortedOverlay(p,
+			                                                particles.get(i)
+			                                                         .getSpace(),
+			                                                particleHist,
+			                                                5);
+			p.addOverlay(d);
+		}
+		PlotWindow.addPlotShow(p);
 	}
 	
 	@Override

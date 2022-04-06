@@ -156,7 +156,7 @@
     <orderEntry type="module-library">
       <library>
         <CLASSES>
-          <root url="jar://$MODULE_DIR$/../../../IDEA/JSparse/out/artifacts/jSparse/jSparse.jar!/" />
+          <root url="jar://$MODULE_DIR$/../jSparse.jar!/" />
         </CLASSES>
         <JAVADOC />
         <SOURCES>

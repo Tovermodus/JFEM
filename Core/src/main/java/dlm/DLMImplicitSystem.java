@@ -69,7 +69,7 @@ public abstract class DLMImplicitSystem
 				                   "NORM" +
 				                   " " + correction.euclidianNorm() + " " + guessVector.euclidianNorm());
 			
-			final Vector newGuess = guessVector.add(correction.mul(1));
+			final Vector newGuess = guessVector.add(correction.mul(0.5));
 			final DenseVector defect2 = new DenseVector(system._4.sub(system._3.mvMul(newGuess)));
 			System.out.println("NONLIN DEFECT AFTER ITER" + nonlinearIteration + " TIME " + time + " NORM" +
 				                   " " + defect2.euclidianNorm() + " " + system._4.euclidianNorm());
@@ -82,6 +82,28 @@ public abstract class DLMImplicitSystem
 			fluidGuess = newGuesses._1;
 			particleGuesses = newGuesses._2;
 			System.out.println();
+			final VelocityMagnitudePlot2D p =
+				new VelocityMagnitudePlot2D(
+					new MixedTPFESpaceFunction<>(getFluid().getSpace()
+					                                       .getShapeFunctionMap(),
+					                             fluidGuess.current),
+					getFluid().getSpace()
+					          .generatePlotPoints(41),
+					41, "-----");
+			for (int i = 0; i < particles.size(); i++)
+			{
+				final DenseMatrix particleHist = new DenseMatrix(1,
+				                                                 particles.get(i)
+				                                                          .getSystemSize());
+				particleHist.addRow(particleGuesses.get(i).current, 0);
+				final DistortedOverlay d = new DistortedOverlay(p,
+				                                                particles.get(i)
+				                                                         .getSpace(),
+				                                                particleHist,
+				                                                5);
+				p.addOverlay(d);
+			}
+			PlotWindow.addPlotShow(p);
 		}
 		final VelocityMagnitudePlot2D p =
 			new VelocityMagnitudePlot2D(
@@ -104,7 +126,7 @@ public abstract class DLMImplicitSystem
 			                                                5);
 			p.addOverlay(d);
 		}
-		PlotWindow.addPlot(p);
+		PlotWindow.addPlotShow(p);
 		return new Tuple2<>(fluidGuess, particleGuesses);
 	}
 	

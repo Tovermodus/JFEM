@@ -123,6 +123,7 @@ public class TPVectorCellIntegral<ST extends VectorShapeFunction<TPCell, TPFace>
 			return TPCellIntegral.integrateNonTensorProduct(x ->
 				                                                shapeFunction1
 					                                                .gradient(x)
+					                                                .transpose()
 					                                                .mvMul(shapeFunction2.value(x))
 					                                                .inner((CoordinateVector) weight
 						                                                .value(x)),

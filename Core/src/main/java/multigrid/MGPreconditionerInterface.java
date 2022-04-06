@@ -360,8 +360,16 @@ public interface MGPreconditionerInterface<CSpace extends AcceptsMatrixBoundaryV
 			System.out.println("MG after FullVCycle " + getFinestSystem().mvMul(initial.add(iterate))
 			                                                             .sub(vector)
 			                                                             .euclidianNorm() + " FROM " + defect.euclidianNorm());
+		StatLogger.log("MG FUllv Res" + getFinestSystem().mvMul(initial.add(iterate))
+		                                                 .sub(vector)
+		                                                 .euclidianNorm() + " From " + defect.euclidianNorm());
 		for (int i = 0; i < getCycles(); i++)
+		{
 			iterate = vCycle(iterate, defect);
+			StatLogger.log("MG V " + i + " Res " + getFinestSystem().mvMul(initial.add(iterate))
+			                                                        .sub(vector)
+			                                                        .euclidianNorm() + " From " + defect.euclidianNorm());
+		}
 		
 		if (isVerbose())
 			System.out.println("MG after Second VCycle " + getFinestSystem().mvMul(initial.add(iterate))

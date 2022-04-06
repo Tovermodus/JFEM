@@ -1,6 +1,7 @@
 package linalg;
 
 import basic.Metric;
+import basic.StatLogger;
 
 import java.awt.*;
 import java.util.concurrent.CopyOnWriteArrayList;
@@ -27,6 +28,7 @@ public class IterativeSolverConvergenceMetric
 	
 	public synchronized void publishIterate(final double residual)
 	{
+		StatLogger.log("Iterativesolver goal " + goal + " residual " + residual);
 		residuals.add(Math.abs(residual));
 	}
 	

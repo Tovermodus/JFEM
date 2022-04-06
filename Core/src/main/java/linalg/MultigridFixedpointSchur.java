@@ -1,6 +1,7 @@
 package linalg;
 
 import basic.MetricWindow;
+import basic.StatLogger;
 import io.vavr.Function2;
 import multigrid.MGPreconditionerInterface;
 
@@ -39,10 +40,7 @@ public class MultigridFixedpointSchur
 				        .sub(b)
 				        .euclidianNorm();
 				System.out.println(res / initialres + " after iterations " + it);
-				res = A.mvMul(iterate)
-				       .sub(b)
-				       .euclidianNorm();
-				System.out.println(res / initialres + " after iterations " + it);
+				StatLogger.log("MGFIxedpointSchur: " + res + " iteration " + it + " initialres " + initialres);
 			}
 			return iterate;
 		};

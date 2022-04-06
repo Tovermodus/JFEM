@@ -73,20 +73,11 @@ public class BenchmarkFluid
 			                                                .mul(density),
 			                                 (x, cell) -> velocity.valueInCell(x, cell)
 			                                                      .mul(density), 2, 2);
-//		final VectorFunctionOnCells<TPCell, TPFace> semiImplicitWeight2 =
-//			VectorFunctionOnCells.fromLambda((x) -> velocity.value(x)
-//			                                                .mul(-density / 2),
-//			                                 (x, cell) -> velocity.valueInCell(x, cell)
-//			                                                      .mul(-density / 2), 2, 2);
 		final TPVectorCellIntegralOnCell<ContinuousTPVectorFunction> convection1 =
-			new TPVectorCellIntegralOnCell<>(semiImplicitWeight1, TPVectorCellIntegral.GRAD_VALUE);
-//		final TPVectorCellIntegralOnCell<ContinuousTPVectorFunction> convection2 =
-//			new TPVectorCellIntegralOnCell<>(semiImplicitWeight2, TPVectorCellIntegral.VALUE_GRAD);
+			new TPVectorCellIntegralOnCell<>(semiImplicitWeight1, TPVectorCellIntegralOnCell.GRAD_VALUE);
 		final MixedCellIntegral<TPCell, ContinuousTPShapeFunction, ContinuousTPVectorFunction,
 			QkQkFunction> mixedConvection1 = MixedCellIntegral.fromVelocityIntegral(convection1);
-//		final MixedCellIntegral<TPCell, ContinuousTPShapeFunction, ContinuousTPVectorFunction,
-//			QkQkFunction> mixedConvection2 = MixedCellIntegral.fromVelocityIntegral(convection2);
-		return List.of(mixedConvection1);//, mixedConvection2);
+		return List.of(mixedConvection1);
 	}
 	
 	@Override
@@ -106,8 +97,8 @@ public class BenchmarkFluid
 	@Override
 	public Function<CoordinateVector, CoordinateVector> velocityBoundaryValues(final double t)
 	{
-		final double um = 1.5;
-		final double charachteristicFunctionT = Math.min(5 * t, 1);
+		final double um = 5;
+		final double charachteristicFunctionT = 1;
 		return x ->
 		{
 			if (x.x() == 0)

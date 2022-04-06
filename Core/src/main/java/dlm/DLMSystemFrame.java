@@ -1,5 +1,6 @@
 package dlm;
 
+import basic.StatLogger;
 import io.vavr.Tuple2;
 import linalg.DenseMatrix;
 import linalg.DenseVector;
@@ -7,7 +8,10 @@ import linalg.DenseVector;
 import javax.swing.*;
 import java.awt.*;
 import java.io.*;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
 import java.util.concurrent.Executors;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -70,66 +74,11 @@ public abstract class DLMSystemFrame
 		setRunText();
 		stoprun.addActionListener(actionEvent ->
 		                          {
-			                          shouldBeRunning = !shouldBeRunning;
-			                          setRunText();
-			                          if (shouldBeRunning)
-			                          {
-				                          Executors.newSingleThreadExecutor()
-				                                   .execute(() ->
-				                                            {
-					                                            if (iteration.get() == 0)
-						                                            initLoop();
-					                                            else
-					                                            {
-						                                            final var state
-							                                            = readHistory(
-							                                            iteration.get());
-						                                            loop(iteration.get(),
-						                                                 state._1,
-						                                                 state._2);
-					                                            }
-				                                            });
-			                          }
+			                          stopStart();
 		                          });
 		store.addActionListener(e ->
 		                        {
-			                        final File dir = new File("/home/tovermodus/dlm/" + name);
-			                        if (!dir.mkdirs())
-				                        throw new IllegalStateException("could not create dir");
-			                        try
-			                        {
-				                        System.out.println(iteration.get());
-				                        FileOutputStream fout = new FileOutputStream(
-					                        "/home/tovermodus/dlm/" + name + "/fh");
-				                        ObjectOutputStream outs = new ObjectOutputStream(fout);
-				                        outs.writeObject(fluidHistory);
-				                        outs.close();
-				                        for (int i = 0; i < particles.size(); i++)
-				                        {
-					                        fout = new FileOutputStream(
-						                        "/home/tovermodus/dlm/" + name + "/ph" + i);
-					                        outs = new ObjectOutputStream(fout);
-					                        outs.writeObject(particleHistory.get(i));
-					                        outs.close();
-					                        fout = new FileOutputStream(
-						                        "/home/tovermodus/dlm/" + name + "/lh" + i);
-					                        outs = new ObjectOutputStream(fout);
-					                        outs.writeObject(lagrangeHistory.get(i));
-					                        outs.close();
-				                        }
-				                        Runtime.getRuntime()
-				                               .exec("cp -r /home/tovermodus/IdeaProjects/JFEM" +
-					                                     "/Examples/src/dlm " +
-					                                     "/home/tovermodus/dlm/" + name + "/code" +
-					                                     "" + System.getProperty(
-					                               "sun.java.command"));
-			                        } catch (final FileNotFoundException ex)
-			                        {
-				                        ex.printStackTrace();
-			                        } catch (final IOException ioException)
-			                        {
-				                        ioException.printStackTrace();
-			                        }
+			                        Store();
 		                        });
 		showButton.addActionListener(e ->
 		                             {
@@ -190,6 +139,77 @@ public abstract class DLMSystemFrame
 				                       classNotFoundException.printStackTrace();
 			                       }
 		                       });
+		if (GraphicsEnvironment.isHeadless())
+		{
+			stopStart();
+		}
+	}
+	
+	private void Store()
+	{
+		final File dir = new File("../dlm/" + name);
+		try
+		{
+			if (!dir.mkdirs())
+			{
+				final Path pathToBeDeleted = dir.toPath();
+				
+				Files.walk(pathToBeDeleted)
+				     .sorted(Comparator.reverseOrder())
+				     .map(Path::toFile)
+				     .forEach(File::delete);
+				dir.mkdirs();
+			}
+			System.out.println(iteration.get());
+			FileOutputStream fout = new FileOutputStream(
+				"../dlm/" + name + "/fh");
+			ObjectOutputStream outs = new ObjectOutputStream(fout);
+			outs.writeObject(fluidHistory);
+			outs.close();
+			for (int i = 0; i < particles.size(); i++)
+			{
+				fout = new FileOutputStream(
+					"../dlm/" + name + "/ph" + i);
+				outs = new ObjectOutputStream(fout);
+				outs.writeObject(particleHistory.get(i));
+				outs.close();
+				fout = new FileOutputStream(
+					"../dlm/" + name + "/lh" + i);
+				outs = new ObjectOutputStream(fout);
+				outs.writeObject(lagrangeHistory.get(i));
+				outs.close();
+			}
+		} catch (final FileNotFoundException ex)
+		{
+			ex.printStackTrace();
+		} catch (final IOException ioException)
+		{
+			ioException.printStackTrace();
+		}
+	}
+	
+	private void stopStart()
+	{
+		shouldBeRunning = !shouldBeRunning;
+		setRunText();
+		if (shouldBeRunning)
+		{
+			Executors.newSingleThreadExecutor()
+			         .execute(() ->
+			                  {
+				                  if (iteration.get() == 0)
+					                  initLoop();
+				                  else
+				                  {
+					                  final var state
+						                  = readHistory(
+						                  iteration.get());
+					                  loop(iteration.get(),
+					                       state._1,
+					                       state._2);
+				                  }
+			                  });
+		}
 	}
 	
 	private void setRunText()
@@ -261,6 +281,11 @@ public abstract class DLMSystemFrame
 			writeHistory(fluidState, particlestates, i + 1);
 			iteration.set(i + 1);
 			setRunText();
+			StatLogger.log("Time " + time + " is dome");
+			if (GraphicsEnvironment.isHeadless())
+			{
+				Store();
+			}
 		}
 		running = false;
 		setRunText();

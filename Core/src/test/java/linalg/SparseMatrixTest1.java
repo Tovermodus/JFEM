@@ -292,30 +292,45 @@ public class SparseMatrixTest1
 		}
 		return ret;
 	}
-	
-	@Test
-	public void testLLarge()
-	{
-		SparseMatrix s = createLargeSparseMatrix(2000);
-		final DenseVector b = createRhs(s);
-		System.out.println("created");
-		Stopwatch st = Stopwatch.createStarted();
-		final Vector x1 = s.solve(b);
-		System.out.println(st.elapsed());
-		st = Stopwatch.createStarted();
-		final Vector x2 = new DenseVector(s
-			                                  .getSparseSolver()
-			                                  .solve(b.entries), true);
-		System.out.println(st.elapsed());
-		assertEquals(x1, x2);
-		s = createLargeSparseMatrix(2000);
-		st = Stopwatch.createStarted();
-		final DenseMatrix d1 = s.inverse();
-		System.out.println(st.elapsed());
-		st = Stopwatch.createStarted();
-		final DenseMatrix d2 = new DenseMatrix(s.getSparseSolver()
-		                                        .inverse());
-		System.out.println(st.elapsed());
-		assertEquals(d1, d2);
-	}
+
+//	@Test
+//	public void testLLarge()
+//	{
+//		SparseMatrix s = createLargeSparseMatrix(2000);
+//		final DenseVector b = createRhs(s);
+//		System.out.println("created");
+//		Stopwatch st = Stopwatch.createStarted();
+//		final Vector x1 = s.solve(b);
+//		System.out.println(st.elapsed());
+//		st = Stopwatch.createStarted();
+//		final Vector x2 = new DenseVector(s
+//			                                  .getSparseSolver()
+//			                                  .solve(b.entries), true);
+//		System.out.println(st.elapsed());
+//		assertEquals(x1, x2);
+//		s = createLargeSparseMatrix(2000);
+//		st = Stopwatch.createStarted();
+//		final DenseMatrix d1 = s.inverse();
+//		System.out.println(st.elapsed());
+//		st = Stopwatch.createStarted();
+//		final DenseMatrix d2 = new DenseMatrix(s.getSparseSolver()
+//		                                        .inverse());
+//		System.out.println(st.elapsed());
+//		assertEquals(d1, d2);
+//	}
+//
+//	@Test
+//	public void testLLarge2()
+//	{
+//		for (int i = 0; i < 100000; i++)
+//		{
+//			final SparseMatrix s = createLargeSparseMatrix(2000);
+//			final DenseVector b = createRhs(s);
+//			s.inverseNative();
+//			System.out.println(s.solveNative(b)
+//			                    .at(0));
+//			System.out.println(i);
+//			System.out.println();
+//		}
+//	}
 }

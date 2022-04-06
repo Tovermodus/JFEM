@@ -1,6 +1,6 @@
 package dlm;
 
-import basic.PlotWindow;
+import basic.StatLogger;
 import basic.VectorFunctionOnCells;
 import io.vavr.Tuple2;
 import it.unimi.dsi.fastutil.ints.Int2DoubleMap;
@@ -9,10 +9,10 @@ import mixed.*;
 import multigrid.MGPreconditionerSpace;
 import multigrid.Smoother;
 import org.jetbrains.annotations.NotNull;
+import schwarz.CartesianUpFrontSchwarz;
 import schwarz.DirectSolver;
 import schwarz.MultiplicativeSubspaceCorrection;
 import schwarz.SchwarzSmoother;
-import schwarz.VankaSchwarz;
 import tensorproduct.geometry.TPCell;
 import tensorproduct.geometry.TPFace;
 
@@ -112,50 +112,50 @@ public class DLMHybridMGSolver
 	{
 		return new MGPreconditionerSpace<>(fluid.refinements, fluid.polynomialDegree)
 		{
-			@Override
-			public void postmoothcallback(final int level, final Vector guess, final Vector rhs)
-			{
-				if (level == 0)
-				{
-					final var function =
-						new MixedTPFESpaceFunction<>(getSpace(level).getShapeFunctionMap(),
-						                             guess);
-					PlotWindow.addPlot(new MixedPlot2D(function,
-					                                   getSpace(level).generatePlotPoints(40), 40
-						, "coarse correction"));
-				}
-			}
-			
-			@Override
-			public void precorrectioncallback(final int level, final Vector guess, final Vector rhs)
-			{
-				if (level == 1)
-				{
-					final Vector realCorrect =
-						((SparseMatrix) getSystem(level)).solve(
-							rhs.sub(getSystem(level).mvMul(guess)));
-					final var function =
-						new MixedTPFESpaceFunction<>(getSpace(level).getShapeFunctionMap(),
-						                             realCorrect);
-					PlotWindow.addPlot(new MixedPlot2D(function,
-					                                   getSpace(level).generatePlotPoints(40), 40
-						, "real pre correction"));
-				}
-			}
-			
-			@Override
-			public void correctioncallback(final int level, final Vector correction, final Vector rhs)
-			{
-				if (level == 1)
-				{
-					final var function =
-						new MixedTPFESpaceFunction<>(getSpace(level).getShapeFunctionMap(),
-						                             correction);
-					PlotWindow.addPlot(new MixedPlot2D(function,
-					                                   getSpace(level).generatePlotPoints(40), 40
-						, "actual correction"));
-				}
-			}
+//			@Override
+//			public void postmoothcallback(final int level, final Vector guess, final Vector rhs)
+//			{
+//				if (level == 0)
+//				{
+//					final var function =
+//						new MixedTPFESpaceFunction<>(getSpace(level).getShapeFunctionMap(),
+//						                             guess);
+//					PlotWindow.addPlot(new MixedPlot2D(function,
+//					                                   getSpace(level).generatePlotPoints(40), 40
+//						, "coarse correction"));
+//				}
+//			}
+//
+//			@Override
+//			public void precorrectioncallback(final int level, final Vector guess, final Vector rhs)
+//			{
+//				if (level == 1)
+//				{
+//					final Vector realCorrect =
+//						((SparseMatrix) getSystem(level)).solve(
+//							rhs.sub(getSystem(level).mvMul(guess)));
+//					final var function =
+//						new MixedTPFESpaceFunction<>(getSpace(level).getShapeFunctionMap(),
+//						                             realCorrect);
+//					PlotWindow.addPlot(new MixedPlot2D(function,
+//					                                   getSpace(level).generatePlotPoints(40), 40
+//						, "real pre correction"));
+//				}
+//			}
+//
+//			@Override
+//			public void correctioncallback(final int level, final Vector correction, final Vector rhs)
+//			{
+//				if (level == 1)
+//				{
+//					final var function =
+//						new MixedTPFESpaceFunction<>(getSpace(level).getShapeFunctionMap(),
+//						                             correction);
+//					PlotWindow.addPlot(new MixedPlot2D(function,
+//					                                   getSpace(level).generatePlotPoints(40), 40
+//						, "actual correction"));
+//				}
+//			}
 			
 			@Override
 			public List<TaylorHoodSpace> createSpaces(final int refinements)
@@ -210,26 +210,28 @@ public class DLMHybridMGSolver
 				{
 					final IntCoordinates partitions =
 						new IntCoordinates((int) (fluid.coarsestCells.get(0) * Math.pow(2,
-						                                                                i - 2)),
+						                                                                i - 3)),
 						                   (int) (fluid.coarsestCells.get(1) * Math.pow(2,
-						                                                                i - 2)));
-					System.out.println(partitions);
+						                                                                i - 3)));
+					StatLogger.log("CUFSchwarz cells " + spaces.get(i).grid.cellsPerDimension +
+						               " Partitions " + partitions + " overlap " + overlap +
+						               " smootherRuns " + smootherRuns);
 
 //					final ColoredCartesianSchwarz<QkQkFunction> schwarz
 //						= new ColoredCartesianSchwarz<>((SparseMatrix) getSystem(i),
 //						                                getSpace(i),
 //						                                partitions, overlap,
 //						                                new DirectSolver(), omega);
-//					final CartesianUpFrontSchwarz<QkQkFunction> schwarz
-//						= new CartesianUpFrontSchwarz<>((SparseMatrix) getSystem(i),
-//						                                getSpace(i),
-//						                                partitions, overlap,
-//						                                new AdditiveSubspaceCorrection<>(0.1),
-//						                                new DirectSolver());
-					final VankaSchwarz schwarz = new VankaSchwarz((SparseMatrix) getSystem(i),
-					                                              getSpace(i),
-					                                              new MultiplicativeSubspaceCorrection<>(),
-					                                              new DirectSolver());
+					final CartesianUpFrontSchwarz<QkQkFunction> schwarz
+						= new CartesianUpFrontSchwarz<>((SparseMatrix) getSystem(i),
+						                                getSpace(i),
+						                                partitions, overlap,
+						                                new MultiplicativeSubspaceCorrection<>(),
+						                                new DirectSolver());
+//					final VankaSchwarz schwarz = new VankaSchwarz((SparseMatrix) getSystem(i),
+//					                                              getSpace(i),
+//					                                              new MultiplicativeSubspaceCorrection<>(),
+//					                                              new DirectSolver());
 					ret.add(new SchwarzSmoother(smootherRuns, schwarz));
 				}
 				verbose = true;
