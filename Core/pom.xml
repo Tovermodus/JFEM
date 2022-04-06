@@ -83,7 +83,7 @@
                 <executions>
                     <execution>
                         <id>install-jsparse</id>
-                        <phase>validate</phase>
+                        <phase>clean</phase>
                         <configuration>
                             <repositoryLayout>default</repositoryLayout>
                             <groupId>com.simonschmidt</groupId>
