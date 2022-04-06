@@ -10,7 +10,8 @@ public class StatLogger
 {
 	public static void log(final String message)
 	{
-		
+		final File f = new File("../dlm");
+		f.mkdirs();
 		final BufferedWriter writer;
 		try
 		{
@@ -25,6 +26,8 @@ public class StatLogger
 	
 	public static void clear()
 	{
+		final File fi = new File("../dlm");
+		fi.mkdirs();
 		final File f = new File("../dlm/statlog");
 		if (f.exists())
 			f.delete();
@@ -33,6 +36,8 @@ public class StatLogger
 	public static void log(final List<String> messages)
 	{
 		
+		final File f = new File("../dlm");
+		f.mkdirs();
 		final BufferedWriter writer;
 		try
 		{
