@@ -14,7 +14,7 @@
         <compilerSettings />
         <compilerArguments>
           <option name="languageVersion" value="1.6" />
-          <option name="apiVersion" value="1.5" />
+          <option name="apiVersion" value="1.6" />
           <option name="pluginOptions">
             <array />
           </option>
@@ -51,6 +51,7 @@
         </SOURCES>
       </library>
     </orderEntry>
+    <orderEntry type="library" name="Maven: com.simonschmidt:jsparse:1.0" level="project" />
     <orderEntry type="library" name="Maven: org.openjdk.jmh:jmh-core:1.32" level="project" />
     <orderEntry type="library" name="Maven: net.sf.jopt-simple:jopt-simple:4.6" level="project" />
     <orderEntry type="library" name="Maven: org.openjdk.jmh:jmh-generator-annprocess:1.32" level="project" />

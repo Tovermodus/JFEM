@@ -77,9 +77,36 @@
                     <target>11</target>
                 </configuration>
             </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-install-plugin</artifactId>
+                <executions>
+                    <execution>
+                        <id>install-jsparse</id>
+                        <phase>validate</phase>
+                        <configuration>
+                            <repositoryLayout>default</repositoryLayout>
+                            <groupId>com.simonschmidt</groupId>
+                            <artifactId>jsparse</artifactId>
+                            <version>1.0</version>
+                            <file>${project.basedir}/../jSparse.jar</file>
+                            <packaging>jar</packaging>
+                            <generatePom>true</generatePom>
+                        </configuration>
+                        <goals>
+                            <goal>install-file</goal>
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>
         </plugins>
     </build>
     <dependencies>
+        <dependency>
+            <groupId>com.simonschmidt</groupId>
+            <artifactId>jsparse</artifactId>
+            <version>1.0</version>
+        </dependency>
         <dependency>
             <groupId>org.openjdk.jmh</groupId>
             <artifactId>jmh-core</artifactId>
