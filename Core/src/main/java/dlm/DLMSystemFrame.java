@@ -32,12 +32,12 @@ public abstract class DLMSystemFrame
 	volatile boolean running;
 	volatile boolean shouldBeRunning;
 	AtomicInteger iteration;
-	final JButton store;
+	JButton store;
 	JTextField it;
-	final JButton load;
-	final JButton showButton;
-	final JButton stoprun;
-	final String name;
+	JButton load;
+	JButton showButton;
+	JButton stoprun;
+	String name;
 	JFrame f;
 	
 	public DLMSystemFrame(final double dt,
@@ -55,15 +55,15 @@ public abstract class DLMSystemFrame
 		running = false;
 		shouldBeRunning = false;
 		iteration = new AtomicInteger(0);
-		final GridLayout l = new GridLayout(3, 2);
-		stoprun = new JButton("currently: running. Click To stop");
-		load = new JButton("load");
-		store = new JButton("store");
-		showButton = new JButton("show");
-		it = new JTextField("Click to start");
 		System.out.println(GraphicsEnvironment.isHeadless());
 		if (!GraphicsEnvironment.isHeadless())
 		{
+			final GridLayout l = new GridLayout(3, 2);
+			stoprun = new JButton("currently: running. Click To stop");
+			load = new JButton("load");
+			store = new JButton("store");
+			showButton = new JButton("show");
+			it = new JTextField("Click to start");
 			f = new JFrame("DLMActions");
 			f.setLayout(l);
 			f.add(stoprun);
@@ -217,6 +217,8 @@ public abstract class DLMSystemFrame
 	
 	private void setRunText()
 	{
+		if (GraphicsEnvironment.isHeadless())
+			return;
 		it.setText("Currently in iteration " + iteration.get() + " out of " + timeSteps);
 		String text = "Currently: ";
 		if (running)
