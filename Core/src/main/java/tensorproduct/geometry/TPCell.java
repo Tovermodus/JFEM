@@ -15,6 +15,8 @@ import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+import java.util.concurrent.locks.Lock;
+import java.util.concurrent.locks.ReentrantLock;
 
 public class TPCell
 	implements CellWithReferenceCell<TPCell, TPFace>
@@ -36,18 +38,30 @@ public class TPCell
 	}
 	
 	static TPCell[] unitHyperCubes;
+	static Lock unitHyperCubeLock = new ReentrantLock();
 	
 	public static TPCell unitHyperCube(final int dimension)
 	{
 		if (unitHyperCubes == null)
 		{
-			unitHyperCubes = new TPCell[4];
-			for (int d = 0; d < 4; d++)
+			unitHyperCubeLock.lock();
+			try
 			{
-				final List<Cell1D> cells = new ArrayList<>(d);
-				for (int i = 0; i < d; i++)
-					cells.add(new Cell1D(0, 1));
-				unitHyperCubes[d] = new TPCell(cells);
+				if (unitHyperCubes == null)
+				{
+					final TPCell[] unitHyperCubes_ = new TPCell[4];
+					for (int d = 0; d < 4; d++)
+					{
+						final List<Cell1D> cells = new ArrayList<>(d);
+						for (int i = 0; i < d; i++)
+							cells.add(new Cell1D(0, 1));
+						unitHyperCubes_[d] = new TPCell(cells);
+					}
+					unitHyperCubes = unitHyperCubes_;
+				}
+			} finally
+			{
+				unitHyperCubeLock.unlock();
 			}
 		}
 		return unitHyperCubes[dimension];
