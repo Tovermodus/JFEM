@@ -31,7 +31,7 @@ public class DLMRestartable
 		      timeSteps,
 		      backGround,
 		      particles,
-		      new DLMHybridMGSolver(3, 3, backGround, particles, 1),
+		      new DLMHybridMGSolver(3, 3, 3, backGround, particles, 1),
 		      name);
 		plotPoints = backGround.getSpace()
 		                       .generatePlotPoints(41);

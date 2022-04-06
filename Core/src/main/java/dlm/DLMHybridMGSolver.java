@@ -27,17 +27,19 @@ public class DLMHybridMGSolver
 	public final int smootherRuns;
 	final int overlap;
 	MultigridFixedpointSchur schur;
+	private final int stepsCoarser;
 	MultiGridFluid fluid;
 	final List<Particle> particles;
 	final double omega;
 	
 	public DLMHybridMGSolver(final int smootherRuns,
 	                         final int overlap,
-	                         final MultiGridFluid f,
+	                         final int stepsCoarser, final MultiGridFluid f,
 	                         final List<Particle> particles, final double omega)
 	{
 		this.smootherRuns = smootherRuns;
 		this.overlap = overlap;
+		this.stepsCoarser = stepsCoarser;
 		fluid = f;
 		this.particles = particles;
 		this.omega = omega;
@@ -210,9 +212,9 @@ public class DLMHybridMGSolver
 				{
 					final IntCoordinates partitions =
 						new IntCoordinates((int) (fluid.coarsestCells.get(0) * Math.pow(2,
-						                                                                i - 3)),
+						                                                                i - stepsCoarser)),
 						                   (int) (fluid.coarsestCells.get(1) * Math.pow(2,
-						                                                                i - 3)));
+						                                                                i - stepsCoarser)));
 					StatLogger.log("CUFSchwarz cells " + spaces.get(i).grid.cellsPerDimension +
 						               " Partitions " + partitions + " overlap " + overlap +
 						               " smootherRuns " + smootherRuns);

@@ -26,17 +26,14 @@ public class BenchmarkFluid
 {
 	private final double density;
 	private final double viscosity;
+	private final double um;
 	
-	public BenchmarkFluid(final CoordinateVector startCoordinates,
-	                      final CoordinateVector endCoordinates,
-	                      final IntCoordinates cells,
-	                      final int polynomialDegree,
-	                      final int refinements,
-	                      final double dt,
-	                      final double density,
-	                      final double viscosity)
+	public BenchmarkFluid(final CoordinateVector startCoordinates, final CoordinateVector endCoordinates,
+	                      final IntCoordinates cells, final int polynomialDegree, final DLMBenchmark.DLMBenchmarkConfig config,
+	                      final double density, final double viscosity)
 	{
-		super(startCoordinates, endCoordinates, cells, refinements, polynomialDegree);
+		super(startCoordinates, endCoordinates, cells, config.refinements, polynomialDegree);
+		this.um = config.um;
 		this.density = density;
 		this.viscosity = viscosity;
 	}
@@ -97,7 +94,6 @@ public class BenchmarkFluid
 	@Override
 	public Function<CoordinateVector, CoordinateVector> velocityBoundaryValues(final double t)
 	{
-		final double um = 5;
 		final double charachteristicFunctionT = 1;
 		return x ->
 		{

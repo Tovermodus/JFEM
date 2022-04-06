@@ -9,7 +9,7 @@ import java.util.concurrent.Executors;
 
 public class PlotWindow
 	extends JFrame
-	implements KeyListener, WindowListener, ComponentListener, MouseWheelListener
+	implements KeyListener, WindowListener, ComponentListener, MouseWheelListener, PlotWindowInterface
 {
 	final JSlider slider;
 	final JCheckBox overlay;
@@ -20,8 +20,12 @@ public class PlotWindow
 	
 	private static PlotWindow INSTANCE;
 	
-	public static PlotWindow getInstance()
+	public static PlotWindowInterface getInstance()
 	{
+		if (GraphicsEnvironment.isHeadless())
+			return new PlotWindowInterface()
+			{
+			};
 		if (INSTANCE == null)
 			INSTANCE = new PlotWindow();
 		return INSTANCE;
@@ -74,10 +78,18 @@ public class PlotWindow
 	public static void addPlotShow(final Plot plot)
 	{
 		getInstance().addPlotPrivate(plot);
-		getInstance().d.setPlot(plot);
+		getInstance().getDrawThread()
+		             .setPlot(plot);
 	}
 	
-	private void addPlotPrivate(final Plot plot)
+	@Override
+	public DrawThread getDrawThread()
+	{
+		return d;
+	}
+	
+	@Override
+	public void addPlotPrivate(final Plot plot)
 	{
 		if (plots.size() == 0) d.setPlot(plot);
 		plots.add(plot);
@@ -200,6 +212,7 @@ public class PlotWindow
 	}
 	
 	static class DrawThread
+		extends DrawThreadInterface
 		implements Runnable
 	{
 		private volatile Plot currentPlot;
@@ -259,6 +272,7 @@ public class PlotWindow
 			      .drawImage(content, 0, 0, null);
 		}
 		
+		@Override
 		public synchronized void setPlot(final Plot p)
 		{
 			currentPlot = p;

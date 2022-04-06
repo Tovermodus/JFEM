@@ -10,7 +10,7 @@ import java.util.concurrent.Executors;
 
 public class MetricWindow
 	extends JFrame
-	implements KeyListener, WindowListener, ComponentListener, MouseWheelListener
+	implements KeyListener, WindowListener, ComponentListener, MouseWheelListener, MetricWindowInterface
 {
 	private final Canvas canvas;
 	private final ConcurrentSkipListMap<String, Metric> metrics;
@@ -18,10 +18,29 @@ public class MetricWindow
 	private volatile String currentPlot = null;
 	private static MetricWindow INSTANCE;
 	
-	public static MetricWindow getInstance()
+	public static MetricWindowInterface getInstance()
 	{
+		try
+		{
+			if (GraphicsEnvironment.isHeadless())
+				return new MetricWindowInterface()
+				{
+				};
+		} catch (final HeadlessException e)
+		{
+			return new MetricWindowInterface()
+			{
+			};
+		}
+		if (GraphicsEnvironment.isHeadless())
+			return new MetricWindowInterface()
+			{
+			};
+		
 		if (INSTANCE == null)
+		{
 			INSTANCE = new MetricWindow();
+		}
 		return INSTANCE;
 	}
 	
@@ -55,6 +74,7 @@ public class MetricWindow
 		}
 	}
 	
+	@Override
 	public void addMetric(final Metric plot)
 	{
 		metrics.put("" + metrics.size(), plot);
@@ -65,6 +85,7 @@ public class MetricWindow
 		}
 	}
 	
+	@Override
 	public <M extends Metric> M setMetric(final String name, final M plot)
 	{
 		metrics.put(name, plot);
@@ -240,7 +261,7 @@ public class MetricWindow
 					                 isChecked);
 				final Graphics g = content.getGraphics();
 				g.setColor(Color.GREEN);
-				String s = getInstance().currentPlot;
+				String s = ((MetricWindow) getInstance()).currentPlot;
 				if (s == null)
 					s = "";
 				g.drawString(s, width - 100, 100);

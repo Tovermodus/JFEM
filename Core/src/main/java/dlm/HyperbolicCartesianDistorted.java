@@ -34,7 +34,7 @@ public abstract class HyperbolicCartesianDistorted<ST extends ComposeMixedShapeF
 	final public BlockSparseMatrix zeroDerivativeMatrix;
 	final public int[] blockStarts;
 	SparseMatrix fixedBackGroundVelocityMatrix;
-	final MetricWindow metricWindow = MetricWindow.getInstance();
+	final MetricWindowInterface metricWindow = MetricWindow.getInstance();
 	final CountMetric cm;
 	
 	public HyperbolicCartesianDistorted(final double dt,

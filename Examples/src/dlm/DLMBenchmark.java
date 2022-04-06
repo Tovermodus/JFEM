@@ -11,9 +11,7 @@ import mixed.*;
 import tensorproduct.geometry.TPCell;
 import tensorproduct.geometry.TPFace;
 
-import java.io.BufferedWriter;
-import java.io.FileWriter;
-import java.io.IOException;
+import java.io.*;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -27,18 +25,23 @@ public class DLMBenchmark
 	private Map<CoordinateVector, CoordinateVector> velocityValues;
 	private Map<CoordinateVector, Double> pressureValues;
 	
-	public DLMBenchmark(final double dt,
+	public DLMBenchmark(final DLMBenchmarkConfig config,
 	                    final int timeSteps,
 	                    final MultiGridFluid backGround,
 	                    final List<Particle> particles, final String name)
 	{
-		super(dt, timeSteps, backGround, particles, new DLMHybridMGSolver(3, 2, backGround, particles, 1),
+		super(config.dt, timeSteps, backGround, particles, new DLMHybridMGSolver(config.smootherSteps,
+		                                                                         config.overlap,
+		                                                                         config.stepsCoarser,
+		                                                                         backGround,
+		                                                                         particles,
+		                                                                         1),
 		      name);
 		plotPoints = backGround.getSpace()
 		                       .generatePlotPoints(41);
 		velocityValues = new ConcurrentSkipListMap<>();
 		pressureValues = new ConcurrentSkipListMap<>();
-		System.out.println("Simulating up to time " + timeSteps * dt);
+		System.out.println("Simulating up to time " + timeSteps * config.dt);
 	}
 	
 	static double dt = 0.002;
@@ -46,14 +49,16 @@ public class DLMBenchmark
 	public static void main(final String[] args)
 	{
 		StatLogger.clear();
+		final DLMBenchmarkConfig config = new DLMBenchmarkConfig();
+		System.out.println(config);
+		StatLogger.log(config.toString());
 		final var builder = new PerformanceArguments.PerformanceArgumentBuilder();
 		builder.build();
 		final MultiGridFluid fluid = new BenchmarkFluid(CoordinateVector.fromValues(0, 0),
 		                                                CoordinateVector.fromValues(2.2, 0.41),
 		                                                new IntCoordinates(16, 4),
 		                                                1,
-		                                                2,
-		                                                dt,
+		                                                config,
 		                                                1,
 		                                                1e-3);
 		final List<Particle> particles = new ArrayList<>();
@@ -61,10 +66,10 @@ public class DLMBenchmark
 		                                     0.05,
 		                                     3,
 		                                     1,
-		                                     10000,
-		                                     10000,
+		                                     config.lamb,
+		                                     config.mu,
 		                                     150));
-		final DLMBenchmark system = new DLMBenchmark(dt,
+		final DLMBenchmark system = new DLMBenchmark(config,
 		                                             2000,
 		                                             fluid,
 		                                             particles,
@@ -177,5 +182,61 @@ public class DLMBenchmark
 					                                                           .getSystemSize())),
 					         p));
 		PlotWindow.addPlot(p);
+	}
+	
+	static class DLMBenchmarkConfig
+	{
+		final int overlap;
+		final int stepsCoarser;
+		final double um;
+		final int smootherSteps;
+		final double lamb;
+		final double mu;
+		final double dt;
+		final int refinements;
+		
+		private DLMBenchmarkConfig()
+		{
+			final File f = new File("../dlm/config");
+			try
+			{
+				final BufferedReader r = new BufferedReader(new FileReader(f));
+				String line = r.readLine();
+				overlap = Integer.parseInt(line.split(" ")[0]);
+				line = r.readLine();
+				stepsCoarser = Integer.parseInt(line.split(" ")[0]);
+				line = r.readLine();
+				um = Double.parseDouble(line.split(" ")[0]);
+				line = r.readLine();
+				smootherSteps = Integer.parseInt(line.split(" ")[0]);
+				line = r.readLine();
+				lamb = Double.parseDouble(line.split(" ")[0]);
+				line = r.readLine();
+				mu = Double.parseDouble(line.split(" ")[0]);
+				line = r.readLine();
+				dt = Double.parseDouble(line.split(" ")[0]);
+				line = r.readLine();
+				refinements = Integer.parseInt(line.split(" ")[0]);
+			} catch (final IOException e)
+			{
+				e.printStackTrace();
+				throw new IllegalStateException("Bad Config File");
+			}
+		}
+		
+		@Override
+		public String toString()
+		{
+			return "DLMBenchmarkConfig{" +
+				"overlap=" + overlap +
+				", stepsCoarser=" + stepsCoarser +
+				", um=" + um +
+				", smootherSteps=" + smootherSteps +
+				", lamb=" + lamb +
+				", mu=" + mu +
+				", dt=" + dt +
+				", refinements=" + refinements +
+				'}';
+		}
 	}
 }

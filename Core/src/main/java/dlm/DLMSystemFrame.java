@@ -19,7 +19,6 @@ import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
 public abstract class DLMSystemFrame
-	extends JFrame
 	implements DLMSystemInterface
 {
 	private final double dt;
@@ -39,6 +38,7 @@ public abstract class DLMSystemFrame
 	final JButton showButton;
 	final JButton stoprun;
 	final String name;
+	JFrame f;
 	
 	public DLMSystemFrame(final double dt,
 	                      final int timeSteps,
@@ -46,7 +46,6 @@ public abstract class DLMSystemFrame
 	                      final List<Particle> particles,
 	                      final DLMSolver solver, final String name)
 	{
-		super("DLMActions");
 		this.backGround = backGround;
 		this.particles = particles;
 		this.dt = dt;
@@ -57,89 +56,93 @@ public abstract class DLMSystemFrame
 		shouldBeRunning = false;
 		iteration = new AtomicInteger(0);
 		final GridLayout l = new GridLayout(3, 2);
-		setLayout(l);
 		stoprun = new JButton("currently: running. Click To stop");
 		load = new JButton("load");
 		store = new JButton("store");
 		showButton = new JButton("show");
 		it = new JTextField("Click to start");
-		this.add(stoprun);
-		this.add(load);
-		this.add(store);
-		this.add(it);
-		this.add(showButton);
-		this.setSize(400, 400);
-		this.setVisible(true);
-		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-		setRunText();
-		stoprun.addActionListener(actionEvent ->
-		                          {
-			                          stopStart();
-		                          });
-		store.addActionListener(e ->
-		                        {
-			                        Store();
-		                        });
-		showButton.addActionListener(e ->
-		                             {
-			                             Executors.newSingleThreadExecutor()
-			                                      .execute(() ->
-			                                               {
-				                                               if (iteration.get() >= 1)
+		System.out.println(GraphicsEnvironment.isHeadless());
+		if (!GraphicsEnvironment.isHeadless())
+		{
+			f = new JFrame("DLMActions");
+			f.setLayout(l);
+			f.add(stoprun);
+			f.add(load);
+			f.add(store);
+			f.add(it);
+			f.add(showButton);
+			f.setSize(400, 400);
+			f.setVisible(true);
+			f.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+			setRunText();
+			stoprun.addActionListener(actionEvent ->
+			                          {
+				                          stopStart();
+			                          });
+			store.addActionListener(e ->
+			                        {
+				                        Store();
+			                        });
+			showButton.addActionListener(e ->
+			                             {
+				                             Executors.newSingleThreadExecutor()
+				                                      .execute(() ->
 				                                               {
-					                                               final var state
-						                                               = readHistory(
-						                                               iteration.get());
-					                                               show(state._1,
-					                                                    state._2,
-					                                                    iteration.get());
-				                                               }
-			                                               });
-		                             });
-		load.addActionListener(e ->
-		                       {
-			                       try
+					                                               if (iteration.get() >= 1)
+					                                               {
+						                                               final var state
+							                                               = readHistory(
+							                                               iteration.get());
+						                                               show(state._1,
+						                                                    state._2,
+						                                                    iteration.get());
+					                                               }
+				                                               });
+			                             });
+			load.addActionListener(e ->
 			                       {
-				                       FileInputStream fin = new FileInputStream(
-					                       "/home/tovermodus/dlm/" + name + "/fh");
-				                       ObjectInputStream ins = new ObjectInputStream(fin);
-				                       fluidHistory = (DenseMatrix) ins.readObject();
-				                       for (int i = 1; i < fluidHistory.getRows(); i++)
-					                       if (fluidHistory.getRow(i)
-					                                       .euclidianNorm() == 0)
-					                       {
-						                       iteration = new AtomicInteger(i - 1);
-						                       System.out.println(iteration);
-						                       break;
-					                       }
-				                       ins.close();
-				                       particleHistory = new ArrayList<>();
-				                       lagrangeHistory = new ArrayList<>();
-				                       for (int i = 0; i < particles.size(); i++)
+				                       try
 				                       {
-					                       fin = new FileInputStream(
-						                       "/home/tovermodus/dlm/" + name + "/ph" + i);
-					                       ins = new ObjectInputStream(fin);
-					                       particleHistory.add((DenseMatrix) ins.readObject());
+					                       FileInputStream fin = new FileInputStream(
+						                       "../dlm/" + name + "/fh");
+					                       ObjectInputStream ins = new ObjectInputStream(fin);
+					                       fluidHistory = (DenseMatrix) ins.readObject();
+					                       for (int i = 1; i < fluidHistory.getRows(); i++)
+						                       if (fluidHistory.getRow(i)
+						                                       .euclidianNorm() == 0)
+						                       {
+							                       iteration = new AtomicInteger(i - 1);
+							                       System.out.println(iteration);
+							                       break;
+						                       }
 					                       ins.close();
-					                       fin = new FileInputStream(
-						                       "/home/tovermodus/dlm/" + name + "/lh" + i);
-					                       ins = new ObjectInputStream(fin);
-					                       lagrangeHistory.add((DenseMatrix) ins.readObject());
-					                       ins.close();
+					                       particleHistory = new ArrayList<>();
+					                       lagrangeHistory = new ArrayList<>();
+					                       for (int i = 0; i < particles.size(); i++)
+					                       {
+						                       fin = new FileInputStream(
+							                       "../dlm/" + name + "/ph" + i);
+						                       ins = new ObjectInputStream(fin);
+						                       particleHistory.add((DenseMatrix) ins.readObject());
+						                       ins.close();
+						                       fin = new FileInputStream(
+							                       "../dlm/" + name + "/lh" + i);
+						                       ins = new ObjectInputStream(fin);
+						                       lagrangeHistory.add((DenseMatrix) ins.readObject());
+						                       ins.close();
+					                       }
+				                       } catch (final FileNotFoundException ex)
+				                       {
+					                       ex.printStackTrace();
+				                       } catch (final IOException ioException)
+				                       {
+					                       ioException.printStackTrace();
+				                       } catch (final ClassNotFoundException classNotFoundException)
+				                       {
+					                       classNotFoundException.printStackTrace();
 				                       }
-			                       } catch (final FileNotFoundException ex)
-			                       {
-				                       ex.printStackTrace();
-			                       } catch (final IOException ioException)
-			                       {
-				                       ioException.printStackTrace();
-			                       } catch (final ClassNotFoundException classNotFoundException)
-			                       {
-				                       classNotFoundException.printStackTrace();
-			                       }
-		                       });
-		if (GraphicsEnvironment.isHeadless())
+			                       });
+		} else
 		{
 			stopStart();
 		}
