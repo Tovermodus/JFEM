@@ -16,6 +16,8 @@ jobs:
           path: ~/.m2
           key: ${{ runner.os }}-m2-${{ hashFiles('**/pom.xml') }}
           restore-keys: ${{ runner.os }}-m2
+      - name: Install Blas/Lapack
+        run: apt-get install libblas-dev liblapack-dev
       - name: Maven Clean
         run: timeout 600 mvn clean --file Core/pom.xml
       - name: Run tests with Maven
