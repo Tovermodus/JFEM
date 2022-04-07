@@ -5,6 +5,8 @@ RUN apk add openblas
 RUN apk add openblas-dev
 RUN apk add lapack
 RUN apk add lapack-dev
+RUN rm /etc/mavenrc
+RUN echo 'M2_HOME="$m2_home"' > /etc/mavenrc
 RUN mkdir /app
 RUN mkdir /app/dlm
 RUN echo "hi"
