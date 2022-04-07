@@ -2,8 +2,8 @@ FROM openjdk:17-alpine
 RUN apk add g++
 RUN apk add maven
 RUN apk add git
-RUN apk add openblas
-RUN apk add openblas-dev
+RUN apk add blas
+RUN apk add blas-dev
 RUN apk add lapack
 RUN apk add lapack-dev
 RUN rm /etc/mavenrc
