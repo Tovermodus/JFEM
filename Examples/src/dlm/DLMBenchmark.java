@@ -51,7 +51,17 @@ public class DLMBenchmark
 		StatLogger.clear();
 		final DLMBenchmarkConfig config = new DLMBenchmarkConfig();
 		System.out.println(config);
+		System.out.println(Runtime.getRuntime()
+		                          .maxMemory());
+		System.out.println(Runtime.getRuntime()
+		                          .maxMemory() / 1000 + "KB");
+		System.out.println(Runtime.getRuntime()
+		                          .maxMemory() / 1000000 + "MB");
+		System.out.println(Runtime.getRuntime()
+		                          .maxMemory() / 1000000000 + "GB");
 		StatLogger.log(config.toString());
+		StatLogger.log("MAx MEm " + Runtime.getRuntime()
+		                                   .maxMemory());
 		final var builder = new PerformanceArguments.PerformanceArgumentBuilder();
 		builder.build();
 		final MultiGridFluid fluid = new BenchmarkFluid(CoordinateVector.fromValues(0, 0),
