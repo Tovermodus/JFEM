@@ -13,8 +13,8 @@ COPY . /app/JFEM
 WORKDIR /app/JFEM/JSparse
 CMD ["/bin/bash"]
 #RUN echo "his"
-RUN /bin/sh build.sh
-RUN /bin/sh run.sh
+RUN ./build.sh
+RUN ./run.sh
 RUN cp /app/JFEM/JSparse/out/artifacts/jSparse/jSparse.jar ../jSparse.jar
 WORKDIR /app/JFEM
 RUN mvn clean -file=Core/pom.xml
