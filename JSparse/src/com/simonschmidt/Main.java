@@ -31,6 +31,6 @@ public class Main
 		SparseSolver s = new SparseSolver(Xs, Ys, Vals, sparseEntries, rows, cols);
 		System.out.println(s.solve(vect));
 		System.out.println(Arrays.toString(s.solve(vect)));
-		//System.out.println(Arrays.deepToString(s.inverse()));
+		System.out.println(Arrays.deepToString(s.inverse()));
 	}
 }

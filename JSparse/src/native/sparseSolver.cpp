@@ -112,3 +112,7 @@ JNIEXPORT jdoubleArray JNICALL Java_com_simonschmidt_SparseSolver_iInverse
     free(ret);
     return result;
 }
+int main()
+{
+return 0;
+}
