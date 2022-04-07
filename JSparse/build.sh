@@ -4,3 +4,4 @@ g++ -llapack -lopenblas -c -fPIC -I/usr/lib/jvm/java-11-openjdk/include -I/usr/l
 echo "C++ COMPILED"
 g++ -llapack -lopenblas -shared -fPIC -o out/native/libnative.so out/native/sparseSolver.o -lc
 echo "BUILT SO"
+jar cf out/artifacts/jSparse/jSparse.jar out/java/* out/native/*
