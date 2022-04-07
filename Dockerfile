@@ -1,4 +1,5 @@
 FROM openjdk:17-alpine
+RUN apk add g++
 RUN apk add maven
 RUN apk add git
 RUN apk add openblas
