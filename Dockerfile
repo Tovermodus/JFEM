@@ -12,9 +12,10 @@ COPY . /app/JFEM
 #RUN git clone https://github.com/Tovermodus/JFEM.git
 WORKDIR /app/JFEM/JSparse
 #RUN echo "his"
+RUN rm -r /app/JFEM/JSparse/out
 RUN ./build.sh
 RUN ./run.sh
 RUN cp /app/JFEM/JSparse/out/artifacts/jSparse/jSparse.jar ../jSparse.jar
 WORKDIR /app/JFEM
-RUN mvn clean -file=Core/pom.xml
-RUN mvn install -file=Core/pom.xml -DskipTests
+#RUN mvn clean -file=Core/pom.xml
+#RUN mvn install -file=Core/pom.xml -DskipTests
