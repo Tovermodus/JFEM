@@ -1,0 +1,1 @@
+java -cp out/java -Djava.library.path=out/native com.simonschmidt.Main

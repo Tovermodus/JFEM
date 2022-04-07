@@ -1,0 +1,13 @@
+<component name="ArtifactManager">
+  <artifact type="jar" build-on-make="true" name="jSparse">
+    <output-path>$PROJECT_DIR$/out/artifacts/jSparse</output-path>
+    <root id="archive" name="jSparse.jar">
+      <element id="directory" name="com">
+        <element id="dir-copy" path="$PROJECT_DIR$/out/java/com" />
+      </element>
+      <element id="directory" name="native">
+        <element id="dir-copy" path="$PROJECT_DIR$/out/native" />
+      </element>
+    </root>
+  </artifact>
+</component>

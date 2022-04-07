@@ -14,5 +14,6 @@ ENV MAVEN_OPTS="-Xmx8000m"
 WORKDIR /app
 RUN git clone https://github.com/Tovermodus/JFEM.git
 WORKDIR /app/JFEM
+RUN Jsparse/buildandrun.sh
 RUN mvn clean -file=Core/pom.xml
 RUN mvn install -file=Core/pom.xml -DskipTests
