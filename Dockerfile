@@ -8,6 +8,7 @@ RUN apk add lapack-dev
 RUN mkdir /app
 RUN mkdir /app/dlm
 RUN echo "hi"
+ENV MAVEN_OPTS="-Xmx8000m"
 WORKDIR /app
 RUN git clone https://github.com/Tovermodus/JFEM.git
 WORKDIR /app/JFEM
