@@ -35,7 +35,7 @@ public class DLMBenchmark
 		                                                                         config.stepsCoarser,
 		                                                                         backGround,
 		                                                                         particles,
-		                                                                         1),
+		                                                                         1.),
 		      name);
 		plotPoints = backGround.getSpace()
 		                       .generatePlotPoints(41);
