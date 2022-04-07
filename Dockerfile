@@ -13,7 +13,10 @@ RUN echo "hi"
 ENV MAVEN_OPTS="-Xmx8000m"
 WORKDIR /app
 RUN git clone https://github.com/Tovermodus/JFEM.git
+WORKDIR /app/JFEM/JSparse
+RUN /bin/sh build.sh
+RUN /bin/sh run.sh
+RUN cp out/artifacts/jSparse.jar ../jSparse.jar
 WORKDIR /app/JFEM
-RUN /bin/sh /app/JFEM/JSparse/buildandrun.sh
 RUN mvn clean -file=Core/pom.xml
 RUN mvn install -file=Core/pom.xml -DskipTests
