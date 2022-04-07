@@ -14,7 +14,6 @@ WORKDIR /app/JFEM/JSparse
 #RUN echo "his"
 RUN ./build.sh
 RUN ./run.sh
-CMD ["/bin/bash"]
 RUN cp /app/JFEM/JSparse/out/artifacts/jSparse/jSparse.jar ../jSparse.jar
 WORKDIR /app/JFEM
 RUN mvn clean -file=Core/pom.xml
