@@ -16,5 +16,5 @@ jobs:
           password: ${{ secrets.DOCKER_PASSWORD }}
       - name: Pull Docker
         run: docker pull tovermodus/jfem:master
-      - name run Tests
+      - name: run Tests
         run: docker run tovermodus/jfem:master timeout 1000 mvn -B test -file=Core/pom.xml
