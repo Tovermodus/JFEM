@@ -8,8 +8,8 @@ RUN mkdir /app
 RUN mkdir /app/dlm
 ENV MAVEN_OPTS="-Xmx8000m"
 WORKDIR /app
-COPY . /app/JFEM
-#RUN git clone https://github.com/Tovermodus/JFEM.git
+#COPY . /app/JFEM
+RUN git clone https://github.com/Tovermodus/JFEM.git
 WORKDIR /app/JFEM/JSparse
 #RUN echo "his"
 RUN rm -r /app/JFEM/JSparse/out
