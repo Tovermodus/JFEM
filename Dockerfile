@@ -17,5 +17,5 @@ RUN ./build.sh
 RUN ./run.sh
 RUN cp /app/JFEM/JSparse/out/artifacts/jSparse/jSparse.jar ../jSparse.jar
 WORKDIR /app/JFEM
-#RUN mvn clean -file=Core/pom.xml
-#RUN mvn install -file=Core/pom.xml -DskipTests
+RUN mvn clean -file=Core/pom.xml
+RUN mvn install -file=Core/pom.xml -DskipTests
