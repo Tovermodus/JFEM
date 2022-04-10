@@ -14,4 +14,4 @@ echo "BUILT SO"
 ls
 ls out
 ls out/native
-jar cf out/artifacts/jSparse/jSparse.jar out/java/* out/native/*
+jar cf out/artifacts/jSparse/jSparse.jar -C out/java . -C out native

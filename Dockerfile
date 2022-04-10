@@ -1,4 +1,5 @@
 FROM archlinux
+RUN echo "hs"
 RUN pacman -Syu --noconfirm
 RUN pacman -S jdk11-openjdk gcc maven git openblas --noconfirm
 RUN pacman -S lapack --noconfirm
@@ -8,10 +9,9 @@ RUN mkdir /app
 RUN mkdir /app/dlm
 ENV MAVEN_OPTS="-Xmx8000m"
 WORKDIR /app
-#COPY . /app/JFEM
-RUN git clone https://github.com/Tovermodus/JFEM.git
+COPY . /app/JFEM
+#RUN git clone https://github.com/Tovermodus/JFEM.git
 WORKDIR /app/JFEM/JSparse
-#RUN echo "his"
 RUN rm -r /app/JFEM/JSparse/out
 RUN ./build.sh
 RUN ./run.sh
