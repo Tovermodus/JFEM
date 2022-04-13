@@ -7,7 +7,7 @@ RUN pacman -S lapack --noconfirm
 #RUN echo 'M2_HOME="$m2_home"' > /etc/mavenrc
 RUN mkdir /app
 RUN mkdir /app/dlm
-ENV MAVEN_OPTS="-Xmx8000m"
+ENV MAVEN_OPTS="-Xmx32000m"
 WORKDIR /app
 COPY . /app/JFEM
 #RUN git clone https://github.com/Tovermodus/JFEM.git
