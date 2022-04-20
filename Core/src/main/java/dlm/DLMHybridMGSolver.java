@@ -260,7 +260,6 @@ public class DLMHybridMGSolver
 	{
 		if (schur == null)
 			schur = new MultigridFixedpointSchur(systemMatrix, null);//PreconditionedIterativeImplicitSchur
-			// (systemMatrix, null);
 		else
 			schur.resetOffDiagonals(systemMatrix);
 		final MGPreconditionerSpace<TaylorHoodSpace, TPCell, TPFace, QkQkFunction, MixedValue, MixedGradient,

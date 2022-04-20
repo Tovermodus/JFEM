@@ -15,7 +15,7 @@ def readFile(time):
     ps = []
     thisp = []
     curx = -1
-    with open("../dlm/data "+time,"r") as f:
+    with open("data "+time,"r") as f:
         while line := f.readline():
             dat = line[:-2].split(",")
             datF = [float(d) for d in dat]
@@ -37,7 +37,8 @@ def readFile(time):
             thisp.append(datF[4])
             curx = datF[0]
     return np.array(xs), np.array(ys), np.array(vxs), np.array(vys), np.array(ps)
-xs, ys, vxs, vys, ps = readFile("2.0000e-03")
+
+xs, ys, vxs, vys, ps = readFile("5.6800e+00")
 xReg = np.linspace(xs[0,0],xs[-1,-1],len(xs))
 yReg = np.linspace(ys[0,0],ys[-1,-1],len(ys[0]))
 xReg2 = np.linspace(xs[0,0],xs[-1,-1],len(xs)*4)

@@ -29,9 +29,9 @@ public abstract class AbstractSchurSolver<T extends VectorMultiplyable>
 		         .forEach(i ->
 		                  {
 			                  System.out.println("inverting diagonal schur block " + i);
-			                  final DenseMatrix inv = getDiagonalBlock(i - 1).inverse();
 			                  synchronized (this)
 			                  {
+				                  final DenseMatrix inv = getDiagonalBlock(i - 1).inverseNative();
 				                  diagonalInverses.put(i - 1, inv);
 				                  if (diagonalInverses.get(i - 1) == null)
 					                  throw new IllegalArgumentException(
