@@ -11,24 +11,26 @@ import mixed.*;
 import tensorproduct.geometry.TPCell;
 import tensorproduct.geometry.TPFace;
 
-import java.io.*;
+import java.io.BufferedWriter;
+import java.io.FileWriter;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentSkipListMap;
 
-public class DLMBenchmark
+public class DLMFSIBenchmark
 	extends DLMSystemFrame
 {
 	List<CoordinateVector> plotPoints;
 	private Map<CoordinateVector, CoordinateVector> velocityValues;
 	private Map<CoordinateVector, Double> pressureValues;
 	
-	public DLMBenchmark(final DLMBenchmarkConfig config,
-	                    final int timeSteps,
-	                    final MultiGridFluid backGround,
-	                    final List<Particle> particles, final String name)
+	public DLMFSIBenchmark(final DLMBenchmark.DLMBenchmarkConfig config,
+	                       final int timeSteps,
+	                       final MultiGridFluid backGround,
+	                       final List<Particle> particles, final String name)
 	{
 		super(config.dt, timeSteps, backGround, particles, new DLMHybridMGSolver(config.smootherSteps,
 		                                                                         config.overlap,
@@ -44,12 +46,12 @@ public class DLMBenchmark
 		System.out.println("Simulating up to time " + timeSteps * config.dt);
 	}
 	
-	static double dt = 0.002;
+	static double dt = 0.004;
 	
 	public static void main(final String[] args)
 	{
 		StatLogger.clear();
-		final DLMBenchmarkConfig config = new DLMBenchmarkConfig();
+		final DLMBenchmark.DLMBenchmarkConfig config = new DLMBenchmark.DLMBenchmarkConfig();
 		System.out.println(config);
 		System.out.println(Runtime.getRuntime()
 		                          .maxMemory());
@@ -79,11 +81,18 @@ public class DLMBenchmark
 		                                     config.lamb,
 		                                     config.mu,
 		                                     150));
-		final DLMBenchmark system = new DLMBenchmark(config,
-		                                             2000,
-		                                             fluid,
-		                                             particles,
-		                                             "benchfiner_" + fluid.refinements);
+		particles.add(new SolidBrickParticle(CoordinateVector.fromValues(0.4, 0.2),
+		                                     0.4,
+		                                     0.02,
+		                                     1,
+		                                     2,
+		                                     CoordinateVector.fromValues(0, 0),
+		                                     1000, 10, 10));
+		final DLMFSIBenchmark system = new DLMFSIBenchmark(config,
+		                                                   2000,
+		                                                   fluid,
+		                                                   particles,
+		                                                   "benchfiner_" + fluid.refinements);
 	}
 	
 	@Override
@@ -192,61 +201,5 @@ public class DLMBenchmark
 					                                                           .getSystemSize())),
 					         p));
 		PlotWindow.addPlot(p);
-	}
-	
-	public static class DLMBenchmarkConfig
-	{
-		public final int overlap;
-		public final int stepsCoarser;
-		public final double um;
-		public final int smootherSteps;
-		public final double lamb;
-		public final double mu;
-		public final double dt;
-		public final int refinements;
-		
-		public DLMBenchmarkConfig()
-		{
-			final File f = new File("../dlm/config");
-			try
-			{
-				final BufferedReader r = new BufferedReader(new FileReader(f));
-				String line = r.readLine();
-				overlap = Integer.parseInt(line.split(" ")[0]);
-				line = r.readLine();
-				stepsCoarser = Integer.parseInt(line.split(" ")[0]);
-				line = r.readLine();
-				um = Double.parseDouble(line.split(" ")[0]);
-				line = r.readLine();
-				smootherSteps = Integer.parseInt(line.split(" ")[0]);
-				line = r.readLine();
-				lamb = Double.parseDouble(line.split(" ")[0]);
-				line = r.readLine();
-				mu = Double.parseDouble(line.split(" ")[0]);
-				line = r.readLine();
-				dt = Double.parseDouble(line.split(" ")[0]);
-				line = r.readLine();
-				refinements = Integer.parseInt(line.split(" ")[0]);
-			} catch (final IOException e)
-			{
-				e.printStackTrace();
-				throw new IllegalStateException("Bad Config File");
-			}
-		}
-		
-		@Override
-		public String toString()
-		{
-			return "DLMBenchmarkConfig{" +
-				"overlap=" + overlap +
-				", stepsCoarser=" + stepsCoarser +
-				", um=" + um +
-				", smootherSteps=" + smootherSteps +
-				", lamb=" + lamb +
-				", mu=" + mu +
-				", dt=" + dt +
-				", refinements=" + refinements +
-				'}';
-		}
 	}
 }

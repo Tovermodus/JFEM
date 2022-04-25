@@ -58,7 +58,7 @@ public class FixedSolidParticle
 	public List<CellIntegral<DistortedCell, DistortedVectorShapeFunction>> getLagrangeIntegrals()
 	{
 		final DistortedVectorCellIntegral l2Integral = new DistortedVectorCellIntegral(1,
-		                                                                               DistortedVectorCellIntegral.H1);
+		                                                                               DistortedVectorCellIntegral.VALUE_VALUE);
 		return List.of(l2Integral);
 	}
 	
@@ -82,7 +82,7 @@ public class FixedSolidParticle
 	{
 		final DistortedVectorDistortedRightHandSideIntegral lagrange =
 			new DistortedVectorDistortedRightHandSideIntegral(backgroundFunctionAtX,
-			                                                  DistortedVectorDistortedRightHandSideIntegral.H1);
+			                                                  DistortedVectorDistortedRightHandSideIntegral.VALUE);
 		return List.of(lagrange);
 	}
 	

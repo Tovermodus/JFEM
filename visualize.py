@@ -38,7 +38,7 @@ def readFile(time):
             curx = datF[0]
     return np.array(xs), np.array(ys), np.array(vxs), np.array(vys), np.array(ps)
 
-xs, ys, vxs, vys, ps = readFile("5.6800e+00")
+xs, ys, vxs, vys, ps = readFile("8.8000e-01")
 xReg = np.linspace(xs[0,0],xs[-1,-1],len(xs))
 yReg = np.linspace(ys[0,0],ys[-1,-1],len(ys[0]))
 xReg2 = np.linspace(xs[0,0],xs[-1,-1],len(xs)*4)
