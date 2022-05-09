@@ -38,25 +38,30 @@ def readFile(time):
             curx = datF[0]
     return np.array(xs), np.array(ys), np.array(vxs), np.array(vys), np.array(ps)
 
-xs, ys, vxs, vys, ps = readFile("8.8000e-01")
+xs, ys, vxs, vys, ps = readFile("4.0000e+00")
 xReg = np.linspace(xs[0,0],xs[-1,-1],len(xs))
 yReg = np.linspace(ys[0,0],ys[-1,-1],len(ys[0]))
-xReg2 = np.linspace(xs[0,0],xs[-1,-1],len(xs)*4)
-yReg2 = np.linspace(ys[0,0],ys[-1,-1],len(xs)*4)
+xReg2 = np.linspace(xs[0,0],xs[-1,-1],len(xs)//4)
+yReg2 = np.linspace(ys[0,0],ys[-1,-1],len(xs)//4)
 print(xs)
 xs,ys = np.meshgrid(xReg,yReg)
 print(xs)
 vs = np.sqrt(vxs*vxs + vys*vys)
+plt.rc('text', usetex=True)
+
+plt.rc('font', family='serif', size=40)
 fig, (ax1) = plt.subplots(nrows=1)
 #ax1.contour(xs, ys, vs.T, levels=40, linewidths=0.5, colors='k')
 cntr1 = ax1.contourf(xs, ys, vs.T, levels=40)
 fig.colorbar(cntr1,ax=ax1)
-lw = np.power(vs.T/np.max(vs),0.3)*0.5
+lw = np.power(vs.T/np.max(vs),0.3)*1
 seeds = np.zeros((len(xReg2),2))
 seeds[:,0] = xReg2
 seeds[:,1] = yReg2
 print(seeds)
-ax1.streamplot(xs,ys,vxs.T,vys.T,color='r',linewidth=lw, density=(4,2), arrowstyle="-",maxlength=106)
-plt.show()
+ax1.streamplot(xs,ys,vxs.T,vys.T,color='r',linewidth=lw, density=(3,1.5), arrowstyle="-",maxlength=106)
+fig.set_size_inches(30, 6, forward=True)
+plt.savefig("plot_tex")
+#plt.show()
 
 #print(np.meshgrid(np.arange(7),np.arange(10)))

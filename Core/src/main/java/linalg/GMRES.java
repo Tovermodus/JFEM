@@ -2,6 +2,7 @@ package linalg;
 
 import basic.Interruptor;
 import basic.PerformanceArguments;
+import basic.StatLogger;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.ArrayList;
@@ -186,13 +187,13 @@ public class GMRES
 			metric.publishIterateAsync(() ->
 			                           {
 				                           final DenseVector alpha = calculateAlpha(gamma, h, j);
-				                           //System.out.println("gmres alphanorm" + alpha
-				                           // .euclidianNorm());
 				                           final Vector step = linearCombination(v, alpha);
 				                           final Vector newIt = x.add(step);
-				                           return A.mvMul(newIt)
-				                                   .sub(b)
-				                                   .euclidianNorm();
+				                           final double ret = A.mvMul(newIt)
+				                                               .sub(b)
+				                                               .euclidianNorm();
+				                           StatLogger.log("MGGMRes: " + ret);
+				                           return ret;
 			                           });
 		else
 			metric.publishIterate(gamma.at(j + 1));

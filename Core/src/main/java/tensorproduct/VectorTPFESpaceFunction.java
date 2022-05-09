@@ -3,6 +3,7 @@ package tensorproduct;
 import basic.VectorFESpaceFunction;
 import basic.VectorFunctionOnCells;
 import basic.VectorShapeFunction;
+import io.vavr.Tuple2;
 import it.unimi.dsi.fastutil.ints.Int2ObjectLinkedOpenHashMap;
 import it.unimi.dsi.fastutil.ints.Int2ObjectMap;
 import linalg.CoordinateDenseMatrix;
@@ -21,8 +22,8 @@ public class VectorTPFESpaceFunction<ST extends VectorShapeFunction<TPCell, TPFa
 	implements
 	VectorFunctionOnCells<TPCell, TPFace>
 {
-	final Int2ObjectMap<HashSet<ST>> supportOnCell;
-	final Int2ObjectMap<ArrayList<ST>> supportOnCellFast;
+	Int2ObjectMap<HashSet<Tuple2<ST, Double>>> supportOnCell;
+	Int2ObjectMap<ArrayList<Tuple2<ST, Double>>> supportOnCellFast;
 	
 	public VectorTPFESpaceFunction(final ST[] functions, final double[] coefficients)
 	{
@@ -36,7 +37,7 @@ public class VectorTPFESpaceFunction<ST extends VectorShapeFunction<TPCell, TPFa
 				if (!supportOnCell.containsKey(cell.doneCode()))
 					supportOnCell.put(cell.doneCode(), new HashSet<>());
 				supportOnCell.get(cell.doneCode())
-				             .add(function);
+				             .add(new Tuple2<>(function, coefficients[function.getGlobalIndex()]));
 			}
 		}
 		for (final int cellCode : supportOnCell.keySet())
@@ -57,7 +58,7 @@ public class VectorTPFESpaceFunction<ST extends VectorShapeFunction<TPCell, TPFa
 				if (!supportOnCell.containsKey(cell.doneCode()))
 					supportOnCell.put(cell.doneCode(), new HashSet<>());
 				supportOnCell.get(cell.doneCode())
-				             .add(function);
+				             .add(new Tuple2<>(function, coefficients.at(function.getGlobalIndex())));
 			}
 		}
 		for (final int cellCode : supportOnCell.keySet())
@@ -72,7 +73,8 @@ public class VectorTPFESpaceFunction<ST extends VectorShapeFunction<TPCell, TPFa
 		return supportOnCellFast
 			.get(cell.doneCode())
 			.stream()
-			.map(f -> f.valueInCell(pos, cell))
+			.map(f -> f._1.valueInCell(pos, cell)
+			              .mul(f._2))
 			.reduce(new CoordinateVector(pos.getLength()), CoordinateVector::add);
 	}
 	
@@ -82,7 +84,8 @@ public class VectorTPFESpaceFunction<ST extends VectorShapeFunction<TPCell, TPFa
 		return supportOnCellFast
 			.get(cell.doneCode())
 			.stream()
-			.map(f -> f.gradientInCell(pos, cell))
+			.map(f -> f._1.gradientInCell(pos, cell)
+			              .mul(f._2))
 			.reduce(new CoordinateDenseMatrix(pos.getLength(), pos.getLength()), CoordinateMatrix::add);
 	}
 }

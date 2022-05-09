@@ -30,7 +30,7 @@ public class MultigridFixedpointSchur
 			final IterativeSolverConvergenceMetric cm = new IterativeSolverConvergenceMetric(1e-8);
 			MetricWindow.getInstance()
 			            .setMetric("mg", cm);
-			for (it = 0; it < 100 && res > 1e-8; it++)
+			for (it = 0; it < 100 && res > 1e-6; it++)
 			
 			{
 				cm.publishIterate(res);

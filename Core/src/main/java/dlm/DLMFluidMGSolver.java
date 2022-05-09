@@ -9,6 +9,9 @@ import mixed.*;
 import multigrid.MGPreconditionerSpace;
 import multigrid.Smoother;
 import org.jetbrains.annotations.NotNull;
+import schwarz.ColoredCartesianSchwarz;
+import schwarz.DirectSolver;
+import schwarz.SchwarzSmoother;
 import tensorproduct.geometry.TPCell;
 import tensorproduct.geometry.TPFace;
 
@@ -91,10 +94,35 @@ public class DLMFluidMGSolver
 				final List<Smoother> ret = new ArrayList<>();
 				for (int i = 1; i < fluid.refinements + 1; i++)
 				{
-					ret.add(new BSSmoother2(smootherRuns,
-					                        smootherOmega,
-					                        spaces.get(i)
-					                              .getVelocitySize()));
+					final IntCoordinates partitions =
+						new IntCoordinates((int) (fluid.coarsestCells.get(0) * Math.pow(2,
+						                                                                i - 3)),
+						                   (int) (fluid.coarsestCells.get(1) * Math.pow(2,
+						                                                                i - 3)));
+
+//					ret.add(new BSSmoother2(smootherRuns,
+//					                        smootherOmega,
+//					                        spaces.get(i)
+//					                              .getVelocitySize()));
+//					final CartesianUpFrontSchwarz<QkQkFunction> schwarz
+//						= new CartesianUpFrontSchwarz<>((SparseMatrix) getSystem(i),
+//						                                getSpace(i),
+//						                                partitions, 2,
+//						                                new MultiplicativeSubspaceCorrection<>(),
+//						                                new DirectSolver());
+					final ColoredCartesianSchwarz<QkQkFunction> schwarz
+						= new ColoredCartesianSchwarz<>((SparseMatrix) getSystem(i),
+						                                getSpace(i),
+						                                partitions, 2,
+						                                new DirectSolver(),
+						                                1);
+//					final VankaSchwarz schwarz
+//						= new VankaSchwarz((SparseMatrix) getSystem(i),
+//						                   getSpace(i),
+//						                   new MultiplicativeSubspaceCorrection<>(),
+//						                   new DirectSolver());
+					ret.add(new SchwarzSmoother(smootherRuns, schwarz));
+//					ret.add(new BSSmoother(3, 0.5, getSpace(i).getVelocitySize()));
 				}
 				return ret;
 			}
@@ -143,10 +171,16 @@ public class DLMFluidMGSolver
 	{
 		
 		if (schur == null)
-			schur = new PreconditionedIterativeImplicitSchur(systemMatrix,
-			                                                 create_space(dt, t, fluidState));
+			schur = new PreconditionedIterativeImplicitSchur(systemMatrix, null);//MultigridFixedPointSchur
 		else
 			schur.resetOffDiagonals(systemMatrix);
+		final MGPreconditionerSpace<TaylorHoodSpace, TPCell, TPFace, QkQkFunction, MixedValue, MixedGradient,
+			MixedHessian> mg = create_space(dt, t, fluidState);
+		mg.cycles = 3;
+		schur.preconditioner = mg;
+		if (t <= 0.004)
+			return systemMatrix.toSparse()
+			                   .solveNative(rhs);
 		return schur.mvMul(rhs);
 	}
 }

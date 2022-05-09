@@ -30,12 +30,14 @@ public class DLMBenchmark
 	                    final MultiGridFluid backGround,
 	                    final List<Particle> particles, final String name)
 	{
-		super(config.dt, timeSteps, backGround, particles, new DLMHybridMGSolver(config.smootherSteps,
-		                                                                         config.overlap,
-		                                                                         config.stepsCoarser,
-		                                                                         backGround,
-		                                                                         particles,
-		                                                                         1.),
+		super(config.dt, timeSteps, backGround, particles,
+		      new DLMHybridMGSolver(config.smootherSteps,
+		                            config.overlap,
+		                            config.stepsCoarser,
+		                            backGround,
+		                            particles,
+		                            1.),
+		      //new DLMFluidMGSolver(backGround),
 		      name);
 		plotPoints = backGround.getSpace()
 		                       .generatePlotPoints(41);
@@ -63,22 +65,67 @@ public class DLMBenchmark
 		StatLogger.log("MAx MEm " + Runtime.getRuntime()
 		                                   .maxMemory());
 		final var builder = new PerformanceArguments.PerformanceArgumentBuilder();
+		builder.GMResData = PerformanceArguments.GMRESResidual;
 		builder.build();
 		final MultiGridFluid fluid = new BenchmarkFluid(CoordinateVector.fromValues(0, 0),
-		                                                CoordinateVector.fromValues(2.2, 0.41),
+		                                                CoordinateVector.fromValues(1.6, 0.41),
 		                                                new IntCoordinates(16, 4),
 		                                                1,
 		                                                config,
 		                                                1,
 		                                                1e-3);
 		final List<Particle> particles = new ArrayList<>();
-		particles.add(new FixedSolidParticle(CoordinateVector.fromValues(0.2, 0.2),
+		final double l = 100;
+		final double mu = 10;
+		particles.add(new FixedSolidParticle(CoordinateVector.fromValues(1.0, 0.2),
 		                                     0.05,
 		                                     3,
 		                                     1,
 		                                     config.lamb,
 		                                     config.mu,
 		                                     150));
+		particles.add(new SolidParticle(CoordinateVector.fromValues(0.3, 0.21),
+		                                0.02,
+		                                2,
+		                                1,
+		                                CoordinateVector.fromValues(0, 0),
+		                                l,
+		                                mu,
+		                                5));
+		particles.add(new SolidParticle(CoordinateVector.fromValues(0.4, 0.11),
+		                                0.02,
+		                                2,
+		                                1,
+		                                CoordinateVector.fromValues(0, 0),
+		                                l,
+		                                mu,
+		                                5));
+		particles.add(new SolidParticle(CoordinateVector.fromValues(0.4, 0.31),
+		                                0.02,
+		                                2,
+		                                1,
+		                                CoordinateVector.fromValues(0, 0),
+		                                l,
+		                                mu,
+		                                5));
+		particles.add(new SolidBrickParticle(CoordinateVector.fromValues(0.3, 0.15),
+		                                     0.04,
+		                                     0.02,
+		                                     1,
+		                                     1,
+		                                     CoordinateVector.fromValues(0, 0),
+		                                     l,
+		                                     mu,
+		                                     5));
+		particles.add(new SolidBrickParticle(CoordinateVector.fromValues(0.3, 0.25),
+		                                     0.04,
+		                                     0.02,
+		                                     1,
+		                                     1,
+		                                     CoordinateVector.fromValues(0, 0),
+		                                     l,
+		                                     mu,
+		                                     5));
 		final DLMBenchmark system = new DLMBenchmark(config,
 		                                             2000,
 		                                             fluid,
@@ -204,6 +251,24 @@ public class DLMBenchmark
 		public final double mu;
 		public final double dt;
 		public final int refinements;
+		
+		public DLMBenchmarkConfig(final int overlap,
+		                          final int stepsCoarser,
+		                          final double um,
+		                          final int smootherSteps,
+		                          final double lamb,
+		                          final double mu,
+		                          final double dt, final int refinements)
+		{
+			this.overlap = overlap;
+			this.stepsCoarser = stepsCoarser;
+			this.um = um;
+			this.smootherSteps = smootherSteps;
+			this.lamb = lamb;
+			this.mu = mu;
+			this.dt = dt;
+			this.refinements = refinements;
+		}
 		
 		public DLMBenchmarkConfig()
 		{

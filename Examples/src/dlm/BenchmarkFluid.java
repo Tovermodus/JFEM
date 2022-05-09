@@ -28,9 +28,13 @@ public class BenchmarkFluid
 	private final double viscosity;
 	private final double um;
 	
-	public BenchmarkFluid(final CoordinateVector startCoordinates, final CoordinateVector endCoordinates,
-	                      final IntCoordinates cells, final int polynomialDegree, final DLMBenchmark.DLMBenchmarkConfig config,
-	                      final double density, final double viscosity)
+	public BenchmarkFluid(final CoordinateVector startCoordinates,
+	                      final CoordinateVector endCoordinates,
+	                      final IntCoordinates cells,
+	                      final int polynomialDegree,
+	                      final DLMBenchmark.DLMBenchmarkConfig config,
+	                      final double density,
+	                      final double viscosity)
 	{
 		super(startCoordinates, endCoordinates, cells, config.refinements, polynomialDegree);
 		this.um = config.um;
@@ -86,7 +90,9 @@ public class BenchmarkFluid
 	@Override
 	public Function<CoordinateVector, CoordinateVector> getInitialVelocity()
 	{
+		final var boundary = velocityBoundaryValues(0);
 		return x ->
+			
 			CoordinateVector.getUnitVector(2, 0)
 			                .mul(0.0);
 	}

@@ -31,7 +31,8 @@ public class DLMRestartable
 		      timeSteps,
 		      backGround,
 		      particles,
-		      new DLMHybridMGSolver(3, 3, 3, backGround, particles, 1),
+		      //new DLMHybridMGSolver(3, 3, 3, backGround, particles, 1),
+		      new DLMFluidMGSolver(backGround),
 		      name);
 		plotPoints = backGround.getSpace()
 		                       .generatePlotPoints(41);
@@ -40,83 +41,99 @@ public class DLMRestartable
 		System.out.println("Simulating up to time " + timeSteps * dt);
 	}
 	
-	static double dt = 0.01;
+	static double dt = 0.004;
 	
 	public static void main(final String[] args)
 	{
 		final var builder = new PerformanceArguments.PerformanceArgumentBuilder();
+		builder.GMResData = PerformanceArguments.GMRESResidual;
 		builder.build();
-		final MultiGridFluid fluid = new BackgroundFluidMG(CoordinateVector.fromValues(0, 0),
-		                                                   CoordinateVector.fromValues(2, 1),
-		                                                   new IntCoordinates(8, 4),
-		                                                   1,
-		                                                   3,
-		                                                   dt,
-		                                                   0.01,
-		                                                   5);
+		final MultiGridFluid fluid
+			= new BenchmarkFluid(CoordinateVector.fromValues(0, 0),
+			                     CoordinateVector.fromValues(2, 1),
+			                     new IntCoordinates(8, 4),
+			                     1,
+			                     new DLMBenchmark.DLMBenchmarkConfig(2,
+			                                                         3,
+			                                                         0.5,
+			                                                         3,
+			                                                         1,
+			                                                         1,
+			                                                         0.004,
+			                                                         3),
+			                     1,
+			                     1e-3);
+//			new BackgroundFluidMG(CoordinateVector.fromValues(0, 0),
+//		                                                   CoordinateVector.fromValues(2, 1),
+//		                                                   new IntCoordinates(8, 4),
+//		                                                   1,
+//		                                                   3,
+//		                                                   dt,
+//		                                                   1,
+//		                                                   5);
 		final List<Particle> particles = new ArrayList<>();
 		particles.add(new SolidBrickParticle(CoordinateVector.fromValues(0.6, 0.45),
 		                                     0.1,
 		                                     0.45,
-		                                     2,
+		                                     1,
 		                                     2,
 		                                     CoordinateVector.fromValues(0, 0),
-		                                     100,
-		                                     100,
-		                                     15));
+		                                     10,
+		                                     10,
+		                                     5));
 		particles.add(new SolidParticle(CoordinateVector.fromValues(0.75, 0.6),
 		                                0.05,
 		                                2,
 		                                2,
 		                                CoordinateVector.fromValues(0, 0),
-		                                100,
-		                                100,
-		                                15));
+		                                10,
+		                                10,
+		                                5));
 		particles.add(new SolidParticle(CoordinateVector.fromValues(0.4, 0.5),
 		                                0.05,
 		                                2,
 		                                2,
 		                                CoordinateVector.fromValues(0, 0),
-		                                100,
-		                                100,
-		                                15));
+		                                10,
+		                                10,
+		                                5));
 		particles.add(new Membrane(CoordinateVector.fromValues(0.6, 0.5),
 		                           0.34,
 		                           0.35,
 		                           1,
 		                           2,
 		                           new CoordinateVector(2),
-		                           100,
-		                           100,
-		                           15));
+		                           10,
+		                           10,
+		                           5));
 		particles.add(new FixedSolidParticle(CoordinateVector.fromValues(0.15, 0.25),
 		                                     0.05,
 		                                     2,
 		                                     2,
-		                                     1000,
-		                                     1000,
-		                                     15));
+		                                     100,
+		                                     100,
+		                                     5));
 		particles.add(new FixedSolidParticle(CoordinateVector.fromValues(0.15, 0.75),
 		                                     0.05,
 		                                     2,
 		                                     2,
-		                                     1000,
-		                                     1000,
-		                                     15));
+		                                     100,
+		                                     100,
+		                                     5));
 		particles.add(new FixedSolidParticle(CoordinateVector.fromValues(1.1, 0.25),
 		                                     0.05,
 		                                     2,
 		                                     2,
 		                                     100,
-		                                     1000,
-		                                     15));
+		                                     100,
+		                                     5));
 		particles.add(new FixedSolidParticle(CoordinateVector.fromValues(1.1, 0.75),
 		                                     0.05,
 		                                     2,
 		                                     2,
-		                                     1000,
-		                                     1000,
-		                                     15));
+		                                     100,
+		                                     100,
+		                                     5));
 		final DLMRestartable system = new DLMRestartable(dt,
 		                                                 400,
 		                                                 fluid,
